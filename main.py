@@ -13,6 +13,7 @@ app = WSGIApplication([
             Route('/reverse.php', api.PaymentReverseHandler),
             Route('/payment_types.php', api.PaymentTypesHandler)
         ]),
-        Route('/venues.php', api.VenuesHandler)
+        Route('/venues.php', api.VenuesHandler),
+        Route('/menu.php', api.MenuHandler),
     ])
 ], debug=True)

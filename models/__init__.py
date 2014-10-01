@@ -30,10 +30,24 @@ class MenuItem(ndb.Model):
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
 
+    def dict(self):
+        dct = {
+            'id': str(self.key.id()),
+            'title': self.title,
+            'description': self.description,
+            'price': self.price,
+            'kal': self.kal,
+            'pic': self.picture
+        }
+        return dct
+
 class MenuCategory(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
+
+    def dict(self):
+        return {self.title : [menu_item.get().dict() for menu_item in self.menu_items]}
 
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
@@ -47,7 +61,7 @@ class Venue(ndb.Model):
 
     def dict(self):
         dct = {
-            'id': self.key.id(),
+            'id': str(self.key.id()),
             'distance': 0,
             'title': self.title,
             'address': self.description,
