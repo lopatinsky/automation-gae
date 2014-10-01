@@ -90,4 +90,12 @@ class Client(ndb.Model):
 class PaymentType(ndb.Model):
     title = ndb.StringProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
-                                 default=STATUS_AVAILABLE, indexed=False)
+                                 default=STATUS_AVAILABLE)
+
+    def dict(self):
+        dct = {
+            'id': int(self.key.id()),
+            'title': self.title
+        }
+
+        return dct
