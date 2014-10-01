@@ -20,11 +20,6 @@ PAYMENT_FAIL = 0
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
-class MenuCategory(ndb.Model):
-    title = ndb.StringProperty(required=True, indexed=False)
-    picture = ndb.StringProperty(indexed=False)
-    menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
-
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
@@ -34,6 +29,11 @@ class MenuItem(ndb.Model):
     cost_price = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
+
+class MenuCategory(ndb.Model):
+    title = ndb.StringProperty(required=True, indexed=False)
+    picture = ndb.StringProperty(indexed=False)
+    menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
 
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
