@@ -43,6 +43,7 @@ class Venue(ndb.Model):
     working_days = ndb.StringProperty(indexed=False)
     working_hours = ndb.StringProperty(indexed=False)
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
+    phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
 
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
