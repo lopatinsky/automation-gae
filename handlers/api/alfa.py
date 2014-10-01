@@ -1,0 +1,56 @@
+from .base import ApiHandler
+from methods import alfa_bank
+from models import Order
+
+
+class UnbindCardHandler(ApiHandler):
+    def post(self):
+        binding_id = self.request.get("bindingId")
+
+        alfa_response = alfa_bank.unbind_card(binding_id)
+        self.render_json(alfa_response)
+
+
+class PaymentBindingHandler(ApiHandler):
+    def post(self):
+        binding_id = self.request.get("bindingId")
+        order_id = self.request.get("mdOrder")
+
+        alfa_response = alfa_bank.create_pay(binding_id, order_id)
+        self.render_json(alfa_response)
+
+
+class PaymentRegisterHandler(ApiHandler):
+    def post(self):
+        client_id = self.request.get("clientId")
+        order_number = self.request.get("orderNumber")
+        amount = self.request.get("amount")
+        return_url = self.request.get("returnUrl")
+
+        alfa_response = alfa_bank.tie_card(amount, order_number, return_url, client_id, 'MOBILE')
+        if 'errorCode' not in alfa_response:
+            order_id = alfa_response['orderId']
+            order = Order.get_by_id(int(order_id))
+            order.payment_id = order_id
+            order.put()
+
+        self.render_json(alfa_response)
+
+
+class PaymentReverseHandler(ApiHandler):
+    def post(self):
+        order_id = self.request.get('orderId')
+
+        alfa_response = alfa_bank.get_back_blocked_sum(order_id)
+        self.render_json(alfa_response)
+
+
+class PaymentStatusHandler(ApiHandler):
+    def post(self):
+        order_id = self.request.get('orderId')
+
+        alfa_response = alfa_bank.check_status(order_id)
+        if str(alfa_response["ErrorCode"]) != "0":
+            pass  # TODO send email
+
+        self.render_json(alfa_response)
