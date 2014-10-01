@@ -15,3 +15,7 @@ handlers:
 libraries:
 - name: webapp2
   version: latest
+
+builtins:
+- remote_api: on
+

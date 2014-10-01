@@ -21,13 +21,11 @@ IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
 class MenuCategory(ndb.Model):
-    category_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
 
 class MenuItem(ndb.Model):
-    menu_item_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
     picture = ndb.StringProperty(indexed=False)
@@ -38,7 +36,6 @@ class MenuItem(ndb.Model):
                                  default=STATUS_AVAILABLE)
 
 class Venue(ndb.Model):
-    venue_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
     pic = ndb.StringProperty(indexed=False)
@@ -48,7 +45,6 @@ class Venue(ndb.Model):
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
 
 class Order(ndb.Model):
-    order_id = ndb.IntegerProperty(required=True)
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
@@ -61,21 +57,17 @@ class Order(ndb.Model):
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty(required=True)
     pan = ndb.StringProperty(indexed=False)
-    #TODO whats the difference?
     return_comment = ndb.StringProperty(indexed=False)
     comment = ndb.StringProperty(indexed=False)
     return_datetime = ndb.DateTimeProperty(indexed=False)
-    #TODO alpha order id maybe?
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
 
 class Client(ndb.Model):
-    client_id = ndb.IntegerProperty(required=True)
     name = ndb.StringProperty(required=True, indexed=False)
     tel = ndb.StringProperty(required=True, indexed=False)
 
 class PaymentType(ndb.Model):
-    payment_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE, indexed=False)
