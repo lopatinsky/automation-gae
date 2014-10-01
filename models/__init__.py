@@ -45,6 +45,25 @@ class Venue(ndb.Model):
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
 
+    def dict(self):
+        dct = {
+            'id': self.key.id(),
+            'distance': 0,
+            'title': self.title,
+            'address': self.description,
+            'pic': self.pic,
+            'lat': self.coordinates.lat,
+            'lon': self.coordinates.lon,
+            'coordinates': str(self.coordinates),
+            'schedule': []
+        }
+        working_days = self.working_days.split(',')
+        working_hours = self.working_hours.split(',')
+        for i in xrange(len(working_days)):
+            dct['schedule'].append({'days': [int(day) for day in working_days[i]],
+                                    'hours': working_hours[i]})
+        return dct
+
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
