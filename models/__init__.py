@@ -59,10 +59,10 @@ class Venue(ndb.Model):
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
 
-    def dict(self):
+    def dict(self, distance=0):
         dct = {
             'id': str(self.key.id()),
-            'distance': 0,
+            'distance': distance,
             'title': self.title,
             'address': self.description,
             'pic': self.pic,
@@ -85,7 +85,7 @@ class Order(ndb.Model):
                                                          CANCELED_BY_BARISTA_ORDER),
                                  default=NEW_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
-    delivery_time = ndb.TimeProperty(required=True)
+    delivery_time = ndb.IntegerProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     payment_status = ndb.IntegerProperty(choices=(PAYMENT_SUCCESS, PAYMENT_FAIL))
     coordinates = ndb.GeoPtProperty(indexed=False)
@@ -96,10 +96,11 @@ class Order(ndb.Model):
     return_datetime = ndb.DateTimeProperty(indexed=False)
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
+    items = ndb.KeyProperty(required=True, indexed=False, repeated=True, kind=MenuItem)
 
 class Client(ndb.Model):
-    name = ndb.StringProperty(required=True, indexed=False)
-    tel = ndb.StringProperty(required=True, indexed=False)
+    name = ndb.StringProperty(indexed=False)
+    tel = ndb.StringProperty(indexed=False)
 
 class PaymentType(ndb.Model):
     title = ndb.StringProperty(indexed=False)

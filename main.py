@@ -15,5 +15,6 @@ app = WSGIApplication([
         ]),
         Route('/venues.php', api.VenuesHandler),
         Route('/menu.php', api.MenuHandler),
+        Route('/order.php', api.OrderHandler),
     ])
 ], debug=True)

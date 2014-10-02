@@ -5,3 +5,4 @@ from alfa import PaymentBindingHandler, PaymentRegisterHandler, \
 from venues import VenuesHandler
 from payment_types import PaymentTypesHandler
 from menu import MenuHandler
+from order import OrderHandler
