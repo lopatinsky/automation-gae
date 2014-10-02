@@ -3,9 +3,13 @@ from models import Venue
 
 __author__ = 'ilyazorin'
 
+
 class VenuesHandler(ApiHandler):
 
     def get(self):
-        #TODO venues in distance order
         venues = Venue.query().fetch()
-        self.render_json({'venues': [venue.dict() for venue in venues]})
+        location = self.request.get("ll")
+        venue_dicts = [venue.dict(location) for venue in venues]
+        if location:
+            venue_dicts = sorted(venue_dicts, key=lambda v: v['distance'])
+        self.render_json({'venues': venue_dicts})

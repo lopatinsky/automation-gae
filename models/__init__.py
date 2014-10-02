@@ -1,4 +1,5 @@
 from google.appengine.ext import ndb
+from methods import location
 
 __author__ = 'ilyazorin'
 
@@ -59,7 +60,10 @@ class Venue(ndb.Model):
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
 
-    def dict(self, distance=0):
+    def dict(self, user_location=None):
+        distance = 0
+        if user_location:
+            distance = location.distance(ndb.GeoPt(user_location), self.coordinates)
         dct = {
             'id': str(self.key.id()),
             'distance': distance,
