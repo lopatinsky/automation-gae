@@ -6,6 +6,7 @@ __author__ = 'ilyazorin'
 
 class VenuesHandler(ApiHandler):
 
+    #TODO check params
     def get(self):
         venues = Venue.query().fetch()
         location = self.request.get("ll")
