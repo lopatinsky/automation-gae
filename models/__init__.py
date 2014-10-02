@@ -1,5 +1,5 @@
 from google.appengine.ext import ndb
-from methods import location
+from methods import location, fastcounter
 
 __author__ = 'ilyazorin'
 
@@ -101,6 +101,11 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(required=True, indexed=False, repeated=True, kind=MenuItem)
+
+    @staticmethod
+    def generate_id():
+        fastcounter.incr("order_id")
+        return fastcounter.get_count("order_id")
 
 class Client(ndb.Model):
     name = ndb.StringProperty(indexed=False)
