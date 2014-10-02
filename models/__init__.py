@@ -100,7 +100,7 @@ class Order(ndb.Model):
     return_datetime = ndb.DateTimeProperty(indexed=False)
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
-    items = ndb.KeyProperty(required=True, indexed=False, repeated=True, kind=MenuItem)
+    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
 
     @staticmethod
     def generate_id():

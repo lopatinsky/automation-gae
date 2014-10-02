@@ -43,5 +43,10 @@ class OrderHandler(ApiHandler):
         self.response.status_int = 201
         self.render_json({'order_id' : order_id})
 
+class RegisterOrderHandler(ApiHandler):
+
+    def get(self):
+        self.render_json({'order_id' : Order.generate_id()})
+
 
 
