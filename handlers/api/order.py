@@ -1,6 +1,8 @@
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.base import ApiHandler
 import json
+import re
+from datetime import datetime, timedelta
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER
 
 __author__ = 'ilyazorin'
@@ -17,14 +19,20 @@ class OrderHandler(ApiHandler):
         coordinates = GeoPt(response_json['coordinates'])
         comment = response_json['comment']
         device_type = response_json['device_type']
-        delivery_time = response_json['delivery_time']
+        delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
         client_id = response_json['client']['client_id']
 
         client = Client.get_by_id(client_id)
-        if not client.name or not client.tel:
-            client.name = response_json['client']['name']
-            client.tel = response_json['client']['phone']
+        client_name = response_json['client']['name']
+        client_tel = re.sub("[^0-9]", "", response_json['client']['tel'])
+        if client.name != client_name or client.tel != client_tel:
+            client.name = client_name
+            client.tel = client_tel
             client.put()
+
+        payment_type_id = response_json['payment']['type_id']
+        payment_status = response_json['payment']['status']
+        payment_id = response_json['payment']['payment_id']
 
         items = []
         for item in response_json['items']:
@@ -33,11 +41,12 @@ class OrderHandler(ApiHandler):
                 items.append(menu_item)
 
         #TODO card payment
-        if response_json['payment']['type_id'] == CARD_PAYMENT_TYPE:
+        if payment_type_id == CARD_PAYMENT_TYPE:
             pass
 
         order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                       comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
+                      payment_type_id=payment_type_id, payment_id=payment_id, payment_status=payment_status,
                       items=[item.key for item in items])
         order.put()
 
