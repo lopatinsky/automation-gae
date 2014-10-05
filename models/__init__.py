@@ -21,6 +21,7 @@ PAYMENT_FAIL = 0
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
+
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
@@ -42,13 +43,15 @@ class MenuItem(ndb.Model):
         }
         return dct
 
+
 class MenuCategory(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
 
     def dict(self):
-        return {self.title : [menu_item.get().dict() for menu_item in self.menu_items]}
+        return {self.title: [menu_item.get().dict() for menu_item in self.menu_items]}
+
 
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
@@ -82,6 +85,7 @@ class Venue(ndb.Model):
                                     'hours': working_hours[i]})
         return dct
 
+
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
@@ -108,9 +112,11 @@ class Order(ndb.Model):
         fastcounter.incr("order_id")
         return value + 1
 
+
 class Client(ndb.Model):
     name = ndb.StringProperty(indexed=False)
     tel = ndb.StringProperty(indexed=False)
+
 
 class PaymentType(ndb.Model):
     title = ndb.StringProperty(indexed=False)

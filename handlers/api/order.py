@@ -5,6 +5,7 @@ from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER
 
 __author__ = 'ilyazorin'
 
+
 class OrderHandler(ApiHandler):
 
     def post(self):
@@ -35,18 +36,16 @@ class OrderHandler(ApiHandler):
         if response_json['payment']['type_id'] == CARD_PAYMENT_TYPE:
             pass
 
-        order = Order(id=order_id, client_id=client_id,venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
+        order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                       comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
                       items=[item.key for item in items])
         order.put()
 
         self.response.status_int = 201
-        self.render_json({'order_id' : order_id})
+        self.render_json({'order_id': order_id})
+
 
 class RegisterOrderHandler(ApiHandler):
 
     def get(self):
-        self.render_json({'order_id' : Order.generate_id()})
-
-
-
+        self.render_json({'order_id': Order.generate_id()})

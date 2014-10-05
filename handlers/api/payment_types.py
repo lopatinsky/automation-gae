@@ -3,6 +3,7 @@ from models import PaymentType, STATUS_AVAILABLE
 
 __author__ = 'ilyazorin'
 
+
 class PaymentTypesHandler(ApiHandler):
 
     def get(self):

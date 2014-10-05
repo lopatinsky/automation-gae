@@ -3,6 +3,7 @@ from models import MenuCategory, Client
 
 __author__ = 'ilyazorin'
 
+
 class MenuHandler(ApiHandler):
 
     def get(self):
