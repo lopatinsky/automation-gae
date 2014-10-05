@@ -1,0 +1,15 @@
+queue:
+- name: PersistCounter0
+  rate: 5/s
+
+- name: PersistCounter1
+  rate: 5/s
+
+- name: PersistCounter2
+  rate: 5/s
+
+- name: PersistCounter3
+  rate: 5/s
+
+- name: PersistCounter4
+  rate: 5/s

@@ -1,3 +1,4 @@
+from methods import fastcounter
 from handlers import api
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -17,5 +18,7 @@ app = WSGIApplication([
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),
         Route('/order_register.php', api.RegisterOrderHandler)
-    ])
+    ]),
+
+    Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
 ], debug=True)

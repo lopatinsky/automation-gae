@@ -104,8 +104,9 @@ class Order(ndb.Model):
 
     @staticmethod
     def generate_id():
+        value = fastcounter.get_count("order_id")
         fastcounter.incr("order_id")
-        return fastcounter.get_count("order_id")
+        return value + 1
 
 class Client(ndb.Model):
     name = ndb.StringProperty(indexed=False)
