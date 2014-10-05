@@ -27,7 +27,7 @@ class OrderHandler(ApiHandler):
 
         items = []
         for item in response_json['items']:
-            menu_item = MenuItem.get_by_id(item['item_id']).fetch()
+            menu_item = MenuItem.get_by_id(item['item_id'])
             for i in xrange(item['quantity']):
                 items.append(menu_item)
 
