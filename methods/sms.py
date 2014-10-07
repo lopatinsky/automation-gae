@@ -19,4 +19,4 @@ def send_sms(from_, to, text):
     response = urlfetch.fetch("http://smspilot.ru/api2.php", payload=json.dumps(data), method='POST',
                               headers={'Content-Type': 'application/json'}).content
     logging.info(response)
-    return response
+    return json.loads(response)

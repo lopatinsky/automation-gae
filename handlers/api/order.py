@@ -1,9 +1,11 @@
+# coding:utf-8
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER
+from methods import sms
+from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue
 
 __author__ = 'ilyazorin'
 
@@ -35,10 +37,12 @@ class OrderHandler(ApiHandler):
         payment_id = response_json['payment']['payment_id']
 
         items = []
+        sms_items_info = []
         for item in response_json['items']:
             menu_item = MenuItem.get_by_id(item['item_id'])
             for i in xrange(item['quantity']):
                 items.append(menu_item)
+            sms_items_info.append((menu_item.title, item['quantity']))
 
         #TODO card payment
         if payment_type_id == CARD_PAYMENT_TYPE:
@@ -49,6 +53,14 @@ class OrderHandler(ApiHandler):
                       payment_type_id=payment_type_id, payment_id=payment_id, payment_status=payment_status,
                       items=[item.key for item in items])
         order.put()
+
+        venue = Venue.get_by_id(venue_id)
+        sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
+            order_id, client_name, total_sum, delivery_time,
+            ', '.join("%s X %s" % i for i in sms_items_info),
+            [u"Наличные", u"Карта"][payment_type_id]
+        )
+        sms.send_sms('DoubleB', venue.phone_numbers, sms_text)
 
         self.response.status_int = 201
         self.render_json({'order_id': order_id})
