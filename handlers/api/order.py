@@ -5,7 +5,7 @@ import json
 import re
 from datetime import datetime, timedelta
 from methods import sms
-from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue
+from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER
 
 __author__ = 'ilyazorin'
 
@@ -70,3 +70,38 @@ class RegisterOrderHandler(ApiHandler):
 
     def get(self):
         self.render_json({'order_id': Order.generate_id()})
+
+class StatusHandler(ApiHandler):
+
+    def post(self):
+        #TODO errors handling
+        response_json = json.loads(self.request.get('orders'))
+        orders = []
+        for order_id in response_json:
+            order = Order.get_by_id(order_id)
+            if order:
+                orders.append(order)
+        self.render_json({'status': order.status_dict() for order in orders})
+
+class ReturnOrderHandler(ApiHandler):
+
+    def post(self):
+        #TODO errors handling
+        order_id = self.request.get('order_id')
+        order = Order.get_by_id(order_id)
+        if order:
+            now = datetime.utcnow()
+            if now - order.delivery_time > timedelta(minutes=10):
+                order.status = CANCELED_BY_CLIENT_ORDER
+                order.put()
+                self.render_json({
+                    'error': 0,
+                    'order_id': order.key.id()
+                })
+            else:
+                self.render_json({
+                    'error': 1,
+                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
+                })
+        else:
+            self.abort(400)

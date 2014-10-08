@@ -106,6 +106,14 @@ class Order(ndb.Model):
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
 
+    def status_dict(self):
+        dct = {
+            'order_id': self.key.id(),
+            'status': self.status
+        }
+
+        return dct
+
     @staticmethod
     def generate_id():
         value = fastcounter.get_count("order_id")

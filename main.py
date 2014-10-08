@@ -17,7 +17,9 @@ app = WSGIApplication([
         Route('/venues.php', api.VenuesHandler),
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),
-        Route('/order_register.php', api.RegisterOrderHandler)
+        Route('/order_register.php', api.RegisterOrderHandler),
+        Route('/status.php', api.StatusHandler),
+        Route('/return.php', api.ReturnOrderHandler)
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
