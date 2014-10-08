@@ -71,6 +71,7 @@ class RegisterOrderHandler(ApiHandler):
     def get(self):
         self.render_json({'order_id': Order.generate_id()})
 
+
 class StatusHandler(ApiHandler):
 
     def post(self):
@@ -83,11 +84,12 @@ class StatusHandler(ApiHandler):
                 orders.append(order)
         self.render_json({'status': order.status_dict() for order in orders})
 
+
 class ReturnOrderHandler(ApiHandler):
 
     def post(self):
         #TODO errors handling
-        order_id = self.request.get('order_id')
+        order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if order:
             now = datetime.utcnow()
