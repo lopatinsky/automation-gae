@@ -26,6 +26,7 @@ def format_order(order):
         },
         'delivery_time': order.delivery_time.strftime("%H:%M"),
         'items': [],
+        'cost_price': 0,
         'canceled': order.status in (CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)
     }
     item_keys = Counter(order.items).items()
@@ -34,6 +35,8 @@ def format_order(order):
         order_data['items'].append({
             'title': item.title,
             'price': item.price,
+            'cost_price': item.cost_price * count,
             'quantity': count
         })
+        order_data['cost_price'] += item.cost_price * count
     return order_data

@@ -26,6 +26,7 @@ app = WSGIApplication([
     PathPrefixRoute('/admin', [
         Route('/orders.php', admin_web.OrdersHandler),
         Route('/backs.php', admin_web.ReturnsHandler),
+        Route('/history.php', admin_web.HistoryHandler),
 
         Route('/check_time.php', admin_api.CheckTimeHandler),
         Route('/check_update.php', admin_api.CheckUpdateHandler),
