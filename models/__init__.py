@@ -101,7 +101,7 @@ class Order(ndb.Model):
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
     comment = ndb.StringProperty(indexed=False)
-    return_datetime = ndb.DateTimeProperty(indexed=False)
+    return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
