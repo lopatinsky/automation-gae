@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>DoubleB Orders List</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-select.css" rel="stylesheet">
+    
+
+    <!-- Page-Level Plugin CSS - Blank -->
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- modal-->
+    
+   
+    <!-- -->
+
+</head>
+
+<!--
+								$('.modal_content').append("<div class='cancel_item'><div>#<span class='modal_val'>"+value+"</span>(к 15:28)</div><div class='modal_items'><div class='modal_item_title'>"+item_title+"</div><div class='modal_item_quantity'>5</div></div>")-->
+
+<body>
+<audio id="audiotag1" src="audio/notification.mp3" preload="auto"></audio>
+
+<div id='info_modal_cancel' style="display:none">
+        <div class='modal_header center'>
+                                  <div class='header_item'>Отмена заказов</div>
+       </div>
+       
+     <div class='modal_content'>
+
+        
+    </div>
+  
+   
+		
+</div>
+<div id='info_modal' style="display:none">
+        <div class='modal_header'>
+        		<div class='header_item order_clock'><div class='order_clock_img'><img src='images/clock_modal.png'></div></div>
+                <div class='header_item order_time'></div>
+                <div class='header_item number'>Заказ № <span class='order_number'></span></div>
+        </div>
+        <div class='modal_client'>
+        </div>
+         <div class='modal_order'>
+         </div>
+         <div class='modal_total'>Итог: <span class='modal_total_amount'></span> р.</div>
+         <div class='modal_footer'>
+        		<div class='modal_options'>
+                        <div class='modal_footer_item' id='change_time'>Перенести</div>
+                        <div class='modal_divider_right'></div>
+                        <div class='modal_footer_item' id='return'>Возврат</div>
+                </div>
+                <div class='modal_dev'></div>
+                <div class='modal_footer_item' id='done'><div class="submit_without"><span class="order_id" style="display:none">1053</span>✔&nbsp;Выдать</div></div>
+       </div>
+        
+
+</div>
+    <div id="wrapper">
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            
+            <!-- /.navbar-header -->
+
+            
+
+            <div class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        
+                        <li id='active_menu' id='menu_link_orders'>
+                            <a href="orders.php">
+                                <div class='navi_img_div'>
+                                		<img class='navi_img' src='images/current.png'>
+                                </div>
+                            <div class='navi_text'>Текущие заказы</div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="backs.php">
+                                <div class='navi_img_div'>
+                                		<img class='navi_img' src='images/return.png'>
+                                </div>
+                            <div class='navi_text'>Возвраты</div>
+                            </a>
+                        </li>
+                        <!--<li>
+                            <a href="orders_list.php">
+                                <div class='navi_img_div'>
+                                		<img class='navi_img' src='images/today.png'>
+                                </div>
+                            <div class='navi_text'>Заказы за сегодня</div>
+                            </a>
+                        </li>
+                        -->
+                        <li>
+                            <a href="history.php">
+                                <div class='navi_img_div'>
+                                		<img class='navi_img' src='images/history.png'>
+                                </div>
+                            <div class='navi_text'>История</div>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+       <!-- <div class="time_line" id="time_line">
+       <div class="time_line_triangle"></div>
+							<div class="t_line"></div>
+							<div id="time"><? // $date_time=new DateTime();echo $date_time2=$date_time->format('H:i:s');?></div>
+							<div class="t_line"></div>
+       </div>
+-->
+        <div class="row">
+            
+                <div>
+                    <div class="last_order_datetime">{{ last_order_datetime.strftime("%Y-%m-%d %H:%M:%S") }}</div>
+
+                    
+               {% for order in orders %}
+               <div class='order {{ 'known canceled' if order.canceled }}' id='{{ order.order_id }}' {{ 'style="color: rgb(204, 204, 204);background-color: rgb(231, 231, 231);"' if order.canceled }}>
+                      <!-- <div class="status"><div class="circle" <?// if($iteration==0) echo 'id="circle"';?>></div></div>-->
+               			<div class='order_info'>
+                            <div class='time'>{{ order.delivery_time }}</div>
+                            <div class='number'>{{ order.order_id }}</div>
+                            <div class='client_info'>
+                            	<div class='client_name'>{{ order.client.name }}</div>
+                                <div class='client_surname'>{{ order.client.surname }}</div>
+                                <div class='client_tel'>{{ order.client.tel }}</div>
+                                <div class='client_pan'>{{ order.client.pan }}</div>
+                            </div>
+                            <div class='order_items'>
+                                {% for item in items %}
+                                    <div class="item">
+                                        <div class="item_title">{{ item.title }}</div>
+                                        <div class="item_quantity {{ 'item_quantity_canceled' if order.canceled }}">{{ item.quantity }}</div>
+                                        <div class="item_price">{{ item.price }}</div>
+                                    </div>
+                                {% endfor %}
+                                {% if order.comment %}
+                                    <div class="order_comment">
+                                        <div class="comment_title">Комментарий</div>
+                                        <div class="comment_divider"></div>
+                                        <div class="comment_text">{{ order.comment }}</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                           
+                            <div class='payment_type'><img src='images/{{ order.payment_type }}.png'></div>
+                            
+                         </div>
+
+                         {% if not order.canceled %}
+                             <div class='submit'><span class='order_id' style='display:none'>{{ order.status }}</span>&#10004;&nbsp;Выдать</div>
+                         {% else %}
+                             <div class='cancel_title'>Отменен</div>
+                         {% endif %}
+
+
+               </div>
+               {% endfor %}
+
+            </div></div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/analytics.js"></script>
+    <!--<script type="text/javascript" src="js/jquery.mb.audio.js"></script>-->
+    <script type="text/javascript" src="js/bootstrap-select.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/pulsate.js"></script>
+    <script src="js/jquery.easyModal.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/sb-admin.js"></script>
+ 
+
+    <script>
+	$(function() 
+	{
+	   	add_line();
+		
+			 //пульсирование около строки
+			//$('#circle').effect( "pulsate", 
+			//    {times:5}, 3000 );
+	 
+	    //запуск записи времени в time	
+	    setInterval(function(){$('#time').html(date())}, 1000);
+		
+		// опускаемся до строки со времене
+		goToByScroll('time')
+	 //	var properties = {
+	  // backgroundColor : '#ddd'
+	//};  
+	  //$('#circle').pulsate();
+	});
+		
+		
+		
+	
+	
+	
+	$('.status').change(function(){
+	
+	var order_id=$(this).last().parent().prop('id');
+	
+	$.post('status_up.php',{"order_id":order_id,"status":$(this).val()}, 
+		function(resp)
+		{
+						//alert(resp);
+						var response=JSON.parse(resp)
+						//console.log(response)
+						var status=["","новый заказа","готовится"," готов", "невозможно приготовить"];
+						
+					    if(response['error']=='0')
+						{
+						$('#info_'+response['order_id']).append('Статус заказа #'+response['order_id']+' успешно изменен.Текущий статус: '+status[response['status']])
+						$('#info_'+response['order_id']).css('background-color',"rgba(0, 204, 102,0.3)");
+						$('#info_'+response['order_id']).css('height',"30px");
+						$('#info_'+response['order_id']).css('line-height',"30px");
+						$('#info_'+response['order_id']).css('padding-left',"14px");
+							
+						}
+					    $('#info_'+response['order_id']).fadeOut(5000);
+		})
+	})
+	
+  
+function timerMethod() {
+  
+ //console.log($('.max_id').html())
+ $.post('check_update.php',{"last_order_datetime":$('.last_order_datetime').html()},
+ function(resp)
+ {
+	    var response=JSON.parse(resp)
+	    console.log(response) 
+		var i=0;
+		
+		
+		
+		//проверку на отмененные заказы
+		      
+			  
+		var orders_current=[];  
+		
+		$('.order').each(function(){
+   		var time= $(this).children('.order_info').children('.time').text()+':00';
+		var order_id= $(this).children('.order_info').children('.number').text()
+        var obj = {};
+        
+		orders_current.push(order_id);
+		
+		// проверка на то насколько срочный заказа 
+	   
+	   //если до выполнения заказа осталось меньше 5 минут - красим
+	  
+	   var currentDateTime = new moment().format('X');
+	   var currentDate=moment().format('YYYY-MM-DD');
+
+		var time_to_go=new moment(currentDate+' '+time).format('X');
+	    var time_diff=time_to_go-currentDateTime;
+
+console.log(time_diff)
+
+	   
+	  // clearInterval(Interval);
+	
+	   if(time_diff<120&&time_diff>0)
+	   {    var timer=0;
+			var timer_int = setInterval(function()
+			{
+			$('#'+order_id).toggleClass("hot_order");
+			timer++;
+			if(timer>5) {clearInterval(timer_int);$('#'+order_id).removeClass('hot_order') }
+			},800)
+			
+			
+			  
+	   }
+	   
+	   
+	    })
+		
+	
+		
+		
+		function getMatch(a, b)
+		{
+    		var matches = [];
+
+			for ( var i = 0; i < a.length; i++ ) {
+				for ( var e = 0; e < b.length; e++ ) {
+					if ( a[i] === b[e] ) matches.push( a[i] );
+				}
+			}
+			return matches;
+		}
+		
+			function getMatch_on_page(a, b)
+		{
+    		         var result=true ;
+			     $.each(a, function( index, value ) {
+ 			      console.log('текущий id '+a[index]+'  добавляемый'+b)
+				     if(a[index]==b)
+					 {
+					     result =false; 
+						// alert('error');
+					 }
+		});
+		      return result; 
+		}
+		
+		//отмененные заказы
+		
+		var cancel=getMatch(orders_current,response['cancel']);
+		
+		if(cancel.length>0){
+			
+			        var show_modal=0;
+					$.each( cancel, function( key, value ) 
+					{           
+								 
+					            if($('#'+value).hasClass('known')==false)
+								{
+						            $('#'+value).addClass('canceled');
+									$('#'+value).css('background-color','#e7e7e7');
+									$('#'+value).children('.order_info').children('.order_items').children('.item').children('.item_quantity').css('color','#ccc');
+									$('#'+value).css('color','#ccc');
+									
+									//console.log($('#'+value).hasClass('cancel_title'))
+									if($('#'+value).children('.cancel_title').length == 0)
+									{
+										$('#'+value).children('.order_info').after('<div class="cancel_title">Отменен</div>');
+									}
+									
+									$('#'+value).children('.submit').hide();
+									if($('#'+value).hasClass( "known" )==false)
+									{ 
+									  show_modal=1
+									}
+								}
+							    
+								//добавляем в модалку заказы:
+								
+                    
+                    //   var cancel_order_items='<div class='cancel_item'><div class='modal_item_title'>Харио</div><div class='modal_item_quantity'>5</div>
+                   //  </div>';
+				 show_order=1;
+				 
+				 // проверяем что его нет в модалке
+                $('.modal_val').each(function(index, element) {
+                    if($(this).html()==value)
+					{
+						show_order=0;
+					}
+                });
+				// если его нет в модалке то добавляем 
+				if(show_order==1)
+				{
+				 //берем из строки значения 
+				 //$('#'+value).children('.order_info').children('.order_items');
+				 var cancel_order_items=''; 
+				 
+				 //информация о заказчике 
+				 var customer_name=$('.order_info_'+value).children('.client_info').children('.client_name').html();
+				 var customer_tel=$('.order_info_'+value).children('.client_info').children('.client_tel').html();
+				 
+				 //время исполнения заказа 
+				 var order_ready_time=$('.order_info_'+value).children('.time').html();
+				 
+				 // позиции в заказе 
+				 $('.order_items_'+value).children('.item').each(function() {
+					 
+					 var item_title=$(this).children('.item_title').html(); 
+					 var item_quantity=$(this).children('.item_quantity').html(); 
+					 cancel_order_items+="<div class='cancel_item'><div class='modal_item_title'>"+item_title+"</div><div class='modal_item_quantity'>"+item_quantity+"</div></div>"
+					 
+					 });  //<div class='customer_info_cancel_modal'>"+customer_name+" "+customer_tel+"</div></div>
+				 
+				  			     if($('#'+value).hasClass('known')==false)
+								 {
+								 $('.modal_content').append("<div class='cancel_order'><div>#<span class='modal_val'>"+value+"</span><span class='ready_time_cancel_modal'> ( "+order_ready_time+" | "+customer_name+" , "+customer_tel+" )</span>"+cancel_order_items +"</div>");
+								 }
+				}
+								
+								//конец добавлени в модалку 
+								
+					});
+					console.log(show_modal);
+					
+					//открываем диалог  
+					if(show_modal==1)
+					{
+								
+								$('#info_modal_cancel').trigger('openModal');
+					}
+					
+					//ставим что мы знаем о них 
+					$.each( cancel, function( key, value ) 
+					{           
+								
+								$('#'+value).addClass('known')
+								
+								
+							    
+					});
+					
+					
+		}
+		
+		
+		
+		//$('.header_item number').empty();
+	///	$('.header_item number').html('Отменены заказы');
+		
+				//конец проверки на отмененные заказ
+		
+		
+		
+		// массив с текущми заказами
+		
+		var orders=[]; 
+		
+		$('.order').each(function(){
+   		 var time= $(this).children('.order_info').children('.time').text()
+    	 var order_id= $(this).children('.order_info').children('.number').text()
+         var obj = {};
+         obj['time'] =time;
+         obj['order_id'] =order_id;
+         orders.push(obj);
+    
+		})
+		
+	   //-----  конец формироавния массива с текущими категориями  ---//// 
+		
+		
+		//----функция для соритровки --//
+		
+		
+		function compare(a,b) {
+		  if (a.time < b.time)
+			 return -1;
+		  if (a.time > b.time)
+			return 1;
+		  return 0;
+		}
+		
+		
+	   /// --- конец функции сортировки--///
+	   
+	   
+	   
+	   //функция для поиска куда вставить строку
+	   
+	    function find_row(array,dilivery_time,order_id)
+		{
+			//console.log(array)
+			var obj={}; 
+			
+			obj['time']=dilivery_time; 
+			obj['order_id']=order_id; 
+			array.push(obj);
+			array.sort(compare);
+		
+			var after_id=0;
+			$.each( array, function( key, value )
+			{     
+			if(value['time']==dilivery_time&&value['order_id']==order_id)  
+			{
+				if(key==0)
+				{
+					after_id=0;
+				}
+				else 
+				{
+						after_id=array[key-1]['order_id'];
+				}
+			}
+			
+		    });
+			return after_id
+		
+		 }
+	     //- конец поиска места куда вставить ---////
+		
+		
+		for (var key in response['data']) {
+  							if (response['data'].hasOwnProperty(key))
+		 												{  
+		   													  if(i==0){$('.last_order_datetime').empty();$('.last_order_datetime').html(response['data'][key]['date_created']); }
+										   var check_ex=getMatch_on_page(orders_current,response["data"][key]['order_id']);
+										   console.log('проверка '+response["data"][key]['order_id']+' '+check_ex)
+										   if(check_ex==false){continue;}
+						  
+															 
+															  i++;
+		/*
+		var status1='';
+		var status2='';
+		var status3='';
+		var status4='';
+		
+		if(response['data'][key]['status']==1){status1="selected" }
+		if(response['data'][key]['status']==2){status2="selected" }
+		if(response['data'][key]['status']==3){status3="selected" }
+		if(response['data'][key]['status']==4){status4="selected" }
+		
+														
+		var selected='<select class="form-control status"><option value="1" '+status1+' >Новый заказ</option><option value="2" '+status2+' >Готовится</option><option value="3" '+status3+' >Готов</option><option value="4"'+status4+' >Нельзя выполнить</option></select>'
+							*/								  
+	
+                                                               var deliv_time=response["data"][key]["delivery_time"];
+															   var order_id=response["data"][key]["order_id"];
+															   deliv_time=deliv_time.split(':')
+                                                               deliv_time=deliv_time[0]+':'+deliv_time[1]
+															   //ищем строчку куда вставить
+															   
+															   var row_id=find_row(orders,deliv_time,order_id);
+															   
+															   var phone= response["data"][key]["tel"].replace(/(\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/, "+$1($2) $3-$4-$5");
+                              								   //$('.last_order_datetime').after(
+															   
+												
+	function date() {
+    var now = new Date()   
+		var hours=now.getHours().toString()
+		var minutes=now.getMinutes().toString()
+		var seconds=now.getSeconds().toString()
+		
+		if(hours.length==1)
+		{
+			hours='0'+hours
+		}
+		if(minutes.length==1)
+		{
+			minutes='0'+minutes
+		}
+		if(seconds.length==1)
+		{
+			seconds='0'+seconds
+		}
+		
+		
+		
+    // now = now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();
+	now=hours+':'+minutes+':'+seconds
+     return now
+	 
+	
+    }
+												
+							var time2=$('#'+row_id).children('.order_info').children('.time').text();											   			    			time2=time2+':00';
+							var time=date();
+													 
+													 
+												
+
+							var dur = moment.duration(moment(time2,"HH:mm:ss")-moment(time,"HH:mm:ss")).seconds()
+							var dur1 = moment.duration(moment(time2,"HH:mm:ss")-moment(time,"HH:mm:ss")).minutes()
+							var dur2 = moment.duration(moment(time2,"HH:mm:ss")-moment(time,"HH:mm:ss")).hours();
+                          
+						    if(dur<0||dur1<0||dur2<0)
+							{ 
+							row_id='time_line';
+						
+							}
+													 
+															   
+															   
+															   $('#'+row_id).after('<div class="order" id='+response["data"][key]["order_id"]+'><div class="order_info order_info_'+response["data"][key]["order_id"]+'"><div class="time">'+deliv_time+'</div><div class="number">'+response["data"][key]["order_id"]+'</div><div class="client_info"><div class="client_name">'+response["data"][key]["name"]+'</div><div class="client_surname">'+response["data"][key]["surname"]+'</div><div class="client_tel">'+phone+'</div><div class="client_pan">'+response["data"][key]["pan"]+'</div></div><div class="order_items order_items_'+response["data"][key]["order_id"]+'">');
+														//sound
+														document.getElementById('audiotag1').play();
+     												   
+  													    var isiPad = navigator.userAgent.match(/iPad/i) != null;
+													    if(isiPad==true)
+														{
+															window.location.assign("doubleb-admin://sound");
+														
+														}
+													//	player.play('http://ru-beacon.ru/doubleb/admin/audio/notification.mp3')
+													//	 $.mbAudio.play('effectSprite', 'streak')
+														var count=0;
+														var backgroundInterval = setInterval(function(){
+															if(count>9)
+															{
+															 $('#'+response["data"][key]["order_id"]).removeClass("blink");
+															 clearInterval(backgroundInterval);
+															   
+															}
+															else 
+															{
+																 $('#'+response["data"][key]["order_id"]).toggleClass("blink");
+															}
+															count++;
+	
+ },500)
+
+ 
+														//setTimeout(function(){ $('#'+response["data"][key]["order_id"]).css("background-color", ""); },5000);
+//													$('#'+response["data"][key]["order_id"]).fadeOut(1500);
+											for (var iter in response['data'][key]['items'])
+														 {
+															if (response['data'][key]['items'].hasOwnProperty(iter))
+																					{  
+																					
+																				    $('.order_items_'+response["data"][key]["order_id"]).append('<div class="item"><div class="item_title">'+ response["data"][key]["items"][iter]["title"]+'</div><div class="item_quantity">'+response["data"][key]["items"][iter]["quantity"]+'</div><div class="item_price">'+response["data"][key]["items"][iter]["price"]+'</div>');
+																					
+																					}
+														  }
+														  
+														  //комментарий 
+														  
+														  var comment='';
+														  if(response['data'][key]['comment'].length!=0)
+														  {
+														  comment='<div class="order_comment"><div class="comment_title">Комментарий</div><div class="comment_divider"></div><div class="comment_text">'+response['data'][key]['comment']+'</div></div>'
+														  }
+														  
+														  $('.order_items_'+response["data"][key]["order_id"]).append(comment)
+														  
+														  //тип оплаты
+														  var payment_ico='';
+														 if(response['data'][key]['payment_type_id']==0)
+														 {
+														 	 payment_ico="<div class='payment_type'><img src='images/cash.png'></div>"
+														 }
+														 
+														 else
+														 {
+														    payment_ico="<div class='payment_type'><img src='images/card.png'></div>"
+														 }
+														 
+														$('.order_items_'+response["data"][key]["order_id"]).after(payment_ico)
+														//$('.order_items_'+response["data"][key]["order_id"]).append('</div>')
+														
+														 
+														
+														$('.order_info_'+response["data"][key]["order_id"]).after('<div class="submit"><span class="order_id" style="display:none">'+response["data"][key]["order_id"]+'</span>&#10004;&nbsp;Выдать</div></div>');
+														
+		 												}
+						   }
+ })
+ 
+ 
+add_line();
+
+}
+
+function add_line()
+{
+	
+	//добавляем линию со временем 
+var orders=[];
+$('.order').each(function(){
+   		 var time= $(this).children('.order_info').children('.time').text()
+    	 var order_id= $(this).children('.order_info').children('.number').text()
+         var obj = {};
+         obj['time'] =time;
+         obj['order_id'] =order_id;
+         orders.push(obj);
+    
+		})
+		
+	   //-----  конец формироавния массива с текущими категориями  ---//// 
+		
+		
+		//----функция для соритровки --//
+		
+		
+		function compare(a,b) {
+		  if (a.time < b.time)
+			 return -1;
+		  if (a.time > b.time)
+			return 1;
+		  return 0;
+		}
+		
+		
+	   /// --- конец функции сортировки--///
+	   
+	   var current_time=date(); 
+	   
+	   var index_row=find_row(orders,current_time,'00777');
+	   
+	     
+	   $('.time_line').remove();
+	    console.log(index_row); 
+	    
+	   if (index_row==0)
+	   {
+	        //если заказов нет 
+		   index_row='page-wrapper';
+		   $('.time_line').remove();
+		  $('#'+index_row).prepend('<div class="time_line" id="time_line"><div class="time_line_triangle"></div><div class="t_line"></div><div id="time">'+current_time+'</div><div class="t_line"></div></div>')
+	   }
+	   else 
+	   {
+	   
+	    
+		$('#'+index_row).after('<div class="time_line" id="time_line"><div class="time_line_triangle"></div><div class="t_line"></div><div id="time">'+current_time+'</div><div class="t_line"></div></div>')
+	   }
+	   //функция для поиска куда вставить строку
+	   
+	    function find_row(array,dilivery_time,order_id)
+		{
+			console.log(array)
+			var obj={}; 
+			
+			obj['time']=dilivery_time; 
+			obj['order_id']=order_id; 
+			array.push(obj);
+			array.sort(compare);
+		
+			var after_id=0;
+			$.each( array, function( key, value )
+			{     
+			if(value['time']==dilivery_time&&value['order_id']==order_id)  
+			{
+				if(key==0)
+				{
+					after_id=0;
+				}
+				else 
+				{
+						after_id=array[key-1]['order_id'];
+				}
+			}
+			
+		    });
+			return after_id
+		
+		 }
+
+/// конец линии со временем
+}
+
+var timerId = setInterval(timerMethod, 6000); 
+$( "body" ).on( "click", ".submit", function(e){
+	$(this).prop("disabled", true);
+    var order_id=$(this).children('.order_id').html();
+	console.log(order_id);
+	$.post('done.php',{"order_id":order_id},function(resp)
+	{
+	     var response=JSON.parse(resp)
+		 console.log(response)
+	     if(response['status']==1&&response['error']==0)
+		 {
+			 $('#'+order_id).css('background-color','rgba(113,205,107,0.1)') 
+	$('#'+order_id).fadeOut(1500);
+			 
+		 }
+	})
+	
+    
+	})
+	
+// modal 
+$(function() {
+    $('#info_modal').easyModal({
+		containerCss: {'height': 'auto !important'}
+		 
+		 
+	
+	});
+	
+	$('#info_modal_cancel').easyModal({
+		onClose: function(myModal){
+			console.log('empty baby ')
+			$('.modal_content').empty();
+		}
+	});
+//	$('#info_modal_cancel').trigger('openModal');
+	if (/ip(hone|od)|ipad/i.test(navigator.userAgent)) {
+           $("body").css ("cursor", "pointer");
+		   }
+		   
+     
+});
+$( "body" ).on( "click", ".order", function(e){
+  
+     if($(event.target).attr('class')!='submit')
+	 {
+            
+			
+			var order_time=$(this).children('.order_info').children('.time').html();
+			var order_id=$(this).children('.order_info').children('.number').html();
+			var client_name=$(this).children('.order_info').children('.client_info').children('.client_name').html();
+			var client_surname=$(this).children('.order_info').children('.client_info').children('.client_surname').html();
+			var client_tel=$(this).children('.order_info').children('.client_info').children('.client_tel').html();
+			var client_pan=$(this).children('.order_info').children('.client_info').children('.client_pan').html();
+			
+			//$('#info_modal').empty();
+			$('#info_modal').trigger('openModal');
+			
+
+            $('.modal_total').show();
+            $('.modal_footer').show();
+            $('.modal_order').empty();
+            $('.modal_client').empty();
+            $('.modal_client').css('border-bottom', '1px solid #ccc');
+            $('.modal_client').prepend("<div class='modal_client_div'><span class='order_client_surname'></span>&nbsp;<span class='order_client_name'></span></div> <div class='modal_client_div order_client_tel'>+7 (916) 447 07 22</div><div class='modal_client_div order_client_card'>**** **** **** <span class='order_client_pan'></span></div>");
+			
+			//empty fields
+
+			$('.order_time').empty();
+			$('.order_number').empty();
+			$('.order_client_name').empty();
+			$('.order_client_surname').empty();
+			$('.order_client_tel').empty();
+			$('.order_client_pan').empty();
+
+			//insert data
+
+			
+			$('.order_time').prepend(order_time);
+			$('.order_number').prepend(order_id);
+			$('.order_client_name').prepend(client_name);
+			$('.order_client_surname').prepend(client_surname);
+			$('.order_client_tel').prepend(client_tel);
+			$('.order_client_pan').prepend(client_pan);
+
+			$('.modal_order_item').empty();
+			
+			var total_amount=0;
+			$(this).children('.order_info').children('.order_items').children('.item').each(function(){
+
+ 			var item_price=$(this).children('.item_price').html();
+			var item_quantity=$(this).children('.item_quantity').html();
+			var item_sum=item_price*item_quantity;
+ 			total_amount+=item_sum;
+			
+			$('.modal_order').append('<div class="modal_order_item"><div class="modal_title order_item">'+$(this).children('.item_title').html()+'</div><div class="modal_quantity order_item"><span class="quant_counter">X</span>'+item_quantity+'</div><div class="modal_price order_item">'+item_price+' р.</div></div>')
+			
+			});
+			
+			$('.modal_total_amount').empty();
+			$('.modal_total_amount').prepend(total_amount);
+			//выключаем кнопки снизу
+			if($(this).hasClass('canceled')==true)
+			{ 
+				$("#info_modal").children('.modal_footer').hide(); 
+				//$("#info_modal").children('.modal_total').css('border-bottom','none');
+				
+			}
+			
+			//items in order
+			var positions_counter=$(this).children('.order_info').children('.order_items').children('.item').length;
+			for(var i=0;i<positions_counter;i++)
+			{
+				
+			}
+	 }
+   
+});
+
+$('.submit_without').click(function(){
+	 
+	 var order_id=$(this).parent('.modal_footer_item').parent('.modal_footer').parent('#info_modal').children('.modal_header').children('.number').children('.order_number').html();
+	 
+	 $.post('done.php',{"order_id":order_id},function(resp)
+	{
+	     var response=JSON.parse(resp)
+		
+	     if(response['status']==1&&response['error']==0)
+		 {
+		     $('#info_modal').trigger('closeModal');	  
+			 $('#'+order_id).css('background-color','rgba(113,205,107,0.1)') 
+	$('#'+order_id).fadeOut(1500);
+			 
+		 }
+	})
+	
+	})
+
+
+$('#change_time').click(function(){
+	
+	$('.modal_order').empty();
+	$('.modal_client').empty();
+	$('.modal_total').hide();
+	$('.modal_footer').hide();
+	$('.modal_client').css('border-bottom','none');
+	$('.modal_client').prepend('<div class="change_time"><div class="cal_image">Перенести на</div><div class="time_picker"><select class="selectpicker" id="time_changer"><option value="5">5 минут</option><option  value="10">10 минут</option><option  value="15">15 минут</option></select></div></div><div class="modal_footer2"><div class="stop">Отменить</div><div class="footer_dev"></div><div class="confirm">Подтвердить</div></div>')
+	$('.selectpicker').selectpicker({
+                'selectedText': 'cat'
+            });
+	
+})
+//time change accept
+
+ $('body').on('click',".confirm",function(){
+	
+	$('.confirm').prop("disabled", true);
+
+	var mins=$("#time_changer").val();
+	var time=$('.order_time').html();
+	var number=$('.order_number').html();
+
+	
+$.post('check_time.php',{'mins':mins,"time":time,"order_id":number}, function(resp){
+	     
+	 var response=JSON.parse(resp)
+	 var order_id=response['info']['order_id']
+	 var time=response['info']['time']
+	 if(response['error']==0)
+        {
+		    $('#info_modal').empty();
+			$('#info_modal').prepend('<div style="margin-top:130px;text-align:center;">Готовность заказа № '+order_id+' изменена на '+time+'</div>')	
+			setTimeout(function(){ location.reload();}, 3000);
+		    
+		}
+	})
+})
+$('body').on('click','.stop', function(){
+    $('.change_time').remove();
+    $('.return_money').remove();
+	var order_id=$('.order_number').html();
+	$('#'+order_id).trigger("click");
+})
+//return to card
+$('body').on('click','#return', function(){
+	
+	var order_id=$('.order_number').html();
+	var total_price=$('.modal_total_amount').html();
+	var card_number=$('.order_client_card').html();
+	
+	$('.modal_order').empty();
+	$('.modal_client').empty();
+	$('.modal_total').hide();
+	$('.modal_footer').hide();
+	$('.modal_client').css('border-bottom','none');
+	
+	
+	$('.modal_client').prepend('<div class="return_money"><div class="return_price">Сумма возврата: <span class="return_amount">'+total_price+' руб.</span></div><div class="card_number">Номер карты: <span class="card_pan">'+card_number+'</span></div><div><div >Комментарий</div><textarea class="return_comments" rows="2" cols="32"></textarea></div></div><div class="modal_footer2"><div class="stop">Отменить</div><div class="footer_dev"></div><div class="confirm_return">Подтвердить</div></div>')
+
+	
+})
+$('body').on('click','.confirm_return', function(){
+ 
+ 	$('.confirm_return').prop("disabled", true);
+
+    var order_id=$('.order_number').html();
+	var comment=$('.return_comments').val();
+
+	$.post('return_barista.php',{"order_id":order_id, "comment":comment},function(resp){
+	         var response=JSON.parse(resp)
+			 if(response['error']==0)
+        {
+		    $('#info_modal').empty();
+			$('#info_modal').prepend('<div style="margin-top:130px;text-align:center;">Возврат за заказа № '+order_id+' выполнен</div>')	
+			setTimeout(function(){ location.reload();}, 3000);
+		    
+		}
+		
+		})
+	
+})
+	
+
+
+        /*
+         * DEFINE SOUNDS
+         */
+       // $.mbAudio.sounds = {};
+
+
+        function audioIsReady(){
+
+            setTimeout(function(){
+                $('#buttons').fadeIn();
+                $("#loading").hide();
+
+            
+
+            },3000);
+
+        }
+
+        $(document).on("initAudio", function () {
+
+            //otherwise sound is initialized on the first tap loosing time and UX
+             $.mbAudio.pause('effectSprite', audioIsReady);
+
+            ;
+        });
+         $('.start').click(function(){
+			 
+			 $('.start').css('display','none');
+		})
+	 //current time
+	 	
+	
+
+     function date() {
+    var now = new Date()   
+		var hours=now.getHours().toString()
+		var minutes=now.getMinutes().toString()
+		var seconds=now.getSeconds().toString()
+		
+		if(hours.length==1)
+		{
+			hours='0'+hours
+		}
+		if(minutes.length==1)
+		{
+			minutes='0'+minutes
+		}
+		if(seconds.length==1)
+		{
+			seconds='0'+seconds
+		}
+		
+		
+		
+    // now = now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();
+	now=hours+':'+minutes+':'+seconds
+     return now
+	 
+	
+    }
+	
+	//scroll
+	function goToByScroll(id){
+    
+// Remove "link" from the ID
+    id = id.replace("link", ""); 
+      // Scroll
+    $('html,body').animate({
+        scrollTop: $("#"+id).offset().top},
+        'slow');
+}
+
+
+//покраска 
+/*
+$('.navbar-default').mouseover(function()
+{	
+    
+	 
+	 $('#active_menu').css('background-color','none'); 
+	
+})
+*/
+	</script>
+<div class='start'onclick="$(document).trigger('initAudio')">sound</div>
+
+</body>
+
+</html>

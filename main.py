@@ -1,3 +1,4 @@
+from webapp2_extras import jinja2
 from methods import fastcounter
 from handlers import api, admin_api, admin_web
 from webapp2 import Route, WSGIApplication
@@ -23,6 +24,8 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/admin', [
+        Route('/orders.php', admin_web.OrdersHandler),
+
         Route('/check_time.php', admin_api.CheckTimeHandler),
         Route('/check_update.php', admin_api.CheckUpdateHandler),
         Route('/done.php', admin_api.OrderDoneHandler),
@@ -32,3 +35,5 @@ app = WSGIApplication([
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
 ], debug=True)
+
+jinja2.set_jinja2(jinja2.Jinja2(app), app=app)
