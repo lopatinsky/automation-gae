@@ -2,13 +2,13 @@
 
 from collections import Counter
 import datetime
-from handlers.api.base import ApiHandler
+from .base import AdminApiHandler
 from methods import push, alfa_bank
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER
 
 
-class CheckTimeHandler(ApiHandler):
+class CheckTimeHandler(AdminApiHandler):
     def post(self):
         mins = self.request.get_range("mins")
         order_id = self.request.get_range("order_id")
@@ -32,7 +32,7 @@ class CheckTimeHandler(ApiHandler):
         self.render_json(response)
 
 
-class CheckUpdateHandler(ApiHandler):
+class CheckUpdateHandler(AdminApiHandler):
     def post(self):
         last_date_str = self.request.get("last_order_datetime")
         last_date = datetime.datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S")
@@ -72,7 +72,7 @@ class CheckUpdateHandler(ApiHandler):
         self.render_json(response)
 
 
-class OrderDoneHandler(ApiHandler):
+class OrderDoneHandler(AdminApiHandler):
     def post(self):
         order_id = self.request.get_range("order_id")
         order = Order.get_by_id(order_id)
@@ -91,7 +91,7 @@ class OrderDoneHandler(ApiHandler):
         self.render_json(response)
 
 
-class OrderCancelHandler(ApiHandler):
+class OrderCancelHandler(AdminApiHandler):
     def post(self):
         order_id = self.request.get_range('order_id')
         comment = self.request.get('comment')
@@ -126,7 +126,7 @@ class OrderCancelHandler(ApiHandler):
         self.render_json(response)
 
 
-class OrderStatusUpdateHandler(ApiHandler):
+class OrderStatusUpdateHandler(AdminApiHandler):
     def post(self):
         order_id = self.request.get_range("order_id")
         status = self.request.get_range("status")
