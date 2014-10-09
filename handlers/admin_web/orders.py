@@ -21,4 +21,4 @@ class OrdersHandler(BaseHandler):
         last_order = Order.query().order(-Order.date_created).get(projection=(Order.date_created,))
         last_order_datetime = last_order.date_created if last_order else now
 
-        self.render('orders.html', orders=orders, last_order_datetime=last_order_datetime)
+        self.render('orders.html', orders=orders_data, last_order_datetime=last_order_datetime)
