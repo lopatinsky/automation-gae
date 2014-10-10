@@ -33,7 +33,6 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_status = response_json['payment']['status']
         payment_id = response_json['payment']['payment_id']
 
         items = []
@@ -50,7 +49,7 @@ class OrderHandler(ApiHandler):
 
         order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                       comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
-                      payment_type_id=payment_type_id, payment_id=payment_id, payment_status=payment_status,
+                      payment_type_id=payment_type_id, payment_id=payment_id,
                       items=[item.key for item in items])
         order.put()
 

@@ -14,10 +14,6 @@ READY_ORDER = 1
 CANCELED_BY_CLIENT_ORDER = 2
 CANCELED_BY_BARISTA_ORDER = 3
 
-#TODO not sure
-PAYMENT_SUCCESS = 1
-PAYMENT_FAIL = 0
-
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
@@ -95,7 +91,6 @@ class Order(ndb.Model):
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     delivery_time = ndb.DateTimeProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
-    payment_status = ndb.IntegerProperty(choices=(PAYMENT_SUCCESS, PAYMENT_FAIL))
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty(required=True)
     pan = ndb.StringProperty(indexed=False)
