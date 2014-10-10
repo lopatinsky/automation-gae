@@ -2,9 +2,10 @@
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.base import ApiHandler
 import json
+from time import time as time_time
 import re
 from datetime import datetime, timedelta
-from methods import sms
+from methods import alfa_bank, sms
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER
 
 __author__ = 'ilyazorin'
@@ -33,7 +34,7 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_id = response_json['payment']['payment_id']
+        payment_id = response_json['payment'].get('payment_id')
 
         items = []
         sms_items_info = []
@@ -43,9 +44,22 @@ class OrderHandler(ApiHandler):
                 items.append(menu_item)
             sms_items_info.append((menu_item.title, item['quantity']))
 
-        #TODO card payment
-        if payment_type_id == CARD_PAYMENT_TYPE:
-            pass
+        if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
+            # payment by card from server
+            binding_id = response_json['payment']['binding_id']
+            alpha_client_id = response_json['payment']['client_id']
+            return_url = response_json['payment']['return_url']
+            tie_result = alfa_bank.tie_card(total_sum * 100, int(time_time()), return_url, alpha_client_id,
+                                            'MOBILE')
+            if 'errorCode' not in tie_result.keys() or str(tie_result['errorCode']) == '0':
+                payment_id = tie_result['orderId']
+                create_result = alfa_bank.create_pay(binding_id, payment_id)
+                if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
+                    pass
+                else:
+                    self.abort(400)
+            else:
+                self.abort(400)
 
         order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                       comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
