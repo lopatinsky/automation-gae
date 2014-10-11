@@ -40,6 +40,7 @@ class CheckUpdateHandler(AdminApiHandler):
         response = {}
         if orders:
             response['status'] = 1
+            response['data'] = {}
             for order in orders:
                 if order.status != NEW_ORDER:
                     continue
@@ -63,6 +64,7 @@ class CheckUpdateHandler(AdminApiHandler):
                         'price': item.price,
                         'quantity': count
                     })
+                response['data'][order.key.id()] = order_data
         else:
             response['status'] = 0
         cancel_keys = Order.query().filter(Order.status == CANCELED_BY_CLIENT_ORDER).fetch(keys_only=True)
