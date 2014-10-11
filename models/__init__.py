@@ -117,8 +117,9 @@ class Order(ndb.Model):
 
 
 class Client(ndb.Model):
-    name = ndb.StringProperty(indexed=False)
-    tel = ndb.StringProperty(indexed=False)
+    name = ndb.StringProperty()
+    surname = ndb.StringProperty()
+    tel = ndb.StringProperty()
 
 
 class PaymentType(ndb.Model):

@@ -11,7 +11,6 @@ def format_phone(phone):
 
 def format_order(order):
     client = Client.get_by_id(order.client_id)
-    client_name, client_surname = client.name.split(None, 1)
     order_data = {
         'date_created': order.date_created.strftime("%Y-%m-%d %H:%M:%S"),
         'comment': order.comment,
@@ -20,8 +19,8 @@ def format_order(order):
         'order_id': order.key.id(),
         'client': {
             'pan': order.pan,
-            'name': client_name,
-            'surname': client_surname,
+            'name': client.name,
+            'surname': client.surname,
             'tel': format_phone(client.tel),
         },
         'delivery_time': order.delivery_time.strftime("%H:%M"),

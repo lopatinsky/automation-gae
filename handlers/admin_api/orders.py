@@ -44,15 +44,14 @@ class CheckUpdateHandler(AdminApiHandler):
                 if order.status != NEW_ORDER:
                     continue
                 client = Client.get_by_id(order.client_id)
-                client_name, client_surname = client.name.split(None, 1)
                 order_data = {
                     'date_created': order.date_created.strftime("%Y-%m-%d %H:%M:%S"),
                     'comment': order.comment,
                     'payment_type_id': order.payment_type_id,
                     'order_id': order.key.id(),
                     'pan': order.pan,
-                    'name': client_name,
-                    'surname': client_surname,
+                    'name': client.name,
+                    'surname': client.surname,
                     'tel': client.tel,
                     'items': []
                 }
