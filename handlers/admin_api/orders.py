@@ -4,8 +4,33 @@ from collections import Counter
 import datetime
 from .base import AdminApiHandler
 from methods import push, alfa_bank
+from methods.orders import search_orders
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER
+
+
+def format_order(order):
+    client = Client.get_by_id(order.client_id)
+    order_data = {
+        'date_created': order.date_created.strftime("%Y-%m-%d %H:%M:%S"),
+        'comment': order.comment,
+        'payment_type_id': order.payment_type_id,
+        'order_id': order.key.id(),
+        'pan': order.pan,
+        'name': client.name,
+        'surname': client.surname,
+        'tel': client.tel,
+        'items': []
+    }
+    item_keys = Counter(order.items).items()
+    for key, count in item_keys:
+        item = key.get()
+        order_data['items'].append({
+            'title': item.title,
+            'price': item.price,
+            'quantity': count
+        })
+    return order_data
 
 
 class CheckTimeHandler(AdminApiHandler):
@@ -44,27 +69,7 @@ class CheckUpdateHandler(AdminApiHandler):
             for order in orders:
                 if order.status != NEW_ORDER:
                     continue
-                client = Client.get_by_id(order.client_id)
-                order_data = {
-                    'date_created': order.date_created.strftime("%Y-%m-%d %H:%M:%S"),
-                    'comment': order.comment,
-                    'payment_type_id': order.payment_type_id,
-                    'order_id': order.key.id(),
-                    'pan': order.pan,
-                    'name': client.name,
-                    'surname': client.surname,
-                    'tel': client.tel,
-                    'items': []
-                }
-                item_keys = Counter(order.items).items()
-                for key, count in item_keys:
-                    item = key.get()
-                    order_data['items'].append({
-                        'title': item.title,
-                        'price': item.price,
-                        'quantity': count
-                    })
-                response['data'][order.key.id()] = order_data
+                response['data'][order.key.id()] = format_order(order)
         else:
             response['status'] = 0
         cancel_keys = Order.query().filter(Order.status == CANCELED_BY_CLIENT_ORDER).fetch(keys_only=True)
@@ -139,3 +144,37 @@ class OrderStatusUpdateHandler(AdminApiHandler):
             'order_id': order_id,
             'status': status
         })
+
+
+class GetOrdersHandler(AdminApiHandler):
+    def get(self):
+        now = datetime.datetime.now()
+        today = datetime.datetime.combine(now.date(), datetime.time())
+        orders = Order.query(Order.date_created >= today,
+                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
+                      .order(-Order.date_created).fetch()
+        orders_data = []
+        for order in orders:
+            if order.status == CANCELED_BY_CLIENT_ORDER and order.delivery_time < now:
+                continue
+
+            orders_data.append(format_order(order))
+
+        last_order = Order.query().order(-Order.date_created).get(projection=(Order.date_created,))
+        last_order_datetime = last_order.date_created if last_order else now
+
+        response = {'orders': orders_data, 'last_order_datetime': last_order_datetime.strftime("%Y-%m-%d %H:%M:%S")}
+        self.render_json(response)
+
+
+class GetHistoryHandler(AdminApiHandler):
+    def get(self):
+        query = self.request.get("search")
+        if query:
+            orders = search_orders(query)
+        else:
+            today = datetime.datetime.combine(datetime.date.today(), datetime.time())
+            orders = Order.query(Order.date_created >= today).order(-Order.date_created).fetch()
+        orders_data = [format_order(order) for order in orders]
+        response = {'orders': orders_data}
+        self.render_json(response)
