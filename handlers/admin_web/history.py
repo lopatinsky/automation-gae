@@ -1,7 +1,7 @@
 # coding=utf-8
 import datetime
 from .base import BaseHandler
-from .methods import format_order
+from .formatting import format_order
 from methods.orders import search_orders
 from models import Order, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CARD_PAYMENT_TYPE, \
     CASH_PAYMENT_TYPE

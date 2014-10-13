@@ -1,6 +1,6 @@
 import datetime
 from .base import BaseHandler
-from .methods import format_order
+from .formatting import format_order
 from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER
 
 
