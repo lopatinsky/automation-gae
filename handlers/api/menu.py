@@ -9,7 +9,10 @@ class MenuHandler(ApiHandler):
     def get(self):
         client_id = self.request.get('client_id')
         categories = MenuCategory.query().fetch()
-        response = {'menu': [category.dict() for category in categories]}
+        result_dict = {}
+        for category in categories:
+            result_dict.update(category.dict())
+        response = {'menu': result_dict}
         if not client_id:
             client = Client()
             client.put()
