@@ -30,7 +30,7 @@ class PaymentRegisterHandler(ApiHandler):
         alfa_response = alfa_bank.tie_card(amount, order_number, return_url, client_id, 'MOBILE')
         if 'errorCode' not in alfa_response:
             order_id = alfa_response['orderId']
-            order = Order.get_by_id(int(order_id))
+            order = Order.get_by_id(int(order_number))
             order.payment_id = order_id
             order.put()
 
