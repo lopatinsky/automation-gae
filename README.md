@@ -103,7 +103,7 @@ Parameters:
     * `client`: object
         * `id`: int|string
         * `name`: string
-        * `tel`: string
+        * `phone`: string
     * `payment`: object
         * `type_id`: int
         * see below
