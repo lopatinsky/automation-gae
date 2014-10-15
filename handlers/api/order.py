@@ -109,7 +109,7 @@ class ReturnOrderHandler(ApiHandler):
         order = Order.get_by_id(order_id)
         if order:
             now = datetime.utcnow()
-            if now - order.delivery_time > timedelta(minutes=10):
+            if order.delivery_time - now > timedelta(minutes=10):
                 order.status = CANCELED_BY_CLIENT_ORDER
                 order.put()
                 self.render_json({
