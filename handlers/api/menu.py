@@ -14,7 +14,7 @@ class MenuHandler(ApiHandler):
             result_dict.update(category.dict())
         response = {'menu': result_dict}
         if not client_id:
-            client = Client()
+            client = Client.create()
             client.put()
             response['client_id'] = client.key.id()
         else:

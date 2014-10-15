@@ -121,6 +121,16 @@ class Client(ndb.Model):
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
 
+    @classmethod
+    def create(cls):
+        return cls(id=cls.generate_id())
+
+    @staticmethod
+    def generate_id():
+        value = fastcounter.get_count("client_id")
+        fastcounter.incr("client_id")
+        return value + 1
+
 
 class PaymentType(ndb.Model):
     title = ndb.StringProperty(indexed=False)
