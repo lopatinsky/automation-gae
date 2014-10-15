@@ -98,7 +98,7 @@ class StatusHandler(ApiHandler):
             order = Order.get_by_id(order_id)
             if order:
                 orders.append(order)
-        self.render_json({'status': order.status_dict() for order in orders})
+        self.render_json({'status': [order.status_dict() for order in orders]})
 
 
 class ReturnOrderHandler(ApiHandler):
