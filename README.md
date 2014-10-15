@@ -93,22 +93,22 @@ POST `/api/orders.php`
 Parameters:
 
 * `order`: JSON string: object with the following fields:
-    * `order_id`: int
-    * `venue_id`: int
+    * `order_id`: int|string
+    * `venue_id`: int|string
     * `total_sum`: int
     * `coordinates`: string with format `"lat,lng"`
     * `comment`: string
     * `device_type`: int
     * `delivery_time`: int (interval in minutes)
     * `client`: object
-        * `client_id`: int
+        * `id`: int|string
         * `name`: string
         * `tel`: string
     * `payment`: object
         * `type_id`: int
         * see below
     * `items`: array of objects
-        * `item_id`: int
+        * `item_id`: int|string
         * `quantity`: int
 
 For payment by card from client (DEPRECATED), `payment` must contain the following fields:

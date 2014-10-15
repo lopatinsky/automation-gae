@@ -16,14 +16,14 @@ class OrderHandler(ApiHandler):
     def post(self):
         #TODO errors handling
         response_json = json.loads(self.request.get('order'))
-        order_id = response_json['order_id']
-        venue_id = response_json['venue_id']
+        order_id = int(response_json['order_id'])
+        venue_id = int(response_json['venue_id'])
         total_sum = response_json['total_sum']
         coordinates = GeoPt(response_json['coordinates'])
         comment = response_json['comment']
         device_type = response_json['device_type']
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
-        client_id = response_json['client']['client_id']
+        client_id = int(response_json['client']['id'])
 
         client = Client.get_by_id(int(client_id))
         name = response_json['client']['name'].split(None, 1)
@@ -42,7 +42,7 @@ class OrderHandler(ApiHandler):
         items = []
         sms_items_info = []
         for item in response_json['items']:
-            menu_item = MenuItem.get_by_id(item['item_id'])
+            menu_item = MenuItem.get_by_id(int(item['item_id']))
             for i in xrange(item['quantity']):
                 items.append(menu_item)
             sms_items_info.append((menu_item.title, item['quantity']))
