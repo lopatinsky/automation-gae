@@ -2,7 +2,7 @@
 
 from collections import Counter
 import datetime
-from .base import AdminApiHandler
+from .base import WebAdminApiHandler
 from methods import push, alfa_bank
 from methods.orders import search_orders
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
@@ -33,7 +33,7 @@ def format_order(order):
     return order_data
 
 
-class CheckTimeHandler(AdminApiHandler):
+class CheckTimeHandler(WebAdminApiHandler):
     def post(self):
         mins = self.request.get_range("mins")
         order_id = self.request.get_range("order_id")
@@ -57,7 +57,7 @@ class CheckTimeHandler(AdminApiHandler):
         self.render_json(response)
 
 
-class CheckUpdateHandler(AdminApiHandler):
+class CheckUpdateHandler(WebAdminApiHandler):
     def post(self):
         last_date_str = self.request.get("last_order_datetime")
         last_date = datetime.datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S")
@@ -78,7 +78,7 @@ class CheckUpdateHandler(AdminApiHandler):
         self.render_json(response)
 
 
-class OrderDoneHandler(AdminApiHandler):
+class OrderDoneHandler(WebAdminApiHandler):
     def post(self):
         order_id = self.request.get_range("order_id")
         order = Order.get_by_id(order_id)
@@ -97,7 +97,7 @@ class OrderDoneHandler(AdminApiHandler):
         self.render_json(response)
 
 
-class OrderCancelHandler(AdminApiHandler):
+class OrderCancelHandler(WebAdminApiHandler):
     def post(self):
         order_id = self.request.get_range('order_id')
         comment = self.request.get('comment')
@@ -132,7 +132,7 @@ class OrderCancelHandler(AdminApiHandler):
         self.render_json(response)
 
 
-class OrderStatusUpdateHandler(AdminApiHandler):
+class OrderStatusUpdateHandler(WebAdminApiHandler):
     def post(self):
         order_id = self.request.get_range("order_id")
         status = self.request.get_range("status")
@@ -146,7 +146,7 @@ class OrderStatusUpdateHandler(AdminApiHandler):
         })
 
 
-class GetOrdersHandler(AdminApiHandler):
+class GetOrdersHandler(WebAdminApiHandler):
     def get(self):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
@@ -167,7 +167,7 @@ class GetOrdersHandler(AdminApiHandler):
         self.render_json(response)
 
 
-class GetHistoryHandler(AdminApiHandler):
+class GetHistoryHandler(WebAdminApiHandler):
     def get(self):
         query = self.request.get("search")
         if query:
