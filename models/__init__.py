@@ -1,5 +1,7 @@
+from collections import Counter
 from google.appengine.ext import ndb
 from methods import location, fastcounter
+from methods.rendering import timestamp
 
 __author__ = 'ilyazorin'
 
@@ -101,6 +103,25 @@ class Order(ndb.Model):
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
 
+    def dict(self):
+        dct = {
+            "order_id": self.key.id(),
+            "delivery_time": timestamp(self.delivery_time),
+            "payment_type_id": self.payment_type_id,
+            "client": Client.get_by_id(self.client_id).dict(),
+            "pan": self.pan,
+            "comment": self.comment,
+            "items": []
+        }
+        for item_key, count in Counter(self.items):
+            item = item_key.get()
+            dct["items"].append({
+                "title": item.title,
+                "price": item.price,
+                "quantity": count
+            })
+        return dct
+
     def status_dict(self):
         dct = {
             'order_id': self.key.id(),
@@ -130,6 +151,13 @@ class Client(ndb.Model):
         value = fastcounter.get_count("client_id")
         fastcounter.incr("client_id")
         return value + 1
+
+    def dict(self):
+        return {
+            "name": self.name,
+            "surname": self.surname,
+            "phone": self.tel
+        }
 
 
 class PaymentType(ndb.Model):
