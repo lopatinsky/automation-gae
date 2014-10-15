@@ -25,7 +25,7 @@ class OrderHandler(ApiHandler):
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
         client_id = response_json['client']['client_id']
 
-        client = Client.get_by_id(client_id)
+        client = Client.get_by_id(int(client_id))
         name = response_json['client']['name'].split(None, 1)
         client_name = name[0]
         client_surname = name[1] if len(name) > 1 else ""

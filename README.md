@@ -126,7 +126,7 @@ Response:
 ```
 #!js
 {
-    "order_id": new_order_id // int
+    "order_id": order_id // int
 }
 ```
 
