@@ -42,7 +42,7 @@ class CheckTimeHandler(AdminApiHandler):
         order.delivery_time += datetime.timedelta(mins)
         order.put()
 
-        time_str = order.delivery_time.strftime("%M:%S")
+        time_str = order.delivery_time.strftime("%H:%M")
         client = Client.get_by_id(order.client_id)
         push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, time_str)
         push.send_order_push(order_id, order.status, push_text, order.device_type, new_time=order.delivery_time)
