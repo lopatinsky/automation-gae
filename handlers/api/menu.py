@@ -17,4 +17,6 @@ class MenuHandler(ApiHandler):
             client = Client()
             client.put()
             response['client_id'] = client.key.id()
+        else:
+            response['client_id'] = client_id
         self.render_json(response)
