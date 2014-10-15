@@ -1,6 +1,6 @@
 from webapp2_extras import jinja2
 from methods import fastcounter
-from handlers import api, admin_api, admin_web
+from handlers import api, web_admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
@@ -24,15 +24,15 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/admin', [
-        Route('/orders.php', admin_web.OrdersHandler),
-        Route('/backs.php', admin_web.ReturnsHandler),
-        Route('/history.php', admin_web.HistoryHandler),
+        Route('/orders.php', web_admin.OrdersHandler),
+        Route('/backs.php', web_admin.ReturnsHandler),
+        Route('/history.php', web_admin.HistoryHandler),
 
-        Route('/check_time.php', admin_api.CheckTimeHandler),
-        Route('/check_update.php', admin_api.CheckUpdateHandler),
-        Route('/done.php', admin_api.OrderDoneHandler),
-        Route('/return_barista.php', admin_api.OrderCancelHandler),
-        Route('/status_up.php', admin_api.OrderStatusUpdateHandler)
+        Route('/check_time.php', web_admin.CheckTimeHandler),
+        Route('/check_update.php', web_admin.CheckUpdateHandler),
+        Route('/done.php', web_admin.OrderDoneHandler),
+        Route('/return_barista.php', web_admin.OrderCancelHandler),
+        Route('/status_up.php', web_admin.OrderStatusUpdateHandler)
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
