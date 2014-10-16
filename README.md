@@ -98,7 +98,7 @@ Parameters:
     * `total_sum`: int
     * `coordinates`: string with format `"lat,lng"`
     * `comment`: string
-    * `device_type`: int
+    * `device_type`: int, optional (0 for iOS, 1 for Android)
     * `delivery_time`: int (interval in minutes)
     * `client`: object
         * `id`: int|string

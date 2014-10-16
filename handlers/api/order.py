@@ -7,7 +7,7 @@ from time import time as time_time
 import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, sms, push
-from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER
+from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE
 
 __author__ = 'ilyazorin'
 
@@ -22,7 +22,7 @@ class OrderHandler(ApiHandler):
         total_sum = response_json['total_sum']
         coordinates = GeoPt(response_json['coordinates'])
         comment = response_json['comment']
-        device_type = response_json['device_type']
+        device_type = response_json.get('device_type', IOS_DEVICE)
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
         client_id = int(response_json['client']['id'])
 
