@@ -15,6 +15,11 @@ app = WSGIApplication([
             Route('/reverse.php', api.PaymentReverseHandler),
             Route('/payment_types.php', api.PaymentTypesHandler),
         ]),
+        PathPrefixRoute('/admin', [
+            Route('/cancel.php', api.CancelOrderHandler),
+            Route('/done.php', api.DoneOrderHandler),
+            Route('/postpone.php', api.PostponeOrderHandler),
+        ]),
         Route('/venues.php', api.VenuesHandler),
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),
