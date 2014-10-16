@@ -1,11 +1,12 @@
 # coding:utf-8
+import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.base import ApiHandler
 import json
 from time import time as time_time
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, sms
+from methods import alfa_bank, sms, push
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER
 
 __author__ = 'ilyazorin'
@@ -107,11 +108,40 @@ class ReturnOrderHandler(ApiHandler):
         #TODO errors handling
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
-        if order:
+        if not order:
+            self.abort(400)
+        elif order.status != NEW_ORDER:
+            self.render_json({
+                'error': 1,
+                'description': u'Заказ уже выдан или отменен'
+            })
+        else:
             now = datetime.utcnow()
             if order.delivery_time - now > timedelta(minutes=10):
                 order.status = CANCELED_BY_CLIENT_ORDER
                 order.put()
+
+                # return money
+                if order.payment_type_id == CARD_PAYMENT_TYPE:
+                    return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
+                    if str(return_result.get('errorCode', 0)) != '0':
+                        logging.error("payment return failed")
+
+                # send sms
+                venue = Venue.get_by_id(order.venue_id)
+                client = Client.get_by_id(order.client_id).get()
+                sms_text = u"[Отмена] Заказ №%s (%s) Сумма: %s Тип оплаты: %s" % (
+                    order_id, order.client.get().name, order.total_sum,
+                    [u"Наличные", u"Карта"][order.payment_type_id]
+                )
+                sms.send_sms("DoubleB", venue.phone_numbers, sms_text)
+
+                # send push
+                push_text = u"%s, заказ №%s отменен." % (client.name, order_id)
+                if order.payment_type_id == CARD_PAYMENT_TYPE:
+                    push_text += u" Ваш платеж будет возвращен на карту в течение несколких минут."
+                push.send_order_push(order_id, order.status, push_text, order.device_type)
+
                 self.render_json({
                     'error': 0,
                     'order_id': order.key.id()
@@ -121,5 +151,3 @@ class ReturnOrderHandler(ApiHandler):
                     'error': 1,
                     'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
-        else:
-            self.abort(400)
