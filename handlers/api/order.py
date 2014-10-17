@@ -20,7 +20,7 @@ class OrderHandler(ApiHandler):
         order_id = int(response_json['order_id'])
         venue_id = int(response_json['venue_id'])
         total_sum = response_json['total_sum']
-        coordinates = GeoPt(response_json['coordinates'])
+        coordinates = GeoPt(response_json.get('coordinates', None))
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
@@ -111,6 +111,7 @@ class ReturnOrderHandler(ApiHandler):
         if not order:
             self.abort(400)
         elif order.status != NEW_ORDER:
+            self.response.status_int = 412
             self.render_json({
                 'error': 1,
                 'description': u'Заказ уже выдан или отменен'
@@ -129,9 +130,9 @@ class ReturnOrderHandler(ApiHandler):
 
                 # send sms
                 venue = Venue.get_by_id(order.venue_id)
-                client = Client.get_by_id(order.client_id).get()
+                client = Client.get_by_id(order.client_id)
                 sms_text = u"[Отмена] Заказ №%s (%s) Сумма: %s Тип оплаты: %s" % (
-                    order_id, order.client.get().name, order.total_sum,
+                    order_id, client.name, order.total_sum,
                     [u"Наличные", u"Карта"][order.payment_type_id]
                 )
                 sms.send_sms("DoubleB", venue.phone_numbers, sms_text)
@@ -147,7 +148,8 @@ class ReturnOrderHandler(ApiHandler):
                     'order_id': order.key.id()
                 })
             else:
+                self.response.status_int = 412
                 self.render_json({
-                    'error': 1,
-                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
+                        'error': 1,
+                        'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
