@@ -1,12 +1,25 @@
 from webapp2_extras import jinja2
 from methods import fastcounter
 from handlers import api, web_admin
+from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
 
 app = WSGIApplication([
     PathPrefixRoute('/api', [
+        PathPrefixRoute('/admin', [
+            Route('/orders/current', admin.CurrentOrdersHandler),
+            Route('/orders/updates', admin.UpdatesHandler),
+
+            Route('/orders/returns', admin.ReturnsHandler),
+            Route('/orders/history', admin.HistoryHandler),
+
+            Route('/orders/<order_id:\d+>/cancel', admin.CancelOrderHandler),
+            Route('/orders/<order_id:\d+>/close', admin.DoneOrderHandler),
+            Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
+        ]),
+
         PathPrefixRoute('/payment', [
             Route('/unbind.php', api.UnbindCardHandler),
             Route('/register.php', api.PaymentRegisterHandler),
@@ -15,11 +28,7 @@ app = WSGIApplication([
             Route('/reverse.php', api.PaymentReverseHandler),
             Route('/payment_types.php', api.PaymentTypesHandler),
         ]),
-        PathPrefixRoute('/admin', [
-            Route('/cancel.php', api.CancelOrderHandler),
-            Route('/done.php', api.DoneOrderHandler),
-            Route('/postpone.php', api.PostponeOrderHandler),
-        ]),
+
         Route('/venues.php', api.VenuesHandler),
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),

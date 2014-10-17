@@ -8,8 +8,7 @@ __author__ = 'ilyazorin'
 
 
 class CancelOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range('order_id')
+    def post(self, order_id):
         comment = self.request.get('comment')
         order = Order.get_by_id(order_id)
 
@@ -37,8 +36,7 @@ class CancelOrderHandler(AdminApiHandler):
 
 
 class DoneOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range("order_id")
+    def post(self, order_id):
         order = Order.get_by_id(order_id)
         order.status = READY_ORDER
         order.put()
@@ -51,8 +49,7 @@ class DoneOrderHandler(AdminApiHandler):
 
 
 class PostponeOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range("order_id")
+    def post(self, order_id):
         mins = self.request.get_range("mins")
 
         order = Order.get_by_id(order_id)
