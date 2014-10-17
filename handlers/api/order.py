@@ -150,6 +150,6 @@ class ReturnOrderHandler(ApiHandler):
             else:
                 self.response.status_int = 412
                 self.render_json({
-                        'error': 1,
-                        'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
+                    'error': 1,
+                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
