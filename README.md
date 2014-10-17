@@ -274,6 +274,8 @@ Parameters:
 
 * `comment`: string
 
+On failure, status code is 400
+
 ```
 #!js
 {
