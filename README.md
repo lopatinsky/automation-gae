@@ -180,3 +180,128 @@ Response on failure:
     "description": error_description // string
 }
 ```
+
+## Endpoints for admins
+
+### Get current orders
+
+GET `/api/admin/orders/current`
+
+No parameters
+
+```
+#!js
+{
+    "orders": [
+        {
+            "order_id": order_id,                     // int
+            "delivery_time": order_delivery_time,     // int, timestamp
+            "payment_type_id": order_payment_type_id, // int
+            "pan": order_pan,                         // string
+            "comment": order_comment,                 // string
+            "client": {
+                "name": client_name,       // string
+                "surname": client_surname, // string
+                "phone": client_phone      // string
+            },
+            "items": [
+                {
+                    "title": item_title,      // string
+                    "price": item_price,      // int
+                    "quantity": item_quantity // int
+                },
+                ...
+            ]
+        },
+        ...
+    ]
+}
+```
+
+### Get updates
+
+GET `/api/admin/orders/updates`
+
+Parameters:
+
+* `timestamp`: int
+
+```
+#!js
+{
+    "new": new_orders,        // list of objects, as above
+    "updated": updated_orders // list of objects, as above
+}
+```
+
+### Get returns
+
+GET `/api/admin/orders/returns`
+
+Parameters:
+
+* `date`: int (timestamp, time part is ignored)
+
+```
+#!js
+{
+    "orders": orders // list of objects, as above
+}
+```
+
+### Get history
+
+GET `/api/admin/orders/history`
+
+Parameters:
+
+* `start`: int (timestamp)
+* `end`: int (timestamp)
+* `search` (optional): string
+
+```
+#!js
+{
+    "orders": orders // list of objects, as above
+}
+```
+
+### Cancel order
+
+POST `/api/admin/orders/<order_id>/cancel`
+
+Parameters:
+
+* `comment`: string
+
+```
+#!js
+{
+}
+```
+
+### Postpone order
+
+POST `/api/admin/orders/<order_id>/postpone`
+
+Parameters:
+
+* `mins`: int
+
+```
+#!js
+{
+}
+```
+
+### Close order
+
+POST `/api/admin/orders/<order_id>/close` 
+
+No parameters
+
+```
+#!js
+{
+}
+```
