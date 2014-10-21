@@ -144,37 +144,3 @@ class OrderStatusUpdateHandler(WebAdminApiHandler):
             'order_id': order_id,
             'status': status
         })
-
-
-class GetOrdersHandler(WebAdminApiHandler):
-    def get(self):
-        now = datetime.datetime.now()
-        today = datetime.datetime.combine(now.date(), datetime.time())
-        orders = Order.query(Order.date_created >= today,
-                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
-                      .order(-Order.date_created).fetch()
-        orders_data = []
-        for order in orders:
-            if order.status == CANCELED_BY_CLIENT_ORDER and order.delivery_time < now:
-                continue
-
-            orders_data.append(format_order(order))
-
-        last_order = Order.query().order(-Order.date_created).get(projection=(Order.date_created,))
-        last_order_datetime = last_order.date_created if last_order else now
-
-        response = {'orders': orders_data, 'last_order_datetime': last_order_datetime.strftime("%Y-%m-%d %H:%M:%S")}
-        self.render_json(response)
-
-
-class GetHistoryHandler(WebAdminApiHandler):
-    def get(self):
-        query = self.request.get("search")
-        if query:
-            orders = search_orders(query)
-        else:
-            today = datetime.datetime.combine(datetime.date.today(), datetime.time())
-            orders = Order.query(Order.date_created >= today).order(-Order.date_created).fetch()
-        orders_data = [format_order(order) for order in orders]
-        response = {'orders': orders_data}
-        self.render_json(response)
