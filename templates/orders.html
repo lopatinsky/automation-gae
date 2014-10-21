@@ -148,7 +148,7 @@
                                 <div class='client_pan'>{{ order.client.pan }}</div>
                             </div>
                             <div class='order_items'>
-                                {% for item in items %}
+                                {% for item in order['items'] %}
                                     <div class="item">
                                         <div class="item_title">{{ item.title }}</div>
                                         <div class="item_quantity {{ 'item_quantity_canceled' if order.canceled }}">{{ item.quantity }}</div>

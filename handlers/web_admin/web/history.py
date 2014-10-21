@@ -19,9 +19,10 @@ class HistoryHandler(BaseHandler):
         total_price = 0
         total_cost_price = 0
         for order in orders:
-            orders_data.append(format_order(order))
+            order_data = format_order(order)
+            orders_data.append(order_data)
             total_price += order.total_sum
-            for item in order['items']:
+            for item in order_data['items']:
                 total_cost_price += item['cost_price']
 
         status_strings = {
