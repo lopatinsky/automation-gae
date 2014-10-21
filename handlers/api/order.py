@@ -96,7 +96,7 @@ class StatusHandler(ApiHandler):
         response_json = json.loads(self.request.get('orders'))
         orders = []
         for order_id in response_json['orders']:
-            order = Order.get_by_id(order_id)
+            order = Order.get_by_id(int(order_id))
             if order:
                 orders.append(order)
         self.render_json({'status': [order.status_dict() for order in orders]})

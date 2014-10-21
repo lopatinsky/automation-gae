@@ -125,7 +125,7 @@ class Order(ndb.Model):
 
     def status_dict(self):
         dct = {
-            'order_id': self.key.id(),
+            'order_id': str(self.key.id()),
             'status': self.status
         }
 
