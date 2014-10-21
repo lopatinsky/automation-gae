@@ -24,7 +24,9 @@ def format_order(order):
             'tel': format_phone(client.tel),
         },
         'delivery_time': order.delivery_time.strftime("%H:%M"),
+        'delivery_datetime': order.delivery_time.strftime("%b %d %H:%M"),
         'items': [],
+        'total_sum': order.total_sum,
         'cost_price': 0,
         'canceled': order.status in (CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)
     }
