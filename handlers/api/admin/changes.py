@@ -1,3 +1,4 @@
+# coding=utf-8
 import datetime
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank
@@ -7,8 +8,7 @@ __author__ = 'ilyazorin'
 
 
 class CancelOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range('order_id')
+    def post(self, order_id):
         comment = self.request.get('comment')
         order = Order.get_by_id(order_id)
 
@@ -29,8 +29,6 @@ class CancelOrderHandler(AdminApiHandler):
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут."
             push.send_order_push(order_id, order.status, push_text, order.device_type)
 
-            self.response.status_int = 200
-            #TODO is needed?
             self.render_json({})
         else:
             self.response.status_int = 400
@@ -38,8 +36,7 @@ class CancelOrderHandler(AdminApiHandler):
 
 
 class DoneOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range("order_id")
+    def post(self, order_id):
         order = Order.get_by_id(order_id)
         order.status = READY_ORDER
         order.put()
@@ -48,13 +45,11 @@ class DoneOrderHandler(AdminApiHandler):
             alfa_bank.pay_by_card(order.payment_id, 0)
         push.send_order_push(order_id, order.status, "", order.device_type, silent=True)
 
-        self.response.status_int = 200
         self.render_json({})
 
 
 class PostponeOrderHandler(AdminApiHandler):
-    def post(self):
-        order_id = self.request.get_range("order_id")
+    def post(self, order_id):
         mins = self.request.get_range("mins")
 
         order = Order.get_by_id(order_id)
@@ -66,5 +61,4 @@ class PostponeOrderHandler(AdminApiHandler):
         push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, time_str)
         push.send_order_push(order_id, order.status, push_text, order.device_type, new_time=order.delivery_time)
 
-        self.response.status_int = 200
         self.render_json({})

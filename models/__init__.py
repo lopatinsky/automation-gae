@@ -91,6 +91,7 @@ class Order(ndb.Model):
                                                          CANCELED_BY_BARISTA_ORDER),
                                  default=NEW_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
+    updated = ndb.DateTimeProperty(auto_now=True)
     delivery_time = ndb.DateTimeProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     coordinates = ndb.GeoPtProperty(indexed=False)
