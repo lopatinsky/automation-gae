@@ -95,7 +95,7 @@ class StatusHandler(ApiHandler):
         #TODO errors handling
         response_json = json.loads(self.request.get('orders'))
         orders = []
-        for order_id in response_json:
+        for order_id in response_json['orders']:
             order = Order.get_by_id(order_id)
             if order:
                 orders.append(order)
@@ -116,6 +116,7 @@ class ReturnOrderHandler(ApiHandler):
                 'error': 1,
                 'description': u'Заказ уже выдан или отменен'
             })
+            logging.info(u'заказ уже %d выдан или отменен' % order_id)
         else:
             now = datetime.utcnow()
             if order.delivery_time - now > timedelta(minutes=10):
@@ -147,9 +148,11 @@ class ReturnOrderHandler(ApiHandler):
                     'error': 0,
                     'order_id': order.key.id()
                 })
+                logging.info(u'заказ %d отменен' % order_id)
             else:
                 self.response.status_int = 412
                 self.render_json({
                         'error': 1,
                         'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
+                logging.info(u'заказ %d отмена невозможна, так как до его исполнения осталось менее 10 минут.' % order_id)
