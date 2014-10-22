@@ -121,6 +121,7 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if order.delivery_time - now > timedelta(minutes=10):
                 order.status = CANCELED_BY_CLIENT_ORDER
+                order.return_datetime = datetime.utcnow()
                 order.put()
 
                 # return money
