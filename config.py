@@ -2,7 +2,9 @@ from google.appengine.api import app_identity
 
 
 class DoubleBConfig(object):
-    pass
+    PROMO_ENABLED = True
+    PROMO_MASTERCARD_ONLY = True
+    POINTS_PER_CUP = 6
 
 
 class ProductionConfig(DoubleBConfig):
