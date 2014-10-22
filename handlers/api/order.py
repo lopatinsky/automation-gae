@@ -7,7 +7,8 @@ from time import time as time_time
 import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, sms, push
-from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE
+from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
+    BONUS_PAYMENT_TYPE
 
 __author__ = 'ilyazorin'
 
@@ -19,7 +20,6 @@ class OrderHandler(ApiHandler):
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
         venue_id = int(response_json['venue_id'])
-        total_sum = response_json['total_sum']
         coordinates = GeoPt(response_json.get('coordinates', None))
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
@@ -42,14 +42,21 @@ class OrderHandler(ApiHandler):
 
         items = []
         sms_items_info = []
+        total_sum = 0
         for item in response_json['items']:
             menu_item = MenuItem.get_by_id(int(item['item_id']))
             for i in xrange(item['quantity']):
                 items.append(menu_item)
+                total_sum += menu_item.price
             sms_items_info.append((menu_item.title, item['quantity']))
 
+        # mastercard
         if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
-            # payment by card from server
+            if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
+                client.has_mastercard_orders = True
+                client.put()
+                total_sum = (total_sum + 1) / 2
+
             binding_id = response_json['payment']['binding_id']
             alpha_client_id = response_json['payment']['client_id']
             return_url = response_json['payment']['return_url']
@@ -64,6 +71,10 @@ class OrderHandler(ApiHandler):
                     self.abort(400)
             else:
                 self.abort(400)
+
+        #TODO bonus payment
+        if payment_type_id == BONUS_PAYMENT_TYPE:
+            pass
 
         order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                       comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
