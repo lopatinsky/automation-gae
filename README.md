@@ -95,7 +95,6 @@ Parameters:
 * `order`: JSON string: object with the following fields:
     * `order_id`: int|string
     * `venue_id`: int|string
-    * `total_sum`: int
     * `coordinates`: string with format `"lat,lng"`
     * `comment`: string
     * `device_type`: int, optional (0 for iOS, 1 for Android)
@@ -106,6 +105,7 @@ Parameters:
         * `phone`: string
     * `payment`: object
         * `type_id`: int
+        *  `mastercard`: boolean
         * see below
     * `items`: array of objects
         * `item_id`: int|string
