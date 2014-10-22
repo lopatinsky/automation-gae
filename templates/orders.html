@@ -148,7 +148,7 @@
                                 <div class='client_pan'>{{ order.client.pan }}</div>
                             </div>
                             <div class='order_items'>
-                                {% for item in items %}
+                                {% for item in order['items'] %}
                                     <div class="item">
                                         <div class="item_title">{{ item.title }}</div>
                                         <div class="item_quantity {{ 'item_quantity_canceled' if order.canceled }}">{{ item.quantity }}</div>
@@ -200,8 +200,16 @@
  
 
     <script>
+    function utcToLocal(time) {
+        return moment.utc(time, "HH:mm").local().format("HH:mm");
+    }
+
 	$(function() 
 	{
+        $('.order .time').text(function() {
+            return utcToLocal($(this).text());
+        });
+
 	   	add_line();
 		
 			 //пульсирование около строки
@@ -535,8 +543,7 @@ console.log(time_diff)
 	
                                                                var deliv_time=response["data"][key]["delivery_time"];
 															   var order_id=response["data"][key]["order_id"];
-															   deliv_time=deliv_time.split(':')
-                                                               deliv_time=deliv_time[0]+':'+deliv_time[1]
+															   deliv_time = utcToLocal(deliv_time);
 															   //ищем строчку куда вставить
 															   
 															   var row_id=find_row(orders,deliv_time,order_id);

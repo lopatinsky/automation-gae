@@ -9,8 +9,8 @@ class OrdersHandler(BaseHandler):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
         orders = Order.query(Order.date_created >= today,
-                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
-                      .order(-Order.date_created).fetch()
+                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER).fetch()
+        orders = sorted(orders, key=lambda order: order.delivery_time)
         orders_data = []
         for order in orders:
             if order.status == CANCELED_BY_CLIENT_ORDER and order.delivery_time < now:

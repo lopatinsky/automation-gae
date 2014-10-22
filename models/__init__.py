@@ -116,7 +116,7 @@ class Order(ndb.Model):
             "comment": self.comment,
             "items": []
         }
-        for item_key, count in Counter(self.items):
+        for item_key, count in Counter(self.items).items():
             item = item_key.get()
             dct["items"].append({
                 "title": item.title,

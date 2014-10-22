@@ -6,7 +6,8 @@ __author__ = 'ilyazorin'
 
 
 class CloseOpenedOrdersHandler(ApiHandler):
-    orders = Order.query(Order.status == NEW_ORDER).fetch()
-    for order in orders:
-        order.status = READY_ORDER
-    ndb.put_multi(orders)
+    def get(self):
+        orders = Order.query(Order.status == NEW_ORDER).fetch()
+        for order in orders:
+            order.status = READY_ORDER
+        ndb.put_multi(orders)

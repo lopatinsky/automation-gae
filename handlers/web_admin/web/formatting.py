@@ -5,7 +5,7 @@ from models import Client, CASH_PAYMENT_TYPE, CANCELED_BY_CLIENT_ORDER, CANCELED
 def format_phone(phone):
     phone = "".join(c for c in phone if '0' <= c <= '9')
     if len(phone) != 11:
-        return False
+        return phone
     return "+%s (%s) %s-%s-%s" % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:])
 
 
@@ -24,8 +24,11 @@ def format_order(order):
             'tel': format_phone(client.tel),
         },
         'delivery_time': order.delivery_time.strftime("%H:%M"),
+        'delivery_datetime': order.delivery_time.strftime("%b %d %H:%M"),
         'items': [],
+        'total_sum': order.total_sum,
         'cost_price': 0,
+        'status': order.status,
         'canceled': order.status in (CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)
     }
     item_keys = Counter(order.items).items()

@@ -121,7 +121,7 @@
                <div class='order' id='{{ order.order_id }}'>
 
                			<div class='order_info'>
-                            <div class='time'>{{ order.date_created }}</div>
+                            <div class='time'>{{ order.delivery_datetime }}</div>
                             <div class='number'>{{ order.order_id }}</div>
                             <div class='client_info'>
                             	<div class='client_name'>{{ order.client.name }}</div>
@@ -130,7 +130,7 @@
                                 <div class='client_pan'>{{ order.client.pan }}</div>
                             </div>
                             <div class='order_items'>
-                            {% for item in order.items %}
+                            {% for item in order['items'] %}
                                 <div class='item'>
                                     <div class='item_title'>{{ item.title }}</div>
                                     <div class='item_quantity'>{{ item.quantity }}</div>
