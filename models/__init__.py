@@ -7,6 +7,7 @@ __author__ = 'ilyazorin'
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
+BONUS_PAYMENT_TYPE = 2
 
 STATUS_AVAILABLE = 1
 STATUS_UNAVAILABLE = 0
@@ -103,6 +104,7 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
+    mastercard = ndb.BooleanProperty(indexed=False)
 
     def dict(self):
         dct = {
@@ -142,6 +144,7 @@ class Client(ndb.Model):
     name = ndb.StringProperty()
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
+    has_mastercard_orders = ndb.BooleanProperty(default=False, indexed=False)
 
     @classmethod
     def create(cls):
