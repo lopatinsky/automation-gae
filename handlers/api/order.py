@@ -134,15 +134,16 @@ class ReturnOrderHandler(ApiHandler):
         else:
             now = datetime.utcnow()
             if order.delivery_time - now > timedelta(minutes=10):
-                order.status = CANCELED_BY_CLIENT_ORDER
-                order.return_datetime = datetime.utcnow()
-                order.put()
-
                 # return money
                 if order.payment_type_id == CARD_PAYMENT_TYPE:
                     return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
+                        self.abort(400)
+
+                order.status = CANCELED_BY_CLIENT_ORDER
+                order.return_datetime = datetime.utcnow()
+                order.put()
 
                 # send sms
                 venue = Venue.get_by_id(order.venue_id)
