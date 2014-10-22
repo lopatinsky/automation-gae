@@ -53,3 +53,8 @@ def activate_promo(user_id, promo_id, count):
         "count": count
     }
     return _post(api_path, params)
+
+
+def cancel_activation(activation_id):
+    api_path = "/activations/%s/cancel" % activation_id
+    return _post(api_path, {})
