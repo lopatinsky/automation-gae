@@ -28,6 +28,7 @@ def format_order(order):
         'items': [],
         'total_sum': order.total_sum,
         'cost_price': 0,
+        'status': order.status,
         'canceled': order.status in (CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)
     }
     item_keys = Counter(order.items).items()
