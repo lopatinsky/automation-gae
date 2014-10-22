@@ -52,8 +52,10 @@ class OrderHandler(ApiHandler):
 
             # mastercard
             payment_id = response_json['payment'].get('payment_id')
+            mastercard = False
             if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
-                if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
+                mastercard = response_json['payment']['mastercard']
+                if mastercard and not client.has_mastercard_orders:
                     client.has_mastercard_orders = True
                     client.put()
                     total_sum = (total_sum + 1) / 2
@@ -80,7 +82,7 @@ class OrderHandler(ApiHandler):
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
-                          items=[item.key for item in items])
+                          mastercard=mastercard, items=[item.key for item in items])
             order.put()
 
             venue = Venue.get_by_id(venue_id)
