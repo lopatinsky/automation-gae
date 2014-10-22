@@ -20,3 +20,8 @@ indexes:
   properties:
   - name: status
   - name: return_datetime
+
+- kind: Order
+  properties:
+  - name: client_id
+  - name: date_created
