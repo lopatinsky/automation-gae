@@ -38,7 +38,7 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_type = PaymentType.get_by_id(payment_type_id)
+        payment_type = PaymentType.get_by_id(str(payment_type_id))
         if payment_type.status == STATUS_AVAILABLE:
             items = []
             sms_items_info = []
@@ -50,9 +50,9 @@ class OrderHandler(ApiHandler):
                     total_sum += menu_item.price
                 sms_items_info.append((menu_item.title, item['quantity']))
 
-            # mastercard
             payment_id = response_json['payment'].get('payment_id')
             if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
+                # mastercard
                 if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
                     client.has_mastercard_orders = True
                     client.put()
