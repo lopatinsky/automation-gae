@@ -932,7 +932,7 @@ $.post('check_time.php',{'mins':mins,"time":time,"order_id":number}, function(re
 	     
 	 var response=JSON.parse(resp)
 	 var order_id=response['info']['order_id']
-	 var time=response['info']['time']
+	 var time=utcToLocal(response['info']['time']);
 	 if(response['error']==0)
         {
 		    $('#info_modal').empty();
