@@ -8,7 +8,7 @@ import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, sms, push
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 
 __author__ = 'ilyazorin'
 
@@ -38,60 +38,63 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_id = response_json['payment'].get('payment_id')
+        payment_type = PaymentType.get_by_id(payment_type_id)
+        if payment_type.status == STATUS_AVAILABLE:
+            items = []
+            sms_items_info = []
+            total_sum = 0
+            for item in response_json['items']:
+                menu_item = MenuItem.get_by_id(int(item['item_id']))
+                for i in xrange(item['quantity']):
+                    items.append(menu_item)
+                    total_sum += menu_item.price
+                sms_items_info.append((menu_item.title, item['quantity']))
 
-        items = []
-        sms_items_info = []
-        total_sum = 0
-        for item in response_json['items']:
-            menu_item = MenuItem.get_by_id(int(item['item_id']))
-            for i in xrange(item['quantity']):
-                items.append(menu_item)
-                total_sum += menu_item.price
-            sms_items_info.append((menu_item.title, item['quantity']))
+            # mastercard
+            payment_id = response_json['payment'].get('payment_id')
+            if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
+                if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
+                    client.has_mastercard_orders = True
+                    client.put()
+                    total_sum = (total_sum + 1) / 2
 
-        # mastercard
-        if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
-            if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
-                client.has_mastercard_orders = True
-                client.put()
-                total_sum = (total_sum + 1) / 2
-
-            binding_id = response_json['payment']['binding_id']
-            alpha_client_id = response_json['payment']['client_id']
-            return_url = response_json['payment']['return_url']
-            tie_result = alfa_bank.tie_card(total_sum * 100, int(time_time()), return_url, alpha_client_id,
-                                            'MOBILE')
-            if 'errorCode' not in tie_result.keys() or str(tie_result['errorCode']) == '0':
-                payment_id = tie_result['orderId']
-                create_result = alfa_bank.create_pay(binding_id, payment_id)
-                if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
-                    pass
+                binding_id = response_json['payment']['binding_id']
+                alpha_client_id = response_json['payment']['client_id']
+                return_url = response_json['payment']['return_url']
+                tie_result = alfa_bank.tie_card(total_sum * 100, int(time_time()), return_url, alpha_client_id,
+                                                'MOBILE')
+                if 'errorCode' not in tie_result.keys() or str(tie_result['errorCode']) == '0':
+                    payment_id = tie_result['orderId']
+                    create_result = alfa_bank.create_pay(binding_id, payment_id)
+                    if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
+                        pass
+                    else:
+                        self.abort(400)
                 else:
                     self.abort(400)
-            else:
-                self.abort(400)
 
-        #TODO bonus payment
-        if payment_type_id == BONUS_PAYMENT_TYPE:
-            pass
+            #TODO bonus payment
+            if payment_type_id == BONUS_PAYMENT_TYPE:
+                pass
 
-        order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
-                      comment=comment, status=NEW_ORDER, device_type=device_type, delivery_time=delivery_time,
-                      payment_type_id=payment_type_id, payment_id=payment_id,
-                      items=[item.key for item in items])
-        order.put()
+            order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
+                          coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
+                          delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
+                          items=[item.key for item in items])
+            order.put()
 
-        venue = Venue.get_by_id(venue_id)
-        sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
-            order_id, client_name, total_sum, delivery_time,
-            ', '.join("%s X %s" % i for i in sms_items_info),
-            [u"Наличные", u"Карта"][payment_type_id]
-        )
-        sms.send_sms('DoubleB', venue.phone_numbers, sms_text)
+            venue = Venue.get_by_id(venue_id)
+            sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
+                order_id, client_name, total_sum, delivery_time,
+                ', '.join("%s X %s" % i for i in sms_items_info),
+                [u"Наличные", u"Карта"][payment_type_id]
+            )
+            sms.send_sms('DoubleB', venue.phone_numbers, sms_text)
 
-        self.response.status_int = 201
-        self.render_json({'order_id': order_id})
+            self.response.status_int = 201
+            self.render_json({'order_id': order_id})
+        else:
+            self.abort(400)
 
 
 class RegisterOrderHandler(ApiHandler):
