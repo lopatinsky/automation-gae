@@ -4,7 +4,6 @@ from collections import Counter
 import datetime
 from .base import WebAdminApiHandler
 from methods import push, alfa_bank
-from methods.orders import search_orders
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER
 
@@ -13,6 +12,7 @@ def format_order(order):
     client = Client.get_by_id(order.client_id)
     order_data = {
         'date_created': order.date_created.strftime("%Y-%m-%d %H:%M:%S"),
+        'delivery_time': order.delivery_time.strftime("%H:%M"),
         'comment': order.comment,
         'payment_type_id': order.payment_type_id,
         'order_id': order.key.id(),
