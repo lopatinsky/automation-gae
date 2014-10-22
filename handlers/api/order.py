@@ -38,7 +38,7 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_type = PaymentType.get_by_id(payment_type_id)
+        payment_type = PaymentType.get_by_id(str(payment_type_id))
         if payment_type.status == STATUS_AVAILABLE:
             items = []
             sms_items_info = []
@@ -51,7 +51,7 @@ class OrderHandler(ApiHandler):
                 sms_items_info.append((menu_item.title, item['quantity']))
 
             # mastercard
-            payment_id = response_json['payment'].get('payment_id')
+            payment_id = response_json['payment'].get(str('payment_id'))
             if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
                 if response_json['payment']['mastercard'] and not client.has_mastercard_orders:
                     client.has_mastercard_orders = True
@@ -130,7 +130,6 @@ class ReturnOrderHandler(ApiHandler):
                 'error': 1,
                 'description': u'Заказ уже выдан или отменен'
             })
-            logging.info(u'заказ уже %d выдан или отменен' % order_id)
         else:
             now = datetime.utcnow()
             if order.delivery_time - now > timedelta(minutes=10):
@@ -171,4 +170,3 @@ class ReturnOrderHandler(ApiHandler):
                     'error': 1,
                     'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
-                logging.info(u'заказ %d отмена невозможна, так как до его исполнения осталось менее 10 минут.' % order_id)
