@@ -3,6 +3,7 @@
 from collections import Counter
 import datetime
 from .base import WebAdminApiHandler
+from config import config
 from methods import push, alfa_bank
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER
@@ -42,15 +43,16 @@ class CheckTimeHandler(WebAdminApiHandler):
         order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
-        time_str = order.delivery_time.strftime("%H:%M")
+        local_delivery_time = order.delivery_time + config.TIMEZONE_OFFSET
+        push_time_str = local_delivery_time.strftime("%H:%M")
         client = Client.get_by_id(order.client_id)
-        push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, time_str)
+        push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, push_time_str)
         push.send_order_push(order_id, order.status, push_text, order.device_type, new_time=order.delivery_time)
 
         response = {
             'error': 0,
             'info': {
-                'time': time_str,
+                'time': order.delivery_time.strftime("%H:%M"),
                 'order_id': order_id
             }
         }

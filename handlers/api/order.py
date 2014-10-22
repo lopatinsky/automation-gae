@@ -1,6 +1,7 @@
 # coding:utf-8
 import logging
 from google.appengine.ext.ndb import GeoPt
+from config import config
 from handlers.api.base import ApiHandler
 import json
 from time import time as time_time
@@ -84,8 +85,9 @@ class OrderHandler(ApiHandler):
             order.put()
 
             venue = Venue.get_by_id(venue_id)
+            local_delivery_time = delivery_time + config.TIMEZONE_OFFSET
             sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
-                order_id, client_name, total_sum, delivery_time,
+                order_id, client_name, total_sum, local_delivery_time,
                 ', '.join("%s X %s" % i for i in sms_items_info),
                 [u"Наличные", u"Карта"][payment_type_id]
             )
@@ -156,7 +158,7 @@ class ReturnOrderHandler(ApiHandler):
                 # send push
                 push_text = u"%s, заказ №%s отменен." % (client.name, order_id)
                 if order.payment_type_id == CARD_PAYMENT_TYPE:
-                    push_text += u" Ваш платеж будет возвращен на карту в течение несколких минут."
+                    push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут."
                 push.send_order_push(order_id, order.status, push_text, order.device_type)
 
                 self.render_json({

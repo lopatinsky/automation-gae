@@ -1,5 +1,6 @@
 # coding=utf-8
 import datetime
+from config import config
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER
@@ -56,7 +57,8 @@ class PostponeOrderHandler(AdminApiHandler):
         order.delivery_time += datetime.timedelta(mins)
         order.put()
 
-        time_str = order.delivery_time.strftime("%H:%M")
+        local_delivery_time = order.delivery_time + config.TIMEZONE_OFFSET
+        time_str = local_delivery_time.strftime("%H:%M")
         client = Client.get_by_id(order.client_id)
         push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, time_str)
         push.send_order_push(order_id, order.status, push_text, order.device_type, new_time=order.delivery_time)
