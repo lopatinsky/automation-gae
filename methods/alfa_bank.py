@@ -2,8 +2,9 @@ import json
 import logging
 import urllib
 from google.appengine.api import urlfetch
+from config import config
 
-ALFA_BASE_URL = 'https://test.paymentgate.ru/testpayment'
+ALFA_BASE_URL = config.ALFA_BASE_URL
 
 ALFA_LOGIN = 'empatika_autopay-api'
 ALFA_PASSWORD = 'empatika_autopay'
