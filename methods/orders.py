@@ -14,7 +14,7 @@ def search_orders(query, start=None, end=None):
     except ValueError:
         pass
     else:
-        if start < order_by_number.date_created < end:
+        if order_by_number and start < order_by_number.date_created < end:
             result.append(order_by_number)
 
     # search by client

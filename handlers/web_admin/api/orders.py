@@ -39,7 +39,7 @@ class CheckTimeHandler(WebAdminApiHandler):
         order_id = self.request.get_range("order_id")
 
         order = Order.get_by_id(order_id)
-        order.delivery_time += datetime.timedelta(mins)
+        order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
         time_str = order.delivery_time.strftime("%H:%M")
