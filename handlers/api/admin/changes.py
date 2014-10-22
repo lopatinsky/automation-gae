@@ -1,9 +1,10 @@
 # coding=utf-8
 import datetime
+import logging
 from config import config
 from handlers.api.admin.base import AdminApiHandler
-from methods import push, alfa_bank
-from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER
+from methods import push, alfa_bank, empatika_promos
+from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE
 
 __author__ = 'ilyazorin'
 
@@ -17,6 +18,12 @@ class CancelOrderHandler(AdminApiHandler):
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
             success = str(return_result['errorCode']) == '0'
+        elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+            try:
+                empatika_promos.cancel_activation(order.payment_id)
+            except empatika_promos.EmpatikaPromosError as e:
+                logging.exception(e)
+                success = False
 
         if success:
             order.status = CANCELED_BY_BARISTA_ORDER

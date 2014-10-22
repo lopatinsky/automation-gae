@@ -7,7 +7,7 @@ import json
 from time import time as time_time
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, sms, push
+from methods import alfa_bank, sms, push, empatika_promos
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 
@@ -76,9 +76,10 @@ class OrderHandler(ApiHandler):
                 else:
                     self.abort(400)
 
-            #TODO bonus payment
             if payment_type_id == BONUS_PAYMENT_TYPE:
-                pass
+                cup_count = len(items)
+                activation = empatika_promos.activate_promo(client_id, empatika_promos.FREE_COFFEE_PROMO_ID, cup_count)
+                payment_id = activation['id']
 
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
@@ -142,6 +143,12 @@ class ReturnOrderHandler(ApiHandler):
                     return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
+                        self.abort(400)
+                elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+                    try:
+                        empatika_promos.cancel_activation(order.payment_id)
+                    except empatika_promos.EmpatikaPromosError as e:
+                        logging.exception(e)
                         self.abort(400)
 
                 order.status = CANCELED_BY_CLIENT_ORDER

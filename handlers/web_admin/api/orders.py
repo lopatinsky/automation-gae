@@ -2,11 +2,12 @@
 
 from collections import Counter
 import datetime
+import logging
 from .base import WebAdminApiHandler
 from config import config
-from methods import push, alfa_bank
+from methods import push, alfa_bank, empatika_promos
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
-    CANCELED_BY_BARISTA_ORDER
+    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE
 
 
 def format_order(order):
@@ -109,6 +110,12 @@ class OrderCancelHandler(WebAdminApiHandler):
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
             success = str(return_result['errorCode']) == '0'
+        elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+            try:
+                empatika_promos.cancel_activation(order.payment_id)
+            except empatika_promos.EmpatikaPromosError as e:
+                logging.exception(e)
+                success = False
 
         if success:
             order.status = CANCELED_BY_BARISTA_ORDER
