@@ -1,4 +1,4 @@
-> Table of contents
+> __Table of contents__
 >
 >   * [API](#markdown-header-api)
 >       * [Server](#markdown-header-server)

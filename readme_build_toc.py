@@ -34,7 +34,7 @@ def main():
         header_text = line[header_level:].strip()
         headers.append((header_level, header_text))
 
-    toc_lines = ["> Table of contents\n",
+    toc_lines = ["> __Table of contents__\n",
                  ">\n"]
     for level, text in headers:
         toc_lines.append(make_link(level, text))
