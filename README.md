@@ -112,11 +112,21 @@ Parameters:
 ```
 #!js
 {
-    "promo_enabled": promo_enabled,                      // boolean
-    "promo_mastercard_only": promo_mastercard_only,      // boolean
-    "points_per_cup": points_per_cup,                    // int
-    "has_mastercard_orders": client_has_mastercard_only, // boolean
-    "bonus_points": client_bonus_points                  // int
+    "promo_enabled": promo_enabled,                        // boolean
+    "promo_mastercard_only": promo_mastercard_only,        // boolean
+    "points_per_cup": points_per_cup,                      // int
+    "has_mastercard_orders": client_has_mastercard_orders, // boolean
+    "bonus_points": client_bonus_points,                   // int
+    "news": [
+        {
+            "id": news_id,                                 // int
+            "title": news_title,                           // string
+            "text": news_text,                             // string (html, may contain <b> tags)
+            "image_url": news_image_url,                   // string
+            "created_at": news_timestamp                   // int
+        },
+        ...
+    ]
 }
 ```
 

@@ -176,3 +176,20 @@ class PaymentType(ndb.Model):
         }
 
         return dct
+
+
+class News(ndb.Model):
+    title = ndb.StringProperty(required=True, indexed=False)
+    text = ndb.StringProperty(required=True, indexed=False)
+    image_url = ndb.StringProperty(required=True, indexed=False)
+    active = ndb.BooleanProperty(required=True, default=True)
+    created_at = ndb.DateTimeProperty(auto_now_add=True, indexed=False)
+
+    def dict(self):
+        return {
+            "id": self.key.id(),
+            "title": self.title,
+            "text": self.text,
+            "image_url": self.image_url,
+            "created_at": timestamp(self.created_at)
+        }

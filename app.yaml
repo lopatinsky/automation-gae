@@ -13,6 +13,9 @@ handlers:
   static_files: static/\1
   upload: static/admin/.*
 
+- url: /static
+  static_dir: static
+
 - url: /cron/.*
   script: handlers.cron.app
   login: admin
