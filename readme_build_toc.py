@@ -8,7 +8,7 @@ def is_header(line):
 
 def make_link(level, text):
     header_id = "markdown-header-" + re.sub(r"\s+", "-", text.lower())
-    prefix = "> " + "   * " * (level - 1)
+    prefix = "> " + "    " * (level - 1) + "  * "
     return "%s[%s](#%s)\n" % (prefix, text, header_id)
 
 
@@ -38,7 +38,7 @@ def main():
                  ">\n"]
     for level, text in headers:
         toc_lines.append(make_link(level, text))
-    toc_lines.append("")
+    toc_lines.append("\n")
 
     print "".join(toc_lines)
 
