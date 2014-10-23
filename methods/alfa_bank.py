@@ -6,10 +6,6 @@ from config import config
 
 ALFA_BASE_URL = config.ALFA_BASE_URL
 
-ALFA_LOGIN = 'empatika_autopay-api'
-ALFA_PASSWORD = 'empatika_autopay'
-
-
 def __post_request_alfa(api_path, params):
     url = '%s%s' % (ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
@@ -23,8 +19,8 @@ def __post_request_alfa(api_path, params):
 
 def tie_card(amount, order_number, return_url, client_id, page_view):
     p = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'amount': amount,
         'orderNumber': order_number,
         'returnUrl': return_url,
@@ -37,8 +33,8 @@ def tie_card(amount, order_number, return_url, client_id, page_view):
 
 def check_status(order_id):
     params = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'orderId': order_id
     }
     result = __post_request_alfa('/rest/getOrderStatus.do', params)
@@ -47,8 +43,8 @@ def check_status(order_id):
 
 def get_back_blocked_sum(order_id):
     params = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'orderId': order_id
     }
     result = __post_request_alfa('/rest/reverse.do', params)
@@ -57,8 +53,8 @@ def get_back_blocked_sum(order_id):
 
 def create_pay(binding_id, order_id):
     params = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'mdOrder': order_id,
         'bindingId': binding_id
     }
@@ -68,8 +64,8 @@ def create_pay(binding_id, order_id):
 
 def pay_by_card(order_id, amount):
     params = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'orderId': order_id,
         'amount': amount
     }
@@ -79,8 +75,8 @@ def pay_by_card(order_id, amount):
 
 def unbind_card(binding_id):
     params = {
-        'userName': ALFA_LOGIN,
-        'password': ALFA_PASSWORD,
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_PASSWORD,
         'bindingId': binding_id
     }
     result = __post_request_alfa('/rest/unBindCard.do', params)

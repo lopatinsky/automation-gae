@@ -11,10 +11,14 @@ class DoubleBConfig(object):
 
 class ProductionConfig(DoubleBConfig):
     ALFA_BASE_URL = "https://engine.paymentgate.ru/payment"
+    ALFA_LOGIN = 'DoubleB_binding-api'
+    ALFA_PASSWORD = 'Empatikaopen1#!'
 
 
 class TestingConfig(DoubleBConfig):
     ALFA_BASE_URL = "https://test.paymentgate.ru/testpayment"
+    ALFA_LOGIN = 'empatika_autopay-api'
+    ALFA_PASSWORD = 'empatika_autopay'
 
 
 if app_identity.get_application_id() == "empatika-doubleb":
