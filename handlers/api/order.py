@@ -51,6 +51,7 @@ class OrderHandler(ApiHandler):
                     total_sum += menu_item.price
                 sms_items_info.append((menu_item.title, item['quantity']))
 
+
             # mastercard
             payment_id = response_json['payment'].get('payment_id')
             mastercard = False
@@ -59,7 +60,8 @@ class OrderHandler(ApiHandler):
                 if mastercard and not client.has_mastercard_orders:
                     client.has_mastercard_orders = True
                     client.put()
-                    total_sum = (total_sum + 1) / 2
+                    most_expensive_item = max(items, key=lambda i: i.price)
+                    total_sum -= (most_expensive_item + 1) / 2
 
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
