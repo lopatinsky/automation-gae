@@ -120,7 +120,6 @@ Parameters:
     "news": [
         {
             "id": news_id,                                 // int
-            "title": news_title,                           // string
             "text": news_text,                             // string (html, may contain <b> tags)
             "image_url": news_image_url,                   // string
             "created_at": news_timestamp                   // int
