@@ -1,3 +1,27 @@
+> Table of contents
+>
+> [API](#markdown-header-api)
+>    * [Server](#markdown-header-server)
+>    * [Endpoints for clients](#markdown-header-endpoints-for-clients)
+>    *    * [Get list of venues](#markdown-header-get-list-of-venues)
+>    *    * [Get menu](#markdown-header-get-menu)
+>    *    * [Get promo info](#markdown-header-get-promo-info)
+>    *    * [Get ID for new order](#markdown-header-get-id-for-new-order)
+>    *    * [Post order](#markdown-header-post-order)
+>    *    * [Get status of orders](#markdown-header-get-status-of-orders)
+>    *    * [Cancel order](#markdown-header-cancel-order)
+>    * [Endpoints for admins](#markdown-header-endpoints-for-admins)
+>    *    * [Get current orders](#markdown-header-get-current-orders)
+>    *    * [Get updates](#markdown-header-get-updates)
+>    *    * [Get returns](#markdown-header-get-returns)
+>    *    * [Get history](#markdown-header-get-history)
+>    *    * [Cancel order](#markdown-header-cancel-order)
+>    *    * [Postpone order](#markdown-header-postpone-order)
+>    *    * [Close order](#markdown-header-close-order)
+>    * [Constants](#markdown-header-constants)
+>    *    * [Device types](#markdown-header-device-types)
+>    *    * [Payment types](#markdown-header-payment-types)
+>    *    * [Order statuses](#markdown-header-order-statuses)
 # API
 
 ## Server
@@ -127,7 +151,6 @@ Parameters:
         * `phone`: string
     * `payment`: object
         * `type_id`: int
-        *  `mastercard`: boolean
         * see below
     * `items`: array of objects
         * `item_id`: int|string
@@ -142,6 +165,7 @@ For payment by card from server, `payment` must contain the following fields:
 * `binding_id`: string
 * `client_id`: string
 * `return_url`: string
+* `mastercard`: boolean
 
 Response:
 
@@ -329,3 +353,23 @@ No parameters
 {
 }
 ```
+
+## Constants
+
+### Device types
+
+* `0`: iOS (default)
+* `1`: Android
+
+### Payment types
+
+* `0`: cash
+* `1`: card
+* `2`: bonus
+
+### Order statuses
+
+* `0`: new
+* `1`: ready
+* `2`: canceled by client
+* `3`: canceled by barista
