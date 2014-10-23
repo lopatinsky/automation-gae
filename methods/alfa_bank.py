@@ -4,10 +4,9 @@ import urllib
 from google.appengine.api import urlfetch
 from config import config
 
-ALFA_BASE_URL = config.ALFA_BASE_URL
 
 def __post_request_alfa(api_path, params):
-    url = '%s%s' % (ALFA_BASE_URL, api_path)
+    url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)
     if params:
