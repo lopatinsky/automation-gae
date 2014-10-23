@@ -61,7 +61,7 @@ class OrderHandler(ApiHandler):
                     client.has_mastercard_orders = True
                     client.put()
                     most_expensive_item = max(items, key=lambda i: i.price)
-                    total_sum -= (most_expensive_item.price - 1) / 2
+                    total_sum -= most_expensive_item.price / 2
 
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
