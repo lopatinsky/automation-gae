@@ -88,15 +88,18 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.status = READY_ORDER
         order.put()
 
+        client = Client.get_by_id(order.client_id)
+
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             alfa_bank.pay_by_card(order.payment_id, 0)  # TODO check success
             if order.mastercard:
                 points = len(order.items)
                 try:
-                    empatika_promos.register_order(order.client_id, points)
+                    empatika_promos.register_order(client.client_id, points)
                 except empatika_promos.EmpatikaPromosError as e:
                     logging.exception(e)
-        push.send_order_push(order_id, order.status, "", order.device_type, silent=True)
+        push.send_order_push(order_id, order.status, u"%s, ваш заказ готов." % client.name,
+                             order.device_type, silent=True)
 
         response = {
             'status': 1,
