@@ -24,6 +24,7 @@ app = WSGIApplication([
             Route('/unbind.php', api.UnbindCardHandler),
             Route('/register.php', api.PaymentRegisterHandler),
             Route('/status.php', api.PaymentStatusHandler),
+            Route('/extended_status', api.PaymentExtendedStatusHandler),
             Route('/payment_binding.php', api.PaymentBindingHandler),
             Route('/reverse.php', api.PaymentReverseHandler),
             Route('/payment_types.php', api.PaymentTypesHandler),

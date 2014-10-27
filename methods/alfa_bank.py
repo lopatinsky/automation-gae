@@ -39,6 +39,14 @@ def check_status(order_id):
     result = __post_request_alfa('/rest/getOrderStatus.do', params)
     return json.loads(result)
 
+def check_extended_status(order_id):
+    params = {
+        'userName': config.ALFA_LOGIN,
+        'password': config.ALFA_LOGIN,
+        'orderId': order_id,
+    }
+    result = __post_request_alfa('/rest/getOrderStatusExtended.do', params)
+    return json.loads(result)
 
 def get_back_blocked_sum(order_id):
     params = {

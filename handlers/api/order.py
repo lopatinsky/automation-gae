@@ -51,7 +51,6 @@ class OrderHandler(ApiHandler):
                     total_sum += menu_item.price
                 sms_items_info.append((menu_item.title, item['quantity']))
 
-
             # mastercard
             payment_id = response_json['payment'].get('payment_id')
             mastercard = False
@@ -81,7 +80,7 @@ class OrderHandler(ApiHandler):
             if payment_type_id == BONUS_PAYMENT_TYPE:
                 cup_count = len(items)
                 activation = empatika_promos.activate_promo(client_id, empatika_promos.FREE_COFFEE_PROMO_ID, cup_count)
-                payment_id = activation['id']
+                payment_id = str(activation['activation']['id'])
 
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
@@ -94,7 +93,7 @@ class OrderHandler(ApiHandler):
             sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
                 order_id, client_name, total_sum, local_delivery_time,
                 ', '.join("%s X %s" % i for i in sms_items_info),
-                [u"Наличные", u"Карта"][payment_type_id]
+                [u"Наличные", u"Карта", u"Бонусы"][payment_type_id]
             )
             sms.send_sms('DoubleB', venue.phone_numbers, sms_text)
 
@@ -162,7 +161,7 @@ class ReturnOrderHandler(ApiHandler):
                 client = Client.get_by_id(order.client_id)
                 sms_text = u"[Отмена] Заказ №%s (%s) Сумма: %s Тип оплаты: %s" % (
                     order_id, client.name, order.total_sum,
-                    [u"Наличные", u"Карта"][order.payment_type_id]
+                    [u"Наличные", u"Карта", u"Бонусы"][order.payment_type_id]
                 )
                 sms.send_sms("DoubleB", venue.phone_numbers, sms_text)
 

@@ -1,3 +1,4 @@
+import logging
 from .base import ApiHandler
 from methods import alfa_bank
 from models import Order
@@ -46,5 +47,17 @@ class PaymentStatusHandler(ApiHandler):
         alfa_response = alfa_bank.check_status(order_id)
         if str(alfa_response["ErrorCode"]) != "0":
             pass  # TODO send email
+
+        self.render_json(alfa_response)
+
+
+class PaymentExtendedStatusHandler(ApiHandler):
+    def post(self):
+        order_id = self.request.get('orderId')
+
+        alfa_response = alfa_bank.check_extended_status(order_id)
+        logging.info(alfa_response)
+        # if str(alfa_response["ErrorCode"]) != "0":
+        #     pass  # TODO send email
 
         self.render_json(alfa_response)
