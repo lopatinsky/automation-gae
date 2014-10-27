@@ -21,7 +21,10 @@ class OrderHandler(ApiHandler):
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
         venue_id = int(response_json['venue_id'])
-        coordinates = GeoPt(response_json.get('coordinates', None))
+        if ('coordinates') in response_json:
+            GeoPt(response_json.get['coordinates'])
+        else:
+            coordinates = None
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
