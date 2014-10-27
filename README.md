@@ -22,6 +22,7 @@
 >           * [Device types](#markdown-header-device-types)
 >           * [Payment types](#markdown-header-payment-types)
 >           * [Order statuses](#markdown-header-order-statuses)
+>   * [Documents](#markdown-header-documents)
 
 # API
 
@@ -383,3 +384,12 @@ No parameters
 * `1`: ready
 * `2`: canceled by client
 * `3`: canceled by barista
+
+# Documents
+
+List of documents:
+
+* About: `/docs/about.html`
+* License agreement: `/docs/license_agreement.html`
+* NDA: `/docs/nda.html`
+* Payment rules: `/docs/payment_rules.html`
