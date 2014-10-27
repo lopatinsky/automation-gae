@@ -21,8 +21,8 @@ class OrderHandler(ApiHandler):
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
         venue_id = int(response_json['venue_id'])
-        if ('coordinates') in response_json:
-            GeoPt(response_json.get['coordinates'])
+        if 'coordinates' in response_json:
+            coordinates = GeoPt(response_json['coordinates'])
         else:
             coordinates = None
         comment = response_json['comment']
