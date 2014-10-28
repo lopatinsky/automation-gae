@@ -37,11 +37,12 @@ def get_user_points(user_id):
     return _get(api_path)["points"]
 
 
-def register_order(user_id, points):
+def register_order(user_id, points, order_id):
     api_path = "/order"
     params = {
         "user_id": user_id,
-        "points": points
+        "points": points,
+        "order_id": order_id
     }
     return _post(api_path, params)
 

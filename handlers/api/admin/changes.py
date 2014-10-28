@@ -54,7 +54,7 @@ class DoneOrderHandler(AdminApiHandler):
             if order.mastercard:
                 points = len(order.items)
                 try:
-                    empatika_promos.register_order(order.client_id, points)
+                    empatika_promos.register_order(order.client_id, points, order.key.id())
                 except empatika_promos.EmpatikaPromosError as e:
                     logging.exception(e)
         push.send_order_push(order_id, order.status, u"Заказ №%s выдан." % str(order.key.id()),
