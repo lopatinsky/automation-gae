@@ -169,7 +169,7 @@
                          </div>
 
                          {% if not order.canceled %}
-                             <div class='submit'><span class='order_id' style='display:none'>{{ order.key.id() }}</span>&#10004;&nbsp;Выдать</div>
+                             <div class='submit'><span class='order_id' style='display:none'>{{ order.order_id }}</span>&#10004;&nbsp;Выдать</div>
                          {% else %}
                              <div class='cancel_title'>Отменен</div>
                          {% endif %}
