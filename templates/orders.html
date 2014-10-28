@@ -766,9 +766,12 @@ $('.order').each(function(){
 }
 
 var timerId = setInterval(timerMethod, 6000); 
+
+var sendingDone = {};
 $( "body" ).on( "click", ".submit", function(e){
-	$(this).prop("disabled", true);
     var order_id=$(this).children('.order_id').html();
+    if (sendingDone[order_id]) return;
+    sendingDone[order_id] = true;
 	console.log(order_id);
 	$.post('done.php',{"order_id":order_id},function(resp)
 	{
@@ -780,7 +783,9 @@ $( "body" ).on( "click", ".submit", function(e){
 	$('#'+order_id).fadeOut(1500);
 			 
 		 }
-	})
+	}).always(function() {
+        delete sendingDone[order_id];
+    })
 	
     
 	})
@@ -887,6 +892,8 @@ $( "body" ).on( "click", ".order", function(e){
 $('.submit_without').click(function(){
 	 
 	 var order_id=$(this).parent('.modal_footer_item').parent('.modal_footer').parent('#info_modal').children('.modal_header').children('.number').children('.order_number').html();
+    if (sendingDone[order_id]) return;
+    sendingDone[order_id] = true;
 	 
 	 $.post('done.php',{"order_id":order_id},function(resp)
 	{
@@ -899,7 +906,9 @@ $('.submit_without').click(function(){
 	$('#'+order_id).fadeOut(1500);
 			 
 		 }
-	})
+	}).always(function() {
+         delete sendingDone[order_id];
+     })
 	
 	})
 
