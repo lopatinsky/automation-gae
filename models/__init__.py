@@ -1,5 +1,6 @@
 from collections import Counter
 from google.appengine.ext import ndb
+from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter
 from methods.rendering import timestamp
 
@@ -192,3 +193,8 @@ class News(ndb.Model):
             "image_url": self.image_url,
             "created_at": timestamp(self.created_at)
         }
+
+
+class Admin(models.User):
+    email = ndb.StringProperty(required=True, indexed=False)
+    venue = ndb.KeyProperty(Venue, indexed=False)  # None for global admin, actual venue for barista

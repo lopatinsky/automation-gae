@@ -2,10 +2,12 @@
 import datetime
 from .base import BaseHandler
 from .formatting import format_order
+from methods.auth import user_required
 from models import CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, Order
 
 
 class ReturnsHandler(BaseHandler):
+    @user_required
     def get(self):
         try:
             date = self.request.get('date')

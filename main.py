@@ -5,6 +5,16 @@ from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
+webapp2_config = {
+    "webapp2_extras.sessions": {
+        "secret_key": '\xfe\xc1\x1d\xc0+\x10\x11\x9a\x0b\xe6\xeb\xd5e \x85NgZ\xcbL\xee\xb0p~\x08\xd5\xa5\x1bAc\x88/'
+                      '\xae\t@\xdc\x08d\xe9\xdb'
+    },
+    "webapp2_extras.auth": {
+        "user_model": "models.Admin"
+    }
+}
+
 
 app = WSGIApplication([
     PathPrefixRoute('/api', [
@@ -40,6 +50,10 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/admin', [
+        Route('/login', web_admin.LoginHandler),
+        Route('/signup', web_admin.SignupHandler),
+        Route('/logout', web_admin.LogoutHandler),
+
         Route('/orders.php', web_admin.OrdersHandler),
         Route('/backs.php', web_admin.ReturnsHandler),
         Route('/history.php', web_admin.HistoryHandler),
@@ -52,6 +66,6 @@ app = WSGIApplication([
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
-], debug=True)
+], debug=True, config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)
