@@ -47,6 +47,6 @@ class HistoryHandler(OrderListBaseHandler):
         end = datetime.datetime.fromtimestamp(end_timestamp)
         search = self.request.get("search").strip()
         if search:
-            return search_orders(search, start, end)
+            return search_orders(search, None, start, end)  # TODO
         else:
             return Order.query(Order.date_created >= start, Order.date_created < end).fetch()

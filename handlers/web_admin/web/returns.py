@@ -16,9 +16,9 @@ class ReturnsHandler(BaseHandler):
             date = datetime.date.today()
         date = datetime.datetime.combine(date, datetime.time())
         next_date = date + datetime.timedelta(days=1)
-        orders = Order.query(Order.return_datetime >= date, Order.return_datetime < next_date,
-                             Order.status == CANCELED_BY_CLIENT_ORDER or Order.status == CANCELED_BY_BARISTA_ORDER) \
-                      .fetch()
+        orders = self.user.query_orders(Order.return_datetime >= date, Order.return_datetime < next_date,
+                                        Order.status == CANCELED_BY_CLIENT_ORDER or
+                                        Order.status == CANCELED_BY_BARISTA_ORDER).fetch()
         orders_data = []
         for order in orders:
             order_data = format_order(order)

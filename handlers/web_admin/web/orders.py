@@ -10,8 +10,8 @@ class OrdersHandler(BaseHandler):
     def get(self):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
-        orders = Order.query(Order.date_created >= today,
-                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER).fetch()
+        orders = self.user.query_orders(Order.date_created >= today,
+                                        Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER).fetch()
         orders = sorted(orders, key=lambda order: order.delivery_time)
         orders_data = []
         for order in orders:
@@ -20,7 +20,7 @@ class OrdersHandler(BaseHandler):
 
             orders_data.append(format_order(order))
 
-        last_order = Order.query().order(-Order.date_created).get(projection=(Order.date_created,))
+        last_order = self.user.query_orders().order(-Order.date_created).get(projection=(Order.date_created,))
         last_order_datetime = last_order.date_created if last_order else now
 
         self.render('orders.html', orders=orders_data, last_order_datetime=last_order_datetime)

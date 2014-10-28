@@ -13,10 +13,10 @@ class HistoryHandler(BaseHandler):
     def get(self):
         search_string = self.request.get("search")
         if search_string:
-            orders = search_orders(search_string)
+            orders = search_orders(search_string, self.user)
         else:
             today = datetime.datetime.combine(datetime.date.today(), datetime.time())
-            orders = Order.query(Order.date_created >= today).order(-Order.date_created).fetch()
+            orders = self.user.query_orders(Order.date_created >= today).order(-Order.date_created).fetch()
         orders_data = []
         total_price = 0
         total_cost_price = 0

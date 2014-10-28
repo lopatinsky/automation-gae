@@ -198,3 +198,8 @@ class News(ndb.Model):
 class Admin(models.User):
     email = ndb.StringProperty(required=True, indexed=False)
     venue = ndb.KeyProperty(Venue, indexed=False)  # None for global admin, actual venue for barista
+
+    def query_orders(self, *args, **kwargs):
+        if self.venue:
+            return Order.query(Order.venue_id == self.venue.id(), *args, **kwargs)
+        return Order.query(*args, **kwargs)
