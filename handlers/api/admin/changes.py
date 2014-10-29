@@ -12,7 +12,7 @@ __author__ = 'ilyazorin'
 class CancelOrderHandler(AdminApiHandler):
     def post(self, order_id):
         comment = self.request.get('comment')
-        order = Order.get_by_id(order_id)
+        order = Order.get_by_id(int(order_id))
 
         success = True
         if order.payment_type_id == CARD_PAYMENT_TYPE:
@@ -45,7 +45,7 @@ class CancelOrderHandler(AdminApiHandler):
 
 class DoneOrderHandler(AdminApiHandler):
     def post(self, order_id):
-        order = Order.get_by_id(order_id)
+        order = Order.get_by_id(int(order_id))
         order.status = READY_ORDER
         order.put()
 
@@ -67,7 +67,7 @@ class PostponeOrderHandler(AdminApiHandler):
     def post(self, order_id):
         mins = self.request.get_range("mins")
 
-        order = Order.get_by_id(order_id)
+        order = Order.get_by_id(int(order_id))
         order.delivery_time += datetime.timedelta(mins)
         order.put()
 
