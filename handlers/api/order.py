@@ -20,6 +20,12 @@ class OrderHandler(ApiHandler):
         #TODO errors handling
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
+        # check if order exists in DB
+        if Order.get_by_id(order_id):
+            self.abort(409)
+        # put a stub
+        order_key = Order(id=order_id).put()
+
         venue_id = int(response_json['venue_id'])
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -76,8 +82,10 @@ class OrderHandler(ApiHandler):
                     if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
                         pass
                     else:
+                        order_key.delete()  # delete stub
                         self.abort(400)
                 else:
+                    order_key.delete()  # delete stub
                     self.abort(400)
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
@@ -103,6 +111,7 @@ class OrderHandler(ApiHandler):
             self.response.status_int = 201
             self.render_json({'order_id': order_id})
         else:
+            order_key.delete()  # delete stub
             self.abort(400)
 
 
