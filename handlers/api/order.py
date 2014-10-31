@@ -1,5 +1,6 @@
 # coding:utf-8
 import logging
+from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 from config import config
 from handlers.api.base import ApiHandler
@@ -20,11 +21,10 @@ class OrderHandler(ApiHandler):
         #TODO errors handling
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
-        # check if order exists in DB
-        if Order.get_by_id(order_id):
+        # check if order exists in DB or currently adding it
+        cache_key = "order_%s" % order_id
+        if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
             self.abort(409)
-        # put a stub
-        order_key = Order(id=order_id).put()
 
         venue_id = int(response_json['venue_id'])
         if 'coordinates' in response_json:
@@ -82,10 +82,10 @@ class OrderHandler(ApiHandler):
                     if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
                         pass
                     else:
-                        order_key.delete()  # delete stub
+                        memcache.delete(cache_key)
                         self.abort(400)
                 else:
-                    order_key.delete()  # delete stub
+                    memcache.delete(cache_key)
                     self.abort(400)
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
@@ -98,6 +98,7 @@ class OrderHandler(ApiHandler):
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
                           mastercard=mastercard, items=[item.key for item in items])
             order.put()
+            memcache.delete(cache_key)
 
             venue = Venue.get_by_id(venue_id)
             local_delivery_time = delivery_time + config.TIMEZONE_OFFSET
@@ -111,7 +112,7 @@ class OrderHandler(ApiHandler):
             self.response.status_int = 201
             self.render_json({'order_id': order_id})
         else:
-            order_key.delete()  # delete stub
+            memcache.delete(cache_key)
             self.abort(400)
 
 
