@@ -8,8 +8,8 @@ class UpdatesHandler(AdminApiHandler):
         timestamp = self.request.get_range("timestamp")
         time = datetime.datetime.fromtimestamp(timestamp)
         orders = Order.query(Order.updated >= time).fetch()
-        new = [order for order in orders if order.date_created > timestamp]
-        updated = [order for order in orders if order.date_created <= timestamp]
+        new = [order for order in orders if order.date_created > time]
+        updated = [order for order in orders if order.date_created <= time]
         self.render_json({
             "new": [o.dict() for o in new],
             "updated": [o.dict() for o in updated]
