@@ -203,3 +203,9 @@ class Admin(models.User):
         if self.venue:
             return Order.query(Order.venue_id == self.venue.id(), *args, **kwargs)
         return Order.query(*args, **kwargs)
+
+    def order_by_id(self, order_id):
+        order = Order.get_by_id(order_id)
+        if self.venue and order.venue_id != self.venue.id():
+            return None
+        return order

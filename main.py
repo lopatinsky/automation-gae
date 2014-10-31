@@ -19,6 +19,9 @@ webapp2_config = {
 app = WSGIApplication([
     PathPrefixRoute('/api', [
         PathPrefixRoute('/admin', [
+            Route('/login', admin.LoginHandler),
+            Route('/logout', admin.LogoutHandler),
+
             Route('/orders/current', admin.CurrentOrdersHandler),
             Route('/orders/updates', admin.UpdatesHandler),
 

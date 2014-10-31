@@ -10,13 +10,12 @@ def search_orders(query, admin, start=None, end=None):
     result = []
     # search by order number
     try:
-        order_by_number = Order.get_by_id(int(query))
+        order_by_number = admin.order_by_id(int(query))
     except ValueError:
         pass
     else:
         if order_by_number and start < order_by_number.date_created < end:
-            if not admin.venue or order_by_number.venue_id == admin.venue.id():
-                result.append(order_by_number)
+            result.append(order_by_number)
 
     # search by client
     client_keys = []

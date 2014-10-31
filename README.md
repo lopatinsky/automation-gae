@@ -11,6 +11,8 @@
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Cancel order](#markdown-header-cancel-order)
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
+>           * [Login](#markdown-header-login)
+>           * [Logout](#markdown-header-logout)
 >           * [Get current orders](#markdown-header-get-current-orders)
 >           * [Get updates](#markdown-header-get-updates)
 >           * [Get returns](#markdown-header-get-returns)
@@ -240,11 +242,38 @@ Response on failure:
 
 ## Endpoints for admins
 
+### Login
+
+POST `/api/admin/login`
+
+Parameters:
+
+* `email`: string
+* `password`: string
+
+```
+#!js
+{
+    "token": access_token // string
+}
+```
+
+### Logout
+
+POST `/api/admin/logout`
+
+Parameters:
+
+* `token`: string
+* `password`: string
+
 ### Get current orders
 
 GET `/api/admin/orders/current`
 
-No parameters
+Parameters:
+
+* `token`: string
 
 ```
 #!js
@@ -281,6 +310,7 @@ GET `/api/admin/orders/updates`
 
 Parameters:
 
+* `token`: string
 * `timestamp`: int
 
 ```
@@ -297,6 +327,7 @@ GET `/api/admin/orders/returns`
 
 Parameters:
 
+* `token`: string
 * `date`: int (timestamp, time part is ignored)
 
 ```
@@ -312,6 +343,7 @@ GET `/api/admin/orders/history`
 
 Parameters:
 
+* `token`: string
 * `start`: int (timestamp)
 * `end`: int (timestamp)
 * `search` (optional): string
@@ -329,6 +361,7 @@ POST `/api/admin/orders/<order_id>/cancel`
 
 Parameters:
 
+* `token`: string
 * `comment`: string
 
 On failure, status code is 400
@@ -345,6 +378,7 @@ POST `/api/admin/orders/<order_id>/postpone`
 
 Parameters:
 
+* `token`: string
 * `mins`: int
 
 ```
@@ -357,7 +391,9 @@ Parameters:
 
 POST `/api/admin/orders/<order_id>/close` 
 
-No parameters
+Parameters:
+
+* `token`: string
 
 ```
 #!js

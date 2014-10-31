@@ -42,7 +42,7 @@ class CheckTimeHandler(WebAdminApiHandler):
         mins = self.request.get_range("mins")
         order_id = self.request.get_range("order_id")
 
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
@@ -88,7 +88,7 @@ class OrderDoneHandler(WebAdminApiHandler):
     @api_user_required
     def post(self):
         order_id = self.request.get_range("order_id")
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.status = READY_ORDER
         order.put()
 
@@ -116,7 +116,7 @@ class OrderCancelHandler(WebAdminApiHandler):
     def post(self):
         order_id = self.request.get_range('order_id')
         comment = self.request.get('comment')
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
 
         success = True
         if order.payment_type_id == CARD_PAYMENT_TYPE:
@@ -158,7 +158,7 @@ class OrderStatusUpdateHandler(WebAdminApiHandler):
     def post(self):
         order_id = self.request.get_range("order_id")
         status = self.request.get_range("status")
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.status = status
         order.put()
         self.render_json({
