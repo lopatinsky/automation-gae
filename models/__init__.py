@@ -206,6 +206,8 @@ class Admin(models.User):
 
     def order_by_id(self, order_id):
         order = Order.get_by_id(order_id)
+        if not order:
+            return None
         if self.venue and order.venue_id != self.venue.id():
             return None
         return order
