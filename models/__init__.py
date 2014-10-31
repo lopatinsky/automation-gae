@@ -209,3 +209,29 @@ class Admin(models.User):
         if self.venue and order.venue_id != self.venue.id():
             return None
         return order
+
+
+class AdminStatus(ndb.Model):
+    location = ndb.GeoPtProperty()
+    time = ndb.DateTimeProperty(auto_now=True)
+
+    @staticmethod
+    def _make_key_name(uid, token):
+        return "%s_%s" % (uid, token)
+
+    @classmethod
+    def create(cls, uid, token, location):
+        key_name = cls._make_key_name(uid, token)
+        entity = cls(id=key_name, location=location)
+        entity.put()
+        return entity
+
+    @classmethod
+    def get(cls, uid, token):
+        key_name = cls._make_key_name(uid, token)
+        return cls.get_by_id(key_name)
+
+    @property
+    def admin(self):
+        uid = int(self.key.id().split("_")[0])
+        return Admin.get_by_id(uid)

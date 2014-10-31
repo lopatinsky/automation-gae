@@ -250,6 +250,8 @@ Parameters:
 
 * `email`: string
 * `password`: string
+* `lat`: float
+* `lon`: float
 
 ```
 #!js
@@ -266,6 +268,27 @@ Parameters:
 
 * `token`: string
 * `password`: string
+
+```
+#!js
+{
+}
+```
+
+### Ping
+
+POST `/api/admin/ping`
+
+Parameters: 
+
+* `lat`: float
+* `lon`: float
+
+```
+#!js
+{
+}
+```
 
 ### Get current orders
 

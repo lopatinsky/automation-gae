@@ -21,6 +21,7 @@ app = WSGIApplication([
         PathPrefixRoute('/admin', [
             Route('/login', admin.LoginHandler),
             Route('/logout', admin.LogoutHandler),
+            Route('/ping', admin.PingHandler),
 
             Route('/orders/current', admin.CurrentOrdersHandler),
             Route('/orders/updates', admin.UpdatesHandler),
