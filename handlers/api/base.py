@@ -5,8 +5,9 @@ import webapp2
 
 class ApiHandler(webapp2.RequestHandler):
     def dispatch(self):
-        for item in self.request.POST.iteritems():
-            logging.debug("%s: %s" % item)
+        for key, value in self.request.POST.iteritems():
+            if key != "password":
+                logging.debug("%s: %s" % (key, value))
         return super(ApiHandler, self).dispatch()
 
     def render_json(self, obj):
