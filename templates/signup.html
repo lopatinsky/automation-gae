@@ -89,6 +89,14 @@
           <input type="password" name="password" value="" id="password">
           <label for="password">Подтвердите пароль</label>
           <input type="password" name="password2" value="" id="password2">
+          <label for="venue">Кофейня</label>
+          <select id="venue" name="venue_id">
+            <option value="0" {% if not venue_id %}selected="selected"{% endif %}>Вся сеть</option>
+            {% for venue in venues %}
+              {% set id = venue.key.id() %}
+              <option value="{{ id }}" {% if id == venue_id %}selected="selected"{% endif %}>{{ venue.title }}</option>
+            {% endfor %}
+          </select>
           <!--div id="checkdiv">
             <input type="checkbox" id="checkbox" value=""> Я принимаю <a href="policies.html">Условия использования</a> и соглашаюсь с политикой конфидициальности Ru-Beacon
           </div-->

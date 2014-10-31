@@ -715,7 +715,8 @@ section article a {
   height: 38px;
   text-indent: 10px;
 }
-.enter-form fieldset input {
+.enter-form fieldset input,
+.enter-form fieldset select {
   font-size: 18px;
   color: #323232;
   border-color: #bdbcbd;

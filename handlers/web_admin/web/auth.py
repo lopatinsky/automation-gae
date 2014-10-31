@@ -1,8 +1,10 @@
 # coding=utf-8
+from webapp2 import cached_property
 
 from .base import BaseHandler
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from methods.auth import set_current_user, user_required
+from models import Venue
 
 
 class LoginHandler(BaseHandler):
@@ -30,6 +32,13 @@ class LoginHandler(BaseHandler):
 
 
 class SignupHandler(BaseHandler):
+    @cached_property
+    def venues(self):
+        return Venue.query().fetch()
+
+    def render(self, template_name, **values):
+        super(SignupHandler, self).render(template_name, venues=self.venues, **values)
+
     def success(self):
         self.redirect("orders.php")
 
@@ -45,6 +54,8 @@ class SignupHandler(BaseHandler):
         email, password, password2 = \
             self.request.get("email").strip().lower(), \
             self.request.get("password"), self.request.get("password2")
+        venue_id = self.request.get_range("venue_id", default=-1)
+        venue_ids = {v.key.id(): v.key for v in self.venues}
         error = None
         if not email:
             error = u"Не введен email"
@@ -52,15 +63,18 @@ class SignupHandler(BaseHandler):
             error = u"Не введен пароль"
         elif password != password2:
             error = u"Пароли не совпадают"
+        elif venue_id and venue_id not in venue_ids:
+            error = u"Неправильно выбрана кофейня"
         else:
+            venue_key = venue_ids.get(venue_id, None)
             success, user = self.auth.store.user_model.create_user(
-                email, email=email, password_raw=password)
+                email, email=email, password_raw=password, venue=venue_key)
             if success:
                 set_current_user(self.auth, user)
             else:
                 error = u"Пользователь с этим email уже зарегистрирован"
         if error:
-            self.render('signup.html', email=email, error=error)
+            self.render('signup.html', email=email, error=error, venue_id=venue_id)
         else:
             self.success()
 
