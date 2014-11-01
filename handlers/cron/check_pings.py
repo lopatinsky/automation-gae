@@ -9,7 +9,6 @@ _EMAIL_SENDER = "ping_errors@%s.appspotmail.com" % app_identity.get_application_
 
 class CheckPingsHandler(RequestHandler):
     def get(self):
-        print _EMAIL_SENDER
         now = datetime.datetime.utcnow()
         delta = datetime.timedelta(minutes=10)
         statuses = AdminStatus.query(AdminStatus.time < now - delta).fetch()
