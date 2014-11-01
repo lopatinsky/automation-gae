@@ -1,5 +1,6 @@
 import datetime
 from .base import AdminApiHandler
+from methods.auth import api_user_required
 from methods.orders import search_orders
 from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 
@@ -8,6 +9,7 @@ class OrderListBaseHandler(AdminApiHandler):
     def _get_orders(self):
         return []
 
+    @api_user_required
     def get(self):
         orders = self._get_orders()
         self.render_json({'orders': [order.dict() for order in orders]})
@@ -17,9 +19,9 @@ class CurrentOrdersHandler(OrderListBaseHandler):
     def _get_orders(self):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
-        orders = Order.query(Order.date_created >= today,
-                             Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
-                      .order(-Order.date_created).fetch()
+        orders = self.user.query_orders(Order.date_created >= today,
+                                        Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
+                          .order(-Order.date_created).fetch()
         return [o for o in orders if o.status == NEW_ORDER or o.delivery_time >= now]
 
 
@@ -32,8 +34,9 @@ class ReturnsHandler(OrderListBaseHandler):
         else:
             date = datetime.datetime.combine(datetime.date.today(), datetime.time())
         next_date = date + datetime.timedelta(days=1)
-        orders = Order.query(Order.status == CANCELED_BY_CLIENT_ORDER or Order.status == CANCELED_BY_BARISTA_ORDER,
-                             Order.date_created >= date, Order.date_created < next_date).fetch()
+        orders = self.user.query_orders(Order.status == CANCELED_BY_CLIENT_ORDER or
+                                        Order.status == CANCELED_BY_BARISTA_ORDER,
+                                        Order.date_created >= date, Order.date_created < next_date).fetch()
         return orders
 
 
@@ -47,6 +50,6 @@ class HistoryHandler(OrderListBaseHandler):
         end = datetime.datetime.fromtimestamp(end_timestamp)
         search = self.request.get("search").strip()
         if search:
-            return search_orders(search, start, end)
+            return search_orders(search, self.user, start, end)
         else:
-            return Order.query(Order.date_created >= start, Order.date_created < end).fetch()
+            return self.user.query_orders(Order.date_created >= start, Order.date_created < end).fetch()

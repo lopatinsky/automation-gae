@@ -112,6 +112,15 @@
                             <div class='navi_text'>История</div>
                             </a>
                         </li>
+                        <li>
+                            <a href="logout">
+                                <div class="navi_text">Выход</div>
+                                <div class="navi_text" style="font-size: 14px">
+                                    {{ admin.venue.get().title if admin.venue else "Вся сеть" }},
+                                    {{ admin.email }}
+                                </div>
+                            </a>
+                        </li>
                         
                     </ul>
                     <!-- /#side-menu -->

@@ -2,7 +2,7 @@ import datetime
 from models import Order, Client
 
 
-def search_orders(query, start=None, end=None):
+def search_orders(query, admin, start=None, end=None):
     if not start:
         start = datetime.datetime.min
     if not end:
@@ -10,7 +10,7 @@ def search_orders(query, start=None, end=None):
     result = []
     # search by order number
     try:
-        order_by_number = Order.get_by_id(int(query))
+        order_by_number = admin.order_by_id(int(query))
     except ValueError:
         pass
     else:
@@ -29,6 +29,6 @@ def search_orders(query, start=None, end=None):
         client_keys.extend(Client.query(Client.name == terms[0], Client.surname == terms[1]).fetch(keys_only=True))
         client_keys.extend(Client.query(Client.name == terms[1], Client.surname == terms[0]).fetch(keys_only=True))
     for client_key in client_keys:
-        result.extend(Order.query(Order.date_created >= start, Order.date_created < end,
-                                  Order.client_id == client_key.id()).fetch())
+        result.extend(admin.query_orders(Order.date_created >= start, Order.date_created < end,
+                                         Order.client_id == client_key.id()).fetch())
     return result

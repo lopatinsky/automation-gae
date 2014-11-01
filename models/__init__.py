@@ -1,5 +1,6 @@
 from collections import Counter
 from google.appengine.ext import ndb
+from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter
 from methods.rendering import timestamp
 
@@ -192,3 +193,47 @@ class News(ndb.Model):
             "image_url": self.image_url,
             "created_at": timestamp(self.created_at)
         }
+
+
+class Admin(models.User):
+    email = ndb.StringProperty(required=True, indexed=False)
+    venue = ndb.KeyProperty(Venue, indexed=False)  # None for global admin, actual venue for barista
+
+    def query_orders(self, *args, **kwargs):
+        if self.venue:
+            return Order.query(Order.venue_id == self.venue.id(), *args, **kwargs)
+        return Order.query(*args, **kwargs)
+
+    def order_by_id(self, order_id):
+        order = Order.get_by_id(order_id)
+        if not order:
+            return None
+        if self.venue and order.venue_id != self.venue.id():
+            return None
+        return order
+
+
+class AdminStatus(ndb.Model):
+    location = ndb.GeoPtProperty()
+    time = ndb.DateTimeProperty(auto_now=True)
+
+    @staticmethod
+    def _make_key_name(uid, token):
+        return "%s_%s" % (uid, token)
+
+    @classmethod
+    def create(cls, uid, token, location):
+        key_name = cls._make_key_name(uid, token)
+        entity = cls(id=key_name, location=location)
+        entity.put()
+        return entity
+
+    @classmethod
+    def get(cls, uid, token):
+        key_name = cls._make_key_name(uid, token)
+        return cls.get_by_id(key_name)
+
+    @property
+    def admin(self):
+        uid = int(self.key.id().split("_")[0])
+        return Admin.get_by_id(uid)

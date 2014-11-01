@@ -4,15 +4,17 @@ import logging
 from config import config
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos
+from methods.auth import api_user_required
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE
 
 __author__ = 'ilyazorin'
 
 
 class CancelOrderHandler(AdminApiHandler):
+    @api_user_required
     def post(self, order_id):
         comment = self.request.get('comment')
-        order = Order.get_by_id(int(order_id))
+        order = self.user.order_by_id(int(order_id))
 
         success = True
         if order.payment_type_id == CARD_PAYMENT_TYPE:
@@ -44,8 +46,9 @@ class CancelOrderHandler(AdminApiHandler):
 
 
 class DoneOrderHandler(AdminApiHandler):
+    @api_user_required
     def post(self, order_id):
-        order = Order.get_by_id(int(order_id))
+        order = self.user.order_by_id(int(order_id))
         order.status = READY_ORDER
         order.put()
 
@@ -64,10 +67,11 @@ class DoneOrderHandler(AdminApiHandler):
 
 
 class PostponeOrderHandler(AdminApiHandler):
+    @api_user_required
     def post(self, order_id):
         mins = self.request.get_range("mins")
 
-        order = Order.get_by_id(int(order_id))
+        order = self.user.order_by_id(int(order_id))
         order.delivery_time += datetime.timedelta(mins)
         order.put()
 

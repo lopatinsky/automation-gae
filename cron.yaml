@@ -4,3 +4,7 @@ cron:
   url: /cron/close_orders
   schedule: every day 23:30
   timezone: Europe/Moscow
+
+- description: check pings
+  url: /cron/check_pings
+  schedule: every 10 minutes synchronized

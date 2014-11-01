@@ -6,6 +6,7 @@ import logging
 from .base import WebAdminApiHandler
 from config import config
 from methods import push, alfa_bank, empatika_promos
+from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE
 
@@ -36,11 +37,12 @@ def format_order(order):
 
 
 class CheckTimeHandler(WebAdminApiHandler):
+    @api_user_required
     def post(self):
         mins = self.request.get_range("mins")
         order_id = self.request.get_range("order_id")
 
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
@@ -61,10 +63,11 @@ class CheckTimeHandler(WebAdminApiHandler):
 
 
 class CheckUpdateHandler(WebAdminApiHandler):
+    @api_user_required
     def post(self):
         last_date_str = self.request.get("last_order_datetime")
         last_date = datetime.datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S")
-        orders = Order.query().filter(Order.date_created > last_date).fetch()
+        orders = self.user.query_orders(Order.date_created > last_date).fetch()
         response = {}
         if orders:
             response['status'] = 1
@@ -75,16 +78,17 @@ class CheckUpdateHandler(WebAdminApiHandler):
                 response['data'][order.key.id()] = format_order(order)
         else:
             response['status'] = 0
-        cancel_keys = Order.query().filter(Order.status == CANCELED_BY_CLIENT_ORDER).fetch(keys_only=True)
+        cancel_keys = self.user.query_orders(Order.status == CANCELED_BY_CLIENT_ORDER).fetch(keys_only=True)
         cancel_ids = [k.id() for k in cancel_keys]
         response['cancel'] = cancel_ids
         self.render_json(response)
 
 
 class OrderDoneHandler(WebAdminApiHandler):
+    @api_user_required
     def post(self):
         order_id = self.request.get_range("order_id")
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.status = READY_ORDER
         order.put()
 
@@ -108,10 +112,11 @@ class OrderDoneHandler(WebAdminApiHandler):
 
 
 class OrderCancelHandler(WebAdminApiHandler):
+    @api_user_required
     def post(self):
         order_id = self.request.get_range('order_id')
         comment = self.request.get('comment')
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
 
         success = True
         if order.payment_type_id == CARD_PAYMENT_TYPE:
@@ -149,10 +154,11 @@ class OrderCancelHandler(WebAdminApiHandler):
 
 
 class OrderStatusUpdateHandler(WebAdminApiHandler):
+    @api_user_required
     def post(self):
         order_id = self.request.get_range("order_id")
         status = self.request.get_range("status")
-        order = Order.get_by_id(order_id)
+        order = self.user.order_by_id(order_id)
         order.status = status
         order.put()
         self.render_json({
