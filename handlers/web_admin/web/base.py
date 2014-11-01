@@ -9,5 +9,6 @@ class BaseHandler(AuthBaseHandler):
         return jinja2.get_jinja2(app=self.app)
 
     def render(self, template_name, **values):
+        values.update(admin=self.user)
         rendered = self.jinja2.render_template(template_name, **values)
         self.response.write(rendered)
