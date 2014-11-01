@@ -11,9 +11,10 @@ class AdminApiHandler(ApiHandler):
     @cached_property
     def _user_and_token(self):
         full_token = self.request.get("token")
-        uid, token = full_token.split("_", 1)
-        if self.auth.get_user_by_token(int(uid), token, save_session=False):
-            return self.auth.store.user_model.get_by_id(int(uid)), token
+        if full_token:
+            uid, token = full_token.split("_", 1)
+            if self.auth.get_user_by_token(int(uid), token, save_session=False):
+                return self.auth.store.user_model.get_by_id(int(uid)), token
         return None, None
 
     @cached_property
