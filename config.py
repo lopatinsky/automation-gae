@@ -22,6 +22,6 @@ class TestingConfig(DoubleBConfig):
 
 
 if app_identity.get_application_id() == "empatika-doubleb":
-    config = TestingConfig()  # TODO use ProductionConfig here
+    config = ProductionConfig()
 else:
     config = TestingConfig()
