@@ -13,6 +13,7 @@
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
 >           * [Login](#markdown-header-login)
 >           * [Logout](#markdown-header-logout)
+>           * [Ping](#markdown-header-ping)
 >           * [Get current orders](#markdown-header-get-current-orders)
 >           * [Get updates](#markdown-header-get-updates)
 >           * [Get returns](#markdown-header-get-returns)
