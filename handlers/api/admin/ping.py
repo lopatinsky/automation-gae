@@ -1,3 +1,4 @@
+import logging
 from google.appengine.api import mail, app_identity
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.admin.base import AdminApiHandler
@@ -24,6 +25,10 @@ class PingHandler(AdminApiHandler):
                    "Current coordinates: %s\n" \
                    "Distance: %s km\n" \
                    "Email: %s" % (status.location, geopt, distance, self.user.email)
-            mail.send_mail(_EMAIL_SENDER, "mdburshteyn@gmail.com", "[DoubleB] Ping error", body)  # TODO recipient
+            logging.error(body)
+            try:
+                mail.send_mail(_EMAIL_SENDER, "mdburshteyn@gmail.com", "[DoubleB] Ping error", body)  # TODO recipient
+            except:
+                pass
         status.put()
         self.render_json({})
