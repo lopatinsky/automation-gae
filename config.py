@@ -3,7 +3,7 @@ from google.appengine.api import app_identity
 
 
 class DoubleBConfig(object):
-    PROMO_ENABLED = True
+    PROMO_ENABLED = False
     PROMO_MASTERCARD_ONLY = True
     POINTS_PER_CUP = 5
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
