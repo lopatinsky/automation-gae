@@ -72,7 +72,7 @@ class PostponeOrderHandler(AdminApiHandler):
         mins = self.request.get_range("mins")
 
         order = self.user.order_by_id(int(order_id))
-        order.delivery_time += datetime.timedelta(mins)
+        order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
         local_delivery_time = order.delivery_time + config.TIMEZONE_OFFSET
