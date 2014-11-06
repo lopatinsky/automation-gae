@@ -51,7 +51,7 @@ class MenuCategory(ndb.Model):
 
     def dict(self):
         return {self.title: [menu_item.get().dict() for menu_item in self.menu_items
-                             if menu_item.status == STATUS_AVAILABLE]}
+                             if menu_item.get().status == STATUS_AVAILABLE]}
 
 
 class Venue(ndb.Model):
