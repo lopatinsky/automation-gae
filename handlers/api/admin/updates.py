@@ -1,9 +1,11 @@
 import datetime
 from .base import AdminApiHandler
+from methods.auth import api_user_required
 from models import Order
 
 
 class UpdatesHandler(AdminApiHandler):
+    @api_user_required
     def get(self):
         timestamp = self.request.get_range("timestamp")
         time = datetime.datetime.fromtimestamp(timestamp)
