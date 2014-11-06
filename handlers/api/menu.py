@@ -1,5 +1,5 @@
 from handlers.api.base import ApiHandler
-from models import MenuCategory, Client
+from models import MenuCategory, Client, STATUS_AVAILABLE
 
 __author__ = 'ilyazorin'
 
