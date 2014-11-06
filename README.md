@@ -282,6 +282,7 @@ POST `/api/admin/ping`
 
 Parameters: 
 
+* `token`: string
 * `lat`: float
 * `lon`: float
 
