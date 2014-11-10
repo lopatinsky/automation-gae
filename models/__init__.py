@@ -112,6 +112,7 @@ class Order(ndb.Model):
     def dict(self):
         dct = {
             "order_id": self.key.id(),
+            "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
             "payment_type_id": self.payment_type_id,
             "client": Client.get_by_id(self.client_id).dict(),

@@ -306,6 +306,7 @@ Parameters:
     "orders": [
         {
             "order_id": order_id,                     // int
+            "status": order_status,                   // int, see constants
             "delivery_time": order_delivery_time,     // int, timestamp
             "payment_type_id": order_payment_type_id, // int
             "pan": order_pan,                         // string
