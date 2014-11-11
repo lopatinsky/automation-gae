@@ -1,4 +1,5 @@
 from google.appengine.ext.ndb import GeoPt
+from webapp2_extras import security
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from .base import AdminApiHandler
 from methods.auth import api_user_required
@@ -16,7 +17,7 @@ class LoginHandler(AdminApiHandler):
         except (InvalidAuthIdError, InvalidPasswordError):
             self.abort(401)
         uid = user_dict["user_id"]
-        token = self.auth.store.create_auth_token(uid)
+        token = security.generate_random_string(entropy=256)
         full_token = "%s_%s" % (uid, token)
         AdminStatus.create(uid, token, GeoPt(lat, lon))
         self.render_json({"token": full_token})
@@ -30,6 +31,5 @@ class LogoutHandler(AdminApiHandler):
             self.auth.store.validate_password(self.user.email, password)
         except (InvalidAuthIdError, InvalidPasswordError):
             self.abort(403)
-        self.auth.store.delete_auth_token(self.user.key.id(), self.token)
         AdminStatus.get(self.user.key.id(), self.token).key.delete()
         self.render_json({})
