@@ -13,6 +13,8 @@ class CheckPingsHandler(RequestHandler):
         now = datetime.datetime.utcnow()
         delta = datetime.timedelta(minutes=10)
         statuses = AdminStatus.query(AdminStatus.time < now - delta).fetch()
+        if not statuses:
+            return  # all pings up-to-date
         status_template = "Token: %s\n" \
                           "Last ping time: %s\n" \
                           "Email: %s"
