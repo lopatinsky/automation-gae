@@ -342,8 +342,9 @@ Parameters:
 ```
 #!js
 {
-    "new": new_orders,        // list of objects, as above
-    "updated": updated_orders // list of objects, as above
+    "new": new_orders,             // list of objects, as above
+    "updated": updated_orders,     // list of objects, as above
+    "timestamp": current_timestamp // int
 }
 ```
 
