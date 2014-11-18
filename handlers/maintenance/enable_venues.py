@@ -5,7 +5,7 @@ from models import Venue
 class EnableVenuesHandler(BaseHandler):
     def get(self):
         venues = Venue.query().fetch()
-        self.render('mt/enable_venues.html', venues=venues)
+        self.render('enable_venues.html', venues=venues)
 
     def post(self):
         venues = Venue.query().fetch()
@@ -15,4 +15,4 @@ class EnableVenuesHandler(BaseHandler):
             if v.active != new_active:
                 v.active = new_active
                 v.put()
-        self.render('mt/enable_venues.html', venues=venues, success=True)
+        self.render('enable_venues.html', venues=venues, success=True)

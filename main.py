@@ -19,6 +19,7 @@ webapp2_config = {
 app = WSGIApplication([
     PathPrefixRoute('/mt', [
         Route('/venues', maintenance.EnableVenuesHandler),
+        Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
     ]),
 
     PathPrefixRoute('/api', [

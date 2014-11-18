@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <style>
+        label {
+            display: inline-block;
+            text-align: right;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    {% if success %}
+        <div style="border: 1px solid black; padding: 4px 6px;">
+            Изменения сохранены
+        </div>
+    {% endif %}
+    <form method="post">
+        {% for param in ('title', 'description', 'coordinates', 'working_days', 'working_hours') %}
+            <div>
+                <label for="{{ param }}">{{ param }}</label>
+                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] }}"/>
+            </div>
+        {% endfor %}
+        <div>
+            <label for="phone_numbers">phone numbers (10 digits, comma-separated)</label>
+            <input type="text" name="phone_numbers" id="phone_numbers" value="{{ ','.join(venue.phone_numbers) }}"/>
+        </div>
+        <div>
+            <label></label>
+            <input type="submit" value="Сохранить"/>
+            <a href="/mt/venues">Назад к списку</a>
+        </div>
+    </form>
+</body>
+</html>

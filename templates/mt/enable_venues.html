@@ -14,7 +14,7 @@
         {% for v in venues %}
             <label style="display: block;">
                 <input type="checkbox" name="{{ v.key.id() }}" {% if v.active %}checked{% endif %}/>
-                {{ v.title }}
+                <a href="/mt/venues/{{ v.key.id() }}">{{ v.title }}</a>
             </label>
         {% endfor %}
         <input type="submit" value="Сохранить"/>
