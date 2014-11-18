@@ -63,6 +63,7 @@ class Venue(ndb.Model):
     working_hours = ndb.StringProperty(indexed=False)
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
+    active = ndb.BooleanProperty(required=True, default=False)
 
     def dict(self, user_location=None):
         distance = 0

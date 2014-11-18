@@ -27,6 +27,10 @@ class OrderHandler(ApiHandler):
             self.abort(409)
 
         venue_id = int(response_json['venue_id'])
+        venue = Venue.get_by_id(venue_id)
+        if not venue.active:
+            self.abort(410)
+
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
         else:
@@ -100,7 +104,6 @@ class OrderHandler(ApiHandler):
             order.put()
             memcache.delete(cache_key)
 
-            venue = Venue.get_by_id(venue_id)
             local_delivery_time = delivery_time + config.TIMEZONE_OFFSET
             sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
                 order_id, client_name, total_sum, local_delivery_time,
