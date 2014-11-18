@@ -1,6 +1,6 @@
 from webapp2_extras import jinja2
 from methods import fastcounter
-from handlers import api, web_admin
+from handlers import api, web_admin, maintenance
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -17,6 +17,10 @@ webapp2_config = {
 
 
 app = WSGIApplication([
+    PathPrefixRoute('/mt', [
+        Route('/venues', maintenance.EnableVenuesHandler),
+    ]),
+
     PathPrefixRoute('/api', [
         PathPrefixRoute('/admin', [
             Route('/login', admin.LoginHandler),
