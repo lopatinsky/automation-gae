@@ -20,7 +20,7 @@ class CurrentOrdersHandler(OrderListBaseHandler):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
         orders = self.user.query_orders(Order.date_created >= today,
-                                        Order.status == NEW_ORDER or Order.status == CANCELED_BY_CLIENT_ORDER) \
+                                        Order.status == NEW_ORDER) \
                           .order(-Order.date_created).fetch()
         return [o for o in orders if o.status == NEW_ORDER or o.delivery_time >= now]
 
@@ -34,8 +34,7 @@ class ReturnsHandler(OrderListBaseHandler):
         else:
             date = datetime.datetime.combine(datetime.date.today(), datetime.time())
         next_date = date + datetime.timedelta(days=1)
-        orders = self.user.query_orders(Order.status == CANCELED_BY_CLIENT_ORDER or
-                                        Order.status == CANCELED_BY_BARISTA_ORDER,
+        orders = self.user.query_orders(Order.status.IN((CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)),
                                         Order.date_created >= date, Order.date_created < next_date).fetch()
         return orders
 

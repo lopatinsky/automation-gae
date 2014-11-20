@@ -24,7 +24,8 @@ def search_orders(query, admin, start=None, end=None):
     # by client name
     terms = query.split(None, 1)
     if len(terms) == 1:
-        client_keys.extend(Client.query(Client.name == query or Client.surname == query).fetch(keys_only=True))
+        client_keys.extend(Client.query(Client.name == query).fetch(keys_only=True))
+        client_keys.extend(Client.query(Client.surname == query).fetch(keys_only=True))
     else:
         client_keys.extend(Client.query(Client.name == terms[0], Client.surname == terms[1]).fetch(keys_only=True))
         client_keys.extend(Client.query(Client.name == terms[1], Client.surname == terms[0]).fetch(keys_only=True))
