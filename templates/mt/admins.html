@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    {% if success %}
+        <div style="border: 1px solid black; padding: 4px 6px;">
+            Изменения сохранены
+        </div>
+    {% endif %}
+    {% for admin in admins %}
+        <h1>{{ admin.email }}</h1>
+        <p>
+            Кофейня:
+            {% if admin.venue %}
+                {% set v = admin.venue.get() %}
+                <a href="/mt/venues/{{ v.key.id() }}">{{ v.title }}</a>
+            {% else %}
+                вся сеть
+            {% endif %}
+        </p>
+        <form method="post">
+            <input type="hidden" name="admin_id" value="{{ admin.key.id() }}"/>
+            <div>
+                <label for="password">New password</label>
+                <input type="text" name="password" id="password"/>
+            </div>
+            <div>
+                <input type="submit" value="Сохранить"/>
+            </div>
+        </form>
+        <hr/>
+    {% endfor %}
+</body>
+</html>

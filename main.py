@@ -20,6 +20,8 @@ app = WSGIApplication([
     PathPrefixRoute('/mt', [
         Route('/venues', maintenance.EnableVenuesHandler),
         Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
+
+        Route('/admins', maintenance.AdminsHandler),
     ]),
 
     PathPrefixRoute('/api', [
