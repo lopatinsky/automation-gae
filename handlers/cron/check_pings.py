@@ -17,7 +17,7 @@ class CheckPingsHandler(RequestHandler):
             return  # all pings up-to-date
         status_template = "Token: %s\n" \
                           "Last ping time: %s\n" \
-                          "Email: %s"
+                          "Login: %s"
         statuses_text = "\n\n".join(status_template % (status.key.id(), status.time, status.admin.email)
                                     for status in statuses)
         body = "Error: no ping in last 10 minutes\n" \

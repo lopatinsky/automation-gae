@@ -32,7 +32,8 @@ class PingHandler(AdminApiHandler):
                    "Initial coordinates: %s\n" \
                    "Current coordinates: %s\n" \
                    "Distance: %s km\n" \
-                   "Email: %s" % (status.location, geopt, distance, self.user.email)
+                   "Login: %s\n"\
+                   "Token: %s" % (status.location, geopt, distance, self.user.email, status.key.id())
             logging.error(body)
             try:
                 mail.send_mail(_EMAIL_SENDER, "mdburshteyn@gmail.com", "[DoubleB] Ping error", body)  # TODO recipient
