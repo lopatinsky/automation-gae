@@ -16,8 +16,10 @@ def __post_request_alfa(api_path, params):
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
-    return urlfetch.fetch(url, method='POST', headers={'Content-Type': 'application/json'}, deadline=30,
-                          validate_certificate=False).content
+    content = urlfetch.fetch(url, method='POST', headers={'Content-Type': 'application/json'}, deadline=30,
+                             validate_certificate=False).content
+    logging.info(content)
+    return content
 
 
 def tie_card(amount, order_number, return_url, client_id, page_view):
