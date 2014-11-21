@@ -24,12 +24,21 @@ class OrderHandler(ApiHandler):
         # check if order exists in DB or currently adding it
         cache_key = "order_%s" % order_id
         if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
+            memcache.delete(cache_key)
             self.abort(409)
 
         venue_id = int(response_json['venue_id'])
         venue = Venue.get_by_id(venue_id)
         if not venue.active:
+            memcache.delete(cache_key)
             self.abort(410)
+        if not venue.is_open():
+            memcache.delete(cache_key)
+            self.error(400)
+            self.render_json({
+                "description": u"Эта кофейня сейчас закрыта."
+            })
+            return
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
