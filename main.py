@@ -1,4 +1,5 @@
 from webapp2_extras import jinja2
+from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, handle_500
 from handlers.api import admin
@@ -78,7 +79,7 @@ app = WSGIApplication([
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
-], debug=True, config=webapp2_config)
+], debug=config.DEBUG, config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)
 
