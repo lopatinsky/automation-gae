@@ -103,7 +103,7 @@ class OrderHandler(ApiHandler):
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
                 cup_count = len(items)
-                activation = empatika_promos.activate_promo(client_id, empatika_promos.FREE_COFFEE_PROMO_ID, cup_count)
+                activation = empatika_promos.activate_promo(client_id, config.FREE_COFFEE_PROMO_ID, cup_count)
                 payment_id = str(activation['activation']['id'])
 
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
