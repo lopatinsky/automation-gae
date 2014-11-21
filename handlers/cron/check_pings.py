@@ -1,11 +1,8 @@
 import datetime
 import logging
-from google.appengine.api import mail
-from google.appengine.api.app_identity import app_identity
 from webapp2 import RequestHandler
+from methods import email
 from models import AdminStatus
-
-_EMAIL_SENDER = "ping_errors@%s.appspotmail.com" % app_identity.get_application_id()
 
 
 class CheckPingsHandler(RequestHandler):
@@ -24,7 +21,4 @@ class CheckPingsHandler(RequestHandler):
                "Current server time: %s\n\n" \
                "%s" % (now, statuses_text)
         logging.error(body)
-        try:
-            mail.send_mail(_EMAIL_SENDER, "mdburshteyn@gmail.com", "[DoubleB] Ping error", body)  # TODO recipient
-        except:
-            pass
+        email.send_error("ping_errors", "Ping error", body)

@@ -1,13 +1,11 @@
 import logging
-from google.appengine.api import mail, app_identity
 from google.appengine.ext.ndb import GeoPt
 from handlers.api.admin.base import AdminApiHandler
-from methods import location
+from methods import location, email
 from methods.auth import api_user_required
 from models import AdminStatus
 
 _MAX_DISTANCE_ALLOWED = 0.5
-_EMAIL_SENDER = "ping_errors@%s.appspotmail.com" % app_identity.get_application_id()
 
 
 def _is_valid(location):
@@ -35,9 +33,6 @@ class PingHandler(AdminApiHandler):
                    "Login: %s\n"\
                    "Token: %s" % (status.location, geopt, distance, self.user.email, status.key.id())
             logging.error(body)
-            try:
-                mail.send_mail(_EMAIL_SENDER, "mdburshteyn@gmail.com", "[DoubleB] Ping error", body)  # TODO recipient
-            except:
-                pass
+            email.send_error("ping_errors", "Ping error", body)
         status.put()
         self.render_json({})
