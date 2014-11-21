@@ -1,6 +1,8 @@
 from collections import Counter
+import datetime
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
+from config import config
 from methods import location, fastcounter
 from methods.rendering import timestamp
 
@@ -78,6 +80,7 @@ class Venue(ndb.Model):
             'lat': self.coordinates.lat,
             'lon': self.coordinates.lon,
             'coordinates': str(self.coordinates),
+            'is_open': self.is_open(),
             'schedule': []
         }
         working_days = self.working_days.split(',')
@@ -86,6 +89,31 @@ class Venue(ndb.Model):
             dct['schedule'].append({'days': [int(day) for day in working_days[i]],
                                     'hours': working_hours[i]})
         return dct
+
+    def is_open(self):
+        working_days = self.working_days.split(',')
+        working_hours = [s.split("-") for s in self.working_hours.split(',')]
+        schedule = {int(d): [int(h) for h in working_hours[i]]
+                    for i in xrange(len(working_days))
+                    for d in working_days[i]}
+
+        now = datetime.datetime.utcnow() + config.TIMEZONE_OFFSET
+
+        def check_day(date):
+            weekday = date.isoweekday()
+            if weekday not in schedule:
+                return False
+
+            open_hours, close_hours = schedule[weekday]
+            open_time = date + datetime.timedelta(hours=open_hours)
+            close_time = date + datetime.timedelta(hours=close_hours)
+            if close_time <= open_time:  # venue works past midnight
+                close_time += datetime.timedelta(days=1)
+            return open_time <= now <= close_time
+
+        today = datetime.datetime.combine(now.date(), datetime.time())
+        yesterday = today - datetime.timedelta(days=1)
+        return check_day(today) or check_day(yesterday)
 
 
 class Order(ndb.Model):

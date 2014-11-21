@@ -66,6 +66,7 @@ Parameters:
                 },
                 ...
             ],
+            "is_open": venue_is_open_now,        // boolean
             "distance": distance_to_location     // float, 0 if location not specified
         },
         ...
