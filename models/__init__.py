@@ -166,6 +166,26 @@ class Order(ndb.Model):
 
         return dct
 
+    def history_dict(self):
+        dct = {
+            "order_id": self.key.id(),
+            "status": self.status,
+            "delivery_time": timestamp(self.delivery_time),
+            "payment_type_id": self.payment_type_id,
+            "total": self.total_sum,
+            "venue_id": self.venue_id,
+            "items": []
+        }
+        for item_key, count in Counter(self.items).items():
+            item = item_key.get()
+            dct["items"].append({
+                "id": item_key.id(),
+                "title": item.title,
+                "price": item.price,
+                "quantity": count
+            })
+        return dct
+
     @staticmethod
     def generate_id():
         value = fastcounter.get_count("order_id")

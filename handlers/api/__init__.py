@@ -9,3 +9,4 @@ from menu import MenuHandler
 from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler
 from promo_info import PromoInfoHandler
 from client import ClientHandler
+from history import HistoryHandler

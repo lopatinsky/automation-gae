@@ -214,6 +214,40 @@ Response:
 }
 ```
 
+### Get orders history
+
+GET `/api/history.php`
+
+Parameters:
+
+* `client_id`: string
+
+```
+#!js
+{
+    "history": [
+        {
+            "order_id": order_id,                     // int
+            "status": order_status,                   // int, see constants
+            "delivery_time": order_delivery_time,     // int, timestamp
+            "payment_type_id": order_payment_type_id, // int
+            "total": order_total_sum,                 // int
+            "venue_id": order_venue_id,               // int
+            "items": [
+                {
+                    "id": item_id,            // int
+                    "title": item_title,      // string
+                    "price": item_price,      // int
+                    "quantity": item_quantity // int
+                },
+                ...
+            ]
+        },
+        ...
+    }
+}
+```
+
 ### Cancel order
 
 POST `/api/return.php`

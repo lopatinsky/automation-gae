@@ -60,6 +60,7 @@ app = WSGIApplication([
         Route('/status.php', api.StatusHandler),
         Route('/return.php', api.ReturnOrderHandler),
         Route('/promo_info', api.PromoInfoHandler),
+        Route('/history', api.HistoryHandler),
     ]),
 
     PathPrefixRoute('/admin', [
