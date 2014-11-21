@@ -217,7 +217,7 @@ Response:
 
 ### Get orders history
 
-GET `/api/history.php`
+GET `/api/history`
 
 Parameters:
 
