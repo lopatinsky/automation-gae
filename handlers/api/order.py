@@ -75,15 +75,24 @@ class OrderHandler(ApiHandler):
 
             # mastercard
             payment_id = response_json['payment'].get('payment_id')
-            mastercard = False
-            if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
-                mastercard = response_json['payment']['mastercard']
-                if mastercard and not client.has_mastercard_orders:
-                    client.has_mastercard_orders = True
-                    client.put()
-                    most_expensive_item = max(items, key=lambda i: i.price)
-                    total_sum -= most_expensive_item.price / 2
+            mastercard = response_json['payment'].get('mastercard', False)
+            apply_discount = mastercard and not client.has_mastercard_orders
 
+            # TODO iOS 1.0.2 bug
+            if not mastercard and 'DoubleB/1.0 ' in self.request.headers["User-Agent"]:
+                request_total_sum = response_json["total_sum"]
+                if not client.has_mastercard_orders and request_total_sum != total_sum:
+                    logging.warning("iOS discount bug")
+                    apply_discount = True
+            # TODO end
+
+            if apply_discount:
+                client.has_mastercard_orders = True
+                client.put()
+                most_expensive_item = max(items, key=lambda i: i.price)
+                total_sum -= most_expensive_item.price / 2
+
+            if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
