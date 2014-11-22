@@ -226,7 +226,7 @@ Parameters:
 ```
 #!js
 {
-    "history": [
+    "orders": [
         {
             "order_id": order_id,                     // int
             "status": order_status,                   // int, see constants
