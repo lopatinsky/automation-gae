@@ -88,7 +88,6 @@ class OrderHandler(ApiHandler):
 
             if apply_discount:
                 client.has_mastercard_orders = True
-                client.put()
                 most_expensive_item = max(items, key=lambda i: i.price)
                 total_sum -= most_expensive_item.price / 2
 
@@ -115,6 +114,7 @@ class OrderHandler(ApiHandler):
                 activation = empatika_promos.activate_promo(client_id, config.FREE_COFFEE_PROMO_ID, cup_count)
                 payment_id = str(activation['activation']['id'])
 
+            client.put()
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
