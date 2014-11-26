@@ -2,20 +2,28 @@ import datetime
 from .base import AdminApiHandler
 from methods.auth import api_user_required
 from methods.orders import search_orders
+from methods.rendering import timestamp
 from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 
 
 class OrderListBaseHandler(AdminApiHandler):
+    _with_timestamp = False
+
     def _get_orders(self):
         return []
 
     @api_user_required
     def get(self):
         orders = self._get_orders()
-        self.render_json({'orders': [order.dict() for order in orders]})
+        dct = {'orders': [order.dict() for order in orders]}
+        if self._with_timestamp:
+            dct['timestamp'] = timestamp(datetime.datetime.utcnow())
+        self.render_json(dct)
 
 
 class CurrentOrdersHandler(OrderListBaseHandler):
+    _with_timestamp = True
+
     def _get_orders(self):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
