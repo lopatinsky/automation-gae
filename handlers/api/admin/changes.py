@@ -50,6 +50,7 @@ class DoneOrderHandler(AdminApiHandler):
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
         order.status = READY_ORDER
+        order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:

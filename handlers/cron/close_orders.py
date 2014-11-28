@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+import datetime
 from handlers.api.base import ApiHandler
 from methods import alfa_bank, email, empatika_promos
 from models import Order, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE
@@ -25,4 +26,5 @@ class CloseOpenedOrdersHandler(ApiHandler):
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
             order.status = READY_ORDER
+            order.actual_delivery_time = datetime.datetime.utcnow()
             order.put()

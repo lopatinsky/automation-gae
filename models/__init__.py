@@ -4,7 +4,7 @@ from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from config import config
 from methods import location, fastcounter
-from methods.rendering import timestamp
+from methods.rendering import timestamp, opt
 
 __author__ = 'ilyazorin'
 
@@ -137,6 +137,7 @@ class Order(ndb.Model):
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     mastercard = ndb.BooleanProperty(indexed=False)
+    actual_delivery_time = ndb.DateTimeProperty(indexed=False)
 
     def dict(self):
         dct = {
@@ -144,6 +145,7 @@ class Order(ndb.Model):
             "venue": Venue.get_by_id(self.venue_id).dict(),
             "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
+            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
             "payment_type_id": self.payment_type_id,
             "client": Client.get_by_id(self.client_id).dict(),
             "pan": self.pan,

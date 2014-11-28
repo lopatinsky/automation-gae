@@ -341,14 +341,15 @@ Parameters:
 {
     "orders": [
         {
-            "order_id": order_id,                     // int
-            "venue": order_venue_object,              // object, see venues list endpoint 
-            "status": order_status,                   // int, see constants
-            "delivery_time": order_delivery_time,     // int, timestamp
-            "payment_type_id": order_payment_type_id, // int
-            "pan": order_pan,                         // string
-            "comment": order_comment,                 // string
-            "return_comment": barista_return_comment, // string|null
+            "order_id": order_id,                               // int
+            "venue": order_venue_object,                        // object, see venues list endpoint 
+            "status": order_status,                             // int, see constants
+            "delivery_time": order_delivery_time,               // int, timestamp
+            "actual_delivery_time": order_actual_delivery_time, // int|null
+            "payment_type_id": order_payment_type_id,           // int
+            "pan": order_pan,                                   // string
+            "comment": order_comment,                           // string
+            "return_comment": barista_return_comment,           // string|null
             "client": {
                 "name": client_name,       // string
                 "surname": client_surname, // string
