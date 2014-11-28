@@ -362,7 +362,8 @@ Parameters:
             ]
         },
         ...
-    ]
+    ],
+    "timestamp": current_server_timestamp // int
 }
 ```
 
