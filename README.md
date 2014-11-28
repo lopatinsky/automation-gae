@@ -347,6 +347,7 @@ Parameters:
             "payment_type_id": order_payment_type_id, // int
             "pan": order_pan,                         // string
             "comment": order_comment,                 // string
+            "return_comment": barista_return_comment, // string|null
             "client": {
                 "name": client_name,       // string
                 "surname": client_surname, // string

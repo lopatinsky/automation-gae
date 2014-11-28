@@ -147,6 +147,7 @@ class Order(ndb.Model):
             "client": Client.get_by_id(self.client_id).dict(),
             "pan": self.pan,
             "comment": self.comment,
+            "return_comment": self.return_comment,
             "items": []
         }
         for item_key, count in Counter(self.items).items():
