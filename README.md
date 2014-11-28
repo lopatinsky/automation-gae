@@ -342,7 +342,6 @@ Parameters:
     "orders": [
         {
             "order_id": order_id,                               // int
-            "venue": order_venue_object,                        // object, see venues list endpoint 
             "status": order_status,                             // int, see constants
             "delivery_time": order_delivery_time,               // int, timestamp
             "actual_delivery_time": order_actual_delivery_time, // int|null
@@ -350,6 +349,11 @@ Parameters:
             "pan": order_pan,                                   // string
             "comment": order_comment,                           // string
             "return_comment": barista_return_comment,           // string|null
+            "venue": {
+                "id": venue_id,          // string
+                "title": venue_title,    // string
+                "address": venue_address // string
+            },
             "client": {
                 "name": client_name,       // string
                 "surname": client_surname, // string

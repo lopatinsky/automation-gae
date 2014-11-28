@@ -90,6 +90,13 @@ class Venue(ndb.Model):
                                     'hours': working_hours[i]})
         return dct
 
+    def admin_dict(self):
+        return {
+            'id': self.key.id(),
+            'title': self.title,
+            'address': self.description
+        }
+
     def is_open(self):
         working_days = self.working_days.split(',')
         working_hours = [s.split("-") for s in self.working_hours.split(',')]
@@ -142,7 +149,7 @@ class Order(ndb.Model):
     def dict(self):
         dct = {
             "order_id": self.key.id(),
-            "venue": Venue.get_by_id(self.venue_id).dict(),
+            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
             "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
