@@ -342,6 +342,7 @@ Parameters:
     "orders": [
         {
             "order_id": order_id,                     // int
+            "venue": order_venue_object,              // object, see venues list endpoint 
             "status": order_status,                   // int, see constants
             "delivery_time": order_delivery_time,     // int, timestamp
             "payment_type_id": order_payment_type_id, // int
