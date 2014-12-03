@@ -101,7 +101,14 @@ class OrderHandler(ApiHandler):
                     payment_id = tie_result['orderId']
                     create_result = alfa_bank.create_pay(binding_id, payment_id)
                     if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
-                        pass
+                        check_result = alfa_bank.check_extended_status(payment_id)['alfa_response']
+                        if str(check_result.get('errorCode')) == '0' and \
+                                check_result['actionCode'] == 0 and check_result['orderStatus'] == 1:
+                            pass
+                        else:
+                            logging.warning("extended status check fail")
+                            memcache.delete(cache_key)
+                            self.abort(400)
                     else:
                         memcache.delete(cache_key)
                         self.abort(400)
