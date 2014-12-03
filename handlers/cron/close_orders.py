@@ -12,7 +12,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
         if not orders:
             return
 
-        mail_body = u"List of orders not closed:\n" + "\n".join(order.key.id() for order in orders)
+        mail_body = u"List of orders not closed:\n" + "\n".join(str(order.key.id()) for order in orders)
         email.send_error("order_errors", "Orders not closed", mail_body)
 
         for order in orders:
