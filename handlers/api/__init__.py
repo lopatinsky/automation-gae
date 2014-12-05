@@ -6,7 +6,7 @@ from alfa import PaymentBindingHandler, PaymentRegisterHandler, \
 from venues import VenuesHandler
 from payment_types import PaymentTypesHandler
 from menu import MenuHandler
-from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler
+from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler, CheckOrderHandler
 from promo_info import PromoInfoHandler
 from client import ClientHandler
 from history import HistoryHandler

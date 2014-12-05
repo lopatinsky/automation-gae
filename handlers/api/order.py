@@ -8,7 +8,7 @@ import json
 from time import time as time_time
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, sms, push, empatika_promos
+from methods import alfa_bank, sms, push, empatika_promos, orders
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 
@@ -223,3 +223,18 @@ class ReturnOrderHandler(ApiHandler):
                     'error': 1,
                     'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
                 })
+
+
+class CheckOrderHandler(ApiHandler):
+    def post(self):
+        client_id = self.request.get_range('client_id')
+        client = Client.get_by_id(client_id)
+
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+
+        payment_info = json.loads(self.request.get('payment'))
+        items = json.loads(self.request.get('items'))
+
+        result = orders.validate_order(client, items, payment_info, venue)
+        self.render_json(result)

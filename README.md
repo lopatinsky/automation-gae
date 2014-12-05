@@ -148,6 +148,45 @@ No parameters
 }
 ```
 
+### Get active promos for order
+
+POST `/api/check_order`
+
+Parameters:
+
+* `client_id`: int
+* `venue_id`: int
+* `items`: JSON string: array of objects with the following fields:
+    * `id`: int|string
+    * `quantity`: int
+* `payment`: JSON string: object with the following fields:
+    * `type_id`: int, see constants
+    * `card`: for card payments only, `"visa"` or `"mastercard"`
+    
+```
+#!js
+{
+    "valid": is_order_valid,      // boolean, currently always true
+    "total_sum": order_total_sum, // int
+    "items": [
+        {
+            "id": item_id,              // int
+            "price": item_price,        // int
+            "quantity": item_quantity,  // int
+            "promos": applied_promo_ids // array of strings, eg ["master","other_promo"]
+        },
+        ...
+    ],
+    "promos": [ // applied promos 
+        {
+            "id": promo_id,    // string
+            "text": promo_text // string
+        },
+        ...
+    ]
+}
+```
+
 ### Post order
 
 POST `/api/orders.php`
