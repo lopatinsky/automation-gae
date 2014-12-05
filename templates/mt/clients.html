@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+     <form method="get">
+         <select name="selectedVenue">
+         <option disabled>Выберите Кофейню</option>
+             {% for venue in venues %}
+                  <option value="{{ venue.key.id() }}">{{ venue.title }}</option>
+             {% endfor %}
+         </select>
+         <input type="submit" value="Выбрать"/>
+     </form>
+
+     {% if current_venue %}
+
+         <h3>{{ current_venue.title }}</h3>
+
+         <table style="border-collapse:collapse; width:100%" border="1">
+             <tr>
+                 <th>Id</th>
+                 <th>Name</th>
+                 <th>Telephone</th>
+                 <th>Number of Orders</th>
+                 <th>Total Expenditure</th>
+                 <th>Average Order Cost</th>
+             </tr>
+             {% for client in clients %}
+                 <tr>
+                     <td>{{ client.id }}</td>
+                     <td>{{ client.name }}</td>
+                     <td>{{ client.tel }}</td>
+                     <td>{{ client.amountOrders }}</td>
+                     <td>{{ client.totalSum }}</td>
+                     <td>{{ client.averageOrderCost }}</td>
+                 </tr>
+             {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Total</td>
+                <td>{{ venue_number }}</td>
+                <td>{{ venue_expenditure }}</td>
+                <td>{{ venue_expenditure / venue_number if venue_number else "-" }}</td>
+            </tr>
+         </table>
+
+     {% endif %}
+</body>
+</html>
