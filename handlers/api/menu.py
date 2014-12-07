@@ -35,10 +35,6 @@ class MenuHandler(ApiHandler):
         if client_id in _FUCKUP_CLIENTS_MAP:
             logging.warning("fuckup found: %s", client_id)
             client_id = _FUCKUP_CLIENTS_MAP[client_id]
-
-        if client_id == 200057 and 'Android' not in self.request.headers['User-Agent']:
-            logging.warning("fuckup found: 200057")
-            client_id = 0
         # TODO END
 
         client = None
