@@ -21,4 +21,4 @@ class CheckPingsHandler(RequestHandler):
                "Current server time: %s\n\n" \
                "%s" % (now, statuses_text)
         logging.error(body)
-        email.send_error("ping_errors", "Ping error", body)
+        email.send_error("ping", "Ping error", body)

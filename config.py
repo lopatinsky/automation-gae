@@ -19,6 +19,11 @@ class ProductionConfig(DoubleBConfig):
 
     DEBUG = False
 
+    EMAILS = {
+        "server": "admins",
+        "orders": "admins",
+    }
+
 
 class TestingConfig(DoubleBConfig):
     ALFA_BASE_URL = "https://test.paymentgate.ru/testpayment"
@@ -29,6 +34,9 @@ class TestingConfig(DoubleBConfig):
     FREE_COFFEE_PROMO_ID = 5678701068943360
 
     DEBUG = True
+
+    EMAILS = {
+    }
 
 
 if app_identity.get_application_id() == "empatika-doubleb":

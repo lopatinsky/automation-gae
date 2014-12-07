@@ -33,6 +33,6 @@ class PingHandler(AdminApiHandler):
                    "Login: %s\n"\
                    "Token: %s" % (status.location, geopt, distance, self.user.email, status.key.id())
             logging.error(body)
-            email.send_error("ping_errors", "Ping error", body)
+            email.send_error("ping", "Ping error", body)
         status.put()
         self.render_json({})
