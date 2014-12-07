@@ -9,7 +9,7 @@
      {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
                             'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
 
-     <!--additional information-->
+     <!--excess information-->
      <!--{% set NUMBER_DAYS = 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31%}-->
 
      <form method="get">
@@ -51,29 +51,26 @@
      <table style="border-collapse:collapse; width:100%" border="1">
          <tr>
              <th>Id</th>
-             <th>Name</th>
-             <th>Telephone</th>
+             <th>Title</th>
+             <th>Price</th>
              <th>Number of Orders</th>
              <th>Total Expenditure</th>
-             <th>Average Order Cost</th>
          </tr>
-         {% for client in clients %}
+         {% for menu_item in menu_items %}
              <tr>
-                 <td>{{ client.id }}</td>
-                 <td>{{ client.name }}</td>
-                 <td>{{ client.tel }}</td>
-                 <td>{{ client.amountOrders }}</td>
-                 <td>{{ client.totalSum }}</td>
-                 <td>{{ client.averageOrderCost }}</td>
+                 <td>{{ menu_item.id }}</td>
+                 <td>{{ menu_item.title }}</td>
+                 <td>{{ menu_item.price }}</td>
+                 <td>{{ menu_item.order_number }}</td>
+                 <td>{{ menu_item.order_number * menu_item.price }}</td>
              </tr>
          {% endfor %}
          <tr>
              <td></td>
              <td></td>
              <td><b>Total</b></td>
-             <td>{{ venue_number }}</td>
-             <td>{{ venue_expenditure }}</td>
-             <td>{{ venue_expenditure / venue_number if venue_number else "-" }}</td>
+             <td>{{ menu_item_number }}</td>
+             <td>{{ menu_item_expenditure }}</td>
          </tr>
      </table>
 
