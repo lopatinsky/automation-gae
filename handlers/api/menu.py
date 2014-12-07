@@ -49,6 +49,7 @@ class MenuHandler(ApiHandler):
         if not client:
             client = Client.create()
             client.put()
+            logging.info("issued new client_id: %s", client.key.id())
 
         response['client_id'] = client.key.id()
         self.render_json(response)
