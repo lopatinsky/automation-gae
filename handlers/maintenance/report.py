@@ -46,12 +46,12 @@ class ClientsReportHandler(BaseHandler):
             if not correspond_date(order.delivery_time, chosen_day, chosen_month, chosen_year):
                 continue
             client_id = order.client_id
+            total_sum = sum(item.get().price for item in order.items)
+            payment = order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0
             if client_id in clients:
-                clients[client_id].addOrder(order.total_sum, payment)
+                clients[client_id].addOrder(total_sum, payment)
             else:
                 client = Client.get_by_id(client_id)
-                total_sum = sum(item.get().price for item in order.items)
-                payment = order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0
                 clients[client_id] = ReportedClient(client_id, client.name, client.tel, total_sum, payment)
 
         return clients,\
@@ -116,7 +116,9 @@ class MenuItemsReportHandler(BaseHandler):
             total_number += item.order_number
             total_sum += item.order_number * item.price
 
-        return suited_menu_items, total_number, total_sum
+        return suited_menu_items, \
+               sum(item.order_number for item in suited_menu_items.values()),\
+               sum(item.order_number * item.price for item in suited_menu_items.values())
 
     def get(self):
         # selected_*param == 0 if choose all *pararm
