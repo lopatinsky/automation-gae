@@ -79,7 +79,8 @@ class ClientsReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
-
+        if not chosen_year: chosen_month = 0
+        if not chosen_month: chosen_day = 0
         clients, venue_total_number, venue_total_cost, venue_total_payment = self.clients_table(chosen_year, chosen_month, chosen_day, venue_id)
         chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
         values = {
@@ -134,8 +135,6 @@ class MenuItemsReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
-        if not chosen_year: chosen_month = 0
-        if not chosen_month: chosen_day = 0
         menu_items, menu_item_total_number, menu_item_total_sum = self.menu_items_table(chosen_year, chosen_month, chosen_day, venue_id)
         chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
         values = {
