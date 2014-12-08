@@ -11,13 +11,9 @@ class ReportHandler(BaseHandler):
     def get(self):
         self.render('report.html')
 
-def correspond_date(date, day, month, year):
-    if date.day != day and day != 0: return False
-    if date.month != month and month != 0: return False
-    if date.year != year and year != 0: return False
-    return True
-
 def suitable_date(day, month, year, beginning):
+    if not year: month = 0
+    if not month: day = 0
     if not beginning:
         if not year: year = datetime.now().year
         if not month: month = 12
@@ -57,8 +53,6 @@ class ClientsReportHandler(BaseHandler):
         if venue_id != 0:
             query = query.filter(Order.venue_id == venue_id,)
         for order in query.fetch():
-            #if not correspond_date(order.delivery_time, chosen_day, chosen_month, chosen_year):
-            #    continue
             client_id = order.client_id
             total_sum = sum(item.get().price for item in order.items)
             payment = order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0
@@ -67,7 +61,6 @@ class ClientsReportHandler(BaseHandler):
             else:
                 client = Client.get_by_id(client_id)
                 clients[client_id] = ReportedClient(client_id, client.name, client.tel, total_sum, payment)
-
         return clients,\
                sum(client.amount_orders for client in clients.values()),\
                sum(client.total_sum for client in clients.values()),\
@@ -112,11 +105,11 @@ class MenuItemsReportHandler(BaseHandler):
     def menu_items_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
         suited_menu_items = {}
         query = Order.query(Order.status == READY_ORDER)
+        query = query.filter(Order.date_created >= suitable_date(chosen_day, chosen_month, chosen_year, True))
+        query = query.filter(Order.date_created <= suitable_date(chosen_day, chosen_month, chosen_year, False))
         if venue_id != 0:
             query = query.filter(Order.venue_id == venue_id)
         for order in query.fetch():
-            if not correspond_date(order.delivery_time, chosen_day, chosen_month, chosen_year):
-                continue
             for item_in_order in order.items:
                 item_id = item_in_order.id()
                 if item_id in suited_menu_items:
@@ -124,7 +117,6 @@ class MenuItemsReportHandler(BaseHandler):
                 else:
                     item = MenuItem.get_by_id(item_id)
                     suited_menu_items[item_id] = ReportedMenuItem(item_id, item.title, item.price)
-
         return suited_menu_items, \
                sum(item.order_number for item in suited_menu_items.values()),\
                sum(item.order_number * item.price for item in suited_menu_items.values())
@@ -135,6 +127,8 @@ class MenuItemsReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
+        if not chosen_year: chosen_month = 0
+        if not chosen_month: chosen_day = 0
         menu_items, menu_item_total_number, menu_item_total_sum = self.menu_items_table(chosen_year, chosen_month, chosen_day, venue_id)
         chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
         values = {
