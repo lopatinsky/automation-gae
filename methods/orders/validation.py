@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+from config import config
 
 from methods import working_hours
 from models import MenuItem, CARD_PAYMENT_TYPE
@@ -10,17 +11,9 @@ _MASTER_PROMO = {
     "text": u"Скидка на первый заказ картой MasterCard"
 }
 
-_CITY_HAPPY_HOURS = {
-    "promo": {
-        "id": "city_hh",
-        "text": u"Счастливые часы: скидка 50р"
-    },
-    "venues": {
-        5629499534213120: {
-            "days": "12345",
-            "hours": "20-21"
-        }
-    },
+_CITY_HAPPY_HOURS_PROMO = {
+    "id": "city_hh",
+    "text": u"Счастливые часы: скидка 50р"
 }
 
 
@@ -40,14 +33,14 @@ def _apply_master_promo(item_dicts, promos_info, client, payment_info):
 
 
 def _apply_city_happy_hours_promo(item_dicts, promos_info, venue):
-    if venue.key.id() in _CITY_HAPPY_HOURS['venues']:
-        schedule = _CITY_HAPPY_HOURS['venues'][venue.key.id()]
+    if venue.key.id() in config.CITY_HAPPY_HOURS:
+        schedule = config.CITY_HAPPY_HOURS[venue.key.id()]
         if working_hours.check(schedule['days'], schedule['hours']):
-            promos_info.append(_CITY_HAPPY_HOURS['promo'])
+            promos_info.append(_CITY_HAPPY_HOURS_PROMO)
             for item_dict in item_dicts:
                 if item_dict['item'].price == 150:
                     logging.info(item_dict)
-                    item_dict['promos'].append(_CITY_HAPPY_HOURS['promo']['id'])
+                    item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
                     item_dict['price'] -= 50
 
 
