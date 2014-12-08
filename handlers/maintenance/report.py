@@ -10,6 +10,12 @@ class ReportHandler(BaseHandler):
     def get(self):
         self.render('report.html')
 
+def correspond_date(date, day, month, year):
+    if date.day != day and day != 0: return False
+    if date.month != month and month != 0: return False
+    if date.year != year and year != 0: return False
+    return True
+
 class ReportedClient:
     def __init__(self, id, name, tel, orderSum):
         self.id = id
@@ -30,15 +36,12 @@ class ClientsReportHandler(BaseHandler):
         clients = {}
         total_number = 0
         total_cost = 0
-        orders = Order.query(Order.venue_id == venue_id, Order.status == READY_ORDER).fetch() if venue_id != 0 else Order.query().fetch()
-        for order in orders:
-            if order.delivery_time.year != chosen_year and chosen_year != 0: # TODO erase this bidlo-code
+        query = Order.query(Order.status == READY_ORDER)
+        if venue_id != 0:
+            query = query.filter(Order.venue_id == venue_id)
+        for order in query.fetch():
+            if not correspond_date(order.delivery_time, chosen_day, chosen_month, chosen_year):
                 continue
-            if order.delivery_time.month != chosen_month and chosen_month != 0: # TODO erase and this bidlo-code
-                continue
-            if order.delivery_time.day != chosen_day and chosen_day != 0: # TODO erase and this bidlo-code
-                continue
-
             client_id = order.client_id
             if client_id in clients:
                 clients[client_id].addOrder(order.total_sum)
@@ -59,10 +62,19 @@ class ClientsReportHandler(BaseHandler):
 
         clients, venue_total_number, venue_total_cost = self.clients_table(chosen_year, chosen_month, chosen_day, venue_id)
         chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
-        self.render('reported_clients.html', venues=Venue.query().fetch(), clients=clients.values(),
-                    venue_number=venue_total_number, venue_expenditure=venue_total_cost, chosen_venue=chosen_venue,
-                    start_year=PROJECT_STARTING_YEAR, end_year=datetime.now().year, chosen_year=chosen_year,
-                    chosen_month=chosen_month, chosen_day=chosen_day)
+        values = {
+            'venues': Venue.query().fetch(),
+            'clients': clients.values(),
+            'venue_number': venue_total_number,
+            'venue_expenditure': venue_total_cost,
+            'chosen_venue': chosen_venue,
+            'start_year': PROJECT_STARTING_YEAR,
+            'end_year': datetime.now().year,
+            'chosen_year': chosen_year,
+            'chosen_month': chosen_month,
+            'chosen_day': chosen_day
+        }
+        self.render('reported_clients.html', **values)
 
 class ReportedMenuItem:
      def __init__(self, id, title, price):
@@ -77,12 +89,11 @@ class MenuItemsReportHandler(BaseHandler):
     @staticmethod
     def menu_items_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
         suited_menu_items = {}
-        for order in Order.query(Order.venue_id == venue_id, Order.status == READY_ORDER).fetch() if venue_id != 0 else Order.query().fetch():
-            if order.delivery_time.year != chosen_year and chosen_year != 0: # TODO erase this bidlo-code
-                continue
-            if order.delivery_time.month != chosen_month and chosen_month != 0: # TODO erase and this bidlo-code
-                continue
-            if order.delivery_time.day != chosen_day and chosen_day != 0: # TODO erase and this bidlo-code
+        query = Order.query(Order.status == READY_ORDER)
+        if venue_id != 0:
+            query = query.filter(Order.venue_id == venue_id)
+        for order in query.fetch():
+            if not correspond_date(order.delivery_time, chosen_day, chosen_month, chosen_year):
                 continue
             for item_in_order in order.items:
                 item_id = item_in_order.id()
@@ -108,7 +119,16 @@ class MenuItemsReportHandler(BaseHandler):
         chosen_day = self.request.get_range("selected_day")
         menu_items, menu_item_total_number, menu_item_total_sum = self.menu_items_table(chosen_year, chosen_month, chosen_day, venue_id)
         chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
-        self.render('reported_menu_items.html', venues=Venue.query().fetch(), menu_items=menu_items.values(),
-                    menu_item_number=menu_item_total_number, menu_item_expenditure=menu_item_total_sum,  chosen_venue=chosen_venue,
-                    start_year=PROJECT_STARTING_YEAR, end_year=datetime.now().year, chosen_year=chosen_year,
-                    chosen_month=chosen_month, chosen_day=chosen_day)
+        values = {
+            'venues': Venue.query().fetch(),
+            'menu_items': menu_items.values(),
+            'menu_item_number': menu_item_total_number,
+            'menu_item_expenditure': menu_item_total_sum,
+            'chosen_venue': chosen_venue,
+            'start_year': PROJECT_STARTING_YEAR,
+            'end_year': datetime.now().year,
+            'chosen_year': chosen_year,
+            'chosen_month': chosen_month,
+            'chosen_day': chosen_day
+        }
+        self.render('reported_menu_items.html', **values)
