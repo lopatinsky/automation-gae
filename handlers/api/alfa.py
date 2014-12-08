@@ -34,7 +34,7 @@ class PaymentRegisterHandler(ApiHandler):
 
 class PaymentReverseHandler(ApiHandler):
     def post(self):
-        order_id = self.request.get('order_id')
+        order_id = self.request.get('orderId') or self.request.get('order_id')
 
         alfa_response = alfa_bank.get_back_blocked_sum(order_id)
         self.render_json(alfa_response)
