@@ -7,6 +7,7 @@
 >           * [Get menu](#markdown-header-get-menu)
 >           * [Get promo info](#markdown-header-get-promo-info)
 >           * [Get ID for new order](#markdown-header-get-id-for-new-order)
+>           * [Validate order and get active promos](#markdown-header-validate-order-and-get-active-promos)
 >           * [Post order](#markdown-header-post-order)
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
@@ -148,7 +149,7 @@ No parameters
 }
 ```
 
-### Get active promos for order
+### Validate order and get active promos
 
 POST `/api/check_order`
 
