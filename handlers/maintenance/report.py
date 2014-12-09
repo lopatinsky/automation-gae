@@ -12,6 +12,7 @@ class ReportHandler(BaseHandler):
     def get(self):
         self.render('report.html')
 
+
 def suitable_date(day, month, year, beginning):
     if not year:
         month = 0
@@ -23,8 +24,8 @@ def suitable_date(day, month, year, beginning):
         if not month:
             month = 12
         if not day:
-            day = calendar.monthrange(year,month)[1]
-        day = min(day, calendar.monthrange(year,month)[1])
+            day = calendar.monthrange(year, month)[1]
+        day = min(day, calendar.monthrange(year, month)[1])
         return datetime.combine(date(year, month, day), time.max)
     else:
         if not year:
@@ -33,7 +34,7 @@ def suitable_date(day, month, year, beginning):
             month = 1
         if not day:
             day = 1
-        day = min(day, calendar.monthrange(year,month)[1])
+        day = min(day, calendar.monthrange(year, month)[1])
         return datetime.combine(date(year, month, day), time.min)
 
 
@@ -146,8 +147,10 @@ class MenuItemsReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
-        if not chosen_year: chosen_month = 0
-        if not chosen_month: chosen_day = 0
+        if not chosen_year:
+            chosen_month = 0
+        if not chosen_month:
+            chosen_day = 0
         menu_items, menu_item_total_number, menu_item_total_sum = self.menu_items_table(chosen_year,
                                                                                         chosen_month,
                                                                                         chosen_day,
