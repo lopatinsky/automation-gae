@@ -120,6 +120,7 @@ Parameters:
 #!js
 {
     "promo_enabled": promo_enabled,                        // boolean
+    "promo_end_date": promo_end_date,                      // int, timestamp
     "promo_mastercard_only": promo_mastercard_only,        // boolean
     "points_per_cup": points_per_cup,                      // int
     "has_mastercard_orders": client_has_mastercard_orders, // boolean

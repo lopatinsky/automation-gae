@@ -1,6 +1,7 @@
 from .base import ApiHandler
 from config import config
 from methods import empatika_promos
+from methods.rendering import timestamp
 from models import Client, News
 
 
@@ -12,6 +13,7 @@ class PromoInfoHandler(ApiHandler):
         news = News.query(News.active == True).fetch()
         self.render_json({
             "promo_enabled": config.PROMO_ENABLED,
+            "promo_end_date": timestamp(config.PROMO_END_DATE),
             "promo_mastercard_only": config.PROMO_MASTERCARD_ONLY,
             "points_per_cup": config.POINTS_PER_CUP,
             "has_mastercard_orders": client.has_mastercard_orders,
