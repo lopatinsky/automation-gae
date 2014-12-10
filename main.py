@@ -25,6 +25,7 @@ app = WSGIApplication([
         Route('/report', maintenance.ReportHandler),
         Route('/report/clients', maintenance.ClientsReportHandler),
         Route('/report/menu_items', maintenance.MenuItemsReportHandler),
+        Route('/report/tablet_queries_history', maintenance.TabletRequestReportHandler),
     ]),
 
     PathPrefixRoute('/api', [

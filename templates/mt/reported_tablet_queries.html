@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <form method="get">
+        {% set MAX_ITEMS = 6 %}
+        <select name="selected_time_min">
+            <option disabled {% if not chosen_time %}selected{% endif %}>Выберите диапазон минут</option>
+            {% for minute in range(MAX_ITEMS) %}
+                {% set current_minute = (minute + 1) * (60 // MAX_ITEMS) %}
+                <option value="{{ current_minute }}" {% if chosen_time == current_minute %} selected {% endif %}>
+                    {{ current_minute }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Выбрать"/>
+    </form>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Admin id</th>
+            <th>Admin token</th>
+            <th>Number of queries</th>
+         </tr>
+        {% for query in queries %}
+             <tr>
+                 <td>{{ query.admin_id }}</td>
+                 <td>{{ query.token }}</td>
+                 <td>{{ query.number }}</td>
+             </tr>
+         {% endfor %}
+    </table>
+</body>
+</html>
