@@ -3,7 +3,7 @@ from google.appengine.ext.ndb import GeoPt
 from handlers.api.admin.base import AdminApiHandler
 from methods import location, email
 from methods.auth import api_user_required
-from models import AdminStatus
+from models import AdminStatus, TabletQuery
 
 _MAX_DISTANCE_ALLOWED = 0.5
 
@@ -35,4 +35,6 @@ class PingHandler(AdminApiHandler):
             logging.error(body)
             email.send_error("ping", "Ping error", body)
         status.put()
+        history_item = TabletQuery(admin_id=status.admin.key.id(), token=self.token, location=status.location)
+        history_item.put()
         self.render_json({})

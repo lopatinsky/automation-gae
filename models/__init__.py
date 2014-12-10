@@ -3,6 +3,7 @@ from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter, working_hours
 from methods.rendering import timestamp, opt
+from tablet_query import TabletQuery
 
 __author__ = 'ilyazorin'
 
@@ -228,6 +229,7 @@ class News(ndb.Model):
         return {
             "id": self.key.id(),
             "text": self.text,
+
             "image_url": self.image_url,
             "created_at": timestamp(self.created_at)
         }
