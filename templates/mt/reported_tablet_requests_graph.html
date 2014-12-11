@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://flotcharts.org/flot/jquery.flot.js"></script>
+    <script type="text/javascript">
+
+	$(document).ready(function() {
+        var options = {
+            lines: {
+                show: true,
+                fill: true
+            }
+		};
+        {% if numbers %}
+            var data = {{ numbers|safe }};
+            var plot = $.plot($("#placeholder"), data, options);
+            $(".add_or_remove_check_box").change(function() {
+                $(this).toggleClass("checked");
+                plot.setData(get_checked_numbers(data));
+                plot.setupGrid();
+                plot.draw();
+            });
+        {% endif %}
+    });
+
+    function get_checked_numbers(numbers) {
+        var index = 0;
+        var result_numbers = [];
+	    for (var i = 0; i < numbers.length; i++) {
+            if ($($(".add_or_remove_check_box")[index]).hasClass("checked")) {
+                result_numbers.push(numbers[i]);
+            }
+            index++;
+        }
+        return result_numbers;
+	}
+
+	</script>
+</head>
+<body>
+    {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
+                            'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
+    <form method="get">
+        <select name="selected_interval">
+            {% set MAX_ITEMS = 6 %}
+            {% for minute in range(MAX_ITEMS) %}
+                {% set current_minute = (minute + 1) * (60 // MAX_ITEMS) %}
+                <option value="{{ current_minute }}" {% if chosen_interval == current_minute %} selected {% endif %}>
+                    {{ current_minute }} минут
+                </option>
+            {% endfor %}
+        </select>
+        <select name="selected_year">
+             <option disabled {% if not chosen_year %}selected{% endif %}>Выберите год</option>
+             {% for year in range(start_year, end_year + 1) %}
+                  <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
+                      {{ year }}
+                  </option>
+             {% endfor %}
+        </select>
+        <select name="selected_month">
+             <option disabled {% if not chosen_month %}selected{% endif %}>Выберите месяц</option>
+             {% for month in range(1, 12 + 1)%}
+                  <option value="{{ month }}" {% if chosen_month == month %} selected {% endif %}>
+                      {{ NAME_MONTHS[month] }}
+                  </option>
+             {% endfor %}
+        </select>
+        <select name="selected_day">
+             <option disabled {% if not chosen_day %}selected{% endif %}>Выберите день</option>
+             {% for day in range(1, 31 + 1)%}
+                  <option value="{{ day }}" {% if chosen_day == day %} selected {% endif %}>
+                      {{ day }}
+                  </option>
+             {% endfor %}
+         </select>
+        <input type="submit" value="Выбрать"/>
+    </form>
+    <div id="placeholder" style="width:800px;height:400px"></div>
+    <div>
+    {% for admin in admins  %}
+        <label><input type="checkbox" checked="checked" class="add_or_remove_check_box checked"/>{{ admin.login }}</label>
+    {% endfor %}
+    </div>
+</body>
+</html>
