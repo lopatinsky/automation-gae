@@ -8,35 +8,35 @@
     <script type="text/javascript">
 
 	$(document).ready(function() {
-        {% if admins %}
-        //var gap = {{ chosen_interval }};
-        var admins = [];
-        {% for admin in admins %} {
-            var d = [];
-            var index = 0;
-            {% for number in admin.number %} {
-                d.push([index, {{ number }}]);
-                index++;
-            }
-            {% endfor %}
-            admins.push({label: "{{ admin.admin_id }}", data: d});
-        }
-        {% endfor %}
         var options = {
-			lines: {
+            lines: {
                 show: true,
                 fill: true
-            },
-            xaxis: {
-				ticks: [
-					0, [ Math.PI/2, "\u03c0/2" ], [ Math.PI, "\u03c0" ],
-					[ Math.PI * 3/2, "3\u03c0/2" ], [ Math.PI * 2, "2\u03c0" ]
-				]
-			}
+            }
 		};
-        $.plot($("#placeholder"), admins, options);
+        {% if numbers %}
+            var data = {{ numbers|safe }};
+            var plot = $.plot($("#placeholder"), data, options);
+            $(".add_or_remove_check_box").change(function() {
+                $(this).toggleClass("checked");
+                plot.setData(get_checked_numbers(data));
+                plot.setupGrid();
+                plot.draw();
+            });
         {% endif %}
     });
+
+    function get_checked_numbers(numbers) {
+        var index = 0;
+        var result_numbers = [];
+	    for (var i = 0; i < numbers.length; i++) {
+            if ($($(".add_or_remove_check_box")[index]).hasClass("checked")) {
+                result_numbers.push(numbers[i]);
+            }
+            index++;
+        }
+        return result_numbers;
+	}
 
 	</script>
 </head>
@@ -44,13 +44,12 @@
     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
                             'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
     <form method="get">
-        {% set MAX_ITEMS = 6 %}
         <select name="selected_interval">
-            <option disabled {% if not chosen_interval %}selected{% endif %}>Выберите диапазон минут</option>
+            {% set MAX_ITEMS = 6 %}
             {% for minute in range(MAX_ITEMS) %}
                 {% set current_minute = (minute + 1) * (60 // MAX_ITEMS) %}
                 <option value="{{ current_minute }}" {% if chosen_interval == current_minute %} selected {% endif %}>
-                    {{ current_minute }}
+                    {{ current_minute }} минут
                 </option>
             {% endfor %}
         </select>
@@ -81,5 +80,10 @@
         <input type="submit" value="Выбрать"/>
     </form>
     <div id="placeholder" style="width:800px;height:400px"></div>
+    <div>
+    {% for admin in admins  %}
+        <label><input type="checkbox" checked="checked" class="add_or_remove_check_box checked"/>{{ admin.login }}</label>
+    {% endfor %}
+    </div>
 </body>
 </html>
