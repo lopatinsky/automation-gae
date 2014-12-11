@@ -233,8 +233,14 @@ class CheckOrderHandler(ApiHandler):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
 
-        payment_info = json.loads(self.request.get('payment'))
+        raw_payment_info = self.request.get('payment')
+        try:
+            payment_info = json.loads(raw_payment_info)
+        except ValueError:
+            payment_info = None
+
+        delivery_time = self.request.get('delivery_time')
         items = json.loads(self.request.get('items'))
 
-        result = orders.validate_order(client, items, payment_info, venue)
+        result = orders.validate_order(client, items, payment_info, venue, delivery_time)
         self.render_json(result)

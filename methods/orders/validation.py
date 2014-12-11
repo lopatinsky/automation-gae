@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+import datetime
 from config import config
 
 from methods import working_hours
@@ -32,10 +33,11 @@ def _apply_master_promo(item_dicts, promos_info, client, payment_info):
         most_expensive['price'] /= 2
 
 
-def _apply_city_happy_hours_promo(item_dicts, promos_info, venue):
+def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time):
     if venue.key.id() in config.CITY_HAPPY_HOURS:
         schedule = config.CITY_HAPPY_HOURS[venue.key.id()]
-        if working_hours.check(schedule['days'], schedule['hours']):
+        delivery_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=delivery_time)
+        if working_hours.check(schedule['days'], schedule['hours'], delivery_time):
             promos_info.append(_CITY_HAPPY_HOURS_PROMO)
             for item_dict in item_dicts:
                 if item_dict['item'].price == 150:
@@ -62,7 +64,7 @@ def _group_item_dicts(item_dicts):
     return result
 
 
-def validate_order(client, items, payment_info, venue):
+def validate_order(client, items, payment_info, venue, delivery_time):
     item_dicts = []
     for item in items:
         menu_item = MenuItem.get_by_id(int(item["id"]))
@@ -75,8 +77,10 @@ def validate_order(client, items, payment_info, venue):
 
     promos_info = []
 
-    _apply_city_happy_hours_promo(item_dicts, promos_info, venue)
-    _apply_master_promo(item_dicts, promos_info, client, payment_info)
+    if venue and delivery_time:
+        _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
+    if payment_info:
+        _apply_master_promo(item_dicts, promos_info, client, payment_info)
 
     total_sum = 0
     for item_dict in item_dicts:

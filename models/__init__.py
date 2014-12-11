@@ -1,4 +1,5 @@
 from collections import Counter
+import datetime
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter, working_hours
@@ -96,7 +97,8 @@ class Venue(ndb.Model):
         }
 
     def is_open(self):
-        return working_hours.check(self.working_days, self.working_hours)
+        now = datetime.datetime.utcnow()
+        return working_hours.check(self.working_days, self.working_hours, now)
 
 
 class Order(ndb.Model):

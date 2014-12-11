@@ -157,13 +157,14 @@ POST `/api/check_order`
 Parameters:
 
 * `client_id`: int
-* `venue_id`: int
+* `venue_id` (optional): int
 * `items`: JSON string: array of objects with the following fields:
     * `id`: int|string
     * `quantity`: int
-* `payment`: JSON string: object with the following fields:
+* `payment` (optional): JSON string: object with the following fields:
     * `type_id`: int, see constants
     * `card`: for card payments only, `"visa"` or `"mastercard"`
+* `delivery_time`(optional): int
     
 ```
 #!js
