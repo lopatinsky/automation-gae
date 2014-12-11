@@ -18,6 +18,18 @@ _CITY_HAPPY_HOURS_PROMO = {
 }
 
 
+def _check_venue(venue, delivery_time, errors):
+    if venue:
+        if not venue.active:
+            logging.warn("order attempt to inactive venue: %s", venue.key.id())
+            errors.append(u"Эта кофейня сейчас недоступна")
+            return False
+        if delivery_time and not venue.is_open(minutes_offset=delivery_time):
+            errors.append(u"Эта кофейня сейчас закрыта")
+            return False
+    return True
+
+
 def _apply_master_promo(item_dicts, promos_info, client, payment_info):
     if payment_info["type_id"] == CARD_PAYMENT_TYPE and \
             payment_info["card"] == "mastercard" and \
@@ -52,13 +64,15 @@ def _group_item_dicts(item_dicts):
         possible_group = result[-1] if result else {'item': None}
         if item_dict['item'].key.id() == possible_group['item'] \
                 and item_dict['price'] == possible_group['price'] \
-                and item_dict['promos'] == possible_group['promos']:
+                and item_dict['promos'] == possible_group['promos'] \
+                and item_dict['errors'] == possible_group['errors']:
             possible_group['quantity'] += 1
         else:
             result.append({
                 'item': item_dict['item'].key.id(),
                 'price': item_dict['price'],
                 'promos': item_dict['promos'],
+                'errors': item_dict['errors'],
                 'quantity': 1
             })
     return result
@@ -72,10 +86,15 @@ def validate_order(client, items, payment_info, venue, delivery_time):
             item_dicts.append({
                 'item': menu_item,
                 'price': menu_item.price,
+                'errors': [],
                 'promos': []
             })
 
+    errors = []
+    valid = True
     promos_info = []
+
+    valid = valid and _check_venue(venue, delivery_time, errors)
 
     if venue and delivery_time:
         _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
@@ -89,7 +108,8 @@ def validate_order(client, items, payment_info, venue, delivery_time):
     grouped_item_dicts = _group_item_dicts(item_dicts)
 
     return {
-        'valid': True,
+        'valid': valid,
+        'errors': errors,
         'items': grouped_item_dicts,
         'promos': promos_info,
         'total_sum': total_sum

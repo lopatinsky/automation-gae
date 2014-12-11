@@ -96,8 +96,8 @@ class Venue(ndb.Model):
             'address': self.description
         }
 
-    def is_open(self):
-        now = datetime.datetime.utcnow()
+    def is_open(self, minutes_offset=0):
+        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
         return working_hours.check(self.working_days, self.working_hours, now)
 
 

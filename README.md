@@ -169,18 +169,20 @@ Parameters:
 ```
 #!js
 {
-    "valid": is_order_valid,      // boolean, currently always true
+    "valid": is_order_valid,      // boolean
     "total_sum": order_total_sum, // int
     "items": [
         {
             "id": item_id,              // int
             "price": item_price,        // int
             "quantity": item_quantity,  // int
+            "errors": item_errors,      // array of strings, item-specific error messages
             "promos": applied_promo_ids // array of strings, eg ["master","other_promo"]
         },
         ...
     ],
-    "promos": [ // applied promos 
+    "errors": order_errors, // order-wide error messages
+    "promos": [             // applied promos 
         {
             "id": promo_id,    // string
             "text": promo_text // string
