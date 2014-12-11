@@ -231,7 +231,10 @@ class CheckOrderHandler(ApiHandler):
         client = Client.get_by_id(client_id)
 
         venue_id = self.request.get_range('venue_id')
-        venue = Venue.get_by_id(venue_id)
+        try:
+            venue = Venue.get_by_id(venue_id)
+        except:
+            venue = None
 
         raw_payment_info = self.request.get('payment')
         try:
@@ -239,7 +242,7 @@ class CheckOrderHandler(ApiHandler):
         except ValueError:
             payment_info = None
 
-        delivery_time = self.request.get('delivery_time')
+        delivery_time = self.request.get_range('delivery_time')
         items = json.loads(self.request.get('items'))
 
         result = orders.validate_order(client, items, payment_info, venue, delivery_time)
