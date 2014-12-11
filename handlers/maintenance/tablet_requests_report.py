@@ -40,13 +40,13 @@ class TabletRequestReportHandler(BaseHandler):
     @staticmethod
     def get_interval_numbers_json(admins):
         numbers = []
-        for admin in admins:
+        for i, admin in enumerate(admins):
             points = []
             index = 0
             for number in admin.number:
                 points.append([index, number])
                 index += 1
-            numbers.append({'label': admin.login, 'data': points})
+            numbers.append({'label': admin.login, 'data': points, 'color': i})
         return numbers
 
     def get(self):
