@@ -53,7 +53,6 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
             promos_info.append(_CITY_HAPPY_HOURS_PROMO)
             for item_dict in item_dicts:
                 if item_dict['item'].price == 150:
-                    logging.info(item_dict)
                     item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
                     item_dict['price'] -= 50
 
