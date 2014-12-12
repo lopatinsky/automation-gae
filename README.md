@@ -174,7 +174,6 @@ Parameters:
     "items": [
         {
             "id": item_id,              // int
-            "price": item_price,        // int
             "quantity": item_quantity,  // int
             "errors": item_errors,      // array of strings, item-specific error messages
             "promos": applied_promo_ids // array of strings, eg ["master","other_promo"]

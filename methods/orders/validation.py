@@ -58,7 +58,13 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                     item_dict['price'] -= 50
 
 
-def _group_item_dicts(item_dicts):
+def _unique(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+def _group_item_dicts_detailed(item_dicts):
     result = []
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'id': None}
@@ -78,7 +84,28 @@ def _group_item_dicts(item_dicts):
     return result
 
 
-def validate_order(client, items, payment_info, venue, delivery_time):
+def _group_item_dicts(item_dicts):
+    result = []
+    for item_dict in item_dicts:
+        possible_group = result[-1] if result else {'id': None}
+        if item_dict['item'].key.id() == possible_group['id']:
+            possible_group['quantity'] += 1
+            possible_group['promos'].append(item_dicts['promos'])
+            possible_group['errors'].append(item_dicts['errors'])
+        else:
+            result.append({
+                'id': item_dict['item'].key.id(),
+                'promos': item_dict['promos'],
+                'errors': item_dict['errors'],
+                'quantity': 1
+            })
+    for dct in result:
+        dct['promos'] = _unique(dct['promos'])
+        dct['errors'] = _unique(dct['errors'])
+    return result
+
+
+def validate_order(client, items, payment_info, venue, delivery_time, with_details=False):
     item_dicts = []
     for item in items:
         menu_item = MenuItem.get_by_id(int(item["id"]))
@@ -107,10 +134,15 @@ def validate_order(client, items, payment_info, venue, delivery_time):
 
     grouped_item_dicts = _group_item_dicts(item_dicts)
 
-    return {
+    result = {
         'valid': valid,
         'errors': errors,
         'items': grouped_item_dicts,
         'promos': promos_info,
         'total_sum': total_sum
     }
+
+    if with_details:
+        result['details'] = _group_item_dicts_detailed(item_dicts)
+
+    return result
