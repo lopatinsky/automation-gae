@@ -9,7 +9,7 @@ from models import MenuItem, CARD_PAYMENT_TYPE
 
 _MASTER_PROMO = {
     "id": "master",
-    "text": u"Скидка на первый заказ картой MasterCard"
+    "text": u"Скидка 50% на один напиток при первом заказе картой MasterCard"
 }
 
 _CITY_HAPPY_HOURS_PROMO = {
@@ -62,14 +62,14 @@ def _group_item_dicts(item_dicts):
     result = []
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'item': None}
-        if item_dict['item'].key.id() == possible_group['item'] \
+        if item_dict['item'].key.id() == possible_group['id'] \
                 and item_dict['price'] == possible_group['price'] \
                 and item_dict['promos'] == possible_group['promos'] \
                 and item_dict['errors'] == possible_group['errors']:
             possible_group['quantity'] += 1
         else:
             result.append({
-                'item': item_dict['item'].key.id(),
+                'id': item_dict['item'].key.id(),
                 'price': item_dict['price'],
                 'promos': item_dict['promos'],
                 'errors': item_dict['errors'],
