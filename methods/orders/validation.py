@@ -89,8 +89,8 @@ def _group_item_dicts(item_dicts):
         possible_group = result[-1] if result else {'id': None}
         if item_dict['item'].key.id() == possible_group['id']:
             possible_group['quantity'] += 1
-            possible_group['promos'].append(item_dicts['promos'])
-            possible_group['errors'].append(item_dicts['errors'])
+            possible_group['promos'].extend(item_dict['promos'])
+            possible_group['errors'].extend(item_dict['errors'])
         else:
             result.append({
                 'id': item_dict['item'].key.id(),
