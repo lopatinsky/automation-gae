@@ -6,6 +6,7 @@
 >           * [Get list of venues](#markdown-header-get-list-of-venues)
 >           * [Get menu](#markdown-header-get-menu)
 >           * [Get promo info](#markdown-header-get-promo-info)
+>           * [Save client info](#markdown-header-save-client-info)
 >           * [Get ID for new order](#markdown-header-get-id-for-new-order)
 >           * [Validate order and get active promos](#markdown-header-validate-order-and-get-active-promos)
 >           * [Post order](#markdown-header-post-order)
@@ -137,6 +138,17 @@ Parameters:
 }
 ```
 
+### Save client info
+
+POST `/api/client.php`
+
+Parameters:
+
+* `client_id`: int
+* `client_name`: string
+* `client_phone` (optional): string
+* `client_email` (optional): string
+
 ### Get ID for new order
 
 GET `/api/order_register.php`
@@ -208,6 +220,7 @@ Parameters:
         * `id`: int|string
         * `name`: string
         * `phone`: string
+        * `email`: string
     * `payment`: object
         * `type_id`: int
         * see below
