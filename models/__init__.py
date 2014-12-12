@@ -187,6 +187,7 @@ class Client(ndb.Model):
     name = ndb.StringProperty()
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
+    email = ndb.StringProperty()
     has_mastercard_orders = ndb.BooleanProperty(default=False, indexed=False)
 
     @classmethod

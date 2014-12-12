@@ -54,10 +54,13 @@ class OrderHandler(ApiHandler):
         client_name = name[0]
         client_surname = name[1] if len(name) > 1 else ""
         client_tel = re.sub("[^0-9]", "", response_json['client']['phone'])
-        if client.name != client_name or client.surname != client_surname or client.tel != client_tel:
+        client_email = response_json['client'].get('email')
+        if client.name != client_name or client.surname != client_surname or client.tel != client_tel \
+                or client.email != client_email:
             client.name = client_name
             client.surname = client_surname
             client.tel = client_tel
+            client.email = client_email
             client.put()
 
         payment_type_id = response_json['payment']['type_id']

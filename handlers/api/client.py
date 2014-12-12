@@ -16,10 +16,13 @@ class ClientHandler(ApiHandler):
         client_phone = self.request.get('client_phone')
         client_phone = ''.join(c for c in client_phone if '0' <= c <= '9')
 
+        client_email = self.request.get('email')
+
         client = Client.get_by_id(client_id)
         client.name = name
         client.surname = surname
         client.tel = client_phone
+        client.email = client_email
         client.put()
         self.render_json({'client': {
             'name': client.name,
