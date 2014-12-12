@@ -5,6 +5,7 @@ from config import config
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos
 from methods.auth import api_user_required
+from methods.rendering import timestamp
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE
 
 __author__ = 'ilyazorin'
@@ -64,7 +65,10 @@ class DoneOrderHandler(AdminApiHandler):
         push.send_order_push(order_id, order.status, u"Заказ №%s выдан." % str(order.key.id()),
                              order.device_type, silent=True)
 
-        self.render_json({})
+        self.render_json({
+            "delivery_time": timestamp(order.delivery_time),
+            "actual_delivery_time": timestamp(order.actual_delivery_time)
+        })
 
 
 class PostponeOrderHandler(AdminApiHandler):

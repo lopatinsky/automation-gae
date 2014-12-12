@@ -512,6 +512,8 @@ Parameters:
 ```
 #!js
 {
+    "delivery_time": requested_delivery_time,    // int, timestamp
+    "actual_delivery_time": actual_delivery_time // int, timestamp
 }
 ```
 
