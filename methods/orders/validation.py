@@ -61,7 +61,7 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
 def _group_item_dicts(item_dicts):
     result = []
     for item_dict in item_dicts:
-        possible_group = result[-1] if result else {'item': None}
+        possible_group = result[-1] if result else {'id': None}
         if item_dict['item'].key.id() == possible_group['id'] \
                 and item_dict['price'] == possible_group['price'] \
                 and item_dict['promos'] == possible_group['promos'] \
