@@ -98,24 +98,9 @@ class OrderHandler(ApiHandler):
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
-                tie_result = alfa_bank.tie_card(total_sum * 100, int(time_time()), return_url, alpha_client_id,
-                                                'MOBILE')
-                if 'errorCode' not in tie_result.keys() or str(tie_result['errorCode']) == '0':
-                    payment_id = tie_result['orderId']
-                    create_result = alfa_bank.create_pay(binding_id, payment_id)
-                    if 'errorCode' not in create_result.keys() or str(create_result['errorCode']) == '0':
-                        check_result = alfa_bank.check_extended_status(payment_id)['alfa_response']
-                        if str(check_result.get('errorCode')) == '0' and \
-                                check_result['actionCode'] == 0 and check_result['orderStatus'] == 1:
-                            pass
-                        else:
-                            logging.warning("extended status check fail")
-                            memcache.delete(cache_key)
-                            self.abort(400)
-                    else:
-                        memcache.delete(cache_key)
-                        self.abort(400)
-                else:
+
+                payment_id = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
+                if not payment_id:
                     memcache.delete(cache_key)
                     self.abort(400)
 

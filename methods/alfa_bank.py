@@ -105,3 +105,21 @@ def unbind_card(binding_id):
     }
     result = __post_request_alfa('/rest/unBindCard.do', params)
     return json.loads(result)
+
+
+def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
+    def success(resp):
+        return str(resp.get('errorCode')) == '0'
+
+    tie_result = tie_card(total_sum * 100, order_number, return_url, client_id, 'MOBILE')
+    if success(tie_result):
+        payment_id = tie_result['orderId']
+        create_result = create_pay(binding_id, payment_id)
+        if success(create_result):
+            check_result = check_extended_status(payment_id)['alfa_response']
+            if success(check_result) and \
+                    check_result['actionCode'] == 0 and check_result['orderStatus'] == 1:
+                return payment_id
+            else:
+                logging.warning("extended status check fail")
+    return None
