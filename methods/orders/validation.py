@@ -32,8 +32,7 @@ def _check_venue(venue, delivery_time, errors):
 
 def _apply_master_promo(item_dicts, promos_info, client, payment_info):
     if payment_info["type_id"] == CARD_PAYMENT_TYPE and \
-            payment_info["card"] == "mastercard" and \
-            not client.has_mastercard_orders:
+            payment_info["mastercard"] and not client.has_mastercard_orders:
         promos_info.append(_MASTER_PROMO)
 
         most_expensive = None

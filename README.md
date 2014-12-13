@@ -175,7 +175,7 @@ Parameters:
     * `quantity`: int
 * `payment` (optional): JSON string: object with the following fields:
     * `type_id`: int, see constants
-    * `card`: for card payments only, `"visa"` or `"mastercard"`
+    * `mastercard`: bool
 * `delivery_time`(optional): int
     
 ```
