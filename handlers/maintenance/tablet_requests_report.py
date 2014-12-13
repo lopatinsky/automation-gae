@@ -5,6 +5,7 @@ from models import TabletRequest, Admin
 from datetime import datetime, timedelta
 from report import PROJECT_STARTING_YEAR
 import json
+import time
 
 
 class AdminRequestNumber():
@@ -33,18 +34,22 @@ class TabletRequestReportHandler(BaseHandler):
         for request in history_tablet_requests:
             if not request.token in requests:
                 requests[request.token] = AdminRequestNumber(request.admin_id, request.token, number_parts)
-            requests[request.token].add_request((request.request_time.hour * 60 + request.request_time.minute) // interval)
-
+            requests[request.token].add_request(
+                (request.request_time.hour * 60 + request.request_time.minute) // interval)
         return requests.values()
 
     @staticmethod
-    def get_interval_numbers_json(admins):
+    def get_interval_numbers_json(date, admins):
         numbers = []
         for i, admin in enumerate(admins):
             points = []
             index = 0
             for number in admin.number:
-                points.append([index, number])
+                cur_time = (24 * 60 // admin.number_parts) * index
+                hour = cur_time // 60
+                minute = cur_time % 60
+                points.append([time.mktime(datetime(date.year, date.month, date.day, hour, minute).timetuple()) * 1000,
+                               number])
                 index += 1
             numbers.append({'label': admin.login, 'data': points, 'color': i})
         return numbers
@@ -54,16 +59,15 @@ class TabletRequestReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
-
         try:
             date = datetime(chosen_year, chosen_month, chosen_day)
         except ValueError:
-            self.render('reported_tablet_requests_graph.html', start_year=PROJECT_STARTING_YEAR, end_year=datetime.now().year)
+            self.render('reported_tablet_requests_graph.html',
+                        start_year=PROJECT_STARTING_YEAR,
+                        end_year=datetime.now().year)
             return
-
         admins = self.group_requests(date, chosen_interval)
-        numbers = self.get_interval_numbers_json(admins)
-
+        numbers = self.get_interval_numbers_json(date, admins)
         values = {
             'numbers': json.dumps(numbers),
             'admins': admins,
@@ -74,5 +78,4 @@ class TabletRequestReportHandler(BaseHandler):
             'chosen_day': chosen_day,
             'chosen_interval': chosen_interval,
         }
-
         self.render('reported_tablet_requests_graph.html', **values)

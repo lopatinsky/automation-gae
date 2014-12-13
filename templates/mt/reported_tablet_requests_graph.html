@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html style="width:100%;height:100%">
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="http://flotcharts.org/flot/jquery.flot.js"></script>
+    <script src="http://www.jqueryflottutorial.com/js/flot/jquery.flot.time.js"></script>
     <script type="text/javascript">
 
 	$(document).ready(function() {
@@ -12,6 +13,10 @@
             lines: {
                 show: true,
                 fill: true
+            },
+            xaxis: {
+                mode: "time",
+                tickSize: [1, "hour"]
             }
 		};
         {% if numbers %}
@@ -40,10 +45,10 @@
 
 	</script>
 </head>
-<body>
+<body style="width:100%;height:100%">
     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
                             'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
-    <form method="get">
+    <form method="get" style="margin-left:2%">
         <select name="selected_interval">
             {% set MAX_ITEMS = 6 %}
             {% for minute in range(MAX_ITEMS) %}
@@ -79,8 +84,10 @@
          </select>
         <input type="submit" value="Выбрать"/>
     </form>
-    <div id="placeholder" style="width:800px;height:400px"></div>
-    <div>
+    <br>
+    <div id="placeholder" style="width:99%;height:60%"></div>
+    <br>
+    <div style="margin-left:2%">
     {% for admin in admins  %}
         <label><input type="checkbox" checked="checked" class="add_or_remove_check_box checked"/>{{ admin.login }}</label>
     {% endfor %}
