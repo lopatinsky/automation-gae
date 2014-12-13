@@ -46,6 +46,10 @@ class PaymentStatusHandler(ApiHandler):
 
         alfa_response = alfa_bank.check_status(order_id)
         # TODO send email on errors?
+        if 'errorCode' in alfa_response:
+            alfa_response['ErrorCode'] = alfa_response['errorCode']
+        if 'orderStatus' in alfa_response:
+            alfa_response['OrderStatus'] = alfa_response['orderStatus']
 
         self.render_json(alfa_response)
 
