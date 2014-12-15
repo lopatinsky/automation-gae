@@ -109,7 +109,7 @@ def unbind_card(binding_id):
 
 def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
     def success(resp):
-        return str(resp.get('errorCode')) == '0'
+        return str(resp.get('errorCode', '0')) == '0'
 
     tie_result = tie_card(total_sum * 100, order_number, return_url, client_id, 'MOBILE')
     if success(tie_result):
