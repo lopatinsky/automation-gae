@@ -54,6 +54,7 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                 if item_dict['item'].price == 150:
                     item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
                     item_dict['price'] -= 50
+                    item_dict['revenue'] -= 50
 
 
 def _unique(seq):
@@ -67,7 +68,6 @@ def _group_item_dicts_detailed(item_dicts):
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'id': None}
         if item_dict['item'].key.id() == possible_group['id'] \
-                and item_dict['price'] == possible_group['price'] \
                 and item_dict['promos'] == possible_group['promos'] \
                 and item_dict['errors'] == possible_group['errors']:
             possible_group['quantity'] += 1
@@ -75,6 +75,7 @@ def _group_item_dicts_detailed(item_dicts):
             result.append({
                 'id': item_dict['item'].key.id(),
                 'price': item_dict['price'],
+                'revenue': item_dict['revenue'],
                 'promos': item_dict['promos'],
                 'errors': item_dict['errors'],
                 'quantity': 1
@@ -111,6 +112,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, with_detai
             item_dicts.append({
                 'item': menu_item,
                 'price': menu_item.price,
+                'revenue': menu_item.price,
                 'errors': [],
                 'promos': []
             })
