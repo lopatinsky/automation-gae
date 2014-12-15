@@ -40,7 +40,7 @@ def suitable_date(day, month, year, beginning):
 
 class ReportedClient:
     def __init__(self, client_id, name, tel, order_sum, payment):
-        self.id = client_id
+        self.client_id = client_id
         self.name = name
         self.tel = tel
         self.amount_orders = 1
