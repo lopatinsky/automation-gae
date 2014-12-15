@@ -50,6 +50,8 @@ class PaymentStatusHandler(ApiHandler):
             alfa_response['ErrorCode'] = alfa_response['errorCode']
         if 'orderStatus' in alfa_response:
             alfa_response['OrderStatus'] = alfa_response['orderStatus']
+        if 'pan' in alfa_response:
+            alfa_response['Pan'] = alfa_response['pan']
 
         self.render_json(alfa_response)
 
