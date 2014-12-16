@@ -377,12 +377,12 @@ Parameters:
 * `token`: string
 * `lat`: float
 * `lon`: float
-* `error_number`: int
-* `sound_level_general`: int
-* `sound_level_system`: int
-* `is_in_charging`: bool
-* `is_turned_on`: bool
-* `app_version`: string
+* `error_number`(optional): int
+* `sound_level_general`(optional): int
+* `sound_level_system`(optional): int
+* `is_in_charging`(optional): bool
+* `is_turned_on`(optional): bool
+* `app_version`(optional): string
 
 ```
 #!js
