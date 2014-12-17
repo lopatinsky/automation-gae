@@ -3,8 +3,7 @@ import logging
 import urllib
 from google.appengine.api import urlfetch
 from config import config
-from models import PaymentErrorsStatistics
-from datetime import datetime, timedelta
+from models import PaymentErrorsStatistics, AlfaBankRequest
 from methods import email
 
 ALPHA_CARD_LIMIT_CODES = [-20010, 902, 116, 123]
@@ -12,22 +11,28 @@ ALPHA_WRONG_CREDENTIALS_CODES = [71015]
 CARD_LIMIT_CODE = 1
 CARD_WRONG_CREDETIALS_CODE = 2
 
-ACCEPTABLE_SERIAL_ERROR_NUMBER = 3
-MIN_TOTAL_REQUEST = 3
-ACCEPTABLE_TOTAL_ERROR_PERCENTAGE = 0.5
-PERIOD_HOUR = 1
+ACCEPTABLE_TOTAL_ERROR_PERCENTAGE = 0.2
 
 
 def __post_request_alfa(api_path, params):
 
-    time_hours_ago = datetime.now() - timedelta(hours=PERIOD_HOUR)
-    statics_per_hours = PaymentErrorsStatistics.query(PaymentErrorsStatistics.data_created > time_hours_ago).fetch()
-    if not statics_per_hours:
-        statics_per_hours = PaymentErrorsStatistics()
-    else:
-        statics_per_hours = statics_per_hours[0]
-    statics_per_hours.request_number += 1
+    error_statistics = PaymentErrorsStatistics.query().order(-PaymentErrorsStatistics.data_created).fetch(1)
 
+    if not error_statistics:
+        error_statistics = PaymentErrorsStatistics()
+    else:
+        error_statistics = error_statistics[0]
+
+    if len(error_statistics.alfa_bank_requests) >= 1000:
+        error_statistics = PaymentErrorsStatistics()
+
+    additional_error_statistics = None
+    if len(error_statistics.alfa_bank_requests) < 100:
+        additional_error_statistics = PaymentErrorsStatistics.query(
+            PaymentErrorsStatistics.data_created < error_statistics.data_created).order(
+                -PaymentErrorsStatistics.data_created).fetch(1)
+    if additional_error_statistics:
+        additional_error_statistics = additional_error_statistics[0]
     url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)
@@ -38,36 +43,21 @@ def __post_request_alfa(api_path, params):
                              validate_certificate=False).content
 
     result = json.loads(content)
-    if str(result.get('errorCode', '0')) == '0':
-        statics_per_hours.serial_error_number = 0
-        if api_path == '/rest/registerPreAuth.do':
-            statics_per_hours.registration_error_number = 0
-        elif api_path == '/rest/reverse.do':
-            statics_per_hours.reverse_error_number = 0
-        elif api_path == '/rest/paymentOrderBinding.do':
-            statics_per_hours.payment_error_number = 0
-        elif api_path == '/rest/deposit.do':
-            statics_per_hours.deposit_error_number = 0
-        elif api_path == '/rest/unBindCard.do':
-            statics_per_hours.unbind_error_number = 0
-    else:
-        statics_per_hours.total_error_number += 1
-        statics_per_hours.serial_error_number += 1
-        if api_path == '/rest/registerPreAuth.do':
-            statics_per_hours.registration_error_number += 1
-        elif api_path == '/rest/reverse.do':
-            statics_per_hours.reverse_error_number += 1
-        elif api_path == '/rest/paymentOrderBinding.do':
-            statics_per_hours.payment_error_number += 1
-        elif api_path == '/rest/deposit.do':
-            statics_per_hours.deposit_error_number += 1
-        elif api_path == '/rest/unBindCard.do':
-            statics_per_hours.unbind_error_number += 1
 
-    check_error_statistics(statics_per_hours)
-    statics_per_hours.put()
+    error_statistics.alfa_bank_requests.append(AlfaBankRequest(url=url, success=str(result.get('errorCode', '0')) == '0'))
+
+    requests = error_statistics.alfa_bank_requests
+    if additional_error_statistics:
+        if len(additional_error_statistics.alfa_bank_requests) > (100 - len(requests)):
+            requests.extend(additional_error_statistics.alfa_bank_requests[
+                            len(additional_error_statistics.alfa_bank_requests) - (100 - len(requests)):])
+        else:
+            requests.extend(additional_error_statistics.alfa_bank_requests)
+    check_error_statistics(requests)
+    error_statistics.put()
 
     logging.info(content)
+
     return content
 
 
@@ -156,22 +146,10 @@ def unbind_card(binding_id):
     return json.loads(result)
 
 
-def check_error_statistics(statistics):
-    if statistics.registration_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER or \
-            statistics.reverse_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER or \
-            statistics.payment_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER or \
-            statistics.deposit_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER or \
-            statistics.unbind_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER or \
-            statistics.serial_error_number > ACCEPTABLE_SERIAL_ERROR_NUMBER:
-        email.send_error('alfa_bank', 'too_many_serial_errors',
-                         'registration, reversion, payment, deposit, unbind or all together errors')
-
-    if statistics.request_number > MIN_TOTAL_REQUEST and \
-            statistics.total_error_number / statistics.request_number > ACCEPTABLE_TOTAL_ERROR_PERCENTAGE:
-        email.send_error('alfa_bank', 'too_big_total_errors_percentage',
-                         'total_errors_percentage: ' + str(statistics.total_error_number)
-                         + ' > ' +
-                         'acceptable percentage ' + str(ACCEPTABLE_TOTAL_ERROR_PERCENTAGE))
+def check_error_statistics(requests):
+    error_number = sum(int(not request.success) for request in requests)
+    if float(error_number) / len(requests) > ACCEPTABLE_TOTAL_ERROR_PERCENTAGE:
+        email.send_error('alfa_bank', 'too_many_errors', '')
 
 
 def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):

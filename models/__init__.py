@@ -5,7 +5,7 @@ from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter, working_hours
 from methods.rendering import timestamp, opt
 from tablet_request import TabletRequest
-from error_statistics import PaymentErrorsStatistics
+from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
 
 __author__ = 'ilyazorin'
 
