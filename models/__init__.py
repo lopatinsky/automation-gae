@@ -6,6 +6,7 @@ from methods import location, fastcounter, working_hours
 from methods.rendering import timestamp, opt
 from tablet_request import TabletRequest
 from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
+from order_client_notification import OrderNotificationStatus
 
 __author__ = 'ilyazorin'
 
