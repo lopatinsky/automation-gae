@@ -23,6 +23,8 @@ def __post_request_alfa(api_path, params):
     else:
         error_statistics = error_statistics[0]
 
+    logging.info(len(error_statistics.alfa_bank_requests))
+
     if len(error_statistics.alfa_bank_requests) >= 1000:
         error_statistics = PaymentErrorsStatistics()
 
@@ -46,13 +48,18 @@ def __post_request_alfa(api_path, params):
 
     error_statistics.alfa_bank_requests.append(AlfaBankRequest(url=url, success=str(result.get('errorCode', '0')) == '0'))
 
-    requests = error_statistics.alfa_bank_requests[0:100]
+    if len(error_statistics.alfa_bank_requests) <= 100:
+        requests = error_statistics.alfa_bank_requests
+    else:
+        requests = error_statistics.alfa_bank_requests[len(error_statistics.alfa_bank_requests) - 100:]
+
     if additional_error_statistics:
         if len(additional_error_statistics.alfa_bank_requests) > (100 - len(requests)):
             requests.extend(additional_error_statistics.alfa_bank_requests[
                             len(additional_error_statistics.alfa_bank_requests) - (100 - len(requests)):])
         else:
             requests.extend(additional_error_statistics.alfa_bank_requests)
+
     check_error_statistics(requests)
     error_statistics.put()
 
@@ -149,7 +156,7 @@ def unbind_card(binding_id):
 def check_error_statistics(requests):
     error_number = sum(int(not request.success) for request in requests)
     if float(error_number) / len(requests) > ACCEPTABLE_TOTAL_ERROR_PERCENTAGE:
-        email.send_error('alfa_bank', 'too_many_errors', '')
+        email.send_error('server', 'payment errors', 'In the server there are a lot of suspicious errors')
 
 
 def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
