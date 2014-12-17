@@ -46,7 +46,7 @@ def __post_request_alfa(api_path, params):
 
     error_statistics.alfa_bank_requests.append(AlfaBankRequest(url=url, success=str(result.get('errorCode', '0')) == '0'))
 
-    requests = error_statistics.alfa_bank_requests
+    requests = error_statistics.alfa_bank_requests[0:100]
     if additional_error_statistics:
         if len(additional_error_statistics.alfa_bank_requests) > (100 - len(requests)):
             requests.extend(additional_error_statistics.alfa_bank_requests[
