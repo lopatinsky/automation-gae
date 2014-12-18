@@ -10,7 +10,7 @@ import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, sms, push, empatika_promos, orders
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, OrderNotificationStatus
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 from google.appengine.api import taskqueue
 
 __author__ = 'ilyazorin'
@@ -119,9 +119,7 @@ class OrderHandler(ApiHandler):
                           mastercard=mastercard, items=[item.key for item in items])
             order.put()
 
-            status = OrderNotificationStatus(order_id=order_id, response_success=False)
-            status.put()
-            taskqueue.add(url='/api/check_order_success', params={'status_id': status.key.id()},
+            taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
 
             memcache.delete(cache_key)

@@ -6,7 +6,6 @@ from methods import location, fastcounter, working_hours
 from methods.rendering import timestamp, opt
 from tablet_request import TabletRequest
 from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
-from order_client_notification import OrderNotificationStatus
 
 __author__ = 'ilyazorin'
 
@@ -126,6 +125,7 @@ class Order(ndb.Model):
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     mastercard = ndb.BooleanProperty(indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
+    response_success = ndb.BooleanProperty(default=False, indexed=False)
 
     def dict(self):
         dct = {

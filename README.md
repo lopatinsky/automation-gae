@@ -10,6 +10,7 @@
 >           * [Get ID for new order](#markdown-header-get-id-for-new-order)
 >           * [Validate order and get active promos](#markdown-header-validate-order-and-get-active-promos)
 >           * [Post order](#markdown-header-post-order)
+>           * [Confirm the order is received](#markdown-header-confirm-the-order-is-received)
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
 >           * [Cancel order](#markdown-header-cancel-order)
@@ -245,6 +246,22 @@ Response:
 #!js
 {
     "order_id": order_id // int
+}
+```
+
+### Confirm the order is received
+
+POST `/api/set_order_success`
+
+Parameters:
+
+* `order_id`: int
+
+Response:
+
+```
+#!js
+{
 }
 ```
 

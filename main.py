@@ -59,7 +59,6 @@ app = WSGIApplication([
         Route('/client.php', api.ClientHandler),
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),
-        Route('/check_order_success', api.CheckOrderSuccessHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
         Route('/order_register.php', api.RegisterOrderHandler),
         Route('/check_order', api.CheckOrderHandler),
@@ -86,6 +85,8 @@ app = WSGIApplication([
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
+    Route('/task/check_order_success', api.CheckOrderSuccessHandler),
+
 ], debug=config.DEBUG, config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)

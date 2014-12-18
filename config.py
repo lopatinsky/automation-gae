@@ -26,6 +26,7 @@ class ProductionConfig(DoubleBConfig):
     EMAILS = {
         "server": "admins",
         "order": "admins",
+        "network": [],
     }
 
 
@@ -47,6 +48,7 @@ class TestingConfig(DoubleBConfig):
     DEBUG = True
 
     EMAILS = {
+        "network": [],
     }
 
 
