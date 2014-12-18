@@ -11,30 +11,8 @@ ALPHA_WRONG_CREDENTIALS_CODES = [71015]
 CARD_LIMIT_CODE = 1
 CARD_WRONG_CREDETIALS_CODE = 2
 
-ACCEPTABLE_TOTAL_ERROR_PERCENTAGE = 0.2
-
 
 def __post_request_alfa(api_path, params):
-
-    error_statistics = PaymentErrorsStatistics.query().order(-PaymentErrorsStatistics.data_created).fetch(1)
-
-    if not error_statistics:
-        error_statistics = PaymentErrorsStatistics()
-    else:
-        error_statistics = error_statistics[0]
-
-    logging.info(len(error_statistics.alfa_bank_requests))
-
-    if len(error_statistics.alfa_bank_requests) >= 1000:
-        error_statistics = PaymentErrorsStatistics()
-
-    additional_error_statistics = None
-    if len(error_statistics.alfa_bank_requests) < 100:
-        additional_error_statistics = PaymentErrorsStatistics.query(
-            PaymentErrorsStatistics.data_created < error_statistics.data_created).order(
-                -PaymentErrorsStatistics.data_created).fetch(1)
-    if additional_error_statistics:
-        additional_error_statistics = additional_error_statistics[0]
     url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)
@@ -43,27 +21,10 @@ def __post_request_alfa(api_path, params):
     logging.info(url)
     content = urlfetch.fetch(url, method='POST', headers={'Content-Type': 'application/json'}, deadline=30,
                              validate_certificate=False).content
+    logging.info(content)
 
     result = json.loads(content)
-
-    error_statistics.alfa_bank_requests.append(AlfaBankRequest(url=url, success=str(result.get('errorCode', '0')) == '0'))
-
-    if len(error_statistics.alfa_bank_requests) <= 100:
-        requests = error_statistics.alfa_bank_requests
-    else:
-        requests = error_statistics.alfa_bank_requests[len(error_statistics.alfa_bank_requests) - 100:]
-
-    if additional_error_statistics:
-        if len(additional_error_statistics.alfa_bank_requests) > (100 - len(requests)):
-            requests.extend(additional_error_statistics.alfa_bank_requests[
-                            len(additional_error_statistics.alfa_bank_requests) - (100 - len(requests)):])
-        else:
-            requests.extend(additional_error_statistics.alfa_bank_requests)
-
-    check_error_statistics(requests)
-    error_statistics.put()
-
-    logging.info(content)
+    PaymentErrorsStatistics.append_request(api_path, str(result.get('errorCode', '0')) == '0')
 
     return content
 
@@ -151,12 +112,6 @@ def unbind_card(binding_id):
     }
     result = __post_request_alfa('/rest/unBindCard.do', params)
     return json.loads(result)
-
-
-def check_error_statistics(requests):
-    error_number = sum(int(not request.success) for request in requests)
-    if float(error_number) / len(requests) > ACCEPTABLE_TOTAL_ERROR_PERCENTAGE:
-        email.send_error('server', 'payment errors', 'In the server there are a lot of suspicious errors')
 
 
 def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
