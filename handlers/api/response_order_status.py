@@ -1,7 +1,7 @@
 __author__ = 'dvpermyakov'
 
 import webapp2
-from models import Order
+from models import Order, Client
 from .base import ApiHandler
 from methods import email
 import logging
@@ -12,9 +12,13 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
         order_id = self.request.get_range('order_id')
         order = Order.get_by_id(order_id)
         if not order.response_success:
-            logging.warning('to email order error')
-            body = 'Order with id=%s did not response to client' % order_id
-            email.send_error('network', 'Order error', body)
+            client = Client.get_by_id(order.client_id)
+            body = u"Timeout in app (bad internet connection\n" \
+                   u"Order number: %s\n" \
+                   u"Client name: %s %s\n" \
+                   u"Client phone: %s" % (order_id, client.name, client.surname, client.tel)
+            logging.warning(body)
+            email.send_error('network', 'Order timeout', body)
 
 
 class ClientSettingSuccessHandler(ApiHandler):
