@@ -29,7 +29,7 @@ class PaymentErrorsStatistics(ndb.Model):
         requests = []
         if prev_statistics:
             for r in prev_statistics.alfa_bank_requests:
-                if r.created_at >= since:
+                if r.data_created >= since:
                     requests.append(r)
         for s in statistics:
             requests += s.alfa_bank_requests
