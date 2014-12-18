@@ -104,7 +104,8 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
                    with_details=False):
     item_dicts = []
     for item in items:
-        menu_item = MenuItem.get_by_id(int(item["id"]))
+        item_id = item.get("id") or item["item_id"]
+        menu_item = MenuItem.get_by_id(int(item_id))
         for i in xrange(item["quantity"]):
             item_dicts.append({
                 'item': menu_item,
@@ -145,12 +146,14 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     if with_details:
         details = []
         for item_dict in item_dicts:
-            details.append(OrderPositionDetails(
+            details_item = OrderPositionDetails(
                 item=item_dict['item'].key,
                 price=item_dict['price'],
                 revenue=item_dict['revenue'],
                 promos=item_dict['promos']
-            ))
+            )
+            details_item.errors = item_dict['errors']
+            details.append(details_item)
         result['details'] = details
 
     return result
@@ -160,6 +163,6 @@ def get_first_error(validation_result):
     if validation_result['errors']:
         return validation_result['errors'][0]
     for item in validation_result['details']:
-        if item['errors']:
-            return item['errors'][0]
+        if item.errors:
+            return item.errors[0]
     return None

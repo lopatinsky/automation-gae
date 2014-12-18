@@ -217,6 +217,7 @@ Parameters:
     * `comment`: string
     * `device_type`: int, optional (0 for iOS, 1 for Android)
     * `delivery_time`: int (interval in minutes)
+    * `total_sum`: int
     * `client`: object
         * `id`: int|string
         * `name`: string

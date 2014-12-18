@@ -37,8 +37,9 @@ class OrderHandler(ApiHandler):
             coordinates = None
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
-        delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
-        request_total_sum = response_json["total_sum"]
+        delivery_time_minutes = response_json['delivery_time']
+        delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
+        request_total_sum = response_json.get("total_sum")
         client_id = int(response_json['client']['id'])
 
         client = Client.get_by_id(int(client_id))
@@ -66,7 +67,7 @@ class OrderHandler(ApiHandler):
                     items.append(menu_item)
 
             validation_result = validate_order(client, response_json['items'], response_json['payment'],
-                                               venue, delivery_time, get_promo_support(self.request), True)
+                                               venue, delivery_time_minutes, get_promo_support(self.request), True)
             if not validation_result['valid']:
                 self.response.set_status(400)
                 self.render_json({"description": get_first_error(validation_result)})
@@ -74,7 +75,7 @@ class OrderHandler(ApiHandler):
                 return
 
             total_sum = validation_result['total_sum']
-            if total_sum != request_total_sum:
+            if request_total_sum and total_sum != request_total_sum:
                 self.response.set_status(400)
                 memcache.delete(cache_key)
                 self.render_json({"description": u"Сумма заказа не совпадает"})  # TODO better description
