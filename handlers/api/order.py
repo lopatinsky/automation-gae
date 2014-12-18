@@ -114,8 +114,13 @@ class OrderHandler(ApiHandler):
                           item_details=item_details)
             order.put()
 
-            taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
-                          countdown=SECONDS_WAITING_BEFORE_SMS)
+            ua = self.request.headers['User-Agent']
+            if not ('DoubleBRedirect' in ua
+                    or '/1.0' in ua
+                    or '/1.1' in ua
+                    or ('/1.2 ' in ua and 'Android' in ua)):
+                taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
+                              countdown=SECONDS_WAITING_BEFORE_SMS)
 
             memcache.delete(cache_key)
 

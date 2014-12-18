@@ -26,7 +26,7 @@ class ProductionConfig(DoubleBConfig):
     EMAILS = {
         "server": "admins",
         "order": "admins",
-        "network": [],
+        "network": "admins",
     }
 
 
