@@ -103,6 +103,13 @@ class Venue(ndb.Model):
         return working_hours.check(self.working_days, self.working_hours, now)
 
 
+class OrderPositionDetails(ndb.Model):
+    item = ndb.KeyProperty(MenuItem, required=True)
+    price = ndb.IntegerProperty(required=True)
+    revenue = ndb.IntegerProperty(required=True)
+    promos = ndb.StringProperty(repeated=True)
+
+
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
@@ -123,6 +130,8 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
+    item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
+    promos = ndb.StringProperty(repeated=True, indexed=False)
     mastercard = ndb.BooleanProperty(indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)

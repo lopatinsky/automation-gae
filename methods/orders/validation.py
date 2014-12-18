@@ -4,7 +4,7 @@ import datetime
 from config import config
 
 from methods import working_hours
-from models import MenuItem, CARD_PAYMENT_TYPE
+from models import MenuItem, CARD_PAYMENT_TYPE, OrderPositionDetails
 
 
 PROMO_SUPPORT_NONE = 0
@@ -79,26 +79,6 @@ def _unique(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def _group_item_dicts_detailed(item_dicts):
-    result = []
-    for item_dict in item_dicts:
-        possible_group = result[-1] if result else {'id': None}
-        if item_dict['item'] == possible_group['id'] \
-                and item_dict['promos'] == possible_group['promos'] \
-                and item_dict['errors'] == possible_group['errors']:
-            possible_group['quantity'] += 1
-        else:
-            result.append({
-                'id': item_dict['item'],
-                'price': item_dict['price'],
-                'revenue': item_dict['revenue'],
-                'promos': item_dict['promos'],
-                'errors': item_dict['errors'],
-                'quantity': 1
-            })
-    return result
-
-
 def _group_item_dicts(item_dicts):
     result = []
     for item_dict in item_dicts:
@@ -163,6 +143,23 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     }
 
     if with_details:
-        result['details'] = _group_item_dicts_detailed(item_dicts)
+        details = []
+        for item_dict in item_dicts:
+            details.append(OrderPositionDetails(
+                item=item_dict['item'].key,
+                price=item_dict['price'],
+                revenue=item_dict['revenue'],
+                promos=item_dict['promos']
+            ))
+        result['details'] = details
 
     return result
+
+
+def get_first_error(validation_result):
+    if validation_result['errors']:
+        return validation_result['errors'][0]
+    for item in validation_result['details']:
+        if item['errors']:
+            return item['errors'][0]
+    return None

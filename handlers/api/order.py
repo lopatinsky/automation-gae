@@ -5,10 +5,10 @@ from google.appengine.ext.ndb import GeoPt
 from config import config
 from handlers.api.base import ApiHandler
 import json
-from time import time as time_time
 import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, sms, push, empatika_promos, orders
+from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 from google.appengine.api import taskqueue
@@ -27,22 +27,10 @@ class OrderHandler(ApiHandler):
         # check if order exists in DB or currently adding it
         cache_key = "order_%s" % order_id
         if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
-            memcache.delete(cache_key)
             self.abort(409)
 
         venue_id = int(response_json['venue_id'])
         venue = Venue.get_by_id(venue_id)
-        if not venue.active:
-            memcache.delete(cache_key)
-            self.abort(410)
-        if not venue.is_open():
-            memcache.delete(cache_key)
-            self.error(400)
-            self.render_json({
-                "description": u"Эта кофейня сейчас закрыта."
-            })
-            return
-
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
         else:
@@ -50,6 +38,7 @@ class OrderHandler(ApiHandler):
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
         delivery_time = datetime.utcnow() + timedelta(minutes=response_json['delivery_time'])
+        request_total_sum = response_json["total_sum"]
         client_id = int(response_json['client']['id'])
 
         client = Client.get_by_id(int(client_id))
@@ -68,34 +57,38 @@ class OrderHandler(ApiHandler):
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
+
         if payment_type.status == STATUS_AVAILABLE:
             items = []
-            sms_items_info = []
-            total_sum = 0
             for item in response_json['items']:
                 menu_item = MenuItem.get_by_id(int(item['item_id']))
                 for i in xrange(item['quantity']):
                     items.append(menu_item)
-                    total_sum += menu_item.price
-                sms_items_info.append((menu_item.title, item['quantity']))
+
+            validation_result = validate_order(client, response_json['items'], response_json['payment'],
+                                               venue, delivery_time, get_promo_support(self.request), True)
+            if not validation_result['valid']:
+                self.response.set_status(400)
+                self.render_json({"description": get_first_error(validation_result)})
+                memcache.delete(cache_key)
+                return
+
+            total_sum = validation_result['total_sum']
+            if total_sum != request_total_sum:
+                self.response.set_status(400)
+                memcache.delete(cache_key)
+                self.render_json({"description": u"Сумма заказа не совпадает"})  # TODO better description
+                return
+
+            item_details = validation_result["details"]
+            promo_list = [promo['id'] for promo in validation_result["promos"]]
 
             # mastercard
             payment_id = response_json['payment'].get('payment_id')
             mastercard = response_json['payment'].get('mastercard', False)
-            apply_discount = mastercard and not client.has_mastercard_orders
 
-            # TODO iOS 1.0.2 bug
-            if not mastercard and 'DoubleB/1.0 ' in self.request.headers["User-Agent"]:
-                request_total_sum = response_json["total_sum"]
-                if not client.has_mastercard_orders and request_total_sum != total_sum:
-                    logging.warning("iOS discount bug")
-                    apply_discount = True
-            # TODO end
-
-            if apply_discount:
+            if "master" in promo_list:
                 client.has_mastercard_orders = True
-                most_expensive_item = max(items, key=lambda i: i.price)
-                total_sum -= most_expensive_item.price / 2
 
             if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
                 binding_id = response_json['payment']['binding_id']
@@ -116,21 +109,14 @@ class OrderHandler(ApiHandler):
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
-                          mastercard=mastercard, items=[item.key for item in items])
+                          promos=promo_list, mastercard=mastercard, items=[item.key for item in items],
+                          item_details=item_details)
             order.put()
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
 
             memcache.delete(cache_key)
-
-            local_delivery_time = delivery_time + config.TIMEZONE_OFFSET
-            sms_text = u"Заказ №%s (%s) Сумма: %s Готовность к: %s %s Тип оплаты: %s" % (
-                order_id, client_name, total_sum, local_delivery_time,
-                ', '.join("%s X %s" % i for i in sms_items_info),
-                [u"Наличные", u"Карта", u"Бонусы"][payment_type_id]
-            )
-            sms.send_sms('DoubleB', venue.phone_numbers, sms_text)
 
             self.response.status_int = 201
             self.render_json({'order_id': order_id})
