@@ -7,6 +7,22 @@ from methods import working_hours
 from models import MenuItem, CARD_PAYMENT_TYPE
 
 
+PROMO_SUPPORT_NONE = 0
+PROMO_SUPPORT_MASTER = 1
+PROMO_SUPPORT_FULL = 2
+
+
+def get_promo_support(request):
+    ua = request.headers['User-Agent']
+    if 'DoubleBRedirect' in ua:  # old server: 1.0, 1.0.1
+        return PROMO_SUPPORT_NONE
+    if '1.0' in ua or \
+            '1.1' in ua or \
+            ('1.2 ' in ua and 'Android' in ua):
+        return PROMO_SUPPORT_MASTER
+    return PROMO_SUPPORT_FULL
+
+
 _MASTER_PROMO = {
     "id": "master",
     "text": u"Скидка 50% на один напиток при первом заказе картой MasterCard"
@@ -67,13 +83,13 @@ def _group_item_dicts_detailed(item_dicts):
     result = []
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'id': None}
-        if item_dict['item'].key.id() == possible_group['id'] \
+        if item_dict['item'] == possible_group['id'] \
                 and item_dict['promos'] == possible_group['promos'] \
                 and item_dict['errors'] == possible_group['errors']:
             possible_group['quantity'] += 1
         else:
             result.append({
-                'id': item_dict['item'].key.id(),
+                'id': item_dict['item'],
                 'price': item_dict['price'],
                 'revenue': item_dict['revenue'],
                 'promos': item_dict['promos'],
@@ -104,7 +120,8 @@ def _group_item_dicts(item_dicts):
     return result
 
 
-def validate_order(client, items, payment_info, venue, delivery_time, with_details=False):
+def validate_order(client, items, payment_info, venue, delivery_time, support_level=PROMO_SUPPORT_FULL,
+                   with_details=False):
     item_dicts = []
     for item in items:
         menu_item = MenuItem.get_by_id(int(item["id"]))
@@ -123,10 +140,13 @@ def validate_order(client, items, payment_info, venue, delivery_time, with_detai
 
     valid = valid and _check_venue(venue, delivery_time, errors)
 
-    if venue and delivery_time:
-        _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
-    if payment_info:
-        _apply_master_promo(item_dicts, promos_info, client, payment_info)
+    if support_level == PROMO_SUPPORT_FULL:
+        if venue and delivery_time:
+            _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
+
+    if support_level in (PROMO_SUPPORT_MASTER, PROMO_SUPPORT_FULL):
+        if payment_info:
+            _apply_master_promo(item_dicts, promos_info, client, payment_info)
 
     total_sum = 0
     for item_dict in item_dicts:
