@@ -466,6 +466,7 @@ Parameters:
 #!js
 {
     "new": new_orders,             // list of objects, as above
+    "new_orders": new_orders,      // same as new 
     "updated": updated_orders,     // list of objects, as above
     "timestamp": current_timestamp // int
 }

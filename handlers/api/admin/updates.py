@@ -16,6 +16,7 @@ class UpdatesHandler(AdminApiHandler):
         updated = [order for order in orders if order.date_created <= time]
         self.render_json({
             "new": [o.dict() for o in new],
+            "new_orders": [o.dict() for o in new],
             "updated": [o.dict() for o in updated],
             "timestamp": timestamp(now)
         })
