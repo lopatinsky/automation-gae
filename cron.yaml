@@ -9,6 +9,6 @@ cron:
   url: /cron/check_pings
   schedule: every 10 minutes synchronized
 
-- description: check alfa orders
-  url: /cron/alfa_orders
+- description: check alfa errors
+  url: /cron/alfa_errors
   schedule: every 10 minutes synchronized
