@@ -13,7 +13,7 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
         order = Order.get_by_id(order_id)
         if not order.response_success:
             client = Client.get_by_id(order.client_id)
-            body = u"Timeout in app (bad internet connection\n" \
+            body = u"Order timeout in app (bad internet connection)\n" \
                    u"Order number: %s\n" \
                    u"Client name: %s %s\n" \
                    u"Client phone: %s" % (order_id, client.name, client.surname, client.tel)
