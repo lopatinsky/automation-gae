@@ -46,6 +46,29 @@ def _check_venue(venue, delivery_time, errors):
     return True
 
 
+def _check_stop_lists(item_dicts, venue, errors):
+    titles = []
+    # TODO actual stop list logic
+    if config.DEBUG:
+        # test server: big cappuccino, latte, double espresso not available
+        for item_dict in item_dicts:
+            if item_dict['item'].key.id() in (1, 2, 5):
+                item_dict['errors'].append(u"Тест стоп-листов " * 10)
+                item_dict['errors'].append(u"Тест стоп-листов " * 9)
+                titles.append(item_dict['item'].title)
+
+    titles = _unique(titles)
+    if titles:
+        if len(titles) == 1:
+            titles_msg = titles[0]
+        else:
+            titles_msg = u"%s и %s" % (", ".join(titles[:-1]), titles[-1])
+        stop_list_msg = u"%s сейчас нельзя заказать в этой кофейне" % titles_msg
+        errors.append(stop_list_msg)
+        return False
+    return True
+
+
 def _apply_master_promo(item_dicts, promos_info, client, payment_info):
     if payment_info["type_id"] == CARD_PAYMENT_TYPE and \
             payment_info["mastercard"] and not client.has_mastercard_orders:
@@ -120,6 +143,8 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     promos_info = []
 
     valid = valid and _check_venue(venue, delivery_time, errors)
+
+    valid = valid and _check_stop_lists(item_dicts, venue, errors)
 
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
