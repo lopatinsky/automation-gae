@@ -40,7 +40,7 @@ def _check_venue(venue, delivery_time, errors):
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
             errors.append(u"Эта кофейня сейчас недоступна")
             return False
-        if delivery_time and not venue.is_open(minutes_offset=delivery_time):
+        if not venue.is_open(minutes_offset=delivery_time):
             errors.append(u"Эта кофейня сейчас закрыта")
             return False
     return True
@@ -122,7 +122,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     valid = valid and _check_venue(venue, delivery_time, errors)
 
     if support_level == PROMO_SUPPORT_FULL:
-        if venue and delivery_time:
+        if venue:
             _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
 
     if support_level in (PROMO_SUPPORT_MASTER, PROMO_SUPPORT_FULL):
