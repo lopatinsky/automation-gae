@@ -18,6 +18,10 @@ def _error_code(resp):
     return int(code)
 
 
+def _error_message(resp):
+    return resp.get('errorMessage') or resp.get('ErrorMessage')
+
+
 def _success(resp):
     return _error_code(resp) == 0
 
@@ -39,7 +43,7 @@ def __post_request_alfa(api_path, params):
         url=api_path,
         success=code == 0,
         error_code=code,
-        error_message=result.get('errorMessage')
+        error_message=_error_message(result)
     )
 
     return result
