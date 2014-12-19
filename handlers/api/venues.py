@@ -13,4 +13,6 @@ class VenuesHandler(ApiHandler):
         venue_dicts = [venue.dict(location) for venue in venues]
         if location:
             venue_dicts = sorted(venue_dicts, key=lambda v: v['distance'])
+        else:
+            venue_dicts = sorted(venue_dicts, key=lambda v: v['address'])
         self.render_json({'venues': venue_dicts})
