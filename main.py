@@ -27,6 +27,7 @@ app = WSGIApplication([
         Route('/report/menu_items', maintenance.MenuItemsReportHandler),
         Route('/report/tablet_requests_history', maintenance.TabletRequestReportHandler),
         Route('/report/finance', maintenance.FinanceReportHandler),
+        Route('/report/venues', maintenance.VenuesReportHandler),
 
     ]),
 
