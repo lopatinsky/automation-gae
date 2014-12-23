@@ -4,6 +4,7 @@ from .base import BaseHandler
 from models import Order, Client, Venue, MenuItem, READY_ORDER, BONUS_PAYMENT_TYPE
 from datetime import datetime, date, time
 import calendar
+import logging
 
 PROJECT_STARTING_YEAR = 2014
 
@@ -169,3 +170,54 @@ class MenuItemsReportHandler(BaseHandler):
             'chosen_day': chosen_day
         }
         self.render('reported_menu_items.html', **values)
+
+
+class FinanceItem:
+    def __init__(self, spent, received, day):
+        self.spent = spent
+        self.received = received
+        self.day = day
+
+
+class FinanceReportHandler(BaseHandler):
+    @staticmethod
+    def finance_table(chosen_year=0, chosen_month=0, venue_id=0):
+        days_in_month = calendar.monthrange(chosen_year, chosen_month)[1]
+        logging.info(days_in_month)
+        finance_items = []
+        for day_number in range(1, days_in_month + 1):
+            query = Order.query(Order.status == READY_ORDER)
+            query = query.filter(Order.date_created >= suitable_date(day_number, chosen_month, chosen_year, True))
+            query = query.filter(Order.date_created <= suitable_date(day_number, chosen_month, chosen_year, False))
+            if venue_id != 0:
+                query = query.filter(Order.venue_id == venue_id)
+            #spent = sum((item.get().price for item in order.items) for order in query.fetch())
+            total_sum = sum(order.total_sum for order in query.fetch())
+            price_sum = 0
+            for order in query.fetch():
+                for item in order.items:
+                    price_sum += item.get().price
+            finance_items.append(FinanceItem(price_sum - total_sum, total_sum, day_number))
+        return finance_items
+
+    def get(self):
+        chosen_venue = self.request.get_range("selected_venue")
+        chosen_year = self.request.get_range("selected_year")
+        chosen_month = self.request.get_range("selected_month")
+        if not chosen_year:
+            chosen_month = 0
+        if not chosen_month:
+            self.render('reported_finance.html', start_year=PROJECT_STARTING_YEAR,
+                        end_year=datetime.now().year)
+            return
+        items = self.finance_table(chosen_year, chosen_month, chosen_venue)
+        values = {
+            'venues': Venue.query().fetch(),
+            'days': items,
+            'chosen_venue': chosen_venue,
+            'start_year': PROJECT_STARTING_YEAR,
+            'end_year': datetime.now().year,
+            'chosen_year': chosen_year,
+            'chosen_month': chosen_month,
+        }
+        self.render('reported_finance.html', **values)
