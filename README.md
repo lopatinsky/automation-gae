@@ -399,6 +399,7 @@ Parameters:
 * `sound_level_general`(optional): int
 * `sound_level_system`(optional): int
 * `is_in_charging`(optional): bool
+* `battery_level`(optional): int
 * `is_turned_on`(optional): bool
 * `app_version`(optional): string
 

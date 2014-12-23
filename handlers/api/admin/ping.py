@@ -17,16 +17,25 @@ class PingHandler(AdminApiHandler):
     def post(self):
         lat = float(self.request.get("lat"))
         lon = float(self.request.get("lon"))
+
         error_number = self.request.get("error_number")
         error_number = None if not error_number else int(error_number)
+
         sound_level_general = self.request.get("sound_level_general")
         sound_level_general = None if not sound_level_general else int(sound_level_general)
+
         sound_level_system = self.request.get("sound_level_system")
         sound_level_system = None if not sound_level_system else int(sound_level_system)
+
         is_in_charging = self.request.get("is_in_charging")
         is_in_charging = None if not is_in_charging else bool(int(is_in_charging))
+
         is_turned_on = self.request.get("is_turned_on")
         is_turned_on = None if not is_turned_on else bool(int(is_turned_on))
+
+        battery_level = self.request.get("battery_level")
+        battery_level = None if not battery_level else int(battery_level)
+
         app_version = self.request.get("app_version")
         if not app_version:
             app_version = None
@@ -51,6 +60,6 @@ class PingHandler(AdminApiHandler):
         history_item = TabletRequest(admin_id=status.admin.key.id(), token=self.token, location=geopt,
                                      error_number=error_number, sound_level_general=sound_level_general,
                                      sound_level_system=sound_level_system, is_in_charging=is_in_charging,
-                                     is_turned_on=is_turned_on, app_version=app_version)
+                                     is_turned_on=is_turned_on, app_version=app_version, battery_level=battery_level)
         history_item.put()
         self.render_json({})
