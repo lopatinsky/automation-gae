@@ -8,6 +8,7 @@ class DoubleBConfig(object):
     POINTS_PER_CUP = 5
     PROMO_END_DATE = datetime.date(2015, 1, 1)
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
+    CANCEL_ALLOWED_BEFORE = 3
 
 
 class ProductionConfig(DoubleBConfig):
@@ -48,7 +49,6 @@ class TestingConfig(DoubleBConfig):
     DEBUG = True
 
     EMAILS = {
-        "network": [],
     }
 
 

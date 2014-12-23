@@ -166,7 +166,7 @@ class ReturnOrderHandler(ApiHandler):
             })
         else:
             now = datetime.utcnow()
-            if order.delivery_time - now > timedelta(minutes=10):
+            if order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 # return money
                 if order.payment_type_id == CARD_PAYMENT_TYPE:
                     return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
@@ -208,7 +208,8 @@ class ReturnOrderHandler(ApiHandler):
                 self.response.status_int = 412
                 self.render_json({
                     'error': 1,
-                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее 10 минут.'
+                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее %s минут.' %
+                                   config.CANCEL_ALLOWED_BEFORE
                 })
 
 
