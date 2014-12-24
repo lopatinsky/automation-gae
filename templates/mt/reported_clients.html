@@ -56,6 +56,8 @@
              <th>Number of Orders</th>
              <th>Total Expenditure</th>
              <th>Payment</th>
+             <th>Number of Cancelled Orders</th>
+             <th>Sum of Cancelled Orders</th>
              <th>Average Order Cost</th>
          </tr>
          {% for client in clients %}
@@ -64,8 +66,10 @@
                  <td>{{ client.name }}</td>
                  <td>{{ client.tel }}</td>
                  <td>{{ client.amount_orders }}</td>
-                 <td>{{ client.total_sum }}</td>
+                 <td>{{ client.success_sum }}</td>
                  <td>{{ client.payment }}</td>
+                 <td>{{ client.cancel_number }}</td>
+                 <td>{{ client.cancel_sum }}</td>
                  <td>{{ client.average_order_cost }}</td>
              </tr>
          {% endfor %}
@@ -76,6 +80,8 @@
              <td>{{ venue_number }}</td>
              <td>{{ venue_expenditure }}</td>
              <td>{{ venue_payment }}</td>
+             <td>{{ venue_cancel_number }}</td>
+             <td>{{ venue_cancel_sum }}</td>
              <td>{{ venue_expenditure / venue_number if venue_number else "-" }}</td>
          </tr>
      </table>
