@@ -38,6 +38,10 @@ class ProductionConfig(DoubleBConfig):
         }
     }
 
+    STOP_LISTS = {
+        5093108584808448: [15, 26, 27], # omega
+    }
+
     DEBUG = False
 
     EMAILS = {
@@ -60,6 +64,9 @@ class TestingConfig(DoubleBConfig):
             "days": "1234567",
             "hours": "0-24"
         }
+    }
+
+    STOP_LISTS = {
     }
 
     DEBUG = True

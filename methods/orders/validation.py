@@ -12,6 +12,9 @@ PROMO_SUPPORT_MASTER = 1
 PROMO_SUPPORT_FULL = 2
 
 
+_OMEGA_VENUE_ID = 5093108584808448
+
+
 def get_promo_support(request):
     ua = request.headers['User-Agent']
     if 'DoubleBRedirect' in ua:  # old server: 1.0, 1.0.1
@@ -33,6 +36,11 @@ _CITY_HAPPY_HOURS_PROMO = {
     "text": u"Счастливые часы: скидка 50р"
 }
 
+_OMEGA_PROMO = {
+    "id": "omega",
+    "text": u"Скидки в Омега Плаза"
+}
+
 
 def _check_venue(venue, delivery_time, errors):
     if venue:
@@ -48,7 +56,6 @@ def _check_venue(venue, delivery_time, errors):
 
 def _check_stop_lists(item_dicts, venue, errors):
     titles = []
-    # TODO actual stop list logic
     if config.DEBUG:
         # test server: big cappuccino, latte, double espresso not available
         for item_dict in item_dicts:
@@ -56,6 +63,15 @@ def _check_stop_lists(item_dicts, venue, errors):
                 item_dict['errors'].append(u"Тест стоп-листов " * 10)
                 item_dict['errors'].append(u"Тест стоп-листов " * 9)
                 titles.append(item_dict['item'].title)
+
+    if venue and venue.key.id() in config.STOP_LISTS:
+        ids = config.STOP_LISTS[venue.key.id()]
+        for item_dict in item_dicts:
+            if item_dict['item'].key.id() in ids:
+                item_dict['errors'].append(u"Напиток недоступен в этой кофейне")
+                titles.append(item_dict['item'].title)
+
+    # TODO temporary stop lists
 
     titles = _unique(titles)
     if titles:
@@ -94,6 +110,16 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                     item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
                     item_dict['price'] -= 50
                     item_dict['revenue'] -= 50
+
+
+def _apply_omega_promo(item_dicts, promos_info, venue):
+    if venue.key.id() == _OMEGA_VENUE_ID:
+        promos_info.append(_OMEGA_PROMO)
+        for item_dict in item_dicts:
+            if item_dict['item'].price == 250:
+                item_dict['promos'].append(_OMEGA_PROMO['id'])
+                item_dict['price'] -= 50
+                item_dict['revenue'] -= 50
 
 
 def _unique(seq):
@@ -149,6 +175,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
             _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
+            _apply_omega_promo(item_dicts, promos_info, venue)
 
     if support_level in (PROMO_SUPPORT_MASTER, PROMO_SUPPORT_FULL):
         if payment_info:
