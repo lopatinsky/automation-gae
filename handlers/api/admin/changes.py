@@ -37,7 +37,8 @@ class CancelOrderHandler(AdminApiHandler):
             client = Client.get_by_id(order.client_id)
             push_text = u"%s, заказ №%s отменен." % (client.name, order_id)
             if order.payment_type_id == CARD_PAYMENT_TYPE:
-                push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут."
+                push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут.\n"
+                push_text += comment
             push.send_order_push(order_id, order.status, push_text, order.device_type)
 
             self.render_json({})
