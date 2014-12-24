@@ -1,6 +1,5 @@
 __author__ = 'dvpermyakov'
 
-from finance import FinanceReportHandler
 from menu_items import MenuItemsReportHandler
 from venues import VenuesReportHandler
 from clients import ClientsReportHandler
