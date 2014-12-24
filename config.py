@@ -20,6 +20,22 @@ class ProductionConfig(DoubleBConfig):
     FREE_COFFEE_PROMO_ID = 5634472569470976
 
     CITY_HAPPY_HOURS = {
+        4801814507552768: {  # ftower
+            "days": "12345",
+            "hours": "8-11"
+        },
+        5656058538229760: {  # gstolic
+            "days": "12345",
+            "hours": "8-11"
+        },
+        4661077019197440: {  # tkachi
+            "days": "12345",
+            "hours": "9-12"
+        },
+        5083289484263424: {  # million
+            "days": "12345",
+            "hours": "9-12"
+        }
     }
 
     DEBUG = False
