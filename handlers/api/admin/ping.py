@@ -25,12 +25,12 @@ class PingHandler(AdminApiHandler):
         sound_level_system = self.request.get_range("sound_level_system")
 
         is_in_charging = self.request.get("is_in_charging")
-        if not is_in_charging is None:
-            is_in_charging = bool(is_in_charging)
+        if is_in_charging:
+            is_in_charging = is_in_charging == "true"
 
         is_turned_on = self.request.get("is_turned_on")
-        if not is_turned_on is None:
-            is_turned_on = bool(is_turned_on)
+        if is_turned_on:
+            is_turned_on = is_turned_on == "true"
 
         battery_level = self.request.get_range("battery_level")
 
