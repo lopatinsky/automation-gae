@@ -24,11 +24,11 @@ class PingHandler(AdminApiHandler):
 
         sound_level_system = self.request.get_range("sound_level_system")
 
-        is_in_charging = self.request.get("is_in_charging")
+        is_in_charging = self.request.get("is_in_charging", None)
         if is_in_charging:
             is_in_charging = is_in_charging == "true"
 
-        is_turned_on = self.request.get("is_turned_on")
+        is_turned_on = self.request.get("is_turned_on", None)
         if is_turned_on:
             is_turned_on = is_turned_on == "true"
 
