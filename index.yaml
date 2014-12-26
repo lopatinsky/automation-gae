@@ -54,3 +54,8 @@ indexes:
   properties:
   - name: venue_id
   - name: updated
+
+- kind: TabletRequest
+  properties:
+  - name: admin_id
+  - name: request_time
