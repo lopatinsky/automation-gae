@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
+                            'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
+
+     <form method="get">
+         <select name="selected_year">
+             <option value="0" {% if not chosen_year %}selected{% endif %}>Все года</option>
+             {% for year in range(start_year, end_year + 1) %}
+                  <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
+                      {{ year }}
+                  </option>
+             {% endfor %}
+         </select>
+         <select name="selected_month">
+             {% for month in range(0, 12 + 1)%}
+                  <option value="{{ month }}" {% if chosen_month == month %} selected {% endif %}>
+                      {{ NAME_MONTHS[month] }}
+                  </option>
+             {% endfor %}
+         </select>
+         <input type="submit" value="Выбрать"/>
+     </form>
+
+     <br>
+     <table style="border-collapse:collapse; width:100%" border="1">
+         <tr>
+             <th>Date</th>
+             <th>Name</th>
+             <th>Number of Orders</th>
+             <th>Revenue + Bonus</th>
+             <th>Revenue</th>
+             <th>Average Order Cost</th>
+         </tr>
+         {% for date, venues in report_data %}
+             {% for venue in venues %}
+                 <tr>
+                     <td>{{ date.strftime("%d.%m.%Y") }}</td>
+                     <td>{{ venue.name }}</td>
+                     <td>{{ venue.amount_orders }}</td>
+                     <td>{{ venue.total_sum }}</td>
+                     <td>{{ venue.payment }}</td>
+                     <td>{{ venue.average_order_cost }}</td>
+                 </tr>
+             {% endfor %}
+         {% endfor %}
+    </table>
+    <a href="/mt/report">Назад</a>
+
+</body>
+</html>

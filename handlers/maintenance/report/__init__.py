@@ -1,7 +1,7 @@
 __author__ = 'dvpermyakov'
 
 from menu_items import MenuItemsReportHandler
-from venues import VenuesReportHandler
+from venues import VenuesReportHandler, VenuesReportWithDatesHandler
 from clients import ClientsReportHandler
 from methods import PROJECT_STARTING_YEAR
 
