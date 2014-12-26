@@ -12,7 +12,7 @@ AVAILABLE_SOUND_LEVEL = 0
 class CheckPingsHandler(RequestHandler):
     def get(self):
         now = datetime.datetime.utcnow()
-        delta = datetime.timedelta(minutes=1)
+        delta = datetime.timedelta(minutes=10)
         statuses = AdminStatus.query(AdminStatus.time < now - delta).fetch()
 
         if statuses:
@@ -30,7 +30,7 @@ class CheckPingsHandler(RequestHandler):
         admins = Admin.query().fetch()
         for admin in admins:
             info = ''
-            requests = TabletRequest.query(TabletRequest.request_time < now - delta,
+            requests = TabletRequest.query(TabletRequest.request_time > now - delta,
                                            TabletRequest.admin_id == admin.key.id()).fetch()
             is_turned_on = False
             is_low_sound = True
