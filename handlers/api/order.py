@@ -118,7 +118,7 @@ class OrderHandler(ApiHandler):
             if not ('DoubleBRedirect' in ua
                     or '/1.0' in ua
                     or '/1.1' in ua
-                    or ('/1.2 ' in ua and 'Android' in ua)):
+                    or (('/1.2' in ua or '/1.3 ' in ua) and 'Android' in ua)):
                 taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                               countdown=SECONDS_WAITING_BEFORE_SMS)
 
