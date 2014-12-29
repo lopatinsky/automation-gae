@@ -6,7 +6,8 @@ from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos
 from methods.auth import api_user_required
 from methods.rendering import timestamp
-from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE
+from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
+    NEW_ORDER
 
 __author__ = 'ilyazorin'
 
@@ -51,6 +52,9 @@ class DoneOrderHandler(AdminApiHandler):
     @api_user_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
+        if order.status != NEW_ORDER:
+            self.abort(400)
+
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
