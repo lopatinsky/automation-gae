@@ -78,7 +78,7 @@ class OrderHandler(ApiHandler):
             if request_total_sum and total_sum != request_total_sum:
                 self.response.set_status(400)
                 memcache.delete(cache_key)
-                self.render_json({"description": u"Сумма заказа не совпадает"})  # TODO better description
+                self.render_json({"description": u"Сумма заказа была пересчитана"})
                 return
 
             item_details = validation_result["details"]
