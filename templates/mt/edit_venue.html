@@ -19,15 +19,15 @@
         </div>
     {% endif %}
     <form method="post">
-        {% for param in ('title', 'description', 'coordinates', 'working_days', 'working_hours') %}
+        {% for param in ('title', 'description', 'coordinates', 'working_days', 'working_hours', 'holiday_schedule') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] }}"/>
+                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] }}" style="width:500px"/>
             </div>
         {% endfor %}
         <div>
             <label for="phone_numbers">phone numbers (10 digits, comma-separated)</label>
-            <input type="text" name="phone_numbers" id="phone_numbers" value="{{ ','.join(venue.phone_numbers) }}"/>
+            <input type="text" name="phone_numbers" id="phone_numbers" value="{{ ','.join(venue.phone_numbers) }}" style="width:500px"/>
         </div>
         <div>
             <label></label>

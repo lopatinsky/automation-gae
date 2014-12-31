@@ -66,6 +66,7 @@ class Venue(ndb.Model):
     working_hours = ndb.StringProperty(indexed=False)
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
+    holiday_schedule = ndb.StringProperty(indexed=False)
     active = ndb.BooleanProperty(required=True, default=False)
 
     def dict(self, user_location=None):
@@ -100,7 +101,7 @@ class Venue(ndb.Model):
 
     def is_open(self, minutes_offset=0):
         now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
-        return working_hours.check(self.working_days, self.working_hours, now)
+        return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
 
 
 class OrderPositionDetails(ndb.Model):

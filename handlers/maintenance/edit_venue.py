@@ -15,7 +15,7 @@ class EditVenueHandler(BaseHandler):
         if not venue:
             self.abort(404)
 
-        raw_params = ('title', 'description', 'working_days', 'working_hours')
+        raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule')
         for param in raw_params:
             setattr(venue, param, self.request.get(param))
 
