@@ -58,7 +58,14 @@ class TabletRequestReportHandler(BaseHandler):
         chosen_interval = self.request.get_range("selected_interval")
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
-        chosen_day = self.request.get_range("selected_day")
+        chosen_day = self.request.get("selected_day")
+        if not chosen_day:
+            chosen_interval = 10
+            chosen_year = datetime.now().year
+            chosen_month = datetime.now().month
+            chosen_day = datetime.now().day
+        else:
+            chosen_day = int(chosen_day)
         try:
             date = datetime(chosen_year, chosen_month, chosen_day)
         except ValueError:
@@ -68,6 +75,13 @@ class TabletRequestReportHandler(BaseHandler):
             return
         admins = self.group_requests(date, chosen_interval)
         numbers = self.get_interval_numbers_json(date, admins)
+        admins_info = {}
+        query = TabletRequest.query(TabletRequest.request_time > date,
+                                    TabletRequest.request_time < date + timedelta(days=1))\
+            .order(TabletRequest.request_time)
+        for request in query.fetch():
+            request.name = Admin.get_by_id(request.admin_id).email
+            admins_info[request.token] = request
         values = {
             'numbers': json.dumps(numbers),
             'admins': admins,
@@ -77,5 +91,6 @@ class TabletRequestReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day,
             'chosen_interval': chosen_interval,
+            'admins_info': admins_info.values(),
         }
         self.render('reported_tablet_requests_graph.html', **values)
