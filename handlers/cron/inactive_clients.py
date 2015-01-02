@@ -6,19 +6,19 @@ from methods import email
 from datetime import datetime, timedelta
 import logging
 
-CLIENT_DAY_INTERVAL = 10
+CLIENT_DAY_INTERVAL = 1
 
 
 class SearchInactiveClientsHandler(RequestHandler):
     def get(self):
-        clients_with_phone = Client.query(Client.updated > datetime.now() - timedelta(days=CLIENT_DAY_INTERVAL)).fetch()
-        for client in clients_with_phone:
+        clients_with_phone = Client.query(Client.created > datetime.now() - timedelta(days=CLIENT_DAY_INTERVAL)).fetch()
+        for client in clients_with_phone[:]:
             if client.tel is None:
                 clients_with_phone.remove(client)
-        for order in Order.query(Order.status == READY_ORDER).fetch():
-            order_client = Client.get_by_id(order.client_id)
-            if order_client in clients_with_phone:
-                clients_with_phone.remove(order_client)
+        for client in clients_with_phone[:]:
+            last_order = Order.query(Order.client_id == client.key.id()).get()
+            if last_order:
+                clients_with_phone.remove(client)
         if not len(clients_with_phone):
             return
         else:

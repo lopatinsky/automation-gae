@@ -202,7 +202,7 @@ class Client(ndb.Model):
     email = ndb.StringProperty()
     has_mastercard_orders = ndb.BooleanProperty(default=False, indexed=False)
 
-    updated = ndb.DateTimeProperty(auto_now=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def create(cls):

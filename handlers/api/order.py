@@ -55,10 +55,6 @@ class OrderHandler(ApiHandler):
             client.tel = client_tel
             client.email = client_email
 
-        # TODO: update client
-        client.put()
-        # TODO: end update client
-
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
 
@@ -220,10 +216,6 @@ class CheckOrderHandler(ApiHandler):
     def post(self):
         client_id = self.request.get_range('client_id')
         client = Client.get_by_id(client_id)
-
-        # TODO: update client
-        client.put()
-        # TODO: end update client
 
         venue_id = self.request.get_range('venue_id')
         try:
