@@ -23,12 +23,15 @@ app = WSGIApplication([
         Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
         Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
-        Route('/report/clients', maintenance.ClientsReportHandler),
-        Route('/report/menu_items', maintenance.MenuItemsReportHandler),
-        Route('/report/tablet_requests_history', maintenance.TabletRequestReportHandler),
-        Route('/report/venues', maintenance.VenuesReportHandler),
-        Route('/report/venues_with_dates', maintenance.VenuesReportWithDatesHandler),
 
+        PathPrefixRoute('/report', [
+            Route('/clients', maintenance.ClientsReportHandler),
+            Route('/menu_items', maintenance.MenuItemsReportHandler),
+            Route('/tablet_requests_history', maintenance.TabletRequestReportHandler),
+            Route('/venues', maintenance.VenuesReportHandler),
+            Route('/venues_with_dates', maintenance.VenuesReportWithDatesHandler),
+            Route('/orders', maintenance.OrdersReportHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/api', [
