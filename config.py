@@ -48,7 +48,7 @@ class ProductionConfig(DoubleBConfig):
         "server": "admins",
         "order": "admins",
         "network": "admins",
-        "analytics": "isparfenov@gmail.com"
+        "analytics": "admins"
     }
 
 
@@ -73,7 +73,6 @@ class TestingConfig(DoubleBConfig):
     DEBUG = True
 
     EMAILS = {
-        "analytics": "dvpermyakov@edu.hse.ru"
     }
 
 
