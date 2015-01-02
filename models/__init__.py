@@ -202,6 +202,8 @@ class Client(ndb.Model):
     email = ndb.StringProperty()
     has_mastercard_orders = ndb.BooleanProperty(default=False, indexed=False)
 
+    updated = ndb.DateTimeProperty(auto_now=True)
+
     @classmethod
     def create(cls):
         return cls(id=cls.generate_id())

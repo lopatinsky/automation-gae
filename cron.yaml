@@ -12,3 +12,8 @@ cron:
 - description: check alfa errors
   url: /cron/alfa_errors
   schedule: every 10 minutes synchronized
+
+- description: check inactive clients
+  url: /cron/inactive_clients
+  schedule: every day 7:00
+  timezone: Europe/Moscow
