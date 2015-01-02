@@ -54,6 +54,7 @@ class OrderHandler(ApiHandler):
             client.surname = client_surname
             client.tel = client_tel
             client.email = client_email
+            client.put()
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
