@@ -28,7 +28,6 @@ class CheckPingsHandler(RequestHandler):
                           "%s" % (now, statuses_text)
             logging.error(body_error)
 
-
         admins = Admin.query().fetch()
         for admin in admins:
             info = ''
