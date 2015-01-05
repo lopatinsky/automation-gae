@@ -1,12 +1,11 @@
 __author__ = 'dvpermyakov'
 
-from .base import BaseHandler
-from models import TabletRequest, Admin
+from ..base import BaseHandler
+from models import TabletRequest, Admin, AdminStatus
 from datetime import datetime, timedelta
-from report import PROJECT_STARTING_YEAR
+from methods import PROJECT_STARTING_YEAR
 import json
 import time
-import operator
 import logging
 
 MAX_NUMBER_LAST_PING = 10
@@ -24,7 +23,7 @@ class AdminRequestNumber():
         self.number[part] += 1
 
 
-class TabletRequestReportHandler(BaseHandler):
+class TabletRequestGraphHandler(BaseHandler):
 
     @staticmethod
     def group_requests(init_requests, interval):
@@ -101,3 +100,17 @@ class TabletRequestReportHandler(BaseHandler):
             'admins_info': admins_info,
         }
         self.render('reported_tablet_requests_graph.html', **values)
+
+
+class TabletInfoHandler(BaseHandler):
+    def get(self):
+        admins_info = []
+        statuses = AdminStatus.query().fetch()
+        for status in statuses:
+            logging.info(status.token)
+            requests = TabletRequest.query(TabletRequest.token == status.token).order(-TabletRequest.request_time).fetch(
+                MAX_NUMBER_LAST_PING)
+            for request in requests:
+                request.name = status.admin.email
+            admins_info.extend(requests)
+        self.render('reported_tablet_requests_info.html', admins_info=admins_info)

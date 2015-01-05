@@ -294,3 +294,7 @@ class AdminStatus(ndb.Model):
     def admin(self):
         uid = int(self.key.id().split("_")[0])
         return Admin.get_by_id(uid)
+
+    @property
+    def token(self):
+        return self.key.id().split("_")[1]

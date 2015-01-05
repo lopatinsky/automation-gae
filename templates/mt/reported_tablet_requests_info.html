@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <table style="border-collapse:collapse; width:100%" border="1">
+         <tr>
+             <th>Id</th>
+             <th>Name</th>
+             <th>Token</th>
+             <th>App version</th>
+             <th>Last ping time</th>
+             <th>Location</th>
+             <th>Errors_number</th>
+             <th>Sound level general</th>
+             <th>Sound level system</th>
+             <th>Battery level</th>
+             <th>Charging</th>
+             <th>Turned on</th>
+         </tr>
+         {% for admin_info in admins_info %}
+             <tr>
+                 <td>{{ admin_info.admin_id }}</td>
+                 <td>{{ admin_info.name }}</td>
+                 <td>{{ admin_info.token }}</td>
+                 <td>{{ admin_info.app_versiom }}</td>
+                 <td>{{ admin_info.request_time }}</td>
+                 <td>{{ admin_info.location }}</td>
+                 <td>{{ admin_info.error_number }}</td>
+                 <td>{{ admin_info.sound_level_general}}</td>
+                 <td>{{ admin_info.sound_level_system }}</td>
+                 <td>{{ admin_info.battery_level }}</td>
+                 <td>{{ admin_info.is_in_charging }}</td>
+                 <td>{{ admin_info.is_turned_on }}</td>
+             </tr>
+         {% endfor %}
+     </table>
+</body>
+</html>
