@@ -1,6 +1,7 @@
 import json
 import logging
 from google.appengine.api import urlfetch
+from . import email
 
 SMSPILOT_API_KEY = 'YMO7263H170NDGPX2N3863D17EX88HX9P96MFK5O4DKKBQ8D9J897J9O6TQH8741'
 
@@ -19,4 +20,8 @@ def send_sms(from_, to, text):
     response = urlfetch.fetch("http://smspilot.ru/api2.php", payload=json.dumps(data), method='POST',
                               headers={'Content-Type': 'application/json'}).content
     logging.info(response)
+    result = json.loads(response)
+    for message in result["send"]:
+        if message["status"] != "0":
+            email.send_error("sms", "SMS failure", response)
     return json.loads(response)
