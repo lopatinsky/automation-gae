@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 from report import PROJECT_STARTING_YEAR
 import json
 import time
+import operator
+import logging
+
+MAX_NUMBER_LAST_PING = 10
 
 
 class AdminRequestNumber():
@@ -23,15 +27,10 @@ class AdminRequestNumber():
 class TabletRequestReportHandler(BaseHandler):
 
     @staticmethod
-    def group_requests(date, interval):
+    def group_requests(init_requests, interval):
         number_parts = 24 * 60 // interval
-        shift_date_min = datetime(date.year, date.month, date.day)
-        shift_date_max = shift_date_min + timedelta(days=1)
-        history_tablet_requests = TabletRequest.query(
-            TabletRequest.request_time >= shift_date_min,
-            TabletRequest.request_time <= shift_date_max).fetch()
         requests = {}
-        for request in history_tablet_requests:
+        for request in init_requests:
             if not request.token in requests:
                 requests[request.token] = AdminRequestNumber(request.admin_id, request.token, number_parts)
             requests[request.token].add_request(
@@ -73,15 +72,24 @@ class TabletRequestReportHandler(BaseHandler):
                         start_year=PROJECT_STARTING_YEAR,
                         end_year=datetime.now().year)
             return
-        admins = self.group_requests(date, chosen_interval)
+        requests = TabletRequest.query(TabletRequest.request_time >= date,
+                                       TabletRequest.request_time <= date + timedelta(days=1))\
+            .order(TabletRequest.request_time).fetch()
+        admins = self.group_requests(requests, chosen_interval)
         numbers = self.get_interval_numbers_json(date, admins)
         admins_info = {}
-        query = TabletRequest.query(TabletRequest.request_time > date,
-                                    TabletRequest.request_time < date + timedelta(days=1))\
-            .order(TabletRequest.request_time)
-        for request in query.fetch():
+        admins_indexes = {}
+        for request in requests:
             request.name = Admin.get_by_id(request.admin_id).email
-            admins_info[request.token] = request
+            if admins_indexes.get(request.token) is None:
+                admins_indexes[request.token] = 0
+            else:
+                admins_indexes[request.token] += 1
+                admins_indexes[request.token] %= MAX_NUMBER_LAST_PING
+            admins_info[request.token + str(admins_indexes[request.token])] = request
+        logging.info(admins_info.keys())
+        admins_info = admins_info.values()
+        admins_info = sorted(admins_info, key=lambda x: (x.token, x.request_time))
         values = {
             'numbers': json.dumps(numbers),
             'admins': admins,
@@ -91,6 +99,6 @@ class TabletRequestReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day,
             'chosen_interval': chosen_interval,
-            'admins_info': admins_info.values(),
+            'admins_info': admins_info,
         }
         self.render('reported_tablet_requests_graph.html', **values)
