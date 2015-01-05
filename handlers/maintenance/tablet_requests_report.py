@@ -87,7 +87,6 @@ class TabletRequestReportHandler(BaseHandler):
                 admins_indexes[request.token] += 1
                 admins_indexes[request.token] %= MAX_NUMBER_LAST_PING
             admins_info[request.token + str(admins_indexes[request.token])] = request
-        logging.info(admins_info.keys())
         admins_info = admins_info.values()
         admins_info = sorted(admins_info, key=lambda x: (x.token, x.request_time))
         values = {
