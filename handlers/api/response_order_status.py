@@ -1,9 +1,10 @@
+# coding=utf-8
 __author__ = 'dvpermyakov'
 
 import webapp2
 from models import Order, Client
 from .base import ApiHandler
-from methods import email
+from methods import email, sms
 import logging
 
 
@@ -19,6 +20,12 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
                    u"Client phone: %s" % (order_id, client.name, client.surname, client.tel)
             logging.warning(body)
             email.send_error('network', 'Order timeout', body)
+
+            sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов."
+            phone = client.tel
+            if len(phone) == 11 and phone[0] == "8":
+                phone = "7" + phone[1:]
+            sms.send_sms("DoubleB", phone, sms_text)
 
 
 class ClientSettingSuccessHandler(ApiHandler):
