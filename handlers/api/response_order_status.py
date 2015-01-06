@@ -25,7 +25,7 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
             phone = client.tel
             if len(phone) == 11 and phone[0] == "8":
                 phone = "7" + phone[1:]
-            sms.send_sms("DoubleB", phone, sms_text)
+            sms.send_sms("DoubleB", [phone], sms_text)
 
 
 class ClientSettingSuccessHandler(ApiHandler):
