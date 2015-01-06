@@ -130,8 +130,7 @@ class TabletInfoHandler(BaseHandler):
                     admin_info.name = admin.email
                     admin_info.token = status.token
                     admin_info.ping_number = 0
-                    self.render('reported_tablet_requests_info.html', admins_info=admins_info)
-                    return
+                    continue
                 admin_info.color = RED_CODE
             else:
                 admin_info = requests[0]
