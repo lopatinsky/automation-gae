@@ -24,11 +24,11 @@ class MenuHandler(ApiHandler):
             result_dict.update(category.dict())
         response = {'menu': result_dict}
 
-        # TODO iOS 1.1 fuckup
+        # fuckup iOS 1.1
         if client_id in _FUCKUP_CLIENTS_MAP:
             logging.warning("fuckup found: %s", client_id)
             client_id = _FUCKUP_CLIENTS_MAP[client_id]
-        # TODO END
+        # fuckup end
 
         client = None
         try:

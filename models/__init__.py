@@ -72,7 +72,7 @@ class Venue(ndb.Model):
     def dict(self, user_location=None):
         distance = 0
         if user_location:
-            distance = location.distance(ndb.GeoPt(user_location), self.coordinates)
+            distance = location.distance(user_location, self.coordinates)
         dct = {
             'id': str(self.key.id()),
             'distance': distance,

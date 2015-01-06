@@ -7,7 +7,7 @@ from config import config
 
 class ApiHandler(webapp2.RequestHandler):
     def dispatch(self):
-        # TODO iOS 1.1 fuckup
+        # fuckup iOS 1.1
         if config.DEBUG and self.request.headers['User-Agent'].startswith("DoubleB/1.1 "):
             result = urlfetch.fetch(
                 'http://empatika-doubleb.appspot.com' + self.request.path_qs,
@@ -20,7 +20,7 @@ class ApiHandler(webapp2.RequestHandler):
             self.response.headers['Content-Type'] = result.headers['Content-Type']
             self.response.write(result.content)
             return
-        # TODO end
+        # fuckup end
 
         for key, value in self.request.POST.iteritems():
             if key == "password":

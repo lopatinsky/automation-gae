@@ -140,7 +140,6 @@ class RegisterOrderHandler(ApiHandler):
 class StatusHandler(ApiHandler):
 
     def post(self):
-        #TODO errors handling
         response_json = json.loads(self.request.get('orders'))
         orders = []
         for order_id in response_json['orders']:
@@ -153,7 +152,6 @@ class StatusHandler(ApiHandler):
 class ReturnOrderHandler(ApiHandler):
 
     def post(self):
-        #TODO errors handling
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
