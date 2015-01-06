@@ -123,6 +123,7 @@ class TabletInfoHandler(BaseHandler):
                 admin_info.color = RED_CODE
             else:
                 admin_info = requests[0]
+                admin_info.color = None
             admin_info.name = Admin.get_by_id(admin_info.admin_id).email
             admin_info.ping_number = len(requests)
             admin_info.distance = location.distance(admin_info.location, status.location)
