@@ -100,7 +100,10 @@ AVAIL_SOUND_LEVEL = 10
 class TabletInfoHandler(BaseHandler):
 
     def check(self, admin_info):
-        if admin_info.ping_number < AVAIL_PING_PER_10 or \
+        if admin_info.app_version:
+            return False
+        if admin_info.error_sum or \
+                admin_info.ping_number < AVAIL_PING_PER_10 or \
                 admin_info.is_turned_on or \
                 (not admin_info.is_in_charging and admin_info.battery_level < AVAIL_BATTERY_LEVEL) or \
                 admin_info.sound_level_system < AVAIL_SOUND_LEVEL:
@@ -139,7 +142,7 @@ class TabletInfoHandler(BaseHandler):
             admin_info.error_sum = sum(request.error_number for request in requests)
             if not status.admin.venue.get().active:
                 admin_info.color = GRAY_CODE
-            elif admin_info.error_sum or not self.check(admin_info) or not admin_info.app_version:
+            elif not self.check(admin_info):
                 admin_info.color = RED_CODE
             elif not admin_info.color:
                 admin_info.color = GREEN_CODE
