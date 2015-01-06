@@ -65,3 +65,7 @@ indexes:
   - name: token
   - name: request_time
     direction: desc
+
+- kind: Admin
+  properties:
+  - name: venue

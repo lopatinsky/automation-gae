@@ -10,9 +10,9 @@
              <th>Name</th>
              <th>Token</th>
              <th>App version</th>
-             <th>Last ping time</th>
-             <th>Location</th>
-             <th>Errors_number</th>
+             <th>Ping number for the last 10 min</th>
+             <th>Distance</th>
+             <th>Errors_number for the last 10 min</th>
              <th>Sound level general</th>
              <th>Sound level system</th>
              <th>Battery level</th>
@@ -20,14 +20,14 @@
              <th>Turned on</th>
          </tr>
          {% for admin_info in admins_info %}
-             <tr>
+             <tr bgcolor={{ admin_info.color }}>
                  <td>{{ admin_info.admin_id }}</td>
                  <td>{{ admin_info.name }}</td>
                  <td>{{ admin_info.token }}</td>
                  <td>{{ admin_info.app_version }}</td>
-                 <td>{{ admin_info.request_time }}</td>
-                 <td>{{ admin_info.location }}</td>
-                 <td>{{ admin_info.error_number }}</td>
+                 <td>{{ admin_info.ping_number }}</td>
+                 <td>{{ admin_info.distance }}</td>
+                 <td>{{ admin_info.error_sum }}</td>
                  <td>{{ admin_info.sound_level_general}}</td>
                  <td>{{ admin_info.sound_level_system }}</td>
                  <td>{{ admin_info.battery_level }}</td>

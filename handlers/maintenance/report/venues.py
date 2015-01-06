@@ -3,7 +3,7 @@ __author__ = 'dvpermyakov'
 from ..base import BaseHandler
 from models import Order, Venue, READY_ORDER, BONUS_PAYMENT_TYPE
 from datetime import datetime, timedelta
-from methods import PROJECT_STARTING_YEAR, suitable_date
+from report_methods import PROJECT_STARTING_YEAR, suitable_date
 
 
 class ReportedVenue:

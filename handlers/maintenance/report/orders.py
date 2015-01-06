@@ -3,7 +3,7 @@ from collections import Counter
 from datetime import datetime
 from ..base import BaseHandler
 from config import config
-from handlers.maintenance.report.methods import suitable_date, PROJECT_STARTING_YEAR
+from handlers.maintenance.report.report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
     CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue
 

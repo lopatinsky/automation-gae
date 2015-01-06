@@ -4,7 +4,7 @@ from ..base import BaseHandler
 from models import Order, Client, Venue, READY_ORDER, BONUS_PAYMENT_TYPE,\
     CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
 from datetime import datetime
-from methods import PROJECT_STARTING_YEAR, suitable_date
+from report_methods import PROJECT_STARTING_YEAR, suitable_date
 from google.appengine.ext import ndb
 
 

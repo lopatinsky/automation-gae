@@ -3,13 +3,11 @@ __author__ = 'dvpermyakov'
 from ..base import BaseHandler
 from models import TabletRequest, Admin, AdminStatus
 from datetime import datetime, timedelta
-from methods import PROJECT_STARTING_YEAR
+from report_methods import PROJECT_STARTING_YEAR
+from methods import location
 import json
 import time
 import logging
-
-MAX_NUMBER_LAST_PING = 10
-
 
 class AdminRequestNumber():
     def __init__(self, admin_id, token, number_parts):
@@ -76,18 +74,6 @@ class TabletRequestGraphHandler(BaseHandler):
             .order(TabletRequest.request_time).fetch()
         admins = self.group_requests(requests, chosen_interval)
         numbers = self.get_interval_numbers_json(date, admins)
-        admins_info = {}
-        admins_indexes = {}
-        for request in requests:
-            request.name = Admin.get_by_id(request.admin_id).email
-            if admins_indexes.get(request.token) is None:
-                admins_indexes[request.token] = 0
-            else:
-                admins_indexes[request.token] += 1
-                admins_indexes[request.token] %= MAX_NUMBER_LAST_PING
-            admins_info[request.token + str(admins_indexes[request.token])] = request
-        admins_info = admins_info.values()
-        admins_info = sorted(admins_info, key=lambda x: (x.token, x.request_time))
         values = {
             'numbers': json.dumps(numbers),
             'admins': admins,
@@ -96,21 +82,40 @@ class TabletRequestGraphHandler(BaseHandler):
             'chosen_year': chosen_year,
             'chosen_month': chosen_month,
             'chosen_day': chosen_day,
-            'chosen_interval': chosen_interval,
-            'admins_info': admins_info,
+            'chosen_interval': chosen_interval
         }
         self.render('reported_tablet_requests_graph.html', **values)
 
 
+RED_CODE = '#DF0101'
+GREEN_CODE = '#04B404'
+GRAY_CODE = '#6E6E6E'
+
+
 class TabletInfoHandler(BaseHandler):
+
     def get(self):
         admins_info = []
         statuses = AdminStatus.query().fetch()
         for status in statuses:
+            if status.admin.venue is None:
+                continue
             logging.info(status.token)
-            requests = TabletRequest.query(TabletRequest.token == status.token).order(-TabletRequest.request_time).fetch(
-                MAX_NUMBER_LAST_PING)
-            for request in requests:
-                request.name = status.admin.email
-            admins_info.extend(requests)
+            query = TabletRequest.query(TabletRequest.token == status.token,
+                                        TabletRequest.request_time > datetime.now() - timedelta(days=20)).\
+                order(-TabletRequest.request_time)
+            admin_info = query.get()
+            if not admin_info:
+                continue
+            admin_info.name = Admin.get_by_id(admin_info.admin_id).email
+            admin_info.ping_number = query.count()
+            admin_info.distance = location.distance(admin_info.location, status.location)
+            admin_info.error_sum = sum(tablet_request.error_number for tablet_request in query.fetch())
+            if not status.admin.venue.get().active:
+                admin_info.color = GRAY_CODE
+            elif admin_info.error_sum:
+                admin_info.color = RED_CODE
+            else:
+                admin_info.color = GREEN_CODE
+            admins_info.append(admin_info)
         self.render('reported_tablet_requests_info.html', admins_info=admins_info)
