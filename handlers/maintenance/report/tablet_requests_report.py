@@ -9,6 +9,7 @@ import json
 import time
 import logging
 
+
 class AdminRequestNumber():
     def __init__(self, admin_id, token, number_parts):
         self.admin_id = admin_id
@@ -91,8 +92,21 @@ RED_CODE = '#DF0101'
 GREEN_CODE = '#04B404'
 GRAY_CODE = '#6E6E6E'
 
+AVAIL_PING_PER_10 = 4
+AVAIL_BATTERY_LEVEL = 10
+AVAIL_SOUND_LEVEL = 10
+
 
 class TabletInfoHandler(BaseHandler):
+
+    def check(self, admin_info):
+        if admin_info.ping_number < AVAIL_PING_PER_10 or \
+                admin_info.is_turned_on or \
+                (not admin_info.is_in_charging and admin_info.battery_level < AVAIL_BATTERY_LEVEL) or \
+                admin_info.sound_level_system < AVAIL_SOUND_LEVEL:
+            return False
+        else:
+            return True
 
     def get(self):
         admins_info = []
@@ -100,22 +114,24 @@ class TabletInfoHandler(BaseHandler):
         for status in statuses:
             if status.admin.venue is None:
                 continue
-            logging.info(status.token)
-            query = TabletRequest.query(TabletRequest.token == status.token,
-                                        TabletRequest.request_time > datetime.now() - timedelta(days=20)).\
-                order(-TabletRequest.request_time)
-            admin_info = query.get()
-            if not admin_info:
-                continue
-            admin_info.name = Admin.get_by_id(admin_info.admin_id).email
-            admin_info.ping_number = query.count()
-            admin_info.distance = location.distance(admin_info.location, status.location)
-            admin_info.error_sum = sum(tablet_request.error_number for tablet_request in query.fetch())
-            if not status.admin.venue.get().active:
-                admin_info.color = GRAY_CODE
-            elif admin_info.error_sum:
+            requests = TabletRequest.query(TabletRequest.token == status.token,
+                                           TabletRequest.request_time > datetime.now() - timedelta(minutes=10)).\
+                order(-TabletRequest.request_time).fetch()
+            if not requests:
+                admin_info = TabletRequest.query(TabletRequest.token == status.token).\
+                    order(-TabletRequest.request_time).get()
                 admin_info.color = RED_CODE
             else:
+                admin_info = requests[0]
+            admin_info.name = Admin.get_by_id(admin_info.admin_id).email
+            admin_info.ping_number = len(requests)
+            admin_info.distance = location.distance(admin_info.location, status.location)
+            admin_info.error_sum = sum(request.error_number for request in requests)
+            if not status.admin.venue.get().active:
+                admin_info.color = GRAY_CODE
+            elif admin_info.error_sum or not self.check(admin_info):
+                admin_info.color = RED_CODE
+            elif not admin_info.color:
                 admin_info.color = GREEN_CODE
             admins_info.append(admin_info)
         self.render('reported_tablet_requests_info.html', admins_info=admins_info)
