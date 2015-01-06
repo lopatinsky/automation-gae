@@ -120,6 +120,15 @@ class TabletInfoHandler(BaseHandler):
             if not requests:
                 admin_info = TabletRequest.query(TabletRequest.token == status.token).\
                     order(-TabletRequest.request_time).get()
+                if not admin_info:
+                    admin_info = TabletRequest()
+                    admin = status.admin
+                    admin_info.admin_id = admin.key.id()
+                    admin_info.name = admin.email
+                    admin_info.token = status.token
+                    admin_info.ping_number = 0
+                    self.render('reported_tablet_requests_info.html', admins_info=admins_info)
+                    return
                 admin_info.color = RED_CODE
             else:
                 admin_info = requests[0]
@@ -130,7 +139,7 @@ class TabletInfoHandler(BaseHandler):
             admin_info.error_sum = sum(request.error_number for request in requests)
             if not status.admin.venue.get().active:
                 admin_info.color = GRAY_CODE
-            elif admin_info.error_sum or not self.check(admin_info):
+            elif admin_info.error_sum or not self.check(admin_info) or not admin_info.app_version:
                 admin_info.color = RED_CODE
             elif not admin_info.color:
                 admin_info.color = GREEN_CODE
