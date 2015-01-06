@@ -141,7 +141,8 @@ class TabletInfoHandler(BaseHandler):
             admin_info.ping_number = len(requests)
             admin_info.distance = location.distance(admin_info.location, status.location)
             admin_info.error_sum = sum(request.error_number for request in requests) if admin_info.app_version else 0
-            if not status.admin.venue.get().active or not status.admin.venue.get().is_open:
+            venue = status.admin.venue.get()
+            if not venue.active or not venue.is_open():
                 admin_info.color = GRAY_CODE
             elif not self.check(admin_info):
                 admin_info.color = RED_CODE
