@@ -130,6 +130,7 @@ class TabletInfoHandler(BaseHandler):
                     admin_info.name = admin.email
                     admin_info.token = status.token
                     admin_info.ping_number = 0
+                    admins_info.append(admin_info)
                     continue
                 admin_info.color = RED_CODE
             else:
