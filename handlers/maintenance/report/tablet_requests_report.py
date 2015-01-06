@@ -100,7 +100,7 @@ AVAIL_SOUND_LEVEL = 10
 class TabletInfoHandler(BaseHandler):
 
     def check(self, admin_info):
-        if admin_info.app_version:
+        if not admin_info.app_version:
             return False
         if admin_info.error_sum or \
                 admin_info.ping_number < AVAIL_PING_PER_10 or \
