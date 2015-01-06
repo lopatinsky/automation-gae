@@ -139,7 +139,7 @@ class TabletInfoHandler(BaseHandler):
             admin_info.name = Admin.get_by_id(admin_info.admin_id).email
             admin_info.ping_number = len(requests)
             admin_info.distance = location.distance(admin_info.location, status.location)
-            admin_info.error_sum = sum(request.error_number for request in requests)
+            admin_info.error_sum = sum(request.error_number for request in requests) if admin_info.app_version else 0
             if not status.admin.venue.get().active:
                 admin_info.color = GRAY_CODE
             elif not self.check(admin_info):
