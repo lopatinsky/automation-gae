@@ -104,7 +104,7 @@ class TabletInfoHandler(BaseHandler):
             return False
         if admin_info.error_sum or \
                 admin_info.ping_number < AVAIL_PING_PER_10 or \
-                admin_info.is_turned_on or \
+                not admin_info.is_turned_on or \
                 (not admin_info.is_in_charging and admin_info.battery_level < AVAIL_BATTERY_LEVEL) or \
                 admin_info.sound_level_system < AVAIL_SOUND_LEVEL:
             return False
