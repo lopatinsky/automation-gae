@@ -1,3 +1,5 @@
+from methods.pings import PingReport, LEVEL_SUPPRESSED, LEVEL_OK, LEVEL_WARNING, LEVEL_ERROR, LEVEL_CRITICAL
+
 __author__ = 'dvpermyakov'
 
 from ..base import BaseHandler
@@ -88,65 +90,18 @@ class TabletRequestGraphHandler(BaseHandler):
         self.render('reported_tablet_requests_graph.html', **values)
 
 
-RED_CODE = '#DF0101'
-GREEN_CODE = '#04B404'
-GRAY_CODE = '#6E6E6E'
-
-AVAIL_PING_PER_10 = 4
-AVAIL_BATTERY_LEVEL = 10
-AVAIL_SOUND_LEVEL = 10
+_LEVELS_COLOR_MAP = {
+    LEVEL_SUPPRESSED: 'CCCCCC',
+    LEVEL_OK: '00FF00',
+    LEVEL_WARNING: 'FFFF00',
+    LEVEL_ERROR: 'FFA500',
+    LEVEL_CRITICAL: 'FF0000'
+}
 
 
 class TabletInfoHandler(BaseHandler):
 
-    def check(self, admin_info):
-        if not admin_info.app_version:
-            return False
-        if admin_info.error_sum or \
-                admin_info.ping_number < AVAIL_PING_PER_10 or \
-                not admin_info.is_turned_on or \
-                (not admin_info.is_in_charging and admin_info.battery_level < AVAIL_BATTERY_LEVEL) or \
-                admin_info.sound_level_system < AVAIL_SOUND_LEVEL:
-            return False
-        else:
-            return True
-
     def get(self):
-        admins_info = []
         statuses = AdminStatus.query().fetch()
-        for status in statuses:
-            if status.admin.venue is None:
-                continue
-            requests = TabletRequest.query(TabletRequest.token == status.token,
-                                           TabletRequest.request_time > datetime.now() - timedelta(minutes=10)).\
-                order(-TabletRequest.request_time).fetch()
-            if not requests:
-                admin_info = TabletRequest.query(TabletRequest.token == status.token).\
-                    order(-TabletRequest.request_time).get()
-                if not admin_info:
-                    admin_info = TabletRequest()
-                    admin = status.admin
-                    admin_info.admin_id = admin.key.id()
-                    admin_info.name = admin.email
-                    admin_info.token = status.token
-                    admin_info.ping_number = 0
-                    admin_info.color = RED_CODE
-                    admins_info.append(admin_info)
-                    continue
-                admin_info.color = RED_CODE
-            else:
-                admin_info = requests[0]
-                admin_info.color = None
-            admin_info.name = Admin.get_by_id(admin_info.admin_id).email
-            admin_info.ping_number = len(requests)
-            admin_info.distance = location.distance(admin_info.location, status.location)
-            admin_info.error_sum = sum(request.error_number for request in requests) if admin_info.app_version else 0
-            venue = status.admin.venue.get()
-            if not venue.active or not venue.is_open():
-                admin_info.color = GRAY_CODE
-            elif not self.check(admin_info):
-                admin_info.color = RED_CODE
-            elif not admin_info.color:
-                admin_info.color = GREEN_CODE
-            admins_info.append(admin_info)
-        self.render('reported_tablet_requests_info.html', admins_info=admins_info)
+        admins_info = [PingReport(status) for status in statuses]
+        self.render('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)

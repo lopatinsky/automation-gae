@@ -13,26 +13,24 @@
              <th>Ping number for the last 10 min</th>
              <th>Distance</th>
              <th>Errors_number for the last 10 min</th>
-             <th>Sound level general</th>
              <th>Sound level system</th>
              <th>Battery level</th>
              <th>Charging</th>
              <th>Turned on</th>
          </tr>
          {% for admin_info in admins_info %}
-             <tr bgcolor={{ admin_info.color }}>
-                 <td>{{ admin_info.admin_id }}</td>
-                 <td>{{ admin_info.name }}</td>
-                 <td>{{ admin_info.token }}</td>
+             <tr bgcolor="#{{ colors[admin_info.error_level] }}" title="{{ "\n".join(admin_info.error_messages) }}">
+                 <td>{{ admin_info.admin_status.admin_id }}</td>
+                 <td>{{ admin_info.admin_status.admin.email }}</td>
+                 <td>{{ admin_info.admin_status.token }}</td>
                  <td>{{ admin_info.app_version }}</td>
-                 <td>{{ admin_info.ping_number }}</td>
+                 <td>{{ admin_info.pings_10min|length }}</td>
                  <td>{{ admin_info.distance }}</td>
-                 <td>{{ admin_info.error_sum }}</td>
-                 <td>{{ admin_info.sound_level_general}}</td>
+                 <td>{{ admin_info.error_number }}</td>
                  <td>{{ admin_info.sound_level_system }}</td>
                  <td>{{ admin_info.battery_level }}</td>
-                 <td>{{ admin_info.is_in_charging }}</td>
-                 <td>{{ admin_info.is_turned_on }}</td>
+                 <td>{{ admin_info.charging }}</td>
+                 <td>{{ admin_info.turned_on }}</td>
              </tr>
          {% endfor %}
      </table>
