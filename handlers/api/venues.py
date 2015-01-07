@@ -1,3 +1,4 @@
+from google.appengine.api.datastore_errors import BadValueError
 from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
 from models import Venue
@@ -11,7 +12,7 @@ class VenuesHandler(ApiHandler):
         location = self.request.get("ll")
         try:
             location = ndb.GeoPt(location)
-        except ValueError:
+        except BadValueError:
             location = None
 
         venue_dicts = [venue.dict(location) for venue in venues]
