@@ -13,7 +13,7 @@ class SearchInactiveClientsHandler(RequestHandler):
     def get(self):
         clients_with_phone = Client.query(Client.created > datetime.now() - timedelta(days=CLIENT_DAY_INTERVAL)).fetch()
         for client in clients_with_phone[:]:
-            if client.tel is None:
+            if not client.tel:
                 clients_with_phone.remove(client)
         for client in clients_with_phone[:]:
             last_order = Order.query(Order.client_id == client.key.id()).get()
