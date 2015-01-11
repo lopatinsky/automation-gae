@@ -21,7 +21,7 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
             logging.warning(body)
             email.send_error('network', 'Order timeout', body)
 
-            sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов."
+            sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов." % (client.name, order_id)
             phone = client.tel
             if len(phone) == 11 and phone[0] == "8":
                 phone = "7" + phone[1:]
