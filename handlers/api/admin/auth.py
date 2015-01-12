@@ -12,6 +12,7 @@ class LoginHandler(AdminApiHandler):
         password = self.request.get("password")
         lat = float(self.request.get("lat"))
         lon = float(self.request.get("lon"))
+        readonly = self.request.get("readonly") == "true"
         try:
             user_dict = self.auth.get_user_by_password(email, password, save_session=False)
         except (InvalidAuthIdError, InvalidPasswordError):
@@ -19,7 +20,7 @@ class LoginHandler(AdminApiHandler):
         uid = user_dict["user_id"]
         token = security.generate_random_string(entropy=256)
         full_token = "%s_%s" % (uid, token)
-        AdminStatus.create(uid, token, GeoPt(lat, lon))
+        AdminStatus.create(uid, token, GeoPt(lat, lon), readonly)
         self.render_json({"token": full_token})
 
 

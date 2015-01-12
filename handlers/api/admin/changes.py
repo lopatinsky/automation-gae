@@ -4,7 +4,7 @@ import logging
 from config import config
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos
-from methods.auth import api_user_required
+from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
     NEW_ORDER
@@ -13,7 +13,7 @@ __author__ = 'ilyazorin'
 
 
 class CancelOrderHandler(AdminApiHandler):
-    @api_user_required
+    @write_access_required
     def post(self, order_id):
         comment = self.request.get('comment')
         order = self.user.order_by_id(int(order_id))
@@ -49,7 +49,7 @@ class CancelOrderHandler(AdminApiHandler):
 
 
 class DoneOrderHandler(AdminApiHandler):
-    @api_user_required
+    @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
         if order.status != NEW_ORDER:
@@ -77,7 +77,7 @@ class DoneOrderHandler(AdminApiHandler):
 
 
 class PostponeOrderHandler(AdminApiHandler):
-    @api_user_required
+    @write_access_required
     def post(self, order_id):
         mins = self.request.get_range("mins")
 

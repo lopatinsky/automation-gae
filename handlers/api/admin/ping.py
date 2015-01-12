@@ -32,9 +32,11 @@ class PingHandler(AdminApiHandler):
             status.location = geopt
         status.put()
 
-        history_item = TabletRequest(admin_id=status.admin.key.id(), token=self.token, location=geopt,
-                                     error_number=error_number, sound_level_general=sound_level_general,
-                                     sound_level_system=sound_level_system, is_in_charging=is_in_charging,
-                                     is_turned_on=is_turned_on, app_version=app_version, battery_level=battery_level)
-        history_item.put()
+        if status.admin.venue and not status.readonly:
+            history_item = TabletRequest(admin_id=status.admin.key.id(), token=self.token, location=geopt,
+                                         error_number=error_number, sound_level_general=sound_level_general,
+                                         sound_level_system=sound_level_system, is_in_charging=is_in_charging,
+                                         is_turned_on=is_turned_on, app_version=app_version,
+                                         battery_level=battery_level)
+            history_item.put()
         self.render_json({})

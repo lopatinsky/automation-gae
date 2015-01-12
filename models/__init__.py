@@ -273,15 +273,16 @@ class Admin(models.User):
 class AdminStatus(ndb.Model):
     location = ndb.GeoPtProperty()
     time = ndb.DateTimeProperty(auto_now=True)
+    readonly = ndb.BooleanProperty(default=False)
 
     @staticmethod
     def _make_key_name(uid, token):
         return "%s_%s" % (uid, token)
 
     @classmethod
-    def create(cls, uid, token, location):
+    def create(cls, uid, token, location, readonly):
         key_name = cls._make_key_name(uid, token)
-        entity = cls(id=key_name, location=location)
+        entity = cls(id=key_name, location=location, readonly=readonly)
         entity.put()
         return entity
 

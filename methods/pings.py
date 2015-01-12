@@ -70,6 +70,7 @@ class PingReport(object):
 
         self._get_pings()
 
+        self._check_suppressed()
         self._add_global_errors()
         if self.last_ping:
             self.app_version = self.last_ping.app_version
@@ -86,15 +87,16 @@ class PingReport(object):
             self.last_ping = TabletRequest.query(TabletRequest.token == self.admin_status.token)\
                 .order(-TabletRequest.request_time).get()
 
-    def _add_global_errors(self):
+    def _check_suppressed(self):
         venue_key = self.admin_status.admin.venue
-        if venue_key is None:
+        if self.admin_status.readonly or venue_key is None:
             self.suppressed = True
         else:
             venue = venue_key.get()
             if not venue.active or not venue.is_open():
                 self.suppressed = True
 
+    def _add_global_errors(self):
         if not self.last_ping:
             self._add_error(LEVEL_CRITICAL, "No pings found for this token")
 

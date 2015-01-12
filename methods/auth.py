@@ -26,3 +26,14 @@ def api_user_required(handler):
         else:
             return handler(self, *args, **kwargs)
     return check_user
+
+
+def write_access_required(handler):
+    def check_user(self, *args, **kwargs):
+        if self.user is None:
+            self.abort(401)
+        elif self._token_entity.readonly:
+            self.abort(403)
+        else:
+            return handler(self, *args, **kwargs)
+    return check_user
