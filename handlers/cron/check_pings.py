@@ -1,7 +1,7 @@
 import logging
 from webapp2 import RequestHandler
 from methods import email
-from methods.pings import PingReport, LEVEL_OK
+from methods.pings import PingReport, LEVEL_OK, LEVEL_WARNING
 from models import AdminStatus
 
 
@@ -24,4 +24,7 @@ class CheckPingsHandler(RequestHandler):
         body = "\n\n".join(error_messages)
 
         logging.info(body)
-        email.send_error("ping", "Tablet monitoring errors", body)
+
+        max_level = max(r.error_level for r in error_reports)
+        subject = "Tablet monitoring " + ("warnings" if max_level == LEVEL_WARNING else "errors")
+        email.send_error("ping", subject, body)
