@@ -17,11 +17,13 @@
              <th>Battery level</th>
              <th>Charging</th>
              <th>Turned on</th>
+             <th></th>
          </tr>
          {% for admin_info in admins_info %}
+             {% set admin = admin_info.admin_status.admin %}
              <tr bgcolor="#{{ colors[admin_info.error_level] }}" title="{{ "\n".join(admin_info.error_messages) }}">
-                 <td>{{ admin_info.admin_status.admin_id }}</td>
-                 <td>{{ admin_info.admin_status.admin.email }}</td>
+                 <td>{{ admin.key.id() }}</td>
+                 <td>{{ admin.email }}</td>
                  <td>{{ admin_info.admin_status.token }}</td>
                  <td>{{ admin_info.app_version }}</td>
                  <td>{{ admin_info.pings_10min|length }}</td>
@@ -31,8 +33,19 @@
                  <td>{{ admin_info.battery_level }}</td>
                  <td>{{ admin_info.charging }}</td>
                  <td>{{ admin_info.turned_on }}</td>
+                 <td>
+                     <form action="" method="post" onsubmit="return formSubmit('{{ admin.email }}');">
+                         <button name="logout_token" value="{{ admin_info.admin_status.key.id() }}">Logout</button>
+                     </form>
+                 </td>
              </tr>
          {% endfor %}
      </table>
+
+    <script>
+        function formSubmit(login) {
+            return confirm("Are you sure you want to logout user '" + login + "'?");
+        }
+    </script>
 </body>
 </html>

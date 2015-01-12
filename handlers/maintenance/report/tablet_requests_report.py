@@ -105,3 +105,11 @@ class TabletInfoHandler(BaseHandler):
         statuses = AdminStatus.query().fetch()
         admins_info = [PingReport(status) for status in statuses]
         self.render('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
+
+    def post(self):
+        token = self.request.get("logout_token")
+        status = AdminStatus.get_by_id(token)
+        if status:
+            status.key.delete()
+
+        self.get()
