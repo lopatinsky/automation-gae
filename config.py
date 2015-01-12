@@ -6,7 +6,7 @@ class DoubleBConfig(object):
     PROMO_ENABLED = True
     PROMO_MASTERCARD_ONLY = True
     POINTS_PER_CUP = 5
-    PROMO_END_DATE = datetime.date(2015, 1, 1)
+    PROMO_END_DATE = datetime.date(2015, 2, 28)
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
     CANCEL_ALLOWED_BEFORE = 3
 
