@@ -48,7 +48,8 @@ class ProductionConfig(DoubleBConfig):
         "server": "admins",
         "order": "admins",
         "network": "admins",
-        "analytics": "admins"
+        "analytics": "admins",
+        "ping": "admins",
     }
 
 
