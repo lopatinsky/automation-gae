@@ -10,9 +10,9 @@ LEVEL_ERROR = 2
 LEVEL_CRITICAL = 3
 
 LEVELS_STRING_MAP = {
-    LEVEL_WARNING: 'WARNING',
-    LEVEL_ERROR: 'ERROR',
-    LEVEL_CRITICAL: 'CRITICAL'
+    LEVEL_WARNING: '!',
+    LEVEL_ERROR: '!!',
+    LEVEL_CRITICAL: '!!!'
 }
 
 
@@ -93,7 +93,7 @@ class PingReport(object):
             self.suppressed = True
         else:
             venue = venue_key.get()
-            if not venue.active or not venue.is_open():
+            if not venue.active or not venue.is_open(-1):
                 self.suppressed = True
 
     def _add_global_errors(self):
@@ -108,7 +108,7 @@ class PingReport(object):
         for ping in self.pings_10min:
             if ping.error_number is not None:
                 self.error_number += ping.error_number
-        error_number_level = _low_value_level(self.error_number, 10, 5, 1)
+        error_number_level = _low_value_level(self.error_number, 20, 10, 5)
         self._add_error(error_number_level, "Request errors in the last 10 minutes: %s" % self.error_number)
 
     def _collect_worst_info(self):
@@ -140,7 +140,7 @@ class PingReport(object):
         elif self.distance is None:
             self._add_error(LEVEL_WARNING, "GPS lock lost")
         else:
-            distance_error_level = _low_value_level(self.distance, 2, 1, 0.5)
+            distance_error_level = _low_value_level(self.distance, 3, 2, 1)
             self._add_error(distance_error_level, "Distance too large: %s" % self.distance)
 
         if self.app_version is None:
@@ -148,7 +148,7 @@ class PingReport(object):
             return
 
         if self.charging is False:
-            self._add_error(LEVEL_WARNING, "Tablet not charging")
+            self._add_error(LEVEL_ERROR, "Tablet not charging")
 
         if self.turned_on is False:
             self._add_error(LEVEL_CRITICAL, "Tablet turned off")
