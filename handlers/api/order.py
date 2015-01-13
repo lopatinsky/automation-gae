@@ -126,10 +126,11 @@ class OrderHandler(ApiHandler):
 
             self.response.status_int = 201
             self.render_json({'order_id': order_id, 'shared_info': {
-                'text_share_new_order': 'Я эксперт кофе 80ого уровня',
-                'text_share_about_up': '''
+                'text_share_new_order': 'Я эксперт кофе 80-го уровня',
+                'text_share_about_app': '''
                                         Приложение Даблби позволяет легко и просто оформить
-                                        и оплатить заказ без необходимости стоять в очереди'''
+                                        и оплатить заказ без необходимости стоять в очереди''',
+                'app_url': 'https://itunes.apple.com/app/id908237281'
                 }
             })
         else:
