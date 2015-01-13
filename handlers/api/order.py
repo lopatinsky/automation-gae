@@ -125,7 +125,10 @@ class OrderHandler(ApiHandler):
             memcache.delete(cache_key)
 
             self.response.status_int = 201
-            self.render_json({'order_id': order_id})
+            self.render_json({'order_id': order_id, 'shared_info': {
+                'shared_text': 'Я эксперт кофе 80ого уровня'
+                }
+            })
         else:
             memcache.delete(cache_key)
             self.abort(400)
