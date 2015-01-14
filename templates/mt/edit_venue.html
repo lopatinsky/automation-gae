@@ -22,7 +22,7 @@
         {% for param in ('title', 'description', 'coordinates', 'working_days', 'working_hours', 'holiday_schedule') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] }}" style="width:500px"/>
+                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] or "" }}" style="width:500px"/>
             </div>
         {% endfor %}
         <div>
