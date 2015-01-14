@@ -130,7 +130,8 @@ class OrderHandler(ApiHandler):
                 'text_share_about_app': '''
                                         Приложение Даблби позволяет легко и просто оформить
                                         и оплатить заказ без необходимости стоять в очереди''',
-                'app_url': 'https://itunes.apple.com/app/id908237281'
+                'app_url_ios': 'https://itunes.apple.com/app/id908237281',
+                'app_url_android': ''
                 }
             })
         else:

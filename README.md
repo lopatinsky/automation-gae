@@ -247,6 +247,12 @@ Response:
 #!js
 {
     "order_id": order_id // int
+    "shared_info": {
+        "text_share_new_order": sharing text // string
+        "text_share_about_app": text about doubleb // string
+        "app_url_ios": url // string
+        "app_url_android" url // string
+    }
 }
 ```
 
