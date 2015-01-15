@@ -18,5 +18,6 @@ class PromoInfoHandler(ApiHandler):
             "points_per_cup": config.POINTS_PER_CUP,
             "has_mastercard_orders": client.has_mastercard_orders,
             "bonus_points": bonus_points,
+            "wallet_balance": 0,
             "news": [n.dict() for n in news]
         })

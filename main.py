@@ -73,6 +73,7 @@ app = WSGIApplication([
         Route('/return.php', api.ReturnOrderHandler),
         Route('/promo_info', api.PromoInfoHandler),
         Route('/history', api.HistoryHandler),
+        Route('/wallet_deposit', api.DepositToWalletHandler),
 
         Route('/update/promo', api.UpdateOrderPromos),
     ]),

@@ -14,6 +14,7 @@
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
 >           * [Cancel order](#markdown-header-cancel-order)
+>           * [Deposit money from card to wallet](#markdown-header-deposit-money-from-card-to-wallet)
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
 >           * [Login](#markdown-header-login)
 >           * [Logout](#markdown-header-logout)
@@ -127,6 +128,7 @@ Parameters:
     "points_per_cup": points_per_cup,                      // int
     "has_mastercard_orders": client_has_mastercard_orders, // boolean
     "bonus_points": client_bonus_points,                   // int
+    "wallet_balance": client_wallet_balance,               // int
     "news": [
         {
             "id": news_id,                                 // int
@@ -357,6 +359,22 @@ Response on failure:
 }
 ```
 
+### Deposit money from card to wallet
+
+POST `/api/wallet_deposit`
+
+Parameters:
+
+* `client_id`: string
+* `binding_id`: string
+* `amount`: int (in rubles)
+
+```
+#!js
+{
+}
+```
+
 ## Endpoints for admins
 
 ### Login
@@ -574,6 +592,7 @@ Parameters:
 * `0`: cash
 * `1`: card
 * `2`: bonus
+* `3`: wallet
 
 ### Order statuses
 

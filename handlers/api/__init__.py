@@ -11,4 +11,5 @@ from promo_info import PromoInfoHandler
 from client import ClientHandler
 from history import HistoryHandler
 from response_order_status import CheckOrderSuccessHandler, ClientSettingSuccessHandler
+from wallet import DepositToWalletHandler
 from update_order import UpdateOrderPromos
