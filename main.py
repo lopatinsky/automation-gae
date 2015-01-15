@@ -73,6 +73,8 @@ app = WSGIApplication([
         Route('/return.php', api.ReturnOrderHandler),
         Route('/promo_info', api.PromoInfoHandler),
         Route('/history', api.HistoryHandler),
+
+        Route('/update/promo', api.UpdateOrderPromos),
     ]),
 
     PathPrefixRoute('/admin', [
