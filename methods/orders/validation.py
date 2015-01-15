@@ -85,10 +85,6 @@ def _check_stop_lists(item_dicts, venue, errors):
     return True
 
 
-def apply_master_promo(item_dicts, promos_info, client, payment_info):
-    _apply_master_promo(item_dicts, promos_info, client, payment_info)
-
-
 def _apply_master_promo(item_dicts, promos_info, client, payment_info):
     if payment_info["type_id"] == CARD_PAYMENT_TYPE and \
             payment_info["mastercard"] and not client.has_mastercard_orders:

@@ -37,6 +37,15 @@ class UpdateOrderPromos(ApiHandler):
                         promos=['master']
                     )
                     order.item_details.append(order_details)
+                    for item in order.items:
+                        if item.key.id() != richest.key.id():
+                            order_details = OrderPositionDetails(
+                                item=item.key,
+                                price=item.price,
+                                revenue=item.price,
+                                promos=[]
+                            )
+                            order.item_details.append(order_details)
                     order.put()
                 item_details = []
                 for item in order.item_details:
