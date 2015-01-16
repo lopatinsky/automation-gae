@@ -6,6 +6,7 @@ from clients import ClientsReportHandler
 from orders import OrdersReportHandler
 from tablet_requests_report import TabletRequestGraphHandler
 from report_methods import PROJECT_STARTING_YEAR
+from repeated_orders import RepeatedOrdersHandler
 
 from ..base import BaseHandler
 
