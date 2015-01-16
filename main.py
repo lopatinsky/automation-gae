@@ -75,6 +75,7 @@ app = WSGIApplication([
         Route('/history', api.HistoryHandler),
 
         Route('/update/promo', api.UpdateOrderPromos),
+        Route('/shared/info', api.GetSharedInfo),
     ]),
 
     PathPrefixRoute('/admin', [

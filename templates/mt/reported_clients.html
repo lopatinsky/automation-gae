@@ -54,6 +54,7 @@
              <th>Name</th>
              <th>Telephone</th>
              <th>Number of Orders</th>
+             <th>Venue Revenue</th>
              <th>Total Expenditure</th>
              <th>Payment</th>
              <th>Number of Cancelled Orders</th>
@@ -66,7 +67,8 @@
                  <td>{{ client.name }}</td>
                  <td>{{ client.tel }}</td>
                  <td>{{ client.amount_orders }}</td>
-                 <td>{{ client.success_sum }}</td>
+                 <td>{{ client.venue_sum }}</td>
+                 <td>{{ client.menu_sum }}</td>
                  <td>{{ client.payment }}</td>
                  <td>{{ client.cancel_number }}</td>
                  <td>{{ client.cancel_sum }}</td>
@@ -78,6 +80,7 @@
              <td></td>
              <td><b>Total</b></td>
              <td>{{ venue_number }}</td>
+             <td>{{ venue_revenue }}</td>
              <td>{{ venue_expenditure }}</td>
              <td>{{ venue_payment }}</td>
              <td>{{ venue_cancel_number }}</td>
