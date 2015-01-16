@@ -19,6 +19,8 @@ class ProductionConfig(DoubleBConfig):
     PROMOS_API_KEY = "NTY1OTMxMzU4NjU2OTIxNgVhFXVOYTAN9r_AM_Jrg-nwDwOj"
     FREE_COFFEE_PROMO_ID = 5634472569470976
 
+    WALLET_API_KEY = "NTY0OTM5MTY3NTI0NDU0NBE8wm32mo01mvyuqw_cyggFtHwJ"
+
     CITY_HAPPY_HOURS = {
         4801814507552768: {  # ftower
             "days": "12345",
@@ -64,6 +66,8 @@ class TestingConfig(DoubleBConfig):
 
     PROMOS_API_KEY = "NTcxOTIzODA0NDAyNDgzMjEGJ9yK_bldMcuo0k-zMH3xktB4"
     FREE_COFFEE_PROMO_ID = 5678701068943360
+
+    WALLET_API_KEY = "NTYzOTQ0NTYwNDcyODgzMtuXDbBgjVQ_ugoIrRnGSjT5LFgK"
 
     CITY_HAPPY_HOURS = {
         5629499534213120: {
