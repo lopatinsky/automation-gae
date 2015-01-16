@@ -369,9 +369,21 @@ Parameters:
 * `binding_id`: string
 * `amount`: int (in rubles)
 
+Success response:
+
 ```
 #!js
 {
+    "balance": client_new_balance // int
+}
+```
+
+Error response:
+
+```
+#!js
+{
+    "description": error_description // string
 }
 ```
 

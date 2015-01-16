@@ -3,11 +3,11 @@ import datetime
 import logging
 from config import config
 from handlers.api.admin.base import AdminApiHandler
-from methods import push, alfa_bank, empatika_promos
+from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
-    NEW_ORDER
+    NEW_ORDER, WALLET_PAYMENT_TYPE
 
 __author__ = 'ilyazorin'
 
@@ -26,6 +26,12 @@ class CancelOrderHandler(AdminApiHandler):
             try:
                 empatika_promos.cancel_activation(order.payment_id)
             except empatika_promos.EmpatikaPromosError as e:
+                logging.exception(e)
+                success = False
+        elif order.payment_type_id == WALLET_PAYMENT_TYPE:
+            try:
+                empatika_wallet.reverse(order.client_id, order_id)
+            except empatika_wallet.EmpatikaWalletError as e:
                 logging.exception(e)
                 success = False
 

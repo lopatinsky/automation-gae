@@ -7,10 +7,10 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, sms, push, empatika_promos, orders
+from methods import alfa_bank, sms, push, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, WALLET_PAYMENT_TYPE
 from google.appengine.api import taskqueue
 
 __author__ = 'ilyazorin'
@@ -106,6 +106,9 @@ class OrderHandler(ApiHandler):
                 activation = empatika_promos.activate_promo(client_id, config.FREE_COFFEE_PROMO_ID, cup_count)
                 payment_id = str(activation['activation']['id'])
 
+            if payment_type_id == WALLET_PAYMENT_TYPE:
+                empatika_wallet.pay(client_id, order_id, total_sum)
+
             client.put()
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
@@ -183,6 +186,12 @@ class ReturnOrderHandler(ApiHandler):
                     try:
                         empatika_promos.cancel_activation(order.payment_id)
                     except empatika_promos.EmpatikaPromosError as e:
+                        logging.exception(e)
+                        self.abort(400)
+                elif order.payment_type_id == WALLET_PAYMENT_TYPE:
+                    try:
+                        empatika_wallet.reverse(order.client_id, order_id)
+                    except empatika_wallet.EmpatikaWalletError as e:
                         logging.exception(e)
                         self.abort(400)
 

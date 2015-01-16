@@ -122,7 +122,7 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_time = ndb.DateTimeProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE))
+                                                                  BONUS_PAYMENT_TYPE, WALLET_PAYMENT_TYPE))
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty(required=True)
     pan = ndb.StringProperty(indexed=False)
