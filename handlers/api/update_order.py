@@ -37,8 +37,10 @@ class UpdateOrderPromos(ApiHandler):
                         promos=['master']
                     )
                     order.item_details.append(order_details)
+                    need_set_promo = True
                     for item in order.items:
-                        if item.key.id() != richest.key.id():
+                        item = item.get()
+                        if item.key.id() != richest.key.id() or (not need_set_promo and item.key.id() == richest.key.id()):
                             order_details = OrderPositionDetails(
                                 item=item.key,
                                 price=item.price,
@@ -46,23 +48,38 @@ class UpdateOrderPromos(ApiHandler):
                                 promos=[]
                             )
                             order.item_details.append(order_details)
-                    order.put()
-                item_details = []
-                for item in order.item_details:
-                    item_details.append({
-                        'price': item.price,
-                        'revenue': item.revenue,
-                        'promo': item.promos,
-                        'item': item.item.get().title
-                    })
-                params = {
-                    'order_id': order.key.id(),
-                    'total_sum_or   der': order.total_sum,
-                    'sum of items price': total_sum,
-                    'items': items,
-                    'promos': order.promos,
-                    'details': item_details
-                }
-                if is_include:
-                    json['orders'].append(params)
+                        else:
+                            if item.key.id() == richest.key.id():
+                                need_set_promo = False
+            else:
+                if not order.item_details:
+                    is_include = True
+                    for item in order.items:
+                        item = item.get()
+                        order_details = OrderPositionDetails(
+                            item=item.key,
+                            price=item.price,
+                            revenue=item.price,
+                            promos=[]
+                        )
+                        order.item_details.append(order_details)
+            order.put()
+            item_details = []
+            for item in order.item_details:
+                item_details.append({
+                    'price': item.price,
+                    'revenue': item.revenue,
+                    'promo': item.promos,
+                    'item': item.item.get().title
+                })
+            params = {
+                'order_id': order.key.id(),
+                'total_sum_order': order.total_sum,
+                'sum of items price': total_sum,
+                'items': items,
+                'promos': order.promos,
+                'details': item_details
+            }
+            if is_include:
+                json['orders'].append(params)
         self.render_json(json)
