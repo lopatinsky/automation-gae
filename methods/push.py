@@ -57,3 +57,16 @@ def send_order_push(order_id, order_status, text, device_type, new_time=None, si
     if silent:
         data['content-available'] = 1
     return send_push("order_%s" % order_id, data, device_type)
+
+
+def send_reminder_push(client_id, client_name, client_score):
+    text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
+    if client_score:
+        text += u' У Вас на балансе накоплено %s балла. а за 5 - будет подарок.' % client_score
+    data = {
+        'text': text,
+        'head': 'DoubleB',
+        'action': 'com.empatika.doubleb.push',
+        'marker': 'send_reminder'
+    }
+    return send_push('client_%s' % client_id, data, ANDROID_DEVICE)

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 __author__ = 'dvpermyakov'
 
 from base import ApiHandler
@@ -10,4 +12,6 @@ class GetSharedInfo(ApiHandler):
             'text_share_new_order': "Я эксперт кофе 80-го уровня",
             'text_share_about_app': "Приложение Даблби позволяет легко и просто оформить и оплатить заказ без необходимости стоять в очереди",
             'app_url': 'https://itunes.apple.com/app/id908237281',
+            'screen_title': 'DoubleB',
+            'screen_text': 'Поделись с друзьями'
         })

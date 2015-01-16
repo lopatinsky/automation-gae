@@ -17,3 +17,8 @@ cron:
   url: /cron/inactive_clients
   schedule: every day 7:00
   timezone: Europe/Moscow
+
+- description: check weekly inactive clients
+  url: /cron/weekly_inactive
+  schedule: every day 15:00
+  timezone: Europe/Moscow
