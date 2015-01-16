@@ -14,6 +14,7 @@
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
 >           * [Cancel order](#markdown-header-cancel-order)
+>           * [Get shared info](#markdown-header-get-shared-info)
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
 >           * [Login](#markdown-header-login)
 >           * [Logout](#markdown-header-logout)
