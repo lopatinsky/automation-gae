@@ -28,6 +28,10 @@ class ProductionConfig(DoubleBConfig):
             "days": "12345",
             "hours": "8-11"
         },
+        5224026972618752: {  # alkon
+            "days": "12345",
+            "hours": "8-12",
+        },
         4661077019197440: {  # tkachi
             "days": "12345",
             "hours": "9-12"
