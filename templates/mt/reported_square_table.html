@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+    {% set TYPE_NAMES = 'Goods number', 'Orders number', 'Sum of orders', 'Gifts number' %}
+
+    <form method="get">
+        <select name="selected_type">
+             {% for type in range(4) %}
+                <option value="{{ type }}" {% if chosen_type == type %} selected {% endif %}>
+                    {{ TYPE_NAMES[type] }}
+                </option>
+             {% endfor %}
+        </select>
+    </form>
+
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            {% for column in square[0] %}
+                <th>{{ '%s.%s.%s - %s.%s.%s' % (column.begin.day, column.begin.month, column.begin.year,
+                        column.end.day, column.end.month, column.end.year) }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in square %}
+            <tr>
+                {% for column in row %}
+                    {% if TYPE_NAMES[chosen_type] == 'Goods number' %}<td>{{ column.goods_number }}</td>{% endif %}
+                    {% if TYPE_NAMES[chosen_type] == 'Orders number' %}<td>{{ column.order_number }}</td>{% endif %}
+                    {% if TYPE_NAMES[chosen_type] == 'Sum of orders' %}<td>{{ column.order_sum }}</td>{% endif %}
+                    {% if TYPE_NAMES[chosen_type] == 'Gifts number' %}<td>{{ column.gift_number }}</td>{% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/mt/report">Назад</a>
+
+</body>
+</html>

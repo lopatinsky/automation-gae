@@ -33,6 +33,7 @@ app = WSGIApplication([
             Route('/venues_with_dates', maintenance.VenuesReportWithDatesHandler),
             Route('/orders', maintenance.OrdersReportHandler),
             Route('/repeated_orders', maintenance.RepeatedOrdersHandler),
+            Route('/square_table', maintenance.SquareTableHandler),
         ]),
     ]),
 
