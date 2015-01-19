@@ -151,14 +151,13 @@ class Order(ndb.Model):
             "return_comment": self.return_comment,
             "items": []
         }
-        item_prices = {}
-        for d_item in self.item_details:
-            item_prices[d_item.item.id()] = d_item.price
-        for item_key, count in Counter(self.items).items():
-            item = item_key.get()
+        items_str = []
+        for item_detail in self.item_details:
+            items_str.append('%s_%s' % (item_detail.item.get().title, item_detail.price))
+        for item_str, count in Counter(items_str).items():
             dct["items"].append({
-                "title": item.title,
-                "price": item_prices.get(item.key.id(), item.price),
+                "title": item_str.split('_')[0],
+                "price": item_str.split('_')[1],
                 "quantity": count
             })
         return dct
