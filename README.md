@@ -365,12 +365,13 @@ No Parameters
 ```
 #!js
 {
-    "image_url": image url                  // string
-    "text_share_new_order": text about me   // string
-    "text_share_about_app": text about app  // string
-    "app_url": app url                      // string
-    "screen_title": title for screen        // string
-    "screen_text": text for screen          // string
+    "image_url": image url                                   // string
+    "fb_android_image_url" image url for android facebook    // string
+    "text_share_new_order": text about me                    // string
+    "text_share_about_app": text about app                   // string
+    "app_url": app url                                       // string
+    "screen_title": title for screen                         // string
+    "screen_text": text for screen                           // string
 }
 ```
 
