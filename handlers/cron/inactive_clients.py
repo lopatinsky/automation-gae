@@ -32,39 +32,21 @@ class FullyInactiveClientsHandler(RequestHandler):
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
+    INACTIVE_DAYS = 10
+
     def get(self):
-        logging.info('in three days inactive clients')
-        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=8),
-                             Order.date_created < datetime.now() - timedelta(days=7)).fetch()
+        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=self.INACTIVE_DAYS),
+                             Order.date_created < datetime.now() - timedelta(days=self.INACTIVE_DAYS - 1)).fetch()
         clients_id = []
-        order_json_7 = []
         for order in orders:
             if not order.client_id in clients_id:
                 clients_id.append(order.client_id)
-            order_json_7.append({
-                'client_id': order.client_id,
-                'data': order.date_created.day
-            })
-        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=7)).fetch()
-        order_json = []
+        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=self.INACTIVE_DAYS - 1)).fetch()
         for order in orders:
             if order.client_id in clients_id:
                 clients_id.remove(order.client_id)
-            order_json.append({
-                'client_id': order.client_id,
-                'data': order.date_created.day
-            })
-        client_json = []
         for client_id in clients_id:
             client = Client.get_by_id(client_id)
             score = 0  # TODO: compute score
-            send_reminder_push(client_id, client.name, score)
-            client_json.append({
-                'client_id': client_id
-            })
-        obj = {
-            'orders_week_ago': order_json_7,
-            'current_orders': order_json,
-            'chosen_clients': client_json
-        }
-        logging.info(obj)
+            name = client.name if client.name_confirmed else None
+            send_reminder_push(client_id, name, score)

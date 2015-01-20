@@ -60,7 +60,10 @@ def send_order_push(order_id, order_status, text, device_type, new_time=None, si
 
 
 def send_reminder_push(client_id, client_name, client_score):
-    text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
+    if client_name:
+        text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
+    else:
+        text = u'Вас давно не было в Даблби. Заходите, как будете рядом.'
     if client_score:
         text += u' У Вас на балансе накоплено %s балла. а за 5 - будет подарок.' % client_score
     data = {
