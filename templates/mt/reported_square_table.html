@@ -2,15 +2,56 @@
 <html>
 <head>
     <title></title>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+    <script>
+        var selected_type = 0;
+
+        $(document).ready(function() {
+            set_values_to_trs();
+            $("#selected_type").change(function() {
+                selected_type = parseInt($("#selected_type").val());
+                alert(selected_type);
+                set_values_to_trs();
+            });
+        });
+
+        function set_values_to_trs() {
+            {% for row in square %}
+                {% for column in row %}
+                    var str = "#" + "{{ column.cell_id }}";
+                    switch (selected_type) {
+                        case 0:
+                            $(str).text("{{ column.goods_number }}");
+                            break;
+                        case 1:
+                            $(str).text("{{ column.order_number }}");
+                            break;
+                        case 2:
+                            $(str).text("{{ column.order_sum }}");
+                            break;
+                        case 3:
+                            $(str).text("{{ column.gift_number }}");
+                            break;
+                        default:
+                            alert("default");
+                            break;
+                    }
+                {% endfor %}
+            {% endfor %}
+        }
+
+    </script>
+
 </head>
 <body>
 
     {% set TYPE_NAMES = 'Goods number', 'Orders number', 'Sum of orders', 'Gifts number' %}
 
     <form method="get">
-        <select name="selected_type">
+        <select name="selected_type" id="selected_type">
              {% for type in range(4) %}
-                <option value="{{ type }}" {% if chosen_type == type %} selected {% endif %}>
+                <option value="{{ type }}">
                     {{ TYPE_NAMES[type] }}
                 </option>
              {% endfor %}
@@ -27,10 +68,7 @@
         {% for row in square %}
             <tr>
                 {% for column in row %}
-                    {% if TYPE_NAMES[chosen_type] == 'Goods number' %}<td>{{ column.goods_number }}</td>{% endif %}
-                    {% if TYPE_NAMES[chosen_type] == 'Orders number' %}<td>{{ column.order_number }}</td>{% endif %}
-                    {% if TYPE_NAMES[chosen_type] == 'Sum of orders' %}<td>{{ column.order_sum }}</td>{% endif %}
-                    {% if TYPE_NAMES[chosen_type] == 'Gifts number' %}<td>{{ column.gift_number }}</td>{% endif %}
+                    <td id="{{ column.cell_id }}">{{ column.cell_id }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
