@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
+                            'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
+
+    <form method="get">
+         <select name="selected_year">
+             <option value="0" {% if not chosen_year %}selected{% endif %}>Все года</option>
+             {% for year in range(start_year, end_year + 1) %}
+                  <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
+                      {{ year }}
+                  </option>
+             {% endfor %}
+         </select>
+         <select name="selected_month">
+             {% for month in range(0, 12 + 1)%}
+                  <option value="{{ month }}" {% if chosen_month == month %} selected {% endif %}>
+                      {{ NAME_MONTHS[month] }}
+                  </option>
+             {% endfor %}
+         </select>
+         <input type="submit" value="Выбрать"/>
+    </form>
+
+    <br>
+    <table style="border-collapse:collapse; width:100%" border="1">
+         <tr>
+             <th>Date</th>
+             <th>Number of new pushes</th>
+             <th>Number of old pushes</th>
+             {% for index in range(days_after_push|int) %}
+                 <th>Day + {{ index  + 1 }}</th>
+             {% endfor %}
+         </tr>
+         {% for push_info in pushes_info %}
+             <tr>
+                 <td>{{ push_info['day'] }}</td>
+                 <td>{{ push_info['push_new'] }}</td>
+                 <td>{{ push_info['push_old'] }}</td>
+                 {% for order_number in push_info['order_numbers'] %}
+                     <td>{{ order_number }}</td>
+                 {% endfor %}
+             </tr>
+         {% endfor %}
+         <tr>
+             <td><b>Total</b></td>
+             <td>{{ total['push_new'] }}</td>
+             <td>{{ total['push_old'] }}</td>
+             {% for order_number in total['order_numbers'] %}
+                 <td>{{ order_number }}</td>
+             {% endfor %}
+         </tr>
+    </table>
+    <a href="/mt/report">Назад</a>
+
+
+</body>
+</html>

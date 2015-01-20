@@ -50,5 +50,6 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
             score = 0  # TODO: compute score
             name = client.name if client.name_confirmed else None
             send_reminder_push(client_id, name, score)
-            client.push_dates.append(datetime.now())
+            client.last_push_date = datetime.now()
+            client.push_numbers += 1
             client.put()

@@ -8,6 +8,7 @@ from tablet_requests_report import TabletRequestGraphHandler
 from report_methods import PROJECT_STARTING_YEAR
 from repeated_orders import RepeatedOrdersHandler
 from square_table import SquareTableHandler
+from pushes import PushesReportHandler
 
 from ..base import BaseHandler
 
