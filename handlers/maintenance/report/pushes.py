@@ -33,7 +33,7 @@ class PushesReportHandler(BaseHandler):
             clients = query.fetch()
             push_new = 0
             push_old = 0
-            order_numbers = []
+            order_numbers = [0] * self.DAYS_AFTER_PUSH
             for client in clients:
                 if not client.push_numbers:
                     continue
@@ -47,7 +47,7 @@ class PushesReportHandler(BaseHandler):
                     order_number = Order.query(
                         Order.client_id == client.key.id(), Order.date_created >= curr_date_begin,
                         Order.date_created <= curr_date_end).count()
-                    order_numbers.append(order_number)
+                    order_numbers[index] = order_number
                     total['order_numbers'][index] += order_number
 
             pushes_info.append({
