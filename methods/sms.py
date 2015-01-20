@@ -21,7 +21,11 @@ def send_sms(from_, to, text):
                               headers={'Content-Type': 'application/json'}).content
     logging.info(response)
     result = json.loads(response)
-    for message in result["send"]:
+
+    success = "send" in result
+    for message in result.get("send", []):
         if message["status"] != "0":
-            email.send_error("sms", "SMS failure", response)
+            success = False
+    if not success:
+        email.send_error("sms", "SMS failure", response)
     return json.loads(response)
