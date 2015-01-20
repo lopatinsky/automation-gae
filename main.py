@@ -35,6 +35,8 @@ app = WSGIApplication([
             Route('/repeated_orders', maintenance.RepeatedOrdersHandler),
             Route('/square_table', maintenance.SquareTableHandler),
         ]),
+
+        Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 
     PathPrefixRoute('/api', [
