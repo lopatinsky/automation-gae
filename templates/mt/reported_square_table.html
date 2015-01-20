@@ -22,16 +22,23 @@
             </option>
          {% endfor %}
     </select>
-
+    <br>
     <table style="border-collapse:collapse; width:100%" border="1" class="0">
         <tr>
+            <th></th>
             {% for column in square[0] %}
-                <th>{{ '%s.%s.%s - %s.%s.%s' % (column.begin.day, column.begin.month, column.begin.year,
-                        column.end.day, column.end.month, column.end.year) }}</th>
+                <th>
+                    {{ '%s.%s.%s - %s.%s.%s' % (column.begin.day, column.begin.month, column.begin.year,
+                        column.end.day, column.end.month, column.end.year) }}
+                </th>
             {% endfor %}
         </tr>
         {% for row in square %}
             <tr>
+                <td>
+                    {{ '%s.%s.%s - %s.%s.%s' % (row[loop.index - 1].begin.day, row[loop.index - 1].begin.month, row[loop.index - 1].begin.year,
+                        row[loop.index - 1].end.day, row[loop.index - 1].end.month, row[loop.index - 1].end.year) }}
+                </td>
                 {% for column in row %}
                     <td>
                         <span class="s0">{{ column.goods_number }}</span>
@@ -43,7 +50,7 @@
             </tr>
         {% endfor %}
     </table>
-
+    <br>
     <a href="/mt/report">Назад</a>
 
     <script src="http://code.jquery.com/jquery-latest.js"></script>
