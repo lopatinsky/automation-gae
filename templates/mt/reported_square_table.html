@@ -2,63 +2,28 @@
 <html>
 <head>
     <title></title>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-
-    <script>
-        var selected_type = 0;
-
-        $(document).ready(function() {
-            set_values_to_trs();
-            $("#selected_type").change(function() {
-                selected_type = parseInt($("#selected_type").val());
-                alert(selected_type);
-                set_values_to_trs();
-            });
-        });
-
-        function set_values_to_trs() {
-            {% for row in square %}
-                {% for column in row %}
-                    var str = "#" + "{{ column.cell_id }}";
-                    switch (selected_type) {
-                        case 0:
-                            $(str).text("{{ column.goods_number }}");
-                            break;
-                        case 1:
-                            $(str).text("{{ column.order_number }}");
-                            break;
-                        case 2:
-                            $(str).text("{{ column.order_sum }}");
-                            break;
-                        case 3:
-                            $(str).text("{{ column.gift_number }}");
-                            break;
-                        default:
-                            alert("default");
-                            break;
-                    }
-                {% endfor %}
-            {% endfor %}
+    <style type="text/css">
+        td span {
+            display: none
         }
-
-    </script>
-
+        .t0 .s0, .t1 .s1, .t2 .s2, .t3 .s3 {
+            display: inline;
+        }
+    </style>
 </head>
 <body>
 
     {% set TYPE_NAMES = 'Goods number', 'Orders number', 'Sum of orders', 'Gifts number' %}
 
-    <form method="get">
-        <select name="selected_type" id="selected_type">
-             {% for type in range(4) %}
-                <option value="{{ type }}">
-                    {{ TYPE_NAMES[type] }}
-                </option>
-             {% endfor %}
-        </select>
-    </form>
+    <select name="selected_type">
+         {% for type in range(4) %}
+            <option value="t{{ type }}" {% if chosen_type == type %} selected {% endif %}>
+                {{ TYPE_NAMES[type] }}
+            </option>
+         {% endfor %}
+    </select>
 
-    <table style="border-collapse:collapse; width:100%" border="1">
+    <table style="border-collapse:collapse; width:100%" border="1" class="0">
         <tr>
             {% for column in square[0] %}
                 <th>{{ '%s.%s.%s - %s.%s.%s' % (column.begin.day, column.begin.month, column.begin.year,
@@ -68,7 +33,12 @@
         {% for row in square %}
             <tr>
                 {% for column in row %}
-                    <td id="{{ column.cell_id }}">{{ column.cell_id }}</td>
+                    <td>
+                        <span class="s0">{{ column.goods_number }}</span>
+                        <span class="s1">{{ column.order_number }}</span>
+                        <span class="s2">{{ column.order_sum }}</span>
+                        <span class="s3">{{ column.gift_number }}</span>
+                    </td>
                 {% endfor %}
             </tr>
         {% endfor %}
@@ -76,5 +46,11 @@
 
     <a href="/mt/report">Назад</a>
 
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        $("select").change(function() {
+            $(document.body).removeClass("t0 t1 t2 t3").addClass($(this).val());
+        }).change();
+    </script>
 </body>
 </html>

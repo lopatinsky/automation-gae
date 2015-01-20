@@ -8,28 +8,16 @@ WEEK = timedelta(days=7)
 
 
 class WeekInfo:
-    def __init__(self, goods_number, order_number, order_sum, gift_number, begin, end, cell_id):
+    def __init__(self, goods_number, order_number, order_sum, gift_number, begin, end):
         self.goods_number = goods_number
         self.order_number = order_number
         self.order_sum = order_sum
         self.gift_number = gift_number
         self.begin = begin
         self.end = end
-        self.cell_id = cell_id
 
 
 class SquareTableHandler(BaseHandler):
-
-    def get_clients_at_time(self, clients, begin, end):
-        result = []
-        for client in clients:
-            if begin <= client.first_order_time <= end:
-                result.append(client)
-        return result
-
-    def get_client_orders_at_time(self, client, begin, end):
-        return Order.query(Order.client_id == client.key.id(), Order.date_created >= begin, Order.date_created <= end).\
-            fetch()
 
     def get_orders_info(self, orders):
         goods_number = 0
@@ -43,34 +31,54 @@ class SquareTableHandler(BaseHandler):
         return goods_number, order_number, order_sum, gift_number
 
     def get(self):
+        chosen_type = self.request.get("selected_type", 0)
 
-        #orders = Order.query().fetch()
+        orders = Order.query().fetch()
         clients = Client.query().fetch()
-        for client in clients[:]:
-            first_order = Order.query(Order.client_id == client.key.id()).order(Order.date_created).get()
-            if first_order:
-                client.first_order_time = first_order.date_created
-            else:
-                clients.remove(client)
-        #sorted(clients, key=lambda client: client.first_order_time)
+
+        for client in clients:
+            client.first_order_time = None
+        clients_map = {c.key.id(): c for c in clients}
+
+        for order in orders:
+            client = clients_map[order.client_id]
+            if not client.first_order_time or client.first_order_time > order.date_created:
+                client.first_order_time = order.date_created
+
+        clients = [c for c in clients if c.first_order_time is not None]
+        clients = sorted(clients, key=lambda client: client.first_order_time)
         start_time = clients[0].first_order_time
-        current_time = start_time
-        square = []
-        index_id = 0
-        while current_time <= datetime.now():
-            week_clients = self.get_clients_at_time(clients, current_time, current_time + WEEK)
-            row_time = start_time
-            row = []
-            while row_time <= datetime.now():
-                index_id += 1
-                week_info_params = 0, 0, 0, 0
-                for client in week_clients:
-                    week_orders = self.get_client_orders_at_time(client, row_time, row_time + WEEK)
-                    week_info_params = tuple(sum(t) for t in zip(self.get_orders_info(week_orders), week_info_params))
-                goods_number, order_number, order_sum, gift_number = week_info_params
-                row.append(WeekInfo(goods_number, order_number, order_sum, gift_number, row_time, row_time + WEEK,
-                                    index_id))
-                row_time += WEEK
-            square.append(row)
-            current_time += WEEK
-        self.render('reported_square_table.html', square=square)
+
+        def _week_number(dt):
+            return (dt - start_time).days / 7
+
+        def _week_start(number):
+            return start_time + timedelta(days=7 * number)
+
+        weeks_count = _week_number(datetime.now()) + 1
+
+        orders_square = []
+        for i in xrange(weeks_count):
+            orders_row = []
+            for j in xrange(weeks_count):
+                orders_row.append([])
+            orders_square.append(orders_row)
+
+        client_week = {}
+        for client in clients:
+            client_week[client.key.id()] = _week_number(client.first_order_time)
+
+        for order in orders:
+            row = client_week[order.client_id]
+            column = _week_number(order.date_created)
+            orders_square[row][column].append(order)
+
+        square = [
+            [
+                WeekInfo(*self.get_orders_info(cell), begin=_week_start(i), end=_week_start(i+1))
+                for i, cell in enumerate(row)
+            ]
+            for row in orders_square
+        ]
+
+        self.render('reported_square_table.html', square=square, chosen_type=chosen_type)
