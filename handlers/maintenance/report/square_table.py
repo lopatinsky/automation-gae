@@ -26,13 +26,9 @@ class SquareTableHandler(BaseHandler):
                 result.append(client)
         return result
 
-    def get_client_orders_at_time(self, orders, client, begin, end):
-        result = []
-        for order in orders:
-            if order.client_id == client.key.id():
-                if begin <= order.date_created <= end:
-                    result.append(order)
-        return result
+    def get_client_orders_at_time(self, client, begin, end):
+        return Order.query(Order.client_id == client.key.id(), Order.date_created >= begin, Order.date_created <= end).\
+            fetch()
 
     def get_orders_info(self, orders):
         goods_number = 0
@@ -48,7 +44,7 @@ class SquareTableHandler(BaseHandler):
     def get(self):
         chosen_type = self.request.get("selected_type", 0)
 
-        orders = Order.query().fetch()
+        #orders = Order.query().fetch()
         clients = Client.query().fetch()
         for client in clients[:]:
             first_order = Order.query(Order.client_id == client.key.id()).order(Order.date_created).get()
@@ -56,7 +52,7 @@ class SquareTableHandler(BaseHandler):
                 client.first_order_time = first_order.date_created
             else:
                 clients.remove(client)
-        sorted(clients, key=lambda client: client.first_order_time)
+        #sorted(clients, key=lambda client: client.first_order_time)
         start_time = clients[0].first_order_time
         current_time = start_time
         square = []
@@ -67,7 +63,7 @@ class SquareTableHandler(BaseHandler):
             while row_time <= datetime.now():
                 week_info_params = 0, 0, 0, 0
                 for client in week_clients:
-                    week_orders = self.get_client_orders_at_time(orders, client, row_time, row_time + WEEK)
+                    week_orders = self.get_client_orders_at_time(client, row_time, row_time + WEEK)
                     week_info_params = tuple(sum(t) for t in zip(self.get_orders_info(week_orders), week_info_params))
                 goods_number, order_number, order_sum, gift_number = week_info_params
                 row.append(WeekInfo(goods_number, order_number, order_sum, gift_number, row_time, row_time + WEEK))
