@@ -55,6 +55,11 @@ indexes:
   - name: venue_id
   - name: updated
 
+- kind: Order
+  properties:
+  - name: mastercard
+
+
 - kind: TabletRequest
   properties:
   - name: admin_id

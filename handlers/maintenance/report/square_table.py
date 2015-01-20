@@ -1,7 +1,7 @@
 __author__ = 'dvpermyakov'
 
 from ..base import BaseHandler
-from models import Order, Client
+from models import Order, Client, BONUS_PAYMENT_TYPE
 from datetime import datetime, timedelta
 
 WEEK = timedelta(days=7)
@@ -27,6 +27,8 @@ class SquareTableHandler(BaseHandler):
         for order in orders:
             goods_number += len(order.items)
             order_sum += order.total_sum
+            if order.payment_type_id == BONUS_PAYMENT_TYPE:
+                gift_number += 1
 
         return goods_number, order_number, order_sum, gift_number
 

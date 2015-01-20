@@ -133,7 +133,7 @@ class Order(ndb.Model):
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     promos = ndb.StringProperty(repeated=True, indexed=False)
-    mastercard = ndb.BooleanProperty(indexed=False)
+    mastercard = ndb.BooleanProperty(indexed=True)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
 

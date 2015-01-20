@@ -65,7 +65,10 @@ def send_reminder_push(client_id, client_name, client_score):
     else:
         text = u'Вас давно не было в Даблби. Заходите, как будете рядом.'
     if client_score:
-        text += u' У Вас на балансе накоплено %s балла. а за 5 - будет подарок.' % client_score
+        if client_score == 1:
+            text += u' Вы уже накопили %s балл. За 5 вам полагается подарок.' % client_score
+        elif client_score == 2 or client_score == 3 or client_score == 4:
+            text += u' Вы уже накопили %s балла. За 5 вам полагается подарок.' % client_score
     data = {
         'text': text,
         'head': 'DoubleB',
