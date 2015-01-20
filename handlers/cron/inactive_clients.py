@@ -3,8 +3,8 @@
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order, READY_ORDER
-from methods import email, free_cup
+from models import Client, Order
+from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
 import logging
@@ -47,7 +47,7 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
                 clients_id.remove(order.client_id)
         for client_id in clients_id:
             client = Client.get_by_id(client_id)
-            score = free_cup.get_master_bonus(client) % 5
+            score = empatika_promos.get_user_points(client.key.id()) % 5
             name = client.name if client.name_confirmed else None
             send_reminder_push(client_id, name, score)
             client.last_push_date = datetime.now()
