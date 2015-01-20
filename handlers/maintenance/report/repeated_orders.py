@@ -34,7 +34,8 @@ class RepeatedOrdersHandler(BaseHandler):
                 if order.status != READY_ORDER:
                     continue
                 client = Client.get_by_id(order.client_id)
-                first_order = Order.query(Order.client_id == client.key.id()).order(Order.date_created).get()
+                first_order = Order.query(Order.client_id == client.key.id(), Order.status == READY_ORDER)\
+                    .order(Order.date_created).get()
                 if first_order.key.id() == order.key.id():
                     new_number += 1
                     new_sum += order.total_sum
