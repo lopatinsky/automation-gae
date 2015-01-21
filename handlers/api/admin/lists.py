@@ -29,7 +29,8 @@ class CurrentOrdersHandler(OrderListBaseHandler):
         today = datetime.datetime.combine(now.date(), datetime.time())
         orders = self.user.query_orders(Order.date_created >= today,
                                         Order.status == NEW_ORDER) \
-                          .order(-Order.date_created).fetch()
+                          .order(Order.date_created).fetch()
+        orders = orders[::-1]
         return [o for o in orders if o.status == NEW_ORDER or o.delivery_time >= now]
 
 

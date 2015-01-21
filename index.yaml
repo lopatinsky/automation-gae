@@ -14,7 +14,6 @@ indexes:
   properties:
   - name: status
   - name: date_created
-    direction: desc
 
 - kind: Order
   properties:
