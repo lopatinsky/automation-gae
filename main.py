@@ -1,7 +1,7 @@
 from webapp2_extras import jinja2
 from config import config
 from methods import fastcounter
-from handlers import api, web_admin, maintenance, handle_500
+from handlers import api, web_admin, maintenance, share, handle_500
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -101,6 +101,9 @@ app = WSGIApplication([
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
     Route('/task/check_order_success', api.CheckOrderSuccessHandler),
+
+    Route('/get/<platform:[ia]>', share.GATrackDownloadHandler),
+    Route('/get/<platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
 
 ], debug=config.DEBUG, config=webapp2_config)
 
