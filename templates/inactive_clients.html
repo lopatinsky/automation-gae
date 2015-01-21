@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <table style="border-collapse:collapse; width:100%" border="1" class="0">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+    </tr>
+    {% for client in clients %}
+        <tr>
+            <td>{{ client.name }} {{ client.surname }}</td>
+            <td>{{ client.email }}</td>
+            <td>{{ client.tel }}</td>
+        </tr>
+    {% endfor %}
+</body>
+</html>

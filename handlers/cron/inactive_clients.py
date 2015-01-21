@@ -7,6 +7,7 @@ from models import Client, Order
 from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
+from webapp2_extras import jinja2
 import logging
 
 
@@ -28,7 +29,8 @@ class FullyInactiveClientsHandler(RequestHandler):
                 body += 'Name: %s %s, email: %s, telephone: %s\n' % (client.name, client.surname,
                                                                      client.email, client.tel)
             logging.info(body)
-            email.send_error('analytics', 'Clients with telephones', body)
+            html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients', clients_with_phone)
+            email.send_error('analytics', 'Clients with telephones', body="",  html=html_file)
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
