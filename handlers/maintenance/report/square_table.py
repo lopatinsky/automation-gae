@@ -1,7 +1,7 @@
 __author__ = 'dvpermyakov'
 
 from ..base import BaseHandler
-from models import Order, Client, BONUS_PAYMENT_TYPE
+from models import Order, Client, BONUS_PAYMENT_TYPE, READY_ORDER
 from datetime import datetime, timedelta
 
 WEEK = timedelta(days=7)
@@ -25,6 +25,8 @@ class SquareTableHandler(BaseHandler):
         order_sum = 0
         gift_number = 0
         for order in orders:
+            if order.status != READY_ORDER:
+                continue
             goods_number += len(order.items)
             order_sum += order.total_sum
             if order.payment_type_id == BONUS_PAYMENT_TYPE:
@@ -43,6 +45,8 @@ class SquareTableHandler(BaseHandler):
         clients_map = {c.key.id(): c for c in clients}
 
         for order in orders:
+            if order.status != READY_ORDER:
+                continue
             client = clients_map[order.client_id]
             if not client.first_order_time or client.first_order_time > order.date_created:
                 client.first_order_time = order.date_created
