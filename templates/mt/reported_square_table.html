@@ -6,17 +6,17 @@
         td span {
             display: none
         }
-        .t0 .s0, .t1 .s1, .t2 .s2, .t3 .s3 {
+        .t0 .s0, .t1 .s1, .t2 .s2, .t3 .s3, .t4 .s4 {
             display: inline;
         }
     </style>
 </head>
 <body>
 
-    {% set TYPE_NAMES = 'Goods number', 'Orders number', 'Sum of orders', 'Gifts number' %}
+    {% set TYPE_NAMES = 'Goods number', 'Orders number', 'Sum of orders', 'Gifts number', 'Clients number' %}
 
     <select name="selected_type">
-         {% for type in range(4) %}
+         {% for type in range(5) %}
             <option value="t{{ type }}" {% if chosen_type == type %} selected {% endif %}>
                 {{ TYPE_NAMES[type] }}
             </option>
@@ -35,16 +35,17 @@
         </tr>
         {% for row in square %}
             <tr>
-                <td>
+                <th>
                     {{ '%s.%s.%s - %s.%s.%s' % (row[loop.index - 1].begin.day, row[loop.index - 1].begin.month, row[loop.index - 1].begin.year,
                         row[loop.index - 1].end.day, row[loop.index - 1].end.month, row[loop.index - 1].end.year) }}
-                </td>
+                </th>
                 {% for column in row %}
                     <td>
                         <span class="s0">{{ column.goods_number }}</span>
                         <span class="s1">{{ column.order_number }}</span>
                         <span class="s2">{{ column.order_sum }}</span>
                         <span class="s3">{{ column.gift_number }}</span>
+                        <span class="s4">{{ column.client_number }}</span>
                     </td>
                 {% endfor %}
             </tr>
@@ -56,7 +57,7 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script>
         $("select").change(function() {
-            $(document.body).removeClass("t0 t1 t2 t3").addClass($(this).val());
+            $(document.body).removeClass("t0 t1 t2 t3 t4").addClass($(this).val());
         }).change();
     </script>
 </body>

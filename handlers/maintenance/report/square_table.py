@@ -8,11 +8,12 @@ WEEK = timedelta(days=7)
 
 
 class WeekInfo:
-    def __init__(self, goods_number, order_number, order_sum, gift_number, begin, end):
+    def __init__(self, goods_number, order_number, order_sum, gift_number, client_number, begin, end):
         self.goods_number = goods_number
         self.order_number = order_number
         self.order_sum = order_sum
         self.gift_number = gift_number
+        self.client_number = client_number
         self.begin = begin
         self.end = end
 
@@ -24,15 +25,16 @@ class SquareTableHandler(BaseHandler):
         order_number = len(orders)
         order_sum = 0
         gift_number = 0
+        client_ids = []
         for order in orders:
-            if order.status != READY_ORDER:
-                continue
             goods_number += len(order.items)
             order_sum += order.total_sum
             if order.payment_type_id == BONUS_PAYMENT_TYPE:
                 gift_number += 1
+            if not order.client_id in client_ids:
+                client_ids.append(order.client_id)
 
-        return goods_number, order_number, order_sum, gift_number
+        return goods_number, order_number, order_sum, gift_number, len(client_ids)
 
     def get(self):
         chosen_type = self.request.get("selected_type", 0)
@@ -40,13 +42,15 @@ class SquareTableHandler(BaseHandler):
         orders = Order.query().fetch()
         clients = Client.query().fetch()
 
+        for order in orders[:]:
+            if order.status != READY_ORDER:
+                orders.remove(order)
+
         for client in clients:
             client.first_order_time = None
         clients_map = {c.key.id(): c for c in clients}
 
         for order in orders:
-            if order.status != READY_ORDER:
-                continue
             client = clients_map[order.client_id]
             if not client.first_order_time or client.first_order_time > order.date_created:
                 client.first_order_time = order.date_created
