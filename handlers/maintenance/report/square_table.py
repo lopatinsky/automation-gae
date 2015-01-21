@@ -39,12 +39,8 @@ class SquareTableHandler(BaseHandler):
     def get(self):
         chosen_type = self.request.get("selected_type", 0)
 
-        orders = Order.query().fetch()
+        orders = Order.query(Order.status == READY_ORDER).fetch()
         clients = Client.query().fetch()
-
-        for order in orders[:]:
-            if order.status != READY_ORDER:
-                orders.remove(order)
 
         for client in clients:
             client.first_order_time = None
