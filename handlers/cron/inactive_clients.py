@@ -7,9 +7,9 @@ from models import Client, Order
 from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
+from methods.sms import send_sms
 from webapp2_extras import jinja2
 import logging
-from datetime import datetime, timedelta
 
 
 class FullyInactiveClientsHandler(RequestHandler):
@@ -33,6 +33,13 @@ class FullyInactiveClientsHandler(RequestHandler):
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
             email.send_error('analytics', 'Clients with telephones', body="",  html=html_file)
+            for client in clients_with_phone:
+                sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
+                            u"Теперь можно получить кофе без очереди в кассу. "
+                            u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
+                            u"Хорошего дня!") % client.name
+                send_sms("DoubleB",  client.tel, sms_text)
+
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
