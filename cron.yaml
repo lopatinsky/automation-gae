@@ -22,3 +22,7 @@ cron:
   url: /cron/weekly_inactive
   schedule: every day 10:00
   timezone: Europe/Moscow
+
+- description: clear old pings
+  url: /cron/clear_pings
+  schedule: every day 0:00

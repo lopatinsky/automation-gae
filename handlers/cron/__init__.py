@@ -3,6 +3,7 @@ from close_orders import CloseOpenedOrdersHandler
 from check_pings import CheckPingsHandler
 from handlers.cron.alfa_errors import CheckAlfaErrorsHandler
 from inactive_clients import FullyInactiveClientsHandler, SeveralDaysInactiveClientsHandler
+from clear_pings import ClearPingsHandler
 
 __author__ = 'ilyazorin'
 
@@ -13,4 +14,5 @@ app = webapp2.WSGIApplication([
     ('/cron/alfa_errors', CheckAlfaErrorsHandler),
     ('/cron/inactive_clients', FullyInactiveClientsHandler),
     ('/cron/weekly_inactive', SeveralDaysInactiveClientsHandler),
+    ('/cron/clear_pings', ClearPingsHandler),
 ], debug=True)
