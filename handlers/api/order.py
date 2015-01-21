@@ -31,6 +31,10 @@ class OrderHandler(ApiHandler):
 
         venue_id = int(response_json['venue_id'])
         venue = Venue.get_by_id(venue_id)
+        if not venue:
+            memcache.delete(cache_key)
+            self.abort(400)
+            
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
         else:
