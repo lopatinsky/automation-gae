@@ -9,12 +9,13 @@ from google.appengine.ext import ndb
 
 
 class ReportedClient:
-    def __init__(self, client_id, name, tel, venue_sum, order_sum, payment, is_cancel):
+    def __init__(self, client_id, name, tel, venue_sum, order_sum, payment, is_cancel, device_type):
         self.client_id = client_id
         self.name = name
         self.tel = tel
         self.amount_orders = 1
         self.average_order_cost = order_sum
+        self.device_type = device_type
         if not is_cancel:
             self.venue_sum = venue_sum
             self.menu_sum = order_sum
@@ -62,7 +63,7 @@ class ClientsReportHandler(BaseHandler):
             else:
                 client = Client.get_by_id(client_id)
                 clients[client_id] = ReportedClient(client_id, client.name, client.tel, venue_sum, total_sum, payment,
-                                                    order.status != READY_ORDER)
+                                                    order.status != READY_ORDER, order.device_type)
         return clients, \
             sum(client.amount_orders for client in clients.values()), \
             sum(client.venue_sum for client in clients.values()), \

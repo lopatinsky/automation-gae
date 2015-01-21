@@ -53,6 +53,7 @@
              <th>Id</th>
              <th>Name</th>
              <th>Telephone</th>
+             <th>Device type</th>
              <th>Number of Orders</th>
              <th>Venue Revenue</th>
              <th>Total Expenditure</th>
@@ -66,6 +67,7 @@
                  <td>{{ client.client_id }}</td>
                  <td>{{ client.name }}</td>
                  <td>{{ client.tel }}</td>
+                 <td>{{ "Android" if client.device_type else "iOS" }}</td>
                  <td>{{ client.amount_orders }}</td>
                  <td>{{ client.venue_sum }}</td>
                  <td>{{ client.menu_sum }}</td>
