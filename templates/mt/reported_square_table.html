@@ -17,7 +17,7 @@
 
     <select name="selected_type">
          {% for type in range(5) %}
-            <option value="t{{ type }}" {% if chosen_type == type %} selected {% endif %}>
+            <option value="t{{ type }}">
                 {{ TYPE_NAMES[type] }}
             </option>
          {% endfor %}
