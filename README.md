@@ -148,8 +148,19 @@ Parameters:
 
 * `client_id`: int
 * `client_name`: string
-* `client_phone` (optional): string
-* `client_email` (optional): string
+* `client_phone` (optional):  string
+* `client_email` (optional):  string
+* `client_emails` (optional): string[]
+
+```
+#!js
+{
+    "id": client id     // int
+    "name": name        // string
+    "surname": surname  // string
+    "tel": phone        // string
+}
+```
 
 ### Get ID for new order
 
