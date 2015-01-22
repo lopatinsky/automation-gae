@@ -28,8 +28,8 @@ class PushesReportHandler(BaseHandler):
         for day in range(1, calendar.monthrange(chosen_year, chosen_month)[1] + 1):
             date_begin = suitable_date(day, chosen_month, chosen_year, True)
             date_end = suitable_date(day, chosen_month, chosen_year, False)
-            query = Client.query(Client.created >= date_begin)
-            query = query.filter(Client.created <= date_end)
+            query = Client.query(Client.last_push_date >= date_begin)
+            query = query.filter(Client.last_push_date <= date_end)
             clients = query.fetch()
             push_new = 0
             push_old = 0
