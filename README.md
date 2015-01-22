@@ -6,7 +6,7 @@
 >           * [Get list of venues](#markdown-header-get-list-of-venues)
 >           * [Get menu](#markdown-header-get-menu)
 >           * [Get promo info](#markdown-header-get-promo-info)
->           * [Save or update(by phone, email or emails) client info](#markdown-header-save-or-update(by-phone,-email-or-emails)-client-info)
+>           * [Save or update (by phone or emails) client info](#markdown-header-save-or-update-(by-phone-or-emails)-client-info)
 >           * [Get ID for new order](#markdown-header-get-id-for-new-order)
 >           * [Validate order and get active promos](#markdown-header-validate-order-and-get-active-promos)
 >           * [Post order](#markdown-header-post-order)
@@ -140,7 +140,7 @@ Parameters:
 }
 ```
 
-### Save or update(by phone, email or emails) client info
+### Save or update (by phone or emails) client info
 
 POST `/api/client.php`
 
@@ -150,7 +150,6 @@ Parameters:
 * `client_name`: string
 * `client_phone` (optional):  string
 * `client_email` (optional):  string
-* `client_emails` (optional): string[]
 
 ```
 #!js
