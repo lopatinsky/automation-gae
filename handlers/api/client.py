@@ -1,13 +1,11 @@
 from .base import ApiHandler
 from models import Client
+from google.appengine.ext import ndb
 
 
 class ClientHandler(ApiHandler):
     def post(self):
         client_id = self.request.get_range('client_id')
-        if not client_id:
-            self.render_json({'error': 2})
-            return
 
         client_name = self.request.get('client_name').split()
         name = client_name[0] if client_name else ''
@@ -17,14 +15,23 @@ class ClientHandler(ApiHandler):
         client_phone = ''.join(c for c in client_phone if '0' <= c <= '9')
 
         client_email = self.request.get('client_email')
+        client_emails = self.request.get('client_emails') if self.request.get('client_emails') else []
 
-        client = Client.get_by_id(client_id)
+        if client_id:
+            client = Client.get_by_id(client_id)
+        else:
+            client = Client.query(ndb.OR(Client.tel == client_phone, Client.email == client_email,
+                                         Client.email.IN(client_emails))).get()
+            if not client:
+                self.render_json({'error': 2})
+
         client.name = name
         client.surname = surname
         client.tel = client_phone
-        client.email = client_email
+        client.email = client_email if client_email else (client_emails[0] if len(client_emails) else None)
         client.put()
         self.render_json({'client': {
+            'id': client.key.id(),
             'name': client.name,
             'surname': client.surname,
             'tel': client.tel
