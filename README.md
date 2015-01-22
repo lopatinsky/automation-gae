@@ -140,7 +140,7 @@ Parameters:
 }
 ```
 
-### Save client info
+### Save or update(by phone, email, emails) client info
 
 POST `/api/client.php`
 
