@@ -12,6 +12,8 @@ from methods.orders.validation import validate_order, get_promo_support, get_fir
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
 from google.appengine.api import taskqueue
+from methods.email_mandrill import send_email
+from webapp2_extras import jinja2
 
 __author__ = 'ilyazorin'
 
@@ -117,6 +119,14 @@ class OrderHandler(ApiHandler):
                           promos=promo_list, mastercard=mastercard, items=[item.key for item in items],
                           item_details=item_details)
             order.put()
+
+            dict_items = order.dict()
+            total = {
+                'quantity': len(items),
+                'sum': total_sum
+            }
+            html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', goods=dict_items['items'], total=total)
+            send_email(config.EMAILS.get('receipt'), client.email, 'Чек заказа в кофейне Дабдби', html_body)
 
             ua = self.request.headers['User-Agent']
             if not ('DoubleBRedirect' in ua

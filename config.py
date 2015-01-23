@@ -54,6 +54,7 @@ class ProductionConfig(DoubleBConfig):
         "network": "admins",
         "analytics": "admins",
         "ping": "admins",
+        "receipt": "dvpermyakov1@gmail.com"
     }
 
 
@@ -78,6 +79,7 @@ class TestingConfig(DoubleBConfig):
     DEBUG = True
 
     EMAILS = {
+        "receipt": "dvpermyakov1@gmail.com"
     }
 
 

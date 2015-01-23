@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+            <th>Цена</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+        </tr>
+        {% for good in goods %}
+            <tr>
+                <td>{{ good['title'] }}</td>
+                <td>{{ good['price'] }}</td>
+                <td>{{ good['quantity'] }}</td>
+                <td>{{ good['quantity'] * good['price'] }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td></td>
+            <td>Итого:</td>
+            <td>{{ total['quantity'] }}</td>
+            <td>{{ total['sum'] }}</td>
+        </tr>
+    </table>
+</body>
+</html>
