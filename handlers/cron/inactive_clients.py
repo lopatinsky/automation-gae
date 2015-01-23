@@ -33,16 +33,16 @@ class FullyInactiveClientsHandler(RequestHandler):
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
             email.send_error('analytics', 'Clients with telephones', body="",  html=html_file)
-            #for client in clients_with_phone:
-            #    sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
-            #                u"Теперь можно получить кофе без очереди в кассу. "
-            #                u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
-            #                u"Хорошего дня!") % client.name
-            #    send_sms("DoubleB",  client.tel, sms_text)
+            for client in clients_with_phone:
+                sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
+                            u"Теперь можно получить кофе без очереди в кассу. "
+                            u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
+                            u"Хорошего дня!") % client.name
+                send_sms("DoubleB",  client.tel, sms_text)
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
-    INACTIVE_DAYS = 10
+    INACTIVE_DAYS = 5
 
     def get(self):
         orders = Order.query(Order.date_created > datetime.now() - timedelta(days=self.INACTIVE_DAYS),
