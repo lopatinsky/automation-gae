@@ -29,11 +29,12 @@ class ClientHandler(ApiHandler):
                 return self.render_json({'error': 2})
             name = client.name
             surname = client.surname
+            client_email = client.email
 
         client.name = name
         client.surname = surname
         client.tel = client_phone
-        client.email = client_emails[0] if len(client_emails) else None
+        client.email = client_email
         client.put()
         self.render_json({
             'id': client.key.id(),
