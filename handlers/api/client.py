@@ -40,5 +40,6 @@ class ClientHandler(ApiHandler):
             'id': client.key.id(),
             'name': client.name,
             'surname': client.surname,
-            'tel': client.tel
+            'tel': client.tel,
+            'email': client.email
         })

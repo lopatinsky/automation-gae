@@ -158,6 +158,7 @@ Parameters:
     "name": name        // string
     "surname": surname  // string
     "tel": phone        // string
+    "email": email      // string
 }
 ```
 
