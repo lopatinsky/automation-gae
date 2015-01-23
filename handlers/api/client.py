@@ -33,9 +33,9 @@ class ClientHandler(ApiHandler):
         client.tel = client_phone
         client.email = client_emails[0] if len(client_emails) else None
         client.put()
-        self.render_json({'client': {
+        self.render_json({
             'id': client.key.id(),
             'name': client.name,
             'surname': client.surname,
             'tel': client.tel
-        }})
+        })
