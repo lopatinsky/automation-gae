@@ -27,6 +27,8 @@ class ClientHandler(ApiHandler):
                 client = Client.query(Client.email.IN(client_emails)).get()
             if not client:
                 return self.render_json({'error': 2})
+            name = client.name
+            surname = client.surname
 
         client.name = name
         client.surname = surname
