@@ -217,6 +217,8 @@ class Client(ndb.Model):
 
     name_confirmed = ndb.BooleanProperty(default=False)
 
+    device_phone = ndb.StringProperty()
+
     @classmethod
     def create(cls):
         return cls(id=cls.generate_id())
