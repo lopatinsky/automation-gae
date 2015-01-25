@@ -5,6 +5,9 @@ from models import Client
 class ClientHandler(ApiHandler):
     def post(self):
         client_id = self.request.get_range('client_id')
+        if not client_id:
+            self.render_json({'error': 2})
+            return
 
         client_name = self.request.get('client_name').split()
         name = client_name[0] if client_name else ''
@@ -14,32 +17,15 @@ class ClientHandler(ApiHandler):
         client_phone = ''.join(c for c in client_phone if '0' <= c <= '9')
 
         client_email = self.request.get('client_email')
-        client_emails = client_email.strip().split(' ') if client_email else []
 
-        if client_id:
-            client = Client.get_by_id(client_id)
-        else:
-            if client_phone:
-                client = Client.query(Client.tel == client_phone).get()
-            else:
-                client = None
-            if not client and client_emails:
-                client = Client.query(Client.email.IN(client_emails)).get()
-            if not client:
-                return self.render_json({'error': 2})
-            name = client.name
-            surname = client.surname
-            client_email = client.email
-
+        client = Client.get_by_id(client_id)
         client.name = name
         client.surname = surname
         client.tel = client_phone
         client.email = client_email
         client.put()
-        self.render_json({
-            'id': client.key.id(),
+        self.render_json({'client': {
             'name': client.name,
             'surname': client.surname,
-            'tel': client.tel,
-            'email': client.email
-        })
+            'tel': client.tel
+        }})
