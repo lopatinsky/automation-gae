@@ -15,7 +15,7 @@ class WeekInfo:
         self.gift_number = gift_number
         self.client_number = client_number
         self.begin = begin
-        self.end = end
+        self.end = end - timedelta(minutes=1)
 
 
 class SquareTableHandler(BaseHandler):
@@ -54,6 +54,7 @@ class SquareTableHandler(BaseHandler):
         clients = [c for c in clients if c.first_order_time is not None]
         clients = sorted(clients, key=lambda client: client.first_order_time)
         start_time = clients[0].first_order_time
+        start_time = start_time.replace(hour=0, minute=0)
 
         def _week_number(dt):
             return (dt - start_time).days / 7
