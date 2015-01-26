@@ -23,6 +23,7 @@ _PAYMENT_TYPE_STRINGS = {
 
 
 def _order_data(order):
+    venue = Venue.get_by_id(order.venue_id)
     dct = {
         "order_id": order.key.id(),
         "status": _STATUS_STRINGS[order.status],
@@ -31,7 +32,7 @@ def _order_data(order):
         "delivery_time": (order.delivery_time + config.TIMEZONE_OFFSET).strftime("%H:%M:%S"),
         "payment_type": _PAYMENT_TYPE_STRINGS[order.payment_type_id],
         "total_sum": order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0,
-        "venue": Venue.get_by_id(order.venue_id).title[22:],  # strip "Double B Coffee & Tea "
+        "venue": venue.title[22:] if len(venue.title) > 22 else venue.title,  # strip "Double B Coffee & Tea "
         "items": []
     }
     client = Client.get_by_id(order.client_id)
