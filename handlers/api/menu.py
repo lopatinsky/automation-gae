@@ -48,4 +48,9 @@ class MenuHandler(ApiHandler):
             client.put()
 
         response['client_id'] = client.key.id()
+        client_name = client.name or ''
+        if client.surname:
+            client_name += ' ' + client.surname
+        response['client_name'] = client_name
+        response['client_email'] = client.email or ''
         self.render_json(response)
