@@ -24,6 +24,9 @@ CANCELED_BY_BARISTA_ORDER = 3
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
+PUSH_NOTIFICATION = 0
+SMS_NOTIFICATION = 1
+
 
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
@@ -196,6 +199,12 @@ class Order(ndb.Model):
         value = fastcounter.get_count("order_id")
         fastcounter.incr("order_id")
         return value + 1
+
+
+class Notification(ndb.Model):
+    client_id = ndb.IntegerProperty(required=True)
+    created = ndb.DateProperty(auto_now_add=True)
+    type = ndb.IntegerProperty(required=True, choices=(PUSH_NOTIFICATION, SMS_NOTIFICATION))
 
 
 class Client(ndb.Model):

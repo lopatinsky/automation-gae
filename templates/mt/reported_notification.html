@@ -8,6 +8,10 @@
                             'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
 
     <form method="get">
+         <select name="selected_type">
+             <option value="{{ sms_type }}" {% if chosen_type == sms_type %} selected {% endif %}>SMS</option>
+             <option value="{{ push_type }}" {% if chosen_type == push_type %} selected {% endif %}>PUSH</option>
+         </select>
          <select name="selected_year">
              {% for year in range(start_year, end_year + 1) %}
                   <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
@@ -29,26 +33,26 @@
     <table style="border-collapse:collapse; width:100%" border="1">
          <tr>
              <th>Date</th>
-             <th>Number of new pushes</th>
-             <th>Number of old pushes</th>
-             {% for index in range(days_after_push|int) %}
+             <th>Number of new notifications</th>
+             <th>Number of old notifications</th>
+             {% for index in range(days_after_notification|int) %}
                  <th>Day + {{ index  + 1 }}</th>
              {% endfor %}
          </tr>
-         {% for push_info in pushes_info %}
+         {% for info in notification_info %}
              <tr>
-                 <td>{{ push_info['day'] }}</td>
-                 <td>{{ push_info['push_new'] }}</td>
-                 <td>{{ push_info['push_old'] }}</td>
-                 {% for order_number in push_info['order_numbers'] %}
+                 <td>{{ info['day'] }}</td>
+                 <td>{{ info['notification_new'] }}</td>
+                 <td>{{ info['notification_old'] }}</td>
+                 {% for order_number in notification_info['order_numbers'] %}
                      <td>{{ order_number }}</td>
                  {% endfor %}
              </tr>
          {% endfor %}
          <tr>
              <td><b>Total</b></td>
-             <td>{{ total['push_new'] }}</td>
-             <td>{{ total['push_old'] }}</td>
+             <td>{{ total['notification_new'] }}</td>
+             <td>{{ total['notification_old'] }}</td>
              {% for order_number in total['order_numbers'] %}
                  <td>{{ order_number }}</td>
              {% endfor %}

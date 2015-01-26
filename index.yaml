@@ -64,3 +64,13 @@ indexes:
   - name: token
   - name: request_time
     direction: desc
+
+- kind: Notification
+  properties:
+  - name: type
+  - name: created
+
+- kind: Notification
+  properties:
+  - name: client_id
+  - name: created

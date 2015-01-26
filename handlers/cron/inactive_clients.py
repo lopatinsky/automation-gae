@@ -3,7 +3,7 @@
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order
+from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_NOTIFICATION
 from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
@@ -39,6 +39,8 @@ class FullyInactiveClientsHandler(RequestHandler):
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
                             u"Хорошего дня!") % client.name
                 send_sms("DoubleB",  client.tel, sms_text)
+                notification = Notification(client_id=client.key.id(), type=SMS_NOTIFICATION)
+                notification.put()
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
@@ -60,6 +62,5 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
             score = empatika_promos.get_user_points(client.key.id()) % 5
             name = client.name if client.name_confirmed else None
             send_reminder_push(client_id, name, score)
-            client.last_push_date = datetime.now()
-            client.push_numbers += 1
-            client.put()
+            notification = Notification(client_id=client_id, type=PUSH_NOTIFICATION)
+            notification.put()

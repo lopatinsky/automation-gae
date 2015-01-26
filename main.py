@@ -34,7 +34,7 @@ app = WSGIApplication([
             Route('/orders', maintenance.OrdersReportHandler),
             Route('/repeated_orders', maintenance.RepeatedOrdersHandler),
             Route('/square_table', maintenance.SquareTableHandler),
-            Route('/pushes', maintenance.PushesReportHandler),
+            Route('/notification', maintenance.NotificationsReportHandler),
         ]),
 
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
