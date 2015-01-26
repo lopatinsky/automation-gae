@@ -216,8 +216,6 @@ class Client(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
 
     name_confirmed = ndb.BooleanProperty(default=False)
-    last_push_date = ndb.DateTimeProperty(auto_now=True)
-    push_numbers = ndb.IntegerProperty(default=0)
 
     @classmethod
     def create(cls):
