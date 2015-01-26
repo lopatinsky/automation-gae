@@ -44,16 +44,27 @@ class FullyInactiveClientsHandler(RequestHandler):
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
-    INACTIVE_DAYS = 5
+    WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    WEEK_OF_INACTIVE_DAYS = {
+        'monday': [6, 5],
+        'tuesday': [5],
+        'wednesday': [5],
+        'friday': [4, 5, 6]
+    }
 
     def get(self):
-        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=self.INACTIVE_DAYS),
-                             Order.date_created < datetime.now() - timedelta(days=self.INACTIVE_DAYS - 1)).fetch()
+        orders = []
+        for inactive_days in self.WEEK_OF_INACTIVE_DAYS[self.WEEK[datetime.today().weekday()]]:
+            orders.extend(Order.query(Order.date_created > datetime.now() - timedelta(days=inactive_days),
+                                      Order.date_created < datetime.now() - timedelta(days=inactive_days - 1)).fetch())
         clients_id = []
         for order in orders:
             if not order.client_id in clients_id:
                 clients_id.append(order.client_id)
-        orders = Order.query(Order.date_created > datetime.now() - timedelta(days=self.INACTIVE_DAYS - 1)).fetch()
+        orders = []
+        for inactive_days in self.WEEK_OF_INACTIVE_DAYS[self.WEEK[datetime.today().weekday()]]:
+            orders.extend(Order.query(Order.date_created > datetime.now() - timedelta(days=inactive_days - 1)).fetch())
+
         for order in orders:
             if order.client_id in clients_id:
                 clients_id.remove(order.client_id)

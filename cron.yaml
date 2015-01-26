@@ -13,14 +13,14 @@ cron:
   url: /cron/alfa_errors
   schedule: every 10 minutes synchronized
 
-- description: check inactive clients
-  url: /cron/inactive_clients
-  schedule: every day 7:00
+- description: check clients with phone
+  url: /cron/sms_notify
+  schedule: every day 10:00
   timezone: Europe/Moscow
 
 - description: check weekly inactive clients
-  url: /cron/weekly_inactive
-  schedule: every day 10:00
+  url: /cron/push_notify
+  schedule: every monday, tuesday, wednesday, friday 07:00
   timezone: Europe/Moscow
 
 - description: clear old pings

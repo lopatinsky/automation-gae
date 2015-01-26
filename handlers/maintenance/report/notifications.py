@@ -38,7 +38,9 @@ class NotificationsReportHandler(BaseHandler):
             order_numbers = [0] * self.DAYS_AFTER_NOTIFICATION
             for notification in notifications:
                 client_id = notification.client_id
-                first_notification = Notification.query(Notification.client_id == client_id).order(Notification.created).get()
+                first_notification = Notification.query(Notification.client_id == client_id,
+                                                        Notification.type == chosen_type)\
+                    .order(Notification.created).get()
                 if notification.key.id() != first_notification.key.id():
                     notification_old += 1
                 else:

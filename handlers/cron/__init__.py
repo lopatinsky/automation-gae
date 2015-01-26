@@ -12,7 +12,7 @@ app = webapp2.WSGIApplication([
     ('/cron/close_orders', CloseOpenedOrdersHandler),
     ('/cron/check_pings', CheckPingsHandler),
     ('/cron/alfa_errors', CheckAlfaErrorsHandler),
-    ('/cron/inactive_clients', FullyInactiveClientsHandler),
-    ('/cron/weekly_inactive', SeveralDaysInactiveClientsHandler),
+    ('/cron/sms_notify', FullyInactiveClientsHandler),
+    ('/cron/push_notify', SeveralDaysInactiveClientsHandler),
     ('/cron/clear_pings', ClearPingsHandler),
 ], debug=True)
