@@ -18,10 +18,10 @@ cron:
   schedule: every day 10:00
   timezone: Europe/Moscow
 
-- description: check weekly inactive clients
-  url: /cron/push_notify
-  schedule: every monday, tuesday, wednesday, friday 07:00
-  timezone: Europe/Moscow
+#- description: check weekly inactive clients
+#  url: /cron/push_notify
+#  schedule: every monday, tuesday, wednesday, friday 07:00
+#  timezone: Europe/Moscow
 
 - description: clear old pings
   url: /cron/clear_pings
