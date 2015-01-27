@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER
 from google.appengine.api import taskqueue
 from methods.email_mandrill import send_email
 from webapp2_extras import jinja2
@@ -198,6 +198,14 @@ class ReturnOrderHandler(ApiHandler):
                 order.put()
 
                 client = Client.get_by_id(order.client_id)
+                if order.mastercard and client.has_mastercard_orders:
+                    # if this was the only mastercard order, make the user eligible for discount again
+                    other_mastercard_order = Order.query(Order.client_id == order.client_id,
+                                                         Order.mastercard == True,
+                                                         Order.status.IN([NEW_ORDER, READY_ORDER])).get()
+                    if not other_mastercard_order:
+                        client.has_mastercard_orders = False
+                        client.put()
 
                 self.render_json({
                     'error': 0,
