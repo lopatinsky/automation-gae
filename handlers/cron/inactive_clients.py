@@ -38,7 +38,7 @@ class FullyInactiveClientsHandler(RequestHandler):
                             u"Теперь можно получить кофе без очереди в кассу. "
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
                             u"Хорошего дня!") % client.name
-                send_sms("DoubleB",  client.tel, sms_text)
+                send_sms("DoubleB", [client.tel], sms_text)
                 notification = Notification(client_id=client.key.id(), type=SMS_NOTIFICATION)
                 notification.put()
 
