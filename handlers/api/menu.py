@@ -17,6 +17,7 @@ class MenuHandler(ApiHandler):
 
     def get(self):
         client_id = self.request.get_range('client_id')
+        device_phone = "".join(c for c in self.request.get('device_phone') if '0' <= c <= '9')
         categories = MenuCategory.query().fetch()
         result_dict = {}
         for category in categories:
@@ -34,10 +35,22 @@ class MenuHandler(ApiHandler):
             client = Client.get_by_id(client_id)
         except:
             pass
+        if not client and device_phone:
+            client = Client.query(Client.device_phone == device_phone).get()
+
         if not client:
             client = Client.create()
+            client.device_phone = device_phone
             client.put()
             logging.info("issued new client_id: %s", client.key.id())
+        elif device_phone and device_phone != client.device_phone:
+            client.device_phone = device_phone
+            client.put()
 
         response['client_id'] = client.key.id()
+        client_name = client.name or ''
+        if client.surname:
+            client_name += ' ' + client.surname
+        response['client_name'] = client_name
+        response['client_email'] = client.email or ''
         self.render_json(response)
