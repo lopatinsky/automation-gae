@@ -71,6 +71,21 @@ class OrderHandler(ApiHandler):
                 menu_item = MenuItem.get_by_id(int(item['item_id']))
                 for i in xrange(item['quantity']):
                     items.append(menu_item)
+            item_keys = [item.key for item in items]
+
+            after_error = response_json.get("after_error")
+            if after_error:
+                five_mins_ago = datetime.utcnow() - timedelta(minutes=3)
+                previous_order = Order.query(Order.client_id == client_id,
+                                             Order.status.IN([READY_ORDER, NEW_ORDER]),
+                                             Order.date_created >= five_mins_ago).get()
+                if previous_order and sorted(previous_order.items) == sorted(item_keys):
+                    self.response.set_status(400)
+                    self.render_json({
+                        "description": u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов."
+                    })
+                    memcache.delete(cache_key)
+                    return
 
             validation_result = validate_order(client, response_json['items'], response_json['payment'],
                                                venue, delivery_time_minutes, get_promo_support(self.request), True)
@@ -116,7 +131,7 @@ class OrderHandler(ApiHandler):
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
-                          promos=promo_list, mastercard=mastercard, items=[item.key for item in items],
+                          promos=promo_list, mastercard=mastercard, items=item_keys,
                           item_details=item_details)
             order.put()
 
