@@ -7,7 +7,7 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, sms, push, empatika_promos, orders
+from methods import alfa_bank, empatika_promos, orders
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE
@@ -197,20 +197,7 @@ class ReturnOrderHandler(ApiHandler):
                 order.return_datetime = datetime.utcnow()
                 order.put()
 
-                # send sms
-                venue = Venue.get_by_id(order.venue_id)
                 client = Client.get_by_id(order.client_id)
-                sms_text = u"[Отмена] Заказ №%s (%s) Сумма: %s Тип оплаты: %s" % (
-                    order_id, client.name, order.total_sum,
-                    [u"Наличные", u"Карта", u"Бонусы"][order.payment_type_id]
-                )
-                sms.send_sms("DoubleB", venue.phone_numbers, sms_text)
-
-                # send push
-                push_text = u"%s, заказ №%s отменен." % (client.name, order_id)
-                if order.payment_type_id == CARD_PAYMENT_TYPE:
-                    push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут."
-                push.send_order_push(order_id, order.status, push_text, order.device_type)
 
                 self.render_json({
                     'error': 0,
