@@ -117,10 +117,16 @@ class OrderHandler(ApiHandler):
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
-                payment_id = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
-                if not payment_id:
+                success, result = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
+                if success:
+                    payment_id = result
+                else:
+                    self.response.set_status(400)
+                    self.render_json({
+                        "description": u"Не удалось произвести оплату. " + (result or '')
+                    })
                     memcache.delete(cache_key)
-                    self.abort(400)
+                    return
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
                 cup_count = len(items)
