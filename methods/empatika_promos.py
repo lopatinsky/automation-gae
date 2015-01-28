@@ -12,7 +12,7 @@ class EmpatikaPromosError(Exception):
 
 def _get(api_path):
     url = PROMOS_BASE_URL + api_path + "?key=" + config.PROMOS_API_KEY
-    result = urlfetch.fetch(url)
+    result = urlfetch.fetch(url, deadline=10)
     response = json.loads(result.content)
     if response["status"] != 200:
         raise EmpatikaPromosError(response["error"])
@@ -23,7 +23,7 @@ def _post(api_path, params):
     url = PROMOS_BASE_URL + api_path + "?key=" + config.PROMOS_API_KEY
     payload = urllib.urlencode(params)
     result = urlfetch.fetch(url, payload, urlfetch.POST,
-                            {"Content-Type": "application/x-www-form-urlencoded"})
+                            {"Content-Type": "application/x-www-form-urlencoded"}, deadline=10)
     response = json.loads(result.content)
     if response["status"] != 200:
         raise EmpatikaPromosError(response["error"])
