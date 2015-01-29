@@ -21,22 +21,33 @@ SECONDS_WAITING_BEFORE_SMS = 15
 
 
 class OrderHandler(ApiHandler):
+    cache_key = None
+
+    def render_error(self, description):
+        self.response.set_status(400)
+        logging.warning("order render_error: %s" % description)
+        self.render_json({
+            "description": description
+        })
+        memcache.delete(self.cache_key)
 
     def post(self):
         #TODO errors handling
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
         # check if order exists in DB or currently adding it
-        cache_key = "order_%s" % order_id
-        if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
+        self.cache_key = "order_%s" % order_id
+        if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
             self.abort(409)
 
-        venue_id = response_json['venue_id']
+        venue_id = response_json.get('venue_id')
+        if not venue_id:
+            return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать кофейню.")
+        venue_id = int(venue_id)
+
         venue = Venue.get_by_id(venue_id)
         if not venue:
-            memcache.delete(cache_key)
-            self.abort(400)
-        venue_id = int(venue_id)
+            return self.render_error("")
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -72,21 +83,26 @@ class OrderHandler(ApiHandler):
                 menu_item = MenuItem.get_by_id(int(item['item_id']))
                 for i in xrange(item['quantity']):
                     items.append(menu_item)
+            item_keys = [item.key for item in items]
+
+            after_error = response_json.get("after_error")
+            if after_error:
+                five_mins_ago = datetime.utcnow() - timedelta(minutes=3)
+                previous_order = Order.query(Order.client_id == client_id,
+                                             Order.status.IN([READY_ORDER, NEW_ORDER]),
+                                             Order.date_created >= five_mins_ago).get()
+                if previous_order and sorted(previous_order.items) == sorted(item_keys):
+                    self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
+                    return
 
             validation_result = validate_order(client, response_json['items'], response_json['payment'],
                                                venue, delivery_time_minutes, get_promo_support(self.request), True)
             if not validation_result['valid']:
-                self.response.set_status(400)
-                self.render_json({"description": get_first_error(validation_result)})
-                memcache.delete(cache_key)
-                return
+                return self.render_error(get_first_error(validation_result))
 
             total_sum = validation_result['total_sum']
             if request_total_sum and total_sum != request_total_sum:
-                self.response.set_status(400)
-                memcache.delete(cache_key)
-                self.render_json({"description": u"Сумма заказа была пересчитана"})
-                return
+                return self.render_error(u"Сумма заказа была пересчитана")
 
             item_details = validation_result["details"]
             promo_list = [promo['id'] for promo in validation_result["promos"]]
@@ -103,10 +119,11 @@ class OrderHandler(ApiHandler):
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
-                payment_id = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
-                if not payment_id:
-                    memcache.delete(cache_key)
-                    self.abort(400)
+                success, result = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
+                if success:
+                    payment_id = result
+                else:
+                    return self.render_error(u"Не удалось произвести оплату. " + (result or ''))
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
                 cup_count = len(items)
@@ -117,7 +134,7 @@ class OrderHandler(ApiHandler):
             order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
                           coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
                           delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
-                          promos=promo_list, mastercard=mastercard, items=[item.key for item in items],
+                          promos=promo_list, mastercard=mastercard, items=item_keys,
                           item_details=item_details)
             order.put()
 
@@ -138,13 +155,12 @@ class OrderHandler(ApiHandler):
                 taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                               countdown=SECONDS_WAITING_BEFORE_SMS)
 
-            memcache.delete(cache_key)
+            memcache.delete(self.cache_key)
 
             self.response.status_int = 201
             self.render_json({'order_id': order_id})
         else:
-            memcache.delete(cache_key)
-            self.abort(400)
+            self.render_error(u"Выбранный способ оплаты недоступен.")
 
 
 class RegisterOrderHandler(ApiHandler):

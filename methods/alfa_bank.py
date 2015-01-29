@@ -19,7 +19,7 @@ def _error_code(resp):
 
 
 def _error_message(resp):
-    return resp.get('errorMessage') or resp.get('ErrorMessage')
+    return resp.get('errorMessage') or resp.get('ErrorMessage') or resp.get('error')
 
 
 def _success(resp):
@@ -135,15 +135,20 @@ def unbind_card(binding_id):
 
 def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
     tie_result = tie_card(total_sum * 100, order_number, return_url, client_id, 'MOBILE')
-    if _success(tie_result):
-        payment_id = tie_result['orderId']
-        create_result = create_pay(binding_id, payment_id)
-        if _success(create_result):
-            check_result = check_extended_status(payment_id)['alfa_response']
-            if _success(check_result) and \
-                    check_result['actionCode'] == 0 and check_result['orderStatus'] == 1:
-                return payment_id
-            else:
-                logging.warning("extended status check fail")
+    if not _success(tie_result):
+        return False, _error_message(tie_result)
+    payment_id = tie_result['orderId']
 
-    return None
+    create_result = create_pay(binding_id, payment_id)
+    if not _success(create_result):
+        return False, _error_message(create_result)
+
+    check_result = check_extended_status(payment_id)['alfa_response']
+    if not _success(check_result):
+        return False, _error_message(check_result)
+
+    if not (check_result['actionCode'] == 0 and check_result['orderStatus'] == 1):
+        logging.warning("extended status check fail")
+        return False, check_result['actionCodeDescription']
+
+    return True, payment_id

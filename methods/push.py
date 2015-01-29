@@ -28,7 +28,7 @@ def send_push(channel, data, device_type):
         'X-Parse-REST-API-Key': PARSE_API_KEY
     }
     result = urlfetch.fetch('https://api.parse.com/1/push', payload=json.dumps(payload), method='POST',
-                            headers=headers, validate_certificate=False).content
+                            headers=headers, validate_certificate=False, deadline=10).content
     logging.info(result)
     return json.loads(result)
 

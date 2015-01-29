@@ -4,7 +4,7 @@ import datetime
 from config import config
 
 from methods import working_hours
-from models import MenuItem, CARD_PAYMENT_TYPE, OrderPositionDetails
+from models import MenuItem, CARD_PAYMENT_TYPE, OrderPositionDetails, Venue
 
 
 PROMO_SUPPORT_NONE = 0
@@ -56,6 +56,7 @@ def _check_venue(venue, delivery_time, errors):
 
 def _check_stop_lists(item_dicts, venue, errors):
     titles = []
+    special_msgs = []
     if config.DEBUG:
         # test server: big cappuccino, latte, double espresso not available
         for item_dict in item_dicts:
@@ -71,6 +72,15 @@ def _check_stop_lists(item_dicts, venue, errors):
                 item_dict['errors'].append(u"Напиток недоступен в этой кофейне")
                 titles.append(item_dict['item'].title)
 
+    if venue:
+        for item_dict in item_dicts:
+            item_id = item_dict['item'].key.id()
+            if item_id in config.SPECIALS and config.SPECIALS[item_id] != venue.key.id():
+                special_venue = Venue.get_by_id(config.SPECIALS[item_id])
+                error_msg = u"%s можно заказать только в кофейне %s" % (item_dict['item'].title, special_venue.title)
+                special_msgs.append(error_msg)
+                item_dict['errors'].append(error_msg)
+
     # TODO temporary stop lists
 
     titles = _unique(titles)
@@ -81,6 +91,10 @@ def _check_stop_lists(item_dicts, venue, errors):
             titles_msg = u"%s и %s" % (", ".join(titles[:-1]), titles[-1])
         stop_list_msg = u"%s сейчас нельзя заказать в этой кофейне" % titles_msg
         errors.append(stop_list_msg)
+        return False
+    special_msgs = _unique(special_msgs)
+    if special_msgs:
+        errors.extend(special_msgs)
         return False
     return True
 
