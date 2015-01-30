@@ -208,6 +208,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
         'promos': promos_info,
         'total_sum': total_sum
     }
+    logging.info(result)
 
     if with_details:
         details = []

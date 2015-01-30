@@ -10,60 +10,29 @@ class UpdateOrderPromos(ApiHandler):
 
         json = {'orders': []}
         for order in Order.query().fetch():
-            total_sum = 0
-            items = []
-            richest = None
-            for item in order.items:
-                item = item.get()
-                total_sum += item.price
-                items.append({
-                    'name': item.title,
-                    'price': item.price
-                })
-                if richest:
-                    if richest.price < item.price:
-                        richest = item
-                else:
-                    richest = item
-            is_include = False
-            if total_sum != order.total_sum:
-                if not order.promos:
-                    is_include = True
-                    order.promos.append('master')
-                    order_details = OrderPositionDetails(
-                        item=richest.key,
-                        price=richest.price / 2,
-                        revenue=richest.price,
-                        promos=['master']
-                    )
-                    order.item_details.append(order_details)
-                    need_set_promo = True
-                    for item in order.items:
-                        item = item.get()
-                        if item.key.id() != richest.key.id() or (not need_set_promo and item.key.id() == richest.key.id()):
-                            order_details = OrderPositionDetails(
-                                item=item.key,
-                                price=item.price,
-                                revenue=item.price,
-                                promos=[]
-                            )
-                            order.item_details.append(order_details)
-                        else:
-                            if item.key.id() == richest.key.id():
-                                need_set_promo = False
-            else:
-                if not order.item_details:
-                    is_include = True
-                    for item in order.items:
-                        item = item.get()
-                        order_details = OrderPositionDetails(
-                            item=item.key,
-                            price=item.price,
-                            revenue=item.price,
-                            promos=[]
-                        )
-                        order.item_details.append(order_details)
+            if order.item_details:
+                continue
+            total = 0
+            for item_key in order.items:
+                item = item_key.get()
+                order.item_details.append(OrderPositionDetails(
+                    item=item_key,
+                    price=item.price,
+                    revenue=item.price,
+                    promos=[]
+                ))
+                total += item.price
+            if total != order.total_sum:
+                order.promos = ['master']
+
+                most_expensive = None
+                for item in order.item_details:
+                    if not most_expensive or item.price > most_expensive.price:
+                        most_expensive = item
+                item.price /= 2
+                item.promos = ['master']
             order.put()
+
             item_details = []
             for item in order.item_details:
                 item_details.append({
@@ -75,11 +44,9 @@ class UpdateOrderPromos(ApiHandler):
             params = {
                 'order_id': order.key.id(),
                 'total_sum_order': order.total_sum,
-                'sum of items price': total_sum,
-                'items': items,
+                'sum of items price': total,
                 'promos': order.promos,
                 'details': item_details
             }
-            if is_include:
-                json['orders'].append(params)
+            json['orders'].append(params)
         self.render_json(json)
