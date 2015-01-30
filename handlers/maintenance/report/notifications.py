@@ -51,17 +51,16 @@ class NotificationsReportHandler(BaseHandler):
                     order_number = Order.query(
                         Order.client_id == client_id, Order.date_created >= curr_date_begin,
                         Order.date_created <= curr_date_end).count()
-                    order_numbers[index] = order_number
+                    order_numbers[index] += order_number
                     total['order_numbers'][index] += order_number
-
             pushes_info.append({
                 'day': day,
                 'notification_new': notification_new,
                 'notification_old': notification_old,
                 'order_numbers': order_numbers
             })
-            total['notification_new'] = notification_new
-            total['notification_old'] = notification_old
+            total['notification_new'] += notification_new
+            total['notification_old'] += notification_old
         values = {
             'notification_info': pushes_info,
             'start_year': PROJECT_STARTING_YEAR,

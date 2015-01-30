@@ -44,7 +44,7 @@
                  <td>{{ info['day'] }}</td>
                  <td>{{ info['notification_new'] }}</td>
                  <td>{{ info['notification_old'] }}</td>
-                 {% for order_number in notification_info['order_numbers'] %}
+                 {% for order_number in info['order_numbers'] %}
                      <td>{{ order_number }}</td>
                  {% endfor %}
              </tr>
