@@ -240,6 +240,8 @@ class ReturnOrderHandler(ApiHandler):
 
 class CheckOrderHandler(ApiHandler):
     def post(self):
+        logging.info("promo support from request: %s" % get_promo_support(self.request))
+
         client_id = self.request.get_range('client_id')
         client = Client.get_by_id(client_id)
 

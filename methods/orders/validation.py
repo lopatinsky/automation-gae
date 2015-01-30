@@ -19,9 +19,9 @@ def get_promo_support(request):
     ua = request.headers['User-Agent']
     if 'DoubleBRedirect' in ua:  # old server: 1.0, 1.0.1
         return PROMO_SUPPORT_NONE
-    if '1.0' in ua or \
-            '1.1' in ua or \
-            ('1.2 ' in ua and 'Android' in ua):
+    if '/1.0' in ua or \
+            '/1.1' in ua or \
+            ('/1.2 ' in ua and 'Android' in ua):
         return PROMO_SUPPORT_MASTER
     return PROMO_SUPPORT_FULL
 
