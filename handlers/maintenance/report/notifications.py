@@ -4,6 +4,7 @@ from ..base import BaseHandler
 from models import Order, Notification, SMS_NOTIFICATION, PUSH_NOTIFICATION
 from datetime import datetime, timedelta
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
+from methods.excel import send_excel_file
 import calendar
 
 
@@ -14,6 +15,7 @@ class NotificationsReportHandler(BaseHandler):
         chosen_year = self.request.get("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_type = self.request.get_range("selected_type")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_year = datetime.now().year
             chosen_month = datetime.now().month
@@ -73,4 +75,7 @@ class NotificationsReportHandler(BaseHandler):
             'days_after_notification': self.DAYS_AFTER_NOTIFICATION,
             'total': total
         }
-        self.render('reported_notification.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'notification', 'reported_notification.html', **values)
+        else:
+            self.render('reported_notification.html', **values)

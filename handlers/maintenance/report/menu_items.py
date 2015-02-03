@@ -4,6 +4,8 @@ from ..base import BaseHandler
 from models import Order, Venue, MenuItem, READY_ORDER
 from datetime import datetime
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
+from methods.excel import send_excel_file
+
 
 class ReportedMenuItem:
     def __init__(self, item_id, title, price):
@@ -43,6 +45,7 @@ class MenuItemsReportHandler(BaseHandler):
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_month = 0
         if not chosen_month:
@@ -71,4 +74,7 @@ class MenuItemsReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day
         }
-        self.render('reported_menu_items.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'menu_items', 'reported_menu_items.html', **values)
+        else:
+            self.render('reported_menu_items.html', **values)

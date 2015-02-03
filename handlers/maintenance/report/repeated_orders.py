@@ -5,12 +5,14 @@ from models import Order, Client, READY_ORDER
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 import calendar
 from datetime import datetime
+from methods.excel import send_excel_file
 
 
 class RepeatedOrdersHandler(BaseHandler):
     def get(self):
         chosen_year = self.request.get("selected_year")
         chosen_month = self.request.get_range("selected_month")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_year = datetime.now().year
             chosen_month = datetime.now().month
@@ -62,4 +64,7 @@ class RepeatedOrdersHandler(BaseHandler):
             'chosen_year': chosen_year,
             'chosen_month': chosen_month,
         }
-        self.render('reported_repeated_orders.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'repeated_orders', 'reported_repeated_orders.html', **values)
+        else:
+            self.render('reported_repeated_orders.html', **values)

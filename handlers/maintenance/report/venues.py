@@ -4,6 +4,7 @@ from ..base import BaseHandler
 from models import Order, Venue, READY_ORDER, BONUS_PAYMENT_TYPE
 from datetime import datetime, timedelta
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
+from methods.excel import send_excel_file
 
 
 class ReportedVenue:
@@ -49,6 +50,7 @@ class VenuesReportHandler(BaseHandler):
         chosen_year = self.request.get("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_month = 0
         if not chosen_month:
@@ -68,7 +70,10 @@ class VenuesReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day
         }
-        self.render('reported_venues.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'venues', 'reported_venues.html', **values)
+        else:
+            self.render('reported_venues.html', **values)
 
 
 class VenuesReportWithDatesHandler(VenuesReportHandler):
@@ -88,6 +93,7 @@ class VenuesReportWithDatesHandler(VenuesReportHandler):
     def get(self):
         chosen_year = self.request.get("selected_year")
         chosen_month = self.request.get_range("selected_month")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_month = 0
         if not chosen_year:
@@ -103,4 +109,7 @@ class VenuesReportWithDatesHandler(VenuesReportHandler):
             'chosen_year': chosen_year,
             'chosen_month': chosen_month
         }
-        self.render('reported_venues_with_dates.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'venues_with_dates', 'reported_venues_with_dates.html', **values)
+        else:
+            self.render('reported_venues_with_dates.html', **values)
