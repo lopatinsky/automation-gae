@@ -6,6 +6,7 @@ from config import config
 from handlers.maintenance.report.report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
     CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue
+from methods.excel import send_excel_file
 
 
 _STATUS_STRINGS = {
@@ -58,6 +59,7 @@ class OrdersReportHandler(BaseHandler):
         chosen_year = self.request.get("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_month = 0
         if not chosen_month:
@@ -87,4 +89,7 @@ class OrdersReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day
         }
-        self.render('reported_orders.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'orders', 'reported_orders.html', **values)
+        else:
+            self.render('reported_orders.html', **values)

@@ -6,6 +6,8 @@ from models import Order, Client, Venue, READY_ORDER, BONUS_PAYMENT_TYPE,\
 from datetime import datetime
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
 from google.appengine.ext import ndb
+from methods.excel import send_excel_file
+import logging
 
 
 class ReportedClient:
@@ -73,11 +75,11 @@ class ClientsReportHandler(BaseHandler):
             sum(client.cancel_sum for client in clients.values())
 
     def get(self):
-        # selected_*param == 0 if choose all *param
         venue_id = self.request.get("selected_venue")
         chosen_year = self.request.get_range("selected_year")
         chosen_month = self.request.get_range("selected_month")
         chosen_day = self.request.get_range("selected_day")
+        chosen_btn_type = self.request.get("button")
         if not chosen_year:
             chosen_month = 0
         if not chosen_month:
@@ -108,4 +110,7 @@ class ClientsReportHandler(BaseHandler):
             'chosen_month': chosen_month,
             'chosen_day': chosen_day
         }
-        self.render('reported_clients.html', **values)
+        if chosen_btn_type == "xls":
+            send_excel_file(self, 'clients', 'reported_clients.html', **values)
+        else:
+            self.render('reported_clients.html', **values)

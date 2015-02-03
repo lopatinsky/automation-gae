@@ -9,6 +9,7 @@
     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
         'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
 
+    {% set fix="false" %}
 
     <form method="get">
         <select name="selected_venue">
@@ -43,6 +44,7 @@
             {% endfor %}
         </select>
         <input type="submit" value="Выбрать"/>
+        <button formaction="/mt/report/orders" formmethod="get" name="button" value="xls">Скачать xls</button>
     </form>
 
     <br>
@@ -66,23 +68,28 @@
         {% for order in orders %}
             {% set icount = order["items"]|length %}
             <tr>
-                <td rowspan="{{ icount }}">{{ order.order_id }}</td>
-                <td rowspan="{{ icount }}">{{ order.venue }}</td>
-                <td rowspan="{{ icount }}">{{ order.date }}</td>
-                <td rowspan="{{ icount }}">{{ order.created_time }}</td>
-                <td rowspan="{{ icount }}">{{ order.delivery_time }}</td>
-                <td rowspan="{{ icount }}">{{ order.status }}</td>
-                <td rowspan="{{ icount }}">{{ order.payment_type }}</td>
-                <td rowspan="{{ icount }}">{{ order.total_sum }}</td>
-                <td rowspan="{{ icount }}">{{ order.client.id }}</td>
-                <td rowspan="{{ icount }}">{{ order.client.name }}</td>
-                <td rowspan="{{ icount }}">{{ order.client.surname }}</td>
-                <td rowspan="{{ icount }}">{{ order.client.phone }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.order_id }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.venue }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.date }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.created_time }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.delivery_time }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.status }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.payment_type }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.total_sum }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.id }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.name }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.surname }}</td>
+                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.phone }}</td>
 
                 {% for item in order["items"] %}
                     {% if loop.index0 > 0 %}
                         </tr>
                         <tr>
+                        {% if btn_type == 'xls' %}
+                            {% for i in range(12) %}
+                                <td></td>
+                            {% endfor %}
+                        {% endif %}
                     {% endif %}
                     <td>{{ item.title }}</td>
                     <td>{{ item.quantity }}</td>
