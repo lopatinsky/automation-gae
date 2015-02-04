@@ -42,6 +42,14 @@ _OMEGA_PROMO = {
 }
 
 
+def _nice_join(strs):
+    if not strs:
+        return ""
+    if len(strs) == 1:
+        return strs[0]
+    return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
+
+
 def _check_venue(venue, delivery_time, errors):
     if venue:
         if not venue.active:
@@ -75,9 +83,14 @@ def _check_stop_lists(item_dicts, venue, errors):
     if venue:
         for item_dict in item_dicts:
             item_id = item_dict['item'].key.id()
-            if item_id in config.SPECIALS and config.SPECIALS[item_id] != venue.key.id():
-                special_venue = Venue.get_by_id(config.SPECIALS[item_id])
-                error_msg = u"%s можно заказать только в кофейне %s" % (item_dict['item'].title, special_venue.title)
+            special_venue_ids = config.SPECIALS.get(item_id)
+            if special_venue_ids and venue.key.id() not in special_venue_ids:
+                special_venue_titles = [Venue.get_by_id(id_).title for id_ in special_venue_ids]
+                if len(special_venue_titles) == 1:
+                    venue_msg = u"кофейне %s" % special_venue_titles[0]
+                else:
+                    venue_msg = u"кофейнях: %s" % _nice_join(special_venue_titles)
+                error_msg = u"%s можно заказать только в %s" % (item_dict['item'].title, venue_msg)
                 special_msgs.append(error_msg)
                 item_dict['errors'].append(error_msg)
 
@@ -85,10 +98,7 @@ def _check_stop_lists(item_dicts, venue, errors):
 
     titles = _unique(titles)
     if titles:
-        if len(titles) == 1:
-            titles_msg = titles[0]
-        else:
-            titles_msg = u"%s и %s" % (", ".join(titles[:-1]), titles[-1])
+        titles_msg = _nice_join(titles)
         stop_list_msg = u"%s сейчас нельзя заказать в этой кофейне" % titles_msg
         errors.append(stop_list_msg)
         return False

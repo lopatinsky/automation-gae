@@ -46,7 +46,14 @@ class ProductionConfig(DoubleBConfig):
         5093108584808448: [15, 26, 27], # omega
     }
     SPECIALS = {
-        37: 1,  # grapefruit tea: mil
+        37: [  # grapefruit tea
+            1,  # mil
+            4801814507552768,  # ftower
+            5656058538229760,  # gstolic
+            5660980839186432,  # dmitr
+            5786976926040064,  # tvyamsk
+            5083289484263424,  # million
+        ],
     }
 
     DEBUG = False
@@ -79,7 +86,10 @@ class TestingConfig(DoubleBConfig):
     STOP_LISTS = {
     }
     SPECIALS = {
-        6: 5707702298738688,
+        6: [
+            5707702298738688,
+            5629499534213120,
+        ],
     }
 
     DEBUG = True
