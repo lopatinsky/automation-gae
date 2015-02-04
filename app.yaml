@@ -44,6 +44,9 @@ libraries:
 - name: jinja2
   version: latest
 
+- name: lxml
+  version: "latest"
+
 builtins:
 - remote_api: on
 - deferred: on
