@@ -15,7 +15,10 @@ def send_excel_file(request_handler, name, template_name, **values):
     for i, tr in enumerate(page.xpath("body/table")[0].findall("tr")):
         for j, td in enumerate(tr.getchildren()):
             if td.text:
-                sheet.write(i, j, u''.join(td.text))
+                td = u''.join(td.text)
+                if td.isdigit():
+                    td = int(td)
+                sheet.write(i, j, td)
 
     request_handler.response.headers['Content-Type'] = 'application/ms-excel'
     request_handler.response.headers['Content-Transfer-Encoding'] = 'Binary'
