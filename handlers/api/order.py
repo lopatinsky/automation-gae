@@ -1,5 +1,6 @@
 # coding:utf-8
 import logging
+from google.appengine.ext.db import BadRequestError
 from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 from config import config
@@ -37,8 +38,11 @@ class OrderHandler(ApiHandler):
         order_id = int(response_json['order_id'])
         # check if order exists in DB or currently adding it
         self.cache_key = "order_%s" % order_id
-        if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
-            self.abort(409)
+        try:
+            if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
+                self.abort(409)
+        except BadRequestError:
+            self.render_error(u'Произошла ошибка. Попробуйте обновить приложение.')
 
         venue_id = response_json.get('venue_id')
         if not venue_id:
