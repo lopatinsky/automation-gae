@@ -59,6 +59,9 @@ def _check_venue(venue, delivery_time, errors):
         if not venue.is_open(minutes_offset=delivery_time):
             errors.append(u"Эта кофейня сейчас закрыта")
             return False
+        if venue.problem:
+            errors.append(u"Кофейня временно не принимает заказы: %s" % venue.problem)
+            return False
     return True
 
 

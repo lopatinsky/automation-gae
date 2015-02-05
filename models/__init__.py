@@ -70,6 +70,7 @@ class Venue(ndb.Model):
     menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
+    problem = ndb.StringProperty(indexed=False)
     active = ndb.BooleanProperty(required=True, default=False)
 
     def dict(self, user_location=None):
