@@ -38,18 +38,8 @@ class OrderHandler(ApiHandler):
         order_id = int(response_json['order_id'])
         # check if order exists in DB or currently adding it
         self.cache_key = "order_%s" % order_id
-        try:
-            if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
-                self.abort(409)
-        except BadRequestError:
-            ua = self.request.headers['User-Agent']
-            if 'DoubleBRedirect' in ua \
-                or '/1.0' in ua \
-                or '/1.1' in ua \
-                or (('/1.2' in ua or '/1.3 ' in ua) and 'Android' in ua):
-                self.render_error(u'Произошла ошибка. Попробуйте обновить приложение.')
-            else:
-                self.abort(400)
+        if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
+            self.abort(409)
 
         venue_id = response_json.get('venue_id')
         if not venue_id:
