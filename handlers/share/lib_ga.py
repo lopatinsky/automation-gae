@@ -14,7 +14,7 @@ def gen_ga_cid():
     return '.'.join((str(random.randint(100, 10000000)), str(int(time()))))
 
 
-def ga_track_page(tracking_id, hostname, page, title, cid=None, v=1, req_headers=None):
+def ga_track_page(tracking_id, hostname, page, title, cid=None, v=1, req_headers=None, campaign=None):
     cid_g = cid if cid is not None else gen_ga_cid()
     req_values = {
         'v': v,  # Version.
@@ -25,6 +25,8 @@ def ga_track_page(tracking_id, hostname, page, title, cid=None, v=1, req_headers
         'dp': page,  # Page.
         'dt': title,  # Title.
     }
+    if campaign:
+        req_values.update(campaign)
     try:
         _request(req_values, req_headers)
     except Exception as ex:
