@@ -14,6 +14,7 @@
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
 >           * [Cancel order](#markdown-header-cancel-order)
+>           * [Add return comment to canceled order](#markdown-header-add-return-comment-to-canceled-order)
 >           * [Get shared info](#markdown-header-get-shared-info)
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
 >           * [Login](#markdown-header-login)
@@ -366,6 +367,21 @@ Response on failure:
 {
     "error": 1,
     "description": error_description // string
+}
+```
+
+### Add return comment to canceled order
+
+POST `/api/add_return_comment`
+
+Parameters:
+
+* `order_id`: int
+* `text`: string
+
+```
+#!js
+{
 }
 ```
 
