@@ -9,12 +9,14 @@
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
+        <th>User-Agent</th>
     </tr>
     {% for client in clients %}
         <tr>
             <td>{{ client.name }} {{ client.surname }}</td>
             <td>{{ client.email }}</td>
             <td>{{ client.tel }}</td>
+            <td>{{ client.user_agent }}</td>
         </tr>
     {% endfor %}
 </body>

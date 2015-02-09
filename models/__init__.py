@@ -218,6 +218,7 @@ class Client(ndb.Model):
 
     name_confirmed = ndb.BooleanProperty(default=False)
 
+    user_agent = ndb.StringProperty(indexed=False)
     device_phone = ndb.StringProperty()
 
     @classmethod

@@ -40,6 +40,7 @@ class MenuHandler(ApiHandler):
 
         if not client:
             client = Client.create()
+            client.user_agent = self.request.headers["User-Agent"]
             client.device_phone = device_phone
             client.put()
             logging.info("issued new client_id: %s", client.key.id())
