@@ -10,6 +10,8 @@ class GATrackBaseRequestHandler(webapp2.RequestHandler):
     def __init__(self, request=None, response=None):
         super(GATrackBaseRequestHandler, self).__init__(request, response)
         self.ga_headers = {'User-Agent': self.request.headers["User-Agent"]}
+        if 'Referer' in self.request.headers:
+            self.ga_headers['Referer'] = self.request.headers['Referer']
         self.cid = self.get_cid()
 
     def track_event(self, category, action, label=None, value=None):

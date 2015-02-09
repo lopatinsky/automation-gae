@@ -6,7 +6,8 @@ from google.appengine.api import urlfetch
 
 
 def _request(req_values, req_headers):
-    return urlfetch.fetch('http://www.google-analytics.com/collect', urllib.urlencode(req_values), 'POST', deadline=30)
+    return urlfetch.fetch('http://www.google-analytics.com/collect', urllib.urlencode(req_values), 'POST', req_headers,
+                          deadline=30)
 
 
 def gen_ga_cid():
