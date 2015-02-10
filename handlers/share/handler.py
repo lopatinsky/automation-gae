@@ -58,6 +58,7 @@ class GATrackRequestHandler(GATrackBaseRequestHandler):
 
 class GATrackDownloadHandler(GATrackRequestHandler):
     def set_campaign(self, platform, client_id=None):
+        self.campaign["cn"] = "share_free_cup"
         self.campaign["cs"] = "ios" if platform == "i" else "android"
         referer = self.request.headers["Referer"]
         if referer:
