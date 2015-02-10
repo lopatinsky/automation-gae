@@ -20,6 +20,7 @@ NEW_ORDER = 0
 READY_ORDER = 1
 CANCELED_BY_CLIENT_ORDER = 2
 CANCELED_BY_BARISTA_ORDER = 3
+CREATING_ORDER = 4
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -119,8 +120,8 @@ class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
-                                                         CANCELED_BY_BARISTA_ORDER),
-                                 default=NEW_ORDER)
+                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
+                                 default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_time = ndb.DateTimeProperty(required=True)

@@ -94,7 +94,7 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.put()
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:
-            alfa_bank.pay_by_card(order.payment_id, 0)  # TODO check success
+            alfa_bank.deposit(order.payment_id, 0)  # TODO check success
             if order.mastercard:
                 points = len(order.items)
                 try:
@@ -121,7 +121,7 @@ class OrderCancelHandler(WebAdminApiHandler):
 
         success = True
         if order.payment_type_id == CARD_PAYMENT_TYPE:
-            return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
+            return_result = alfa_bank.reverse(order.payment_id)
             success = str(return_result['errorCode']) == '0'
         elif order.payment_type_id == BONUS_PAYMENT_TYPE:
             try:

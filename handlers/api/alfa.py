@@ -17,7 +17,7 @@ class PaymentBindingHandler(ApiHandler):
         binding_id = self.request.get("bindingId")
         order_id = self.request.get("mdOrder")
 
-        alfa_response = alfa_bank.create_pay(binding_id, order_id)
+        alfa_response = alfa_bank.authorize(binding_id, order_id)
         self.render_json(alfa_response)
 
 
@@ -28,7 +28,7 @@ class PaymentRegisterHandler(ApiHandler):
         amount = self.request.get("amount")
         return_url = self.request.get("returnUrl")
 
-        alfa_response = alfa_bank.tie_card(amount, order_number, return_url, client_id, 'MOBILE')
+        alfa_response = alfa_bank.create(amount, order_number, return_url, client_id, 'MOBILE')
         self.render_json(alfa_response)
 
 
@@ -36,7 +36,7 @@ class PaymentReverseHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId') or self.request.get('order_id')
 
-        alfa_response = alfa_bank.get_back_blocked_sum(order_id)
+        alfa_response = alfa_bank.reverse(order_id)
         self.render_json(alfa_response)
 
 

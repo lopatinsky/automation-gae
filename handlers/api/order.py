@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
 from google.appengine.api import taskqueue
 from methods.email_mandrill import send_email
 from webapp2_extras import jinja2
@@ -23,6 +23,7 @@ SECONDS_WAITING_BEFORE_SMS = 15
 
 class OrderHandler(ApiHandler):
     cache_key = None
+    order = None
 
     def render_error(self, description):
         self.response.set_status(400)
@@ -30,6 +31,8 @@ class OrderHandler(ApiHandler):
         self.render_json({
             "description": description
         })
+        if self.order:
+            self.order.key.delete()
         memcache.delete(self.cache_key)
 
     def post(self):
@@ -115,32 +118,39 @@ class OrderHandler(ApiHandler):
             if "master" in promo_list:
                 client.has_mastercard_orders = True
 
+            self.order = Order(
+                id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
+                comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
+                payment_type_id=payment_type_id, promos=promo_list, mastercard=mastercard, items=item_keys,
+                item_details=item_details)
+            self.order.put()
+
             if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
-                success, result = alfa_bank.hold_and_check(order_id, total_sum, return_url, alpha_client_id, binding_id)
-                if success:
-                    payment_id = result
+                success, result = alfa_bank.create_simple(total_sum, order_id, return_url, alpha_client_id)
+                if not success:
+                    error = result
                 else:
-                    return self.render_error(u"Не удалось произвести оплату. " + (result or ''))
+                    self.order.payment_id = result
+                    self.order.put()
+                    success, error = alfa_bank.hold_and_check(self.order.payment_id, binding_id)
+                if not success:
+                    return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
 
             if payment_type_id == BONUS_PAYMENT_TYPE:
                 cup_count = len(items)
                 activation = empatika_promos.activate_promo(client_id, config.FREE_COFFEE_PROMO_ID, cup_count)
-                payment_id = str(activation['activation']['id'])
+                self.order.payment_id = str(activation['activation']['id'])
 
             client.put()
-            order = Order(id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum,
-                          coordinates=coordinates, comment=comment, status=NEW_ORDER, device_type=device_type,
-                          delivery_time=delivery_time, payment_type_id=payment_type_id, payment_id=payment_id,
-                          promos=promo_list, mastercard=mastercard, items=item_keys,
-                          item_details=item_details)
-            order.put()
+            self.order.status = NEW_ORDER
+            self.order.put()
 
             if config.DEBUG:
-                dict_items = order.dict()
+                dict_items = self.order.dict()
                 total = {
                     'quantity': len(items),
                     'sum': total_sum
@@ -200,7 +210,7 @@ class ReturnOrderHandler(ApiHandler):
             if order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 # return money
                 if order.payment_type_id == CARD_PAYMENT_TYPE:
-                    return_result = alfa_bank.get_back_blocked_sum(order.payment_id)
+                    return_result = alfa_bank.reverse(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
                         self.abort(400)

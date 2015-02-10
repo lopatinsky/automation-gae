@@ -3,7 +3,7 @@ from .base import AdminApiHandler
 from methods.auth import api_user_required
 from methods.orders import search_orders
 from methods.rendering import timestamp
-from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
+from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CREATING_ORDER
 
 
 class OrderListBaseHandler(AdminApiHandler):
@@ -15,7 +15,7 @@ class OrderListBaseHandler(AdminApiHandler):
     @api_user_required
     def get(self):
         orders = self._get_orders()
-        dct = {'orders': [order.dict() for order in orders]}
+        dct = {'orders': [order.dict() for order in orders if order.status != CREATING_ORDER]}
         if self._with_timestamp:
             dct['timestamp'] = timestamp(datetime.datetime.utcnow())
         self.render_json(dct)

@@ -1,5 +1,5 @@
 from .base import ApiHandler
-from models import Order, CASH_PAYMENT_TYPE, BONUS_PAYMENT_TYPE
+from models import Order, CASH_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, CREATING_ORDER
 
 
 class HistoryHandler(ApiHandler):
@@ -8,7 +8,7 @@ class HistoryHandler(ApiHandler):
         history = Order.query(Order.client_id == client_id)
         sorted_history = sorted(history, key=lambda order: order.delivery_time, reverse=True)
 
-        order_dicts = [order.history_dict() for order in sorted_history]
+        order_dicts = [order.history_dict() for order in sorted_history if order.status != CREATING_ORDER]
 
         # fuckup iOS v1.2
         ua = self.request.headers["User-Agent"]

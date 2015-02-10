@@ -49,7 +49,7 @@ def __post_request_alfa(api_path, params):
     return result
 
 
-def tie_card(amount, order_number, return_url, client_id, page_view):
+def create(amount, order_number, return_url, client_id, page_view):
     p = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -91,7 +91,7 @@ def check_extended_status(order_id):
             'alfa_response': result_json}
 
 
-def get_back_blocked_sum(order_id):
+def reverse(order_id):
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -101,7 +101,7 @@ def get_back_blocked_sum(order_id):
     return result
 
 
-def create_pay(binding_id, order_id):
+def authorize(binding_id, order_id):
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -112,7 +112,7 @@ def create_pay(binding_id, order_id):
     return result
 
 
-def pay_by_card(order_id, amount):
+def deposit(order_id, amount):
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -133,13 +133,15 @@ def unbind_card(binding_id):
     return result
 
 
-def hold_and_check(order_number, total_sum, return_url, client_id, binding_id):
-    tie_result = tie_card(total_sum * 100, order_number, return_url, client_id, 'MOBILE')
-    if not _success(tie_result):
-        return False, _error_message(tie_result)
-    payment_id = tie_result['orderId']
+def create_simple(amount, order_number, return_url, client_id):
+    result = create(amount * 100, order_number, return_url, client_id, 'MOBILE')
+    if not _success(result):
+        return False, _error_message(result)
+    return True, result['orderId']
 
-    create_result = create_pay(binding_id, payment_id)
+
+def hold_and_check(payment_id, binding_id):
+    create_result = authorize(binding_id, payment_id)
     if not _success(create_result):
         return False, _error_message(create_result)
 
