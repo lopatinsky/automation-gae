@@ -1,7 +1,7 @@
 import logging
 from .base import ApiHandler
 from methods import alfa_bank
-from models import Order
+from models import CardBindingPayment, Client
 
 
 class UnbindCardHandler(ApiHandler):
@@ -29,6 +29,8 @@ class PaymentRegisterHandler(ApiHandler):
         return_url = self.request.get("returnUrl")
 
         alfa_response = alfa_bank.create(amount, order_number, return_url, client_id, 'MOBILE')
+        if str(alfa_response.get('errorCode', '0')) == '0':
+            CardBindingPayment(id=alfa_response['orderId'], client_id=int(client_id)).put()
         self.render_json(alfa_response)
 
 
@@ -51,6 +53,16 @@ class PaymentStatusHandler(ApiHandler):
             alfa_response['OrderStatus'] = alfa_response['orderStatus']
         if 'pan' in alfa_response:
             alfa_response['Pan'] = alfa_response['pan']
+
+        binding = CardBindingPayment.get_by_id(order_id)
+        if alfa_response['OrderStatus'] == 1:
+            binding.success = True
+            client = Client.get_by_id(binding.client_id)
+            client.tied_card = True
+            client.put()
+        else:
+            binding.success = False
+        binding.put()
 
         self.render_json(alfa_response)
 

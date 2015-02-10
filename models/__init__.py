@@ -220,6 +220,7 @@ class Client(ndb.Model):
     name_confirmed = ndb.BooleanProperty(default=False)
 
     user_agent = ndb.StringProperty(indexed=False)
+    tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
 
     @classmethod
@@ -342,3 +343,13 @@ class JsonStorage(ndb.Model):
     @classmethod
     def delete(cls, storage_id):
         ndb.Key(cls, storage_id).delete()
+
+
+class CardBindingPayment(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    client_id = ndb.IntegerProperty()
+    success = ndb.BooleanProperty()  # None if status unknown
+
+    @property
+    def order_id(self):
+        return self.key.id()
