@@ -30,3 +30,7 @@ cron:
 - description: build square table report
   url: /cron/build_square_table
   schedule: every day 0:00
+
+- description: check creating orders
+  url: /cron/creating_orders
+  schedule: every 10 minutes

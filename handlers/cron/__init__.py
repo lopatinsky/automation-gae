@@ -5,6 +5,7 @@ from handlers.cron.alfa_errors import CheckAlfaErrorsHandler
 from handlers.cron.build_square_table import BuildSquareTableHandler
 from inactive_clients import FullyInactiveClientsHandler, SeveralDaysInactiveClientsHandler
 from clear_pings import ClearPingsHandler
+from creating_orders import CheckCreatingOrdersHandler
 
 __author__ = 'ilyazorin'
 
@@ -17,4 +18,5 @@ app = webapp2.WSGIApplication([
     ('/cron/push_notify', SeveralDaysInactiveClientsHandler),
     ('/cron/clear_pings', ClearPingsHandler),
     ('/cron/build_square_table', BuildSquareTableHandler),
+    ('/cron/creating_orders', CheckCreatingOrdersHandler),
 ], debug=True)
