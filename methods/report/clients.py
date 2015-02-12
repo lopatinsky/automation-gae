@@ -71,10 +71,6 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
 
 
 def get(venue_id, chosen_year, chosen_month, chosen_day):
-    if not chosen_year:
-        chosen_month = 0
-    if not chosen_month:
-        chosen_day = 0
     if not venue_id:
         venue_id = 0
         chosen_year = datetime.now().year
@@ -82,6 +78,19 @@ def get(venue_id, chosen_year, chosen_month, chosen_day):
         chosen_day = datetime.now().day
     else:
         venue_id = int(venue_id)
+
+    if not chosen_year:
+        chosen_year = datetime.now().year
+        chosen_month = datetime.now().month
+        chosen_day = datetime.now().day
+    else:
+        chosen_year = int(chosen_year)
+
+    if not chosen_year:
+        chosen_month = 0
+    if not chosen_month:
+        chosen_day = 0
+
     clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
         clients_table(chosen_year, chosen_month, chosen_day, venue_id)
     chosen_venue = Venue.get_by_id(venue_id) if venue_id else None

@@ -13,7 +13,7 @@
      <!--{% set NUMBER_DAYS = 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31%}-->
 
      <form method="get">
-         <select name="selected_venue" {% if block %}disabled{% endif %}>
+         <select name="selected_venue" {% if padmin %}disabled{% endif %}>
              <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
              {% for venue in venues %}
                   <option value="{{ venue.key.id() }}" {% if chosen_venue == venue %} selected {% endif %}>
@@ -45,7 +45,7 @@
              {% endfor %}
          </select>
          <input type="submit" value="Выбрать"/>
-         <button formaction="/mt/report/clients" formmethod="get" name="button" value="xls">Скачать xls</button>
+         <button formmethod="get" name="button" value="xls">Скачать xls</button>
      </form>
 
      <br>
@@ -92,7 +92,12 @@
              <td>{{ venue_expenditure / venue_number if venue_number else "-" }}</td>
          </tr>
      </table>
-     <a href="/mt/report">Назад</a>
+
+     {% if padmin %}
+        <a href="/admin/private_office/report">Назад</a>
+     {% else %}
+        <a href="/mt/report">Назад</a>
+     {% endif %}
 
 </body>
 </html>

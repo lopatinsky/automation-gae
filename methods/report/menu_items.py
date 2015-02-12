@@ -39,10 +39,6 @@ def menu_items_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
 
 
 def get(venue_id, chosen_year, chosen_month, chosen_day):
-    if not chosen_year:
-        chosen_month = 0
-    if not chosen_month:
-        chosen_day = 0
     if not venue_id:
         venue_id = 0
         chosen_year = datetime.now().year
@@ -50,6 +46,18 @@ def get(venue_id, chosen_year, chosen_month, chosen_day):
         chosen_day = datetime.now().day
     else:
         venue_id = int(venue_id)
+
+    if not chosen_year:
+        chosen_year = datetime.now().year
+        chosen_month = datetime.now().month
+        chosen_day = datetime.now().day
+    else:
+        chosen_year = int(chosen_year)
+
+    if not chosen_year:
+        chosen_month = 0
+    if not chosen_month:
+        chosen_day = 0
     menu_items, menu_item_total_number, menu_item_total_sum = menu_items_table(chosen_year,
                                                                                chosen_month,
                                                                                chosen_day,

@@ -53,19 +53,25 @@ def _order_data(order):
 
 
 def get(venue_id, chosen_year, chosen_month, chosen_day):
-    if not chosen_year:
-        chosen_month = 0
-    if not chosen_month:
-        chosen_day = 0
+    if not venue_id:
+        venue_id = 0
+        chosen_year = datetime.now().year
+        chosen_month = datetime.now().month
+        chosen_day = datetime.now().day
+    else:
+        venue_id = int(venue_id)
+
     if not chosen_year:
         chosen_year = datetime.now().year
         chosen_month = datetime.now().month
         chosen_day = datetime.now().day
-        venue_id = 0
     else:
         chosen_year = int(chosen_year)
-    if venue_id:
-        venue_id = int(venue_id)
+
+    if not chosen_year:
+        chosen_month = 0
+    if not chosen_month:
+        chosen_day = 0
 
     start = suitable_date(chosen_day, chosen_month, chosen_year, True)
     end = suitable_date(chosen_day, chosen_month, chosen_year, False)
