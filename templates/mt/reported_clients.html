@@ -13,7 +13,7 @@
      <!--{% set NUMBER_DAYS = 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31%}-->
 
      <form method="get">
-         <select name="selected_venue">
+         <select name="selected_venue" {% if block %}disabled{% endif %}>
              <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
              {% for venue in venues %}
                   <option value="{{ venue.key.id() }}" {% if chosen_venue == venue %} selected {% endif %}>

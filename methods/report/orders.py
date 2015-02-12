@@ -1,9 +1,8 @@
 # coding=utf-8
 from collections import Counter
 from datetime import datetime
-from ..base import BaseHandler
 from config import config
-from handlers.maintenance.report.report_methods import suitable_date, PROJECT_STARTING_YEAR
+from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
     CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue
 from methods.excel import send_excel_file
@@ -53,43 +52,37 @@ def _order_data(order):
     return dct
 
 
-class OrdersReportHandler(BaseHandler):
-    def get(self):
-        venue_id = self.request.get_range("selected_venue")
-        chosen_year = self.request.get("selected_year")
-        chosen_month = self.request.get_range("selected_month")
-        chosen_day = self.request.get_range("selected_day")
-        chosen_btn_type = self.request.get("button")
-        if not chosen_year:
-            chosen_month = 0
-        if not chosen_month:
-            chosen_day = 0
-        if not chosen_year:
-            chosen_year = datetime.now().year
-            chosen_month = datetime.now().month
-            chosen_day = datetime.now().day
-        else:
-            chosen_year = int(chosen_year)
+def get(venue_id, chosen_year, chosen_month, chosen_day):
+    if not chosen_year:
+        chosen_month = 0
+    if not chosen_month:
+        chosen_day = 0
+    if not chosen_year:
+        chosen_year = datetime.now().year
+        chosen_month = datetime.now().month
+        chosen_day = datetime.now().day
+        venue_id = 0
+    else:
+        chosen_year = int(chosen_year)
+    if venue_id:
+        venue_id = int(venue_id)
 
-        start = suitable_date(chosen_day, chosen_month, chosen_year, True)
-        end = suitable_date(chosen_day, chosen_month, chosen_year, False)
-        query = Order.query(Order.date_created >= start, Order.date_created <= end)
-        if venue_id:
-            query = query.filter(Order.venue_id == venue_id)
-        orders = query.fetch()
-        order_dicts = [_order_data(order) for order in orders]
+    start = suitable_date(chosen_day, chosen_month, chosen_year, True)
+    end = suitable_date(chosen_day, chosen_month, chosen_year, False)
+    query = Order.query(Order.date_created >= start, Order.date_created <= end)
+    if venue_id:
+        query = query.filter(Order.venue_id == venue_id)
+    orders = query.fetch()
+    order_dicts = [_order_data(order) for order in orders]
 
-        values = {
-            'venues': Venue.query().fetch(),
-            'orders': order_dicts,
-            'start_year': PROJECT_STARTING_YEAR,
-            'end_year': datetime.now().year,
-            'chosen_venue': venue_id,
-            'chosen_year': chosen_year,
-            'chosen_month': chosen_month,
-            'chosen_day': chosen_day
-        }
-        if chosen_btn_type == "xls":
-            send_excel_file(self, 'orders', 'reported_orders.html', **values)
-        else:
-            self.render('reported_orders.html', **values)
+    values = {
+        'venues': Venue.query().fetch(),
+        'orders': order_dicts,
+        'start_year': PROJECT_STARTING_YEAR,
+        'end_year': datetime.now().year,
+        'chosen_venue': venue_id,
+        'chosen_year': chosen_year,
+        'chosen_month': chosen_month,
+        'chosen_day': chosen_day
+    }
+    return values

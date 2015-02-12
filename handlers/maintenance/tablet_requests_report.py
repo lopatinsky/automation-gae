@@ -2,10 +2,10 @@ from methods.pings import PingReport, LEVEL_SUPPRESSED, LEVEL_OK, LEVEL_WARNING,
 
 __author__ = 'dvpermyakov'
 
-from ..base import BaseHandler
 from models import TabletRequest, Admin, AdminStatus
 from datetime import datetime, timedelta
-from report_methods import PROJECT_STARTING_YEAR
+from base import BaseHandler
+from methods.report.report_methods import PROJECT_STARTING_YEAR
 from methods import location
 import json
 import time
@@ -104,7 +104,7 @@ class TabletInfoHandler(BaseHandler):
     def get(self):
         statuses = AdminStatus.query().fetch()
         admins_info = [PingReport(status) for status in statuses]
-        self.render('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
+        return self.jinja2.render_template('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
 
     def post(self):
         token = self.request.get("logout_token")

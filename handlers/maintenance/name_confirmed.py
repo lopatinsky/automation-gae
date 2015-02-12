@@ -5,7 +5,7 @@ __author__ = 'dvpermyakov'
 from base import BaseHandler
 from models import Client
 from datetime import datetime
-from report.report_methods import suitable_date, PROJECT_STARTING_YEAR
+from methods.report.report_methods import suitable_date, PROJECT_STARTING_YEAR
 
 
 class NameConfirmationHandler(BaseHandler):
