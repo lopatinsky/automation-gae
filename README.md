@@ -2,6 +2,11 @@
 >
 >   * [API](#markdown-header-api)
 >       * [Server](#markdown-header-server)
+>       * [Card binding](#markdown-header-card-binding)
+>           * [Step 1](#markdown-header-step-1)
+>           * [Step 2](#markdown-header-step-2)
+>           * [Step 3](#markdown-header-step-3)
+>           * [Step 4](#markdown-header-step-4)
 >       * [Endpoints for clients](#markdown-header-endpoints-for-clients)
 >           * [Get list of venues](#markdown-header-get-list-of-venues)
 >           * [Get menu](#markdown-header-get-menu)
@@ -38,6 +43,61 @@
 ## Server
 
 Server is currently located at http://empatika-doubleb.appspot.com/.
+
+## Card binding
+
+### Step 1
+
+POST `/api/payment/register.php`
+
+Parameters:
+
+* `clientId`
+* `orderNumber`: any alphanumeric string (eg current timestamp)
+* `amount`: number 100
+* `returnUrl`: url to redirect in web view
+
+Response:
+
+On failure, contains nonzero `errorCode`.  
+On success, contains `orderId` and `formUrl`.
+
+### Step 2
+
+Open `formUrl` in web view and wait for it to navigate to `returnUrl`.
+
+### Step 3
+
+POST `/api/payment/status.php`
+
+Parameters:
+
+* `orderId`
+
+Response:
+
+```
+#!js
+{
+    "ErrorCode": error_code,     // numeric string
+    "OrderStatus": order_status, // int
+    "bindingId": binding_id,     // GUID string
+    "Pan": card_pan              // string in format 123456**1234
+}
+```
+
+On success, `ErrorCode` is `0` and `OrderStatus` is `1`, then the client should save the `bindingId` and last four digits of the `Pan`.  
+Any other values of `ErrorCode` and `OrderStatus` indicate a failure.
+
+### Step 4
+
+POST `/api/payment/reverse.php`
+
+Parameters:
+
+* `orderId`
+
+On success, `errorCode` of response is `0`.
 
 ## Endpoints for clients
 
