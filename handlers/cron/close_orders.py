@@ -13,7 +13,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
             return
 
         mail_body = u"List of orders not closed:\n" + \
-                    "\n".join(str(order.key.id()).join(Venue.get_by_id(order.venue_id).title) for order in orders)
+                    u''.join("%s (%s),\n" % (str(order.key.id()), Venue.get_by_id(order.venue_id).title) for order in orders)
         email.send_error("order", "Orders not closed", mail_body)
 
         for order in orders:
