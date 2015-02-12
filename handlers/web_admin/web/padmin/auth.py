@@ -2,9 +2,8 @@
 
 from ..base import BaseHandler
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from methods.auth import user_required
+from methods import auth
 from models import Admin
-import logging
 
 
 class LoginHandler(BaseHandler):
@@ -32,7 +31,7 @@ class LoginHandler(BaseHandler):
 
 
 class LogoutHandler(BaseHandler):
-    @user_required
+    @auth.padmin_user_required
     def get(self):
         self.auth.unset_session()
         self.redirect_to('padmin_login')

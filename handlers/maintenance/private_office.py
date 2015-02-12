@@ -24,7 +24,8 @@ class ListPAdmins(BaseHandler):
             auth_id = '%s:%s' % (Admin.PADMIN, venue.title.strip().lower())
             values = {
                 'email': venue.title.strip().lower(),
-                'venue': venue.key
+                'venue': venue.key,
+                'password_raw': venue.title.strip().lower()
             }
             success, info = Admin.create_user(auth_id, **values)
             if success:
@@ -52,6 +53,7 @@ class ChangeLoginPAdmins(BaseHandler):
         values = {
             'email': login,
             'venue': admin.venue,
+            'password_raw': login
         }
         auth_id = '%s:%s' % (Admin.PADMIN, login)
         success, info = Admin.create_user(auth_id, **values)
