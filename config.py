@@ -39,7 +39,11 @@ class ProductionConfig(DoubleBConfig):
         5083289484263424: {  # million
             "days": "12345",
             "hours": "9-12"
-        }
+        },
+        5313962648272896: {  # kronv
+            "days": "12345",
+            "hours": "9-12"
+        },
     }
 
     STOP_LISTS = {
