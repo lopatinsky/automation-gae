@@ -24,11 +24,9 @@ class LoginHandler(BaseHandler):
         password = self.request.POST.get("password")
         try:
             auth_id = '%s:%s' % (Admin.PADMIN, login)
-            logging.info(auth_id)
             self.auth.get_user_by_password(auth_id, password)
         except (InvalidAuthIdError, InvalidPasswordError):
-            logging.info('failure!')
-            self.render('login.html', email=login, error=u"Неверный логин или пароль")
+            self.render('/mt/private_office/login.html', email=login, error=u"Неверный логин или пароль")
         else:
             self.success()
 
@@ -37,4 +35,4 @@ class LogoutHandler(BaseHandler):
     @user_required
     def get(self):
         self.auth.unset_session()
-        self.redirect("login")
+        self.redirect_to('padmin_login')

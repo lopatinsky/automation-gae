@@ -24,14 +24,14 @@ def get_standart_params(request, user, values=None, delete_params=None):
 class ReportHandler(BaseHandler):
     @auth.padmin_user_required
     def get(self):
-        return self.render('/mt/private_office/report.html')
+        return self.render('/mt/private_office/report.html', padmin=self.user)
 
 
 class ClientsReportHandler(BaseHandler):
     @auth.padmin_user_required
     def get(self):
         html_values = clients.get(**get_standart_params(self.request, self.user))
-        html_values['padmin'] = True
+        html_values['padmin'] = self.user
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'clients', 'reported_clients.html', **html_values)
         else:
@@ -42,7 +42,7 @@ class MenuItemsReportHandler(BaseHandler):
     @auth.padmin_user_required
     def get(self):
         html_values = menu_items.get(**get_standart_params(self.request, self.user))
-        html_values['padmin'] = True
+        html_values['padmin'] = self.user
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'menu_items', 'reported_menu_items.html', **html_values)
         else:
@@ -53,7 +53,7 @@ class OrdersReportHandler(BaseHandler):
     @auth.padmin_user_required
     def get(self):
         html_values = orders.get(**get_standart_params(self.request, self.user))
-        html_values['padmin'] = True
+        html_values['padmin'] = self.user
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'oders', 'reported_orders.html', **html_values)
         else:
