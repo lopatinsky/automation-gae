@@ -3,7 +3,7 @@ import logging
 import datetime
 from handlers.api.base import ApiHandler
 from methods import alfa_bank, email, empatika_promos
-from models import Order, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE
+from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE
 
 
 class CloseOpenedOrdersHandler(ApiHandler):
@@ -12,7 +12,8 @@ class CloseOpenedOrdersHandler(ApiHandler):
         if not orders:
             return
 
-        mail_body = u"List of orders not closed:\n" + "\n".join(str(order.key.id()) for order in orders)
+        mail_body = u"List of orders not closed:\n" + \
+                    "\n".join(str(order.key.id()).join(Venue.get_by_id(order.venue_id).title) for order in orders)
         email.send_error("order", "Orders not closed", mail_body)
 
         for order in orders:
