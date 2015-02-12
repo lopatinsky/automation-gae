@@ -270,8 +270,12 @@ class News(ndb.Model):
 
 
 class Admin(models.User):
+
+    PRIVATE_OFFICE_ADMIN = 0
+
     email = ndb.StringProperty(required=True, indexed=False)
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
+    role = ndb.IntegerProperty(choices=[PRIVATE_OFFICE_ADMIN])
 
     def query_orders(self, *args, **kwargs):
         if self.venue:
@@ -285,6 +289,14 @@ class Admin(models.User):
         if self.venue and order.venue_id != self.venue.id():
             return None
         return order
+
+    @property
+    def login(self):
+        return self.email
+
+    @staticmethod
+    def is_padmin(user):
+        return user.role == Admin.PRIVATE_OFFICE_ADMIN
 
 
 class AdminStatus(ndb.Model):

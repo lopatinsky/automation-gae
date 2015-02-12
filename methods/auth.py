@@ -1,4 +1,5 @@
 from webapp2_extras import security
+from  models import Admin
 
 
 def set_current_user(auth, user):
@@ -20,6 +21,15 @@ def user_required(handler):
 
 
 def api_user_required(handler):
+    def check_user(self, *args, **kwargs):
+        if self.user is None:
+            self.abort(401)
+        else:
+            return handler(self, *args, **kwargs)
+    return check_user
+
+
+def padmin_user_required(handler):
     def check_user(self, *args, **kwargs):
         if self.user is None:
             self.abort(401)

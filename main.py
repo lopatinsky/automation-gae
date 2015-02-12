@@ -2,6 +2,7 @@ from webapp2_extras import jinja2
 from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
+import handlers.web_admin.web.padmin as padmin
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -35,6 +36,12 @@ app = WSGIApplication([
             Route('/repeated_orders', maintenance.RepeatedOrdersHandler),
             Route('/square_table', maintenance.SquareTableHandler),
             Route('/notification', maintenance.NotificationsReportHandler),
+        ]),
+
+        PathPrefixRoute('/private_office', [
+            Route('/list', maintenance.ListPAdmins, 'padmin_main'),
+            Route('/<admin_id:\d+>/change_login', maintenance.ChangeLoginPAdmins),
+            Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
         ]),
 
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
@@ -84,6 +91,14 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/admin', [
+
+        PathPrefixRoute('/private_office', [
+            PathPrefixRoute('/report', [
+                Route('', padmin.ReportHandler, 'padmin_report'),
+                Route('/clients', padmin.ClientsReportHandler, 'padmin_clients'),
+            ]),
+        ]),
+
         Route('/login', web_admin.LoginHandler),
         Route('/signup', web_admin.SignupHandler),
         Route('/logout', web_admin.LogoutHandler),

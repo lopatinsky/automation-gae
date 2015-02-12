@@ -4,12 +4,17 @@ from webapp2 import cached_property
 from .base import BaseHandler
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from methods.auth import set_current_user, user_required
-from models import Venue
+from models import Venue, Admin
+import logging
 
 
 class LoginHandler(BaseHandler):
     def success(self):
-        self.redirect("orders.php")
+        logging.info(self.user)
+        if hasattr(self.user, 'role') and self.user.role == Admin.PRIVATE_OFFICE_ADMIN:
+            self.redirect_to('padmin_report')
+        else:
+            self.redirect("orders.php")
 
     def get(self):
         if self.user is not None:
