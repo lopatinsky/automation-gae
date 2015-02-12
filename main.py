@@ -79,6 +79,7 @@ app = WSGIApplication([
         Route('/menu.php', api.MenuHandler),
         Route('/order.php', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
+        Route('/add_return_comment', api.AddReturnCommentHandler),
         Route('/order_register.php', api.RegisterOrderHandler),
         Route('/check_order', api.CheckOrderHandler),
         Route('/status.php', api.StatusHandler),

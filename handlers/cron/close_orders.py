@@ -19,7 +19,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
         for order in orders:
             logging.info("closing order %s", order.key.id())
             if order.payment_type_id == CARD_PAYMENT_TYPE:
-                alfa_bank.pay_by_card(order.payment_id, 0)  # TODO check success
+                alfa_bank.deposit(order.payment_id, 0)  # TODO check success
                 if order.mastercard:
                     points = len(order.items)
                     try:

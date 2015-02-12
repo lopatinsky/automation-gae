@@ -9,6 +9,7 @@
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
+        <th>Tied card</th>
         <th>User-Agent</th>
     </tr>
     {% for client in clients %}
@@ -16,6 +17,7 @@
             <td>{{ client.name }} {{ client.surname }}</td>
             <td>{{ client.email }}</td>
             <td>{{ client.tel }}</td>
+            <td>{{ client.tied_card }}</td>
             <td>{{ client.user_agent }}</td>
         </tr>
     {% endfor %}

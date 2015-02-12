@@ -20,6 +20,7 @@ NEW_ORDER = 0
 READY_ORDER = 1
 CANCELED_BY_CLIENT_ORDER = 2
 CANCELED_BY_BARISTA_ORDER = 3
+CREATING_ORDER = 4
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -119,8 +120,8 @@ class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
-                                                         CANCELED_BY_BARISTA_ORDER),
-                                 default=NEW_ORDER)
+                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
+                                 default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_time = ndb.DateTimeProperty(required=True)
@@ -219,6 +220,7 @@ class Client(ndb.Model):
     name_confirmed = ndb.BooleanProperty(default=False)
 
     user_agent = ndb.StringProperty(indexed=False)
+    tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
 
     @classmethod
@@ -353,3 +355,13 @@ class JsonStorage(ndb.Model):
     @classmethod
     def delete(cls, storage_id):
         ndb.Key(cls, storage_id).delete()
+
+
+class CardBindingPayment(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    client_id = ndb.IntegerProperty()
+    success = ndb.BooleanProperty()  # None if status unknown
+
+    @property
+    def order_id(self):
+        return self.key.id()
