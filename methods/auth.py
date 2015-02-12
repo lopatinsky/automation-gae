@@ -32,7 +32,7 @@ def api_user_required(handler):
 def padmin_user_required(handler):
     def check_user(self, *args, **kwargs):
         if self.user is None:
-            self.abort(401)
+            self.redirect_to('padmin_login')
         else:
             return handler(self, *args, **kwargs)
     return check_user

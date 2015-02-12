@@ -96,8 +96,12 @@ app = WSGIApplication([
         PathPrefixRoute('/private_office', [
             PathPrefixRoute('/report', [
                 Route('', padmin.ReportHandler, 'padmin_report'),
-                Route('/clients', padmin.ClientsReportHandler, 'padmin_clients'),
+                Route('/clients', padmin.ClientsReportHandler),
+                Route('/menu_items', padmin.MenuItemsReportHandler),
+                Route('/orders', padmin.OrdersReportHandler),
             ]),
+            Route('/login', padmin.LoginHandler, 'padmin_login'),
+            Route('/logout', padmin.LogoutHandler),
         ]),
 
         Route('/login', web_admin.LoginHandler),

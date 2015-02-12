@@ -273,11 +273,10 @@ class News(ndb.Model):
 
 class Admin(models.User):
 
-    PRIVATE_OFFICE_ADMIN = 0
+    PADMIN = 'padmin'
 
     email = ndb.StringProperty(required=True, indexed=False)
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
-    role = ndb.IntegerProperty(choices=[PRIVATE_OFFICE_ADMIN])
 
     def query_orders(self, *args, **kwargs):
         if self.venue:
@@ -296,9 +295,10 @@ class Admin(models.User):
     def login(self):
         return self.email
 
-    @staticmethod
-    def is_padmin(user):
-        return user.role == Admin.PRIVATE_OFFICE_ADMIN
+    def delete_auth_ids(self):
+        class_name = type(self).__name__
+        ids = ["%s.auth_id:%s" % (class_name, i) for i in self.auth_ids]
+        self.unique_model.delete_multi(ids)
 
 
 class AdminStatus(ndb.Model):

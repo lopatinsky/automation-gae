@@ -2,22 +2,23 @@ __author__ = 'dvpermyakov'
 
 from ..base import BaseHandler
 from methods import auth
-from datetime import datetime
-from google.appengine.api import memcache
-import urllib
-import logging
+from methods import excel
+from methods.report import clients, menu_items, orders
 
 
-def redirect(self, url, values):
+def get_standart_params(request, user, values=None, delete_params=None):
     params = {
-        'blocked': 'true',
-        'selected_year': datetime.now().year,
-        'selected_month': datetime.now().month,
-        'selected_day': datetime.now().day
+        'venue_id': user.venue.id(),
+        'chosen_year': request.get("selected_year"),
+        'chosen_month': request.get_range("selected_month"),
+        'chosen_day': request.get_range("selected_day"),
     }
-    params.update(values)
-    url = '%s?%s' % (url, urllib.urlencode(params))
-    self.redirect(url)
+    if delete_params:
+        for param in delete_params:
+            del params[param]
+    if values:
+        params.update(values)
+    return params
 
 
 class ReportHandler(BaseHandler):
@@ -27,25 +28,33 @@ class ReportHandler(BaseHandler):
 
 
 class ClientsReportHandler(BaseHandler):
-
     @auth.padmin_user_required
     def get(self):
-        chosen_year = self.request.get("selected_year")
-        chosen_month = self.request.get_range("selected_month")
-        chosen_day = self.request.get_range("selected_day")
-        values = {
-            'selected_venue': self.user.venue.id()
-        }
-        if chosen_year:
-            values.update({
-                'selected_year': int(chosen_year),
-                'selected_month': chosen_month,
-                'selected_day': chosen_day
-            })
-        html = memcache.get('%s:%s:%s:%s:%s' % ('clients', self.user.venue.id(), chosen_year, chosen_month, chosen_day))
-        logging.info('%s:%s:%s:%s:%s' % ('clients', self.user.venue.id(), chosen_year, chosen_month, chosen_day))
-        logging.info(html)
-        if blocked:
-            self.response.write(html)
+        html_values = clients.get(**get_standart_params(self.request, self.user))
+        html_values['padmin'] = True
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, 'clients', 'reported_clients.html', **html_values)
         else:
-            redirect(self, '/mt/report/clients', values)
+            self.render('/mt/reported_clients.html', **html_values)
+
+
+class MenuItemsReportHandler(BaseHandler):
+    @auth.padmin_user_required
+    def get(self):
+        html_values = menu_items.get(**get_standart_params(self.request, self.user))
+        html_values['padmin'] = True
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, 'menu_items', 'reported_menu_items.html', **html_values)
+        else:
+            self.render('/mt/reported_menu_items.html', **html_values)
+
+
+class OrdersReportHandler(BaseHandler):
+    @auth.padmin_user_required
+    def get(self):
+        html_values = orders.get(**get_standart_params(self.request, self.user))
+        html_values['padmin'] = True
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, 'oders', 'reported_orders.html', **html_values)
+        else:
+            self.render('/mt/reported_orders.html', **html_values)

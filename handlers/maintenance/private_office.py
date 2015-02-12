@@ -5,10 +5,7 @@ __author__ = 'dvpermyakov'
 from base import BaseHandler
 from models import Admin, Venue
 from methods import auth
-from webapp2_extras import security
 import logging
-
-SCOPE = "padmin"
 
 
 class ListPAdmins(BaseHandler):
@@ -16,24 +13,24 @@ class ListPAdmins(BaseHandler):
         venues = Venue.query().fetch()
         admins = []
         for venue in venues:
-            admin = Admin.query(Admin.venue == venue.key, Admin.role == Admin.PRIVATE_OFFICE_ADMIN).get()
-            if admin:
-                admins.append(admin)
+            cur_admin = None
+            for admin in Admin.query(Admin.venue == venue.key).fetch():
+                if Admin.PADMIN in admin.auth_ids[0]:
+                    cur_admin = admin
+                    continue
+            if cur_admin:
+                admins.append(cur_admin)
                 continue
-            auth_id = u'%s:%s' % (SCOPE, venue.title)
-            password = security.generate_random_string(length=12)
+            auth_id = '%s:%s' % (Admin.PADMIN, venue.title.strip().lower())
             values = {
                 'email': venue.title.strip().lower(),
-                'venue': venue.key,
-                'role': Admin.PRIVATE_OFFICE_ADMIN,
-                'password_raw': password
+                'venue': venue.key
             }
-            success, info = self.auth.store.user_model.create_user(auth_id, **values)
+            success, info = Admin.create_user(auth_id, **values)
             if success:
                 admins.append(info.key.get())
             else:
                 self.abort(500)
-        admins = Admin.query(Admin.role == Admin.PRIVATE_OFFICE_ADMIN).fetch()
         self.render('private_office/admin_list.html', admins=admins)
 
 
@@ -55,12 +52,11 @@ class ChangeLoginPAdmins(BaseHandler):
         values = {
             'email': login,
             'venue': admin.venue,
-            'role': admin.role,
-            'password_raw': admin.password
         }
-        auth_id = u'%s:%s' % (SCOPE, login)
-        success, info = self.auth.store.user_model.create_user(auth_id, **values)
+        auth_id = '%s:%s' % (Admin.PADMIN, login)
+        success, info = Admin.create_user(auth_id, **values)
         if success:
+            admin.delete_auth_ids()
             admin.key.delete()
             self.redirect_to('padmin_main')
         else:
