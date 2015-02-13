@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль',
+                            'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
+
+     <form method="get">
+         <select name="selected_year">
+             <option value="0" {% if not chosen_year %}selected{% endif %}>Все года</option>
+             {% for year in range(start_year, end_year + 1) %}
+                  <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
+                      {{ year }}
+                  </option>
+             {% endfor %}
+         </select>
+         <select name="selected_month">
+             {% for month in range(0, 12 + 1)%}
+                  <option value="{{ month }}" {% if chosen_month == month %} selected {% endif %}>
+                      {{ NAME_MONTHS[month] }}
+                  </option>
+             {% endfor %}
+         </select>
+         <select name="selected_day">
+             <option value="0" {% if not chosen_day %}selected{% endif %}>Все дни</option>
+             {% for day in range(1, 31 + 1)%}
+                  <option value="{{ day }}" {% if chosen_day == day %} selected {% endif %}>
+                      {{ day }}
+                  </option>
+             {% endfor %}
+         </select>
+         <input type="submit" value="Выбрать"/>
+         <button formmethod="get" name="button" value="xls">Скачать xls</button>
+     </form>
+
+
+     <p>Client total number: {{ total['clients_number'] }}</p>
+     <p>Client first succeed attempt number: {{ total['clients_success'] }}</p>
+     <p>Client without try number: {{ total['clients_number'] - total['clients_success'] - clients|length }}</p>
+
+     <br>
+     <table style="border-collapse:collapse; width:100%" border="1">
+         <tr>
+             <th>Client Id</th>
+             <th>Name</th>
+             <th>Telephone</th>
+             <th>Email</th>
+             <th>Attempts</th>
+             <th>Web Failures</th>
+             <th>Card Errors</th>
+             <th>Is tied</th>
+         </tr>
+         {% for client in clients %}
+             <tr>
+                 <td>{{ client.key.id() }}</td>
+                 <td>{{ '%s %s' % (client.name, client.surname) if client.name or client.surname }}</td>
+                 <td>{{ client.tel if client.tel }}</td>
+                 <td>{{ client.email if client.email }}</td>
+                 <td>{{ client.attempts|length }}</td>
+                 <td>{{ client.web_failures }}</td>
+                 <td>{{ client.card_errors }}</td>
+                 <td>{{ client.tied_card }}</td>
+             </tr>
+         {% endfor %}
+         <tr>
+             <td></td>
+             <td></td>
+             <td></td>
+             <td><b>Total</b></td>
+             <td>{{ total['attempts'] }}</td>
+             <td>{{ total['web_failures'] }}</td>
+             <td>{{ total['card_errors'] }}</td>
+             <td>{{ '%s (%s)' % (total['tied_card'], clients|length) }}</td>
+         </tr>
+     </table>
+
+     <a href="/mt/report">Назад</a>
+
+</body>
+</html>

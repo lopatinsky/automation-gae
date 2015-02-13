@@ -2,7 +2,8 @@ __author__ = 'dvpermyakov'
 
 from base import BaseHandler
 from methods import excel
-from methods.report import clients, menu_items, notifications, orders, repeated_orders, square_table, venues
+from methods.report import clients, menu_items, notifications, orders, repeated_orders, square_table, venues,\
+    card_binding
 
 
 def get_standart_params(request, values=None, delete_params=None):
@@ -99,3 +100,14 @@ class NotificationsReportHandler(BaseHandler):
             excel.send_excel_file(self, 'repeated_notification', 'reported_notification.html', **html_values)
         else:
             self.render('reported_notification.html', **html_values)
+
+
+class CardBindingReportHandler(BaseHandler):
+    def get(self):
+        html_values = card_binding.get(**get_standart_params(self.request, {
+            'chosen_year': self.request.get_range("selected_year")
+        }, delete_params=['venue_id']))
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, 'card_binding', 'reported_card_binding.html', **html_values)
+        else:
+            self.render('reported_card_binding.html', **html_values)

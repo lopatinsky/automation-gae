@@ -361,6 +361,7 @@ class CardBindingPayment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     client_id = ndb.IntegerProperty()
     success = ndb.BooleanProperty()  # None if status unknown
+    error = ndb.IntegerProperty()  # None if error unknown
 
     @property
     def order_id(self):

@@ -36,6 +36,7 @@ app = WSGIApplication([
             Route('/repeated_orders', maintenance.RepeatedOrdersHandler),
             Route('/square_table', maintenance.SquareTableHandler),
             Route('/notification', maintenance.NotificationsReportHandler),
+            Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
         PathPrefixRoute('/private_office', [

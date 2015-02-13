@@ -62,6 +62,7 @@ class PaymentStatusHandler(ApiHandler):
             client.put()
         else:
             binding.success = False
+            binding.error = alfa_response.get('ErrorCode')
         binding.put()
 
         self.render_json(alfa_response)
