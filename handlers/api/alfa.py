@@ -46,31 +46,36 @@ class PaymentStatusHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId')
 
-        result = alfa_bank.check_extended_status(order_id)
-        alfa_response = result['alfa_response']
+        result = alfa_bank.check_extended_status(order_id)['alfa_response']
+        alfa_response = {}
 
-        if 'errorCode' in alfa_response:
-            alfa_response['ErrorCode'] = alfa_response['errorCode']
-            if alfa_response['ErrorCode'] == 0:
-                if alfa_response['actionCode'] != 0:
-                    alfa_response['ErrorCode'] = 1
+        if 'errorCode' in result:
+            alfa_response['ErrorCode'] = result['errorCode']
+            alfa_response['errorCode'] = result['errorCode']
+            if alfa_response['ErrorCode'] == '0':
+                if result.get('actionCode') != 0:
+                    alfa_response['ErrorCode'] = '1'
+                    alfa_response['errorCode'] = '1'
 
-        if 'orderStatus' in alfa_response:
-            alfa_response['OrderStatus'] = alfa_response['orderStatus']
+        if 'orderStatus' in result:
+            alfa_response['OrderStatus'] = result['orderStatus']
+            alfa_response['orderStatus'] = result['orderStatus']
 
-        if alfa_response.get('cardAuthInfo'):
-            if alfa_response['cardAuthInfo'].get('pan'):
-                alfa_response['Pan'] = alfa_response['cardAuthInfo']['pan']
-            if alfa_response['cardAuthInfo'].get('expiration'):
-                alfa_response['expiration'] = alfa_response['cardAuthInfo']['expiration']
+        if result.get('cardAuthInfo'):
+            if result['cardAuthInfo'].get('pan'):
+                alfa_response['Pan'] = result['cardAuthInfo']['pan']
+                alfa_response['pan'] = result['cardAuthInfo']['pan']
+            if result['cardAuthInfo'].get('expiration'):
+                alfa_response['expiration'] = result['cardAuthInfo']['expiration']
 
-        if 'orderNumber' in alfa_response:
-            alfa_response['OrderNumber'] = alfa_response['orderNumber']
+        if 'orderNumber' in result:
+            alfa_response['OrderNumber'] = result['orderNumber']
+            alfa_response['orderNumber'] = result['orderNumber']
 
         alfa_response['bindingId'] = None
-        if alfa_response.get('bindingInfo'):
-            if alfa_response['bindingInfo'].get('bindingId'):
-                alfa_response['bindingId'] = alfa_response['bindingInfo']['bindingId']
+        if result.get('bindingInfo'):
+            if result['bindingInfo'].get('bindingId'):
+                alfa_response['bindingId'] = result['bindingInfo']['bindingId']
 
         binding = CardBindingPayment.get_by_id(order_id)
         if alfa_response['OrderStatus'] == 1:
@@ -80,8 +85,8 @@ class PaymentStatusHandler(ApiHandler):
             client.put()
         else:
             binding.success = False
-            binding.error = alfa_response.get('actionCode')
-            binding.error_description = alfa_response.get('actionCodeDescription')
+            binding.error = result.get('actionCode')
+            binding.error_description = result.get('actionCodeDescription')
         binding.put()
 
         self.render_json(alfa_response)
