@@ -362,6 +362,7 @@ class CardBindingPayment(ndb.Model):
     client_id = ndb.IntegerProperty()
     success = ndb.BooleanProperty()  # None if status unknown
     error = ndb.IntegerProperty()  # None if error unknown
+    error_description = ndb.StringProperty()
 
     @property
     def order_id(self):

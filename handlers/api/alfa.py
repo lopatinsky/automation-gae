@@ -46,13 +46,31 @@ class PaymentStatusHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId')
 
-        alfa_response = alfa_bank.check_status(order_id)
+        result = alfa_bank.check_extended_status(order_id)
+        alfa_response = result['alfa_response']
+
         if 'errorCode' in alfa_response:
             alfa_response['ErrorCode'] = alfa_response['errorCode']
+            if alfa_response['ErrorCode'] == 0:
+                if alfa_response['actionCode'] != 0:
+                    alfa_response['ErrorCode'] = 1
+
         if 'orderStatus' in alfa_response:
             alfa_response['OrderStatus'] = alfa_response['orderStatus']
-        if 'pan' in alfa_response:
-            alfa_response['Pan'] = alfa_response['pan']
+
+        if alfa_response.get('cardAuthInfo'):
+            if alfa_response['cardAuthInfo'].get('pan'):
+                alfa_response['Pan'] = alfa_response['cardAuthInfo']['pan']
+            if alfa_response['cardAuthInfo'].get('expiration'):
+                alfa_response['expiration'] = alfa_response['cardAuthInfo']['expiration']
+
+        if 'orderNumber' in alfa_response:
+            alfa_response['OrderNumber'] = alfa_response['orderNumber']
+
+        alfa_response['bindingId'] = None
+        if alfa_response.get('bindingInfo'):
+            if alfa_response['bindingInfo'].get('bindingId'):
+                alfa_response['bindingId'] = alfa_response['bindingInfo']['bindingId']
 
         binding = CardBindingPayment.get_by_id(order_id)
         if alfa_response['OrderStatus'] == 1:
@@ -62,7 +80,8 @@ class PaymentStatusHandler(ApiHandler):
             client.put()
         else:
             binding.success = False
-            binding.error = alfa_response.get('ErrorCode')
+            binding.error = alfa_response.get('actionCode')
+            binding.error_description = alfa_response.get('actionCodeDescription')
         binding.put()
 
         self.render_json(alfa_response)
