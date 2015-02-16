@@ -5,6 +5,8 @@ from .lib_ga import ga_track_event, ga_track_page
 
 
 GA_TID = "UA-53165573-6"
+ANDROID_URL = "https://play.google.com/store/apps/details?id=com.empatika.doubleb"
+IOS_URL = "https://itunes.apple.com/ru/app/dablbi-kofe-i-caj/id908237281"
 
 
 class GATrackBaseRequestHandler(webapp2.RequestHandler):
@@ -74,10 +76,32 @@ class GATrackDownloadHandler(GATrackRequestHandler):
         from_ = self.campaign["cs"]
         if 'Android' in ua:
             self.track_event('download', 'download_auto', 'android|from_%s|%s' % (from_, client_id))
-            self.redirect("https://play.google.com/store/apps/details?id=com.empatika.doubleb")
+            self.redirect(ANDROID_URL)
         else:
             if "iPhone" in ua or "iPad" in ua or "iPad" in ua:
                 self.track_event('download', 'download_auto', 'ios|from_%s|%s' % (from_, client_id))
             else:
                 self.track_event('download', 'download_auto', 'other|from_%s|%s' % (from_, client_id))
-            self.redirect("https://itunes.apple.com/ru/app/dablbi-kofe-i-caj/id908237281")
+            self.redirect(IOS_URL)
+
+
+class GATrackSplashHandler(GATrackRequestHandler):
+    def set_campaign(self, button=None):
+        self.campaign["cn"] = "splash"
+        if button:
+            self.campaign["cc"] = "desktop_button_%s" % ("android" if button == "a" else "ios")
+        else:
+            self.campaign["cc"] = "mobile_button_%s" % ("android" if "Android" in self.request.user_agent else "ios")
+
+    def page_titles(self, button=None):
+        return ["splash"]
+
+    def action(self, button=None):
+        ua = self.request.user_agent
+        if button:
+            redirect = button
+        elif 'Android' in ua:
+            redirect = "a"
+        else:
+            redirect = "i"
+        self.redirect(ANDROID_URL if redirect == "a" else IOS_URL)

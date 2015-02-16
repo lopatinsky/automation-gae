@@ -126,6 +126,8 @@ app = WSGIApplication([
     Route('/get/<platform:[ia]>', share.GATrackDownloadHandler),
     Route('/get/<platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
 
+    Route('/get/splash', share.GATrackSplashHandler),
+    Route('/get/splash/<button:[ia]>', share.GATrackSplashHandler),
 ], debug=config.DEBUG, config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)

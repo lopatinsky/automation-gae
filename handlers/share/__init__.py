@@ -1,1 +1,1 @@
-from handler import GATrackDownloadHandler
+from handler import GATrackDownloadHandler, GATrackSplashHandler
