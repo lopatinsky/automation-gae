@@ -3,7 +3,7 @@
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_NOTIFICATION
+from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_SUCCESS, CardBindingPayment
 from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
@@ -25,6 +25,26 @@ class FullyInactiveClientsHandler(RequestHandler):
         if not len(clients_with_phone):
             return
         else:
+            clients_with_card = []
+            error_clients = []
+            passive_clients = []
+            for client in clients_with_phone:
+                if client.tied_card:
+                    clients_with_card.append(client)
+                    client.sms = 'Success'
+                    continue
+                attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
+                error = False
+                for attempt in attempts:
+                    if attempt.success is False:
+                        error_clients.append(client)
+                        client.sms = 'Error'
+                        error = True
+                        continue
+                if error:
+                    continue
+                client.sms = 'No try'
+                passive_clients.append(client)
             body = 'Clients who bind telephone and not order anything:\n'
             for client in clients_with_phone:
                 body += 'Name: %s %s, email: %s, telephone: %s\n' % (client.name, client.surname,
@@ -32,15 +52,22 @@ class FullyInactiveClientsHandler(RequestHandler):
             logging.info(body)
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
+
             email.send_error('analytics', 'Clients with telephones', body="",  html=html_file)
-            for client in clients_with_phone:
+            for client in clients_with_card:
                 sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
                             u"Теперь можно получить кофе без очереди в кассу. "
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
                             u"Хорошего дня!") % client.name
                 send_sms("DoubleB", [client.tel], sms_text)
-                notification = Notification(client_id=client.key.id(), type=SMS_NOTIFICATION)
+                notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
                 notification.put()
+
+            for client in passive_clients:
+                sms_text = (u"%s, добрый день! Вы не приаязали карту!") % client.name
+                #send_sms("DoubleB", [client.tel], sms_text)
+                #notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
+                #notification.put()
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):

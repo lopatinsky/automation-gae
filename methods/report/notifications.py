@@ -1,6 +1,6 @@
 __author__ = 'dvpermyakov'
 
-from models import Order, Notification, SMS_NOTIFICATION, PUSH_NOTIFICATION
+from models import Order, Notification, SMS_SUCCESS, PUSH_NOTIFICATION
 from datetime import datetime, timedelta
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 import calendar
@@ -68,7 +68,7 @@ def get(chosen_year, chosen_month, chosen_type):
         'chosen_year': chosen_year,
         'chosen_month': chosen_month,
         'chosen_type': chosen_type,
-        'sms_type': SMS_NOTIFICATION,
+        'sms_type': SMS_SUCCESS,
         'push_type': PUSH_NOTIFICATION,
         'days_after_notification': DAYS_AFTER_NOTIFICATION,
         'total': total

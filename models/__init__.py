@@ -26,7 +26,8 @@ IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
 PUSH_NOTIFICATION = 0
-SMS_NOTIFICATION = 1
+SMS_SUCCESS = 1
+SMS_PASSIVE = 2
 
 
 class MenuItem(ndb.Model):
@@ -206,7 +207,7 @@ class Order(ndb.Model):
 class Notification(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     created = ndb.DateProperty(auto_now_add=True)
-    type = ndb.IntegerProperty(required=True, choices=(PUSH_NOTIFICATION, SMS_NOTIFICATION))
+    type = ndb.IntegerProperty(required=True, choices=(PUSH_NOTIFICATION, SMS_SUCCESS, SMS_PASSIVE))
 
 
 class Client(ndb.Model):
