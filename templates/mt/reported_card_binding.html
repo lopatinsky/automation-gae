@@ -10,6 +10,14 @@
                             'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
 
      <form method="get">
+         <select name="selected_type">
+             <option value="{{ all }}" {% if chosen_type == all %} selected {% endif %}>All</option>
+             <option value="{{ success }}" {% if chosen_type == success %} selected {% endif %}>Success binding</option>
+             <option value="{{ without_try }}" {% if chosen_type == without_try %} selected {% endif %}>Without attempt</option>
+             <option value="{{ cancelled }}" {% if chosen_type == cancelled %} selected {% endif %}>Cancelled binding</option>
+             <option value="{{ errors }}" {% if chosen_type == errors %} selected {% endif %}>Errors</option>
+         </select>
+
          <select name="selected_year">
              <option value="0" {% if not chosen_year %}selected{% endif %}>Все года</option>
              {% for year in range(start_year, end_year + 1) %}
@@ -25,48 +33,52 @@
                   </option>
              {% endfor %}
          </select>
-         <select name="selected_day">
-             <option value="0" {% if not chosen_day %}selected{% endif %}>Все дни</option>
+         <select name="selected_day" multiple size="31">
              {% for day in range(1, 31 + 1)%}
-                  <option value="{{ day }}" {% if chosen_day == day %} selected {% endif %}>
+                  <option value="{{ day }}" {% if day in chosen_days %} selected {% endif %}>
                       {{ day }}
                   </option>
              {% endfor %}
          </select>
+         <label>Client id:<input type="text" name="client_id"></label>
          <input type="submit" value="Выбрать"/>
          <button formmethod="get" name="button" value="xls">Скачать xls</button>
      </form>
-
-
-     <p>Client total number: {{ total['clients_number'] }}</p>
-     <p>Client first succeed attempt number: {{ total['clients_success'] }}</p>
-     <p>Client without try number: {{ total['clients_number'] - total['clients_success'] - clients|length }}</p>
 
      <br>
      <table style="border-collapse:collapse; width:100%" border="1">
          <tr>
              <th>Client Id</th>
+             <th>Created</th>
+             <th>Platform</th>
              <th>Name</th>
              <th>Telephone</th>
              <th>Email</th>
-             <th>Attempts</th>
-             <th>Web Failures</th>
+             <th>Has Sms</th>
+             <th>Open web page</th>
+             <th>Cancel</th>
              <th>Card Errors</th>
-             <th>Is tied</th>
+             <th>Tied Card Date</th>
          </tr>
          {% for client in clients %}
              <tr>
                  <td>{{ client.key.id() }}</td>
+                 <td>{{ client.created }}</td>
+                 <td>{{ client.user_agent }}</td>
                  <td>{{ '%s %s' % (client.name, client.surname) if client.name or client.surname }}</td>
                  <td>{{ client.tel if client.tel }}</td>
                  <td>{{ client.email if client.email }}</td>
+                 <td>{{ client.has_sms }}</td>
                  <td>{{ client.attempts|length }}</td>
                  <td>{{ client.web_failures }}</td>
                  <td>{{ client.card_errors }}</td>
-                 <td>{{ client.tied_card }}</td>
+                 <td>{{ client.card_date if client.tied_card else '' }}</td>
              </tr>
          {% endfor %}
          <tr>
+             <td></td>
+             <td></td>
+             <td></td>
              <td></td>
              <td></td>
              <td></td>

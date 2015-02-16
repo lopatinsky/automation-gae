@@ -105,8 +105,11 @@ class NotificationsReportHandler(BaseHandler):
 class CardBindingReportHandler(BaseHandler):
     def get(self):
         html_values = card_binding.get(**get_standart_params(self.request, {
-            'chosen_year': self.request.get_range("selected_year")
-        }, delete_params=['venue_id']))
+            'chosen_year': self.request.get_range("selected_year"),
+            'chosen_type': self.request.get_range("selected_type"),
+            'client_id': self.request.get("client_id"),
+            'chosen_days': self.request.get_all('selected_day'),
+        }, delete_params=['chosen_day', 'venue_id']))
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'card_binding', 'reported_card_binding.html', **html_values)
         else:
