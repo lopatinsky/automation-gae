@@ -25,7 +25,7 @@ def get(chosen_year, chosen_month):
     def _get_first_order(client_id):
         if client_id not in first_mapping:
             first_mapping[client_id] = Order.query(Order.client_id == client_id, Order.status == READY_ORDER)\
-                .order(Order.date_created).get()
+                .order(Order.date_created).get(keys_only=True)
         return first_mapping[client_id]
 
     for day in range(1, calendar.monthrange(chosen_year, chosen_month)[1] + 1):
@@ -39,8 +39,8 @@ def get(chosen_year, chosen_month):
             if order.status != READY_ORDER:
                 continue
             client = Client.get_by_id(order.client_id)
-            first_order = _get_first_order(client.key.id())
-            if first_order.key.id() == order.key.id():
+            first_order_key = _get_first_order(client.key.id())
+            if first_order_key.id() == order.key.id():
                 new_number += 1
                 new_sum += order.total_sum
             else:
