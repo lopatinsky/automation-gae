@@ -9,7 +9,7 @@
         <tr>
             <th>Имя кофейни</th>
             <th>Логин</th>
-            <th>Пароль (хешированный)</th>
+            <th>Смена пароля</th>
         </tr>
         {% for admin in admins %}
             <tr>
@@ -22,7 +22,7 @@
                     </div>
                 </td>
                 <td>
-                    <div>{{ admin.password }}
+                    <div>
                         <form>
                             <button formaction="{{ '/mt/private_office/%s/change_password' % admin.key.id() }}" formmethod="get">Изменить пароль</button>
                         </form>
