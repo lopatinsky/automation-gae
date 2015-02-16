@@ -6,4 +6,4 @@ from report import ReportHandler, ClientsReportHandler, MenuItemsReportHandler, 
     NotificationsReportHandler, CardBindingReportHandler
 from tablet_requests_report import TabletRequestGraphHandler, TabletInfoHandler
 from name_confirmed import NameConfirmationHandler
-from private_office import ListPAdmins, ChangeLoginPAdmins, ChangePasswordPAdmin
+from private_office import ListPAdmins, ChangeLoginPAdmins, ChangePasswordPAdmin, AutoCreatePAdmins

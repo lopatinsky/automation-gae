@@ -41,6 +41,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/private_office', [
             Route('/list', maintenance.ListPAdmins, 'padmin_main'),
+            Route('/create', maintenance.AutoCreatePAdmins),
             Route('/<admin_id:\d+>/change_login', maintenance.ChangeLoginPAdmins),
             Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
         ]),

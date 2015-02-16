@@ -10,29 +10,42 @@ import logging
 
 class ListPAdmins(BaseHandler):
     def get(self):
+        admins = [a
+                  for a in Admin.query().fetch()
+                  if a.auth_ids[0].startswith(Admin.PADMIN)]
+        admins = sorted(admins, key=lambda a: a.login)
+        self.render('private_office/admin_list.html', admins=admins)
+
+
+class AutoCreatePAdmins(BaseHandler):
+    def get(self):
         venues = Venue.query().fetch()
-        admins = []
         for venue in venues:
             cur_admin = None
             for admin in Admin.query(Admin.venue == venue.key).fetch():
                 if Admin.PADMIN in admin.auth_ids[0]:
                     cur_admin = admin
-                    continue
+                    break
             if cur_admin:
-                admins.append(cur_admin)
                 continue
-            auth_id = '%s:%s' % (Admin.PADMIN, venue.title.strip().lower())
+
+            ru = u'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+            en = u'abvgdeegziyklmnoprstufhzcss_y_eua'
+            trans_dict = dict(zip(ru, en))
+
+            login_rus = [c for c in venue.title.lower() if 'a' <= c <= 'z' or u'а' <= c <= u'я']
+            login_en = ''.join(trans_dict.get(c, c) for c in login_rus)
+
+            auth_id = '%s:%s' % (Admin.PADMIN, login_en)
             values = {
-                'email': venue.title.strip().lower(),
+                'email': login_en,
                 'venue': venue.key,
-                'password_raw': venue.title.strip().lower()
+                'password_raw': '0000'
             }
             success, info = Admin.create_user(auth_id, **values)
-            if success:
-                admins.append(info.key.get())
-            else:
+            if not success:
                 self.abort(500)
-        self.render('private_office/admin_list.html', admins=admins)
+        self.redirect_to("padmin_main")
 
 
 class ChangeLoginPAdmins(BaseHandler):
@@ -53,11 +66,12 @@ class ChangeLoginPAdmins(BaseHandler):
         values = {
             'email': login,
             'venue': admin.venue,
-            'password_raw': login
         }
         auth_id = '%s:%s' % (Admin.PADMIN, login)
         success, info = Admin.create_user(auth_id, **values)
         if success:
+            info.password = admin.password
+            info.put()
             admin.delete_auth_ids()
             admin.key.delete()
             self.redirect_to('padmin_main')
@@ -79,10 +93,6 @@ class ChangePasswordPAdmin(BaseHandler):
         if not admin:
             self.abort(500)
         password = self.request.get('password')
-        repeat_password = self.request.get('repeat_password')
-        if password != repeat_password:
-            self.render('/private_office/change_password.html', admin=admin, error=u'Пароли не совпадают')
-        else:
-            auth.set_password(admin, password)
-            admin.put()
-            self.redirect_to('padmin_main')
+        auth.set_password(admin, password)
+        admin.put()
+        self.redirect_to('padmin_main')
