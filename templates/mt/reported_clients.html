@@ -49,16 +49,19 @@
      <table style="border-collapse:collapse; width:100%" border="1">
          <tr>
              <th>Id</th>
-             <th>Name</th>
-             <th>Telephone</th>
-             <th>Device type</th>
-             <th>Number of Orders</th>
-             <th>Venue Revenue</th>
-             <th>Total Expenditure</th>
-             <th>Payment</th>
-             <th>Number of Cancelled Orders</th>
-             <th>Sum of Cancelled Orders</th>
-             <th>Average Order Cost</th>
+             <th>Имя</th>
+             <th>Телефон</th>
+             <th>Платформа</th>
+             <th>Всего заказов</th>
+             <th>Выданных заказов</th>
+             <th>Сумма с учетом акций Даблби</th>
+             {% if not padmin %}
+                <th>Полная сумма по меню</th>
+             {% endif %}
+             <th>Оплачено клиентом</th>
+             <th>Отмененных заказов</th>
+             <th>Сумма отмененных заказов</th>
+             <th>Средний чек</th>
          </tr>
          {% for client in clients %}
              <tr>
@@ -67,8 +70,11 @@
                  <td>{{ client.tel }}</td>
                  <td>{{ "Android" if client.device_type else "iOS" }}</td>
                  <td>{{ client.amount_orders }}</td>
+                 <td>{{ client.amount_orders - client.cancel_number }}</td>
                  <td>{{ client.venue_sum }}</td>
-                 <td>{{ client.menu_sum }}</td>
+                 {% if not padmin %}
+                    <td>{{ client.menu_sum }}</td>
+                 {% endif %}
                  <td>{{ client.payment }}</td>
                  <td>{{ client.cancel_number }}</td>
                  <td>{{ client.cancel_sum }}</td>
@@ -81,6 +87,7 @@
              <td></td>
              <td><b>Total</b></td>
              <td>{{ venue_number }}</td>
+             <td>{{ venue_number - venue_cancel_number }}</td>
              <td>{{ venue_revenue }}</td>
              <td>{{ venue_expenditure }}</td>
              <td>{{ venue_payment }}</td>
