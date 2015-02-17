@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% for category in categories %}
+        <a href="{{ '/mt/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a><br>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <form method="post">
+        <label>Category_id ({{ category.title }}):
+            <input disabled type="text" name="category_id" value="{{ category.key.id() }}">
+        </label><br>
+        <label>Title: <input type="text" name="title"></label><br>
+        <label>Description: <input type="text" name="description"></label><br>
+        <label>Price: <input type="number" name="price"></label><br>
+        <label>Cost Price: <input type="number" name="cost_price"></label><br>
+        <input type="submit" value="Выбрать"/>
+    </form>
+</body>
+</html>

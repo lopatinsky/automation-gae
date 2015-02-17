@@ -46,6 +46,15 @@ app = WSGIApplication([
             Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
         ]),
 
+        PathPrefixRoute('/menu', [
+            Route('/categories', maintenance.ListCategoriesHandler),
+            PathPrefixRoute('/item', [
+                Route('/list', maintenance.ListMenuItemsHandler),
+                Route('/info', maintenance.MenuItemInfoHandler),
+                Route('/add', maintenance.AddMenuItemHandler),
+            ]),
+        ]),
+
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 

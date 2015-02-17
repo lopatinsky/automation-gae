@@ -7,3 +7,4 @@ from report import ReportHandler, ClientsReportHandler, MenuItemsReportHandler, 
 from tablet_requests_report import TabletRequestGraphHandler, TabletInfoHandler
 from name_confirmed import NameConfirmationHandler
 from private_office import ListPAdmins, ChangeLoginPAdmins, ChangePasswordPAdmin, AutoCreatePAdmins
+from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandler, AddMenuItemHandler
