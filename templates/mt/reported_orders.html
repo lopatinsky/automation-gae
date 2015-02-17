@@ -57,7 +57,8 @@
             <th>Время самовывоза</th>
             <th>Статус заказа</th>
             <th>Тип оплаты</th>
-            <th>Сумма заказа</th>
+            <th>Полная сумма</th>
+            <th>Сумма с учетом MasterCard и бесплатных кружек</th>
             <th>id клиента</th>
             <th>Имя</th>
             <th>Фамилия</th>
@@ -68,18 +69,19 @@
         {% for order in orders %}
             {% set icount = order["items"]|length %}
             <tr>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.order_id }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.venue }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.date }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.created_time }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.delivery_time }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.status }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.payment_type }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.total_sum }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.id }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.name }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.surname }}</td>
-                <td rowspan={% if btn_type == 'xls' %}"1"{% else %}"{{ icount }}"{% endif %}>{{ order.client.phone }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.order_id }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.venue }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.date }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.created_time }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.delivery_time }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.status }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.payment_type }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.venue_revenue }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.id }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.name }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.surname }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.phone }}</td>
 
                 {% for item in order["items"] %}
                     {% if loop.index0 > 0 %}

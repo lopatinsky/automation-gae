@@ -32,7 +32,8 @@ def _order_data(order):
         "delivery_time": (order.delivery_time + config.TIMEZONE_OFFSET).strftime("%H:%M:%S"),
         "payment_type": _PAYMENT_TYPE_STRINGS[order.payment_type_id],
         "total_sum": order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0,
-        "venue": venue.title[22:] if len(venue.title) > 22 else venue.title,  # strip "Double B Coffee & Tea "
+        "venue_revenue": sum(d.revenue for d in order.item_details),
+        "venue": venue.title,
         "items": []
     }
     client = Client.get_by_id(order.client_id)
