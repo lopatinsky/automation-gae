@@ -13,8 +13,8 @@ class DoubleBConfig(object):
 
 class ProductionConfig(DoubleBConfig):
     ALFA_BASE_URL = "https://engine.paymentgate.ru/payment"
-    ALFA_LOGIN = 'DoubleB_binding-api'
-    ALFA_PASSWORD = 'Empatikaopen1#!'
+    ALFA_LOGIN = 'RuBeacon_DoubleB_bin-api'
+    ALFA_PASSWORD = 'Empatikaopen1#!#!'
 
     PROMOS_API_KEY = "NTY1OTMxMzU4NjU2OTIxNgVhFXVOYTAN9r_AM_Jrg-nwDwOj"
     FREE_COFFEE_PROMO_ID = 5634472569470976
