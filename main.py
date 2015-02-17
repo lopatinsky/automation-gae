@@ -133,8 +133,8 @@ app = WSGIApplication([
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
     Route('/task/check_order_success', api.CheckOrderSuccessHandler),
 
-    Route('/get/<platform:[ia]>', share.GATrackDownloadHandler),
-    Route('/get/<platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
+    Route('/get/<t:[abc]?><platform:[ia]>', share.GATrackDownloadHandler),
+    Route('/get/<t:[abc]?><platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
 
     Route('/get/splash', share.GATrackSplashHandler),
     Route('/get/splash/<button:[ia]>', share.GATrackSplashHandler),
