@@ -4,7 +4,7 @@ __author__ = 'dvpermyakov'
 import webapp2
 from models import Order, Client
 from .base import ApiHandler
-from methods import email, sms
+from methods import email, sms_pilot
 import logging
 
 
@@ -25,7 +25,7 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
             phone = client.tel
             if len(phone) == 11 and phone[0] == "8":
                 phone = "7" + phone[1:]
-            sms.send_sms("DoubleB", [phone], sms_text)
+            sms_pilot.send_sms("DoubleB", [phone], sms_text)
 
 
 class ClientSettingSuccessHandler(ApiHandler):

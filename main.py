@@ -133,6 +133,8 @@ app = WSGIApplication([
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
     Route('/task/check_order_success', api.CheckOrderSuccessHandler),
 
+    Route('/twilio/sms/get', api.ReceiveSms),
+
     Route('/get/<platform:[ia]>', share.GATrackDownloadHandler),
     Route('/get/<platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
 

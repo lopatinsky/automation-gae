@@ -3,11 +3,12 @@
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_SUCCESS, CardBindingPayment
+from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_SUCCESS, SMS_PASSIVE, CardBindingPayment
 from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
-from methods.sms import send_sms
+from methods import sms_pilot
+from methods import twilio
 from webapp2_extras import jinja2
 import logging
 
@@ -31,19 +32,19 @@ class FullyInactiveClientsHandler(RequestHandler):
             for client in clients_with_phone:
                 if client.tied_card:
                     clients_with_card.append(client)
-                    client.sms = 'Success'
+                    client.sms = 'Success binding card'
                     continue
                 attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
                 error = False
                 for attempt in attempts:
                     if attempt.success is False:
                         error_clients.append(client)
-                        client.sms = 'Error'
+                        client.sms = 'None (Error binding card)'
                         error = True
                         continue
                 if error:
                     continue
-                client.sms = 'No try'
+                client.sms = 'No try / Cancel binding card'
                 passive_clients.append(client)
             body = 'Clients who bind telephone and not order anything:\n'
             for client in clients_with_phone:
@@ -59,15 +60,19 @@ class FullyInactiveClientsHandler(RequestHandler):
                             u"Теперь можно получить кофе без очереди в кассу. "
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
                             u"Хорошего дня!") % client.name
-                send_sms("DoubleB", [client.tel], sms_text)
+                sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
                 notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
                 notification.put()
 
             for client in passive_clients:
-                sms_text = (u"%s, добрый день! Вы не приаязали карту!") % client.name
-                #send_sms("DoubleB", [client.tel], sms_text)
-                #notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
-                #notification.put()
+                sms_text = (u'Доброе утро, %s!\n'
+                            u'Спасибо, что пользуетесь приложением Даблби. '
+                            u'Привяжите карту и воспользуйтесь 50%% скидкой на первую кружку.\n'
+                            u'Хорошего дня,\n'
+                            u'Команда Даблби') % client.name
+                twilio.send_sms(receiver_phones=[client.tel], text=sms_text)
+                notification = Notification(client_id=client.key.id(), type=SMS_PASSIVE)
+                notification.put()
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
