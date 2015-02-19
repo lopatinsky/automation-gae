@@ -21,18 +21,20 @@ class GetSharedInfo(ApiHandler):
     def get(self):
         text_id, text = random.choice(TEXTS)
 
-        app_url_template = "http://dblb.mobi/get/%s%s%s"
+        url_template = "http://dblb.mobi/get/%%s%s%s"
         ua = self.request.headers["User-Agent"]
         platform_part = "a" if "Android" in ua else "i"
         client_id = self.request.get("client_id")
         client_id_part = "" if not client_id else ("/" + client_id)
+        campaign_url_template = url_template % (platform_part, client_id_part)
 
         self.render_json({
             'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image.png',
             'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/facebook_shared_image.png',
             'text_share_new_order': text,
             'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
-            'app_url': app_url_template % (text_id, platform_part, client_id_part),
+            'app_url': campaign_url_template % text_id,
+            'about_url': campaign_url_template % 'd',
             'screen_title': text,
             'screen_text': 'Расскажи друзьям, если тебе нравится приложение Даблби.'
         })
