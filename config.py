@@ -9,6 +9,7 @@ class DoubleBConfig(object):
     PROMO_END_DATE = datetime.date(2015, 2, 28)
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
     CANCEL_ALLOWED_BEFORE = 3
+    CARD_BINDING_REQUIRED = True
 
 
 class ProductionConfig(DoubleBConfig):
