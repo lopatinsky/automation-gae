@@ -155,8 +155,8 @@ class OrderHandler(ApiHandler):
                     'quantity': len(items),
                     'sum': total_sum
                 }
-                html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', goods=dict_items['items'], total=total)
-                send_email(config.EMAILS.get('receipt'), client.email, 'Чек заказа в кофейне Дабдби', html_body)
+                #html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', goods=dict_items['items'], total=total)
+                #send_email(config.EMAILS.get('receipt'), client.email, 'Чек заказа в кофейне Дабдби', html_body)
 
             ua = self.request.headers['User-Agent']
             if not ('DoubleBRedirect' in ua
