@@ -78,7 +78,7 @@
                 {% for good in goods %}
                     <tr>
                         <td>{{ '%s x%s' % (good['title'], good['quantity']) }}</td>
-                        <td style="text-align: right">{{ '%sp.' % good['quantity'] * good['price'] }}</td>
+                        <td style="text-align: right">{{ '%sp.' % (good['quantity'] * good['price']) }}</td>
                     </tr>
                 {% endfor %}
                 <tr>
