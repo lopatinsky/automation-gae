@@ -73,7 +73,7 @@ class Venue(ndb.Model):
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
-    takeout_only = ndb.BooleanProperty(indexed=False, default=True)
+    takeout_only = ndb.BooleanProperty(indexed=False, default=False)
     active = ndb.BooleanProperty(required=True, default=False)
 
     def dict(self, user_location=None):

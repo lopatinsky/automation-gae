@@ -195,6 +195,12 @@ Parameters:
 ```
 #!js
 {
+    "geopush": {
+        "send": should_send_geopush, // boolean
+        "expires": expiry_timestamp, // int
+        "text": geopush_text         // string
+    },
+
     "promo_enabled": promo_enabled,                        // boolean
     "promo_end_date": promo_end_date,                      // int, timestamp
     "promo_mastercard_only": promo_mastercard_only,        // boolean
