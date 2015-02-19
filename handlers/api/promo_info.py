@@ -1,3 +1,6 @@
+# coding=utf-8
+
+import datetime
 from .base import ApiHandler
 from config import config
 from methods import empatika_promos
@@ -12,6 +15,13 @@ class PromoInfoHandler(ApiHandler):
         bonus_points = empatika_promos.get_user_points(client_id)
         news = News.query(News.active == True).fetch()
         self.render_json({
+            "geopush": {
+                "id": str(datetime.date.today()),
+                "send": config.DEBUG,
+                "expires": 1424599097,
+                "text": u"Тестовый геолокационный пуш."
+            },
+
             "promo_enabled": config.PROMO_ENABLED,
             "promo_end_date": timestamp(config.PROMO_END_DATE),
             "promo_mastercard_only": config.PROMO_MASTERCARD_ONLY,

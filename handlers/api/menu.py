@@ -1,4 +1,5 @@
 import logging
+from config import config
 from handlers.api.base import ApiHandler
 from models import MenuCategory, Client, STATUS_AVAILABLE
 
@@ -54,5 +55,5 @@ class MenuHandler(ApiHandler):
             client_name += ' ' + client.surname
         response['client_name'] = client_name
         response['client_email'] = client.email or ''
-        response['demo'] = True
+        response['demo'] = config.CARD_BINDING_REQUIRED
         self.render_json(response)

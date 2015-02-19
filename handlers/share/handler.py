@@ -64,6 +64,7 @@ class GATrackDownloadHandler(GATrackRequestHandler):
         'a': 'share_free_cup_a',
         'b': 'share_free_cup_b',
         'c': 'share_free_cup_c',
+        'd': 'share_about_app',
     }
 
     def set_campaign(self, t, platform, client_id=None):
