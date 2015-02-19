@@ -133,6 +133,7 @@ Parameters:
                 ...
             ],
             "is_open": venue_is_open_now,        // boolean
+            "takeout_only": venue_takeout_only,  // boolean
             "distance": distance_to_location     // float, 0 if location not specified
         },
         ...
