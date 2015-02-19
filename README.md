@@ -196,6 +196,7 @@ Parameters:
 #!js
 {
     "geopush": {
+        "id": geopush_id,            // string
         "send": should_send_geopush, // boolean
         "expires": expiry_timestamp, // int
         "text": geopush_text         // string
