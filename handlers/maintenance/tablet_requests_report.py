@@ -104,7 +104,7 @@ class TabletInfoHandler(BaseHandler):
     def get(self):
         statuses = AdminStatus.query().fetch()
         admins_info = [PingReport(status) for status in statuses]
-        return self.jinja2.render_template('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
+        return self.render('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
 
     def post(self):
         token = self.request.get("logout_token")
