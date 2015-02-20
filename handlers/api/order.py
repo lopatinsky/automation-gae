@@ -25,10 +25,11 @@ class OrderHandler(ApiHandler):
     cache_key = None
     order = None
 
-    def render_error(self, description):
+    def render_error(self, description, title=u"Ошибка"):
         self.response.set_status(400)
         logging.warning("order render_error: %s" % description)
         self.render_json({
+            "title": title,
             "description": description
         })
         if self.order:
@@ -106,7 +107,7 @@ class OrderHandler(ApiHandler):
 
             total_sum = validation_result['total_sum']
             if request_total_sum and total_sum != request_total_sum:
-                return self.render_error(u"Сумма заказа была пересчитана")
+                return self.render_error(u"Сумма заказа была пересчитана", u"")
 
             item_details = validation_result["details"]
             promo_list = [promo['id'] for promo in validation_result["promos"]]
