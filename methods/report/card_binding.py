@@ -3,6 +3,7 @@ __author__ = 'dvpermyakov'
 from models import Client, CardBindingPayment, Notification, SMS_PASSIVE
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from datetime import datetime
+from config import config
 import logging
 
 
@@ -41,11 +42,12 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             clients = [client]
 
     for client in clients:
-        sms = Notification.query(Notification.client_id == client.key.id(), Notification.type == SMS_PASSIVE).fetch()
+        client.created += config.TIMEZONE_OFFSET
+        sms = Notification.query(Notification.client_id == client.key.id(), Notification.type == SMS_PASSIVE).get()
         if sms:
-            client.has_sms = True
+            client.sms_date = sms.created
         else:
-            client.has_sms = False
+            client.sms_date = None
         client.attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
         client.web_failures = 0
         client.card_errors = []
@@ -55,7 +57,8 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             elif not attempt.success:
                 client.card_errors.append(attempt.error) if hasattr(attempt, 'error') else None
             elif attempt.success:
-                client.card_date = attempt.created
+                client.card_end_dae = attempt.updated + config.TIMEZONE_OFFSET if attempt.updated else None
+                client.card_start_date = attempt.created + config.TIMEZONE_OFFSET if attempt.created else None
 
     clients_with_card = []
     passive_clients = []
@@ -81,6 +84,7 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
         clients = error_clients
 
     total = dict()
+    total['sms'] = len([client for client in clients if client.sms_date])
     total['attempts'] = sum(len(client.attempts) for client in clients)
     total['web_failures'] = sum(client.web_failures for client in clients)
     total['card_errors'] = sum(len(client.card_errors)for client in clients)

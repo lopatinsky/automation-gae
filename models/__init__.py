@@ -208,7 +208,7 @@ class Order(ndb.Model):
 
 class Notification(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
-    created = ndb.DateProperty(auto_now_add=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
     type = ndb.IntegerProperty(required=True, choices=(PUSH_NOTIFICATION, SMS_SUCCESS, SMS_PASSIVE))
 
 
@@ -362,6 +362,7 @@ class JsonStorage(ndb.Model):
 
 class CardBindingPayment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
+    updated = ndb.DateTimeProperty(auto_now=True)
     client_id = ndb.IntegerProperty()
     success = ndb.BooleanProperty()  # None if status unknown
     error = ndb.IntegerProperty()  # None if error unknown

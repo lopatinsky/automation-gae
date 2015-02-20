@@ -11,11 +11,11 @@
 
      <form method="get">
          <select name="selected_type">
-             <option value="{{ all }}" {% if chosen_type == all %} selected {% endif %}>All</option>
-             <option value="{{ success }}" {% if chosen_type == success %} selected {% endif %}>Success binding</option>
-             <option value="{{ without_try }}" {% if chosen_type == without_try %} selected {% endif %}>Without attempt</option>
-             <option value="{{ cancelled }}" {% if chosen_type == cancelled %} selected {% endif %}>Cancelled binding</option>
-             <option value="{{ errors }}" {% if chosen_type == errors %} selected {% endif %}>Errors</option>
+             <option value="{{ all }}" {% if chosen_type == all %} selected {% endif %}>Все пользователи</option>
+             <option value="{{ success }}" {% if chosen_type == success %} selected {% endif %}>Пользователи с успешной привяской карты</option>
+             <option value="{{ without_try }}" {% if chosen_type == without_try %} selected {% endif %}>Пользователи без попытки привязать карту</option>
+             <option value="{{ cancelled }}" {% if chosen_type == cancelled %} selected {% endif %}>Пользователи, кто нажал кнопку назад</option>
+             <option value="{{ errors }}" {% if chosen_type == errors %} selected {% endif %}>Пользователи, кто получил ошибку при привязки карты</option>
          </select>
 
          <select name="selected_year">
@@ -48,17 +48,18 @@
      <br>
      <table style="border-collapse:collapse; width:100%" border="1">
          <tr>
-             <th>Client Id</th>
-             <th>Created</th>
-             <th>Platform</th>
-             <th>Name</th>
-             <th>Telephone</th>
-             <th>Email</th>
-             <th>Has Sms</th>
-             <th>Open web page</th>
-             <th>Cancel</th>
-             <th>Card Errors</th>
-             <th>Tied Card Date</th>
+             <th>Ид Клиента</th>
+             <th>Время записи клиента в бд</th>
+             <th>Платформа</th>
+             <th>Имя</th>
+             <th>Телефон</th>
+             <th>Почта</th>
+             <th>Время отсылки смс</th>
+             <th>Попытка открыть веб-страничку</th>
+             <th>Нажатие кнопки назад</th>
+             <th>Ошибка привязки</th>
+             <th>Время начала сессии успешной привязки карты</th>
+             <th>Время успешной привязки карты</th>
          </tr>
          {% for client in clients %}
              <tr>
@@ -68,11 +69,12 @@
                  <td>{{ '%s %s' % (client.name, client.surname) if client.name or client.surname }}</td>
                  <td>{{ client.tel if client.tel }}</td>
                  <td>{{ client.email if client.email }}</td>
-                 <td>{{ client.has_sms }}</td>
+                 <td>{{ client.sms_date if client.sms_date else '' }}</td>
                  <td>{{ client.attempts|length }}</td>
                  <td>{{ client.web_failures }}</td>
                  <td>{{ client.card_errors }}</td>
-                 <td>{{ client.card_date if client.tied_card else '' }}</td>
+                 <td>{{ client.card_start_date if client.tied_card else '' }}</td>
+                 <td>{{ client.card_end_date if client.tied_card else '' }}</td>
              </tr>
          {% endfor %}
          <tr>
@@ -81,11 +83,12 @@
              <td></td>
              <td></td>
              <td></td>
-             <td></td>
              <td><b>Total</b></td>
+             <td>{{ total['sms'] }}</td>
              <td>{{ total['attempts'] }}</td>
              <td>{{ total['web_failures'] }}</td>
              <td>{{ total['card_errors'] }}</td>
+             <td>{{ '%s (%s)' % (total['tied_card'], clients|length) }}</td>
              <td>{{ '%s (%s)' % (total['tied_card'], clients|length) }}</td>
          </tr>
      </table>
