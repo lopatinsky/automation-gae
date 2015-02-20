@@ -85,12 +85,12 @@ class GATrackDownloadHandler(GATrackRequestHandler):
         if 'Android' in ua:
             self.track_event('download', 'download_auto', 'android|from_%s|%s' % (from_, client_id))
             self.redirect(ANDROID_URL)
-        else:
-            if "iPhone" in ua or "iPad" in ua or "iPad" in ua:
-                self.track_event('download', 'download_auto', 'ios|from_%s|%s' % (from_, client_id))
-            else:
-                self.track_event('download', 'download_auto', 'other|from_%s|%s' % (from_, client_id))
+        elif "iPhone" in ua or "iPod" in ua or "iPad" in ua:
+            self.track_event('download', 'download_auto', 'ios|from_%s|%s' % (from_, client_id))
             self.redirect(IOS_URL)
+        else:
+            self.track_event('download', 'download_auto', 'other|from_%s|%s' % (from_, client_id))
+            self.redirect('/')
 
 
 class GATrackSplashHandler(GATrackRequestHandler):
