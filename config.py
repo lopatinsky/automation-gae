@@ -8,7 +8,10 @@ class DoubleBConfig(object):
     POINTS_PER_CUP = 5
     PROMO_END_DATE = datetime.date(2015, 2, 28)
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
-    CANCEL_ALLOWED_BEFORE = 3
+
+    CANCEL_ALLOWED_WITHIN = 30  # seconds after creation
+    CANCEL_ALLOWED_BEFORE = 3  # minutes before delivery_time
+
     CARD_BINDING_REQUIRED = True
     GEOPUSH_SEND_RADIUS = 500
 

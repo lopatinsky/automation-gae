@@ -208,7 +208,8 @@ class ReturnOrderHandler(ApiHandler):
             })
         else:
             now = datetime.utcnow()
-            if order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
+            if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
+                    order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 # return money
                 if order.payment_type_id == CARD_PAYMENT_TYPE:
                     return_result = alfa_bank.reverse(order.payment_id)
