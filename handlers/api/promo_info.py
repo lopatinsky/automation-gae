@@ -19,6 +19,7 @@ class PromoInfoHandler(ApiHandler):
                 "id": str(datetime.date.today()),
                 "send": config.DEBUG,
                 "expires": 1424599097,
+                "radius": config.GEOPUSH_SEND_RADIUS,
                 "text": u"Тестовый геолокационный пуш."
             },
 

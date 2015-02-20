@@ -199,6 +199,7 @@ Parameters:
         "id": geopush_id,            // string
         "send": should_send_geopush, // boolean
         "expires": expiry_timestamp, // int
+        "radius": radius_to_send,    // int, in meters
         "text": geopush_text         // string
     },
 

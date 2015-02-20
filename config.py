@@ -10,6 +10,7 @@ class DoubleBConfig(object):
     TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
     CANCEL_ALLOWED_BEFORE = 3
     CARD_BINDING_REQUIRED = True
+    GEOPUSH_SEND_RADIUS = 500
 
 
 class ProductionConfig(DoubleBConfig):
