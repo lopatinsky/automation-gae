@@ -57,7 +57,7 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             elif not attempt.success:
                 client.card_errors.append(attempt.error) if hasattr(attempt, 'error') else None
             elif attempt.success:
-                client.card_end_dae = attempt.updated + config.TIMEZONE_OFFSET if attempt.updated else None
+                client.card_end_date = attempt.updated + config.TIMEZONE_OFFSET if attempt.updated else None
                 client.card_start_date = attempt.created + config.TIMEZONE_OFFSET if attempt.created else None
 
     clients_with_card = []
