@@ -26,14 +26,14 @@ def _success(resp):
     return _error_code(resp) == 0
 
 
-def __post_request_alfa(api_path, params):
+def __post_request_alfa(api_path, params, deadline=30):
     url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
-    content = urlfetch.fetch(url, method='POST', headers={'Content-Type': 'application/json'}, deadline=30,
+    content = urlfetch.fetch(url, method='POST', headers={'Content-Type': 'application/json'}, deadline=deadline,
                              validate_certificate=False).content
     logging.info(content)
 
@@ -59,7 +59,7 @@ def create(amount, order_number, return_url, client_id, page_view):
         'clientId': client_id,
         'pageView': page_view
     }
-    result = __post_request_alfa('/rest/registerPreAuth.do', p)
+    result = __post_request_alfa('/rest/registerPreAuth.do', p, deadline=7)
     return result
 
 
@@ -108,7 +108,7 @@ def authorize(binding_id, order_id):
         'mdOrder': order_id,
         'bindingId': binding_id
     }
-    result = __post_request_alfa('/rest/paymentOrderBinding.do', params)
+    result = __post_request_alfa('/rest/paymentOrderBinding.do', params, deadline=40)
     return result
 
 
