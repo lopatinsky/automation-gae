@@ -101,8 +101,7 @@ class OrderDoneHandler(WebAdminApiHandler):
                     empatika_promos.register_order(order.client_id, points, order.key.id())
                 except empatika_promos.EmpatikaPromosError as e:
                     logging.exception(e)
-        push.send_order_push(order_id, order.status, u"Заказ №%s выдан." % str(order.key.id()),
-                             order.device_type, silent=True)
+        push.send_order_ready_push(order)
 
         response = {
             'status': 1,
