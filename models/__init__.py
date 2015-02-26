@@ -145,6 +145,8 @@ class Order(ndb.Model):
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
 
+    first_for_client = ndb.BooleanProperty()
+
     def dict(self):
         dct = {
             "order_id": self.key.id(),

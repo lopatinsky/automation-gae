@@ -39,11 +39,23 @@ def get(chosen_year, chosen_month):
             if order.status != READY_ORDER:
                 continue
             client = Client.get_by_id(order.client_id)
-            first_order_key = _get_first_order(client.key.id())
-            if first_order_key.id() == order.key.id():
+            if order.first_for_client is not None:
+                if order.first_for_client:
+                    first_order_key = order.key
+                else:
+                    first_order_key = None
+            else:
+                first_order_key = _get_first_order(client.key.id())
+            if first_order_key and first_order_key.id() == order.key.id():
+                if order.first_for_client is None:
+                    order.first_for_client = True
+                    order.put()
                 new_number += 1
                 new_sum += order.total_sum
             else:
+                if order.first_for_client is None:
+                    order.first_for_client = False
+                    order.put()
                 old_number += 1
                 old_sum += order.total_sum
         days.append({
