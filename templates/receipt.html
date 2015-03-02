@@ -2,115 +2,81 @@
 <html>
 <head>
     <title></title>
-    <style>
-
-        html, body {
-            margin: 0;
-            width: 100%;
-            height: auto;
-            font-family: Tahoma, Geneva, sans-serif;
-        }
-
-        header {
-            margin: 0;
-            padding: 10px 20px;
-            color: #e8e8e8;
-            background-color: #0099FF;
-        }
-
-        footer {
-            margin: 0;
-            padding: 10px;
-            background-color: #adadad;
-            border: 1px groove #808080;
-        }
-        #header_number {
-            position: absolute;
-            right: 20px;
-        }
-        #common_block {
-            display: table;
-            width: 100%;
-            height: 75%;
-        }
-        #left_block {
-            width: 60%;
-        }
-        #right_block {
-            width: 40%;
-        }
-        #left_block, #right_block {
-            padding: 10px 20px;
-            vertical-align: top;
-            display: table-cell;
-        }
-        #address_number {
-            width: 100%;
-            border: 1px groove #0099FF;
-        }
-        #order_table {
-            width: 100%;
-        }
-    </style>
 </head>
 
 <body>
 
     <header>
-        <h3>
-            <div>
-                Даблби
-                <small>Кофе и чай</small>
-                <small id=header_number>№100500</small>
-            </div>
-        </h3>
+        <table bgcolor="#76D9E7" style="color:#FFFFFF; width:100%; padding:10px 20px;">
+            <tr>
+                <td>
+                    <h1>
+                        Даблби
+                        <small>Кофе и чай</small>
+                    </h1>
+                </td>
+                <td align="right">
+                    <h1>
+                        <small>№ {{ order_number }}</small>
+                    </h1>
+                </td>
+            </tr>
+        </table>
     </header>
 
-    <div id="common_block">
+    <div style="display:table; width:100%; height:75%;">
 
-        <div id="left_block">
+        <div style="width:60%; vertical-align:top; display:table-cell; padding:10px 20px;">
 
-            <p><b>Благодарим Вас за заказ</b></p>
-            <p>Заказ № <b>100500</b> был сделан 17/02/2015 в <b>18:15</b></p>
+            <h1><b>Благодарим Вас за заказ</b></h1>
+            <p style="font-size:16px">Заказ № <b>{{ order_number }}</b> был сделан {{ date }} в <b>{{ time }}</b></p>
 
             <hr>
-            <table id="order_table">
+            <table style="width:100%; font-size:14px">
                 {% for good in goods %}
                     <tr>
                         <td>{{ '%s x%s' % (good['title'], good['quantity']) }}</td>
-                        <td style="text-align: right">{{ '%sp.' % (good['quantity'] * good['price']) }}</td>
+                        <td style="text-align: right">{{ '%sp.' % (good['quantity']|int * good['price']|int) }}</td>
                     </tr>
                 {% endfor %}
                 <tr>
                     <td colspan="2">
-                        Итого к оплате&nbsp;&nbsp;&nbsp;
-                    </td>
-                    <td>
-                        <hr style="width: 100%">
+                        <hr>
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2">
+                        <h3>Итого к оплате&nbsp;&nbsp;&nbsp;</h3>
+                    </td>
                     <td>
-                        <div>
-                            <img src="/static/map.png">
-                            **** 8394
+                    </td>
+                </tr>
+                <tr style="font-size:16px">
+                    <td>
+                        <div style="display:table">
+                            <div style="display:table-cell; width:20%;">
+                                <img src="http://empatika-doubleb.appspot.com/static/mastercard.png">
+                            </div>
+                            <div style="vertical-align: middle; display:table-cell; width:80%;">
+                                <h3>{{ pan }}</h3>
+                            </div>
                         </div>
                     </td>
-                    <td style="text-align: right">
-                        <div>Сумма</div>
+                    <td style="text-align:right; vertical-align:middle;">
+                        <div><b>{{ '%sp.' % total['sum'] }}</b></div>
                     </td>
                 </tr>
             </table>
         </div>
 
-        <div id="right_block">
-            <table id="address_number">
+        <div style="width:40%; vertical-align:top; display:table-cell; padding:10px 20px;">
+            <table style="width:100%; border:1px groove #98EAFF;" align="center" valign="center">
                 <tr>
-                    <td><img src="/static/map.png"></td>
+                    <td><img src="http://p-test.empatika-doubleb-test.appspot.com/static/map.png"></td>
                     <td>
                         <p><b>Кафе Даблби</b></p>
-                        <p>2ая тверская ямская</p>
-                        <p>Телефон</p>
+                        <p>{{ address }}</p>
+                        <p>{{ phone }}</p>
                     </td>
                 </tr>
                 <tr><td colspan="2" style="text-align:center">Анна Милянская</td></tr>
@@ -119,10 +85,13 @@
 
     </div>
 
-    <footer>
-        <div>Название компании</div>
-        <div>ИНН</div>
-    </footer>
+    <table bgcolor="#CCCCB2" style="width:100%; padding: 5px;">
+        <footer>
+            <div><h3>Название компании</h3></div>
+            <div><h3>ИНН</h3></div>
+        </footer>
+    </table>
+
 
 </body>
 </html>

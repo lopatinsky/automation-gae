@@ -156,8 +156,22 @@ class OrderHandler(ApiHandler):
                     'quantity': len(items),
                     'sum': total_sum
                 }
-                #html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', goods=dict_items['items'], total=total)
-                #send_email(config.EMAILS.get('receipt'), client.email, 'Чек заказа в кофейне Дабдби', html_body)
+                date = datetime.utcnow() + config.TIMEZONE_OFFSET  # TODO: set self.order.created
+                phone = venue.phone_numbers[0]
+                values = {
+                    'goods': dict_items['items'],
+                    'total': total,
+                    'order_number': self.order.key.id(),
+                    'date': date.strftime('%d/%m/%Y'),
+                    'time': date.strftime('%H:%M'),
+                    'address': venue.description,
+                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:])
+                    if phone else '',
+                    'pan': '**** 8394'
+                }
+                html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', **values)
+                send_email(config.EMAILS.get('receipt'), 'dvpermyakov@edu.hse.ru', 'Чек заказа в кофейне Дабдби', html_body)
+                return
 
             ua = self.request.headers['User-Agent']
             if not ('DoubleBRedirect' in ua
