@@ -89,7 +89,9 @@
              <td>{{ venue_number }}</td>
              <td>{{ venue_number - venue_cancel_number }}</td>
              <td>{{ venue_revenue }}</td>
-             <td>{{ venue_expenditure }}</td>
+             {% if not padmin %}
+                <td>{{ venue_expenditure }}</td>
+             {% endif %}
              <td>{{ venue_payment }}</td>
              <td>{{ venue_cancel_number }}</td>
              <td>{{ venue_cancel_sum }}</td>
