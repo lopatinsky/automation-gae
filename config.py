@@ -57,7 +57,6 @@ class ProductionConfig(DoubleBConfig):
     SPECIALS = {
         37: [  # grapefruit tea
             1,  # mil
-            5656058538229760,  # gstolic
             5660980839186432,  # dmitr
             5786976926040064,  # tvyamsk
             5083289484263424,  # million

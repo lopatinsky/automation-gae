@@ -13,6 +13,7 @@ PROMO_SUPPORT_FULL = 2
 
 
 _OMEGA_VENUE_ID = 5093108584808448
+_ETAZHI_VENUE_ID = 5547219436437504
 
 
 def get_promo_support(request):
@@ -39,6 +40,11 @@ _CITY_HAPPY_HOURS_PROMO = {
 _OMEGA_PROMO = {
     "id": "omega",
     "text": u"Скидки в Омега Плаза"
+}
+
+_ETAZHI_PROMO = {
+    "id": "etazhi",
+    "text": u"Скидки в лофт-проекте Этажи"
 }
 
 
@@ -139,12 +145,19 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                     item_dict['revenue'] -= 50
 
 
-def _apply_omega_promo(item_dicts, promos_info, venue):
+def _apply_venue_discounts(item_dicts, promos_info, venue):
     if venue.key.id() == _OMEGA_VENUE_ID:
         promos_info.append(_OMEGA_PROMO)
         for item_dict in item_dicts:
             if item_dict['item'].price == 250:
                 item_dict['promos'].append(_OMEGA_PROMO['id'])
+                item_dict['price'] -= 50
+                item_dict['revenue'] -= 50
+    elif venue.key.id() == _ETAZHI_VENUE_ID:
+        promos_info.append(_ETAZHI_PROMO)
+        for item_dict in item_dicts:
+            if item_dict['item'].price in (150, 250):
+                item_dict['promos'].append(_ETAZHI_PROMO['id'])
                 item_dict['price'] -= 50
                 item_dict['revenue'] -= 50
 
@@ -202,7 +215,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
             _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
-            _apply_omega_promo(item_dicts, promos_info, venue)
+            _apply_venue_discounts(item_dicts, promos_info, venue)
 
     if support_level in (PROMO_SUPPORT_MASTER, PROMO_SUPPORT_FULL):
         if payment_info:

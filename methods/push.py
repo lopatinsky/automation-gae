@@ -2,6 +2,7 @@
 import datetime
 import json
 import logging
+import random
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
 from models import IOS_DEVICE, ANDROID_DEVICE
@@ -76,3 +77,14 @@ def send_reminder_push(client_id, client_name, client_score):
         'marker': 'send_reminder'
     }
     return send_push('client_%s' % client_id, data, ANDROID_DEVICE)
+
+
+def send_order_ready_push(order):
+    strings = [u"А мы открыли новую кофейню :)", u"Как Вам напитки без очереди?", u"Надеемся, напиток Вам понравится.",
+               u"Если Вам понравится напиток - расскажите о нас друзьям :)",
+               u"Есть идеи как улучшить приложение? Напишите нам.", u"И пусть весь мир подождет.",
+               u"Акция от MasterCard продлена до конца марта.", u"Заказы выдаются, баллы копятся.",
+               u"Хвалите наших бариста :)", u"Поставьте оценку нашему приложению."]
+    send_order_push(order.key.id(), order.status,
+                    u"Заказ №%s выдан. %s" % (str(order.key.id()), random.choice(strings)),
+                    order.device_type, silent=True)
