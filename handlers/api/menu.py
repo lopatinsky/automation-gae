@@ -56,6 +56,4 @@ class MenuHandler(ApiHandler):
         response['client_name'] = client_name
         response['client_email'] = client.email or ''
         response['demo'] = config.CARD_BINDING_REQUIRED
-        if 'iOS' in self.request.headers["User-Agent"]:
-            response['demo'] = False
         self.render_json(response)
