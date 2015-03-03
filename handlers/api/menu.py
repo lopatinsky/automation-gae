@@ -19,7 +19,7 @@ class MenuHandler(ApiHandler):
     def get(self):
         client_id = self.request.get_range('client_id')
         device_phone = "".join(c for c in self.request.get('device_phone') if '0' <= c <= '9')
-        categories = MenuCategory.query().fetch()
+        categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
         result_dict = {}
         for category in categories:
             result_dict.update(category.dict())
