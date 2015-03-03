@@ -56,6 +56,7 @@ class MenuCategory(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
+    status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
     def dict(self):
         return {self.title: [menu_item.get().dict() for menu_item in self.menu_items
