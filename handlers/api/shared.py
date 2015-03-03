@@ -4,6 +4,8 @@ import random
 __author__ = 'dvpermyakov'
 
 from base import ApiHandler
+from methods import branch_io, alfa_bank, twilio
+from models import Share, Client, SharedFreeCup, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE
 
 
 TEXTS = [
@@ -38,3 +40,93 @@ class GetSharedInfo(ApiHandler):
             'screen_title': text,
             'screen_text': 'Расскажи друзьям, если тебе нравится приложение Даблби.'
         })
+
+
+class PutBranchIoInfoHandler(ApiHandler):
+    def post(self):
+        client_id = self.request.get_range('client_id')
+        client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
+        share_id = self.request.get_range('share_id')
+        share = Share.get_by_id(share_id)
+        if not share:
+            self.abort(400)
+        if share.share_type == branch_io.INVITATION:
+            SharedFreeCup(sender=share.sender, recipient=client.key).put()
+            self.render_json({})
+        elif share.share_type == branch_io.GIFT:
+            pass
+        else:
+            pass
+
+
+class GetInvitationUrlHandler(ApiHandler):
+    def get(self):
+        client_id = self.request.get_range('client_id')
+        client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
+        channel = self.request.get_range('channel')
+        if channel not in [branch_io.VK, branch_io.FACEBOOK, branch_io.SMS, branch_io.EMAIL, branch_io.OTHER]:
+            self.abort(400)
+        share = Share(share_type=branch_io.INVITATION, sender=client.key)
+        share.put()
+        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel)
+
+        self.render_json({
+            'url': url
+        })
+
+
+class GetGiftUrlHandler(ApiHandler):
+    FIX_GIFT_SUM = 300
+
+    def send_error(self, error):
+        self.response.set_status(400)
+        self.render_json({
+            'error': True,
+            'description': error
+        })
+
+    def success(self, sender, phone, channel):
+        share = Share(share_type=branch_io.GIFT, sender=sender.key)
+        share.put()
+        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel)
+        #twilio.send_sms([phone], u'Получай свою кружку в подарок %s' % url)
+        self.render_json({
+            'success': True,
+            'url': url
+        })
+
+    def post(self):
+        client_id = self.request.get_range('client_id')
+        client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
+        recipient_phone = self.request.get('recipient_phone')
+        channel = self.request.get_range('channel')
+        if channel not in [branch_io.VK, branch_io.FACEBOOK, branch_io.SMS, branch_io.EMAIL, branch_io.OTHER]:
+            self.abort(400)
+        order_id = self.request.get_range('order_id')
+        payment_type_id = self.request.get('payment_type_id')
+        payment_type = PaymentType.get_by_id(payment_type_id)
+        if payment_type.status == STATUS_AVAILABLE:
+            if payment_type_id == CARD_PAYMENT_TYPE:
+                alpha_client_id = self.request.get('alpha_client_id')
+                binding_id = self.request.get('binding_id')
+                return_url = self.request.get('return_utl')
+                mastercard = self.request.get('mastercard')
+
+                success, error = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
+                if success:
+                    success, error = alfa_bank.hold_and_check(payment_type_id, binding_id)
+                if not success:
+                    self.send_error(error)
+                else:
+                    self.success(client, recipient_phone, channel)
+
+            elif payment_type_id == BONUS_PAYMENT_TYPE:
+                pass
+        else:
+            self.send_error(u'Данный вид оплаты недоступен')

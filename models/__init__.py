@@ -373,3 +373,15 @@ class CardBindingPayment(ndb.Model):
     @property
     def order_id(self):
         return self.key.id()
+
+
+class Share(ndb.Model):
+    from methods.branch_io import SHARE, INVITATION, GIFT
+
+    sender = ndb.KeyProperty(required=True, kind=Client)
+    share_type = ndb.IntegerProperty(required=True, choices=[SHARE, INVITATION, GIFT])
+
+
+class SharedFreeCup(ndb.Model):  # free cup is avail after recipient orders smth and should be deleted after that
+    sender = ndb.KeyProperty(required=True, kind=Client)
+    recipient = ndb.KeyProperty(required=True, kind=Client)

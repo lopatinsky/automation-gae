@@ -19,6 +19,7 @@ webapp2_config = {
 
 
 app = WSGIApplication([
+
     PathPrefixRoute('/mt', [
         Route('/venues', maintenance.EnableVenuesHandler),
         Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
@@ -99,7 +100,16 @@ app = WSGIApplication([
         Route('/history', api.HistoryHandler),
 
         Route('/update/promo', api.UpdateOrderPromos),
-        Route('/shared/info', api.GetSharedInfo),
+        PathPrefixRoute('/shared', [
+            Route('/info', api.GetSharedInfo),
+            Route('/send_branch_io_info', api.PutBranchIoInfoHandler),
+            PathPrefixRoute('/invitation', [
+                Route('/get_url', api.GetInvitationUrlHandler),
+            ]),
+            PathPrefixRoute('/gift', [
+                Route('/get_url', api)
+            ]),
+        ]),
     ]),
 
     PathPrefixRoute('/admin', [
