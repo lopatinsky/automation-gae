@@ -157,20 +157,24 @@ class OrderHandler(ApiHandler):
                     'sum': total_sum
                 }
                 date = datetime.utcnow() + config.TIMEZONE_OFFSET  # TODO: set self.order.created
-                phone = venue.phone_numbers[0]
+                phone = venue.phone_numbers[0] if venue.phone_numbers else None
                 values = {
                     'goods': dict_items['items'],
                     'total': total,
+                    'mastercard': response_json['payment'].get('mastercard', False),
                     'order_number': self.order.key.id(),
                     'date': date.strftime('%d/%m/%Y'),
                     'time': date.strftime('%H:%M'),
                     'address': venue.description,
-                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:])
+                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:]) if phone else None
                     if phone else '',
-                    'pan': '**** 8394'
+                    'pan': '**** %s' % response_json['payment'].get('card_pan', ''),
+                    'owner': '123',
+                    'inn': '12312312312312',
+                    'manager': u'Анна Милянская'
                 }
                 html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', **values)
-                send_email(config.EMAILS.get('receipt'), 'dvpermyakov@edu.hse.ru', 'Чек заказа в кофейне Дабдби', html_body)
+                send_email(config.EMAILS.get('receipt'), 'dvpermyakov1@gmail.com', 'Чек заказа в кофейне Дабдби', html_body)
                 return
 
             ua = self.request.headers['User-Agent']

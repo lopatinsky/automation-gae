@@ -54,11 +54,15 @@
                 <tr style="font-size:16px">
                     <td>
                         <div style="display:table">
-                            <div style="display:table-cell; width:20%;">
-                                <img src="http://empatika-doubleb.appspot.com/static/mastercard.png">
+                            <div style="vertical-align:middle; display:table-cell; width:20%;">
+                                {% if mastercard %}
+                                    <img src="http://p.empatika-doubleb.appspot.com/static/mastercard.png" width="64" height="39">
+                                {% else %}
+                                    <img src="http://p.empatika-doubleb.appspot.com/static/visa.png" width="69" height="23">
+                                {% endif %}
                             </div>
-                            <div style="vertical-align: middle; display:table-cell; width:80%;">
-                                <h3>{{ pan }}</h3>
+                            <div style="vertical-align:middle; display:table-cell; width:80%;">
+                                <h3>{{ pan if pan else '' }}</h3>
                             </div>
                         </div>
                     </td>
@@ -72,26 +76,29 @@
         <div style="width:40%; vertical-align:top; display:table-cell; padding:10px 20px;">
             <table style="width:100%; border:1px groove #98EAFF;" align="center" valign="center">
                 <tr>
-                    <td><img src="http://p-test.empatika-doubleb-test.appspot.com/static/map.png"></td>
+                    <td><img src="http://p.empatika-doubleb.appspot.com/static/map.png" width="46" height="54"></td>
                     <td>
                         <p><b>Кафе Даблби</b></p>
                         <p>{{ address }}</p>
-                        <p>{{ phone }}</p>
+                        <p>{{ phone if phone else '' }}</p>
                     </td>
                 </tr>
-                <tr><td colspan="2" style="text-align:center">Анна Милянская</td></tr>
+                <tr><td colspan="2" style="text-align:center">{{ manager }}</td></tr>
             </table>
         </div>
 
     </div>
 
-    <table bgcolor="#CCCCB2" style="width:100%; padding: 5px;">
-        <footer>
-            <div><h3>Название компании</h3></div>
-            <div><h3>ИНН</h3></div>
-        </footer>
+    <table bgcolor="#CCCCB2" style="width:100%; padding: 5px; background:#CCCCB2">
+        <tr>
+            <td>
+                <div>
+                    <h3>{{ owner }}</h3>
+                    <h3>ИНН {{ inn }}</h3>
+                </div>
+            </td>
+        </tr>
     </table>
-
 
 </body>
 </html>
