@@ -65,6 +65,8 @@ class ProductionConfig(DoubleBConfig):
 
     DEBUG = False
 
+    BRANCH_IO_TAG = 'production'
+
     EMAILS = {
         "server": "admins",
         "order": "admins",
@@ -100,6 +102,7 @@ class TestingConfig(DoubleBConfig):
     }
 
     DEBUG = True
+    BRANCH_IO_TAG = 'test'
 
     EMAILS = {
         "receipt": "dvpermyakov1@gmail.com"
