@@ -4,7 +4,7 @@ from datetime import datetime
 from config import config
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
-    CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue
+    CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue, CREATING_ORDER
 from methods.excel import send_excel_file
 
 
@@ -12,7 +12,8 @@ _STATUS_STRINGS = {
     NEW_ORDER: u"Новый",
     READY_ORDER: u"Выдан",
     CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
-    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста"
+    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
+    CREATING_ORDER: u'СОзданный заказ'
 }
 
 _PAYMENT_TYPE_STRINGS = {
@@ -53,7 +54,7 @@ def _order_data(order):
     return dct
 
 
-def get(venue_id, chosen_year, chosen_month, chosen_day):
+def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     if not venue_id:
         venue_id = 0
         chosen_year = datetime.now().year
@@ -74,8 +75,16 @@ def get(venue_id, chosen_year, chosen_month, chosen_day):
     if not chosen_month:
         chosen_day = 0
 
-    start = suitable_date(chosen_day, chosen_month, chosen_year, True)
-    end = suitable_date(chosen_day, chosen_month, chosen_year, False)
+    if chosen_day:
+        start = suitable_date(chosen_day, chosen_month, chosen_year, True)
+        end = suitable_date(chosen_day, chosen_month, chosen_year, False)
+    else:
+        chosen_days = [int(day) for day in chosen_days]
+        min_day = min(chosen_days)
+        max_day = max(chosen_days)
+        start = suitable_date(min_day, chosen_month, chosen_year, True)
+        end = suitable_date(max_day, chosen_month, chosen_year, False)
+
     query = Order.query(Order.date_created >= start, Order.date_created <= end)
     if venue_id:
         query = query.filter(Order.venue_id == venue_id)

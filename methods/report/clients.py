@@ -40,10 +40,17 @@ class ReportedClient:
         self.average_order_cost = (self.menu_sum + self.cancel_sum) / self.amount_orders
 
 
-def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
+def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chosen_days=None):
     clients = {}
-    query = Order.query(Order.date_created >= suitable_date(chosen_day, chosen_month, chosen_year, True))
-    query = query.filter(Order.date_created <= suitable_date(chosen_day, chosen_month, chosen_year, False))
+    if chosen_days:
+        chosen_days = [int(day) for day in chosen_days]
+        min_day = min(chosen_days)
+        max_day = max(chosen_days)
+        query = Order.query(Order.date_created >= suitable_date(min_day, chosen_month, chosen_year, True))
+        query = query.filter(Order.date_created <= suitable_date(max_day, chosen_month, chosen_year, False))
+    else:
+        query = Order.query(Order.date_created >= suitable_date(chosen_day, chosen_month, chosen_year, True))
+        query = query.filter(Order.date_created <= suitable_date(chosen_day, chosen_month, chosen_year, False))
     if venue_id != 0:
         query = query.filter(Order.venue_id == venue_id)
     query = query.filter(ndb.OR(Order.status == READY_ORDER,
@@ -70,7 +77,7 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0):
         sum(client.cancel_sum for client in clients.values())
 
 
-def get(venue_id, chosen_year, chosen_month, chosen_day):
+def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     if not venue_id:
         venue_id = 0
         chosen_year = datetime.now().year
@@ -91,8 +98,12 @@ def get(venue_id, chosen_year, chosen_month, chosen_day):
     if not chosen_month:
         chosen_day = 0
 
-    clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
-        clients_table(chosen_year, chosen_month, chosen_day, venue_id)
+    if not chosen_days:
+        clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
+            clients_table(chosen_year, chosen_month, chosen_day, venue_id)
+    else:
+        clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
+            clients_table(chosen_year, chosen_month, chosen_day, venue_id, chosen_days)
     chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
     values = {
         'venues': Venue.query().fetch(),

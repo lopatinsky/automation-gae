@@ -32,7 +32,9 @@ class ReportHandler(BaseHandler):
 
 class ClientsReportHandler(BaseHandler):
     def get(self):
-        html_values = clients.get(**get_standart_params(self.request))
+        html_values = clients.get(**get_standart_params(self.request, {
+            'chosen_days': self.request.get_all('selected_day')
+        }, delete_params=['chosen_day']))
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'clients', 'reported_clients.html', **html_values)
         else:
@@ -68,7 +70,9 @@ class VenuesReportWithDatesHandler(BaseHandler):
 
 class OrdersReportHandler(BaseHandler):
     def get(self):
-        html_values = orders.get(**get_standart_params(self.request))
+        html_values = orders.get(**get_standart_params(self.request, {
+            'chosen_days': self.request.get_all('selected_day'),
+        }, delete_params=['chosen_day']))
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'oders', 'reported_orders.html', **html_values)
         else:
