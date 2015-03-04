@@ -8,7 +8,7 @@ from config import config
 from methods import push, alfa_bank, empatika_promos
 from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
-    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE
+    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup
 
 
 def format_order(order):
@@ -92,6 +92,14 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
+
+        client = Client.get_by_id(order.client_id)
+        if not client:
+            logging.error('Has not client %s' % order.client_id)
+        else:
+            free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
+            if free_cup.status == SharedFreeCup.ACTIVE:
+                free_cup.activate_cup()
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success

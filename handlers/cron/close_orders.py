@@ -3,7 +3,7 @@ import logging
 import datetime
 from handlers.api.base import ApiHandler
 from methods import alfa_bank, email, empatika_promos
-from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE
+from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, Client, SharedFreeCup
 
 
 class CloseOpenedOrdersHandler(ApiHandler):
@@ -27,5 +27,14 @@ class CloseOpenedOrdersHandler(ApiHandler):
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
             order.status = READY_ORDER
+
+            client = Client.get_by_id(order.client_id)
+            if not client:
+                logging.error('Has not client %s' % order.client_id)
+            else:
+                free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
+                if free_cup.status == SharedFreeCup.ACTIVE:
+                    free_cup.activate_cup()
+
             order.actual_delivery_time = datetime.datetime.utcnow()
             order.put()

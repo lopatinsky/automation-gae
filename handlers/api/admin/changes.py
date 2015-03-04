@@ -7,7 +7,7 @@ from methods import push, alfa_bank, empatika_promos
 from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
-    NEW_ORDER
+    NEW_ORDER, SharedFreeCup
 
 __author__ = 'ilyazorin'
 
@@ -67,6 +67,14 @@ class DoneOrderHandler(AdminApiHandler):
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
+
+        client = Client.get_by_id(order.client_id)
+        if not client:
+            logging.error('Has not client %s' % order.client_id)
+        else:
+            free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
+            if free_cup.status == SharedFreeCup.ACTIVE:
+                free_cup.activate_cup()
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success
