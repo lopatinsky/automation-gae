@@ -102,12 +102,11 @@ app = WSGIApplication([
         Route('/update/promo', api.UpdateOrderPromos),
         PathPrefixRoute('/shared', [
             Route('/info', api.GetSharedInfo),
-            Route('/send_branch_io_info', api.PutBranchIoInfoHandler),
             PathPrefixRoute('/invitation', [
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),
             PathPrefixRoute('/gift', [
-                Route('/get_url', api)
+                Route('/get_url', api.GetGiftUrlHandler),
             ]),
         ]),
     ]),

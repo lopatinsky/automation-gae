@@ -1,7 +1,9 @@
 import logging
 from config import config
 from handlers.api.base import ApiHandler
-from models import MenuCategory, Client, STATUS_AVAILABLE
+from models import MenuCategory, Client, STATUS_AVAILABLE, Share, SharedFreeCup, SharedGift
+from methods import empatika_promos
+import json
 
 __author__ = 'ilyazorin'
 
@@ -18,6 +20,11 @@ class MenuHandler(ApiHandler):
 
     def get(self):
         client_id = self.request.get_range('client_id')
+        if not client_id:
+            first_enter = True
+        else:
+            first_enter = False
+
         device_phone = "".join(c for c in self.request.get('device_phone') if '0' <= c <= '9')
         categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
         result_dict = {}
@@ -56,4 +63,24 @@ class MenuHandler(ApiHandler):
         response['client_name'] = client_name
         response['client_email'] = client.email or ''
         response['demo'] = config.CARD_BINDING_REQUIRED
+
+        share_date = self.request.get('share_data')
+
+        if share_date:
+            share_date = json.loads(share_date)
+            share_id = share_date.get('share_id')
+            if share_id:
+                share = Share.get_by_id(share_id)
+                if not share:
+                    self.abort(400)
+                if share.share_type == Share.INVITATION:
+                    if first_enter:
+                        SharedFreeCup(sender=share.sender, recipient=client.key).put()
+                elif share.share_type == Share.GIFT:
+                    if share.status == Share.ACTIVE:
+                        gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
+                        if not gift:
+                            self.abort(400)
+                        gift.activate_cup(client)
+
         self.render_json(response)

@@ -4,8 +4,9 @@ import random
 __author__ = 'dvpermyakov'
 
 from base import ApiHandler
-from methods import branch_io, alfa_bank, twilio
-from models import Share, Client, SharedFreeCup, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE
+from methods import branch_io, alfa_bank
+from models import Share, Client, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, Order, SharedGift
+import logging
 
 
 TEXTS = [
@@ -17,6 +18,18 @@ TEXTS = [
           u"в подарок"),
 ]
 random.seed()
+
+
+def get_general_shared_dict():
+    text_id, text = random.choice(TEXTS)
+    return {
+        'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image.png',
+        'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/facebook_shared_image.png',
+        'text_share_new_order': text,
+        'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
+        'screen_title': text,
+        'screen_text': 'Расскажи друзьям, если тебе нравится приложение Даблби.'
+    }
 
 
 class GetSharedInfo(ApiHandler):
@@ -42,25 +55,6 @@ class GetSharedInfo(ApiHandler):
         })
 
 
-class PutBranchIoInfoHandler(ApiHandler):
-    def post(self):
-        client_id = self.request.get_range('client_id')
-        client = Client.get_by_id(client_id)
-        if not client:
-            self.abort(400)
-        share_id = self.request.get_range('share_id')
-        share = Share.get_by_id(share_id)
-        if not share:
-            self.abort(400)
-        if share.share_type == branch_io.INVITATION:
-            SharedFreeCup(sender=share.sender, recipient=client.key).put()
-            self.render_json({})
-        elif share.share_type == branch_io.GIFT:
-            pass
-        else:
-            pass
-
-
 class GetInvitationUrlHandler(ApiHandler):
     def get(self):
         client_id = self.request.get_range('client_id')
@@ -68,35 +62,59 @@ class GetInvitationUrlHandler(ApiHandler):
         if not client:
             self.abort(400)
         channel = self.request.get_range('channel')
-        if channel not in [branch_io.VK, branch_io.FACEBOOK, branch_io.SMS, branch_io.EMAIL, branch_io.OTHER]:
+        if channel not in branch_io.CHANNELS:
             self.abort(400)
         share = Share(share_type=branch_io.INVITATION, sender=client.key)
         share.put()
-        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel)
+        if 'iOS' in self.request.headers["User-Agent"]:
+            user_agent = 'ios'
+        elif 'Android' in self.request.headers["User-Agent"]:
+            user_agent = 'android'
+        else:
+            user_agent = 'unknown'
+        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent)
+        share.url = url
+        share.put()
 
-        self.render_json({
-            'url': url
-        })
+        values = get_general_shared_dict()
+        values['url'] = url
+
+        self.render_json(values)
 
 
 class GetGiftUrlHandler(ApiHandler):
-    FIX_GIFT_SUM = 300
+    FIX_GIFT_SUM = 350
 
     def send_error(self, error):
+        logging.info(error)
+
         self.response.set_status(400)
         self.render_json({
-            'error': True,
+            'success': False,
             'description': error
         })
 
-    def success(self, sender, phone, channel):
+    def success(self, sender, channel, gift, name=None, phone=None):
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
-        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel)
-        #twilio.send_sms([phone], u'Получай свою кружку в подарок %s' % url)
+        if 'iOS' in self.request.headers["User-Agent"]:
+            user_agent = 'ios'
+        elif 'Android' in self.request.headers["User-Agent"]:
+            user_agent = 'android'
+        else:
+            user_agent = 'unknown'
+        recipient = {
+            'name': name,
+            'phone': phone
+        }
+        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent, recipient=recipient)
+        share.url = url
+        share.put()
+        gift.share_id = share.key.id()
+        gift.put()
         self.render_json({
             'success': True,
-            'url': url
+            'text': u' Ссылка для скачивания'
         })
 
     def post(self):
@@ -105,28 +123,31 @@ class GetGiftUrlHandler(ApiHandler):
         if not client:
             self.abort(400)
         recipient_phone = self.request.get('recipient_phone')
+        recipient_name = self.request.get('recipient_name')
         channel = self.request.get_range('channel')
         if channel not in [branch_io.VK, branch_io.FACEBOOK, branch_io.SMS, branch_io.EMAIL, branch_io.OTHER]:
             self.abort(400)
-        order_id = self.request.get_range('order_id')
-        payment_type_id = self.request.get('payment_type_id')
-        payment_type = PaymentType.get_by_id(payment_type_id)
+        payment_type_id = self.request.get_range('payment_type_id')
+        payment_type = PaymentType.get_by_id(str(payment_type_id))
         if payment_type.status == STATUS_AVAILABLE:
             if payment_type_id == CARD_PAYMENT_TYPE:
                 alpha_client_id = self.request.get('alpha_client_id')
                 binding_id = self.request.get('binding_id')
-                return_url = self.request.get('return_utl')
-                mastercard = self.request.get('mastercard')
+                return_url = self.request.get('return_url')
 
-                success, error = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
+                order_id = Order.generate_id()  # TODO: Миша, is it valid?
+                success, result = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
                 if success:
-                    success, error = alfa_bank.hold_and_check(payment_type_id, binding_id)
+                    success, error = alfa_bank.hold_and_check(result, binding_id)
+                else:
+                    error = result
                 if not success:
                     self.send_error(error)
                 else:
-                    self.success(client, recipient_phone, channel)
-
-            elif payment_type_id == BONUS_PAYMENT_TYPE:
-                pass
+                    gift = SharedGift(client_id=client_id, total_sum=self.FIX_GIFT_SUM, order_id=order_id,
+                                      payment_type_id=payment_type_id, payment_id=result)
+                    self.success(client, channel, gift=gift, name=recipient_name, phone=recipient_phone)
+            else:
+                self.send_error(u'Возможна оплата только картой')
         else:
             self.send_error(u'Данный вид оплаты недоступен')
