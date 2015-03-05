@@ -174,8 +174,7 @@ class OrderHandler(ApiHandler):
                     'manager': u'Анна Милянская'
                 }
                 html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', **values)
-                send_email(config.EMAILS.get('receipt'), 'dvpermyakov1@gmail.com', 'Чек заказа в кофейне Дабдби', html_body)
-                return
+                send_email(config.EMAILS.get('receipt'), client.email, 'Заказ в кофейне Дабдби', html_body)
 
             ua = self.request.headers['User-Agent']
             if not ('DoubleBRedirect' in ua
