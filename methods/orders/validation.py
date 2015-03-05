@@ -182,6 +182,11 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                     item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
                     item_dict['price'] -= 50
                     item_dict['revenue'] -= 50
+                elif item_dict['item'].price == 200 and item_dict['item'].key.id() == 10:  # cappucino in new menu
+                    item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
+                    item_dict['price'] -= 100
+                    item_dict['revenue'] -= 100
+
 
 
 def _apply_venue_discounts(item_dicts, promos_info, venue):
