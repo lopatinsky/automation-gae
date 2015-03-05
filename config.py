@@ -24,6 +24,20 @@ class ProductionConfig(DoubleBConfig):
     PROMOS_API_KEY = "NTY1OTMxMzU4NjU2OTIxNgVhFXVOYTAN9r_AM_Jrg-nwDwOj"
     FREE_COFFEE_PROMO_ID = 5634472569470976
 
+    OLD_MENU_VENUES = [
+        4661077019197440,  # tkachi
+        4851681627996160,  # lefort
+        5083289484263424,  # million
+        5093108584808448,  # omega
+        5224026972618752,  # alkon
+        5313962648272896,  # kronv
+        5364764460974080,  # krivok
+        5547219436437504,  # etazhi
+        5682617542246400,  # noev
+        6110169389858816,  # setun
+        6490664367816704,  # monarch
+    ]
+
     CITY_HAPPY_HOURS = {
         4801814507552768: {  # ftower
             "days": "12345",
@@ -56,10 +70,6 @@ class ProductionConfig(DoubleBConfig):
     }
     SPECIALS = {
         37: [  # grapefruit tea
-            1,  # mil
-            5660980839186432,  # dmitr
-            5786976926040064,  # tvyamsk
-            5083289484263424,  # million
         ],
     }
 
@@ -84,6 +94,9 @@ class TestingConfig(DoubleBConfig):
 
     PROMOS_API_KEY = "NTcxOTIzODA0NDAyNDgzMjEGJ9yK_bldMcuo0k-zMH3xktB4"
     FREE_COFFEE_PROMO_ID = 5678701068943360
+
+    OLD_MENU_VENUES = [
+    ]
 
     CITY_HAPPY_HOURS = {
         5629499534213120: {

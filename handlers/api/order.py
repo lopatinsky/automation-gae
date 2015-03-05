@@ -1,6 +1,5 @@
 # coding:utf-8
 import logging
-from google.appengine.ext.db import BadRequestError
 from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 from config import config
@@ -8,7 +7,7 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders
+from methods import alfa_bank, empatika_promos, orders, versions
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
@@ -101,7 +100,8 @@ class OrderHandler(ApiHandler):
                     return
 
             validation_result = validate_order(client, response_json['items'], response_json['payment'],
-                                               venue, delivery_time_minutes, get_promo_support(self.request), True)
+                                               venue, delivery_time_minutes, get_promo_support(self.request),
+                                               versions.supports_new_menu(self.request), True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -176,11 +176,7 @@ class OrderHandler(ApiHandler):
                 html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', **values)
                 send_email(config.EMAILS.get('receipt'), client.email, 'Заказ в кофейне Дабдби', html_body)
 
-            ua = self.request.headers['User-Agent']
-            if not ('DoubleBRedirect' in ua
-                    or '/1.0' in ua
-                    or '/1.1' in ua
-                    or (('/1.2' in ua or '/1.3 ' in ua) and 'Android' in ua)):
+            if versions.supports_check_order_success(self.request):
                 taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                               countdown=SECONDS_WAITING_BEFORE_SMS)
 
@@ -303,5 +299,6 @@ class CheckOrderHandler(ApiHandler):
         delivery_time = self.request.get_range('delivery_time')
         items = json.loads(self.request.get('items'))
 
-        result = orders.validate_order(client, items, payment_info, venue, delivery_time)
+        result = orders.validate_order(client, items, payment_info, venue, delivery_time,
+                                       supports_new_menu=versions.supports_new_menu(self.request))
         self.render_json(result)

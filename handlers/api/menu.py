@@ -1,8 +1,8 @@
 import logging
 from config import config
 from handlers.api.base import ApiHandler
-from models import MenuCategory, Client, STATUS_AVAILABLE, Share, SharedFreeCup, SharedGift
-from methods import empatika_promos
+from models import MenuCategory, Client, STATUS_AVAILABLE, Share, SharedFreeCup, SharedGift, IOS_DEVICE, ANDROID_DEVICE
+from methods import empatika_promos, versions
 import json
 
 __author__ = 'ilyazorin'
@@ -25,11 +25,13 @@ class MenuHandler(ApiHandler):
         else:
             first_enter = False
 
+        old_version = not versions.supports_new_menu(self.request)
+
         device_phone = "".join(c for c in self.request.get('device_phone') if '0' <= c <= '9')
         categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
         result_dict = {}
         for category in categories:
-            result_dict.update(category.dict())
+            result_dict.update(category.dict(old_version))
         response = {'menu': result_dict}
 
         # fuckup iOS 1.1

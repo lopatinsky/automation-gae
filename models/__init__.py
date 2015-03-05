@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from collections import Counter
 import datetime
 from google.appengine.ext import ndb
@@ -42,12 +44,21 @@ class MenuItem(ndb.Model):
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
 
-    def dict(self):
+    @property
+    def price_for_old_version(self):
+        if self.price >= 300:
+            return 300
+        elif self.price >= 250:
+            return 250
+        else:
+            return 150
+
+    def dict(self, for_old_version):
         dct = {
             'id': str(self.key.id()),
             'title': self.title,
             'description': self.description,
-            'price': self.price,
+            'price': self.price_for_old_version if for_old_version else self.price,
             'kal': self.kal,
             'pic': self.picture
         }
@@ -60,8 +71,8 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    def dict(self):
-        return {self.title: [menu_item.get().dict() for menu_item in self.menu_items
+    def dict(self, for_old_version):
+        return {self.title: [menu_item.get().dict(for_old_version) for menu_item in self.menu_items
                              if menu_item.get().status == STATUS_AVAILABLE]}
 
 
