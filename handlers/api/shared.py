@@ -72,12 +72,15 @@ class GetInvitationUrlHandler(ApiHandler):
             user_agent = 'android'
         else:
             user_agent = 'unknown'
-        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent)
-        share.url = url
+        urls = [{
+            'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent),
+            'channel': channel
+        } for channel in branch_io.CHANNELS]
+        share.urls = [url['url'] for url in urls]
         share.put()
 
         values = get_general_shared_dict()
-        values['url'] = url
+        values['urls'] = urls
 
         self.render_json(values)
 
@@ -94,7 +97,7 @@ class GetGiftUrlHandler(ApiHandler):
             'description': error
         })
 
-    def success(self, sender, channel, gift, name=None, phone=None):
+    def success(self, sender, gift, name=None, phone=None):
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -107,14 +110,17 @@ class GetGiftUrlHandler(ApiHandler):
             'name': name,
             'phone': phone
         }
-        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent, recipient=recipient)
-        share.url = url
+        url = branch_io.create_url(share.key.id(), branch_io.INVITATION, branch_io.SMS, user_agent, recipient=recipient)
+        share.urls = [url]
         share.put()
         gift.share_id = share.key.id()
         gift.put()
         self.render_json({
             'success': True,
-            'text': u' Ссылка для скачивания'
+            'text': (u'%s %s подарил вам кружку кофе. '
+                     u'Получить ее вы сможете, пройдя по %s и установив приложение сети кофеен Даблби. '
+                     u'Закажите любой напиток, расплатитесь подарочной кружкой и насладитесь отличным кофе.'
+                     % (sender.name, sender.surname, url))
         })
 
     def post(self):
@@ -124,9 +130,6 @@ class GetGiftUrlHandler(ApiHandler):
             self.abort(400)
         recipient_phone = self.request.get('recipient_phone')
         recipient_name = self.request.get('recipient_name')
-        channel = self.request.get_range('channel')
-        if channel not in [branch_io.VK, branch_io.FACEBOOK, branch_io.SMS, branch_io.EMAIL, branch_io.OTHER]:
-            self.abort(400)
         payment_type_id = self.request.get_range('payment_type_id')
         payment_type = PaymentType.get_by_id(str(payment_type_id))
         if payment_type.status == STATUS_AVAILABLE:
@@ -146,7 +149,7 @@ class GetGiftUrlHandler(ApiHandler):
                 else:
                     gift = SharedGift(client_id=client_id, total_sum=self.FIX_GIFT_SUM, order_id=order_id,
                                       payment_type_id=payment_type_id, payment_id=result)
-                    self.success(client, channel, gift=gift, name=recipient_name, phone=recipient_phone)
+                    self.success(client, gift=gift, name=recipient_name, phone=recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')
         else:

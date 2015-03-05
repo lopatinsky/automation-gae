@@ -398,7 +398,7 @@ class Share(ndb.Model):
     sender = ndb.KeyProperty(required=True, kind=Client)
     share_type = ndb.IntegerProperty(required=True, choices=[SHARE, INVITATION, GIFT])
     status = ndb.IntegerProperty(default=ACTIVE)
-    url = ndb.StringProperty()
+    urls = ndb.StringProperty(repeated=True)
 
     def deactivate(self):
         self.status = self.INACTIVE
