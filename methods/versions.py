@@ -17,3 +17,8 @@ def get_platform_and_version(request):
         return ANDROID_DEVICE, version
     else:
         return None, version
+
+
+def supports_new_menu(request):
+    platform, version = get_platform_and_version(request)
+    return platform != IOS_DEVICE

@@ -56,6 +56,45 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
+def _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info):
+    logging.info("supports_new_menu: %s" % supports_new_menu)
+
+    prices = {}
+    for item_dict in item_dicts:
+        item = item_dict['item']
+        prices[item.key.id()] = (item.price, item.price_for_old_version)
+
+    if venue:
+        if venue.key.id() in config.OLD_MENU_VENUES:
+            for item_dict in item_dicts:
+                item = item_dict['item']
+                original_price, show_price = prices[item.key.id()]
+                if original_price != show_price:
+                    item.price = show_price  # for proper happy hours and other promos
+                    item_dict['price'] = show_price
+                    if supports_new_menu:
+                        item_dict['promos'].append("old_menu")
+
+            if supports_new_menu:
+                promos_info.append({
+                    "id": "old_menu",
+                    "text": u"В кофейне %s действует старое меню" % venue.title
+                })
+
+        else:
+            if not supports_new_menu:
+                for item_dict in item_dicts:
+                    item = item_dict['item']
+                    original_price, show_price = prices[item.key.id()]
+                    if original_price != show_price:
+                        item_dict['promos'].append("new_menu")
+
+                promos_info.append({
+                    "id": "new_menu",
+                    "text": u"Новое меню в Даблби"
+                })
+
+
 def _check_venue(venue, delivery_time, errors):
     if venue:
         if not venue.active:
@@ -82,8 +121,8 @@ def _check_stop_lists(item_dicts, venue, errors):
                 item_dict['errors'].append(u"Тест стоп-листов " * 9)
                 titles.append(item_dict['item'].title)
 
-    if venue and venue.key.id() in config.STOP_LISTS:
-        ids = config.STOP_LISTS[venue.key.id()]
+    if venue:
+        ids = config.STOP_LISTS.get(venue.key.id(), []) + [37]  # TODO hack for new menu
         for item_dict in item_dicts:
             if item_dict['item'].key.id() in ids:
                 item_dict['errors'].append(u"Напиток недоступен в этой кофейне")
@@ -190,7 +229,7 @@ def _group_item_dicts(item_dicts):
 
 
 def validate_order(client, items, payment_info, venue, delivery_time, support_level=PROMO_SUPPORT_FULL,
-                   with_details=False):
+                   supports_new_menu=True, with_details=False):
     item_dicts = []
     for item in items:
         item_id = item.get("id") or item["item_id"]
@@ -208,9 +247,12 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     valid = True
     promos_info = []
 
-    valid = valid and _check_venue(venue, delivery_time, errors)
+    if client.key.id() not in (202076, 201001):
+        valid = valid and _check_venue(venue, delivery_time, errors)
 
     valid = valid and _check_stop_lists(item_dicts, venue, errors)
+
+    _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info)
 
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
