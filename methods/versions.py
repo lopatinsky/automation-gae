@@ -22,3 +22,13 @@ def get_platform_and_version(request):
 def supports_new_menu(request):
     platform, version = get_platform_and_version(request)
     return platform != IOS_DEVICE
+
+
+def supports_check_order_success(request):
+    platform, version = get_platform_and_version(request)
+    if platform == IOS_DEVICE:
+        return version >= 10200
+    elif platform == ANDROID_DEVICE:
+        return version > 10300
+    else:
+        return False
