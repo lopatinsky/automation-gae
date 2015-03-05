@@ -19,10 +19,12 @@ _FUCKUP_CLIENTS_MAP = {
 class MenuHandler(ApiHandler):
 
     def get(self):
-        client_id = self.request.get_range('client_id')
+
+        client_id = self.request.get('client_id')
         if not client_id:
             first_enter = True
         else:
+            client_id = int(client_id)
             first_enter = False
 
         old_version = not versions.supports_new_menu(self.request)
@@ -77,7 +79,7 @@ class MenuHandler(ApiHandler):
                     self.abort(400)
                 if share.share_type == Share.INVITATION:
                     if first_enter:
-                        SharedFreeCup(sender=share.sender, recipient=client.key).put()
+                        SharedFreeCup(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
                 elif share.share_type == Share.GIFT:
                     if share.status == Share.ACTIVE:
                         gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
@@ -85,5 +87,7 @@ class MenuHandler(ApiHandler):
                             self.abort(400)
                         if gift.status == SharedGift.READY:
                             gift.deactivate_cup(client)
+                        response['branch_name'] = share_date.get('name')
+                        response['branch_phone'] = share_date.get('phone')
 
         self.render_json(response)

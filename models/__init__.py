@@ -90,6 +90,10 @@ class Venue(ndb.Model):
     takeout_only = ndb.BooleanProperty(indexed=False, default=False)
     active = ndb.BooleanProperty(required=True, default=False)
 
+    owner = ndb.StringProperty()
+    inn = ndb.StringProperty()
+    manager = ndb.StringProperty()
+
     def dict(self, user_location=None):
         distance = 0
         if user_location:
@@ -397,6 +401,7 @@ class Share(ndb.Model):
 
     sender = ndb.KeyProperty(required=True, kind=Client)
     share_type = ndb.IntegerProperty(required=True, choices=[SHARE, INVITATION, GIFT])
+    created = ndb.DateTimeProperty(auto_now_add=True)
     status = ndb.IntegerProperty(default=ACTIVE)
     urls = ndb.StringProperty(repeated=True)
 
@@ -411,6 +416,8 @@ class SharedFreeCup(ndb.Model):  # free cup is avail after recipient orders smth
 
     sender = ndb.KeyProperty(required=True, kind=Client)
     recipient = ndb.KeyProperty(required=True, kind=Client)
+    share_id = ndb.IntegerProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
     order_id = ndb.IntegerProperty()
 
