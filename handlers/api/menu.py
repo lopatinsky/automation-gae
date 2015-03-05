@@ -83,6 +83,7 @@ class MenuHandler(ApiHandler):
                         gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
                         if not gift:
                             self.abort(400)
-                        gift.activate_cup(client)
+                        if gift.status == SharedGift.READY:
+                            gift.deactivate_cup(client)
 
         self.render_json(response)

@@ -33,8 +33,8 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 logging.error('Has not client %s' % order.client_id)
             else:
                 free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
-                if free_cup.status == SharedFreeCup.ACTIVE:
-                    free_cup.activate_cup()
+                if free_cup and free_cup.status == SharedFreeCup.READY:
+                    free_cup.deactivate_cup()
 
             order.actual_delivery_time = datetime.datetime.utcnow()
             order.put()

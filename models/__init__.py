@@ -406,23 +406,26 @@ class Share(ndb.Model):
 
 
 class SharedFreeCup(ndb.Model):  # free cup is avail after recipient orders smth and should be deleted after that
-    ACTIVE = 0
-    INACTIVE = 1
+    READY = 0
+    DONE = 1
 
     sender = ndb.KeyProperty(required=True, kind=Client)
     recipient = ndb.KeyProperty(required=True, kind=Client)
-    status = ndb.IntegerProperty(choices=[ACTIVE, INACTIVE], default=INACTIVE)
+    status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
     order_id = ndb.IntegerProperty()
 
-    def activate_cup(self):
+    def deactivate_cup(self):
         order_id = Order.generate_id()  # TODO: Миша, is it valid?
         register_order(user_id=self.sender.id(), points=config.POINTS_PER_CUP, order_id=order_id)
         self.order_id = order_id
-        self.status = self.ACTIVE
+        self.status = self.DONE
         self.put()
 
 
 class SharedGift(ndb.Model):
+    READY = 0
+    DONE = 1
+
     created = ndb.DateTimeProperty(auto_now_add=True)
     share_id = ndb.IntegerProperty(required=True)
     client_id = ndb.IntegerProperty(required=True)  # Who pays for cup
@@ -431,9 +434,12 @@ class SharedGift(ndb.Model):
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
                                                                   BONUS_PAYMENT_TYPE))
     payment_id = ndb.StringProperty(required=True)
+    status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
-    def activate_cup(self, client):
+    def deactivate_cup(self, client):
         register_order(user_id=client.key.id(), points=config.POINTS_PER_CUP,
                        order_id=self.order_id)
-        self.status = Share.INACTIVE
+        share = Share.get_by_id(self.share_id)
+        share.deactivate()
+        self.status = self.DONE
         self.put()
