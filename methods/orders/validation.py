@@ -252,8 +252,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     valid = True
     promos_info = []
 
-    if client.key.id() not in (202076, 201001):
-        valid = valid and _check_venue(venue, delivery_time, errors)
+    valid = valid and _check_venue(venue, delivery_time, errors)
 
     valid = valid and _check_stop_lists(item_dicts, venue, errors)
 

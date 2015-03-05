@@ -21,7 +21,7 @@ def get_platform_and_version(request):
 
 def supports_new_menu(request):
     platform, version = get_platform_and_version(request)
-    return platform != IOS_DEVICE
+    return not (platform == IOS_DEVICE and version < 10301)
 
 
 def supports_check_order_success(request):
