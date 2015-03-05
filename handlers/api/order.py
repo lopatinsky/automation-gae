@@ -166,8 +166,7 @@ class OrderHandler(ApiHandler):
                     'date': date.strftime('%d/%m/%Y'),
                     'time': date.strftime('%H:%M'),
                     'address': venue.description,
-                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:]) if phone else None
-                    if phone else '',
+                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:]) if phone else None,
                     'pan': '**** %s' % response_json['payment'].get('card_pan', ''),
                     'owner': '123',
                     'inn': '12312312312312',
