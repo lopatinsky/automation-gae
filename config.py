@@ -68,9 +68,21 @@ class ProductionConfig(DoubleBConfig):
     STOP_LISTS = {
         5093108584808448: [15, 26, 27], # omega
     }
+
+    MAIN_VENUES = [
+        1,  # mil
+        4801814507552768,  # ftower
+        5656058538229760,  # gstolic
+        5660980839186432,  # dmitr
+        5786976926040064,  # tvyamsk
+        6209189391106048,  # ilikewine
+    ]
     SPECIALS = {
         37: [  # grapefruit tea
         ],
+        38: MAIN_VENUES,
+        39: MAIN_VENUES,
+        40: MAIN_VENUES,
     }
 
     DEBUG = False
