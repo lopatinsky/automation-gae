@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 import datetime
+from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
 from methods import alfa_bank, email, empatika_promos
 from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, Client, SharedFreeCup
@@ -28,13 +29,11 @@ class CloseOpenedOrdersHandler(ApiHandler):
                         logging.exception(e)
             order.status = READY_ORDER
 
-            client = Client.get_by_id(order.client_id)
-            if not client:
-                logging.error('Has not client %s' % order.client_id)
-            else:
-                free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
-                if free_cup and free_cup.status == SharedFreeCup.READY:
-                    free_cup.deactivate_cup()
+            client_key = ndb.Key(Client, order.client_id)
+            free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
+                                           SharedFreeCup.status == SharedFreeCup.READY).get()
+            if free_cup:
+                free_cup.deactivate_cup()
 
             order.actual_delivery_time = datetime.datetime.utcnow()
             order.put()

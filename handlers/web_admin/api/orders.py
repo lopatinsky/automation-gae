@@ -3,6 +3,7 @@
 from collections import Counter
 import datetime
 import logging
+from google.appengine.ext import ndb
 from .base import WebAdminApiHandler
 from config import config
 from methods import push, alfa_bank, empatika_promos
@@ -93,13 +94,11 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
 
-        client = Client.get_by_id(order.client_id)
-        if not client:
-            logging.error('Has not client %s' % order.client_id)
-        else:
-            free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client.key).get()
-            if free_cup and free_cup.status == SharedFreeCup.READY:
-                free_cup.deactivate_cup()
+        client_key = ndb.Key(Client, order.client_id)
+        free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
+                                       SharedFreeCup.status == SharedFreeCup.READY).get()
+        if free_cup:
+            free_cup.deactivate_cup()
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success

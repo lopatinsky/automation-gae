@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 
 __author__ = 'dvpermyakov'
 
@@ -138,7 +139,7 @@ class GetGiftUrlHandler(ApiHandler):
                 binding_id = self.request.get('binding_id')
                 return_url = self.request.get('return_url')
 
-                order_id = Order.generate_id()  # TODO: Миша, is it valid?
+                order_id = "gift_%s_%s" % (client_id, int(time.time()))
                 success, result = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
                 if success:
                     success, error = alfa_bank.hold_and_check(result, binding_id)
