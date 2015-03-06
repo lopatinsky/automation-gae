@@ -48,7 +48,7 @@ FEATURE_MAP = {
 }
 
 
-def create_url(share_id, feature, channel, user_agent, recipient=None, alias=None):
+def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
     params = {
         'app_id': APP_KEY,
         'data': {
@@ -66,6 +66,9 @@ def create_url(share_id, feature, channel, user_agent, recipient=None, alias=Non
         'feature': FEATURE_MAP[feature],
         'channel': CHANNEL_MAP[channel]
     }
+    if custom_tags:
+        for item in custom_tags.items():
+            params['tags'].append("%s:%s" % item)
     url = '%s%s' % (BASE_URL, '/v1/url')
     response = urlfetch.fetch(url=url, payload=json.dumps(params), method=urlfetch.POST,
                               headers={'Content-Type': 'application/json'}).content
