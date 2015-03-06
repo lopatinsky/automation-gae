@@ -436,7 +436,7 @@ class SharedGift(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)  # Who pays for cup
     recipient_id = ndb.IntegerProperty()
     total_sum = ndb.IntegerProperty(required=True)
-    order_id = ndb.IntegerProperty(required=True)
+    order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
                                                                   BONUS_PAYMENT_TYPE))
     payment_id = ndb.StringProperty(required=True)

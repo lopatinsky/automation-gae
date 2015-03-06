@@ -62,9 +62,6 @@ class GetInvitationUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
-        channel = self.request.get_range('channel')
-        if channel not in branch_io.CHANNELS:
-            self.abort(400)
         share = Share(share_type=branch_io.INVITATION, sender=client.key)
         share.put()
 

@@ -68,7 +68,7 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
     }
     if custom_tags:
         for item in custom_tags.items():
-            params['tags'].append("%s:%s" % item)
+            params['tags'].append("%s__%s" % item)
     url = '%s%s' % (BASE_URL, '/v1/url')
     response = urlfetch.fetch(url=url, payload=json.dumps(params), method=urlfetch.POST,
                               headers={'Content-Type': 'application/json'}).content
