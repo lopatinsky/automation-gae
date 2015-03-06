@@ -285,13 +285,14 @@ class News(ndb.Model):
     created_at = ndb.DateTimeProperty(auto_now_add=True, indexed=False)
 
     def dict(self):
-        return {
+        dct = {
             "id": self.key.id(),
             "text": self.text,
-
-            "image_url": self.image_url,
             "created_at": timestamp(self.created_at)
         }
+        if self.image_url:
+            dct["image_url"] = self.image_url
+        return dct
 
 
 class Admin(models.User):
