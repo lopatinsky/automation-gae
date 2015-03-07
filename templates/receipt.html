@@ -93,8 +93,12 @@
         <tr>
             <td>
                 <div>
-                    <h3>{{ owner }}</h3>
-                    <h3>ИНН {{ inn }}</h3>
+                    {% if owner %}
+                        <h3>{{ owner }}</h3>
+                    {% endif %}
+                    {% if inn %}
+                        <h3>ИНН {{ inn }}</h3>
+                    {% endif %}
                 </div>
             </td>
         </tr>
