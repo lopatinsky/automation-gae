@@ -32,6 +32,17 @@ def get_general_shared_dict():
     }
 
 
+class GetPreText(ApiHandler):
+    def get(self):
+        self.render_json({
+            'head': 'Подари кофе другу',
+            'text': (u'Вы можете подарить напиток своему другу!\n'
+                    u'Для этого введите его имя и телефон.\n'
+                    u'С вашей карты спишется 350 рублей, '
+                    u'которые ваш друг сможет потратить на любой напиток в кофейне Даблби.')
+        })
+
+
 class GetSharedInfo(ApiHandler):
     def get(self):
         text_id, text = random.choice(TEXTS)

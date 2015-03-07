@@ -107,6 +107,7 @@ app = WSGIApplication([
             ]),
             PathPrefixRoute('/gift', [
                 Route('/get_url', api.GetGiftUrlHandler),
+                Route('/text', api.GetPreText),
             ]),
         ]),
     ]),
