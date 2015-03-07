@@ -57,7 +57,9 @@ def create_url(share_id, feature, channel, user_agent, recipient=None, alias=Non
             'share_id': share_id,
             '$desktop_url': DESKTOP_URL,
             '$android_url': ANDROID_URL,
-            '$ios_url': IOS_URL
+            '$ios_url': IOS_URL,
+            '$deeplink_path': '',
+            '$always_deeplink': False
         },
         'alias': alias if alias else None,
         'identity': share_id,
