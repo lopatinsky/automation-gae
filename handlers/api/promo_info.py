@@ -31,3 +31,8 @@ class PromoInfoHandler(ApiHandler):
             "bonus_points": bonus_points,
             "news": [n.dict() for n in news]
         })
+
+
+class DemoInfoHandler(ApiHandler):
+    def get(self):
+        self.render_json({"demo": config.CARD_BINDING_REQUIRED})

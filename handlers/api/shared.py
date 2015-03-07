@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 
 __author__ = 'dvpermyakov'
 
@@ -22,7 +23,7 @@ random.seed()
 
 def get_general_shared_dict():
     text_id, text = random.choice(TEXTS)
-    return {
+    return text_id, {
         'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image.png',
         'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/facebook_shared_image.png',
         'text_share_new_order': text,
@@ -72,11 +73,11 @@ class GetInvitationUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
-        channel = self.request.get_range('channel')
-        if channel not in branch_io.CHANNELS:
-            self.abort(400)
         share = Share(share_type=branch_io.INVITATION, sender=client.key)
         share.put()
+
+        text_id, values = get_general_shared_dict()
+
         if 'iOS' in self.request.headers["User-Agent"]:
             user_agent = 'ios'
         elif 'Android' in self.request.headers["User-Agent"]:
@@ -84,13 +85,13 @@ class GetInvitationUrlHandler(ApiHandler):
         else:
             user_agent = 'unknown'
         urls = [{
-            'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent),
+            'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent,
+                                        custom_tags={"text_id": text_id}),
             'channel': channel
         } for channel in branch_io.CHANNELS]
         share.urls = [url['url'] for url in urls]
         share.put()
 
-        values = get_general_shared_dict()
         values['urls'] = urls
 
         self.render_json(values)
@@ -149,7 +150,7 @@ class GetGiftUrlHandler(ApiHandler):
                 binding_id = self.request.get('binding_id')
                 return_url = self.request.get('return_url')
 
-                order_id = Order.generate_id()  # TODO: Миша, is it valid?
+                order_id = "gift_%s_%s" % (client_id, int(time.time()))
                 success, result = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
                 if success:
                     success, error = alfa_bank.hold_and_check(result, binding_id)
