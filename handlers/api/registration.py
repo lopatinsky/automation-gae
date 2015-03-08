@@ -7,7 +7,7 @@ from models import Client, Share, SharedFreeCup, SharedGift
 def perform_registration(request):
     response = {}
 
-    client_id = request.get_range('client_id')
+    request_client_id = client_id = request.get_range('client_id')
     device_phone = "".join(c for c in request.get('device_phone') if '0' <= c <= '9')
 
     client = None
@@ -47,8 +47,7 @@ def perform_registration(request):
         if share:
             response["share_type"] = share.share_type
             if share.share_type == Share.INVITATION:
-                existing_cup = SharedFreeCup(recipient=client.key)
-                if not existing_cup:
+                if not request_client_id:
                     SharedFreeCup(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
             elif share.share_type == Share.GIFT:
                 if share.status == Share.ACTIVE:
