@@ -140,7 +140,7 @@ class GetGiftUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
-        recipient_phone = self.request.get('recipient_phone')
+        recipient_phone = "".join(c for c in self.request.get('recipient_phone') if '0' <= c <= '9')
         recipient_name = self.request.get('recipient_name')
         payment_type_id = self.request.get_range('payment_type_id')
         payment_type = PaymentType.get_by_id(str(payment_type_id))
