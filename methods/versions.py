@@ -39,6 +39,6 @@ def supports_registration(request):
     if platform == IOS_DEVICE:
         return version >= 10301
     elif platform == ANDROID_DEVICE:
-        return False
+        return version >= 10600
     else:
         return False

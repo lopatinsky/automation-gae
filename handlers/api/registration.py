@@ -45,7 +45,7 @@ def perform_registration(request):
             share = Share.get_by_id(share_id)
 
         if share:
-            response["share_type"] = Share.share_type
+            response["share_type"] = share.share_type
             if share.share_type == Share.INVITATION:
                 existing_cup = SharedFreeCup(recipient=client.key)
                 if not existing_cup:
