@@ -49,6 +49,10 @@ class NameConfirmationHandler(BaseHandler):
         for client in clients:
             confirmed = bool(self.request.get(str(client.key.id())))
             client.name_confirmed = confirmed
+            sms_name = self.request.get('name_for_sms_%s' % client.key.id())
+            if confirmed:
+                sms_name = client.name
+            client.name_for_sms = sms_name
             client.put()
         values = {
             'clients': clients,

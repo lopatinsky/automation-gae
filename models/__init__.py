@@ -241,6 +241,7 @@ class Client(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
 
     name_confirmed = ndb.BooleanProperty(default=False)
+    name_for_sms = ndb.StringProperty(default='')
 
     user_agent = ndb.StringProperty(indexed=False)
     tied_card = ndb.BooleanProperty(default=False)

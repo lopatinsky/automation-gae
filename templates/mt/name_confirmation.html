@@ -39,7 +39,8 @@
 
     <form method="post">
         {% for client in clients %}
-             <label><input type="checkbox" {% if client.name_confirmed %} checked {% endif %} name={{ client.key.id() }}>{{ client.name }} {{ client.surname }}</label><br>
+             <label><input type="checkbox" {% if client.name_confirmed %} checked {% endif %} name={{ client.key.id() }}>{{ client.name }} {{ client.surname }}</label>
+             <label><input type="text" name="name_for_sms_{{ client.key.id() }}" value="{{ client.name_for_sms }}"></label><br>
         {% endfor %}
         <label><input type="submit" value="Сохранить"></label>
     </form>
