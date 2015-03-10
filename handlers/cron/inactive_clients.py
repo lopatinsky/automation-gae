@@ -8,6 +8,7 @@ from methods import email, empatika_promos
 from datetime import datetime, timedelta
 from methods.push import send_reminder_push
 from methods import sms_pilot
+from config import config
 from methods import twilio
 from webapp2_extras import jinja2
 import logging
@@ -46,20 +47,16 @@ class FullyInactiveClientsHandler(RequestHandler):
                     continue
                 client.sms = 'No try / Cancel binding card'
                 passive_clients.append(client)
-            body = 'Clients who bind telephone and not order anything:\n'
-            for client in clients_with_phone:
-                body += 'Name: %s %s, email: %s, telephone: %s\n' % (client.name, client.surname,
-                                                                     client.email, client.tel)
-            logging.info(body)
+
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
 
-            email.send_error('analytics', 'Clients with telephones', body="",  html=html_file)
+            email.send_error('analytics', 'Binding card', body="",  html=html_file)
             for client in clients_with_card:
                 sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
                             u"Теперь можно получить кофе без очереди в кассу. "
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
-                            u"Хорошего дня!") % client.name
+                            u"Хорошего дня!") % client.name_for_sms
                 sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
                 notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
                 notification.put()
@@ -76,12 +73,17 @@ class FullyInactiveClientsHandler(RequestHandler):
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
+    INACTIVE_PERIOD_IN_DAYS = 3 * 7
+
     WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
     WEEK_OF_INACTIVE_DAYS = {
-        'monday': [6, 5],
-        'tuesday': [5],
-        'wednesday': [5],
-        'friday': [4, 5, 6]
+        'monday': [INACTIVE_PERIOD_IN_DAYS],
+        'tuesday': [INACTIVE_PERIOD_IN_DAYS],
+        'wednesday': [INACTIVE_PERIOD_IN_DAYS],
+        'thursday': [INACTIVE_PERIOD_IN_DAYS],
+        'friday': [INACTIVE_PERIOD_IN_DAYS],
+        'saturday': [INACTIVE_PERIOD_IN_DAYS],
+        'sunday': [INACTIVE_PERIOD_IN_DAYS]
     }
 
     def get(self):
@@ -93,17 +95,26 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
         for order in orders:
             if not order.client_id in clients_id:
                 clients_id.append(order.client_id)
-        orders = []
-        for inactive_days in self.WEEK_OF_INACTIVE_DAYS[self.WEEK[datetime.today().weekday()]]:
-            orders.extend(Order.query(Order.date_created > datetime.now() - timedelta(days=inactive_days - 1)).fetch())
 
-        for order in orders:
-            if order.client_id in clients_id:
-                clients_id.remove(order.client_id)
+        clients = []
         for client_id in clients_id:
-            client = Client.get_by_id(client_id)
-            score = empatika_promos.get_user_points(client.key.id()) % 5
-            name = client.name if client.name_confirmed else None
-            send_reminder_push(client_id, name, score)
-            notification = Notification(client_id=client_id, type=PUSH_NOTIFICATION)
-            notification.put()
+            last_order = Order.query(Order.client_id == client_id).order(-Order.date_created).get()
+            if last_order.date_created > datetime.now() - timedelta(days=self.INACTIVE_PERIOD_IN_DAYS - 1):
+                clients_id.remove(client_id)
+            else:
+                client = Client.get_by_id(client_id)
+                client.last_order_date = last_order.date_created + config.TIMEZONE_OFFSET
+                clients.append(client)
+
+        html_file = jinja2.get_jinja2(app=self.app).render_template(
+            'inactive_clients_period.html', clients=clients)
+
+        email.send_error('analytics', u'Люди без заказов в течении 3-х недель', body="",  html=html_file)
+
+        #for client_id in clients_id:
+            #client = Client.get_by_id(client_id)
+            #score = empatika_promos.get_user_points(client.key.id()) % 5
+            #name = client.name if client.name_confirmed else None
+            #send_reminder_push(client_id, name, score)
+            #notification = Notification(client_id=client_id, type=PUSH_NOTIFICATION)
+            #notification.put()
