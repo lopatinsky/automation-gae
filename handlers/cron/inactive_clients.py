@@ -70,9 +70,9 @@ class FullyInactiveClientsHandler(RequestHandler):
                             u'Привяжите карту и воспользуйтесь 50%% скидкой на первую кружку.\n'
                             u'Хорошего дня,\n'
                             u'Команда Даблби') % client.name
-                twilio.send_sms(receiver_phones=[client.tel], text=sms_text)
-                notification = Notification(client_id=client.key.id(), type=SMS_PASSIVE)
-                notification.put()
+                #twilio.send_sms(receiver_phones=[client.tel], text=sms_text)
+                #notification = Notification(client_id=client.key.id(), type=SMS_PASSIVE)
+                #notification.put()
 
 
 class SeveralDaysInactiveClientsHandler(RequestHandler):
