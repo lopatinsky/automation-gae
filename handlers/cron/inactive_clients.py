@@ -14,7 +14,35 @@ from webapp2_extras import jinja2
 import logging
 
 
-class FullyInactiveClientsHandler(RequestHandler):
+class SuccessBindingCardHandler(RequestHandler):
+    def get(self):
+        clients_with_phone = Client.query(Client.created > datetime.now() - timedelta(days=1)).fetch()
+        for client in clients_with_phone[:]:
+            if not client.tel:
+                clients_with_phone.remove(client)
+        for client in clients_with_phone[:]:
+            last_order = Order.query(Order.client_id == client.key.id()).get()
+            if last_order:
+                clients_with_phone.remove(client)
+        if not len(clients_with_phone):
+            return
+        else:
+            clients_with_card = []
+            for client in clients_with_phone:
+                if client.tied_card:
+                    clients_with_card.append(client)
+
+            for client in clients_with_card:
+                sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
+                            u"Теперь можно получить кофе без очереди в кассу. "
+                            u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
+                            u"Хорошего дня!") % client.name_for_sms
+                sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
+                notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
+                notification.put()
+
+
+class BindingCardHandler(RequestHandler):
     def get(self):
         clients_with_phone = Client.query(Client.created > datetime.now() - timedelta(days=1)).fetch()
         for client in clients_with_phone[:]:
@@ -33,7 +61,7 @@ class FullyInactiveClientsHandler(RequestHandler):
             for client in clients_with_phone:
                 if client.tied_card:
                     clients_with_card.append(client)
-                    client.sms = 'Success binding card'
+                    client.sms = 'Binding card'
                     continue
                 attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
                 error = False
@@ -51,15 +79,7 @@ class FullyInactiveClientsHandler(RequestHandler):
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
 
-            email.send_error('analytics', 'Binding card', body="",  html=html_file)
-            for client in clients_with_card:
-                sms_text = (u"%s, добрый день! Спасибо, что скачали приложение Даблби. "
-                            u"Теперь можно получить кофе без очереди в кассу. "
-                            u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
-                            u"Хорошего дня!") % client.name_for_sms
-                sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
-                notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
-                notification.put()
+            email.send_error('analytics', 'Привязка карт', body="",  html=html_file)
 
             for client in passive_clients:
                 sms_text = (u'Доброе утро, %s!\n'
