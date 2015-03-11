@@ -57,8 +57,6 @@ def _nice_join(strs):
 
 
 def _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info):
-    logging.info("supports_new_menu: %s" % supports_new_menu)
-
     prices = {}
     for item_dict in item_dicts:
         item = item_dict['item']
@@ -70,8 +68,10 @@ def _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info):
                 item = item_dict['item']
                 original_price, show_price = prices[item.key.id()]
                 if original_price != show_price:
-                    item.price = show_price  # for proper happy hours and other promos
-                    item_dict['price'] = show_price
+                    item_dict['item'] = MenuItem(id=item.key.id(), **item.to_dict())
+                    item_dict['item'].price = show_price  # for proper happy hours and other promos
+
+                    item_dict['price'] = item_dict['revenue'] = show_price
                     if supports_new_menu:
                         item_dict['promos'].append("old_menu")
 
