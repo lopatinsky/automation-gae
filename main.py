@@ -56,6 +56,8 @@ app = WSGIApplication([
             ]),
         ]),
 
+        Route('/check_menu', maintenance.CheckMenuHandler),
+
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 

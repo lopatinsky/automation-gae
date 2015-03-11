@@ -26,16 +26,13 @@ class ProductionConfig(DoubleBConfig):
 
     OLD_MENU_VENUES = [
         4661077019197440,  # tkachi
-        4851681627996160,  # lefort
         5083289484263424,  # million
+        5313962648272896,  # kronv
+        5547219436437504,  # etazhi
+    ]
+    CAPPUCCINO_150 = [
         5093108584808448,  # omega
         5224026972618752,  # alkon
-        5313962648272896,  # kronv
-        5364764460974080,  # krivok
-        5547219436437504,  # etazhi
-        5682617542246400,  # noev
-        6110169389858816,  # setun
-        6490664367816704,  # monarch
     ]
 
     CITY_HAPPY_HOURS = {
@@ -44,6 +41,10 @@ class ProductionConfig(DoubleBConfig):
             "hours": "8-11"
         },
         5656058538229760: {  # gstolic
+            "days": "12345",
+            "hours": "8-11"
+        },
+        6209189391106048: {  # ilikewine
             "days": "12345",
             "hours": "8-11"
         },
@@ -65,24 +66,26 @@ class ProductionConfig(DoubleBConfig):
         },
     }
 
+    NEW_MENU_DRINKS = [11, 38, 39, 40]
+
     STOP_LISTS = {
-        5093108584808448: [15, 26, 27], # omega
+        5093108584808448: [15, 27, 29],  # omega
+
+        4661077019197440: NEW_MENU_DRINKS,  # tkachi
+        5083289484263424: NEW_MENU_DRINKS,  # million
+        5313962648272896: NEW_MENU_DRINKS,  # kronv
+
+        5547219436437504: NEW_MENU_DRINKS,  # etazhi
+
+        5224026972618752: [11],  # alkon
+
+        5682617542246400: [40],  # noev
+        6110169389858816: [40],  # setun
+        6490664367816704: [40],  # monarch
+        4851681627996160: [40],  # lefort
     }
 
-    MAIN_VENUES = [
-        1,  # mil
-        4801814507552768,  # ftower
-        5656058538229760,  # gstolic
-        5660980839186432,  # dmitr
-        5786976926040064,  # tvyamsk
-        6209189391106048,  # ilikewine
-    ]
     SPECIALS = {
-        37: [  # grapefruit tea
-        ],
-        38: MAIN_VENUES,
-        39: MAIN_VENUES,
-        40: MAIN_VENUES,
     }
 
     DEBUG = False
@@ -108,6 +111,8 @@ class TestingConfig(DoubleBConfig):
     FREE_COFFEE_PROMO_ID = 5678701068943360
 
     OLD_MENU_VENUES = [
+    ]
+    CAPPUCCINO_150 = [
     ]
 
     CITY_HAPPY_HOURS = {
