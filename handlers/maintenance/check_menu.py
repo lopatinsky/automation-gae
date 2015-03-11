@@ -5,6 +5,23 @@ from models import Venue, MenuItem, STATUS_AVAILABLE, Client
 
 
 class CheckMenuHandler(BaseHandler):
+    @staticmethod
+    def check(client, order_items, venues, hour):
+        datetime_to_check = datetime.datetime.combine(datetime.date.today(), datetime.time(hour, 0))
+        delivery_time = int((datetime_to_check - datetime.datetime.now()).total_seconds() / 60)
+
+        data = {}
+
+        for venue in venues:
+            venue_data = {}
+            validation_details = validate_order(client, order_items, None, venue, delivery_time,
+                                                with_details=True)['details']
+            for details_item in validation_details:
+                venue_data[details_item.item.id()] = details_item.price if not details_item.errors else None
+            data[venue.key.id()] = venue_data
+
+        return data
+
     def get(self):
         venue_ids = [
             1,  # mil
@@ -39,17 +56,7 @@ class CheckMenuHandler(BaseHandler):
         order_items = [{"id": item.key.id(), "quantity": 1} for item in items]
         client = Client.get_by_id(1)
         
-        datetime_to_check = datetime.datetime.combine(datetime.date.today(), datetime.time(13, 0))
-        delivery_time = int((datetime_to_check - datetime.datetime.now()).total_seconds() / 60)
+        data = self.check(client, order_items, venues, 13)
+        hh_data = self.check(client, order_items, venues, 8)
 
-        data = {}
-
-        for venue in venues:
-            venue_data = {}
-            validation_details = validate_order(client, order_items, None, venue, delivery_time,
-                                                with_details=True)['details']
-            for details_item in validation_details:
-                venue_data[details_item.item.id()] = details_item.price if not details_item.errors else None
-            data[venue.key.id()] = venue_data
-
-        self.render('check_menu.html', prices=data, items=items, venues=venues)
+        self.render('check_menu.html', prices=data, hh_prices=hh_data, items=items, venues=venues)

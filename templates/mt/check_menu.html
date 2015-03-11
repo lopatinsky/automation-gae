@@ -23,7 +23,14 @@
         <tr>
             <th align="right">{{ item.title }}</th>
             {% for venue in venues %}
-                <td>{{ prices[venue.key.id()][item.key.id()] }}</td>
+                {% set normal_price = prices[venue.key.id()][item.key.id()] %}
+                {% set hh_price = hh_prices[venue.key.id()][item.key.id()] %}
+                <td>
+                    {{ normal_price }}
+                    {% if normal_price != hh_price %}
+                        ({{ hh_price }})
+                    {% endif %}
+                </td>
             {% endfor %}
         </tr>
     {% endfor %}
