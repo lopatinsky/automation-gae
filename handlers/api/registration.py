@@ -18,6 +18,9 @@ def perform_registration(request):
     if not client and device_phone:
         client = Client.query(Client.device_phone == device_phone).get()
 
+    if client:  # getting client_id if client has device phone
+        request_client_id = client.key.id()
+
     if not client:
         client = Client.create()
         client.user_agent = request.headers["User-Agent"]
