@@ -14,6 +14,8 @@ PROMO_SUPPORT_FULL = 2
 
 _OMEGA_VENUE_ID = 5093108584808448
 _ETAZHI_VENUE_ID = 5547219436437504
+_NOEV_VENUE_ID = 5682617542246400
+_ALKON_VENUE_ID = 5224026972618752
 
 
 def get_promo_support(request):
@@ -45,6 +47,16 @@ _OMEGA_PROMO = {
 _ETAZHI_PROMO = {
     "id": "etazhi",
     "text": u"Скидки в лофт-проекте Этажи"
+}
+
+_NOEV_PROMO = {
+    "id": "noev",
+    "text": u"Скидки в БЦ Ноев Ковчег"
+}
+
+_ALKON_PROMO = {
+    "id": "alkon",
+    "text": u"Скидки в БЦ Алкон"
 }
 
 
@@ -184,16 +196,18 @@ def _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
                     item_dict['revenue'] -= 50
                 elif item_dict['item'].price == 200 and item_dict['item'].key.id() == 10:  # cappucino in new menu
                     item_dict['promos'].append(_CITY_HAPPY_HOURS_PROMO['id'])
-                    item_dict['price'] -= 100
-                    item_dict['revenue'] -= 100
-
+                    discount = 100
+                    if venue.key.id() in config.CAPPUCCINO_150:
+                        discount = 50
+                    item_dict['price'] -= discount
+                    item_dict['revenue'] -= discount
 
 
 def _apply_venue_discounts(item_dicts, promos_info, venue):
     if venue.key.id() == _OMEGA_VENUE_ID:
         promos_info.append(_OMEGA_PROMO)
         for item_dict in item_dicts:
-            if item_dict['item'].price == 250:
+            if item_dict['item'].price == 250 or item_dict['item'].key.id() in (10, 17):
                 item_dict['promos'].append(_OMEGA_PROMO['id'])
                 item_dict['price'] -= 50
                 item_dict['revenue'] -= 50
@@ -202,6 +216,20 @@ def _apply_venue_discounts(item_dicts, promos_info, venue):
         for item_dict in item_dicts:
             if item_dict['item'].price in (150, 250):
                 item_dict['promos'].append(_ETAZHI_PROMO['id'])
+                item_dict['price'] -= 50
+                item_dict['revenue'] -= 50
+    elif venue.key.id() == _NOEV_VENUE_ID:
+        promos_info.append(_NOEV_PROMO)
+        for item_dict in item_dicts:
+            if item_dict['item'].price == 350 or item_dict['item'].key.id() == 10:
+                item_dict['promos'].append(_NOEV_PROMO['id'])
+                item_dict['price'] -= 50
+                item_dict['revenue'] -= 50
+    elif venue.key.id() == _ALKON_VENUE_ID:
+        promos_info.append(_ALKON_PROMO)
+        for item_dict in item_dicts:
+            if item_dict['item'].key.id() in (10, 15, 17, 27, 29):  # cappuccino and old drinks for 300
+                item_dict['promos'].append(_ALKON_PROMO['id'])
                 item_dict['price'] -= 50
                 item_dict['revenue'] -= 50
 
@@ -252,9 +280,9 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
     valid = True
     promos_info = []
 
-    valid = valid and _check_venue(venue, delivery_time, errors)
+    valid = _check_venue(venue, delivery_time, errors) and valid
 
-    valid = valid and _check_stop_lists(item_dicts, venue, errors)
+    valid = _check_stop_lists(item_dicts, venue, errors) and valid
 
     _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info)
 
