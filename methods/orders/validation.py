@@ -68,43 +68,23 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info):
+def _apply_new_menu(item_dicts, supports_new_menu, promos_info):
     prices = {}
     for item_dict in item_dicts:
         item = item_dict['item']
         prices[item.key.id()] = (item.price, item.price_for_old_version)
 
-    if venue:
-        if venue.key.id() in config.OLD_MENU_VENUES:
-            for item_dict in item_dicts:
-                item = item_dict['item']
-                original_price, show_price = prices[item.key.id()]
-                if original_price != show_price:
-                    item_dict['item'] = MenuItem(id=item.key.id(), **item.to_dict())
-                    item_dict['item'].price = show_price  # for proper happy hours and other promos
+    if not supports_new_menu:
+        for item_dict in item_dicts:
+            item = item_dict['item']
+            original_price, show_price = prices[item.key.id()]
+            if original_price != show_price:
+                item_dict['promos'].append("new_menu")
 
-                    item_dict['price'] = item_dict['revenue'] = show_price
-                    if supports_new_menu:
-                        item_dict['promos'].append("old_menu")
-
-            if supports_new_menu:
-                promos_info.append({
-                    "id": "old_menu",
-                    "text": u"В кофейне %s действует старое меню" % venue.title
-                })
-
-        else:
-            if not supports_new_menu:
-                for item_dict in item_dicts:
-                    item = item_dict['item']
-                    original_price, show_price = prices[item.key.id()]
-                    if original_price != show_price:
-                        item_dict['promos'].append("new_menu")
-
-                promos_info.append({
-                    "id": "new_menu",
-                    "text": u"Новое меню в Даблби"
-                })
+        promos_info.append({
+            "id": "new_menu",
+            "text": u"Новое меню в Даблби"
+        })
 
 
 def _check_venue(venue, delivery_time, errors):
@@ -214,7 +194,7 @@ def _apply_venue_discounts(item_dicts, promos_info, venue):
     elif venue.key.id() == _ETAZHI_VENUE_ID:
         promos_info.append(_ETAZHI_PROMO)
         for item_dict in item_dicts:
-            if item_dict['item'].price in (150, 250):
+            if item_dict['item'].price in (200, 350):
                 item_dict['promos'].append(_ETAZHI_PROMO['id'])
                 item_dict['price'] -= 50
                 item_dict['revenue'] -= 50
@@ -223,13 +203,6 @@ def _apply_venue_discounts(item_dicts, promos_info, venue):
         for item_dict in item_dicts:
             if item_dict['item'].price == 350 or item_dict['item'].key.id() == 10:
                 item_dict['promos'].append(_NOEV_PROMO['id'])
-                item_dict['price'] -= 50
-                item_dict['revenue'] -= 50
-    elif venue.key.id() == _ALKON_VENUE_ID:
-        promos_info.append(_ALKON_PROMO)
-        for item_dict in item_dicts:
-            if item_dict['item'].key.id() in (10, 15, 17, 27, 29):  # cappuccino and old drinks for 300
-                item_dict['promos'].append(_ALKON_PROMO['id'])
                 item_dict['price'] -= 50
                 item_dict['revenue'] -= 50
 
@@ -284,7 +257,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
 
     valid = _check_stop_lists(item_dicts, venue, errors) and valid
 
-    _apply_new_menu(item_dicts, venue, supports_new_menu, promos_info)
+    _apply_new_menu(item_dicts, supports_new_menu, promos_info)
 
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
