@@ -58,6 +58,10 @@ class ProductionConfig(DoubleBConfig):
             "days": "12345",
             "hours": "9-12"
         },
+        5547219436437504: {  # etazhi
+            "days": "12345",
+            "hours": "9-12"
+        },
     }
 
     STOP_LISTS = {
@@ -67,14 +71,9 @@ class ProductionConfig(DoubleBConfig):
         5083289484263424: [11],  # million
         5313962648272896: [11],  # kronv
 
-        5547219436437504: [11, 40],  # etazhi
+        5547219436437504: [11],  # etazhi
 
         5224026972618752: [11],  # alkon
-
-        5682617542246400: [40],  # noev
-        6110169389858816: [40],  # setun
-        6490664367816704: [40],  # monarch
-        4851681627996160: [40],  # lefort
     }
 
     SPECIALS = {
