@@ -24,15 +24,9 @@ class ProductionConfig(DoubleBConfig):
     PROMOS_API_KEY = "NTY1OTMxMzU4NjU2OTIxNgVhFXVOYTAN9r_AM_Jrg-nwDwOj"
     FREE_COFFEE_PROMO_ID = 5634472569470976
 
-    OLD_MENU_VENUES = [
-        4661077019197440,  # tkachi
-        5083289484263424,  # million
-        5313962648272896,  # kronv
-        5547219436437504,  # etazhi
-    ]
     CAPPUCCINO_150 = [
         5093108584808448,  # omega
-        5224026972618752,  # alkon
+        5547219436437504,  # etazhi
     ]
 
     CITY_HAPPY_HOURS = {
@@ -64,25 +58,22 @@ class ProductionConfig(DoubleBConfig):
             "days": "12345",
             "hours": "9-12"
         },
+        5547219436437504: {  # etazhi
+            "days": "12345",
+            "hours": "9-12"
+        },
     }
-
-    NEW_MENU_DRINKS = [11, 38, 39, 40]
 
     STOP_LISTS = {
         5093108584808448: [15, 27, 29],  # omega
 
-        4661077019197440: NEW_MENU_DRINKS,  # tkachi
-        5083289484263424: NEW_MENU_DRINKS,  # million
-        5313962648272896: NEW_MENU_DRINKS,  # kronv
+        4661077019197440: [11],  # tkachi
+        5083289484263424: [11],  # million
+        5313962648272896: [11],  # kronv
 
-        5547219436437504: NEW_MENU_DRINKS,  # etazhi
+        5547219436437504: [11],  # etazhi
 
         5224026972618752: [11],  # alkon
-
-        5682617542246400: [40],  # noev
-        6110169389858816: [40],  # setun
-        6490664367816704: [40],  # monarch
-        4851681627996160: [40],  # lefort
     }
 
     SPECIALS = {
@@ -110,8 +101,6 @@ class TestingConfig(DoubleBConfig):
     PROMOS_API_KEY = "NTcxOTIzODA0NDAyNDgzMjEGJ9yK_bldMcuo0k-zMH3xktB4"
     FREE_COFFEE_PROMO_ID = 5678701068943360
 
-    OLD_MENU_VENUES = [
-    ]
     CAPPUCCINO_150 = [
     ]
 
