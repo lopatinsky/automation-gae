@@ -9,6 +9,9 @@ from methods import branch_io, alfa_bank
 from models import Share, Client, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, Order, SharedGift
 import logging
 
+TEXT = (u'Роскошный кофе, дружелюбные бариста. '
+        u'Подарки при заказе через мобильное приложение Даблби. '
+        u'50% скидка на первый напиток. И без очереди')
 
 #TEXTS = [
 #    ("a", u"Заказываю кофе через приложение Даблби. Экспертам хорошего кофе каждая шестая кружка в подарок. Вот как "
@@ -22,14 +25,14 @@ random.seed()
 
 
 def get_general_shared_dict():
-    text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок'
-                           u'Ты делишься ссылкой c друзьями'
-                           u'Друг ставит приложение Даблби и заказывает кофе с 50% скидкой'
+    text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок. '
+                           u'Ты делишься ссылкой c друзьями. '
+                           u'Друг ставит приложение Даблби и заказывает кофе с 50% скидкой. '
                            u'Ты получаешь бесплатную кружку кофе'))
     return text_id, {
-        'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image.png',
-        'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/facebook_shared_image.png',
-        'text_share_new_order': text,
+        'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
+        'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
+        'text_share_new_order': TEXT,
         'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
         'screen_title': text,
         'screen_text': ' '
@@ -51,9 +54,9 @@ class GetPreText(ApiHandler):
 
 class GetSharedInfo(ApiHandler):
     def get(self):
-        text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок'
-                               u'Ты делишься ссылкой c друзьями'
-                               u'Друг ставит приложение Даблби и заказывает кофе с 50% скидкой'
+        text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок. '
+                               u'Ты делишься ссылкой c друзьями. '
+                               u'Друг ставит приложение Даблби и заказывает кофе с 50% скидкой. '
                                u'Ты получаешь бесплатную кружку кофе'))
 
         url_template = "http://dblb.mobi/get/%%s%s%s"
@@ -64,9 +67,9 @@ class GetSharedInfo(ApiHandler):
         campaign_url_template = url_template % (platform_part, client_id_part)
 
         self.render_json({
-            'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image.png',
-            'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/facebook_shared_image.png',
-            'text_share_new_order': text,
+            'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
+            'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
+            'text_share_new_order': TEXT,
             'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
             'app_url': campaign_url_template % text_id,
             'about_url': campaign_url_template % 'd',
