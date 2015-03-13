@@ -3,6 +3,7 @@ from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
 import handlers.web_admin.web.padmin as padmin
+import handlers.web_admin.web.manager as manager
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -113,6 +114,16 @@ app = WSGIApplication([
                 Route('/get_url', api.GetGiftUrlHandler),
                 Route('/text', api.GetPreText),
             ]),
+        ]),
+    ]),
+
+    PathPrefixRoute('/manager', [
+        Route('/categories', manager.CategoriesHandler),
+        Route('/products', manager.ProductsHandler),
+        Route('/product/modifiers', manager.ModifiersForProductHandler),
+        PathPrefixRoute('/modifiers', [
+            Route('/list', manager.ModifierList),
+            Route('/add', manager.AddSingleModifierHandler),
         ]),
     ]),
 

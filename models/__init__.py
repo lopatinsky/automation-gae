@@ -34,6 +34,27 @@ SMS_SUCCESS = 1
 SMS_PASSIVE = 2
 
 
+class SingleModifier(ndb.Model):
+    title = ndb.StringProperty(required=True)
+    price = ndb.IntegerProperty(required=True)
+
+
+class SingleModifierInfo(ndb.Model):
+    modifier = ndb.KeyProperty(kind=SingleModifier)
+    min_amount = ndb.IntegerProperty()
+    max_amount = ndb.IntegerProperty()
+
+
+class GroupModifierChoice(ndb.Model):
+    title = ndb.StringProperty(required=True)
+    price = ndb.IntegerProperty(default=0)
+
+
+class GroupModifier(ndb.Model):
+    title = ndb.StringProperty(required=True)
+    choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
+
+
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
@@ -43,6 +64,8 @@ class MenuItem(ndb.Model):
     cost_price = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
+    single_modifiers = ndb.KeyProperty(repeated=True, kind=SingleModifierInfo)
+    group_modifiers = ndb.KeyProperty(repeated=True, kind=GroupModifier)
 
     @property
     def price_for_old_version(self):

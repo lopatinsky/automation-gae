@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Категории</title>
+</head>
+<body>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+        </tr>
+        {% for category in categories %}
+            <tr>
+                <td><a href="{{ '/manager/products?category_id=%s' % category.key.id() }}">{{ category.title }}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

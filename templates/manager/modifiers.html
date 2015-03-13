@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Модификаторы</title>
+</head>
+<body>
+    <h3>Модификаторы для {{ product.title }}</h3>
+    <h2>Одиночные модификаторы</h2>
+    <table>
+        <tr>
+            <th>Имя</th>
+            <th>Цена</th>
+        </tr>
+        {% for modifier in single_modifiers %}
+            <tr>
+                <td>{{ modifier.title }}</td>
+                <td></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <h2>Групповые модификаторы</h2>
+    <table>
+        <tr>
+            <th>Имя модификатора</th>
+            <th>Имя выбора</th>
+            <th>Цена выбора</th>
+        </tr>
+        {% for modifier in group_modifiers %}
+            <tr>
+                <td colspan="{{ group_modifiers|length }}">{{ modifier.title }}</td>
+                {% for choice in modifier.choices %}
+                    <td>{{ choice.title }}</td>
+                    <td>{{ choice.price }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
