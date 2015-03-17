@@ -4,37 +4,69 @@
     <title>Модификаторы</title>
 </head>
 <body>
-    <h3>Модификаторы для {{ product.title }}</h3>
     <h2>Одиночные модификаторы</h2>
-    <table>
+    <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Имя</th>
+            <th>Продукты с модификатором</th>
             <th>Цена</th>
         </tr>
         {% for modifier in single_modifiers %}
             <tr>
                 <td>{{ modifier.title }}</td>
-                <td></td>
+                <td>
+                    <a href="{{ '/manager/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
+                        Выбрать
+                    </a>
+                </td>
+                <td>{{ modifier.price }}</td>
             </tr>
         {% endfor %}
     </table>
+    <div>
+        <form method="get">
+            <button formaction="{{ '/manager/modifiers/add/single_modifier' }}">
+                Добавить
+            </button>
+        </form>
+    </div>
     <h2>Групповые модификаторы</h2>
-    <table>
+    <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Имя модификатора</th>
+            <th>Продукты с модификатором</th>
             <th>Имя выбора</th>
             <th>Цена выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
             <tr>
-                <td colspan="{{ group_modifiers|length }}">{{ modifier.title }}</td>
+                <td rowspan="{{ modifier.choices|length + 1 }}">{{ modifier.title }}</td>
+                <td rowspan="{{ modifier.choices|length + 1 }}">
+                    <a href="{{ '/manager/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
+                        Выбрать
+                    </a>
+                </td>
+                <td colspan="2">
+                    <form method="get">
+                        <button formaction="{{ '/manager/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
+                            Добавить выбор
+                        </button>
+                    </form>
+                </td>
                 {% for choice in modifier.choices %}
+                    </tr><tr>
                     <td>{{ choice.title }}</td>
                     <td>{{ choice.price }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
     </table>
-
+    <div>
+        <form method="get">
+            <button formaction="{{ '/manager/modifiers/add/group_modifier' }}">
+                Добавить
+            </button>
+        </form>
+    </div>
 </body>
 </html>

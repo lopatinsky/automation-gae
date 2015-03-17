@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбирите продукты</title>
+</head>
+<body>
+    <h3>Выберите продукты для {{ modifier.title }}</h3>
+    <form method="post">
+        <input type="text" name="modifier_id" value="{{ modifier.key.id() }}">
+        <input type="text" name="modifier_type" value="{{ modifier_type }}">
+        <br>
+        {% for product in products %}
+             <label>
+                 <input type="checkbox" {% if product.has_modifier %} checked {% endif %} name={{ product.key.id() }}>
+                 {{ product.title }}
+             </label><br>
+        {% endfor %}
+        <label><input type="submit" value="Сохранить"></label>
+    </form>
+</body>
+</html>

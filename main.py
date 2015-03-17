@@ -120,10 +120,13 @@ app = WSGIApplication([
     PathPrefixRoute('/manager', [
         Route('/categories', manager.CategoriesHandler),
         Route('/products', manager.ProductsHandler),
-        Route('/product/modifiers', manager.ModifiersForProductHandler),
+        Route('/product/modifiers/list', manager.ModifiersForProductHandler),
+        Route('/product/modifiers/select', manager.SelectProductForModifierHandler),
         PathPrefixRoute('/modifiers', [
-            Route('/list', manager.ModifierList),
-            Route('/add', manager.AddSingleModifierHandler),
+            Route('/list', manager.ModifierList, 'modifiers_list'),
+            Route('/add/single_modifier', manager.AddSingleModifierHandler),
+            Route('/add/group_modifier', manager.AddGroupModifierHandler),
+            Route('/add/<group_modifier_id:\d+>/group_modifier_item', manager.AddGroupModifierItemHandler),
         ]),
     ]),
 

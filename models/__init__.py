@@ -33,16 +33,22 @@ PUSH_NOTIFICATION = 0
 SMS_SUCCESS = 1
 SMS_PASSIVE = 2
 
+SINGLE_MODIFIER = 0
+GROUP_MODIFIER = 1
+
 
 class SingleModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(required=True)
+    min_amount = ndb.IntegerProperty(default=0)
+    max_amount = ndb.IntegerProperty(default=0)
 
-
-class SingleModifierInfo(ndb.Model):
-    modifier = ndb.KeyProperty(kind=SingleModifier)
-    min_amount = ndb.IntegerProperty()
-    max_amount = ndb.IntegerProperty()
+    def dict(self):
+        return {
+            'modifier_id': self.key.id(),
+            'title': self.title,
+            'price': self.price
+        }
 
 
 class GroupModifierChoice(ndb.Model):
@@ -54,6 +60,18 @@ class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
 
+    def dict(self):
+        return {
+            'modifier_id': self.key.id(),
+            'title': self.title,
+            'choices': [
+                {
+                    'title': choice.title,
+                    'price': choice.price,
+                } for choice in self.choices
+            ]
+        }
+
 
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
@@ -64,8 +82,8 @@ class MenuItem(ndb.Model):
     cost_price = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
-    single_modifiers = ndb.KeyProperty(repeated=True, kind=SingleModifierInfo)
-    group_modifiers = ndb.KeyProperty(repeated=True, kind=GroupModifier)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
     @property
     def price_for_old_version(self):
@@ -76,14 +94,16 @@ class MenuItem(ndb.Model):
         else:
             return 150
 
-    def dict(self, for_old_version):
+    def dict(self):
         dct = {
             'id': str(self.key.id()),
             'title': self.title,
             'description': self.description,
-            'price': self.price_for_old_version if for_old_version else self.price,
+            'price':  self.price,
             'kal': self.kal,
-            'pic': self.picture
+            'pic': self.picture,
+            'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
+            'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers]
         }
         return dct
 
