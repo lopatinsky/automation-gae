@@ -11,6 +11,16 @@ class ListCategoriesHandler(BaseHandler):
         self.render('/menu/categories.html', categories=categories)
 
 
+class CreateCategoryHandler(BaseHandler):
+    def get(self):
+        self.render('/menu/add_category.html')
+
+    def post(self):
+        title = self.request.get('title')
+        MenuCategory(title=title).put()
+        self.redirect_to('mt_category_list')
+
+
 class ListMenuItemsHandler(BaseHandler):
     def get(self):
         category_id = self.request.get_range('category_id')
