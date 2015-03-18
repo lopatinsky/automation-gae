@@ -1,3 +1,4 @@
+from google.appengine.ext import ndb
 from config import config
 from handlers.api.base import ApiHandler
 from handlers.api.registration import perform_registration
@@ -8,21 +9,12 @@ import logging
 __author__ = 'ilyazorin'
 
 
-def _get_menu():
-    result = []
-    for category in MenuCategory.query().fetch():
-        result.append({
-            'info': {
-                'category_id': category.key.id(),
-                'title': category.title,
-                'status': category.status,
-            },
-            'items': [item.get().dict() for item in category.menu_items]
-        })
-    return result
+def _get_menu(venue_id):
+    return [category.dict(venue_id) for category in MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()]
 
 
 class MenuHandler(ApiHandler):
     def get(self):
-        response = {"menu": _get_menu()}
+        venue_id = self.request.get_range('venue_id')
+        response = {"menu": _get_menu(venue_id)}
         self.render_json(response)

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кофейни</title>
+</head>
+<body>
+    {% for venue in venues %}
+        <div>
+            {{ venue.title }}
+            <a href="{{ '/manager/venue/add_restrictions?venue_id=%s' % venue.key.id() }}">Выбрать продукты</a>
+        </div>
+    {% endfor %}
+</body>
+</html>

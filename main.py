@@ -129,6 +129,10 @@ app = WSGIApplication([
             Route('/add/group_modifier', manager.AddGroupModifierHandler),
             Route('/add/<group_modifier_id:\d+>/group_modifier_item', manager.AddGroupModifierItemHandler),
         ]),
+        PathPrefixRoute('/venue', [
+            Route('/list', manager.VenueListHandler, 'venues_list'),
+            Route('/add_restrictions', manager.AddRestrictionHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/admin', [

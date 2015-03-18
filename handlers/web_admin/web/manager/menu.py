@@ -1,12 +1,12 @@
 # coding: utf-8
 from ..base import BaseHandler
 from models import MenuCategory, MenuItem, SingleModifier, STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier, \
-    GroupModifierChoice, SINGLE_MODIFIER, GROUP_MODIFIER
+    GroupModifierChoice, SINGLE_MODIFIER, GROUP_MODIFIER, Venue
 
 
 class CategoriesHandler(BaseHandler):
     def get(self):
-        self.render('/manager/categories.html', **{
+        self.render('/manager/menu/categories.html', **{
             'categories': MenuCategory.query().fetch(),
             'status_map': {
                 STATUS_AVAILABLE: u'Доступно',
@@ -18,7 +18,7 @@ class CategoriesHandler(BaseHandler):
 class ProductsHandler(BaseHandler):
     def get(self):
         category = MenuCategory.get_by_id(self.request.get_range('category_id'))
-        self.render('/manager/products.html', **{
+        self.render('/manager/menu/products.html', **{
             'products': [item.get() for item in category.menu_items]
         })
 
@@ -45,7 +45,7 @@ class SelectProductForModifierHandler(BaseHandler):
                     product.has_modifier = True
                 else:
                     product.has_modifier = False
-        self.render('/manager/select_products.html', **{
+        self.render('/manager/menu/select_products_modifier.html', **{
             'products': products,
             'modifier': modifier,
             'modifier_type': modifier_type
@@ -93,7 +93,7 @@ class SelectProductForModifierHandler(BaseHandler):
 class ModifiersForProductHandler(BaseHandler):
     def get(self):
         product = MenuItem.get_by_id(self.request.get('product_id'))
-        self.render('/manager/product_modifiers.html', {
+        self.render('/manager/menu/product_modifiers.html', {
             'product': product,
             'single_modifiers': [modifier.get().modifier.get() for modifier in product.single_modifiers],
             'group_modifiers': [modifier.get() for modifier in product.group_modifiers]
@@ -102,7 +102,7 @@ class ModifiersForProductHandler(BaseHandler):
 
 class ModifierList(BaseHandler):
     def get(self):
-        self.render('/manager/modifiers.html', **{
+        self.render('/manager/menu/modifiers.html', **{
             'single_modifiers': SingleModifier.query().fetch(),
             'group_modifiers': GroupModifier.query().fetch()
         })
@@ -110,7 +110,7 @@ class ModifierList(BaseHandler):
 
 class AddSingleModifierHandler(BaseHandler):
     def get(self):
-        self.render('/manager/add_modifier.html')
+        self.render('/manager/menu/add_modifier.html')
 
     def post(self):
         name = self.request.get('name')
@@ -121,7 +121,7 @@ class AddSingleModifierHandler(BaseHandler):
 
 class AddGroupModifierHandler(BaseHandler):
     def get(self):
-        self.render('/manager/add_group_modifier.html')
+        self.render('/manager/menu/add_group_modifier.html')
 
     def post(self):
         name = self.request.get('name')
@@ -131,7 +131,7 @@ class AddGroupModifierHandler(BaseHandler):
 
 class AddGroupModifierItemHandler(BaseHandler):
     def get(self, group_modifier_id):
-        self.render('/manager/add_modifier.html')
+        self.render('/manager/menu/add_modifier.html')
 
     def post(self, group_modifier_id):
         name = self.request.get('name')
@@ -142,3 +142,4 @@ class AddGroupModifierItemHandler(BaseHandler):
         group_modifier.choices.append(choice)
         group_modifier.put()
         self.redirect_to('modifiers_list')
+

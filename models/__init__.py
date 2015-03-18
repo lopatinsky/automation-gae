@@ -85,6 +85,8 @@ class MenuItem(ndb.Model):
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
+
     @property
     def price_for_old_version(self):
         if self.price >= 300:
@@ -94,7 +96,7 @@ class MenuItem(ndb.Model):
         else:
             return 150
 
-    def dict(self):
+    def dict(self, venue_id):
         dct = {
             'id': str(self.key.id()),
             'title': self.title,
@@ -103,7 +105,8 @@ class MenuItem(ndb.Model):
             'kal': self.kal,
             'pic': self.picture,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
-            'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers]
+            'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers],
+            'avail': not ndb.Key('Venue', str(venue_id)) in self.restrictions
         }
         return dct
 
@@ -114,9 +117,23 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    def dict(self, for_old_version):
-        return {self.title: [menu_item.get().dict(for_old_version) for menu_item in self.menu_items
-                             if menu_item.get().status == STATUS_AVAILABLE]}
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
+
+    def dict(self, venue_id):
+        items = []
+        for item in self.menu_items:
+            item = item.get()
+            if item.status != STATUS_AVAILABLE:
+                continue
+            items.append(item.dict(venue_id))
+        return {
+            'info': {
+                'category_id': self.key.id(),
+                'title': self.title,
+                'avail': not ndb.Key('Venue', str(venue_id)) in self.restrictions
+            },
+            'items': items
+        }
 
 
 class Venue(ndb.Model):
