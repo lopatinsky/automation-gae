@@ -45,7 +45,7 @@ class SingleModifier(ndb.Model):
 
     def dict(self):
         return {
-            'modifier_id': self.key.id(),
+            'modifier_id': str(self.key.id()),
             'title': self.title,
             'price': self.price
         }
@@ -62,7 +62,7 @@ class GroupModifier(ndb.Model):
 
     def dict(self):
         return {
-            'modifier_id': self.key.id(),
+            'modifier_id': str(self.key.id()),
             'title': self.title,
             'choices': [
                 {
@@ -96,7 +96,7 @@ class MenuItem(ndb.Model):
         else:
             return 150
 
-    def dict(self, venue_id):
+    def dict(self):
         dct = {
             'id': str(self.key.id()),
             'title': self.title,
@@ -106,7 +106,9 @@ class MenuItem(ndb.Model):
             'pic': self.picture,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
             'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers],
-            'avail': not ndb.Key('Venue', str(venue_id)) in self.restrictions
+            'restrictions': {
+                'venues': [str(restrict.id()) for restrict in self.restrictions]
+            }
         }
         return dct
 
@@ -119,18 +121,20 @@ class MenuCategory(ndb.Model):
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
 
-    def dict(self, venue_id):
+    def dict(self):
         items = []
         for item in self.menu_items:
             item = item.get()
             if item.status != STATUS_AVAILABLE:
                 continue
-            items.append(item.dict(venue_id))
+            items.append(item.dict())
         return {
             'info': {
-                'category_id': self.key.id(),
+                'category_id': str(self.key.id()),
                 'title': self.title,
-                'avail': not ndb.Key('Venue', str(venue_id)) in self.restrictions
+                'restrictions': {
+                    'venues': [str(restrict.id()) for restrict in self.restrictions]
+                }
             },
             'items': items
         }

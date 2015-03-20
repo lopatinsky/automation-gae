@@ -9,12 +9,11 @@ import logging
 __author__ = 'ilyazorin'
 
 
-def _get_menu(venue_id):
-    return [category.dict(venue_id) for category in MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()]
+def _get_menu():
+    return [category.dict() for category in MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()]
 
 
 class MenuHandler(ApiHandler):
     def get(self):
-        venue_id = self.request.get_range('venue_id')
-        response = {"menu": _get_menu(venue_id)}
+        response = {"menu": _get_menu()}
         self.render_json(response)
