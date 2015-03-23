@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders, versions
 from methods.orders.validation import validate_order, get_promo_support, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SingleModifier, GroupModifier
 from google.appengine.api import taskqueue
 from methods.email_mandrill import send_email
 from webapp2_extras import jinja2
@@ -79,12 +79,26 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_type = PaymentType.get_by_id(str(payment_type_id))
+        payment_type = PaymentType.get_by_id(int(payment_type_id))
 
         if payment_type.status == STATUS_AVAILABLE:
             items = []
             for item in response_json['items']:
                 menu_item = MenuItem.get_by_id(int(item['item_id']))
+                menu_item.chosen_single_modifiers = []
+                for single_modifier in item['single_modifiers']:
+                    single_modifier_obj = SingleModifier.get_by_id(single_modifier['single_modifier_id'])
+                    for i in xrange(single_modifier['quantity']):
+                        menu_item.chosen_single_modifiers.append(single_modifier_obj)
+                menu_item.chosen_group_modifiers = []
+                for group_modifier in item['group_modifiers']:
+                    group_modifier_obj = GroupModifier.get_by_id(group_modifier['group_modifier_id'])
+                    for choice in group_modifier_obj.choices:
+                        if choice.title == group_modifier['choice']:
+                            group_modifier_obj.choice = choice
+                    if group_modifier_obj.choice:
+                        for i in xrange(group_modifier['quantity']):
+                            menu_item.group_modifiers.append(group_modifier_obj)
                 for i in xrange(item['quantity']):
                     items.append(menu_item)
             item_keys = [item.key for item in items]
@@ -99,7 +113,7 @@ class OrderHandler(ApiHandler):
                     self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
                     return
 
-            validation_result = validate_order(client, response_json['items'], response_json['payment'],
+            validation_result = validate_order(client, items, response_json['payment'],
                                                venue, delivery_time_minutes, get_promo_support(self.request),
                                                versions.supports_new_menu(self.request), True)
             if not validation_result['valid']:

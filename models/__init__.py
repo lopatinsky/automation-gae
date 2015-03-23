@@ -67,7 +67,7 @@ class GroupModifier(ndb.Model):
             'choices': [
                 {
                     'title': choice.title,
-                    'price': choice.price,
+                    'price': choice.price
                 } for choice in self.choices
             ]
         }
@@ -194,11 +194,18 @@ class Venue(ndb.Model):
         return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
 
 
+class ChosenGroupModifierDetails(ndb.Model):
+    group_modifier = ndb.KeyProperty(kind=GroupModifier)
+    chosen_group_modifier_name = ndb.StringProperty()
+
+
 class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
     price = ndb.IntegerProperty(required=True)
     revenue = ndb.IntegerProperty(required=True)
     promos = ndb.StringProperty(repeated=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_modifiers = ndb.LocalStructuredProperty(ChosenGroupModifierDetails, repeated=True)
 
 
 class Order(ndb.Model):

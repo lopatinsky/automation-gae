@@ -4,7 +4,7 @@ import datetime
 from config import config
 
 from methods import working_hours
-from models import MenuItem, CARD_PAYMENT_TYPE, OrderPositionDetails, Venue
+from models import MenuItem, CARD_PAYMENT_TYPE, OrderPositionDetails, Venue, ChosenGroupModifierDetails
 
 
 PROMO_SUPPORT_NONE = 0
@@ -238,16 +238,20 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
                    supports_new_menu=True, with_details=False):
     item_dicts = []
     for item in items:
-        item_id = item.get("id") or item["item_id"]
-        menu_item = MenuItem.get_by_id(int(item_id))
-        for i in xrange(item["quantity"]):
-            item_dicts.append({
-                'item': menu_item,
-                'price': menu_item.price,
-                'revenue': menu_item.price,
-                'errors': [],
-                'promos': []
-            })
+        price = item.price
+        for single_modifier in item.chosen_single_modifiers:
+            price += single_modifier.price
+        for group_modifier in item.chosen_group_modifiers:
+            price += group_modifier.choice.price
+        item_dicts.append({
+            'item': item,
+            'single_modifiers': item.chosen_single_modifiers,
+            'group_modifiers': item.chosen_group_modifiers,
+            'price': price,
+            'revenue': price,
+            'errors': [],
+            'promos': []
+        })
 
     errors = []
     valid = True
@@ -255,18 +259,20 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
 
     valid = _check_venue(venue, delivery_time, errors) and valid
 
-    valid = _check_stop_lists(item_dicts, venue, errors) and valid
+    #valid = _check_stop_lists(item_dicts, venue, errors) and valid
 
-    _apply_new_menu(item_dicts, supports_new_menu, promos_info)
+    #_apply_new_menu(item_dicts, supports_new_menu, promos_info)
 
     if support_level == PROMO_SUPPORT_FULL:
         if venue:
-            _apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
-            _apply_venue_discounts(item_dicts, promos_info, venue)
+            pass
+            #_apply_city_happy_hours_promo(item_dicts, promos_info, venue, delivery_time)
+            #_apply_venue_discounts(item_dicts, promos_info, venue)
 
     if support_level in (PROMO_SUPPORT_MASTER, PROMO_SUPPORT_FULL):
         if payment_info:
-            _apply_master_promo(item_dicts, promos_info, client, payment_info)
+            pass
+            #_apply_master_promo(item_dicts, promos_info, client, payment_info)
 
     total_sum = 0
     for item_dict in item_dicts:
@@ -290,7 +296,11 @@ def validate_order(client, items, payment_info, venue, delivery_time, support_le
                 item=item_dict['item'].key,
                 price=item_dict['price'],
                 revenue=item_dict['revenue'],
-                promos=item_dict['promos']
+                promos=item_dict['promos'],
+                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+                group_modifiers=[ChosenGroupModifierDetails(chosen_group_modifier_name=modifier.choice,
+                                                            group_modifier=modifier.key)
+                                 for modifier in item_dict['group_modifiers']]
             )
             details_item.errors = item_dict['errors']
             details.append(details_item)
