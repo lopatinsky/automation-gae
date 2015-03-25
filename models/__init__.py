@@ -47,7 +47,9 @@ class SingleModifier(ndb.Model):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
-            'price': self.price
+            'price': self.price,
+            'min': self.min_amount,
+            'max': self.max_amount
         }
 
 
@@ -67,7 +69,8 @@ class GroupModifier(ndb.Model):
             'choices': [
                 {
                     'title': choice.title,
-                    'price': choice.price
+                    'price': choice.price,
+                    'id': choice.title
                 } for choice in self.choices
             ]
         }
@@ -78,6 +81,8 @@ class MenuItem(ndb.Model):
     description = ndb.StringProperty(indexed=False)
     picture = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
+    weight = ndb.FloatProperty(indexed=False)
+    volume = ndb.FloatProperty(indexed=False)
     price = ndb.IntegerProperty(required=True, indexed=False)
     cost_price = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
@@ -104,6 +109,8 @@ class MenuItem(ndb.Model):
             'price':  self.price,
             'kal': self.kal,
             'pic': self.picture,
+            'weight': self.weight,
+            'volume': self.volume,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
             'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers],
             'restrictions': {
