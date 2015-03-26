@@ -1,12 +1,5 @@
-from google.appengine.ext import ndb
-from config import config
 from handlers.api.base import ApiHandler
-from handlers.api.registration import perform_registration
-from models import MenuCategory, STATUS_AVAILABLE, MenuItem
-from methods import versions
-import logging
-
-__author__ = 'ilyazorin'
+from models import MenuCategory, STATUS_AVAILABLE
 
 
 def _get_menu():
