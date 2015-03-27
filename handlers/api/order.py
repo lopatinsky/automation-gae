@@ -8,14 +8,12 @@ import json
 import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders, versions
-from methods.orders.validation import validate_order, get_promo_support, get_first_error
+from methods.orders.validation import validate_order, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SingleModifier, GroupModifier
 from google.appengine.api import taskqueue
 from methods.email_mandrill import send_email
 from webapp2_extras import jinja2
-
-__author__ = 'ilyazorin'
 
 SECONDS_WAITING_BEFORE_SMS = 15
 
@@ -79,7 +77,7 @@ class OrderHandler(ApiHandler):
             client.put()
 
         payment_type_id = response_json['payment']['type_id']
-        payment_type = PaymentType.get_by_id(int(payment_type_id))
+        payment_type = PaymentType.get_by_id(str(payment_type_id))
 
         if payment_type.status == STATUS_AVAILABLE:
             items = []
@@ -113,9 +111,8 @@ class OrderHandler(ApiHandler):
                     self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
                     return
 
-            validation_result = validate_order(client, items, response_json['payment'],
-                                               venue, delivery_time_minutes, get_promo_support(self.request),
-                                               versions.supports_new_menu(self.request), True)
+            validation_result = validate_order(client, items, response_json['payment'], venue, delivery_time_minutes,
+                                               True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -154,11 +151,6 @@ class OrderHandler(ApiHandler):
                     success, error = alfa_bank.hold_and_check(self.order.payment_id, binding_id)
                 if not success:
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
-
-            if payment_type_id == BONUS_PAYMENT_TYPE:
-                cup_count = len(items)
-                activation = empatika_promos.activate_promo(client_id, config.FREE_COFFEE_PROMO_ID, cup_count)
-                self.order.payment_id = str(activation['activation']['id'])
 
             client.put()
             self.order.status = NEW_ORDER
@@ -292,7 +284,6 @@ class AddReturnCommentHandler(ApiHandler):
 
 class CheckOrderHandler(ApiHandler):
     def post(self):
-        logging.info("promo support from request: %s" % get_promo_support(self.request))
 
         client_id = self.request.get_range('client_id')
         client = Client.get_by_id(client_id)
@@ -312,6 +303,5 @@ class CheckOrderHandler(ApiHandler):
         delivery_time = self.request.get_range('delivery_time')
         items = json.loads(self.request.get('items'))
 
-        result = orders.validate_order(client, items, payment_info, venue, delivery_time,
-                                       supports_new_menu=versions.supports_new_menu(self.request))
+        result = orders.validate_order(client, items, payment_info, venue, delivery_time)
         self.render_json(result)
