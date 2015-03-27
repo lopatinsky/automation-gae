@@ -3,7 +3,6 @@ from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
 import handlers.web_admin.web.padmin as padmin
-import handlers.web_admin.web.manager as manager
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -49,12 +48,25 @@ app = WSGIApplication([
         ]),
 
         PathPrefixRoute('/menu', [
+            Route('/main', maintenance.MainMenuHandler),
             Route('/category/add', maintenance.CreateCategoryHandler),
             Route('/category/list', maintenance.ListCategoriesHandler, 'mt_category_list'),
             PathPrefixRoute('/item', [
                 Route('/list', maintenance.ListMenuItemsHandler),
                 Route('/info', maintenance.MenuItemInfoHandler),
                 Route('/add', maintenance.AddMenuItemHandler),
+            ]),
+            Route('/product/modifiers/list', maintenance.ModifiersForProductHandler),
+            Route('/product/modifiers/select', maintenance.SelectProductForModifierHandler),
+            PathPrefixRoute('/modifiers', [
+                Route('/list', maintenance.ModifierList, 'modifiers_list'),
+                Route('/add/single_modifier', maintenance.AddSingleModifierHandler),
+                Route('/add/group_modifier', maintenance.AddGroupModifierHandler),
+                Route('/add/<group_modifier_id:\d+>/group_modifier_item', maintenance.AddGroupModifierItemHandler),
+            ]),
+            PathPrefixRoute('/venue', [
+                Route('/list', maintenance.VenueListHandler, 'venues_list'),
+                Route('/add_restrictions', maintenance.AddRestrictionHandler),
             ]),
         ]),
 
@@ -115,23 +127,6 @@ app = WSGIApplication([
                 Route('/get_url', api.GetGiftUrlHandler),
                 Route('/text', api.GetPreText),
             ]),
-        ]),
-    ]),
-
-    PathPrefixRoute('/manager', [
-        Route('/categories', manager.CategoriesHandler),
-        Route('/products', manager.ProductsHandler),
-        Route('/product/modifiers/list', manager.ModifiersForProductHandler),
-        Route('/product/modifiers/select', manager.SelectProductForModifierHandler),
-        PathPrefixRoute('/modifiers', [
-            Route('/list', manager.ModifierList, 'modifiers_list'),
-            Route('/add/single_modifier', manager.AddSingleModifierHandler),
-            Route('/add/group_modifier', manager.AddGroupModifierHandler),
-            Route('/add/<group_modifier_id:\d+>/group_modifier_item', manager.AddGroupModifierItemHandler),
-        ]),
-        PathPrefixRoute('/venue', [
-            Route('/list', manager.VenueListHandler, 'venues_list'),
-            Route('/add_restrictions', manager.AddRestrictionHandler),
         ]),
     ]),
 

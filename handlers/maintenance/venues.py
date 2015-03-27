@@ -1,12 +1,11 @@
-from google.appengine.ext import db, ndb
-from google.appengine.ext.ndb import GeoPtProperty
-from handlers.web_admin.web.base import BaseHandler
+from google.appengine.ext import ndb
+from base import BaseHandler
 from models import Venue, MenuItem
 
 
 class VenueListHandler(BaseHandler):
     def get(self):
-        self.render('/manager/venues/venue_list.html', **{
+        self.render('menu/venue_list.html', **{
             'venues': Venue.query().fetch()
         })
 
@@ -24,7 +23,7 @@ class AddRestrictionHandler(BaseHandler):
                 product.avail = False
             else:
                 product.avail = True
-        self.render('/manager/venues/select_products_restriction.html', **{
+        self.render('menu/select_products_restriction.html', **{
             'products': products,
             'venue': venue
         })

@@ -15,7 +15,7 @@
             <tr>
                 <td>{{ modifier.title }}</td>
                 <td>
-                    <a href="{{ '/manager/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
+                    <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
                         Выбрать
                     </a>
                 </td>
@@ -25,7 +25,7 @@
     </table>
     <div>
         <form method="get">
-            <button formaction="{{ '/manager/modifiers/add/single_modifier' }}">
+            <button formaction="{{ '/mt/menu/modifiers/add/single_modifier' }}">
                 Добавить
             </button>
         </form>
@@ -42,13 +42,13 @@
             <tr>
                 <td rowspan="{{ modifier.choices|length + 1 }}">{{ modifier.title }}</td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/manager/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
+                    <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
                         Выбрать
                     </a>
                 </td>
                 <td colspan="2">
                     <form method="get">
-                        <button formaction="{{ '/manager/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
+                        <button formaction="{{ '/mt/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
                             Добавить выбор
                         </button>
                     </form>
@@ -63,7 +63,7 @@
     </table>
     <div>
         <form method="get">
-            <button formaction="{{ '/manager/modifiers/add/group_modifier' }}">
+            <button formaction="{{ '/mt/menu/modifiers/add/group_modifier' }}">
                 Добавить
             </button>
         </form>
