@@ -1,7 +1,6 @@
 # coding=utf-8
 from collections import Counter
 from datetime import datetime, timedelta
-from config import config
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
     CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue, CREATING_ORDER

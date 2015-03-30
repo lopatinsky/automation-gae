@@ -135,9 +135,8 @@ class OrderHandler(ApiHandler):
             self.order.status = NEW_ORDER
             self.order.put()
 
-            if versions.supports_check_order_success(self.request):
-                taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
-                              countdown=SECONDS_WAITING_BEFORE_SMS)
+            taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
+                          countdown=SECONDS_WAITING_BEFORE_SMS)
 
             memcache.delete(self.cache_key)
 

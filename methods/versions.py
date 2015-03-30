@@ -17,28 +17,3 @@ def get_platform_and_version(request):
         return ANDROID_DEVICE, version
     else:
         return None, version
-
-
-def supports_new_menu(request):
-    platform, version = get_platform_and_version(request)
-    return not (platform == IOS_DEVICE and version < 10301)
-
-
-def supports_check_order_success(request):
-    platform, version = get_platform_and_version(request)
-    if platform == IOS_DEVICE:
-        return version >= 10200
-    elif platform == ANDROID_DEVICE:
-        return version > 10300
-    else:
-        return False
-
-
-def supports_registration(request):
-    platform, version = get_platform_and_version(request)
-    if platform == IOS_DEVICE:
-        return version >= 10301
-    elif platform == ANDROID_DEVICE:
-        return version >= 10600
-    else:
-        return False
