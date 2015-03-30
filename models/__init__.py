@@ -203,7 +203,7 @@ class OrderPositionDetails(ndb.Model):
     revenue = ndb.IntegerProperty(required=True)
     promos = ndb.StringProperty(repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
-    group_modifiers = ndb.LocalStructuredProperty(ChosenGroupModifierDetails, repeated=True)
+    group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
 
 
 class Order(ndb.Model):

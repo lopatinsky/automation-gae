@@ -1,6 +1,6 @@
 # coding=utf-8
 import logging
-from models import OrderPositionDetails, ChosenGroupModifierDetails
+from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
 
 
 def _nice_join(strs):
@@ -53,7 +53,33 @@ def _group_item_dicts(item_dicts):
     return result
 
 
+def set_modifiers(items):
+    mod_items = []
+    for item in items:
+        menu_item = MenuItem.get_by_id(int(item['item_id']))
+        menu_item.chosen_single_modifiers = []
+        for single_modifier in item['single_modifiers']:
+            single_modifier_obj = SingleModifier.get_by_id(int(single_modifier['single_modifier_id']))
+            for i in xrange(single_modifier['quantity']):
+                menu_item.chosen_single_modifiers.append(single_modifier_obj)
+        menu_item.chosen_group_modifiers = []
+        for group_modifier in item['group_modifiers']:
+            group_modifier_obj = GroupModifier.get_by_id(int(group_modifier['group_modifier_id']))
+            for choice in group_modifier_obj.choices:
+                if choice.title == group_modifier['choice']:
+                    group_modifier_obj.choice = choice
+            if group_modifier_obj.choice:
+                for i in xrange(group_modifier['quantity']):
+                    menu_item.chosen_group_modifiers.append(group_modifier_obj)
+        for i in xrange(item['quantity']):
+            mod_items.append(menu_item)
+    return mod_items
+
+
 def validate_order(client, items, payment_info, venue, delivery_time, with_details=False):
+
+    items = set_modifiers(items)
+
     item_dicts = []
     for item in items:
         price = item.price
@@ -101,7 +127,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, with_detai
                 revenue=item_dict['revenue'],
                 promos=item_dict['promos'],
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
-                group_modifiers=[ChosenGroupModifierDetails(chosen_group_modifier_name=modifier.choice,
+                group_modifiers=[ChosenGroupModifierDetails(chosen_group_modifier_name=modifier.choice.title,
                                                             group_modifier=modifier.key)
                                  for modifier in item_dict['group_modifiers']]
             )
