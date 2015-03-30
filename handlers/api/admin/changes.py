@@ -8,7 +8,7 @@ from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
-    NEW_ORDER, SharedFreeCup, WALLET_PAYMENT_TYPE
+    NEW_ORDER, SharedFreeCup, WALLET_PAYMENT_TYPE, Venue
 
 __author__ = 'ilyazorin'
 
@@ -106,7 +106,8 @@ class PostponeOrderHandler(AdminApiHandler):
         order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
-        local_delivery_time = order.delivery_time + config.TIMEZONE_OFFSET
+        venue = Venue.get_by_id(order.venue_id)
+        local_delivery_time = order.delivery_time + datetime.timedelta(hours=venue.timezone_offset)
         time_str = local_delivery_time.strftime("%H:%M")
         client = Client.get_by_id(order.client_id)
         push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, time_str)

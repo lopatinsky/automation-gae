@@ -1,11 +1,10 @@
 # coding=utf-8
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from config import config
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
     CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue, CREATING_ORDER
-from methods.excel import send_excel_file
 
 
 _STATUS_STRINGS = {
@@ -28,9 +27,9 @@ def _order_data(order):
     dct = {
         "order_id": order.key.id(),
         "status": _STATUS_STRINGS[order.status],
-        "date": (order.date_created + config.TIMEZONE_OFFSET).strftime("%d.%m.%Y"),
-        "created_time": (order.date_created + config.TIMEZONE_OFFSET).strftime("%H:%M:%S"),
-        "delivery_time": (order.delivery_time + config.TIMEZONE_OFFSET).strftime("%H:%M:%S"),
+        "date": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%d.%m.%Y"),
+        "created_time": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
+        "delivery_time": (order.delivery_time + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
         "payment_type": _PAYMENT_TYPE_STRINGS[order.payment_type_id],
         "total_sum": order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0,
         "venue_revenue": sum(d.revenue for d in order.item_details),

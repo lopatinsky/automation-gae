@@ -9,7 +9,7 @@ from config import config
 from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
-    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, WALLET_PAYMENT_TYPE
+    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, WALLET_PAYMENT_TYPE, Venue
 
 
 def format_order(order):
@@ -47,7 +47,8 @@ class CheckTimeHandler(WebAdminApiHandler):
         order.delivery_time += datetime.timedelta(minutes=mins)
         order.put()
 
-        local_delivery_time = order.delivery_time + config.TIMEZONE_OFFSET
+        venue = Venue.get_by_id(order.venue_id)
+        local_delivery_time = order.delivery_time + datetime.timedelta(hours=venue.timezone_offset)
         push_time_str = local_delivery_time.strftime("%H:%M")
         client = Client.get_by_id(order.client_id)
         push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order_id, push_time_str)

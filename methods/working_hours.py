@@ -34,8 +34,6 @@ def check(working_days, working_hours, time, overrides=None):
 
     overrides_dict = _parse_overrides(overrides)
 
-    time += config.TIMEZONE_OFFSET
-
     def check_day(date):
         weekday = date.isoweekday()
         date_schedule = schedule.get(weekday)

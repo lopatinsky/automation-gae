@@ -123,7 +123,7 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
                 clients_id.remove(client_id)
             else:
                 client = Client.get_by_id(client_id)
-                client.last_order_date = last_order.date_created + config.TIMEZONE_OFFSET
+                client.last_order_date = last_order.date_created
                 clients.append(client)
 
         html_file = jinja2.get_jinja2(app=self.app).render_template(

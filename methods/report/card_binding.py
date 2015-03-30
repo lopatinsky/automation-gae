@@ -42,10 +42,9 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             clients = [client]
 
     for client in clients:
-        client.created += config.TIMEZONE_OFFSET
         sms = Notification.query(Notification.client_id == client.key.id(), Notification.type == SMS_PASSIVE).get()
         if sms:
-            client.sms_date = sms.created + config.TIMEZONE_OFFSET if sms.created else None
+            client.sms_date = sms.created if sms.created else None
         else:
             client.sms_date = None
         client.attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
@@ -57,8 +56,8 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             elif not attempt.success:
                 client.card_errors.append(attempt.error) if hasattr(attempt, 'error') else None
             elif attempt.success:
-                client.card_end_date = attempt.updated + config.TIMEZONE_OFFSET if attempt.updated else None
-                client.card_start_date = attempt.created + config.TIMEZONE_OFFSET if attempt.created else None
+                client.card_end_date = attempt.updated if attempt.updated else None
+                client.card_start_date = attempt.created if attempt.created else None
 
     clients_with_card = []
     passive_clients = []

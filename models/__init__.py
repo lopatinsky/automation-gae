@@ -153,6 +153,8 @@ class Venue(ndb.Model):
     takeout_only = ndb.BooleanProperty(indexed=False, default=False)
     active = ndb.BooleanProperty(required=True, default=False)
 
+    timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
+
     owner = ndb.StringProperty()
     inn = ndb.StringProperty()
     manager = ndb.StringProperty()
@@ -189,7 +191,7 @@ class Venue(ndb.Model):
         }
 
     def is_open(self, minutes_offset=0):
-        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
+        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset) + datetime.timedelta(hours=self.timezone_offset)
         return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
 
 
