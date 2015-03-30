@@ -117,6 +117,9 @@ app = WSGIApplication([
         Route('/promo_info', api.PromoInfoHandler),
         Route('/history', api.HistoryHandler),
 
+        Route('/wallet/balance', api.WalletBalanceHandler),
+        Route('/wallet/deposit', api.DepositToWalletHandler),
+
         Route('/update/promo', api.UpdateOrderPromos),
         PathPrefixRoute('/shared', [
             Route('/info', api.GetSharedInfo),

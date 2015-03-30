@@ -17,6 +17,8 @@ class ProductionConfig(DoubleBConfig):
     ALFA_LOGIN = ''
     ALFA_PASSWORD = ''
 
+    WALLET_API_KEY = "NTY1OTMxMzU4NjU2OTIxNsN7jorhvqRjzwKVYGSxDVSX5raI"
+
     DEBUG = False
 
     BRANCH_IO_TAG = 'production'
@@ -35,6 +37,8 @@ class TestingConfig(DoubleBConfig):
     ALFA_BASE_URL = "https://test.paymentgate.ru/testpayment"
     ALFA_LOGIN = 'empatika_autopay-api'
     ALFA_PASSWORD = 'empatika_autopay'
+
+    WALLET_API_KEY = "NTYzNDQ3MjU2OTQ3MDk3Nt5XvGjSyGwIzlf7F-SjVSdv9LyF"
 
     DEBUG = True
     BRANCH_IO_TAG = 'test'

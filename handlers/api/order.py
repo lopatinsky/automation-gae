@@ -7,10 +7,11 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, versions
+from methods import alfa_bank, empatika_promos, orders, versions, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
 from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SingleModifier, GroupModifier
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SingleModifier, GroupModifier, \
+    WALLET_PAYMENT_TYPE
 from google.appengine.api import taskqueue
 from methods.email_mandrill import send_email
 from webapp2_extras import jinja2
@@ -127,6 +128,9 @@ class OrderHandler(ApiHandler):
                 if not success:
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
 
+            if payment_type_id == WALLET_PAYMENT_TYPE:
+                empatika_wallet.pay(client_id, order_id, total_sum)
+
             client.put()
             self.order.status = NEW_ORDER
             self.order.put()
@@ -188,6 +192,12 @@ class ReturnOrderHandler(ApiHandler):
                     try:
                         empatika_promos.cancel_activation(order.payment_id)
                     except empatika_promos.EmpatikaPromosError as e:
+                        logging.exception(e)
+                        self.abort(400)
+                elif order.payment_type_id == WALLET_PAYMENT_TYPE:
+                    try:
+                        empatika_wallet.reverse(order.client_id, order_id)
+                    except empatika_wallet.EmpatikaWalletError as e:
                         logging.exception(e)
                         self.abort(400)
 
