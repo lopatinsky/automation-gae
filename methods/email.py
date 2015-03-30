@@ -1,13 +1,12 @@
-from google.appengine.api import app_identity, mail
+from google.appengine.api import app_identity, mail, namespace_manager
 from config import config
 
 _EMAIL_DOMAIN = "%s.appspotmail.com" % app_identity.get_application_id()
 
 
 def send_error(scope, subject, body, html=None):
-    subject = "[DoubleB] " + subject
-    if config.DEBUG:
-        subject = "[Test]" + subject
+    namespace = namespace_manager.get_namespace()
+    subject = "[Auto][%s] " % namespace + subject
     sender = "%s_errors@%s" % (scope, _EMAIL_DOMAIN)
     recipients = config.EMAILS.get(scope, "mdburshteyn@gmail.com")
     kw = {'html': html} if html else {}

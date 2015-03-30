@@ -9,10 +9,11 @@ from menu import MenuHandler
 from registration import RegistrationHandler
 from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler, CheckOrderHandler, \
     AddReturnCommentHandler
-from promo_info import PromoInfoHandler, DemoInfoHandler
+from promo_info import DemoInfoHandler
 from client import ClientHandler
 from history import HistoryHandler
 from response_order_status import CheckOrderSuccessHandler, ClientSettingSuccessHandler
+from wallet import DepositToWalletHandler, WalletBalanceHandler
 from update_order import UpdateOrderPromos
 from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, GetPreText
 from twilio import ReceiveSms

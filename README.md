@@ -19,6 +19,8 @@
 >           * [Get status of orders](#markdown-header-get-status-of-orders)
 >           * [Get orders history](#markdown-header-get-orders-history)
 >           * [Cancel order](#markdown-header-cancel-order)
+>           * [Get wallet balance](#markdown-header-get-wallet-balance)
+>           * [Deposit money from card to wallet](#markdown-header-deposit-money-from-card-to-wallet)
 >           * [Add return comment to canceled order](#markdown-header-add-return-comment-to-canceled-order)
 >           * [Get shared info](#markdown-header-get-shared-info)
 >       * [Endpoints for admins](#markdown-header-endpoints-for-admins)
@@ -446,6 +448,49 @@ Response on failure:
 #!js
 {
     "error": 1,
+    "description": error_description // string
+}
+```
+
+### Get wallet balance
+
+POST `/api/wallet/balance`
+
+Parameters:
+
+* `client_id`: string
+
+```
+#!js
+{
+    "balance": client_new_balance // int
+}
+```
+
+### Deposit money from card to wallet
+
+POST `/api/wallet/deposit`
+
+Parameters:
+
+* `client_id`: string
+* `binding_id`: string
+* `amount`: int (in rubles)
+
+Success response:
+
+```
+#!js
+{
+    "balance": client_new_balance // int
+}
+```
+
+Error response:
+
+```
+#!js
+{
     "description": error_description // string
 }
 ```
