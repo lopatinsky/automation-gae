@@ -139,6 +139,7 @@ class MenuCategory(ndb.Model):
             'info': {
                 'category_id': str(self.key.id()),
                 'title': self.title,
+                'pic': self.picture,
                 'restrictions': {
                     'venues': [str(restrict.id()) for restrict in self.restrictions]
                 }
