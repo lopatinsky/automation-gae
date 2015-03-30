@@ -11,7 +11,6 @@ from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
 from config import config
 from methods.empatika_promos import register_order
 
-__author__ = 'ilyazorin'
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
@@ -91,15 +90,6 @@ class MenuItem(ndb.Model):
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
-
-    @property
-    def price_for_old_version(self):
-        if self.price >= 300:
-            return 300
-        elif self.price >= 250:
-            return 250
-        else:
-            return 150
 
     def dict(self):
         dct = {
@@ -238,7 +228,6 @@ class Order(ndb.Model):
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     promos = ndb.StringProperty(repeated=True, indexed=False)
-    mastercard = ndb.BooleanProperty(indexed=True)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
 
@@ -316,7 +305,6 @@ class Client(ndb.Model):
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
     email = ndb.StringProperty()
-    has_mastercard_orders = ndb.BooleanProperty(default=False, indexed=False)
     created = ndb.DateTimeProperty(auto_now_add=True)
 
     name_confirmed = ndb.BooleanProperty(default=False)
