@@ -114,7 +114,6 @@ app = WSGIApplication([
         Route('/check_order', api.CheckOrderHandler),
         Route('/status.php', api.StatusHandler),
         Route('/return.php', api.ReturnOrderHandler),
-        Route('/promo_info', api.PromoInfoHandler),
         Route('/history', api.HistoryHandler),
 
         Route('/wallet/balance', api.WalletBalanceHandler),
@@ -171,7 +170,7 @@ app = WSGIApplication([
 
     Route('/get/splash', share.GATrackSplashHandler),
     Route('/get/splash/<button:[ia]>', share.GATrackSplashHandler),
-], debug=config.DEBUG, config=webapp2_config)
+], config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)
 

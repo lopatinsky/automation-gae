@@ -1,54 +1,41 @@
-import datetime
-from google.appengine.api import app_identity
+import threading
+from google.appengine.ext import ndb
 
 
-class DoubleBConfig(object):
-    TIMEZONE_OFFSET = datetime.timedelta(hours=3)  # TODO this is hardcoded!!!
-
-    CANCEL_ALLOWED_WITHIN = 30  # seconds after creation
-    CANCEL_ALLOWED_BEFORE = 3  # minutes before delivery_time
+class Config(ndb.Model):
+    CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
+    CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
 
     CARD_BINDING_REQUIRED = True
-    GEOPUSH_SEND_RADIUS = 500
+    
+    ALFA_BASE_URL = ndb.StringProperty(indexed=False, default="https://test.paymentgate.ru/testpayment")
+    ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
+    ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
 
+    WALLET_API_KEY = ndb.StringProperty(indexed=False)
 
-class ProductionConfig(DoubleBConfig):
-    ALFA_BASE_URL = "https://engine.paymentgate.ru/payment"
-    ALFA_LOGIN = ''
-    ALFA_PASSWORD = ''
-
-    WALLET_API_KEY = "NTY1OTMxMzU4NjU2OTIxNsN7jorhvqRjzwKVYGSxDVSX5raI"
-
-    DEBUG = False
-
-    BRANCH_IO_TAG = 'production'
-
-    EMAILS = {
+    EMAILS = ndb.JsonProperty(default={
         "server": "admins",
-        "order": "admins",
-        "network": "admins",
-        "analytics": "admins",
-        "ping": "admins",
-        "receipt": "dvpermyakov1@gmail.com"
-    }
+    })
+
+    @classmethod
+    def get(cls):
+        return cls.get_by_id(1)
 
 
-class TestingConfig(DoubleBConfig):
-    ALFA_BASE_URL = "https://test.paymentgate.ru/testpayment"
-    ALFA_LOGIN = 'empatika_autopay-api'
-    ALFA_PASSWORD = 'empatika_autopay'
+class LocalConfigProxy(object):
+    _local = threading.local()
 
-    WALLET_API_KEY = "NTYzNDQ3MjU2OTQ3MDk3Nt5XvGjSyGwIzlf7F-SjVSdv9LyF"
+    @property
+    def _config_object(self):
+        try:
+            self._local.config
+        except AttributeError:
+            self._local.config = Config.get()
+        return self._local.config
 
-    DEBUG = True
-    BRANCH_IO_TAG = 'test'
-
-    EMAILS = {
-        "receipt": "dvpermyakov1@gmail.com"
-    }
+    def __getattr__(self, item):
+        return getattr(self._config_object, item)
 
 
-if app_identity.get_application_id() == "doubleb-automation-production":
-    config = ProductionConfig()
-else:
-    config = TestingConfig()
+config = LocalConfigProxy()
