@@ -196,6 +196,9 @@ class ChosenGroupModifierDetails(ndb.Model):
     group_modifier = ndb.KeyProperty(kind=GroupModifier)
     chosen_group_modifier_name = ndb.StringProperty()
 
+    def group_modifier_obj(self):
+        return self.group_modifier, self.chosen_group_modifier_name
+
 
 class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
@@ -277,13 +280,24 @@ class Order(ndb.Model):
             "items": []
         }
 
-        for item_key, count in Counter(self.items).items():
-            item = item_key.get()
+        item_dicts = []
+        for item_detail in self.item_details:
+            item_dicts.append({
+                'item': item_detail.item.get(),
+                'price': item_detail.price,
+                'single_modifier_keys':  item_detail.single_modifiers,
+                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
+            })
+
+        from methods.orders.validation import group_item_dicts
+        for item_dict in group_item_dicts(item_dicts):
             dct["items"].append({
-                "id": item_key.id(),
-                "title": item.title,
-                "price": item.price,
-                "quantity": count
+                "id": item_dict['id'],
+                "title": item_dict['title'],
+                "price": item_dict['price_without_promos'],
+                "quantity": item_dict['quantity'],
+                "single_modifiers": item_dict['single_modifiers'],
+                "group_modifiers": item_dict['group_modifiers']
             })
         return dct
 

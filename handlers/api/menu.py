@@ -1,5 +1,5 @@
 from handlers.api.base import ApiHandler
-from models import MenuCategory, STATUS_AVAILABLE
+from models import MenuCategory, STATUS_AVAILABLE, MenuItem
 
 
 def _get_menu():
