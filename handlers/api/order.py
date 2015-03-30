@@ -1,7 +1,7 @@
 # coding:utf-8
 import logging
 from google.appengine.api import memcache
-from google.appengine.ext.ndb import GeoPt
+from google.appengine.ext.ndb import GeoPt, Key
 from config import config
 from handlers.api.base import ApiHandler
 import json
@@ -80,26 +80,8 @@ class OrderHandler(ApiHandler):
         payment_type = PaymentType.get_by_id(str(payment_type_id))
 
         if payment_type.status == STATUS_AVAILABLE:
-            items = []
-            for item in response_json['items']:
-                menu_item = MenuItem.get_by_id(int(item['item_id']))
-                menu_item.chosen_single_modifiers = []
-                for single_modifier in item['single_modifiers']:
-                    single_modifier_obj = SingleModifier.get_by_id(int(single_modifier['single_modifier_id']))
-                    for i in xrange(single_modifier['quantity']):
-                        menu_item.chosen_single_modifiers.append(single_modifier_obj)
-                menu_item.chosen_group_modifiers = []
-                for group_modifier in item['group_modifiers']:
-                    group_modifier_obj = GroupModifier.get_by_id(int(group_modifier['group_modifier_id']))
-                    for choice in group_modifier_obj.choices:
-                        if choice.title == group_modifier['choice']:
-                            group_modifier_obj.choice = choice
-                    if group_modifier_obj.choice:
-                        for i in xrange(group_modifier['quantity']):
-                            menu_item.group_modifiers.append(group_modifier_obj)
-                for i in xrange(item['quantity']):
-                    items.append(menu_item)
-            item_keys = [item.key for item in items]
+
+            item_keys = [Key('MenuItem', int(item['item_id'])) for item in response_json['items']]
 
             after_error = response_json.get("after_error")
             if after_error:
@@ -111,8 +93,8 @@ class OrderHandler(ApiHandler):
                     self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
                     return
 
-            validation_result = validate_order(client, items, response_json['payment'], venue, delivery_time_minutes,
-                                               True)
+            validation_result = validate_order(client, response_json['items'], response_json['payment'], venue,
+                                               delivery_time_minutes, True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -123,21 +105,14 @@ class OrderHandler(ApiHandler):
             item_details = validation_result["details"]
             promo_list = [promo['id'] for promo in validation_result["promos"]]
 
-            # mastercard
-            payment_id = response_json['payment'].get('payment_id')
-            mastercard = response_json['payment'].get('mastercard', False)
-
-            if "master" in promo_list:
-                client.has_mastercard_orders = True
-
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
-                payment_type_id=payment_type_id, promos=promo_list, mastercard=mastercard, items=item_keys,
+                payment_type_id=payment_type_id, promos=promo_list, items=item_keys,
                 item_details=item_details)
             self.order.put()
 
-            if payment_type_id == CARD_PAYMENT_TYPE and not payment_id:
+            if payment_type_id == CARD_PAYMENT_TYPE:
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
@@ -155,31 +130,6 @@ class OrderHandler(ApiHandler):
             client.put()
             self.order.status = NEW_ORDER
             self.order.put()
-
-            if config.DEBUG:
-                dict_items = self.order.dict()
-                total = {
-                    'quantity': len(items),
-                    'sum': total_sum
-                }
-                date = datetime.utcnow() + config.TIMEZONE_OFFSET  # TODO: set self.order.created
-                phone = venue.phone_numbers[0] if venue.phone_numbers else None
-                values = {
-                    'goods': dict_items['items'],
-                    'total': total,
-                    'mastercard': response_json['payment'].get('mastercard', False),
-                    'order_number': self.order.key.id(),
-                    'date': date.strftime('%d/%m/%Y'),
-                    'time': date.strftime('%H:%M'),
-                    'address': venue.description,
-                    'phone': '+%s (%s) %s %s %s' % (phone[0], phone[1:4], phone[4:7], phone[7:9], phone[9:]) if phone else None,
-                    'pan': '**** %s' % response_json['payment'].get('card_pan', ''),
-                    'owner': venue.owner if venue.owner else '',
-                    'inn': venue.inn if venue.inn else '',
-                    'manager': u'Анна Милянская'
-                }
-                html_body = jinja2.get_jinja2(app=self.app).render_template('receipt.html', **values)
-                send_email(config.EMAILS.get('receipt'), client.email, 'Заказ в кофейне Дабдби', html_body)
 
             if versions.supports_check_order_success(self.request):
                 taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
@@ -245,16 +195,6 @@ class ReturnOrderHandler(ApiHandler):
                 order.return_datetime = datetime.utcnow()
                 order.put()
 
-                client = Client.get_by_id(order.client_id)
-                if order.mastercard and client.has_mastercard_orders:
-                    # if this was the only mastercard order, make the user eligible for discount again
-                    other_mastercard_order = Order.query(Order.client_id == order.client_id,
-                                                         Order.mastercard == True,
-                                                         Order.status.IN([NEW_ORDER, READY_ORDER])).get()
-                    if not other_mastercard_order:
-                        client.has_mastercard_orders = False
-                        client.put()
-
                 self.render_json({
                     'error': 0,
                     'order_id': order.key.id()
@@ -284,6 +224,7 @@ class AddReturnCommentHandler(ApiHandler):
 
 class CheckOrderHandler(ApiHandler):
     def post(self):
+        logging.info(self.request.POST)
 
         client_id = self.request.get_range('client_id')
         client = Client.get_by_id(client_id)
