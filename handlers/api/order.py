@@ -85,12 +85,12 @@ class OrderHandler(ApiHandler):
                 menu_item = MenuItem.get_by_id(int(item['item_id']))
                 menu_item.chosen_single_modifiers = []
                 for single_modifier in item['single_modifiers']:
-                    single_modifier_obj = SingleModifier.get_by_id(single_modifier['single_modifier_id'])
+                    single_modifier_obj = SingleModifier.get_by_id(int(single_modifier['single_modifier_id']))
                     for i in xrange(single_modifier['quantity']):
                         menu_item.chosen_single_modifiers.append(single_modifier_obj)
                 menu_item.chosen_group_modifiers = []
                 for group_modifier in item['group_modifiers']:
-                    group_modifier_obj = GroupModifier.get_by_id(group_modifier['group_modifier_id'])
+                    group_modifier_obj = GroupModifier.get_by_id(int(group_modifier['group_modifier_id']))
                     for choice in group_modifier_obj.choices:
                         if choice.title == group_modifier['choice']:
                             group_modifier_obj.choice = choice
