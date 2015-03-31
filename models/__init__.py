@@ -93,7 +93,7 @@ class MenuItem(ndb.Model):
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
     stop_lists = ndb.KeyProperty(repeated=True)    # kind=Venue (temporary use)
 
-    def dict(self):
+    def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
             'title': self.title,
@@ -109,6 +109,8 @@ class MenuItem(ndb.Model):
                 'venues': [str(restrict.id()) for restrict in self.restrictions]
             }
         }
+        if without_restrictions:
+            del dct['restrictions']
         return dct
 
 
@@ -118,13 +120,17 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    def dict(self):
+    def dict(self, venue=None):
         items = []
         for item in self.menu_items:
             item = item.get()
             if item.status != STATUS_AVAILABLE:
                 continue
-            items.append(item.dict())
+            if not venue:
+                items.append(item.dict())
+            else:
+                if venue.key not in item.restrictions:
+                    items.append(item.dict(without_restrictions=True))
         return {
             'info': {
                 'category_id': str(self.key.id()),
