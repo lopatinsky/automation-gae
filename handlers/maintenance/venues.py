@@ -13,7 +13,7 @@ class VenueListHandler(BaseHandler):
 class AddRestrictionHandler(BaseHandler):
     def get(self):
         venue_id = self.request.get_range('venue_id')
-        venue_key = ndb.Key('Venue', str(venue_id))
+        venue_key = ndb.Key('Venue', venue_id)
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)

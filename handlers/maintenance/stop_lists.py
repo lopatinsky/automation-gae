@@ -17,7 +17,7 @@ class StopListsHandler(BaseHandler):
         products = [product for product in MenuItem.query(MenuItem.status == STATUS_AVAILABLE).fetch()
                     if venue.key not in product.restrictions]
         for product in products:
-            if venue.key in product.stop_lists:
+            if product.key in venue.stop_lists:
                 product.stopped = True
             else:
                 product.stopped = False
@@ -28,13 +28,14 @@ class StopListsHandler(BaseHandler):
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)
-        products = MenuItem.query().fetch()
+        products = [product for product in MenuItem.query(MenuItem.status == STATUS_AVAILABLE).fetch()
+                    if venue.key not in product.restrictions]
         for product in products:
             stopped = not bool(self.request.get(str(product.key.id())))
-            if stopped and venue.key not in product.stop_lists:
-                product.stop_lists.append(venue.key)
-                product.put()
-            if not stopped and venue.key in product.stop_lists:
-                product.stop_lists.remove(venue.key)
-                product.put()
+            if stopped and product.key not in venue.stop_lists:
+                venue.stop_lists.append(product.key)
+                venue.put()
+            if not stopped and product.key in venue.stop_lists:
+                venue.stop_lists.remove(product.key)
+                venue.put()
         self.redirect_to('main_stop_list')

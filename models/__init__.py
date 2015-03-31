@@ -91,7 +91,6 @@ class MenuItem(ndb.Model):
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
-    stop_lists = ndb.KeyProperty(repeated=True)    # kind=Venue (temporary use)
 
     def dict(self, without_restrictions=False):
         dct = {
@@ -120,6 +119,8 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+
     def dict(self, venue=None):
         items = []
         for item in self.menu_items:
@@ -131,14 +132,18 @@ class MenuCategory(ndb.Model):
             else:
                 if venue.key not in item.restrictions:
                     items.append(item.dict(without_restrictions=True))
-        return {
+        dct = {
             'info': {
                 'category_id': str(self.key.id()),
                 'title': self.title,
-                'pic': self.picture
+                'pic': self.picture,
+                'restrictions': [str(restrict.id()) for restrict in self.restrictions]
             },
             'items': items
         }
+        if venue:
+            del dct['info']['restrictions']
+        return dct
 
 
 class Venue(ndb.Model):
@@ -148,7 +153,6 @@ class Venue(ndb.Model):
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     working_days = ndb.StringProperty(indexed=False)
     working_hours = ndb.StringProperty(indexed=False)
-    menu = ndb.KeyProperty(kind=MenuCategory, repeated=True, indexed=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
@@ -156,10 +160,15 @@ class Venue(ndb.Model):
     active = ndb.BooleanProperty(required=True, default=False)
 
     timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
+    stop_lists = ndb.KeyProperty(kind=MenuItem, repeated=True)
 
-    owner = ndb.StringProperty()
-    inn = ndb.StringProperty()
-    manager = ndb.StringProperty()
+    def dynamic_info(self):
+        return {
+            'stop_list': {
+                'items': [str(item_key.id()) for item_key in MenuItem.query().fetch(keys_only=True)
+                          if item_key in self.stop_lists]
+            }
+        }
 
     def dict(self, user_location=None):
         distance = 0

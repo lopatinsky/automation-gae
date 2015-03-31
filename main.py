@@ -76,7 +76,6 @@ app = WSGIApplication([
         ]),
 
         Route('/check_menu', maintenance.CheckMenuHandler),
-
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 
@@ -95,6 +94,8 @@ app = WSGIApplication([
             Route('/orders/<order_id:\d+>/cancel', admin.CancelOrderHandler),
             Route('/orders/<order_id:\d+>/close', admin.DoneOrderHandler),
             Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
+
+            Route('/stop_list/set', admin.SetStopListHandler),
         ]),
 
         PathPrefixRoute('/payment', [
@@ -112,6 +113,7 @@ app = WSGIApplication([
         Route('/venues.php', api.VenuesHandler),
         Route('/client.php', api.ClientHandler),
         Route('/menu.php', api.MenuHandler),
+        Route('/dynamic_info', api.DynamicInfoHandler),
         Route('/order.php', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
         Route('/add_return_comment', api.AddReturnCommentHandler),
