@@ -70,6 +70,11 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/stop_list', [
+            Route('/main', maintenance.MainStopListHandler, 'main_stop_list'),
+            Route('/list', maintenance.StopListsHandler),
+        ]),
+
         Route('/check_menu', maintenance.CheckMenuHandler),
 
         Route('/name_confirmation', maintenance.NameConfirmationHandler),

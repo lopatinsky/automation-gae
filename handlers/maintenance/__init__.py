@@ -12,3 +12,4 @@ from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandle
     AddSingleModifierHandler, AddGroupModifierHandler, AddGroupModifierItemHandler
 from check_menu import CheckMenuHandler
 from venues import VenueListHandler, AddRestrictionHandler
+from stop_lists import MainStopListHandler, StopListsHandler

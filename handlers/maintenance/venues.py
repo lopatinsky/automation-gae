@@ -29,8 +29,8 @@ class AddRestrictionHandler(BaseHandler):
         })
 
     def post(self):
-        venue_id = self.request.get('venue_id')
-        venue_key = ndb.Key('Venue', str(venue_id))
+        venue_id = self.request.get_range('venue_id')
+        venue_key = ndb.Key('Venue', venue_id)
         for product in MenuItem.query().fetch():
             confirmed = bool(self.request.get(str(product.key.id())))
             if venue_key in product.restrictions:

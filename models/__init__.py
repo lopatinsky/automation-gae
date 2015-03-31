@@ -90,7 +90,8 @@ class MenuItem(ndb.Model):
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+    stop_lists = ndb.KeyProperty(repeated=True)    # kind=Venue (temporary use)
 
     def dict(self):
         dct = {
@@ -117,8 +118,6 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue
-
     def dict(self):
         items = []
         for item in self.menu_items:
@@ -130,10 +129,7 @@ class MenuCategory(ndb.Model):
             'info': {
                 'category_id': str(self.key.id()),
                 'title': self.title,
-                'pic': self.picture,
-                'restrictions': {
-                    'venues': [str(restrict.id()) for restrict in self.restrictions]
-                }
+                'pic': self.picture
             },
             'items': items
         }
