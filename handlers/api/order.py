@@ -7,14 +7,11 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, versions, empatika_wallet
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
-from models import Client, MenuItem, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SingleModifier, GroupModifier, \
-    WALLET_PAYMENT_TYPE
+from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, WALLET_PAYMENT_TYPE
 from google.appengine.api import taskqueue
-from methods.email_mandrill import send_email
-from webapp2_extras import jinja2
 
 SECONDS_WAITING_BEFORE_SMS = 15
 

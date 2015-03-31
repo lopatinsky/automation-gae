@@ -11,6 +11,34 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
+def _check_modifier_consistency(item_dicts, errors):
+    description = None
+    for item_dict in item_dicts:
+        item = item_dict['item']
+        for single_modifier in item.chosen_single_modifiers:
+            if single_modifier.key not in item.single_modifiers:
+                description = u'%s нет для %s' % (single_modifier.title, item.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
+        for group_modifier in item.chosen_group_modifiers:
+            if group_modifier.key not in item.group_modifiers:
+                description = u'%s нет для %s' % (group_modifier.title, item.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
+            choice_confirmed = False
+            for choice in group_modifier.choices:
+                if choice.title == group_modifier.choice.title:
+                    choice_confirmed = True
+            if not choice_confirmed:
+                description = u'%s нет для %s' % (group_modifier.choice.title, group_modifier.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
+    if description:
+        return False
+    else:
+        return True
+
+
 def _check_venue(venue, delivery_time, errors):
     if venue:
         if not venue.active:
@@ -24,6 +52,35 @@ def _check_venue(venue, delivery_time, errors):
             errors.append(u"Кофейня временно не принимает заказы: %s" % venue.problem)
             return False
     return True
+
+
+def _check_restrictions(venue, item_dicts, errors):
+    description = None
+    for item_dict in item_dicts:
+        item = item_dict['item']
+        if venue.key in item.restrictions:
+            description = u'%s не имеет %s' % (venue.title, item.title)
+            errors.append(description)
+            item_dict['errors'].append(description)
+    if description:
+        return False
+    else:
+        return True
+
+
+def _check_stop_list(venue, item_dicts, errors):
+    description = None
+    for item_dict in item_dicts:
+        item = item_dict['item']
+        if item.key in venue.stop_lists:
+            description = u'%s положил %s в стоп лист' % (venue.title, item.title)
+            errors.append(description)
+            item_dict['errors'].append(description)
+    if description:
+        return False
+    else:
+        return True
+
 
 
 def _unique(seq):
@@ -135,31 +192,33 @@ def set_modifiers(items):
     return mod_items
 
 
+def set_price_with_modifiers(items):
+    for item in items:
+        price = item.price
+        for single_modifier in item.chosen_single_modifiers:
+            price += single_modifier.price
+        for group_modifier in item.chosen_group_modifiers:
+            price += group_modifier.choice.price
+        item.total_price = price
+    return items
+
+
 def validate_order(client, items, payment_info, venue, delivery_time, with_details=False):
 
     items = set_modifiers(items)
+    items = set_price_with_modifiers(items)
 
     item_dicts = []
     for item in items:
-        price = item.price
-        errors = []
-        for single_modifier in item.chosen_single_modifiers:
-            price += single_modifier.price
-            if single_modifier.key not in item.single_modifiers:
-                errors.append('%s нет для %s' % (item.title, single_modifier.title))
-        for group_modifier in item.chosen_group_modifiers:
-            price += group_modifier.choice.price
-            if group_modifier.key not in item.group_modifiers:
-                errors.append('%s нет для %s' % (item.title, group_modifier.title))
         item_dicts.append({
             'item': item,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
             'group_modifier_keys': [(modifier.key, modifier.choice.title) for modifier in item.chosen_group_modifiers],
-            'price': price,
-            'revenue': price,
-            'errors': errors,
+            'price': item.total_price,
+            'revenue': item.total_price,
+            'errors': [],
             'promos': []
         })
 
@@ -167,6 +226,9 @@ def validate_order(client, items, payment_info, venue, delivery_time, with_detai
     promos_info = []
 
     valid = _check_venue(venue, delivery_time, errors)
+    valid = _check_modifier_consistency(item_dicts, errors) and valid
+    valid = _check_restrictions(venue, item_dicts, errors) and valid
+    valid = _check_stop_list(venue, item_dicts, errors) and valid
 
     total_sum = 0
     for item_dict in item_dicts:
