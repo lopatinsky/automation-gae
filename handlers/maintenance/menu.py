@@ -80,7 +80,6 @@ class AddMenuItemHandler(BaseHandler):
         title = self.request.get('title')
         description = self.request.get('description')
         price = self.request.get_range('price')
-        cost_price = self.request.get_range('cost_price')
         picture = self.request.get('picture')
         weight = self.request.get_range('weight')
         volume = self.request.get_range('volume')
@@ -89,11 +88,10 @@ class AddMenuItemHandler(BaseHandler):
         item = MenuItem(title=title)
         item.description = description
         item.price = price
-        item.cost_price = cost_price
         item.kal = kal
         item.volume = volume
         item.weight = weight
-        item.picture = picture
+        item.picture = picture if picture else None
         item.put()
         category.menu_items.append(item.key)
         category.put()

@@ -82,7 +82,6 @@ def _check_stop_list(venue, item_dicts, errors):
         return True
 
 
-
 def _unique(seq):
     if not seq:
         return []
@@ -203,7 +202,7 @@ def set_price_with_modifiers(items):
     return items
 
 
-def validate_order(client, items, payment_info, venue, delivery_time, with_details=False):
+def validate_order(client, items, payment_info, venue, delivery_time, delivery_type, with_details=False):
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)

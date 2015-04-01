@@ -74,6 +74,8 @@ class OrderHandler(ApiHandler):
             client.email = client_email
             client.put()
 
+        delivery_type = int(response_json.get('delivery_type'))
+
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
 
@@ -92,7 +94,7 @@ class OrderHandler(ApiHandler):
                     return
 
             validation_result = validate_order(client, response_json['items'], response_json['payment'], venue,
-                                               delivery_time_minutes, True)
+                                               delivery_time_minutes, delivery_type, True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -250,5 +252,7 @@ class CheckOrderHandler(ApiHandler):
         delivery_time = self.request.get_range('delivery_time')
         items = json.loads(self.request.get('items'))
 
-        result = orders.validate_order(client, items, payment_info, venue, delivery_time)
+        delivery_type = int(self.request.get('delivery_type'))
+
+        result = orders.validate_order(client, items, payment_info, venue, delivery_time, delivery_type)
         self.render_json(result)

@@ -36,6 +36,9 @@ SMS_PASSIVE = 2
 SINGLE_MODIFIER = 0
 GROUP_MODIFIER = 1
 
+SELF = 0
+IN_CAFE = 1
+
 
 class SingleModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
@@ -84,7 +87,6 @@ class MenuItem(ndb.Model):
     weight = ndb.FloatProperty(indexed=False)
     volume = ndb.FloatProperty(indexed=False)
     price = ndb.IntegerProperty(required=True, indexed=False)
-    cost_price = ndb.IntegerProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
@@ -146,6 +148,37 @@ class MenuCategory(ndb.Model):
         return dct
 
 
+class PromoOutcome(ndb.Model):
+    DISCOUNT = 0
+    GIFT = 1
+    BONUS = 2
+
+    item = ndb.KeyProperty(kind=MenuItem)  # if item is None and item_required is True => apply for all items
+    item_required = ndb.BooleanProperty(default=False)
+    method = ndb.IntegerProperty(choices=[DISCOUNT, GIFT, BONUS], required=True)
+    value = ndb.IntegerProperty(required=True)
+
+
+class PromoCondition(ndb.Model):
+    CHECK_TYPE_DELIVERY = 0
+
+    item = ndb.KeyProperty(kind=MenuItem)  # if item is None and item_required is True => apply for all items
+    item_required = ndb.BooleanProperty(default=False)
+    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY], required=True)
+    value = ndb.IntegerProperty()
+
+
+class Promo(ndb.Model):
+    title = ndb.StringProperty(required=True)
+    description = ndb.StringProperty()
+    conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
+    outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
+
+    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
+    priority = ndb.IntegerProperty()
+    more_one = ndb.BooleanProperty(default=True)
+
+
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
@@ -153,14 +186,15 @@ class Venue(ndb.Model):
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     working_days = ndb.StringProperty(indexed=False)
     working_hours = ndb.StringProperty(indexed=False)
+    takeout_only = ndb.BooleanProperty(indexed=False, default=False)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
-    takeout_only = ndb.BooleanProperty(indexed=False, default=False)
     active = ndb.BooleanProperty(required=True, default=False)
-
+    type_deliveries = ndb.IntegerProperty(required=True)
     timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
     stop_lists = ndb.KeyProperty(kind=MenuItem, repeated=True)
+    promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
 
     def dynamic_info(self):
         return {
@@ -218,7 +252,7 @@ class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
     price = ndb.IntegerProperty(required=True)
     revenue = ndb.IntegerProperty(required=True)
-    promos = ndb.StringProperty(repeated=True)
+    promos = ndb.KeyProperty(kind=Promo, repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
 
@@ -244,10 +278,9 @@ class Order(ndb.Model):
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
-    promos = ndb.StringProperty(repeated=True, indexed=False)
+    promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
-
     first_for_client = ndb.BooleanProperty()
 
     def dict(self):
