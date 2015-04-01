@@ -81,15 +81,23 @@ class AddMenuItemHandler(BaseHandler):
         description = self.request.get('description')
         price = self.request.get_range('price')
         cost_price = self.request.get_range('cost_price')
+        picture = self.request.get('picture')
+        weight = self.request.get_range('weight')
+        volume = self.request.get_range('volume')
+        kal = self.request.get_range('kal')
 
         item = MenuItem(title=title)
         item.description = description
         item.price = price
         item.cost_price = cost_price
+        item.kal = kal
+        item.volume = volume
+        item.weight = weight
+        item.picture = picture
         item.put()
         category.menu_items.append(item.key)
         category.put()
-        self.redirect('/menu/item/list?category_id=%s' % category_id)
+        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
 
 
 class SelectProductForModifierHandler(BaseHandler):
@@ -184,7 +192,9 @@ class AddSingleModifierHandler(BaseHandler):
     def post(self):
         name = self.request.get('name')
         price = self.request.get_range('price')
-        SingleModifier(title=name, price=price).put()
+        min = self.request.get_range('min')
+        max = self.request.get_range('max')
+        SingleModifier(title=name, price=price, min_amount=min, max_amount=max).put()
         self.redirect_to('modifiers_list')
 
 
