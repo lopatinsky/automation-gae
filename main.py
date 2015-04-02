@@ -95,6 +95,8 @@ app = WSGIApplication([
             Route('/orders/<order_id:\d+>/close', admin.DoneOrderHandler),
             Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
 
+            Route('/menu', admin.MenuHandler),
+            Route('/dynamic_info', admin.DynamicInfoHandler),
             Route('/stop_list/set', admin.SetStopListHandler),
         ]),
 

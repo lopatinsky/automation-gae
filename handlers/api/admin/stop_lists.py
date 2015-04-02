@@ -5,21 +5,22 @@ from methods.auth import api_user_required
 from models import MenuItem, STATUS_AVAILABLE
 
 
-class SetStopListHandler(AdminApiHandler):
-    def send_error(self, description):
-        self.response.set_status(400)
-        self.render_json({
-            'success': False,
-            'description': description
-        })
+class MenuHandler(AdminApiHandler):
+    def get(self):
+        venue = self.venue_or_error
+        self.redirect('/api/menu.php?venue_id=%s&dynamic' % venue.key.id())
 
+
+class DynamicInfoHandler(AdminApiHandler):
+    def get(self):
+        venue = self.venue_or_error
+        self.redirect('/api/dynamic_info?venue_id=%s' % venue.key.id())
+
+
+class SetStopListHandler(AdminApiHandler):
     @api_user_required
     def post(self):
-        venue = None
-        if self.user.venue:
-            venue = self.user.venue.get()
-        if not venue:
-            self.send_error('Не связки с точкой кофейни')
+        venue = self.venue_or_error
         stop_list = json.loads(self.request.get('stop_list'))
         for item_id in stop_list.get('stopped'):
             item = MenuItem.get_by_id(int(item_id))

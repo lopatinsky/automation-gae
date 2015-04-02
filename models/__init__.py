@@ -106,6 +106,7 @@ class MenuItem(ndb.Model):
     description = ndb.StringProperty(indexed=False)
     picture = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
+    cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False)
     volume = ndb.FloatProperty(indexed=False)
     price = ndb.IntegerProperty(required=True, indexed=False)
