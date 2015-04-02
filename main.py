@@ -123,6 +123,8 @@ app = WSGIApplication([
         Route('/return.php', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
 
+        Route('/promos', api.PromoInfoHandler),
+
         Route('/wallet/balance', api.WalletBalanceHandler),
         Route('/wallet/deposit', api.DepositToWalletHandler),
 
