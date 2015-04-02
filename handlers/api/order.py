@@ -236,12 +236,13 @@ class CheckOrderHandler(ApiHandler):
 
         client_id = self.request.get_range('client_id')
         client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
 
         venue_id = self.request.get_range('venue_id')
-        try:
-            venue = Venue.get_by_id(venue_id)
-        except:
-            venue = None
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
 
         raw_payment_info = self.request.get('payment')
         try:
