@@ -161,7 +161,9 @@ class MenuCategory(ndb.Model):
                 'category_id': str(self.key.id()),
                 'title': self.title,
                 'pic': self.picture,
-                'restrictions': [str(restrict.id()) for restrict in self.restrictions]
+                'restrictions': {
+                    'venues': [str(restrict.id()) for restrict in self.restrictions]
+                }
             },
             'items': items
         }
@@ -279,7 +281,7 @@ class ChosenGroupModifierDetails(ndb.Model):
 class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
     price = ndb.IntegerProperty(required=True)
-    revenue = ndb.IntegerProperty(required=True)
+    revenue = ndb.FloatProperty(required=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
@@ -287,7 +289,7 @@ class OrderPositionDetails(ndb.Model):
 
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
-    total_sum = ndb.IntegerProperty(indexed=False)
+    total_sum = ndb.FloatProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
                                                          CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
                                  default=CREATING_ORDER)

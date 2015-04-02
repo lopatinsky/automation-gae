@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+from google.appengine.ext import ndb
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
 from promos import apply_promos
 
@@ -227,7 +228,6 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
     valid = _check_restrictions(venue, item_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, errors) and valid
 
-    promos_info = []
     item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type)
 
     total_sum = 0
@@ -254,7 +254,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
                 item=item_dict['item'].key,
                 price=item_dict['price'],
                 revenue=item_dict['revenue'],
-                promos=item_dict['promos'],
+                promos=[ndb.Key('Promo', promo_id) for promo_id in item_dict['promos']],
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
                 group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
                                                             group_modifier=modifier.key)

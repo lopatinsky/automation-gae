@@ -1,6 +1,7 @@
 # coding:utf-8
 import logging
 from google.appengine.api import memcache
+from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt, Key
 from config import config
 from handlers.api.base import ApiHandler
@@ -103,7 +104,7 @@ class OrderHandler(ApiHandler):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
 
             item_details = validation_result["details"]
-            promo_list = [promo['id'] for promo in validation_result["promos"]]
+            promo_list = [ndb.Key('Promo', promo_id) for promo_id in validation_result["promos"]]
 
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
