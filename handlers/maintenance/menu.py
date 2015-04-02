@@ -213,8 +213,7 @@ class AddGroupModifierItemHandler(BaseHandler):
     def post(self, group_modifier_id):
         name = self.request.get('name')
         price = self.request.get_range('price')
-        choice = GroupModifierChoice(title=name, price=price)
-        choice.put()
+        choice = GroupModifierChoice.create(title=name, price=price)
         group_modifier = GroupModifier.get_by_id(int(group_modifier_id))
         group_modifier.choices.append(choice)
         group_modifier.put()

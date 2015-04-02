@@ -1,6 +1,7 @@
 from models import Promo, PromoCondition, PromoOutcome
 from conditions import check_condition_by_value
 from outcomes import set_discounts
+import logging
 
 
 def get_promos(venue):
@@ -16,12 +17,13 @@ def check_condition(condition, venue, client, item_dicts, payment_info, delivery
         return check_condition_by_value(condition, delivery_type)
 
 
-def set_outcome(promo_id, outcome, items):
-    if outcome == PromoOutcome.DISCOUNT:
+def set_outcome(outcome, items, promo_id):
+    if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(outcome, items, promo_id)
 
 
-def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, promos):
+def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type):
+    promos = []
     for promo in get_promos(venue):
         apply_promo = True
         for condition in promo.conditions:
@@ -30,7 +32,9 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                if set_outcome(outcome, item_dicts, promo.key.id()):
+                new_item_dicts = set_outcome(outcome, item_dicts, promo.key.id())
+                if new_item_dicts:
+                    item_dicts = new_item_dicts
                     if promo.key.id() not in promos:
                         promos.append(promo.key.id())
-    return promos
+    return item_dicts, promos

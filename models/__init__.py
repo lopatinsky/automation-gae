@@ -57,15 +57,37 @@ class SingleModifier(ndb.Model):
 
 
 class GroupModifierChoice(ndb.Model):
+    choice_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(default=0)
+
+    @staticmethod
+    def generate_id():
+        value = fastcounter.get_count("group_choice_id")
+        fastcounter.incr("group_choice_id")
+        return value + 1
+
+    @classmethod
+    def create(cls, title, price):
+        choice = cls(choice_id=GroupModifierChoice.generate_id(), title=title, price=price)
+        choice.put()
+        return choice
 
 
 class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
 
+    def get_choice_by_id(self, choice_id):
+        for choice in self.choices:
+            if choice_id == choice.choice_id:
+                return choice
+        return None
+
     def dict(self):
+        import logging
+        for choice in self.choices:
+            logging.info(choice)
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
@@ -73,7 +95,7 @@ class GroupModifier(ndb.Model):
                 {
                     'title': choice.title,
                     'price': choice.price,
-                    'id': choice.title
+                    'id': choice.choice_id
                 } for choice in self.choices
             ]
         }
@@ -153,8 +175,8 @@ class PromoOutcome(ndb.Model):
     GIFT = 1
     BONUS = 2
 
-    item = ndb.KeyProperty(kind=MenuItem)  # if item is None and item_required is True => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
+    item_required = ndb.BooleanProperty(default=True)
     method = ndb.IntegerProperty(choices=[DISCOUNT, GIFT, BONUS], required=True)
     value = ndb.IntegerProperty(required=True)
 
@@ -162,8 +184,8 @@ class PromoOutcome(ndb.Model):
 class PromoCondition(ndb.Model):
     CHECK_TYPE_DELIVERY = 0
 
-    item = ndb.KeyProperty(kind=MenuItem)  # if item is None and item_required is True => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
+    item_required = ndb.BooleanProperty(default=True)
     method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY], required=True)
     value = ndb.IntegerProperty()
 
@@ -178,6 +200,12 @@ class Promo(ndb.Model):
     priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)
 
+    def dict(self):
+        return {
+            'title': self.title,
+            'description': self.description
+        }
+
 
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
@@ -191,7 +219,7 @@ class Venue(ndb.Model):
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
     active = ndb.BooleanProperty(required=True, default=False)
-    type_deliveries = ndb.IntegerProperty(required=True)
+    type_deliveries = ndb.IntegerProperty(repeated=True)
     timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
     stop_lists = ndb.KeyProperty(kind=MenuItem, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
@@ -242,10 +270,10 @@ class Venue(ndb.Model):
 
 class ChosenGroupModifierDetails(ndb.Model):
     group_modifier = ndb.KeyProperty(kind=GroupModifier)
-    chosen_group_modifier_name = ndb.StringProperty()
+    group_choice_id = ndb.IntegerProperty()
 
     def group_modifier_obj(self):
-        return self.group_modifier, self.chosen_group_modifier_name
+        return self.group_modifier, self.group_choice_id
 
 
 class OrderPositionDetails(ndb.Model):

@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
+from promos import apply_promos
 
 
 def _nice_join(strs):
@@ -180,9 +181,7 @@ def set_modifiers(items):
         menu_item.chosen_group_modifiers = []
         for group_modifier in item['group_modifiers']:
             group_modifier_obj = GroupModifier.get_by_id(int(group_modifier['group_modifier_id']))
-            for choice in group_modifier_obj.choices:
-                if choice.title == group_modifier['choice']:
-                    group_modifier_obj.choice = choice
+            group_modifier_obj.choice = group_modifier_obj.get_choice_by_id(int(group_modifier['choice']))
             if group_modifier_obj.choice:
                 for i in xrange(group_modifier['quantity']):
                     menu_item.chosen_group_modifiers.append(group_modifier_obj)
@@ -203,7 +202,6 @@ def set_price_with_modifiers(items):
 
 
 def validate_order(client, items, payment_info, venue, delivery_time, delivery_type, with_details=False):
-
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
 
@@ -214,7 +212,8 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
-            'group_modifier_keys': [(modifier.key, modifier.choice.title) for modifier in item.chosen_group_modifiers],
+            'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
+                                    for modifier in item.chosen_group_modifiers],
             'price': item.total_price,
             'revenue': item.total_price,
             'errors': [],
@@ -222,16 +221,20 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
         })
 
     errors = []
-    promos_info = []
-
-    valid = _check_venue(venue, delivery_time, errors)
+    valid = True
+    valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_modifier_consistency(item_dicts, errors) and valid
     valid = _check_restrictions(venue, item_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, errors) and valid
 
+    promos_info = []
+    item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type)
+
     total_sum = 0
     for item_dict in item_dicts:
-        total_sum += item_dict['price']
+        total_sum += item_dict['revenue']
+
+    logging.info(item_dicts)
 
     grouped_item_dicts = group_item_dicts(item_dicts)
 
@@ -253,7 +256,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
                 revenue=item_dict['revenue'],
                 promos=item_dict['promos'],
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
-                group_modifiers=[ChosenGroupModifierDetails(chosen_group_modifier_name=modifier.choice.title,
+                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
                                                             group_modifier=modifier.key)
                                  for modifier in item_dict['group_modifiers']]
             )

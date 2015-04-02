@@ -9,7 +9,7 @@ from menu import MenuHandler, DynamicInfoHandler
 from registration import RegistrationHandler
 from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler, CheckOrderHandler, \
     AddReturnCommentHandler
-from promo_info import DemoInfoHandler
+from promo_info import DemoInfoHandler, PromoInfoHandler
 from client import ClientHandler
 from history import HistoryHandler
 from response_order_status import CheckOrderSuccessHandler, ClientSettingSuccessHandler
