@@ -32,9 +32,7 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                new_item_dicts = set_outcome(outcome, item_dicts, promo.key.id())
-                if new_item_dicts:
-                    item_dicts = new_item_dicts
+                if set_outcome(outcome, item_dicts, promo.key.id()):
                     if promo.key.id() not in promos:
                         promos.append(promo.key.id())
     return item_dicts, promos
