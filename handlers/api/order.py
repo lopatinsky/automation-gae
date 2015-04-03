@@ -104,7 +104,7 @@ class OrderHandler(ApiHandler):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
 
             item_details = validation_result["details"]
-            promo_list = [ndb.Key('Promo', promo_id) for promo_id in validation_result["promos"]]
+            promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
 
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
@@ -118,6 +118,7 @@ class OrderHandler(ApiHandler):
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
+                total_sum = int(total_sum * 100)
                 success, result = alfa_bank.create_simple(total_sum, order_id, return_url, alpha_client_id)
                 if not success:
                     error = result

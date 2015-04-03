@@ -134,7 +134,7 @@ def unbind_card(binding_id):
 
 
 def create_simple(amount, order_number, return_url, client_id):
-    result = create(amount * 100, order_number, return_url, client_id, 'MOBILE')
+    result = create(amount, order_number, return_url, client_id, 'MOBILE')
     if not _success(result):
         return False, _error_message(result)
     return True, result['orderId']
