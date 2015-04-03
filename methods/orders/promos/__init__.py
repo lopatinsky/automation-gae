@@ -17,9 +17,9 @@ def check_condition(condition, venue, client, item_dicts, payment_info, delivery
         return check_condition_by_value(condition, delivery_type)
 
 
-def set_outcome(outcome, items, promo_id):
+def set_outcome(outcome, items, promo):
     if outcome.method == PromoOutcome.DISCOUNT:
-        return set_discounts(outcome, items, promo_id)
+        return set_discounts(outcome, items, promo)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type):
@@ -32,7 +32,7 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                if set_outcome(outcome, item_dicts, promo.key.id()):
+                if set_outcome(outcome, item_dicts, promo):
                     if promo.key.id() not in promos:
-                        promos.append(promo.key.id())
+                        promos.append(promo)
     return item_dicts, promos

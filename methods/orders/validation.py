@@ -92,6 +92,16 @@ def _unique(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
+def _group_promos(promos):
+    if not promos:
+        return []
+    result = {}
+    for promo in promos:
+        if promo.key.id() not in result:
+            result[promo.key.id()] = promo
+    return [promo.validation_dict() for promo in result.values()]
+
+
 def _is_equal(item_dict1, item_dict2):
     if not item_dict1 or not item_dict2:
         return False
@@ -145,7 +155,7 @@ def group_item_dicts(item_dicts):
         if _is_equal(item_dict, possible_group.get('item_dict')):
             possible_group['quantity'] += 1
             if item_dict.get('promos'):
-                possible_group['promos'].extend(item_dict['promos'])
+                possible_group['promos'].extend(item_dict.get('promos'))
             if item_dict.get('errors'):
                 possible_group['errors'].extend(item_dict['errors'])
         else:
@@ -165,7 +175,7 @@ def group_item_dicts(item_dicts):
     if result[-1].get('item_dict'):
             del result[-1]['item_dict']
     for dct in result:
-        dct['promos'] = _unique(dct.get('promos'))
+        dct['promos'] = _group_promos(dct.get('promos'))
         dct['errors'] = _unique(dct.get('errors'))
     return result
 
@@ -242,7 +252,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
         'valid': valid,
         'errors': errors,
         'items': grouped_item_dicts,
-        'promos': promos_info,
+        'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum
     }
     logging.info(result)
@@ -254,7 +264,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
                 item=item_dict['item'].key,
                 price=item_dict['price'],
                 revenue=item_dict['revenue'],
-                promos=[ndb.Key('Promo', promo_id) for promo_id in item_dict['promos']],
+                promos=[promo.key for promo in item_dict['promos']],
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
                 group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
                                                             group_modifier=modifier.key)

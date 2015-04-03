@@ -195,6 +195,7 @@ class PromoCondition(ndb.Model):
 
 class Promo(ndb.Model):
     title = ndb.StringProperty(required=True)
+    title_for_user = ndb.StringProperty()
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
@@ -205,8 +206,15 @@ class Promo(ndb.Model):
 
     def dict(self):
         return {
+            'id': self.key.id(),
             'title': self.title,
             'description': self.description
+        }
+
+    def validation_dict(self):
+        return {
+            'id': self.key.id(),
+            'text': self.title_for_user if self.title_for_user else self.title
         }
 
 
