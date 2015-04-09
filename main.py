@@ -57,6 +57,7 @@ app = WSGIApplication([
                 Route('/list', maintenance.ListMenuItemsHandler),
                 Route('/info', maintenance.MenuItemInfoHandler),
                 Route('/add', maintenance.AddMenuItemHandler),
+                Route('/edit', maintenance.EditMenuItemHandler),
             ]),
             Route('/product/modifiers/list', maintenance.ModifiersForProductHandler),
             Route('/product/modifiers/select', maintenance.SelectProductForModifierHandler),

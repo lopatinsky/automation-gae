@@ -5,17 +5,28 @@
 </head>
 <body>
     <form method="post">
-        <label>Category_id ({{ category.title }}):
-            <input disabled type="text" name="category_id" value="{{ category.key.id() }}">
-        </label><br>
-        <label>Title: <input type="text" name="title"></label><br>
-        <label>Description: <input type="text" name="description"></label><br>
-        <label>Kal: <input type="number" name="kal"></label><br>
-        <label>Price: <input type="number" name="price"></label><br>
-        <label>Volume(ml): <input type="number" name="volume"></label><br>
-        <label>Weight: <input type="number" name="weight"></label><br>
-        <label>Picture: <input type="text" name="picture"></label><br>
+        {% if category %}
+            <label>Category_id ({{ category.title }}):
+                <input disabled type="text" name="category_id" value="{{ category.key.id() }}">
+            </label><br>
+        {% endif %}
+        {% if product %}
+            <label>Product_id:
+                <input type="text" name="product_id" value="{{ product.key.id() }}">
+            </label>
+        {% endif %}
+        {% for param in ('title', 'description', 'kal', 'price', 'volume', 'weight', 'picture') %}
+            <div>
+                <label for="{{ param }}">{{ param }}</label>
+                <input type="text" name="{{ param }}" id="{{ param }}"
+                       {% if product %}
+                            value="{{ product[param] or "" }}"
+                       {% endif %}
+                />
+            </div>
+        {% endfor %}
         <input type="submit" value="Отправить"/>
+        <a href="{{ '/mt/menu/item/list?category_id=%s' % category.key.id()  }}">Назад</a>
     </form>
 </body>
 </html>

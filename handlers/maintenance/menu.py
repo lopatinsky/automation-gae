@@ -77,24 +77,49 @@ class AddMenuItemHandler(BaseHandler):
         category = MenuCategory.get_by_id(category_id)
         if not category:
             self.abort(400)
-        title = self.request.get('title')
-        description = self.request.get('description')
-        price = self.request.get_range('price')
-        picture = self.request.get('picture')
-        weight = self.request.get_range('weight')
-        volume = self.request.get_range('volume')
-        kal = self.request.get_range('kal')
 
-        item = MenuItem(title=title)
-        item.description = description
-        item.price = price
-        item.kal = kal
-        item.volume = volume
-        item.weight = weight
-        item.picture = picture if picture else None
+        item = MenuItem(title=self.request.get('title'))
+        item.description = self.request.get('description')
+        item.price = self.request.get_range('price')
+        item.kal = self.request.get_range('kal')
+        item.volume = self.request.get_range('volume')
+        item.weight = self.request.get_range('weight')
+        item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.put()
         category.menu_items.append(item.key)
         category.put()
+        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+
+
+class EditMenuItemHandler(BaseHandler):
+    def get(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        product_id = self.request.get_range('item_id')
+        product = MenuItem.get_by_id(product_id)
+        if not product:
+            self.abort(400)
+        self.render('/menu/add_item.html', product=product, category=category)
+
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        product_id = self.request.get_range('product_id')
+        item = MenuItem.get_by_id(product_id)
+        if not item:
+            self.abort(400)
+
+        item.description = self.request.get('description')
+        item.price = self.request.get_range('price')
+        item.kal = self.request.get_range('kal')
+        item.volume = self.request.get_range('volume')
+        item.weight = self.request.get_range('weight')
+        item.picture = self.request.get('picture') if self.request.get('picture') else None
+        item.put()
         self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
 
 
