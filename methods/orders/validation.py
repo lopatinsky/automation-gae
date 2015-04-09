@@ -127,7 +127,7 @@ def _group_single_modifiers(modifiers):
             result[modifier.id()]['quantity'] += 1
         else:
             result[modifier.id()] = {
-                'id': modifier.id(),
+                'id': str(modifier.id()),
                 'quantity': 1
             }
     return result.values()
@@ -141,8 +141,8 @@ def _group_group_modifiers(modifiers):
             result[key]['quantity'] += 1
         else:
             result[key] = {
-                'id': modifier[0].id(),
-                'choice': modifier[1],
+                'id': str(modifier[0].id()),
+                'choice': str(modifier[1]),
                 'quantity': 1
             }
     return result.values()
@@ -162,7 +162,7 @@ def group_item_dicts(item_dicts):
             if possible_group.get('item_dict'):
                 del possible_group['item_dict']
             result.append({
-                'id': item_dict['item'].key.id(),
+                'id': str(item_dict['item'].key.id()),
                 'title': item_dict['item'].title,
                 'promos': item_dict.get('promos'),
                 'errors': item_dict.get('errors'),

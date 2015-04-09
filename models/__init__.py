@@ -95,7 +95,7 @@ class GroupModifier(ndb.Model):
                 {
                     'title': choice.title,
                     'price': choice.price,
-                    'id': choice.choice_id
+                    'id': str(choice.choice_id)
                 } for choice in self.choices
             ]
         }
@@ -357,12 +357,12 @@ class Order(ndb.Model):
 
     def history_dict(self):
         dct = {
-            "order_id": self.key.id(),
+            "order_id": str(self.key.id()),
             "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
-            "venue_id": self.venue_id,
+            "venue_id": str(self.venue_id),
             "items": []
         }
 
