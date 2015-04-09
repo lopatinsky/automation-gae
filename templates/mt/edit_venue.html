@@ -22,12 +22,20 @@
         {% for param in ('title', 'description', 'coordinates', 'working_days', 'working_hours', 'holiday_schedule', 'problem') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}" value="{{ venue[param] or "" }}" style="width:500px"/>
+                <input type="text" name="{{ param }}" id="{{ param }}"
+                       {% if venue %}
+                            value="{{ venue[param] or "" }}"
+                       {% endif %}
+                style="width:500px"/>
             </div>
         {% endfor %}
         <div>
             <label for="phone_numbers">phone numbers (10 digits, comma-separated)</label>
-            <input type="text" name="phone_numbers" id="phone_numbers" value="{{ ','.join(venue.phone_numbers) }}" style="width:500px"/>
+            <input type="text" name="phone_numbers" id="phone_numbers"
+                   {% if venue %}
+                        value="{{ ','.join(venue.phone_numbers) }}"
+                   {% endif %}
+            style="width:500px"/>
         </div>
         <div>
             <label></label>

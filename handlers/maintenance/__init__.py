@@ -1,5 +1,3 @@
-from enable_venues import EnableVenuesHandler
-from edit_venue import EditVenueHandler
 from admins import AdminsHandler
 from report import ReportHandler, ClientsReportHandler, MenuItemsReportHandler, VenuesReportHandler, \
     VenuesReportWithDatesHandler, OrdersReportHandler, RepeatedOrdersHandler, SquareTableHandler,\
@@ -11,5 +9,5 @@ from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandle
     CreateCategoryHandler, MainMenuHandler, SelectProductForModifierHandler, ModifiersForProductHandler, ModifierList, \
     AddSingleModifierHandler, AddGroupModifierHandler, AddGroupModifierItemHandler
 from check_menu import CheckMenuHandler
-from venues import VenueListHandler, AddRestrictionHandler
+from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, EnableVenuesHandler, CreateVenueHandler
 from stop_lists import MainStopListHandler, StopListsHandler

@@ -3,6 +3,60 @@ from base import BaseHandler
 from models import Venue, MenuItem
 
 
+class CreateVenueHandler(BaseHandler):
+    def get(self):
+        self.render('edit_venue.html')
+
+    def post(self):
+        venue = Venue()
+        raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule', 'problem')
+        for param in raw_params:
+            setattr(venue, param, self.request.get(param))
+        venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
+        venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
+        venue.put()
+        self.redirect('/mt/venues')
+
+
+class EnableVenuesHandler(BaseHandler):
+    def get(self):
+        venues = Venue.query().fetch()
+        self.render('enable_venues.html', venues=venues)
+
+    def post(self):
+        venues = Venue.query().fetch()
+        for v in venues:
+            venue_id = str(v.key.id())
+            new_active = bool(self.request.get(venue_id))
+            if v.active != new_active:
+                v.active = new_active
+                v.put()
+        self.render('enable_venues.html', venues=venues, success=True)
+
+
+class EditVenueHandler(BaseHandler):
+    def get(self, venue_id):
+        venue = Venue.get_by_id(int(venue_id))
+        if not venue:
+            self.abort(404)
+        self.render('edit_venue.html', venue=venue)
+
+    def post(self, venue_id):
+        venue = Venue.get_by_id(int(venue_id))
+        if not venue:
+            self.abort(404)
+
+        raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule', 'problem')
+        for param in raw_params:
+            setattr(venue, param, self.request.get(param))
+
+        venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
+        venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
+
+        venue.put()
+        self.render('edit_venue.html', venue=venue, success=True)
+
+
 class VenueListHandler(BaseHandler):
     def get(self):
         self.render('menu/venue_list.html', **{
