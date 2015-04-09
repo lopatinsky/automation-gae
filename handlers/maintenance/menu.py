@@ -1,7 +1,9 @@
+from google.appengine.ext import ndb
+
 __author__ = 'dvpermyakov'
 
 from base import BaseHandler
-from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier, GROUP_MODIFIER, GroupModifier, GroupModifierChoice
+from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier, GROUP_MODIFIER, GroupModifier, GroupModifierChoice, Venue
 import logging
 
 
@@ -120,6 +122,33 @@ class EditMenuItemHandler(BaseHandler):
         item.weight = self.request.get_range('weight')
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.put()
+        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+
+
+class RemoveMenuItemHandler(BaseHandler):
+    @staticmethod
+    @ndb.transactional(xg=True)
+    def delete_item_from_anything(venues, category, item):
+        category.menu_items.remove(item.key)
+        category.put()
+        for venue in venues:
+            if item.key in venue.stop_lists:
+                venue.stop_lists.remove(item.key)
+                venue.put()
+        item.key.delete()
+
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        item_id = self.request.get_range('item_id')
+        item = MenuItem.get_by_id(item_id)
+        if not item:
+            self.abort(400)
+        if item.key not in category.menu_items:
+            self.abort(409)
+        self.delete_item_from_anything(Venue.query().fetch(), category, item)
         self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
 
 

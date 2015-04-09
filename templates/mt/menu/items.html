@@ -8,7 +8,14 @@
     <form method="post">
         {% for item in items %}
             <label><input type="checkbox" name={{ item.key.id() }} {% if item.status %}checked{% endif %}></label>
-            <a href="{{ '/mt/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a><br>
+            <a href="{{ '/mt/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
+            <form method="post">
+                <button formaction="{{ '/mt/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
+                        name="button" value="delete">
+                    Удалить
+                </button>
+            </form>
+            <br>
         {% endfor %}
         <input type="submit">
         <a href="/mt/menu/category/list">Назад</a>
