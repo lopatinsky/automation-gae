@@ -23,6 +23,7 @@ class CheckMenuHandler(BaseHandler):
         return data
 
     def get(self):
+        self.abort(501)  # this endpoint is not work!
         venue_ids = [
             1,  # mil
             4801814507552768,  # ftower
