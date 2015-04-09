@@ -46,5 +46,5 @@ class AdminApiHandler(ApiHandler):
         if self.user.venue:
             venue = self.user.venue.get()
         if not venue:
-            self.send_error(u'Не связки с точкой кофейни')
+            return self.send_error(u'Не связки с точкой кофейни')
         return venue
