@@ -86,9 +86,6 @@ class GroupModifier(ndb.Model):
         return None
 
     def dict(self):
-        import logging
-        for choice in self.choices:
-            logging.info(choice)
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
