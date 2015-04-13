@@ -72,12 +72,26 @@ def _check_restrictions(venue, item_dicts, errors):
 
 def _check_stop_list(venue, item_dicts, errors):
     description = None
+    stop_list_choices = [choice.get().choice_id for choice in venue.group_choice_modifier_stop_list]
     for item_dict in item_dicts:
         item = item_dict['item']
         if item.key in venue.stop_lists:
             description = u'%s положил %s в стоп лист' % (venue.title, item.title)
             errors.append(description)
             item_dict['errors'].append(description)
+        for single_modifier in item_dict['single_modifiers']:
+            if single_modifier.key in venue.single_modifiers_stop_list:
+                description = u'%s положил одиночный модификатор %s в стоп лист' % (venue.title, single_modifier.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
+        for group_modifier in item_dict['group_modifiers']:
+            logging.info(group_modifier.choice)
+            logging.info(stop_list_choices)
+            if group_modifier.choice.choice_id in stop_list_choices:
+                description = u'%s положил выбор группового модификатора %s в стоп лист' % \
+                              (venue.title, group_modifier.choice.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
     if description:
         return False
     else:
@@ -250,7 +264,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
 
     result = {
         'valid': valid,
-        'errors': errors,
+        'errors': _unique(errors),
         'items': grouped_item_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum
