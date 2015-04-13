@@ -15,7 +15,7 @@ class PaymentTypesHandler(BaseHandler):
             PaymentType(id=str(CARD_PAYMENT_TYPE), title='card', status=STATUS_UNAVAILABLE).put()
         wallet = PaymentType.get_by_id(str(WALLET_PAYMENT_TYPE))
         if not wallet:
-            PaymentType(id=str(WALLET_PAYMENT_TYPE), titla='wallet', status=STATUS_UNAVAILABLE).put()
+            PaymentType(id=str(WALLET_PAYMENT_TYPE), title='wallet', status=STATUS_UNAVAILABLE).put()
         self.render('/payment_types.html', payments=PaymentType.query().fetch())
 
     def post(self):

@@ -22,7 +22,7 @@ class Config(ndb.Model):
     def get(cls):
         config = cls.get_by_id(1)
         if not config:
-            config = config(id=1)
+            config = Config(id=1)
             config.put()
         return config
 
