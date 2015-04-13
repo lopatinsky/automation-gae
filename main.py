@@ -21,9 +21,13 @@ webapp2_config = {
 app = WSGIApplication([
 
     PathPrefixRoute('/mt', [
+        Route('/automation', maintenance.AutomationMainHandler),
+
         Route('/venues', maintenance.EnableVenuesHandler),
         Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
         Route('/venues/create', maintenance.CreateVenueHandler),
+
+        Route('/payment_types', maintenance.PaymentTypesHandler),
 
         Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),

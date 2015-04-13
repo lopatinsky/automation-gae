@@ -11,3 +11,5 @@ from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandle
 from check_menu import CheckMenuHandler
 from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, EnableVenuesHandler, CreateVenueHandler
 from stop_lists import MainStopListHandler, StopListsHandler
+from payment_type import PaymentTypesHandler
+from automation import AutomationMainHandler
