@@ -20,7 +20,11 @@ class Config(ndb.Model):
 
     @classmethod
     def get(cls):
-        return cls.get_by_id(1)
+        config = cls.get_by_id(1)
+        if not config:
+            config = config(id=1)
+            config.put()
+        return config
 
 
 class LocalConfigProxy(object):
