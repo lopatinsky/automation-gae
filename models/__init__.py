@@ -65,6 +65,7 @@ class GroupModifierChoice(ndb.Model):
     def generate_id():
         value = fastcounter.get_count("group_choice_id")
         fastcounter.incr("group_choice_id")
+        fastcounter.incr("group_choice_id")
         return value + 1
 
     @classmethod
@@ -144,7 +145,7 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use) TODO: not implemented
 
     def dict(self, venue=None):
         items = []
@@ -233,13 +234,16 @@ class Venue(ndb.Model):
     type_deliveries = ndb.IntegerProperty(repeated=True)
     timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
     stop_lists = ndb.KeyProperty(kind=MenuItem, repeated=True)
+    single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
 
     def dynamic_info(self):
         return {
             'stop_list': {
-                'items': [str(item_key.id()) for item_key in MenuItem.query().fetch(keys_only=True)
-                          if item_key in self.stop_lists]
+                'items': [str(item.id()) for item in self.stop_lists],
+                'single_modifiers': [str(item.id()) for item in self.single_modifiers_stop_list],
+                'group_modifier_choices': [str(item.get().choice_id) for item in self.group_choice_modifier_stop_list]
             }
         }
 

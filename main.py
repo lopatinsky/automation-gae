@@ -100,6 +100,7 @@ app = WSGIApplication([
             Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
 
             Route('/menu', admin.MenuHandler),
+            Route('/modifiers', admin.ModifiersHandler),
             Route('/dynamic_info', admin.DynamicInfoHandler),
             Route('/stop_list/set', admin.SetStopListHandler),
         ]),
@@ -119,6 +120,7 @@ app = WSGIApplication([
         Route('/venues.php', api.VenuesHandler),
         Route('/client.php', api.ClientHandler),
         Route('/menu.php', api.MenuHandler),
+        Route('/modifiers', api.ModifiersHandler),
         Route('/dynamic_info', api.DynamicInfoHandler),
         Route('/order.php', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
