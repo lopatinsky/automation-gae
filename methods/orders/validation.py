@@ -201,7 +201,6 @@ def set_modifiers(items):
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
-            logging.info(single_modifier)
             single_modifier_obj = SingleModifier.get_by_id(int(single_modifier['single_modifier_id']))
             for i in xrange(single_modifier['quantity']):
                 menu_item.chosen_single_modifiers.append(single_modifier_obj)
