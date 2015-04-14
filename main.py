@@ -31,7 +31,6 @@ app = WSGIApplication([
 
         Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
-
         PathPrefixRoute('/report', [
             Route('/clients', maintenance.ClientsReportHandler),
             Route('/menu_items', maintenance.MenuItemsReportHandler),
@@ -71,6 +70,7 @@ app = WSGIApplication([
                 Route('/add/single_modifier', maintenance.AddSingleModifierHandler),
                 Route('/add/group_modifier', maintenance.AddGroupModifierHandler),
                 Route('/add/<group_modifier_id:\d+>/group_modifier_item', maintenance.AddGroupModifierItemHandler),
+                Route('/choices/select', maintenance.SelectProductForChoiceHandler),
             ]),
             PathPrefixRoute('/venue', [
                 Route('/list', maintenance.VenueListHandler, 'venues_list'),

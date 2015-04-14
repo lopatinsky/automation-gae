@@ -37,6 +37,7 @@
             <th>Продукты с модификатором</th>
             <th>Имя выбора</th>
             <th>Цена выбора</th>
+            <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
             <tr>
@@ -46,7 +47,7 @@
                         Выбрать
                     </a>
                 </td>
-                <td colspan="2">
+                <td colspan="3">
                     <form method="get">
                         <button formaction="{{ '/mt/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
                             Добавить выбор
@@ -57,6 +58,9 @@
                     </tr><tr>
                     <td>{{ choice.title }}</td>
                     <td>{{ choice.price }}</td>
+                    <td>
+                        <a href="{{ '/mt/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
+                    </td>
                 {% endfor %}
             </tr>
         {% endfor %}

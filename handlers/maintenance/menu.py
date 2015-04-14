@@ -1,4 +1,5 @@
 from google.appengine.ext import ndb
+from methods.unique import unique
 
 __author__ = 'dvpermyakov'
 
@@ -162,20 +163,24 @@ class SelectProductForModifierHandler(BaseHandler):
             modifier = GroupModifier.get_by_id(self.request.get_range('modifier_id'))
         else:
             self.abort(400)
-        products = MenuItem.query().fetch()
-        for product in products:
-            if modifier_type == SINGLE_MODIFIER:
-                if modifier.key in product.single_modifiers:
-                    product.has_modifier = True
-                else:
-                    product.has_modifier = False
-            elif modifier_type == GROUP_MODIFIER:
-                if modifier.key in product.group_modifiers:
-                    product.has_modifier = True
-                else:
-                    product.has_modifier = False
+        categories = MenuCategory.query().fetch()
+        for category in categories:
+            category.products = []
+            for product in category.menu_items:
+                product = product.get()
+                category.products.append(product)
+                if modifier_type == SINGLE_MODIFIER:
+                    if modifier.key in product.single_modifiers:
+                        product.has_modifier = True
+                    else:
+                        product.has_modifier = False
+                elif modifier_type == GROUP_MODIFIER:
+                    if modifier.key in product.group_modifiers:
+                        product.has_modifier = True
+                    else:
+                        product.has_modifier = False
         self.render('/menu/select_products_modifier.html', **{
-            'products': products,
+            'categories': categories,
             'modifier': modifier,
             'modifier_type': modifier_type
         })
@@ -219,6 +224,50 @@ class SelectProductForModifierHandler(BaseHandler):
             self.redirect_to('modifiers_list')
 
 
+class SelectProductForChoiceHandler(BaseHandler):
+    def get_products(self, group_modifier, choice):
+        products = []
+        for product in MenuItem.query().fetch():
+            if group_modifier.key in product.group_modifiers:
+                products.append(product)
+            product.has_choice = choice.choice_id not in product.group_choice_restrictions
+        return products
+
+    def get(self):
+        choice_id = self.request.get_range('choice_id')
+        choice = GroupModifierChoice.get_by_choice_id(choice_id)
+        if not choice:
+            self.abort(400)
+        group_modifier = choice.get_group_modifier()
+        if not group_modifier:
+            self.abort(400)
+
+        self.render('/menu/select_group_choices.html', **{
+            'products': self.get_products(group_modifier, choice),
+            'choice': choice
+        })
+
+    def post(self):
+        choice_id = self.request.get_range('choice_id')
+        choice = GroupModifierChoice.get_by_choice_id(choice_id)
+        if not choice:
+            self.abort(400)
+        group_modifier = choice.get_group_modifier()
+        if not group_modifier:
+            self.abort(400)
+
+        for product in self.get_products(group_modifier, choice):
+            confirmed = bool(self.request.get(str(product.key.id())))
+            if confirmed and choice.choice_id in product.group_choice_restrictions:
+                product.group_choice_restrictions.remove(choice.choice_id)
+                product.put()
+            if not confirmed and choice.choice_id not in product.group_choice_restrictions:
+                product.group_choice_restrictions.append(choice.choice_id)
+                product.put()
+
+        self.redirect_to('modifiers_list')
+
+
 class ModifiersForProductHandler(BaseHandler):
     def get(self):
         product = MenuItem.get_by_id(self.request.get('product_id'))
@@ -239,7 +288,9 @@ class ModifierList(BaseHandler):
 
 class AddSingleModifierHandler(BaseHandler):
     def get(self):
-        self.render('/menu/add_modifier.html')
+        self.render('/menu/add_modifier.html', **{
+            'single_modifier': True
+        })
 
     def post(self):
         name = self.request.get('name')
@@ -255,21 +306,29 @@ class AddGroupModifierHandler(BaseHandler):
         self.render('/menu/add_group_modifier.html')
 
     def post(self):
-        name = self.request.get('name')
-        GroupModifier(title=name).put()
+        for name in unique(self.request.params.getall('name')):
+            if name:
+                GroupModifier(title=name).put()
         self.redirect_to('modifiers_list')
 
 
 class AddGroupModifierItemHandler(BaseHandler):
     def get(self, group_modifier_id):
-        self.render('/menu/add_modifier.html')
+        self.render('/menu/add_modifier.html', **{
+            'group_modifier_choice': True
+        })
 
     def post(self, group_modifier_id):
         name = self.request.get('name')
-        price = self.request.get_range('price')
-        choice = GroupModifierChoice.create(title=name, price=price)
+        prices = unique(self.request.params.getall('price'))
+
         group_modifier = GroupModifier.get_by_id(int(group_modifier_id))
-        group_modifier.choices.append(choice)
+        for price in prices:
+            if not len(price):
+                continue
+            price = int(price)
+            choice = GroupModifierChoice.create(title=name, price=price)
+            group_modifier.choices.append(choice)
         group_modifier.put()
         self.redirect_to('modifiers_list')
 

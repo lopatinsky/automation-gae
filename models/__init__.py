@@ -2,6 +2,7 @@
 
 from collections import Counter
 import datetime
+import random
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter, working_hours
@@ -63,16 +64,21 @@ class GroupModifierChoice(ndb.Model):
 
     @staticmethod
     def generate_id():
-        value = fastcounter.get_count("group_choice_id")
-        fastcounter.incr("group_choice_id")
-        fastcounter.incr("group_choice_id")
-        return value + 1
+        fastcounter.incr("group_choice_id", delta=100, update_interval=1)
+        return fastcounter.get_count("group_choice_id") + random.randint(1, 100)
 
     @classmethod
     def create(cls, title, price):
         choice = cls(choice_id=GroupModifierChoice.generate_id(), title=title, price=price)
         choice.put()
         return choice
+
+    @classmethod
+    def get_by_choice_id(cls, choice_id):  # use outside of group_modifier
+        return cls.query(cls.choice_id == choice_id).get()
+
+    def get_group_modifier(self):  # use outside of group_modifier
+        return GroupModifier.get_modifier_by_choice(self.choice_id)
 
 
 class GroupModifier(ndb.Model):
@@ -85,7 +91,15 @@ class GroupModifier(ndb.Model):
                 return choice
         return None
 
-    def dict(self):
+    @classmethod
+    def get_modifier_by_choice(cls, choice_id):
+        for modifier in cls.query().fetch():
+            for choice in modifier.choices:
+                if choice.choice_id == choice_id:
+                    return modifier
+        return None
+
+    def dict(self, product):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
@@ -94,7 +108,7 @@ class GroupModifier(ndb.Model):
                     'title': choice.title,
                     'price': choice.price,
                     'id': str(choice.choice_id)
-                } for choice in self.choices
+                } for choice in self.choices if choice.choice_id not in product.group_choice_restrictions
             ]
         }
 
@@ -114,6 +128,7 @@ class MenuItem(ndb.Model):
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+    group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
 
     def dict(self, without_restrictions=False):
         dct = {
@@ -126,7 +141,7 @@ class MenuItem(ndb.Model):
             'weight': self.weight,
             'volume': self.volume,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
-            'group_modifiers': [modifier.get().dict() for modifier in self.group_modifiers],
+            'group_modifiers': [modifier.get().dict(self) for modifier in self.group_modifiers],
             'restrictions': {
                 'venues': [str(restrict.id()) for restrict in self.restrictions]
             }
@@ -142,7 +157,7 @@ class MenuCategory(ndb.Model):
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use) TODO: not implemented
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
 
     def dict(self, venue=None):
         items = []

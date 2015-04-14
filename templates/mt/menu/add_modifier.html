@@ -1,7 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Одиночный модификатор</title>
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#add_price').click(function(e){
+                e.preventDefault();
+                $('#prices').append('<label>Цена:<input type="number" name="price"></label>');
+            });
+        });
+    </script>
 </head>
 <body>
     <form method="post">
@@ -10,21 +19,28 @@
             <input type="text" name="name">
         </label>
         <br>
-        <label>
-            Цена:
-            <input type="number" name="price">
-        </label>
+        <div id="prices">
+            <label>
+                Цена:
+                <input type="number" name="price">
+            </label>
+        </div>
         <br>
-        <label>
-            Минимальное кол-во (для одиночных модификаторов):
-            <input type="number" name="min">
-        </label>
-        <br>
-        <label>
-            Максимальное кол-во (для одиночных модификаторов):
-            <input type="number" name="max">
-        </label>
-        <br>
+        {% if group_modifier_choice %}
+            <button id="add_price">Добавить новую цену</button>
+        {% endif %}
+        {% if single_modifier %}
+            <label>
+                Минимальное кол-во (для одиночных модификаторов):
+                <input type="number" name="min">
+            </label>
+            <br>
+            <label>
+                Максимальное кол-во (для одиночных модификаторов):
+                <input type="number" name="max">
+            </label>
+            <br>
+        {% endif %}
         <input type="submit">
     </form>
     <a href="{{ '/mt/menu/modifiers/list' }}">Назад</a>

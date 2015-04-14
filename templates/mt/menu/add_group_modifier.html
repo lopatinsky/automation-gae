@@ -2,14 +2,26 @@
 <html>
 <head>
     <title>Групповой модификатор</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#add_name').click(function(e){
+                e.preventDefault();
+                $('#names').append('<label>Имя:<input type="text" name="name"></label>');
+            });
+        });
+    </script>
 </head>
 <body>
     <form method="post">
-        <label>
-            Имя:
-            <input type="text" name="name">
-        </label>
+        <div id="names">
+            <label>
+                Имя:
+                <input type="text" name="name">
+            </label>
+        </div>
         <br>
+        <button id="add_name">Добавить новый модификатор</button>
         <input type="submit">
     </form>
     <a href="{{ '/mt/menu/modifiers/list' }}">Назад</a>

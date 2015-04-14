@@ -9,11 +9,17 @@
         <input type="text" name="modifier_id" value="{{ modifier.key.id() }}" hidden>
         <input type="text" name="modifier_type" value="{{ modifier_type }}" hidden>
         <br>
-        {% for product in products %}
-             <label>
-                 <input type="checkbox" {% if product.has_modifier %} checked {% endif %} name={{ product.key.id() }}>
-                 {{ product.title }}
-             </label><br>
+        {% for category in categories %}
+            <h3>{{ category.title }}</h3>
+            {% for product in category.products %}
+                <div>
+                    <label>
+                         <input type="checkbox" {% if product.has_modifier %} checked {% endif %} name={{ product.key.id() }}>
+                         {{ product.title }}
+                     </label><br>
+                </div>
+
+            {% endfor %}
         {% endfor %}
         <label><input type="submit" value="Сохранить"></label>
     </form>
