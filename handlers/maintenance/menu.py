@@ -115,7 +115,7 @@ class EditMenuItemHandler(BaseHandler):
         item = MenuItem.get_by_id(product_id)
         if not item:
             self.abort(400)
-
+        item.title = self.request.get('title')
         item.description = self.request.get('description')
         item.price = self.request.get_range('price')
         item.kal = self.request.get_range('kal')
