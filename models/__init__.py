@@ -99,7 +99,9 @@ class GroupModifier(ndb.Model):
                     return modifier
         return None
 
-    def dict(self, product):
+    def dict(self, product=None):
+        choices = [choice for choice in self.choices
+                   if product is None or choice.choice_id not in product.group_choice_restrictions]
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
@@ -108,7 +110,7 @@ class GroupModifier(ndb.Model):
                     'title': choice.title,
                     'price': choice.price,
                     'id': str(choice.choice_id)
-                } for choice in self.choices if choice.choice_id not in product.group_choice_restrictions
+                } for choice in choices
             ]
         }
 
