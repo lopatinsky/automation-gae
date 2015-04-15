@@ -45,7 +45,11 @@
         </tr>
         {% for modifier in group_modifiers %}
             <tr>
-                <td rowspan="{{ modifier.choices|length + 1 }}">{{ modifier.title }}</td>
+                <td rowspan="{{ modifier.choices|length + 1 }}">
+                    <a href="{{ '/mt/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
+                        {{ modifier.title }}
+                    </a>
+                </td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
                         Выбрать

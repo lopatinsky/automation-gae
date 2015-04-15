@@ -308,7 +308,8 @@ class EditSingleModifierHandler(BaseHandler):
         if not single_modifier:
             self.abort(400)
         self.render('/menu/add_modifier.html', **{
-            'single_modifier': single_modifier
+            'single_modifier': True,
+            'single_modifier_obj': single_modifier
         })
 
     def post(self):
@@ -332,6 +333,26 @@ class AddGroupModifierHandler(BaseHandler):
         for name in unique(self.request.params.getall('name')):
             if name:
                 GroupModifier(title=name).put()
+        self.redirect_to('modifiers_list')
+
+
+class EditGroupModifierHandler(BaseHandler):
+    def get(self):
+        group_modifier_id = self.request.get_range('group_modifier_id')
+        group_modifier = GroupModifier.get_by_id(group_modifier_id)
+        if not group_modifier:
+            self.abort(400)
+        self.render('/menu/add_group_modifier.html', **{
+            'group_modifier': group_modifier
+        })
+
+    def post(self):
+        group_modifier_id = self.request.get_range('group_modifier_id')
+        group_modifier = GroupModifier.get_by_id(group_modifier_id)
+        if not group_modifier:
+            self.abort(400)
+        group_modifier.title = self.request.get('name')
+        group_modifier.put()
         self.redirect_to('modifiers_list')
 
 
