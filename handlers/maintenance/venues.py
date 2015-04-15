@@ -1,11 +1,27 @@
+# coding:utf-8
+import logging
 from google.appengine.ext import ndb
 from base import BaseHandler
 from models import Venue, MenuItem
+from methods import map
 
 
 class CreateVenueHandler(BaseHandler):
     def get(self):
-        self.render('edit_venue.html')
+        lat = self.request.get('lat')
+        lon = self.request.get('lon')
+        address = map.get_houses_by_coordinates(lat, lon)
+        address_str = ''
+        if len(address):
+            if address[0].get('address'):
+                address = address[0].get('address')
+                address_str = u'г. %s, ул. %s, д. %s' % (address.get('city'), address.get('street'), address.get('home'))
+        logging.info(address)
+        logging.info(address_str)
+        self.render('edit_venue.html', **{
+            'coordinates': '%s, %s' % (lat, lon) if lat else '',
+            'address': address_str
+        })
 
     def post(self):
         venue = Venue()
@@ -96,3 +112,15 @@ class AddRestrictionHandler(BaseHandler):
                     product.restrictions.append(venue_key)
                     product.put()
         self.redirect_to('venues_list')
+
+
+class MapVenuesHandler(BaseHandler):
+    def get(self):
+        venues = []
+        for venue in Venue.query().fetch():
+            venue.lat = venue.coordinates.lat
+            venue.lon = venue.coordinates.lon
+            venues.append(venue)
+        self.render('/map.html', **{
+            'venues': venues
+        })

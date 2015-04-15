@@ -25,7 +25,12 @@
                 <input type="text" name="{{ param }}" id="{{ param }}"
                        {% if venue %}
                             value="{{ venue[param] or "" }}"
+                       {% elif param == 'coordinates' and coordinates %}
+                            value="{{ coordinates  }}"
+                       {% elif param == 'description' and address %}
+                            value="{{ address }}"
                        {% endif %}
+
                 style="width:500px"/>
             </div>
         {% endfor %}

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html style="width: 100%; height: 100%; padding:0 0; margin:0;">
 <head>
-    {% load customized %}
     <title>Карта</title>
     <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     <script type="text/javascript">
@@ -20,7 +19,7 @@
                         '<br/>',
                         firstGeoObject.properties.get('text'),
                         '<br/>',
-                        '<a href="/web/venue/signup?lat=',
+                        '<a href="/mt/venues/create?lat=',
                         coords[0],
                         '&lon=',
                         coords[1],
@@ -42,16 +41,10 @@
             });
 
             {% for venue in venues %}
-                myMap.geoObjects.add(new ymaps.Placemark([{{ venue.address.lat|js_float }}, {{ venue.address.lon|js_float }}], {
+                myMap.geoObjects.add(new ymaps.Placemark([{{ venue.lat }}, {{ venue.lon }}], {
                     balloonContentBody: [
-                            '{{ venue.name }}',
-                            '</br>',
-                            '{{ venue.address.city|add:', '|add:venue.address.street|add:', '|add:venue.address.home }}',
-                            '</br>',
-                            '<div>{{ venue.description }}</div>',
-                            '<a href="{{ '/web/%s/venue/main/'|percentage:venue.id }}">Окно кофейни</a>'
                     ].join(''),
-                    hintContent: '{{ venue.name }}'
+                    hintContent: '{{ venue.title }}'
                 }, {
                     preset: 'islands#circleDotIcon',
                     iconColor: '#19D119'

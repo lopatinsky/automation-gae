@@ -25,6 +25,7 @@ app = WSGIApplication([
         Route('/automation', maintenance.AutomationMainHandler),
 
         Route('/venues', maintenance.EnableVenuesHandler),
+        Route('/venues/map', maintenance.MapVenuesHandler),
         Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
         Route('/venues/create', maintenance.CreateVenueHandler),
 
