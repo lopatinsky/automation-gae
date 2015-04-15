@@ -13,7 +13,11 @@
         </tr>
         {% for modifier in single_modifiers %}
             <tr>
-                <td>{{ modifier.title }}</td>
+                <td>
+                    <a href="{{ '/mt/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
+                        {{ modifier.title }}
+                    </a>
+                </td>
                 <td>
                     <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
                         Выбрать

@@ -72,6 +72,7 @@ app = WSGIApplication([
                 Route('/add/single_modifier', maintenance.AddSingleModifierHandler),
                 Route('/add/group_modifier', maintenance.AddGroupModifierHandler),
                 Route('/add/<group_modifier_id:\d+>/group_modifier_item', maintenance.AddGroupModifierItemHandler),
+                Route('/edit/single_modifier', maintenance.EditSingleModifierHandler),
                 Route('/choices/select', maintenance.SelectProductForChoiceHandler),
             ]),
             PathPrefixRoute('/venue', [

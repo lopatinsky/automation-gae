@@ -301,6 +301,29 @@ class AddSingleModifierHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
+class EditSingleModifierHandler(BaseHandler):
+    def get(self):
+        single_modifier_id = self.request.get_range('single_modifier_id')
+        single_modifier = SingleModifier.get_by_id(single_modifier_id)
+        if not single_modifier:
+            self.abort(400)
+        self.render('/menu/add_modifier.html', **{
+            'single_modifier': single_modifier
+        })
+
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        single_modifier = SingleModifier.get_by_id(modifier_id)
+        if not single_modifier:
+            self.abort(400)
+        single_modifier.title = self.request.get('name')
+        single_modifier.price = self.request.get_range('price')
+        single_modifier.min_amount = self.request.get_range('min')
+        single_modifier.max_amount = self.request.get_range('max')
+        single_modifier.put()
+        self.redirect_to('modifiers_list')
+
+
 class AddGroupModifierHandler(BaseHandler):
     def get(self):
         self.render('/menu/add_group_modifier.html')

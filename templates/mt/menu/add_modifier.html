@@ -14,15 +14,16 @@
 </head>
 <body>
     <form method="post">
+        <input type="text" name="modifier_id" {% if single_modifier %} value="{{ single_modifier.key.id() }}" {% endif %} hidden>
         <label>
             Имя:
-            <input type="text" name="name">
+            <input type="text" name="name" {% if single_modifier %} value="{{ single_modifier.title }}" {% endif %}>
         </label>
         <br>
         <div id="prices">
             <label>
                 Цена:
-                <input type="number" name="price">
+                <input type="number" name="price" {% if single_modifier %} value="{{ single_modifier.price }}" {% endif %}>
             </label>
         </div>
         <br>
@@ -32,12 +33,12 @@
         {% if single_modifier %}
             <label>
                 Минимальное кол-во (для одиночных модификаторов):
-                <input type="number" name="min">
+                <input type="number" name="min" {% if single_modifier %} value="{{ single_modifier.min_amount }}" {% endif %}>
             </label>
             <br>
             <label>
                 Максимальное кол-во (для одиночных модификаторов):
-                <input type="number" name="max">
+                <input type="number" name="max" {% if single_modifier %} value="{{ single_modifier.max_amount }}" {% endif %}>
             </label>
             <br>
         {% endif %}
