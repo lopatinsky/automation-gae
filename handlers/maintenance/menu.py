@@ -281,8 +281,8 @@ class ModifiersForProductHandler(BaseHandler):
 class ModifierList(BaseHandler):
     def get(self):
         self.render('/menu/modifiers.html', **{
-            'single_modifiers': SingleModifier.query().fetch(),
-            'group_modifiers': GroupModifier.query().fetch()
+            'single_modifiers': SingleModifier.query().order(SingleModifier.title).fetch(),
+            'group_modifiers': GroupModifier.query().order(GroupModifier.title).fetch()
         })
 
 
