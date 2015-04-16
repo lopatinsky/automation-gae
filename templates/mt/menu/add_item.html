@@ -6,19 +6,15 @@
 <body>
     <form method="post">
         {% if category %}
-            <label>Category_id ({{ category.title }}):
-                <input disabled type="text" name="category_id" value="{{ category.key.id() }}">
-            </label><br>
+            <input disabled type="text" name="category_id" value="{{ category.key.id() }}" hidden>
         {% endif %}
         {% if product %}
-            <label>Product_id:
-                <input type="text" name="product_id" value="{{ product.key.id() }}">
-            </label>
+            <input type="text" name="product_id" value="{{ product.key.id() }}" hidden>
         {% endif %}
         {% for param in ('title', 'description', 'kal', 'price', 'volume', 'weight', 'picture') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}"
+                <input type="text" name="{{ param }}" id="{{ param }}" size="3"
                        {% if product %}
                             value="{{ product[param] or "" }}"
                        {% endif %}

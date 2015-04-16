@@ -376,3 +376,30 @@ class AddGroupModifierItemHandler(BaseHandler):
         group_modifier.put()
         self.redirect_to('modifiers_list')
 
+
+class EditGroupModifierItemHandler(BaseHandler):
+    def get(self):
+        choice_id = self.request.get_range('choice_id')
+        choice = GroupModifierChoice.get_by_choice_id(choice_id)
+        if not choice:
+            self.abort(400)
+        self.render('/menu/add_modifier.html', **{
+            'choice_obj': choice,
+            'group_modifier_choice': True
+        })
+
+    def post(self):
+        choice_id = self.request.get_range('modifier_id')
+        choice = GroupModifierChoice.get_by_choice_id(choice_id)
+        if not choice:
+            self.abort(400)
+        choice.title = self.request.get('name')
+        choice.price = self.request.get_range('price')
+        choice.put()
+        modifier = GroupModifier.get_modifier_by_choice(choice_id)
+        for m_choice in modifier.choices:
+            if m_choice.choice_id == choice_id:
+                modifier.choices.remove(m_choice)
+                modifier.choices.append(choice)
+        modifier.put()
+        self.redirect_to('modifiers_list')

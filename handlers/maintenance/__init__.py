@@ -8,7 +8,8 @@ from private_office import ListPAdmins, ChangeLoginPAdmins, ChangePasswordPAdmin
 from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandler, AddMenuItemHandler, \
     CreateCategoryHandler, MainMenuHandler, SelectProductForModifierHandler, ModifiersForProductHandler, ModifierList, \
     AddSingleModifierHandler, AddGroupModifierHandler, AddGroupModifierItemHandler, EditMenuItemHandler, \
-    RemoveMenuItemHandler, SelectProductForChoiceHandler, EditSingleModifierHandler, EditGroupModifierHandler
+    RemoveMenuItemHandler, SelectProductForChoiceHandler, EditSingleModifierHandler, EditGroupModifierHandler, \
+    EditGroupModifierItemHandler
 from check_menu import CheckMenuHandler
 from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, EnableVenuesHandler, CreateVenueHandler, \
     MapVenuesHandler

@@ -10,6 +10,8 @@
             <th>Имя</th>
             <th>Продукты с модификатором</th>
             <th>Цена</th>
+            <th>Минимальное кол-во</th>
+            <th>Максимальное кол-во</th>
         </tr>
         {% for modifier in single_modifiers %}
             <tr>
@@ -24,6 +26,8 @@
                     </a>
                 </td>
                 <td>{{ modifier.price }}</td>
+                <td>{{ modifier.min_amount }}</td>
+                <td>{{ modifier.max_amount }}</td>
             </tr>
         {% endfor %}
     </table>
@@ -64,7 +68,9 @@
                 </td>
                 {% for choice in modifier.choices %}
                     </tr><tr>
-                    <td>{{ choice.title }}</td>
+                    <td>
+                        <a href="{{ '/mt/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
+                    </td>
                     <td>{{ choice.price }}</td>
                     <td>
                         <a href="{{ '/mt/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
