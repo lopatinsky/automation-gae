@@ -6,13 +6,16 @@
 <body>
     <h3>Выберите продукты для {{ venue.title }}</h3>
     <form method="post">
-        <input type="text" name="venue_id" value="{{ venue.key.id() }}">
+        <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
         <br>
-        {% for product in products %}
-             <label>
-                 <input type="checkbox" {% if product.avail %} checked {% endif %} name={{ product.key.id() }}>
-                 {{ product.title }}
-             </label><br>
+        {% for category in categories %}
+            <h3>{{ category.title }}</h3>
+            {% for product in category.products %}
+                 <label>
+                     <input type="checkbox" {% if product.avail %} checked {% endif %} name={{ product.key.id() }}>
+                     {{ product.title }}
+                 </label><br>
+            {% endfor %}
         {% endfor %}
         <label><input type="submit" value="Сохранить"></label>
     </form>

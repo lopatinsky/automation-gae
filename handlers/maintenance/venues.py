@@ -2,7 +2,7 @@
 import logging
 from google.appengine.ext import ndb
 from base import BaseHandler
-from models import Venue, MenuItem
+from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE
 from methods import map
 
 
@@ -87,14 +87,21 @@ class AddRestrictionHandler(BaseHandler):
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)
-        products = MenuItem.query().fetch()
-        for product in products:
-            if venue_key in product.restrictions:
-                product.avail = False
-            else:
-                product.avail = True
+        categories = []
+        for category in MenuCategory.query().fetch():
+            products = []
+            for product in category.menu_items:
+                product = product.get()
+                if product.status == STATUS_AVAILABLE:
+                    if venue_key in product.restrictions:
+                        product.avail = False
+                    else:
+                        product.avail = True
+                    products.append(product)
+            category.products = products
+            categories.append(category)
         self.render('menu/select_products_restriction.html', **{
-            'products': products,
+            'categories': categories,
             'venue': venue
         })
 
