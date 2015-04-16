@@ -35,7 +35,7 @@ class ListMenuItemsHandler(BaseHandler):
         category = MenuCategory.get_by_id(category_id)
         if not category:
             self.abort(400)
-        items = [item.get() for item in category.menu_items]
+        items = category.get_items_in_order()
         self.render('/menu/items.html', items=items, category=category)
 
     def post(self):

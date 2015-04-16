@@ -126,6 +126,7 @@ class MenuItem(ndb.Model):
     price = ndb.IntegerProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
+    sequence_number = ndb.IntegerProperty(default=0)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
@@ -135,6 +136,7 @@ class MenuItem(ndb.Model):
     def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
+            'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
             'price':  self.price,
@@ -160,6 +162,13 @@ class MenuCategory(ndb.Model):
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
+
+    def generate_sequence_number(self):
+        fastcounter.incr("category_%s" % self.key.id(), delta=100, update_interval=1)
+        return fastcounter.get_count("category_%s" % self.key.id()) + random.randint(1, 100)
+
+    def get_items_in_order(self):
+        return sorted([item.get() for item in self.menu_items], key=lambda item: item.sequence_number)
 
     def dict(self, venue=None):
         items = []
