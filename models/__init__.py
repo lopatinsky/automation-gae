@@ -170,6 +170,26 @@ class MenuCategory(ndb.Model):
     def get_items_in_order(self):
         return sorted([item.get() for item in self.menu_items], key=lambda item: item.sequence_number)
 
+    def get_previous(self, item):
+        items = self.get_items_in_order()
+        if item not in items:
+            return None
+        index = items.index(item)
+        if index == 0:
+            return None
+        else:
+            return items[index - 1]
+
+    def get_next(self, item):
+        items = self.get_items_in_order()
+        if item not in items:
+            return None
+        index = items.index(item)
+        if index == len(items) - 1:
+            return None
+        else:
+            return items[index + 1]
+
     def dict(self, venue=None):
         items = []
         for item in self.menu_items:

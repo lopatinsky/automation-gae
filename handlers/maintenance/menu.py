@@ -1,3 +1,4 @@
+import json
 from google.appengine.ext import ndb
 from methods.unique import unique
 
@@ -403,3 +404,55 @@ class EditGroupModifierItemHandler(BaseHandler):
                 modifier.choices.append(choice)
         modifier.put()
         self.redirect_to('modifiers_list')
+
+
+class UpProductHandler(BaseHandler):
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        product_id = self.request.get_range('product_id')
+        product = MenuItem.get_by_id(product_id)
+        if not product:
+            self.abort(400)
+        previous = category.get_previous(product)
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = product.sequence_number
+        product.sequence_number = number
+        product.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'product_id': product.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownProductHandler(BaseHandler):
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        product_id = self.request.get_range('product_id')
+        product = MenuItem.get_by_id(product_id)
+        if not product:
+            self.abort(400)
+        next_ = category.get_next(product)
+        if not next_:
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = product.sequence_number
+        product.sequence_number = number
+        product.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'product_id': product.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))

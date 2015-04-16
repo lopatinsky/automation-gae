@@ -9,7 +9,7 @@ from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandle
     CreateCategoryHandler, MainMenuHandler, SelectProductForModifierHandler, ModifiersForProductHandler, ModifierList, \
     AddSingleModifierHandler, AddGroupModifierHandler, AddGroupModifierItemHandler, EditMenuItemHandler, \
     RemoveMenuItemHandler, SelectProductForChoiceHandler, EditSingleModifierHandler, EditGroupModifierHandler, \
-    EditGroupModifierItemHandler
+    EditGroupModifierItemHandler, UpProductHandler, DownProductHandler
 from check_menu import CheckMenuHandler
 from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, EnableVenuesHandler, CreateVenueHandler, \
     MapVenuesHandler
