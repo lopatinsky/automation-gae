@@ -14,7 +14,7 @@
             <th>Максимальное кол-во</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr>
+            <tr {% if modifier.enable %} bgcolor="#009933" {% endif %}>
                 <td>
                     <a href="{{ '/mt/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -48,7 +48,7 @@
             <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
-            <tr>
+            <tr {% if modifier.enable %} bgcolor="#009933" {% endif %}>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/mt/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}

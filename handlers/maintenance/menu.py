@@ -281,9 +281,30 @@ class ModifiersForProductHandler(BaseHandler):
 
 class ModifierList(BaseHandler):
     def get(self):
+        single_modifier_ids = []
+        group_modifier_ids = []
+        for product in MenuItem.query().fetch():
+            for modifier in product.group_modifiers:
+                if modifier.id not in group_modifier_ids:
+                    group_modifier_ids.append(modifier.id())
+            for modifier in product.single_modifiers:
+                if modifier.id not in single_modifier_ids:
+                    single_modifier_ids.append(modifier.id())
+        single_modifiers = SingleModifier.query().order(SingleModifier.title).fetch()
+        for single_modifier in single_modifiers:
+            if single_modifier.key.id() in single_modifier_ids:
+                single_modifier.enable = True
+            else:
+                single_modifier.enable = False
+        group_modifiers = GroupModifier.query().order(GroupModifier.title).fetch()
+        for group_modifier in group_modifiers:
+            if group_modifier.key.id() in group_modifier_ids:
+                group_modifier.enable = True
+            else:
+                group_modifier.enable = False
         self.render('/menu/modifiers.html', **{
-            'single_modifiers': SingleModifier.query().order(SingleModifier.title).fetch(),
-            'group_modifiers': GroupModifier.query().order(GroupModifier.title).fetch()
+            'single_modifiers': single_modifiers,
+            'group_modifiers': group_modifiers
         })
 
 
