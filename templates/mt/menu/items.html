@@ -6,17 +6,41 @@
 <body>
     <a href="{{ '/mt/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
     <form method="post">
-        {% for item in items %}
-            <label><input type="checkbox" name={{ item.key.id() }} {% if item.status %}checked{% endif %}></label>
-            <a href="{{ '/mt/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
-            <form method="post">
-                <button formaction="{{ '/mt/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
-                        name="button" value="delete">
-                    Удалить
-                </button>
-            </form>
-            <br>
-        {% endfor %}
+        <table>
+            <tr>
+                <th>Статус</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Объм</th>
+                <th>Вес(если нет объема)</th>
+                <th>Картинка</th>
+            </tr>
+            {% for item in items %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name={{ item.key.id() }} {% if item.status %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <a href="{{ '/mt/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
+                    </td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.volume }}</td>
+                    <td>{{ item.weight }}</td>
+                    <td>{{ item.picture }}</td>
+                    <td>
+                        <img src="{{ item.pic }}">
+                    </td>
+                    <!--
+                    <form method="post">
+                        <button formaction="{{ '/mt/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
+                                name="button" value="delete">
+                            Удалить
+                        </button>
+                    </form>
+                    -->
+                </tr>
+            {% endfor %}
+        </table>
         <input type="submit">
         <a href="/mt/menu/category/list">Назад</a>
     </form>
