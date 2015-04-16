@@ -262,9 +262,15 @@ class Venue(ndb.Model):
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
 
     def dynamic_info(self):
+        items = []
+        for item in self.stop_lists:
+            item = item.get()
+            if item.status != STATUS_AVAILABLE and self.key in item.restrictions:
+                continue
+            items.append(str(item.key.id()))
         return {
             'stop_list': {
-                'items': [str(item.id()) for item in self.stop_lists],
+                'items': items,
                 'single_modifiers': [str(item.id()) for item in self.single_modifiers_stop_list],
                 'group_modifier_choices': [str(item.get().choice_id) for item in self.group_choice_modifier_stop_list]
             }
