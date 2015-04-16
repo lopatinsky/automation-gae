@@ -1,9 +1,10 @@
 from handlers.api.base import ApiHandler
-from models import MenuCategory, STATUS_AVAILABLE, Venue, GroupModifierChoice
+from models import MenuCategory, STATUS_AVAILABLE, Venue
 
 
 def _get_menu(venue=None):
-    return [category.dict(venue) for category in MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()]
+    categories = [category.dict(venue) for category in MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()]
+    return [category for category in categories if category.get('items')]
 
 
 class MenuHandler(ApiHandler):
