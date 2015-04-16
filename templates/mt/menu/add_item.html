@@ -14,7 +14,7 @@
         {% for param in ('title', 'description', 'kal', 'price', 'volume', 'weight', 'picture') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}" size="3"
+                <input type="text" name="{{ param }}" id="{{ param }}" size="100"
                        {% if product %}
                             value="{{ product[param] or "" }}"
                        {% endif %}
