@@ -171,6 +171,8 @@ class SelectProductForModifierHandler(BaseHandler):
             category.products = []
             for product in category.menu_items:
                 product = product.get()
+                if product.status != STATUS_AVAILABLE:
+                    continue
                 category.products.append(product)
                 if modifier_type == SINGLE_MODIFIER:
                     if modifier.key in product.single_modifiers:
@@ -230,7 +232,7 @@ class SelectProductForModifierHandler(BaseHandler):
 class SelectProductForChoiceHandler(BaseHandler):
     def get_products(self, group_modifier, choice):
         products = []
-        for product in MenuItem.query().fetch():
+        for product in MenuItem.query(MenuItem.status == STATUS_AVAILABLE).fetch():
             if group_modifier.key in product.group_modifiers:
                 products.append(product)
             product.has_choice = choice.choice_id not in product.group_choice_restrictions
@@ -285,7 +287,8 @@ class ModifierList(BaseHandler):
     def get(self):
         single_modifier_ids = []
         group_modifier_ids = []
-        for product in MenuItem.query().fetch():
+        products = MenuItem.query().fetch()
+        for product in products:
             for modifier in product.group_modifiers:
                 if modifier.id not in group_modifier_ids:
                     group_modifier_ids.append(modifier.id())
@@ -294,12 +297,20 @@ class ModifierList(BaseHandler):
                     single_modifier_ids.append(modifier.id())
         single_modifiers = SingleModifier.query().order(SingleModifier.title).fetch()
         for single_modifier in single_modifiers:
+            single_modifier.products = []
+            for product in products:
+                if single_modifier.key in product.single_modifiers:
+                    single_modifier.products.append(product)
             if single_modifier.key.id() in single_modifier_ids:
                 single_modifier.enable = True
             else:
                 single_modifier.enable = False
         group_modifiers = GroupModifier.query().order(GroupModifier.title).fetch()
         for group_modifier in group_modifiers:
+            group_modifier.products = []
+            for product in products:
+                if group_modifier.key in product.group_modifiers:
+                    group_modifier.products.append(product)
             if group_modifier.key.id() in group_modifier_ids:
                 group_modifier.enable = True
             else:

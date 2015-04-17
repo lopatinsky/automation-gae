@@ -2,6 +2,14 @@
 <html>
 <head>
     <title>Модификаторы</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.show_products').click(function(e){
+                $('#tr_' + this.id).toggle();
+            });
+         });
+    </script>
 </head>
 <body>
     <h2>Одиночные модификаторы</h2>
@@ -14,7 +22,7 @@
             <th>Максимальное кол-во</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#009933" {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% endif %}>
                 <td>
                     <a href="{{ '/mt/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -48,11 +56,17 @@
             <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#009933" {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% endif %}>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/mt/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
                     </a>
+                    <br>
+                    {% if modifier.enable %}
+                        <button class="show_products" id="{{ modifier.key.id() }}">
+                            Показать/Скрыть
+                        </button>
+                    {% endif %}
                 </td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
@@ -76,6 +90,13 @@
                         <a href="{{ '/mt/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
                     </td>
                 {% endfor %}
+            </tr>
+            <tr id="tr_{{ modifier.key.id() }}" hidden>
+                <td colspan="4">
+                    {% for product in modifier.products %}
+                        {{ '%s, ' % product.title }}
+                    {% endfor %}
+                </td>
             </tr>
         {% endfor %}
     </table>
