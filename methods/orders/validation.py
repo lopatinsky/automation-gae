@@ -86,8 +86,6 @@ def _check_stop_list(venue, item_dicts, errors):
                 errors.append(description)
                 item_dict['errors'].append(description)
         for group_modifier in item_dict['group_modifiers']:
-            logging.info(group_modifier.choice)
-            logging.info(stop_list_choices)
             if group_modifier.choice.choice_id in stop_list_choices:
                 description = u'%s положил выбор группового модификатора %s в стоп лист' % \
                               (venue.title, group_modifier.choice.title)
@@ -201,7 +199,7 @@ def set_modifiers(items):
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
-            single_modifier_obj = SingleModifier.get_by_id(int(single_modifier['single_modifier_id']))
+            single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
             for i in xrange(single_modifier['quantity']):
                 menu_item.chosen_single_modifiers.append(single_modifier_obj)
         menu_item.chosen_group_modifiers = []
