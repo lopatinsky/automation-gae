@@ -39,11 +39,18 @@
                     }
                 });
             });
+            $('#show_inactive').click(function(e){
+                e.preventDefault();
+                $('.0').toggle();
+            });
          });
     </script>
 </head>
 <body>
     <a href="{{ '/mt/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
+    <button id="show_inactive">
+        Показать/Скрыть неактивные
+    </button>
     <form method="post">
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
@@ -57,7 +64,7 @@
                 <th>Картинка</th>
             </tr>
             {% for item in items %}
-                <tr id="{{ 'tr_%s' % item.key.id() }}">
+                <tr id="{{ 'tr_%s' % item.key.id() }}" class="{{ item.status }}" {% if item.status == 0 %} hidden {% endif %}>
                     <td>
                         <input type="checkbox" name={{ item.key.id() }} {% if item.status %}checked{% endif %}>
                     </td>

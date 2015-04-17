@@ -8,11 +8,22 @@
             $('.show_products').click(function(e){
                 $('#tr_' + this.id).toggle();
             });
+            $('#show_inactive_single').click(function(e){
+                e.preventDefault();
+                $('.single').toggle();
+            });
+            $('#show_inactive_group').click(function(e){
+                e.preventDefault();
+                $('.group').toggle();
+            });
          });
     </script>
 </head>
 <body>
     <h2>Одиночные модификаторы</h2>
+        <button id="show_inactive_single">
+            Показать/Скрыть неактивные
+        </button>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Имя</th>
@@ -22,7 +33,7 @@
             <th>Максимальное кол-во</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
                 <td>
                     <a href="{{ '/mt/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -47,6 +58,9 @@
         </form>
     </div>
     <h2>Групповые модификаторы</h2>
+    <button id="show_inactive_group">
+        Показать/Скрыть неактивные
+    </button>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Имя модификатора</th>
@@ -56,7 +70,7 @@
             <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/mt/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -81,7 +95,7 @@
                     </form>
                 </td>
                 {% for choice in modifier.choices %}
-                    </tr><tr>
+                    </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
                     <td>
                         <a href="{{ '/mt/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
                     </td>
@@ -91,8 +105,8 @@
                     </td>
                 {% endfor %}
             </tr>
-            <tr id="tr_{{ modifier.key.id() }}" hidden>
-                <td colspan="4">
+            <tr id="tr_{{ modifier.key.id() }}" hidden bgcolor="#99FF99">
+                <td colspan="5">
                     {% for product in modifier.products %}
                         {{ '%s, ' % product.title }}
                     {% endfor %}
