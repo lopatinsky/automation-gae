@@ -100,7 +100,7 @@ class OrderHandler(ApiHandler):
                 return self.render_error(get_first_error(validation_result))
 
             total_sum = validation_result['total_sum']
-            if request_total_sum and total_sum != request_total_sum:
+            if request_total_sum and int(total_sum * 100) != int(request_total_sum * 100):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
 
             item_details = validation_result["details"]

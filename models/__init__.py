@@ -378,6 +378,7 @@ class Order(ndb.Model):
     def dict(self):
         dct = {
             "order_id": self.key.id(),
+            "total_sum": self.total_sum,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
