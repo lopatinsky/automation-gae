@@ -5,7 +5,8 @@ from methods.unique import unique
 __author__ = 'dvpermyakov'
 
 from base import BaseHandler
-from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier, GROUP_MODIFIER, GroupModifier, GroupModifierChoice, Venue
+from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier,\
+    GROUP_MODIFIER, GroupModifier, GroupModifierChoice, Venue
 import logging
 
 
@@ -89,6 +90,7 @@ class AddMenuItemHandler(BaseHandler):
         item.volume = self.request.get_range('volume')
         item.weight = self.request.get_range('weight')
         item.picture = self.request.get('picture') if self.request.get('picture') else None
+        item.sequence_number = category.generate_sequence_number()
         item.put()
         category.menu_items.append(item.key)
         category.put()
@@ -127,7 +129,7 @@ class EditMenuItemHandler(BaseHandler):
         self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
 
 
-class RemoveMenuItemHandler(BaseHandler):
+class RemoveMenuItemHandler(BaseHandler):  # TODO: DEPRECATED!
     @staticmethod
     @ndb.transactional(xg=True)
     def delete_item_from_anything(venues, category, item):
