@@ -90,6 +90,10 @@ app = WSGIApplication([
             Route('/list', maintenance.StopListsHandler),
         ]),
 
+        PathPrefixRoute('/promos', [
+            Route('/list', maintenance.PromoListHandler),
+        ]),
+
         Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),

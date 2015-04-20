@@ -16,3 +16,4 @@ from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, En
 from stop_lists import MainStopListHandler, StopListsHandler
 from payment_type import PaymentTypesHandler
 from automation import AutomationMainHandler, CompaniesListHandler
+from promos import PromoListHandler

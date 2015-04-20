@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Акции</title>
+</head>
+<body>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th rowspan="2">Название</th>
+            <th rowspan="2">Описание</th>
+            <th colspan="3">Условия</th>
+            <th colspan="3">Последствия</th>
+        </tr>
+        <tr>
+            <th>Выберите продукты</th>
+            <th>Метод</th>
+            <th>Значение</th>
+            <!-- -->
+            <th>Выберите продукты</th>
+            <th>Метод</th>
+            <th>Значение</th>
+        </tr>
+        {% for promo in promos %}
+            <tr>
+                <td>{{ promo.title }}</td>
+                <td>{{ promo.description }}</td>
+                {% for condition in promo.conditions %}
+                    <td>{{ condition.items }}</td>
+                    <td>{{ condition_map[condition.method] }}</td>
+                    <td>{{ condition.value_string }}</td>
+                {% endfor %}
+                {% for outcome in promo.outcomes %}
+                    <td>{{ outcome.items }}</td>
+                    <td>{{ outcome_map[outcome.method] }}</td>
+                    <td>{{ outcome.value if outcome.value else "" }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
