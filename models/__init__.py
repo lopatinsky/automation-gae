@@ -392,12 +392,14 @@ class Order(ndb.Model):
         }
         items_str = []
         for item_detail in self.item_details:
-            items_str.append('%s_%s' % (item_detail.item.get().title, item_detail.price))
+            item = item_detail.item.get()
+            items_str.append('%s_%s_%s' % (item.title, item_detail.price, item.picture))
         for item_str, count in Counter(items_str).items():
             dct["items"].append({
                 "title": item_str.split('_')[0],
                 "price": item_str.split('_')[1],
-                "quantity": count
+                "quantity": count,
+                "image_url": item_str.split('_')[2] if item_str.split('_')[2] != "None" else None
             })
         return dct
 
