@@ -86,7 +86,8 @@ def _check_stop_list(venue, item_dicts, errors):
                 errors.append(description)
                 item_dict['errors'].append(description)
         for group_modifier in item_dict['group_modifiers']:
-            if group_modifier.choice.choice_id in stop_list_choices:
+            if group_modifier.choice.choice_id in stop_list_choices or \
+                            group_modifier.choice.choice_id in item.stop_list_group_choices:
                 description = u'%s положил выбор группового модификатора %s в стоп лист' % \
                               (venue.title, group_modifier.choice.title)
                 errors.append(description)

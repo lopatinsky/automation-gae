@@ -2,7 +2,7 @@
 from base import AdminApiHandler
 import json
 from methods.auth import api_user_required
-from models import MenuItem, STATUS_AVAILABLE, SingleModifier, GroupModifierChoice
+from models import MenuItem, STATUS_AVAILABLE, SingleModifier, GroupModifierChoice, GroupModifier
 
 
 class MenuHandler(AdminApiHandler):
@@ -78,6 +78,37 @@ class SetStopListHandler(AdminApiHandler):
             if item.key not in venue.group_choice_modifier_stop_list:
                 return self.send_error(u'Выбор группового модификатора %s не находится в стоп-листе' % item.title)
             venue.group_choice_modifier_stop_list.remove(item.key)
+
+        for group_choice_id_with_item_id in stop_list.get('stopped_group_choices_with_item_id'):
+            group_choice_id = int(group_choice_id_with_item_id.get('choice_id'))
+            item_id = group_choice_id_with_item_id.get('item_id')
+            modifier = GroupModifier.get_modifier_by_choice(group_choice_id)
+            item = MenuItem.get_by_id(int(item_id))
+            if not modifier:
+                return self.send_error(u'Выбор группового модификатора не найден')
+            if not item:
+                return self.send_error(u"Продукт не найден")
+            if modifier.key not in item.group_modifiers:
+                return self.send_error(u"Продукт не связан с этим групповым модификатором")
+            if group_choice_id in item.stop_list_group_choices:
+                return self.send_error(u'Выбор группового модификатора %s уже в стоп-листе' % item.title)
+            item.stop_list_group_choices.append(group_choice_id)
+            item.put()
+        for group_choice_id_with_item_id in stop_list.get('recovered_group_choices_with_item_id'):
+            group_choice_id = int(group_choice_id_with_item_id.get('choice_id'))
+            item_id = group_choice_id_with_item_id.get('item_id')
+            modifier = GroupModifier.get_modifier_by_choice(group_choice_id)
+            item = MenuItem.get_by_id(int(item_id))
+            if not modifier:
+                return self.send_error(u'Выбор группового модификатора не найден')
+            if not item:
+                return self.send_error(u"Продукт не найден")
+            if modifier.key not in item.group_modifiers:
+                return self.send_error(u"Продукт не связан с этим групповым модификатором")
+            if group_choice_id not in item.stop_list_group_choices:
+                return self.send_error(u'Выбор группового модификатора %s не в стоп-листе' % item.title)
+            item.stop_list_group_choices.remove(group_choice_id)
+            item.put()
         venue.put()
         self.render_json({
             'success': True
