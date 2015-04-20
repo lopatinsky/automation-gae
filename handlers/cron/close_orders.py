@@ -28,7 +28,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
             order.status = READY_ORDER
-
+            order.activate_cash_back()
             client_key = ndb.Key(Client, order.client_id)
             free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
                                            SharedFreeCup.status == SharedFreeCup.READY).get()

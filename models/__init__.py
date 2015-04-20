@@ -2,6 +2,7 @@
 
 from collections import Counter
 import datetime
+import logging
 import random
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
@@ -220,21 +221,21 @@ class MenuCategory(ndb.Model):
 
 class PromoOutcome(ndb.Model):
     DISCOUNT = 0
-    GIFT = 1
-    BONUS = 2
+    CASH_BACK = 1
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[DISCOUNT, GIFT, BONUS], required=True)
+    method = ndb.IntegerProperty(choices=[DISCOUNT, CASH_BACK], required=True)
     value = ndb.IntegerProperty(required=True)
 
 
 class PromoCondition(ndb.Model):
     CHECK_TYPE_DELIVERY = 0
+    CHECK_FIRST_ORDER = 1
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY], required=True)
+    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER], required=True)
     value = ndb.IntegerProperty()
 
 
@@ -261,6 +262,14 @@ class Promo(ndb.Model):
             'id': self.key.id(),
             'text': self.title_for_user if self.title_for_user else self.title
         }
+
+
+class CashBack(ndb.Model):
+    READY = 0
+    DONE = 1
+
+    amount = ndb.IntegerProperty(required=True)
+    status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
 
 class Venue(ndb.Model):
@@ -375,6 +384,17 @@ class Order(ndb.Model):
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
     first_for_client = ndb.BooleanProperty()
+
+    cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
+
+    def activate_cash_back(self):
+        logging.info("activate_cash_back")
+        from methods.empatika_wallet import deposit
+        for cash_back in self.cash_backs:
+            if cash_back.status == cash_back.READY:
+                deposit(self.client_id, cash_back.amount, "order_id_%s" % self.key.id())
+                cash_back.status = cash_back.DONE
+        self.put()
 
     def dict(self):
         dct = {

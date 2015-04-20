@@ -95,6 +95,8 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()
 
+        order.activate_cash_back()
+
         client_key = ndb.Key(Client, order.client_id)
         free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
                                        SharedFreeCup.status == SharedFreeCup.READY).get()

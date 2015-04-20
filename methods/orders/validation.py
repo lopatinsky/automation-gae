@@ -226,7 +226,7 @@ def set_price_with_modifiers(items):
     return items
 
 
-def validate_order(client, items, payment_info, venue, delivery_time, delivery_type, with_details=False):
+def validate_order(client, items, payment_info, venue, delivery_time, delivery_type, with_details=False, order=None):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
 
@@ -252,7 +252,11 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
     valid = _check_restrictions(venue, item_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, errors) and valid
 
-    item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type)
+    if order:
+        if valid:
+            item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order)
+    else:
+        item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type)
 
     total_sum = 0
     for item_dict in item_dicts:

@@ -71,6 +71,8 @@ class DoneOrderHandler(AdminApiHandler):
         if order.status != NEW_ORDER:
             self.abort(400)
 
+        order.activate_cash_back()
+
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()
         order.put()

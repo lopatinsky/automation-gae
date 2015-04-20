@@ -136,6 +136,9 @@ class OrderHandler(ApiHandler):
             self.order.status = NEW_ORDER
             self.order.put()
 
+            validate_order(client, response_json['items'], response_json['payment'], venue,  # it is used for creating
+                           delivery_time_minutes, delivery_type, False, self.order)             # db for promos
+
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
 
