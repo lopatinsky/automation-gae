@@ -119,6 +119,8 @@ app = WSGIApplication([
             Route('/dynamic_info', admin.DynamicInfoHandler),
             Route('/stop_list/set', admin.SetStopListHandler),
             Route('/wallet/deposit', admin.WalletDepositHandler),
+
+            Route('/clients/<client_id:\d+>/history', admin.ClientHistoryHandler),
         ]),
 
         PathPrefixRoute('/payment', [

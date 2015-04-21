@@ -1,0 +1,16 @@
+from .base import AdminApiHandler
+from methods.auth import api_user_required
+from models import Order, CREATING_ORDER
+
+
+class ClientHistoryHandler(AdminApiHandler):
+    @api_user_required
+    def post(self, client_id):
+        history = Order.query(Order.client_id == int(client_id))
+        sorted_history = sorted(history, key=lambda order: order.delivery_time, reverse=True)
+
+        order_dicts = [order.dict() for order in sorted_history if order.status != CREATING_ORDER]
+
+        self.render_json({
+            'orders': order_dicts
+        })
