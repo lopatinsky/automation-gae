@@ -503,6 +503,7 @@ class Client(ndb.Model):
 
     def dict(self):
         return {
+            "id": self.key.id(),
             "name": self.name,
             "surname": self.surname,
             "phone": self.tel
