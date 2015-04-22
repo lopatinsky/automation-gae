@@ -1,11 +1,12 @@
 # coding=utf-8
+import logging
 import time
 from methods import empatika_wallet
 
-from methods.auth import write_access_required
+from methods.auth import write_access_required, api_user_required
 from .base import AdminApiHandler
 from methods.empatika_wallet import EmpatikaWalletError
-from models import Client
+from models import Client, Deposit
 
 
 class WalletDepositHandler(AdminApiHandler):
@@ -32,6 +33,26 @@ class WalletDepositHandler(AdminApiHandler):
                 "description": e.message
             })
         else:
+            self.user.deposit_history.append(Deposit(source=wallet_source))
+            self.user.put()
             self.render_json({
                 "balance": wallet_result["balance"] / 100.0
             })
+
+
+class WalletDepositHistoryHandler(AdminApiHandler):
+    @api_user_required
+    def get(self):
+        try:
+            wallet_result = empatika_wallet.deposit_history(self.user.get_sources())
+        except EmpatikaWalletError as e:
+            self.response.set_status(400)
+            self.render_json({
+                "description": e.message
+            })
+        else:
+            self.render_json([{
+                'amount': deposit['amount'] / 100.0,
+                'time': deposit['time'],
+                'client_id': deposit['client_id']
+            } for deposit in wallet_result.get('response', [])])

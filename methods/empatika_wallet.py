@@ -65,6 +65,16 @@ def deposit(client_id, amount, source):
     return _post(api_path, params)
 
 
+def deposit_history(sources):
+    api_path = "/deposit_history"
+    params = {
+        "request": json.dumps({
+            'sources': sources
+        })
+    }
+    return _post(api_path, params)
+
+
 def get_balance(client_id):
     api_path = "/clients/%s/balance" % client_id
     return _get(api_path)["balance"]

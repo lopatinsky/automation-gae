@@ -541,12 +541,17 @@ class News(ndb.Model):
         return dct
 
 
+class Deposit(ndb.Model):
+    source = ndb.StringProperty(required=True)
+
+
 class Admin(models.User):
 
     PADMIN = 'padmin'
 
     email = ndb.StringProperty(required=True, indexed=False)
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
+    deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
 
     def query_orders(self, *args, **kwargs):
         if self.venue:
@@ -560,6 +565,9 @@ class Admin(models.User):
         if self.venue and order.venue_id != self.venue.id():
             return None
         return order
+
+    def get_sources(self):
+        return [deposit.source for deposit in self.deposit_history]
 
     @property
     def login(self):
