@@ -5,7 +5,7 @@ from models import Order, CREATING_ORDER
 
 class ClientHistoryHandler(AdminApiHandler):
     @api_user_required
-    def post(self, client_id):
+    def get(self, client_id):
         history = Order.query(Order.client_id == int(client_id))
         sorted_history = sorted(history, key=lambda order: order.delivery_time, reverse=True)
 
