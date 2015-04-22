@@ -220,8 +220,10 @@ class MenuCategory(ndb.Model):
 
 
 class PromoOutcome(ndb.Model):
-    DISCOUNT = 0
-    CASH_BACK = 1
+    DISCOUNT = 0           # calculated by prices
+    CASH_BACK = 1          # calculated by prices
+    DISCOUNT_CHEAPEST = 2  # calculated by prices ## use priority to imply in the end
+    DISCOUNT_RICHEST = 3   # calculated by prices ## use priority to imply in the end
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
@@ -247,7 +249,7 @@ class Promo(ndb.Model):
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
-    priority = ndb.IntegerProperty()
+    priority = ndb.IntegerProperty(default=0)
     more_one = ndb.BooleanProperty(default=True)
 
     def dict(self):

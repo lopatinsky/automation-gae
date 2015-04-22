@@ -1,11 +1,11 @@
 from models import Promo, PromoCondition, PromoOutcome
 from conditions import check_condition_by_value, check_first_order
-from outcomes import set_discounts, set_cash_back
+from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest
 
 
 def get_promos(venue):
     promos = []
-    for promo in Promo.query().fetch():
+    for promo in Promo.query().order(-Promo.priority).fetch():
         if promo not in venue.promo_restrictions:
             promos.append(promo)
     return promos
@@ -22,7 +22,11 @@ def set_outcome(outcome, items, promo, client, order):
     if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(outcome, items, promo)
     if outcome.method == PromoOutcome.CASH_BACK:
-        return set_cash_back(outcome, items, promo, client, order)
+        return set_cash_back(outcome, items, promo, order)
+    if outcome.method == PromoOutcome.DISCOUNT_CHEAPEST:
+        return set_discount_cheapest(outcome, items, promo)
+    if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
+        return set_discount_richest(outcome, items, promo)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order=None):

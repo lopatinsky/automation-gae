@@ -1,7 +1,7 @@
 from models import CashBack
 
 
-def get_item_keys(item_dicts):
+def _get_item_keys(item_dicts):
     result = {}
     for item_dict in item_dicts:
         if result.get(item_dict['item'].key):
@@ -11,8 +11,7 @@ def get_item_keys(item_dicts):
     return result
 
 
-def set_discounts(outcome, item_dicts, promo):
-    def apply_discounts(item_dict):
+def _apply_discounts(item_dict, promo, discount):
         if promo not in item_dict['promos']:
             if item_dict['revenue'] >= item_dict['price'] * discount:
                 item_dict['revenue'] -= item_dict['price'] * discount
@@ -20,22 +19,8 @@ def set_discounts(outcome, item_dicts, promo):
                 return True
         return False
 
-    discount = float(outcome.value) / 100.0
-    item_keys = get_item_keys(item_dicts)
-    promo_applied = False
-    if item_keys.get(outcome.item):
-        for item_dict in item_keys[outcome.item]:
-            if apply_discounts(item_dict):
-                promo_applied = True
-    if not outcome.item_required:
-        for item_dict in item_dicts:
-            if apply_discounts(item_dict):
-                promo_applied = True
-    return promo_applied
 
-
-def set_cash_back(outcome, item_dicts, promo, client, order):
-    def apply_cash_back(item_dict):
+def _apply_cash_back(item_dict, promo, cash_back, order=None):
         if promo not in item_dict['promos']:
             if order:
                 order.cash_backs.append(CashBack(amount=int(cash_back * item_dict['price'] * 100)))
@@ -43,17 +28,80 @@ def set_cash_back(outcome, item_dicts, promo, client, order):
             return True
         return False
 
-    cash_back = float(outcome.value) / 100.0
-    item_keys = get_item_keys(item_dicts)
+
+def set_discounts(outcome, item_dicts, promo):
+    discount = float(outcome.value) / 100.0
+    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
     if item_keys.get(outcome.item):
         for item_dict in item_keys[outcome.item]:
-            if apply_cash_back(item_dict):
+            if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
     if not outcome.item_required:
         for item_dict in item_dicts:
-            if apply_cash_back(item_dict):
+            if _apply_discounts(item_dict, promo, discount):
+                promo_applied = True
+    return promo_applied
+
+
+def set_cash_back(outcome, item_dicts, promo, order):
+    cash_back = float(outcome.value) / 100.0
+    item_keys = _get_item_keys(item_dicts)
+    promo_applied = False
+    if item_keys.get(outcome.item):
+        for item_dict in item_keys[outcome.item]:
+            if _apply_cash_back(item_dict, promo, cash_back, order):
+                promo_applied = True
+    if not outcome.item_required:
+        for item_dict in item_dicts:
+            if _apply_cash_back(item_dict, promo, cash_back, order):
                 promo_applied = True
     if order:
         order.put()
+    return promo_applied
+
+
+def set_discount_cheapest(outcome, item_dicts, promo):
+    def get_cheapest(item_dicts):
+        if not len(item_dicts):
+            return
+        cheapest_item_dict = item_dicts[0]
+        for item_dict in item_dicts:
+            if item_dict['price'] < cheapest_item_dict['price']:
+                cheapest_item_dict = item_dict
+        return cheapest_item_dict
+
+    discount = float(outcome.value) / 100.0
+    item_keys = _get_item_keys(item_dicts)
+    promo_applied = False
+    if item_keys.get(outcome.item):  # Not implemented, unfortunately
+        pass
+    if not outcome.item_required:
+        item_dict = get_cheapest(item_dicts)
+        if item_dict:
+            if _apply_discounts(item_dict, promo, discount):
+                promo_applied = True
+    return promo_applied
+
+
+def set_discount_richest(outcome, item_dicts, promo):
+    def get_richest(item_dicts):
+        if not len(item_dicts):
+            return
+        richest_item_dict = item_dicts[0]
+        for item_dict in item_dicts:
+            if item_dict['price'] > richest_item_dict['price']:
+                richest_item_dict = item_dict
+        return richest_item_dict
+
+    discount = float(outcome.value) / 100.0
+    item_keys = _get_item_keys(item_dicts)
+    promo_applied = False
+    if item_keys.get(outcome.item):  # Not implemented, unfortunately
+        pass
+    if not outcome.item_required:
+        item_dict = get_richest(item_dicts)
+        if item_dict:
+            if _apply_discounts(item_dict, promo, discount):
+                promo_applied = True
     return promo_applied
