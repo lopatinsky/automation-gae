@@ -18,6 +18,8 @@ class Config(ndb.Model):
         "server": "admins",
     })
 
+    password = ndb.StringProperty()
+
     @classmethod
     def get(cls):
         config = cls.get_by_id(1)
