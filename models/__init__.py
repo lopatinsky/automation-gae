@@ -227,7 +227,7 @@ class PromoOutcome(ndb.Model):
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[DISCOUNT, CASH_BACK], required=True)
+    method = ndb.IntegerProperty(choices=[DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST], required=True)
     value = ndb.IntegerProperty(required=True)
 
 
@@ -248,9 +248,10 @@ class Promo(ndb.Model):
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
-    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
+    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
     priority = ndb.IntegerProperty(default=0)
-    more_one = ndb.BooleanProperty(default=True)
+    more_one = ndb.BooleanProperty(default=True)              # Not Implemented
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
 
     def dict(self):
         return {

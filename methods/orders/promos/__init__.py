@@ -1,11 +1,11 @@
-from models import Promo, PromoCondition, PromoOutcome
+from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest
 
 
 def get_promos(venue):
     promos = []
-    for promo in Promo.query().order(-Promo.priority).fetch():
+    for promo in Promo.query(Promo.status == STATUS_AVAILABLE).order(-Promo.priority).fetch():
         if promo not in venue.promo_restrictions:
             promos.append(promo)
     return promos

@@ -80,3 +80,9 @@ indexes:
   properties:
   - name: client_id
   - name: created
+
+- kind: Promo
+  properties:
+  - name: status
+  - name: priority
+    direction: desc
