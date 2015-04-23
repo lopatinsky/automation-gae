@@ -123,6 +123,9 @@ app = WSGIApplication([
             Route('/wallet/deposit_history', admin.WalletDepositHistoryHandler),
 
             Route('/clients/<client_id:\d+>/history', admin.ClientHistoryHandler),
+            
+            Route('/revenue/today', admin.RevenueReportTodayHandler),
+            Route('/revenue/month', admin.RevenueReportMonthHandler),
         ]),
 
         PathPrefixRoute('/payment', [

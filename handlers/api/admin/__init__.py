@@ -6,3 +6,4 @@ from changes import CancelOrderHandler, DoneOrderHandler, PostponeOrderHandler
 from stop_lists import SetStopListHandler, MenuHandler, DynamicInfoHandler, ModifiersHandler
 from wallet import WalletDepositHandler, WalletDepositHistoryHandler
 from client_history import ClientHistoryHandler
+from revenue import RevenueReportMonthHandler, RevenueReportTodayHandler
