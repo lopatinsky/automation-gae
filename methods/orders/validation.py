@@ -180,6 +180,7 @@ def group_item_dicts(item_dicts):
                 'title': item_dict['item'].title,
                 'promos': item_dict.get('promos'),
                 'errors': item_dict.get('errors'),
+                'image': item_dict.get('image'),
                 'quantity': 1,
                 'price_without_promos': item_dict['price'],
                 'single_modifiers': _group_single_modifiers(item_dict['single_modifier_keys']),

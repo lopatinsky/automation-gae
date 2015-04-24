@@ -414,16 +414,27 @@ class Order(ndb.Model):
             "return_comment": self.return_comment,
             "items": []
         }
-        items_str = []
+        item_dicts = []
         for item_detail in self.item_details:
             item = item_detail.item.get()
-            items_str.append('%s_%s_%s' % (item.title, item_detail.price, item.picture))
-        for item_str, count in Counter(items_str).items():
+            item_dicts.append({
+                'item': item,
+                'price': item_detail.price,
+                'image': item.picture,
+                'single_modifier_keys':  item_detail.single_modifiers,
+                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
+            })
+
+        from methods.orders.validation import group_item_dicts
+        for item_dict in group_item_dicts(item_dicts):
             dct["items"].append({
-                "title": item_str.split('_')[0],
-                "price": item_str.split('_')[1],
-                "quantity": count,
-                "image_url": item_str.split('_')[2] if item_str.split('_')[2] != "None" else None
+                "id": item_dict['id'],
+                "title": item_dict['title'],
+                "price": item_dict['price_without_promos'],
+                "image": item_dict.get('image'),
+                "quantity": item_dict['quantity'],
+                "single_modifiers": item_dict['single_modifiers'],
+                "group_modifiers": item_dict['group_modifiers']
             })
         return dct
 
