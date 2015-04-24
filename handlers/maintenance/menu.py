@@ -87,8 +87,10 @@ class AddMenuItemHandler(BaseHandler):
         item.description = self.request.get('description')
         item.price = self.request.get_range('price')
         item.kal = self.request.get_range('kal')
-        item.volume = self.request.get_range('volume')
-        item.weight = self.request.get_range('weight')
+        if self.request.get('volume'):
+            item.volume = float(self.request.get('volume'))
+        if self.request.get('weight'):
+            item.weight = float(self.request.get('weight'))
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.sequence_number = category.generate_sequence_number()
         item.put()
@@ -122,8 +124,10 @@ class EditMenuItemHandler(BaseHandler):
         item.description = self.request.get('description')
         item.price = self.request.get_range('price')
         item.kal = self.request.get_range('kal')
-        item.volume = self.request.get_range('volume')
-        item.weight = self.request.get_range('weight')
+        if self.request.get('volume'):
+            item.volume = float(self.request.get('volume'))
+        if self.request.get('weight'):
+            item.weight = float(self.request.get('weight'))
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.put()
         self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
