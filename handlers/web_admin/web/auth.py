@@ -72,8 +72,7 @@ class SignupHandler(BaseHandler):
             error = u"Неправильно выбрана кофейня"
         else:
             venue_key = venue_ids.get(venue_id, None)
-            success, user = self.auth.store.user_model.create_user(
-                email, email=email, password_raw=password, venue=venue_key)
+            success, user = Admin.create_user(email, email=email, password_raw=password, venue=venue_key)
             if success:
                 set_current_user(self.auth, user)
             else:

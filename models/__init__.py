@@ -5,6 +5,7 @@ import datetime
 import logging
 import random
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import polymodel
 from webapp2_extras.appengine.auth import models
 from methods import location, fastcounter, working_hours
 from methods.rendering import timestamp, opt
@@ -559,10 +560,15 @@ class Deposit(ndb.Model):
     source = ndb.StringProperty(required=True)
 
 
-class Admin(models.User):
+class User(polymodel.PolyModel, models.User):
+    pass
 
-    PADMIN = 'padmin'
 
+class CompanyUser(User):
+    login = ndb.StringProperty()
+
+
+class Admin(User):
     email = ndb.StringProperty(required=True, indexed=False)
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)

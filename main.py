@@ -173,7 +173,6 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/admin', [
-
         PathPrefixRoute('/private_office', [
             PathPrefixRoute('/report', [
                 Route('', padmin.ReportHandler, 'padmin_report'),

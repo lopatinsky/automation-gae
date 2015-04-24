@@ -22,8 +22,7 @@ class LoginHandler(BaseHandler):
         login = self.request.POST.get("login").lower().strip()
         password = self.request.POST.get("password")
         try:
-            auth_id = '%s:%s' % (Admin.PADMIN, login)
-            self.auth.get_user_by_password(auth_id, password)
+            self.auth.get_user_by_password(login, password)
         except (InvalidAuthIdError, InvalidPasswordError):
             self.render('/mt/private_office/login.html', email=login, error=u"Неверный логин или пароль")
         else:
