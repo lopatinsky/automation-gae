@@ -8,8 +8,7 @@ class RevenueReportTodayHandler(AdminApiHandler):
     @api_user_required
     def get(self):
         venue_key = self.user.venue
-        venue = venue_key.get()
-        end = datetime.utcnow() + timedelta(venue.timezone_offset)
+        end = datetime.utcnow()
         start = end.replace(hour=0, minute=0)
         if venue_key:
             orders = Order.query(Order.date_created > start, Order.date_created < end,
