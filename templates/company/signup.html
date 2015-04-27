@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <script src="js/jquery-1.10.2.js"></script>
+    <!--<script type="text/javascript" src="js/jquery.mb.audio.js"></script>-->
+    <script type="text/javascript" src="js/bootstrap-select.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Регистрация в системе</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,300&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+
+    <link rel="stylesheet" type="text/css" href="css/auth.css">
+    <style>
+
+    .wrap {
+      width: 50%;
+
+      overflow: auto;
+      margin: auto auto;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      text-align: center;
+      display: table;
+    }
+
+    .footer {
+      width: 50%;
+      height: 5%;
+      overflow: auto;
+      margin: auto;
+      position: absolute;
+      top: auto; left: 0; bottom: 5px; right: 0;
+      text-align: center;
+    }
+
+    section {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+
+    section .separator .line {
+      width: 35%;
+    }
+
+    section h2 {
+      margin-bottom: 5px;
+    }
+
+    .btn-submit {
+      margin-top: 20px;
+    }
+
+    #submit {
+      height: 42px;
+      cursor: pointer;
+    }
+
+    .description {
+      margin-top: 10px;
+    }
+
+    #checkdiv {
+      margin-top: 15px;
+      width: 95%;
+      margin-left: 2.5%;
+    }
+    </style>
+</head>
+
+<body>
+  <div class="wrap">
+  <section>
+
+      <div class="separator">
+        <div class="line"></div>
+        <h2>Регистрация</h2>
+        <div class="line"></div>
+      </div>
+
+      <div class="enter-form">
+        <form id="enter_form" method="POST" action="" accept-charset="UTF-8">
+        <fieldset>
+          <label for="email">Логин</label>
+          <input required type="text" name="email" value="{{ email }}" id="email">
+          <label for="password">Пароль</label>
+          <input type="password" name="password" value="" id="password">
+          <label for="password">Подтвердите пароль</label>
+          <input type="password" name="password2" value="" id="password2">
+          <label for="venue">Кофейня</label>
+          <select id="venue" name="venue_id">
+            <option value="0" {% if not venue_id %}selected="selected"{% endif %}>Вся сеть</option>
+            {% for venue in venues %}
+              {% set id = venue.key.id() %}
+              <option value="{{ id }}" {% if id == venue_id %}selected="selected"{% endif %}>{{ venue.title }}</option>
+            {% endfor %}
+          </select>
+          <!--div id="checkdiv">
+            <input type="checkbox" id="checkbox" value=""> Я принимаю <a href="policies.html">Условия использования</a> и соглашаюсь с политикой конфидициальности Ru-Beacon
+          </div-->
+        </fieldset>
+        <fieldset class="fsubmit">
+          <input id="submit"  type="submit" class="btn btn-primary btn-submit" value="Зарегистрироваться">
+        </fieldset>
+        </form>
+        <div class="description">или <a href="login" >войти</a></div>
+      </div>
+      </section>
+    </div>
+
+   <div class="footer">
+        &copy; ru-beacon 2014. Все права защищены.
+    </div>
+</body>
+
+</html>
+<script>
+
+$(document).keypress(function(e) {
+    if(e.which == 13) {
+        $("#enter_form").submit()
+    }
+});
+
+</script>
