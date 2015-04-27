@@ -105,12 +105,6 @@ class OrderDoneHandler(WebAdminApiHandler):
 
         if order.payment_type_id == CARD_PAYMENT_TYPE:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success
-            if order.mastercard:
-                points = len(order.items)
-                try:
-                    empatika_promos.register_order(order.client_id, points, order.key.id())
-                except empatika_promos.EmpatikaPromosError as e:
-                    logging.exception(e)
         push.send_order_ready_push(order)
 
         response = {

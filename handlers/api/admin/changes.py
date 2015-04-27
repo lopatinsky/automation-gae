@@ -49,15 +49,6 @@ class CancelOrderHandler(AdminApiHandler):
                 push_text += comment
             push.send_order_push(order_id, order.status, push_text, order.device_type)
 
-            if order.mastercard and client.has_mastercard_orders:
-                # if this was the only mastercard order, make the user eligible for discount again
-                other_mastercard_order = Order.query(Order.client_id == order.client_id,
-                                                     Order.mastercard == True,
-                                                     Order.status.IN([NEW_ORDER, READY_ORDER])).get()
-                if not other_mastercard_order:
-                    client.has_mastercard_orders = False
-                    client.put()
-
             self.render_json({})
         else:
             self.response.status_int = 400
