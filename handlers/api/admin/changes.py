@@ -7,7 +7,7 @@ from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models import CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
-    NEW_ORDER, SharedFreeCup, WALLET_PAYMENT_TYPE, Venue
+    NEW_ORDER, SharedFreeCup, Venue
 
 __author__ = 'ilyazorin'
 
@@ -28,7 +28,8 @@ class CancelOrderHandler(AdminApiHandler):
             except empatika_promos.EmpatikaPromosError as e:
                 logging.exception(e)
                 success = False
-        elif order.payment_type_id == WALLET_PAYMENT_TYPE:
+
+        if order.wallet_payment > 0:
             try:
                 empatika_wallet.reverse(order.client_id, order_id)
             except empatika_wallet.EmpatikaWalletError as e:

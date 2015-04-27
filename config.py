@@ -14,6 +14,10 @@ class Config(ndb.Model):
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
 
+    @property
+    def WALLET_ENABLED(self):
+        return self.WALLET_API_KEY is not None
+
     EMAILS = ndb.JsonProperty(default={
         "server": "admins",
     })

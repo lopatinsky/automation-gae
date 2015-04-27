@@ -1,6 +1,8 @@
 # coding=utf-8
 import copy
 import logging
+from config import config
+from methods import empatika_wallet
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
 from promos import apply_promos
 
@@ -266,12 +268,18 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
 
     grouped_item_dicts = group_item_dicts(item_dicts)
 
+    max_wallet_payment = 0.0
+    if config.WALLET_ENABLED:
+        wallet_balance = empatika_wallet.get_balance(client.key.id())
+        max_wallet_payment = min(total_sum, wallet_balance / 100.0)
+
     result = {
         'valid': valid,
         'errors': _unique(errors),
         'items': grouped_item_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
-        'total_sum': total_sum
+        'total_sum': total_sum,
+        'max_wallet_payment': max_wallet_payment,
     }
     logging.info(result)
     logging.info(total_sum)

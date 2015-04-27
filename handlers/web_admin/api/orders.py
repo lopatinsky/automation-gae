@@ -8,7 +8,7 @@ from .base import WebAdminApiHandler
 from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
-    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, WALLET_PAYMENT_TYPE, Venue
+    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, Venue
 
 
 def format_order(order):
@@ -131,14 +131,15 @@ class OrderCancelHandler(WebAdminApiHandler):
             except empatika_promos.EmpatikaPromosError as e:
                 logging.exception(e)
                 success = False
-        elif order.payment_type_id == WALLET_PAYMENT_TYPE:
-            try:
-                empatika_wallet.reverse(order.client_id, order_id)
-            except empatika_wallet.EmpatikaWalletError as e:
-                logging.exception(e)
-                self.abort(400)
 
         if success:
+            if order.wallet_payment > 0:
+                try:
+                    empatika_wallet.reverse(order.client_id, order_id)
+                except empatika_wallet.EmpatikaWalletError as e:
+                    logging.exception(e)
+                    # do not abort -- primary payment reversed
+
             order.status = CANCELED_BY_BARISTA_ORDER
             order.return_datetime = datetime.datetime.utcnow()
             order.return_comment = comment
