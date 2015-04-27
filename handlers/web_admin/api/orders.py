@@ -5,7 +5,6 @@ import datetime
 import logging
 from google.appengine.ext import ndb
 from .base import WebAdminApiHandler
-from config import config
 from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \

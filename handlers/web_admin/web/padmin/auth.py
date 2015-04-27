@@ -3,7 +3,6 @@
 from ..base import BaseHandler
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from methods import auth
-from models import Admin
 
 
 class LoginHandler(BaseHandler):

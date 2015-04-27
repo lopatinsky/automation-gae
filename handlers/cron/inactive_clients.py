@@ -3,15 +3,11 @@
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order, Notification, PUSH_NOTIFICATION, SMS_SUCCESS, SMS_PASSIVE, CardBindingPayment
-from methods import email, empatika_promos
+from models import Client, Order, Notification, SMS_SUCCESS, CardBindingPayment
+from methods import email
 from datetime import datetime, timedelta
-from methods.push import send_reminder_push
 from methods import sms_pilot
-from config import config
-from methods import twilio
 from webapp2_extras import jinja2
-import logging
 
 
 class SuccessBindingCardHandler(RequestHandler):

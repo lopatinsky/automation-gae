@@ -6,10 +6,8 @@ from models import TabletRequest, Admin, AdminStatus
 from datetime import datetime, timedelta
 from base import BaseHandler
 from methods.report.report_methods import PROJECT_STARTING_YEAR
-from methods import location
 import json
 import time
-import logging
 
 
 class AdminRequestNumber():

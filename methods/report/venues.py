@@ -3,7 +3,6 @@ __author__ = 'dvpermyakov'
 from models import Order, Venue, READY_ORDER, BONUS_PAYMENT_TYPE
 from datetime import datetime, timedelta
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
-from methods.excel import send_excel_file
 
 
 class ReportedVenue:

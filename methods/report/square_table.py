@@ -2,7 +2,6 @@ __author__ = 'dvpermyakov'
 
 from datetime import datetime
 from models import JsonStorage
-from methods.excel import send_excel_file
 
 
 def get():

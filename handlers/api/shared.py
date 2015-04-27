@@ -6,7 +6,7 @@ __author__ = 'dvpermyakov'
 
 from base import ApiHandler
 from methods import branch_io, alfa_bank
-from models import Share, Client, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, Order, SharedGift
+from models import Share, Client, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, SharedGift
 import logging
 
 TEXT = (u'Роскошный кофе, дружелюбные бариста. '

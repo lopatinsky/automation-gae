@@ -3,8 +3,6 @@ __author__ = 'dvpermyakov'
 from models import Client, CardBindingPayment, Notification, SMS_PASSIVE
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from datetime import datetime
-from config import config
-import logging
 
 
 def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):

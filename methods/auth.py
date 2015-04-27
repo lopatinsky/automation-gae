@@ -1,5 +1,4 @@
 from webapp2_extras import security
-from  models import Admin
 
 
 def set_current_user(auth, user):

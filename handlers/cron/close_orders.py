@@ -3,7 +3,7 @@ import logging
 import datetime
 from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
-from methods import alfa_bank, email, empatika_promos
+from methods import alfa_bank, email
 from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, Client, SharedFreeCup
 
 

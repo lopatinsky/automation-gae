@@ -1,5 +1,4 @@
 import datetime
-from config import config
 
 
 def _date_str_to_date(date_str):

@@ -5,7 +5,6 @@ __author__ = 'dvpermyakov'
 from base import BaseHandler
 from models import Admin, Venue
 from methods import auth
-import logging
 
 
 class ListPAdmins(BaseHandler):

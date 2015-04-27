@@ -1,6 +1,5 @@
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import jinja2, sessions, auth
-from google.appengine.api import users
 
 
 class BaseHandler(RequestHandler):

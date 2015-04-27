@@ -1,5 +1,4 @@
 from webapp2_extras import jinja2
-from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
 import handlers.web_admin.web.padmin as padmin

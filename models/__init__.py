@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from collections import Counter
 import datetime
 import logging
 import random

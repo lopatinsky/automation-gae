@@ -4,7 +4,6 @@ __author__ = 'dvpermyakov'
 from models import Order, Venue, MenuItem, READY_ORDER
 from datetime import datetime
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
-from methods.excel import send_excel_file
 
 
 class ReportedMenuItem:

@@ -2,12 +2,11 @@
 import datetime
 import logging
 from google.appengine.ext import ndb
-from config import config
 from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos, empatika_wallet
 from methods.auth import write_access_required
 from methods.rendering import timestamp
-from models import Order, CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
+from models import CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
     NEW_ORDER, SharedFreeCup, WALLET_PAYMENT_TYPE, Venue
 
 __author__ = 'ilyazorin'

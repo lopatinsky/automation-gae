@@ -2,7 +2,7 @@
 
 from .base import ApiHandler
 from config import config
-from models import Promo, PromoCondition, PromoOutcome
+from models import Promo
 
 
 class DemoInfoHandler(ApiHandler):

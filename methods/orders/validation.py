@@ -1,7 +1,6 @@
 # coding=utf-8
 import copy
 import logging
-from google.appengine.ext import ndb
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
 from promos import apply_promos
 

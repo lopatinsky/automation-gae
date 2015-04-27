@@ -7,9 +7,6 @@ from methods.report import clients, menu_items, notifications, orders, repeated_
     card_binding
 
 
-from methods.twilio import send_sms
-
-
 def get_standart_params(request, values=None, delete_params=None):
     params = {
         'venue_id': request.get("selected_venue"),
