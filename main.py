@@ -6,6 +6,7 @@ import handlers.web_admin.web.padmin as padmin
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
+import handlers.web_admin.web.company as company_admin
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -170,6 +171,10 @@ app = WSGIApplication([
                 Route('/text', api.GetPreText),
             ]),
         ]),
+    ]),
+
+    PathPrefixRoute('/company', [
+        Route('/create', company_admin.SignupHandler),
     ]),
 
     PathPrefixRoute('/admin', [

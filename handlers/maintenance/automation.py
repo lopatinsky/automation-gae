@@ -1,6 +1,7 @@
 # coding:utf-8
 from urlparse import urlparse
 from google.appengine.ext.ndb import metadata
+from methods.rendering import latinize
 
 __author__ = 'dvpermyakov'
 
@@ -29,18 +30,9 @@ class CreateCompanyHandler(BaseHandler):
 
     def post(self):
         name = self.request.get('name')
-        english = u'abcdefghijklmnopqrstuvwxyz'
-        russian = u'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-        russian_translate = u'abvgdeezziiklmnoprstufhchhhiiiaua'
-        new_name = u''
-        for letter in name.lower():
-            if letter in russian:
-                new_name += russian_translate[russian.index(letter)]
-            else:
-                if letter in english:
-                    new_name += letter
+        name = latinize(name)
         for metadata_instance in metadata.get_namespaces():
-            if new_name == metadata_instance:
+            if name == metadata_instance:
                 return self.abort(400)
-        url = u'http://%s.1.%s/mt/automation' % (new_name, urlparse(self.request.url).hostname)
+        url = u'http://%s.1.%s/mt/automation' % (name, urlparse(self.request.url).hostname)
         self.redirect(str(url))

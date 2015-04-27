@@ -123,8 +123,8 @@ class MenuItem(ndb.Model):
     picture = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
-    weight = ndb.FloatProperty(indexed=False)
-    volume = ndb.FloatProperty(indexed=False)
+    weight = ndb.FloatProperty(indexed=False, default=0)
+    volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
@@ -561,7 +561,7 @@ class Deposit(ndb.Model):
 
 
 class User(polymodel.PolyModel, models.User):
-    pass
+    namespace = ndb.StringProperty(required=True)
 
 
 class CompanyUser(User):

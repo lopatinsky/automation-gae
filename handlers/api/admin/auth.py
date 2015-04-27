@@ -34,3 +34,8 @@ class LogoutHandler(AdminApiHandler):
             self.abort(403)
         AdminStatus.get(self.user.key.id(), self.token).key.delete()
         self.render_json({})
+
+
+class GetBaseUrHandler(AdminApiHandler):
+    def get(self):
+        pass

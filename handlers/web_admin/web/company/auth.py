@@ -1,7 +1,12 @@
 # coding=utf-8
+import logging
+from google.appengine.ext.ndb import metadata
+
 __author__ = 'dvpermyakov'
 
 from ..base import BaseHandler
+from models import CompanyUser
+from methods.rendering import latinize
 
 
 class SignupHandler(BaseHandler):
@@ -17,29 +22,29 @@ class SignupHandler(BaseHandler):
     def post(self):
         if self.user is not None:
             self.success()
-        email, password, password2 = \
+        login, password, password2 = \
             self.request.get("email").strip().lower(), \
             self.request.get("password"), self.request.get("password2")
-        venue_id = self.request.get_range("venue_id", default=-1)
-        venue_ids = {v.key.id(): v.key for v in self.venues}
+        namespace = latinize(login)
         error = None
-        if not email:
+        for metadata_instance in metadata.get_namespaces():
+            if namespace == metadata_instance:
+                error = u"Введите другой email"
+        if error:
+            pass
+        elif not login:
             error = u"Не введен email"
         elif not password:
             error = u"Не введен пароль"
         elif password != password2:
             error = u"Пароли не совпадают"
-        elif venue_id and venue_id not in venue_ids:
-            error = u"Неправильно выбрана кофейня"
         else:
-            venue_key = venue_ids.get(venue_id, None)
-            success, user = self.auth.store.user_model.create_user(
-                email, email=email, password_raw=password, venue=venue_key)
-            if success:
-                set_current_user(self.auth, user)
-            else:
+            success, user = CompanyUser.create_user(login, namespace=namespace, login=login, password_raw=password)
+            if not success:
                 error = u"Пользователь с этим email уже зарегистрирован"
+            self.redirect('/mt/automation')
         if error:
-            self.render('signup.html', email=email, error=error, venue_id=venue_id)
+            logging.info(error)
+            self.render('signup.html', email=login, error=error)
         else:
             self.success()
