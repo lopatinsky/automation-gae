@@ -13,6 +13,7 @@
     </style>
 </head>
 <body>
+    {% include '/company/header.html' %}
     {% if success %}
         <div style="border: 1px solid black; padding: 4px 6px;">
             Изменения сохранены
@@ -45,7 +46,7 @@
         <div>
             <label></label>
             <input type="submit" value="Сохранить"/>
-            <a href="/mt/venues">Назад к списку</a>
+            <a href="/company/venues">Назад к списку</a>
         </div>
     </form>
 </body>

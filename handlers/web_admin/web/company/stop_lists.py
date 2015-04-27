@@ -1,14 +1,14 @@
-from base import BaseHandler
+from base import CompanyBaseHandler
 from models import Venue, MenuItem, STATUS_AVAILABLE
 
 
-class MainStopListHandler(BaseHandler):
+class MainStopListHandler(CompanyBaseHandler):
     def get(self):
         venues = Venue.query().fetch()
         self.render('/stop_list/main.html', venues=venues)
 
 
-class StopListsHandler(BaseHandler):
+class StopListsHandler(CompanyBaseHandler):
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)

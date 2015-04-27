@@ -5,15 +5,5 @@ from report import ReportHandler, ClientsReportHandler, MenuItemsReportHandler, 
 from tablet_requests_report import TabletRequestGraphHandler, TabletInfoHandler
 from name_confirmed import NameConfirmationHandler
 from private_office import ListPAdmins, ChangeLoginPAdmins, ChangePasswordPAdmin, AutoCreatePAdmins
-from menu import ListCategoriesHandler, ListMenuItemsHandler, MenuItemInfoHandler, AddMenuItemHandler, \
-    CreateCategoryHandler, MainMenuHandler, SelectProductForModifierHandler, ModifiersForProductHandler, ModifierList, \
-    AddSingleModifierHandler, AddGroupModifierHandler, AddGroupModifierItemHandler, EditMenuItemHandler, \
-    RemoveMenuItemHandler, SelectProductForChoiceHandler, EditSingleModifierHandler, EditGroupModifierHandler, \
-    EditGroupModifierItemHandler, UpProductHandler, DownProductHandler
 from check_menu import CheckMenuHandler
-from venues import VenueListHandler, AddRestrictionHandler, EditVenueHandler, EnableVenuesHandler, CreateVenueHandler, \
-    MapVenuesHandler
-from stop_lists import MainStopListHandler, StopListsHandler
-from payment_type import PaymentTypesHandler
-from automation import AutomationMainHandler, CompaniesListHandler, CreateCompanyHandler
-from promos import PromoListHandler
+from automation import CompaniesListHandler

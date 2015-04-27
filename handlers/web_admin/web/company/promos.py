@@ -1,9 +1,8 @@
 # coding:utf-8
 from models import Promo, PromoCondition, PromoOutcome, IN_CAFE, SELF
+from base import CompanyBaseHandler
 
 __author__ = 'dvpermyakov'
-
-from base import BaseHandler
 
 CONDITION_MAP = {
     PromoCondition.CHECK_FIRST_ORDER: u"Первый заказ",
@@ -21,7 +20,7 @@ DELIVERY_MAP = {
 }
 
 
-class PromoListHandler(BaseHandler):
+class PromoListHandler(CompanyBaseHandler):
     def get(self):
         promos = Promo.query().fetch()
         for promo in promos:

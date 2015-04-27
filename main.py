@@ -1,5 +1,4 @@
 from webapp2_extras import jinja2
-from config import config
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
 import handlers.web_admin.web.padmin as padmin
@@ -23,15 +22,6 @@ app = WSGIApplication([
 
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
-        Route('/create_company', maintenance.CreateCompanyHandler),
-        Route('/automation', maintenance.AutomationMainHandler),
-
-        Route('/venues', maintenance.EnableVenuesHandler),
-        Route('/venues/map', maintenance.MapVenuesHandler),
-        Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
-        Route('/venues/create', maintenance.CreateVenueHandler),
-
-        Route('/payment_types', maintenance.PaymentTypesHandler),
 
         Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
@@ -54,46 +44,6 @@ app = WSGIApplication([
             Route('/create', maintenance.AutoCreatePAdmins),
             Route('/<admin_id:\d+>/change_login', maintenance.ChangeLoginPAdmins),
             Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
-        ]),
-
-        PathPrefixRoute('/menu', [
-            Route('/main', maintenance.MainMenuHandler),
-            Route('/category/add', maintenance.CreateCategoryHandler),
-            Route('/category/list', maintenance.ListCategoriesHandler, 'mt_category_list'),
-            PathPrefixRoute('/item', [
-                Route('/list', maintenance.ListMenuItemsHandler),
-                Route('/info', maintenance.MenuItemInfoHandler),
-                Route('/add', maintenance.AddMenuItemHandler),
-                Route('/edit', maintenance.EditMenuItemHandler),
-                Route('/delete', maintenance.RemoveMenuItemHandler),
-                Route('/up', maintenance.UpProductHandler),
-                Route('/down', maintenance.DownProductHandler),
-            ]),
-            Route('/product/modifiers/list', maintenance.ModifiersForProductHandler),
-            Route('/product/modifiers/select', maintenance.SelectProductForModifierHandler),
-            PathPrefixRoute('/modifiers', [
-                Route('/list', maintenance.ModifierList, 'modifiers_list'),
-                Route('/add/single_modifier', maintenance.AddSingleModifierHandler),
-                Route('/add/group_modifier', maintenance.AddGroupModifierHandler),
-                Route('/add/<group_modifier_id:\d+>/group_modifier_item', maintenance.AddGroupModifierItemHandler),
-                Route('/edit/single_modifier', maintenance.EditSingleModifierHandler),
-                Route('/edit/group_modifier', maintenance.EditGroupModifierHandler),
-                Route('/edit/choice', maintenance.EditGroupModifierItemHandler),
-                Route('/choices/select', maintenance.SelectProductForChoiceHandler),
-            ]),
-            PathPrefixRoute('/venue', [
-                Route('/list', maintenance.VenueListHandler, 'venues_list'),
-                Route('/add_restrictions', maintenance.AddRestrictionHandler),
-            ]),
-        ]),
-
-        PathPrefixRoute('/stop_list', [
-            Route('/main', maintenance.MainStopListHandler, 'main_stop_list'),
-            Route('/list', maintenance.StopListsHandler),
-        ]),
-
-        PathPrefixRoute('/promos', [
-            Route('/list', maintenance.PromoListHandler),
         ]),
 
         Route('/check_menu', maintenance.CheckMenuHandler),
@@ -175,6 +125,55 @@ app = WSGIApplication([
 
     PathPrefixRoute('/company', [
         Route('/create', company_admin.SignupHandler),
+        Route('/login', company_admin.LoginHandler),
+        Route('/logout', company_admin.LogoutHandler),
+        Route('/main', company_admin.AutomationMainHandler),
+        Route('/payment_types', company_admin.PaymentTypesHandler),
+
+        Route('/venues', company_admin.EnableVenuesHandler),
+        Route('/venues/map', company_admin.MapVenuesHandler),
+        Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
+        Route('/venues/create', company_admin.CreateVenueHandler),
+
+        PathPrefixRoute('/menu', [
+            Route('/main', company_admin.MainMenuHandler),
+            Route('/category/add', company_admin.CreateCategoryHandler),
+            Route('/category/list', company_admin.ListCategoriesHandler, 'mt_category_list'),
+            PathPrefixRoute('/item', [
+                Route('/list', company_admin.ListMenuItemsHandler),
+                Route('/info', company_admin.MenuItemInfoHandler),
+                Route('/add', company_admin.AddMenuItemHandler),
+                Route('/edit', company_admin.EditMenuItemHandler),
+                Route('/delete', company_admin.RemoveMenuItemHandler),
+                Route('/up', company_admin.UpProductHandler),
+                Route('/down', company_admin.DownProductHandler),
+            ]),
+            Route('/product/modifiers/list', company_admin.ModifiersForProductHandler),
+            Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
+            PathPrefixRoute('/modifiers', [
+                Route('/list', company_admin.ModifierList, 'modifiers_list'),
+                Route('/add/single_modifier', company_admin.AddSingleModifierHandler),
+                Route('/add/group_modifier', company_admin.AddGroupModifierHandler),
+                Route('/add/<group_modifier_id:\d+>/group_modifier_item', company_admin.AddGroupModifierItemHandler),
+                Route('/edit/single_modifier', company_admin.EditSingleModifierHandler),
+                Route('/edit/group_modifier', company_admin.EditGroupModifierHandler),
+                Route('/edit/choice', company_admin.EditGroupModifierItemHandler),
+                Route('/choices/select', company_admin.SelectProductForChoiceHandler),
+            ]),
+            PathPrefixRoute('/venue', [
+                Route('/list', company_admin.VenueListHandler, 'venues_list'),
+                Route('/add_restrictions', company_admin.AddRestrictionHandler),
+            ]),
+        ]),
+
+        PathPrefixRoute('/stop_list', [
+            Route('/main', company_admin.MainStopListHandler, 'main_stop_list'),
+            Route('/list', company_admin.StopListsHandler),
+        ]),
+
+        PathPrefixRoute('/promos', [
+            Route('/list', company_admin.PromoListHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/admin', [

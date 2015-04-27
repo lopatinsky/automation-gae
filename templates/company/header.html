@@ -5,13 +5,11 @@
 </head>
 <body>
     <nav>
-        {% if padmin %}
+        {% if user %}
             <p>
-                {{ padmin.login }}
-                <a href="/admin/private_office/logout">Выйти</a>
+                {{ user.namespace }}
+                <a href="/company/logout">Выйти</a>
             </p>
-        {% else %}
-            <a href="/admin/private_office/login">Зайти</a>
         {% endif %}
     </nav>
 </body>

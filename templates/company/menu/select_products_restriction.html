@@ -4,6 +4,7 @@
     <title>Выбирите продукты</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <h3>Выберите продукты для {{ venue.title }}</h3>
     <form method="post">
         <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
@@ -19,6 +20,6 @@
         {% endfor %}
         <label><input type="submit" value="Сохранить"></label>
     </form>
-    <a href="/mt/menu/venue/list">Назад</a>
+    <a href="/company/menu/venue/list">Назад</a>
 </body>
 </html>

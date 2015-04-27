@@ -20,6 +20,7 @@
     </script>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <h2>Одиночные модификаторы</h2>
         <button id="show_inactive_single">
             Показать/Скрыть неактивные
@@ -35,12 +36,12 @@
         {% for modifier in single_modifiers %}
             <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
                 <td>
-                    <a href="{{ '/mt/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
+                    <a href="{{ '/company/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
                     </a>
                 </td>
                 <td>
-                    <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
+                    <a href="{{ '/company/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 0) }}">
                         Выбрать
                     </a>
                 </td>
@@ -52,7 +53,7 @@
     </table>
     <div>
         <form method="get">
-            <button formaction="{{ '/mt/menu/modifiers/add/single_modifier' }}">
+            <button formaction="{{ '/company/menu/modifiers/add/single_modifier' }}">
                 Добавить
             </button>
         </form>
@@ -72,7 +73,7 @@
         {% for modifier in group_modifiers %}
             <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/mt/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
+                    <a href="{{ '/company/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
                     </a>
                     <br>
@@ -83,13 +84,13 @@
                     {% endif %}
                 </td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/mt/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
+                    <a href="{{ '/company/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
                         Выбрать
                     </a>
                 </td>
                 <td colspan="3">
                     <form method="get">
-                        <button formaction="{{ '/mt/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
+                        <button formaction="{{ '/company/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
                             Добавить выбор
                         </button>
                     </form>
@@ -97,11 +98,11 @@
                 {% for choice in modifier.choices %}
                     </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
                     <td>
-                        <a href="{{ '/mt/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
+                        <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
                     </td>
                     <td>{{ choice.price }}</td>
                     <td>
-                        <a href="{{ '/mt/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
+                        <a href="{{ '/company/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
                     </td>
                 {% endfor %}
             </tr>
@@ -116,11 +117,11 @@
     </table>
     <div>
         <form method="get">
-            <button formaction="{{ '/mt/menu/modifiers/add/group_modifier' }}">
+            <button formaction="{{ '/company/menu/modifiers/add/group_modifier' }}">
                 Добавить
             </button>
         </form>
     </div>
-    <a href="{{ '/mt/menu/main' }}">Назад</a>
+    <a href="{{ '/company/menu/main' }}">Назад</a>
 </body>
 </html>

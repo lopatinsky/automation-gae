@@ -4,6 +4,7 @@
     <title></title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <form method="post">
         {% if category %}
             <input disabled type="text" name="category_id" value="{{ category.key.id() }}" hidden>
@@ -22,7 +23,7 @@
             </div>
         {% endfor %}
         <input type="submit" value="Отправить"/>
-        <a href="{{ '/mt/menu/item/list?category_id=%s' % category.key.id()  }}">Назад</a>
+        <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id()  }}">Назад</a>
     </form>
 </body>
 </html>

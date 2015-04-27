@@ -13,6 +13,7 @@
     </script>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <form method="post">
         {% if single_modifier_obj %}
             <input type="text" name="modifier_id"  value="{{ single_modifier_obj.key.id() }}"  hidden>
@@ -55,6 +56,6 @@
         {% endif %}
         <input type="submit">
     </form>
-    <a href="{{ '/mt/menu/modifiers/list' }}">Назад</a>
+    <a href="{{ '/company/menu/modifiers/list' }}">Назад</a>
 </body>
 </html>

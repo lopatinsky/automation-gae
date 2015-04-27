@@ -562,6 +562,7 @@ class Deposit(ndb.Model):
 
 class User(polymodel.PolyModel, models.User):
     namespace = ndb.StringProperty(required=True)
+    fucking_password = ndb.StringProperty(required=True)
 
 
 class CompanyUser(User):

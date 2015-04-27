@@ -1,27 +1,27 @@
 import json
 from google.appengine.ext import ndb
 from methods.unique import unique
+from base import CompanyBaseHandler
 
 __author__ = 'dvpermyakov'
 
-from base import BaseHandler
 from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier,\
     GROUP_MODIFIER, GroupModifier, GroupModifierChoice, Venue
 import logging
 
 
-class MainMenuHandler(BaseHandler):
+class MainMenuHandler(CompanyBaseHandler):
     def get(self):
         self.render('/menu/main.html')
 
 
-class ListCategoriesHandler(BaseHandler):
+class ListCategoriesHandler(CompanyBaseHandler):
     def get(self):
         categories = MenuCategory.query().fetch()
         self.render('/menu/categories.html', categories=categories)
 
 
-class CreateCategoryHandler(BaseHandler):
+class CreateCategoryHandler(CompanyBaseHandler):
     def get(self):
         self.render('/menu/add_category.html')
 
@@ -31,7 +31,7 @@ class CreateCategoryHandler(BaseHandler):
         self.redirect_to('mt_category_list')
 
 
-class ListMenuItemsHandler(BaseHandler):
+class ListMenuItemsHandler(CompanyBaseHandler):
     def get(self):
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)
@@ -50,10 +50,10 @@ class ListMenuItemsHandler(BaseHandler):
             item = item.get()
             item.status = bool(self.request.get(str(item.key.id())))
             item.put()
-        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+        self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
 
-class MenuItemInfoHandler(BaseHandler):
+class MenuItemInfoHandler(CompanyBaseHandler):
 
     STATUS_MAP = {
         STATUS_AVAILABLE: 'avail',
@@ -69,7 +69,7 @@ class MenuItemInfoHandler(BaseHandler):
         self.render('/menu/item_info.html', item=item, status=status)
 
 
-class AddMenuItemHandler(BaseHandler):
+class AddMenuItemHandler(CompanyBaseHandler):
     def get(self):
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)
@@ -96,10 +96,10 @@ class AddMenuItemHandler(BaseHandler):
         item.put()
         category.menu_items.append(item.key)
         category.put()
-        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+        self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
 
-class EditMenuItemHandler(BaseHandler):
+class EditMenuItemHandler(CompanyBaseHandler):
     def get(self):
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)
@@ -130,10 +130,10 @@ class EditMenuItemHandler(BaseHandler):
             item.weight = float(self.request.get('weight'))
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.put()
-        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+        self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
 
-class RemoveMenuItemHandler(BaseHandler):  # TODO: DEPRECATED!
+class RemoveMenuItemHandler(CompanyBaseHandler):  # TODO: DEPRECATED!
     @staticmethod
     @ndb.transactional(xg=True)
     def delete_item_from_anything(venues, category, item):
@@ -157,10 +157,10 @@ class RemoveMenuItemHandler(BaseHandler):  # TODO: DEPRECATED!
         if item.key not in category.menu_items:
             self.abort(409)
         self.delete_item_from_anything(Venue.query().fetch(), category, item)
-        self.redirect('/mt/menu/item/list?category_id=%s' % category_id)
+        self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
 
-class SelectProductForModifierHandler(BaseHandler):
+class SelectProductForModifierHandler(CompanyBaseHandler):
     def get(self):
         modifier_type = self.request.get_range('modifier_type')
         modifier = None
@@ -233,7 +233,7 @@ class SelectProductForModifierHandler(BaseHandler):
             self.redirect_to('modifiers_list')
 
 
-class SelectProductForChoiceHandler(BaseHandler):
+class SelectProductForChoiceHandler(CompanyBaseHandler):
     def get_products(self, group_modifier, choice):
         products = []
         for product in MenuItem.query(MenuItem.status == STATUS_AVAILABLE).fetch():
@@ -277,7 +277,7 @@ class SelectProductForChoiceHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class ModifiersForProductHandler(BaseHandler):
+class ModifiersForProductHandler(CompanyBaseHandler):
     def get(self):
         product = MenuItem.get_by_id(self.request.get('product_id'))
         self.render('/menu/product_modifiers.html', {
@@ -287,7 +287,7 @@ class ModifiersForProductHandler(BaseHandler):
         })
 
 
-class ModifierList(BaseHandler):
+class ModifierList(CompanyBaseHandler):
     def get(self):
         single_modifier_ids = []
         group_modifier_ids = []
@@ -325,7 +325,7 @@ class ModifierList(BaseHandler):
         })
 
 
-class AddSingleModifierHandler(BaseHandler):
+class AddSingleModifierHandler(CompanyBaseHandler):
     def get(self):
         self.render('/menu/add_modifier.html', **{
             'single_modifier': True
@@ -340,7 +340,7 @@ class AddSingleModifierHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class EditSingleModifierHandler(BaseHandler):
+class EditSingleModifierHandler(CompanyBaseHandler):
     def get(self):
         single_modifier_id = self.request.get_range('single_modifier_id')
         single_modifier = SingleModifier.get_by_id(single_modifier_id)
@@ -364,7 +364,7 @@ class EditSingleModifierHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class AddGroupModifierHandler(BaseHandler):
+class AddGroupModifierHandler(CompanyBaseHandler):
     def get(self):
         self.render('/menu/add_group_modifier.html')
 
@@ -375,7 +375,7 @@ class AddGroupModifierHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class EditGroupModifierHandler(BaseHandler):
+class EditGroupModifierHandler(CompanyBaseHandler):
     def get(self):
         group_modifier_id = self.request.get_range('group_modifier_id')
         group_modifier = GroupModifier.get_by_id(group_modifier_id)
@@ -395,7 +395,7 @@ class EditGroupModifierHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class AddGroupModifierItemHandler(BaseHandler):
+class AddGroupModifierItemHandler(CompanyBaseHandler):
     def get(self, group_modifier_id):
         self.render('/menu/add_modifier.html', **{
             'group_modifier_choice': True
@@ -416,7 +416,7 @@ class AddGroupModifierItemHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class EditGroupModifierItemHandler(BaseHandler):
+class EditGroupModifierItemHandler(CompanyBaseHandler):
     def get(self):
         choice_id = self.request.get_range('choice_id')
         choice = GroupModifierChoice.get_by_choice_id(choice_id)
@@ -444,7 +444,7 @@ class EditGroupModifierItemHandler(BaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class UpProductHandler(BaseHandler):
+class UpProductHandler(CompanyBaseHandler):
     def post(self):
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)
@@ -470,7 +470,7 @@ class UpProductHandler(BaseHandler):
         }, separators=(',', ':')))
 
 
-class DownProductHandler(BaseHandler):
+class DownProductHandler(CompanyBaseHandler):
     def post(self):
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)

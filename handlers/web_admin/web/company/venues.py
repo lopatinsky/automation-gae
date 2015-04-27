@@ -1,12 +1,12 @@
 # coding:utf-8
 import logging
 from google.appengine.ext import ndb
-from base import BaseHandler
+from base import CompanyBaseHandler
 from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE
 from methods import map
 
 
-class CreateVenueHandler(BaseHandler):
+class CreateVenueHandler(CompanyBaseHandler):
     def get(self):
         lat = self.request.get('lat')
         lon = self.request.get('lon')
@@ -18,7 +18,7 @@ class CreateVenueHandler(BaseHandler):
                 address_str = u'г. %s, ул. %s, д. %s' % (address.get('city'), address.get('street'), address.get('home'))
         logging.info(address)
         logging.info(address_str)
-        self.render('edit_venue.html', **{
+        self.render('/venues/edit_venue.html', **{
             'coordinates': '%s, %s' % (lat, lon) if lat else '',
             'address': address_str
         })
@@ -31,13 +31,13 @@ class CreateVenueHandler(BaseHandler):
         venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
         venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
         venue.put()
-        self.redirect('/mt/venues')
+        self.redirect('/company/venues')
 
 
-class EnableVenuesHandler(BaseHandler):
+class EnableVenuesHandler(CompanyBaseHandler):
     def get(self):
         venues = Venue.query().fetch()
-        self.render('enable_venues.html', venues=venues)
+        self.render('/venues/enable_venues.html', venues=venues)
 
     def post(self):
         venues = Venue.query().fetch()
@@ -47,15 +47,15 @@ class EnableVenuesHandler(BaseHandler):
             if v.active != new_active:
                 v.active = new_active
                 v.put()
-        self.render('enable_venues.html', venues=venues, success=True)
+        self.render('/venues/enable_venues.html', venues=venues, success=True)
 
 
-class EditVenueHandler(BaseHandler):
+class EditVenueHandler(CompanyBaseHandler):
     def get(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
             self.abort(404)
-        self.render('edit_venue.html', venue=venue)
+        self.render('/edit_venue.html', venue=venue)
 
     def post(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
@@ -70,17 +70,17 @@ class EditVenueHandler(BaseHandler):
         venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
 
         venue.put()
-        self.render('edit_venue.html', venue=venue, success=True)
+        self.render('/venues/edit_venue.html', venue=venue, success=True)
 
 
-class VenueListHandler(BaseHandler):
+class VenueListHandler(CompanyBaseHandler):
     def get(self):
-        self.render('menu/venue_list.html', **{
+        self.render('/menu/venue_list.html', **{
             'venues': Venue.query().fetch()
         })
 
 
-class AddRestrictionHandler(BaseHandler):
+class AddRestrictionHandler(CompanyBaseHandler):
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
@@ -100,7 +100,7 @@ class AddRestrictionHandler(BaseHandler):
                     products.append(product)
             category.products = products
             categories.append(category)
-        self.render('menu/select_products_restriction.html', **{
+        self.render('/menu/select_products_restriction.html', **{
             'categories': categories,
             'venue': venue
         })
@@ -121,13 +121,13 @@ class AddRestrictionHandler(BaseHandler):
         self.redirect_to('venues_list')
 
 
-class MapVenuesHandler(BaseHandler):
+class MapVenuesHandler(CompanyBaseHandler):
     def get(self):
         venues = []
         for venue in Venue.query().fetch():
             venue.lat = venue.coordinates.lat
             venue.lon = venue.coordinates.lon
             venues.append(venue)
-        self.render('/map.html', **{
+        self.render('/venues/map.html', **{
             'venues': venues
         })

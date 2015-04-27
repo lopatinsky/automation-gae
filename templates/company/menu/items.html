@@ -47,7 +47,8 @@
     </script>
 </head>
 <body>
-    <a href="{{ '/mt/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
+    {% include '/company/header.html' %}
+    <a href="{{ '/company/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
     <button id="show_inactive">
         Показать/Скрыть неактивные
     </button>
@@ -78,7 +79,7 @@
                         </button>
                     </td>
                     <td>
-                        <a href="{{ '/mt/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
+                        <a href="{{ '/company/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
                     </td>
                     <td>{{ item.description }}</td>
                     <td>{{ item.price }}</td>
@@ -89,7 +90,7 @@
                     </td>
                     <!--
                     <form method="post">
-                        <button formaction="{{ '/mt/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
+                        <button formaction="{{ '/company/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
                                 name="button" value="delete">
                             Удалить
                         </button>
@@ -99,7 +100,7 @@
             {% endfor %}
         </table>
         <input type="submit">
-        <a href="/mt/menu/category/list">Назад</a>
+        <a href="/company/menu/category/list">Назад</a>
     </form>
 </body>
 </html>

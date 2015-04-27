@@ -4,9 +4,14 @@ from webapp2 import cached_property
 from webapp2_extras import auth
 from ..base import ApiHandler
 from models import AdminStatus
+from google.appengine.api.namespace_manager import namespace_manager
 
 
 class AdminApiHandler(ApiHandler):
+    def dispatch(self):
+        namespace_manager.set_namespace(self.user.namespace)
+        super(AdminApiHandler, self).dispatch()
+
     @cached_property
     def _token_entity(self):
         full_token = self.request.get("token")

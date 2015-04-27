@@ -1,8 +1,6 @@
 import json
 import logging
-from google.appengine.api import urlfetch
 import webapp2
-from config import config
 
 
 class ApiHandler(webapp2.RequestHandler):

@@ -1,11 +1,11 @@
 from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, WALLET_PAYMENT_TYPE, STATUS_AVAILABLE
+from base import CompanyBaseHandler
+
 
 __author__ = 'dvpermyakov'
 
-from base import BaseHandler
 
-
-class PaymentTypesHandler(BaseHandler):
+class PaymentTypesHandler(CompanyBaseHandler):
     def get(self):
         cash = PaymentType.get_by_id(str(CASH_PAYMENT_TYPE))
         if not cash:
@@ -27,4 +27,4 @@ class PaymentTypesHandler(BaseHandler):
                 else:
                     payment.status = STATUS_UNAVAILABLE
                 payment.put()
-        self.redirect('/mt/automation')
+        self.redirect('/company/main')

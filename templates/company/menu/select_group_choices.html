@@ -4,6 +4,7 @@
     <title>Выбор группового модификатора</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <h3>Выберите продукты для {{ choice.title }}</h3>
     <form method="post">
         <input type="text" name="choice_id" value="{{ choice.key.id() }}" hidden>
@@ -16,6 +17,6 @@
         {% endfor %}
         <label><input type="submit" value="Сохранить"></label>
     </form>
-    <a href="{{ '/mt/menu/modifiers/list' }}">Назад</a>
+    <a href="{{ '/company/menu/modifiers/list' }}">Назад</a>
 </body>
 </html>

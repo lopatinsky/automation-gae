@@ -4,16 +4,17 @@
     <title></title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <div>
-        <a href="{{ '/mt/menu/category/add' }}">Добавить категорию</a>
+        <a href="{{ '/company/menu/category/add' }}">Добавить категорию</a>
     </div>
     <br>
     {% for category in categories %}
-        <a href="{{ '/mt/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a><br>
+        <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a><br>
     {% endfor %}
     <br>
     <div>
-        <a href="{{ '/mt/menu/main' }}">Назад</a>
+        <a href="{{ '/company/menu/main' }}">Назад</a>
     </div>
 </body>
 </html>

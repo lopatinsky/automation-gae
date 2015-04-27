@@ -1,3 +1,4 @@
+import logging
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import auth, sessions
 
@@ -26,4 +27,5 @@ class AuthBaseHandler(RequestHandler):
         try:
             super(AuthBaseHandler, self).dispatch()
         finally:
+            logging.info('save in store')
             self.session_store.save_sessions(self.response)
