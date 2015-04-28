@@ -394,10 +394,13 @@ class Order(ndb.Model):
     def activate_cash_back(self):
         logging.info("activate_cash_back")
         from methods.empatika_wallet import deposit
+        total_cash_back = 0
         for cash_back in self.cash_backs:
             if cash_back.status == cash_back.READY:
-                deposit(self.client_id, cash_back.amount, "order_id_%s" % self.key.id())
+                total_cash_back += cash_back.amount
                 cash_back.status = cash_back.DONE
+        if total_cash_back > 0:
+            deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
         self.put()
 
     def dict(self):

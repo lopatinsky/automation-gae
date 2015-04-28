@@ -118,7 +118,7 @@ class OrderHandler(ApiHandler):
             self.order.put()
 
             if wallet_payment > 0:
-                empatika_wallet.pay(client_id, order_id, wallet_payment)
+                empatika_wallet.pay(client_id, order_id, int(wallet_payment * 100))
 
             payment_amount = int((total_sum - wallet_payment) * 100)
 
