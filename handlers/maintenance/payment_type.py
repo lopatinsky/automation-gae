@@ -1,4 +1,4 @@
-from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, WALLET_PAYMENT_TYPE, STATUS_AVAILABLE
+from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, STATUS_AVAILABLE
 
 __author__ = 'dvpermyakov'
 
@@ -13,9 +13,6 @@ class PaymentTypesHandler(BaseHandler):
         card = PaymentType.get_by_id(str(CARD_PAYMENT_TYPE))
         if not card:
             PaymentType(id=str(CARD_PAYMENT_TYPE), title='card', status=STATUS_UNAVAILABLE).put()
-        wallet = PaymentType.get_by_id(str(WALLET_PAYMENT_TYPE))
-        if not wallet:
-            PaymentType(id=str(WALLET_PAYMENT_TYPE), title='wallet', status=STATUS_UNAVAILABLE).put()
         self.render('/payment_types.html', payments=PaymentType.query().fetch())
 
     def post(self):

@@ -21,7 +21,7 @@ class CheckCreatingOrdersHandler(webapp2.RequestHandler):
                 ("payment id", order.payment_id)
             ]
             to_delete = False
-            if order.payment_type_id == CARD_PAYMENT_TYPE and order.payment_id:
+            if order.has_card_payment:
                 try:
                     # check payment status
                     status = alfa_bank.check_extended_status(order.payment_id)["alfa_response"]

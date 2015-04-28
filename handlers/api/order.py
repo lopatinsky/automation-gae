@@ -8,10 +8,10 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, WALLET_PAYMENT_TYPE
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -80,6 +80,8 @@ class OrderHandler(ApiHandler):
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
 
+        wallet_payment = response_json['payment'].get('wallet_payment', 0.0)
+
         if payment_type.status == STATUS_AVAILABLE:
 
             item_keys = [Key('MenuItem', int(item['item_id'])) for item in response_json['items']]
@@ -102,6 +104,8 @@ class OrderHandler(ApiHandler):
             total_sum = validation_result['total_sum']
             if request_total_sum and int(total_sum * 100) != int(request_total_sum * 100):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
+            if wallet_payment and int(wallet_payment * 100) != int(validation_result['max_wallet_payment'] * 100):
+                return self.render_error(u"Сумма оплаты баллами была пересчитана", u"")
 
             item_details = validation_result["details"]
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
@@ -109,17 +113,21 @@ class OrderHandler(ApiHandler):
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
-                payment_type_id=payment_type_id, promos=promo_list, items=item_keys,
+                payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
                 item_details=item_details)
             self.order.put()
 
-            if payment_type_id == CARD_PAYMENT_TYPE:
+            if wallet_payment > 0:
+                empatika_wallet.pay(client_id, order_id, int(wallet_payment * 100))
+
+            payment_amount = int((total_sum - wallet_payment) * 100)
+
+            if payment_type_id == CARD_PAYMENT_TYPE and payment_amount > 0:
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
-                total_sum = int(total_sum * 100)
-                success, result = alfa_bank.create_simple(total_sum, order_id, return_url, alpha_client_id)
+                success, result = alfa_bank.create_simple(payment_amount, order_id, return_url, alpha_client_id)
                 if not success:
                     error = result
                 else:
@@ -127,10 +135,9 @@ class OrderHandler(ApiHandler):
                     self.order.put()
                     success, error = alfa_bank.hold_and_check(self.order.payment_id, binding_id)
                 if not success:
+                    if wallet_payment > 0:
+                        empatika_wallet.reverse(client_id, order_id)
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
-
-            if payment_type_id == WALLET_PAYMENT_TYPE:
-                empatika_wallet.pay(client_id, order_id, total_sum)
 
             client.put()
             self.order.status = NEW_ORDER
@@ -186,7 +193,7 @@ class ReturnOrderHandler(ApiHandler):
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 # return money
-                if order.payment_type_id == CARD_PAYMENT_TYPE:
+                if order.has_card_payment:
                     return_result = alfa_bank.reverse(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
@@ -197,12 +204,14 @@ class ReturnOrderHandler(ApiHandler):
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
                         self.abort(400)
-                elif order.payment_type_id == WALLET_PAYMENT_TYPE:
+
+                if order.wallet_payment > 0:
                     try:
                         empatika_wallet.reverse(order.client_id, order_id)
                     except empatika_wallet.EmpatikaWalletError as e:
                         logging.exception(e)
-                        self.abort(400)
+                        email.send_error("payment", "Wallet reversal failed", str(e))
+                        # main payment reversed -- do not abort
 
                 order.status = CANCELED_BY_CLIENT_ORDER
                 order.return_datetime = datetime.utcnow()

@@ -17,7 +17,6 @@ from methods.empatika_promos import register_order
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
 BONUS_PAYMENT_TYPE = 2
-WALLET_PAYMENT_TYPE = 3
 
 STATUS_AVAILABLE = 1
 STATUS_UNAVAILABLE = 0
@@ -365,6 +364,7 @@ class OrderPositionDetails(ndb.Model):
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.FloatProperty(indexed=False)
+    payment_sum = ndb.FloatProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
                                                          CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
                                  default=CREATING_ORDER)
@@ -372,7 +372,8 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_time = ndb.DateTimeProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE, WALLET_PAYMENT_TYPE))
+                                                                  BONUS_PAYMENT_TYPE))
+    wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty(required=True)
     pan = ndb.StringProperty(indexed=False)
@@ -393,10 +394,13 @@ class Order(ndb.Model):
     def activate_cash_back(self):
         logging.info("activate_cash_back")
         from methods.empatika_wallet import deposit
+        total_cash_back = 0
         for cash_back in self.cash_backs:
             if cash_back.status == cash_back.READY:
-                deposit(self.client_id, cash_back.amount, "order_id_%s" % self.key.id())
+                total_cash_back += cash_back.amount
                 cash_back.status = cash_back.DONE
+        if total_cash_back > 0:
+            deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
         self.put()
 
     def dict(self):
@@ -483,6 +487,10 @@ class Order(ndb.Model):
         value = fastcounter.get_count("order_id")
         fastcounter.incr("order_id")
         return value + 1
+
+    @property
+    def has_card_payment(self):
+        return bool(self.payment_type_id == CARD_PAYMENT_TYPE and self.payment_id)
 
 
 class Notification(ndb.Model):
