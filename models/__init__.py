@@ -485,6 +485,10 @@ class Order(ndb.Model):
         fastcounter.incr("order_id")
         return value + 1
 
+    @property
+    def has_card_payment(self):
+        return bool(self.payment_type_id == CARD_PAYMENT_TYPE and self.payment_id)
+
 
 class Notification(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)

@@ -102,7 +102,7 @@ class OrderDoneHandler(WebAdminApiHandler):
         if free_cup:
             free_cup.deactivate_cup()
 
-        if order.payment_type_id == CARD_PAYMENT_TYPE:
+        if order.has_card_payment:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success
         push.send_order_ready_push(order)
 
@@ -122,7 +122,7 @@ class OrderCancelHandler(WebAdminApiHandler):
         order = self.user.order_by_id(order_id)
 
         success = True
-        if order.payment_type_id == CARD_PAYMENT_TYPE:
+        if order.has_card_payment:
             return_result = alfa_bank.reverse(order.payment_id)
             success = str(return_result['errorCode']) == '0'
         elif order.payment_type_id == BONUS_PAYMENT_TYPE:
@@ -147,7 +147,7 @@ class OrderCancelHandler(WebAdminApiHandler):
 
             client = Client.get_by_id(order.client_id)
             push_text = u"%s, заказ №%s отменен." % (client.name, order_id)
-            if order.payment_type_id == CARD_PAYMENT_TYPE:
+            if order.has_card_payment:
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут."
             push.send_order_push(order_id, order.status, push_text, order.device_type)
 

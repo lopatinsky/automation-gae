@@ -8,7 +8,7 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
@@ -120,13 +120,14 @@ class OrderHandler(ApiHandler):
             if wallet_payment > 0:
                 empatika_wallet.pay(client_id, order_id, wallet_payment)
 
-            if payment_type_id == CARD_PAYMENT_TYPE:
+            payment_amount = int((total_sum - wallet_payment) * 100)
+
+            if payment_type_id == CARD_PAYMENT_TYPE and payment_amount > 0:
                 binding_id = response_json['payment']['binding_id']
                 alpha_client_id = response_json['payment']['client_id']
                 return_url = response_json['payment']['return_url']
 
-                total_sum = int(total_sum * 100)
-                success, result = alfa_bank.create_simple(total_sum, order_id, return_url, alpha_client_id)
+                success, result = alfa_bank.create_simple(payment_amount, order_id, return_url, alpha_client_id)
                 if not success:
                     error = result
                 else:
@@ -192,7 +193,7 @@ class ReturnOrderHandler(ApiHandler):
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 # return money
-                if order.payment_type_id == CARD_PAYMENT_TYPE:
+                if order.has_card_payment:
                     return_result = alfa_bank.reverse(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
@@ -209,6 +210,7 @@ class ReturnOrderHandler(ApiHandler):
                         empatika_wallet.reverse(order.client_id, order_id)
                     except empatika_wallet.EmpatikaWalletError as e:
                         logging.exception(e)
+                        email.send_error("payment", "Wallet reversal failed", str(e))
                         # main payment reversed -- do not abort
 
                 order.status = CANCELED_BY_CLIENT_ORDER

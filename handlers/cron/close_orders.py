@@ -19,7 +19,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
 
         for order in orders:
             logging.info("closing order %s", order.key.id())
-            if order.payment_type_id == CARD_PAYMENT_TYPE:
+            if order.has_card_payment:
                 alfa_bank.deposit(order.payment_id, 0)  # TODO check success
             order.status = READY_ORDER
             order.activate_cash_back()
