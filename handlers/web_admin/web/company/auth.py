@@ -29,11 +29,11 @@ class SignupHandler(CompanyBaseHandler):
         login, password, password2 = \
             self.request.get("email").strip().lower(), \
             self.request.get("password"), self.request.get("password2")
-        namespace = latinize(login)
+        #namespace = latinize(login)
         error = None
-        for metadata_instance in metadata.get_namespaces():
-            if namespace == metadata_instance:
-                error = u"Введите другой email"
+        #for metadata_instance in metadata.get_namespaces():
+        #    if namespace == metadata_instance:
+        #        error = u"Введите другой email"
         if error:
             pass
         elif not login:
@@ -43,16 +43,15 @@ class SignupHandler(CompanyBaseHandler):
         elif password != password2:
             error = u"Пароли не совпадают"
         else:
-            success, user = CompanyUser.create_user(login, namespace=namespace, login=login, password_raw=password,
-                                                    fucking_password=password)
+            success, user = CompanyUser.create_user(login, login=login, password_raw=password)
             if not success:
                 error = u"Пользователь с этим email уже зарегистрирован"
             else:
-                namespace_manager.set_namespace(user.namespace)
-                success, user = CompanyUser.create_user(id=user.key.id(), auth_id=login, namespace=namespace,
-                                                        login=login, password_raw=password, fucking_password=password)
-                if success:
-                    set_current_user(self.auth, user)
+                #namespace_manager.set_namespace(user.namespace)
+                #success, user = CompanyUser.create_user(id=user.key.id(), auth_id=login, namespace=namespace,
+                #                                        login=login, password_raw=password, fucking_password=password)
+                #if success:
+                set_current_user(self.auth, user)
         if error:
             logging.info(error)
             self.render('/signup.html', email=login, error=error)
@@ -73,16 +72,17 @@ class LoginHandler(CompanyBaseHandler):
     def post(self):
         if self.user is not None:
             self.success()
-        login = self.request.POST.get("login").lower().strip()
-        password = self.request.POST.get("password")
-        user = CompanyUser.query(CompanyUser.login == login).get()
-        if user and password == user.fucking_password:
-            set_current_user(self.auth, user)
-            logging.info('user was found by login')
-            namespace_manager.set_namespace(user.namespace)
-            self.redirect('/company/main')
+        email, password = self.request.POST.get("login").lower().strip(), \
+            self.request.POST.get("password")
+        try:
+            logging.info(email)
+            logging.info(password)
+            self.auth.get_user_by_password(email, password)
+        except (InvalidAuthIdError, InvalidPasswordError):
+            self.render('/login.html', email=email,
+                        error=u"Неверный логин или пароль")
         else:
-            self.render('/login.html', email=login, error=u"Неверный логин или пароль")
+            self.success()
 
 
 class LogoutHandler(CompanyBaseHandler):

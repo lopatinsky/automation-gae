@@ -8,7 +8,7 @@ from models import CompanyUser
 
 class CompanyBaseHandler(AuthBaseHandler):
     def dispatch(self):
-        if self.user:
+        '''if self.user:
             namespace_manager.set_namespace(self.user.namespace)
         else:
             logging.info('user was not found')
@@ -16,7 +16,7 @@ class CompanyBaseHandler(AuthBaseHandler):
             if user:
                 namespace_manager.set_namespace(user.namespace)
             else:
-                namespace_manager.set_namespace('')
+                namespace_manager.set_namespace('')'''
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         super(CompanyBaseHandler, self).dispatch()
 
