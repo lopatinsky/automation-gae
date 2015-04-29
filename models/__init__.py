@@ -407,6 +407,7 @@ class Order(ndb.Model):
         dct = {
             "order_id": self.key.id(),
             "total_sum": self.total_sum,
+            "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "status": self.status,
             "delivery_time": timestamp(self.delivery_time),
