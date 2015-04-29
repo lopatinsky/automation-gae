@@ -75,10 +75,7 @@ class SignupHandler(BaseHandler):
             venue_key = venue_ids.get(venue_id, None)
             success, user = Admin.create_user(email, email=email, password_raw=password, venue=venue_key)
             if success:
-                namespace_manager.set_namespace(self.user.namespace)
-                success, user = Admin.create_user(email, email=email, password_raw=password, venue=venue_key)
-                if success:
-                    set_current_user(self.auth, user)
+                set_current_user(self.auth, user)
             else:
                 error = u"Пользователь с этим email уже зарегистрирован"
         if error:
