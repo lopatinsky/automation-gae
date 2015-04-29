@@ -83,8 +83,8 @@ class LoginHandler(CompanyBaseHandler):
             self.success()
 
 
-@company_user_required
 class LogoutHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.auth.unset_session()
         self.redirect('/company/login')
