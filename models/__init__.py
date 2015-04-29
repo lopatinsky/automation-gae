@@ -575,7 +575,7 @@ class CompanyUser(User):
         return self.ROLE
 
 
-class Admin(ndb.Model):
+class Admin(User):
     ROLE = 'admin'
 
     email = ndb.StringProperty(required=True, indexed=False)  # todo: remove it change to login
