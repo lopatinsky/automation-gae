@@ -67,8 +67,7 @@ class ChangeLoginPAdmins(BaseHandler):
             'email': login,
             'venue': admin.venue,
         }
-        auth_id = '%s:%s' % (Admin.PADMIN, login)
-        success, info = Admin.create_user(auth_id, **values)
+        success, info = Admin.create_user(login, **values)
         if success:
             info.password = admin.password
             info.put()
