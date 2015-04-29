@@ -1,7 +1,6 @@
 from webapp2_extras import jinja2
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
-import handlers.web_admin.web.padmin as padmin
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -13,7 +12,7 @@ webapp2_config = {
                       '\xae\t@\xdc\x08d\xe9\xdb'
     },
     "webapp2_extras.auth": {
-        "user_model": "models.Admin"
+        "user_model": "models.User"
     }
 }
 
@@ -125,9 +124,9 @@ app = WSGIApplication([
 
     PathPrefixRoute('/company', [
         Route('/create', company_admin.SignupHandler),
-        Route('/login', company_admin.LoginHandler),
+        Route('/login', company_admin.LoginHandler, 'company_login'),
         Route('/logout', company_admin.LogoutHandler),
-        Route('/main', company_admin.AutomationMainHandler),
+        Route('/main', company_admin.AutomationMainHandler, 'company_main'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         Route('/venues', company_admin.EnableVenuesHandler),
@@ -144,7 +143,6 @@ app = WSGIApplication([
                 Route('/info', company_admin.MenuItemInfoHandler),
                 Route('/add', company_admin.AddMenuItemHandler),
                 Route('/edit', company_admin.EditMenuItemHandler),
-                Route('/delete', company_admin.RemoveMenuItemHandler),
                 Route('/up', company_admin.UpProductHandler),
                 Route('/down', company_admin.DownProductHandler),
             ]),
@@ -174,20 +172,16 @@ app = WSGIApplication([
         PathPrefixRoute('/promos', [
             Route('/list', company_admin.PromoListHandler),
         ]),
+
+        PathPrefixRoute('/report', [
+            Route('/main', company_admin.ReportHandler),
+            Route('/clients', company_admin.ClientsReportHandler),
+            Route('/menu_items', company_admin.MenuItemsReportHandler),
+            Route('/orders', company_admin.OrdersReportHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/admin', [
-        PathPrefixRoute('/private_office', [
-            PathPrefixRoute('/report', [
-                Route('', padmin.ReportHandler, 'padmin_report'),
-                Route('/clients', padmin.ClientsReportHandler),
-                Route('/menu_items', padmin.MenuItemsReportHandler),
-                Route('/orders', padmin.OrdersReportHandler),
-            ]),
-            Route('/login', padmin.LoginHandler, 'padmin_login'),
-            Route('/logout', padmin.LogoutHandler),
-        ]),
-
         Route('/login', web_admin.LoginHandler),
         Route('/signup', web_admin.SignupHandler),
         Route('/logout', web_admin.LogoutHandler),

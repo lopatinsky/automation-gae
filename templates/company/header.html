@@ -7,7 +7,7 @@
     <nav>
         {% if user %}
             <p>
-                {{ user.namespace }}
+                {{ user.login }}
                 <a href="/company/logout">Выйти</a>
             </p>
         {% endif %}

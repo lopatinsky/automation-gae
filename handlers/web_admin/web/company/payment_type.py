@@ -1,3 +1,4 @@
+from methods.auth import company_user_required
 from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, WALLET_PAYMENT_TYPE, STATUS_AVAILABLE
 from base import CompanyBaseHandler
 
@@ -6,6 +7,7 @@ __author__ = 'dvpermyakov'
 
 
 class PaymentTypesHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         cash = PaymentType.get_by_id(str(CASH_PAYMENT_TYPE))
         if not cash:
@@ -18,6 +20,7 @@ class PaymentTypesHandler(CompanyBaseHandler):
             PaymentType(id=str(WALLET_PAYMENT_TYPE), title='wallet', status=STATUS_UNAVAILABLE).put()
         self.render('/payment_types.html', payments=PaymentType.query().fetch())
 
+    @company_user_required
     def post(self):
         for payment in PaymentType.query().fetch():
             confirmed = bool(self.request.get(str(payment.key.id())))

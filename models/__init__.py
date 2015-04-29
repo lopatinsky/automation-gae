@@ -562,17 +562,28 @@ class Deposit(ndb.Model):
 
 class User(polymodel.PolyModel, models.User):
     namespace = ndb.StringProperty(required=True, default='')
-    #fucking_password = ndb.StringProperty(required=True)
+    login = ndb.StringProperty()
+
+    def get_role(self):
+        return NotImplemented
 
 
 class CompanyUser(User):
-    login = ndb.StringProperty()
+    ROLE = 'company'
+
+    def get_role(self):
+        return self.ROLE
 
 
-class Admin(User):
-    email = ndb.StringProperty(required=True, indexed=False)
+class Admin(ndb.Model):
+    ROLE = 'admin'
+
+    email = ndb.StringProperty(required=True, indexed=False)  # todo: remove it change to login
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
+
+    def get_role(self):
+        return self.ROLE
 
     def query_orders(self, *args, **kwargs):
         if self.venue:

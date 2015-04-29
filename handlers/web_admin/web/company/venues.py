@@ -2,11 +2,13 @@
 import logging
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
+from methods.auth import company_user_required
 from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE
 from methods import map
 
 
 class CreateVenueHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         lat = self.request.get('lat')
         lon = self.request.get('lon')
@@ -23,6 +25,7 @@ class CreateVenueHandler(CompanyBaseHandler):
             'address': address_str
         })
 
+    @company_user_required
     def post(self):
         venue = Venue()
         raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule', 'problem')
@@ -51,12 +54,14 @@ class EnableVenuesHandler(CompanyBaseHandler):
 
 
 class EditVenueHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
             self.abort(404)
         self.render('/edit_venue.html', venue=venue)
 
+    @company_user_required
     def post(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
@@ -74,6 +79,7 @@ class EditVenueHandler(CompanyBaseHandler):
 
 
 class VenueListHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.render('/menu/venue_list.html', **{
             'venues': Venue.query().fetch()
@@ -81,6 +87,7 @@ class VenueListHandler(CompanyBaseHandler):
 
 
 class AddRestrictionHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
@@ -105,6 +112,7 @@ class AddRestrictionHandler(CompanyBaseHandler):
             'venue': venue
         })
 
+    @company_user_required
     def post(self):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
@@ -122,6 +130,7 @@ class AddRestrictionHandler(CompanyBaseHandler):
 
 
 class MapVenuesHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         venues = []
         for venue in Venue.query().fetch():

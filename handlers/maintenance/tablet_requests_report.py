@@ -68,7 +68,7 @@ class TabletRequestGraphHandler(BaseHandler):
         try:
             date = datetime(chosen_year, chosen_month, chosen_day)
         except ValueError:
-            self.render('reported_tablet_requests_graph.html',
+            self.render('tablet_requests_graph.html',
                         start_year=PROJECT_STARTING_YEAR,
                         end_year=datetime.now().year)
             return
@@ -87,7 +87,7 @@ class TabletRequestGraphHandler(BaseHandler):
             'chosen_day': chosen_day,
             'chosen_interval': chosen_interval
         }
-        self.render('reported_tablet_requests_graph.html', **values)
+        self.render('tablet_requests_graph.html', **values)
 
 
 _LEVELS_COLOR_MAP = {
@@ -104,7 +104,7 @@ class TabletInfoHandler(BaseHandler):
     def get(self):
         statuses = AdminStatus.query().fetch()
         admins_info = [PingReport(status) for status in statuses]
-        return self.render('reported_tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
+        return self.render('/reports/tablet_requests_info.html', admins_info=admins_info, colors=_LEVELS_COLOR_MAP)
 
     def post(self):
         token = self.request.get("logout_token")

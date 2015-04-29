@@ -1,4 +1,5 @@
 # coding:utf-8
+from methods.auth import company_user_required
 from models import Promo, PromoCondition, PromoOutcome, IN_CAFE, SELF
 from base import CompanyBaseHandler
 
@@ -21,6 +22,7 @@ DELIVERY_MAP = {
 
 
 class PromoListHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         promos = Promo.query().fetch()
         for promo in promos:

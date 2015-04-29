@@ -13,7 +13,7 @@
      <!--{% set NUMBER_DAYS = 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31%}-->
 
      <form method="get">
-         <select name="selected_venue" {% if padmin %}disabled{% endif %}>
+         <select name="selected_venue">
              <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
              {% for venue in venues %}
                   <option value="{{ venue.key.id() }}" {% if chosen_venue == venue %} selected {% endif %}>
@@ -76,7 +76,7 @@
      </table>
 
     {% if padmin %}
-        <a href="/admin/private_office/report">Назад</a>
+        <a href="/company/report/main">Назад</a>
      {% else %}
         <a href="/mt/report">Назад</a>
      {% endif %}
