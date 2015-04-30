@@ -600,10 +600,6 @@ class Admin(User):
     def get_sources(self):
         return [deposit.source for deposit in self.deposit_history]
 
-    @property
-    def login(self):
-        return self.email
-
     def delete_auth_ids(self):
         class_name = type(self).__name__
         ids = ["%s.auth_id:%s" % (class_name, i) for i in self.auth_ids]

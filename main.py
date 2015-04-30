@@ -38,12 +38,7 @@ app = WSGIApplication([
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
-        PathPrefixRoute('/private_office', [
-            Route('/list', maintenance.ListPAdmins, 'padmin_main'),
-            Route('/create', maintenance.AutoCreatePAdmins),
-            Route('/<admin_id:\d+>/change_login', maintenance.ChangeLoginPAdmins),
-            Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
-        ]),
+
 
         Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
@@ -179,11 +174,19 @@ app = WSGIApplication([
             Route('/menu_items', company_admin.MenuItemsReportHandler),
             Route('/orders', company_admin.OrdersReportHandler),
         ]),
+
+        PathPrefixRoute('/barista', [
+            Route('/signup', company_admin.SignupHandler),
+            Route('/list', company_admin.ListAdmins, 'barista_main'),
+            Route('/create', company_admin.AutoCreateAdmins),
+            Route('/<admin_id:\d+>/change_login', company_admin.ChangeLoginAdmins),
+            Route('/<admin_id:\d+>/change_password', company_admin.ChangePasswordAdmin),
+        ]),
     ]),
 
     PathPrefixRoute('/admin', [
         Route('/login', web_admin.LoginHandler),
-        Route('/signup', web_admin.SignupHandler),
+        #Route('/signup', web_admin.SignupHandler),
         Route('/logout', web_admin.LogoutHandler),
 
         Route('/orders', web_admin.OrdersHandler),

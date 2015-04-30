@@ -18,6 +18,7 @@ from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
     VenueListHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
+from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

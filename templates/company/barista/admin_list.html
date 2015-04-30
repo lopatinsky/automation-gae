@@ -4,27 +4,28 @@
     <title>Список админов</title>
 </head>
 <body>
-
+    <a href="/company/barista/create">Обновить список</a><br>
+    <a href="/company/barista/signup">Создать баристу</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Имя кофейни</th>
             <th>Логин</th>
-            <th>Смена пароля</th>
+            <th>Смена пароля(0000-по умолчанию)</th>
         </tr>
         {% for admin in admins %}
             <tr>
-                <td>{{ admin.venue.get().title }}</td>
+                <td>{% if admin.venue %}{{ admin.venue.get().title }}{% else %} Вся сеть {% endif %}</td>
                 <td>
                     <div>{{ admin.login }}
                         <form>
-                            <button formaction="{{ '/mt/private_office/%s/change_login' % admin.key.id() }}" formmethod="get">Изменить логин</button>
+                            <button formaction="{{ '/mt/barista/%s/change_login' % admin.key.id() }}" formmethod="get">Изменить логин</button>
                         </form>
                     </div>
                 </td>
                 <td>
                     <div>
                         <form>
-                            <button formaction="{{ '/mt/private_office/%s/change_password' % admin.key.id() }}" formmethod="get">Изменить пароль</button>
+                            <button formaction="{{ '/mt/barista/%s/change_password' % admin.key.id() }}" formmethod="get">Изменить пароль</button>
                         </form>
                     </div>
                 </td>
