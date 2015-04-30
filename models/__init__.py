@@ -561,7 +561,7 @@ class Deposit(ndb.Model):
 
 
 class User(polymodel.PolyModel, models.User):
-    namespace = ndb.StringProperty(required=True, default='')
+    namespace = ndb.StringProperty(default='')
     login = ndb.StringProperty()
 
     def get_role(self):
@@ -578,7 +578,6 @@ class CompanyUser(User):
 class Admin(User):
     ROLE = 'admin'
 
-    email = ndb.StringProperty(required=True, indexed=False)  # todo: remove it change to login
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
 

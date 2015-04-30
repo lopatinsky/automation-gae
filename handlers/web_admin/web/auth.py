@@ -11,11 +11,7 @@ import logging
 
 class LoginHandler(BaseHandler):
     def success(self):
-        logging.info(self.user)
-        if hasattr(self.user, 'role') and self.user.role == Admin.PRIVATE_OFFICE_ADMIN:
-            self.redirect_to('padmin_report')
-        else:
-            self.redirect("orders.php")
+        self.redirect("orders")
 
     def get(self):
         if self.user is not None:
@@ -37,7 +33,7 @@ class LoginHandler(BaseHandler):
             self.success()
 
 
-class SignupHandler(BaseHandler):
+class SignupHandler(BaseHandler):  # todo: deprecated, used only with namespace in the url
     @cached_property
     def venues(self):
         return Venue.query().fetch()
@@ -46,7 +42,7 @@ class SignupHandler(BaseHandler):
         super(SignupHandler, self).render(template_name, venues=self.venues, **values)
 
     def success(self):
-        self.redirect("orders.php")
+        self.redirect("orders")
 
     def get(self):
         if self.user is not None:
@@ -57,14 +53,14 @@ class SignupHandler(BaseHandler):
     def post(self):
         if self.user is not None:
             self.success()
-        email, password, password2 = \
+        login, password, password2 = \
             self.request.get("email").strip().lower(), \
             self.request.get("password"), self.request.get("password2")
         venue_id = self.request.get_range("venue_id", default=-1)
         venue_ids = {v.key.id(): v.key for v in self.venues}
         error = None
-        if not email:
-            error = u"Не введен email"
+        if not login:
+            error = u"Не введен логин"
         elif not password:
             error = u"Не введен пароль"
         elif password != password2:
@@ -73,13 +69,18 @@ class SignupHandler(BaseHandler):
             error = u"Неправильно выбрана кофейня"
         else:
             venue_key = venue_ids.get(venue_id, None)
-            success, user = Admin.create_user(email, email=email, password_raw=password, venue=venue_key)
+            namespace = namespace_manager.get_namespace()
+            success, user = Admin.create_user(login, namespace=namespace, venue=venue_key, password_raw=password)
             if success:
                 set_current_user(self.auth, user)
+                namespace_manager.set_namespace('')
+                success, user = Admin.create_user(login, namespace=namespace, venue=venue_key, password_raw=password)
+                if success:
+                    logging.info(user)
             else:
                 error = u"Пользователь с этим email уже зарегистрирован"
         if error:
-            self.render('signup.html', email=email, error=error, venue_id=venue_id)
+            self.render('signup.html', email=login, error=error, venue_id=venue_id)
         else:
             self.success()
 
