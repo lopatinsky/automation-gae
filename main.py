@@ -186,7 +186,6 @@ app = WSGIApplication([
 
     PathPrefixRoute('/admin', [
         Route('/login', web_admin.LoginHandler),
-        #Route('/signup', web_admin.SignupHandler),
         Route('/logout', web_admin.LogoutHandler),
 
         Route('/orders', web_admin.OrdersHandler),
