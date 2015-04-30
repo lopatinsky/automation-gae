@@ -1,4 +1,5 @@
 # coding:utf-8
+import logging
 
 from webapp2 import cached_property
 from webapp2_extras import auth
@@ -9,7 +10,12 @@ from google.appengine.api.namespace_manager import namespace_manager
 
 class AdminApiHandler(ApiHandler):
     def dispatch(self):
-        namespace_manager.set_namespace(self.user.namespace)
+        if self.user:
+            logging.info(self.user)
+            namespace_manager.set_namespace(self.user.namespace)
+        else:
+            namespace_manager.set_namespace('')
+        logging.debug('namespace=%s' % namespace_manager.get_namespace())
         super(AdminApiHandler, self).dispatch()
 
     @cached_property
