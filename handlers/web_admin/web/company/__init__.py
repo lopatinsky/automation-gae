@@ -2,7 +2,7 @@ from methods.auth import company_user_required
 
 __author__ = 'dvpermyakov'
 
-from auth import SignupHandler, LoginHandler, LogoutHandler
+from auth import CompanySignupHandler, LoginHandler, LogoutHandler
 from base import CompanyBaseHandler
 from payment_type import PaymentTypesHandler
 

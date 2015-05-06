@@ -14,5 +14,5 @@ class CompaniesListHandler(BaseHandler):
         })
 
     def post(self):
-        url = u'http://%s.1.%s/mt/automation' % (self.request.get('company'), urlparse(self.request.url).hostname)
+        url = u'http://%s.1.%s/mt/report' % (self.request.get('company'), urlparse(self.request.url).hostname)
         self.redirect(str(url))

@@ -38,8 +38,6 @@ app = WSGIApplication([
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
-
-
         Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
@@ -88,6 +86,7 @@ app = WSGIApplication([
         Route('/venues', api.VenuesHandler),
         Route('/client', api.ClientHandler),
         Route('/menu', api.MenuHandler),
+        Route('/menu.php', api.MenuHandler),
         Route('/modifiers', api.ModifiersHandler),
         Route('/dynamic_info', api.DynamicInfoHandler),
         Route('/order', api.OrderHandler),
@@ -118,7 +117,7 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/company', [
-        Route('/create', company_admin.SignupHandler),
+        Route('/create', company_admin.CompanySignupHandler),
         Route('/login', company_admin.LoginHandler, 'company_login'),
         Route('/logout', company_admin.LogoutHandler),
         Route('/main', company_admin.AutomationMainHandler, 'company_main'),

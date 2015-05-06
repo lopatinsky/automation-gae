@@ -13,7 +13,7 @@ from models import CompanyUser
 from methods.rendering import latinize
 
 
-class SignupHandler(CompanyBaseHandler):
+class CompanySignupHandler(CompanyBaseHandler):
     def success(self):
         self.redirect("/company/main")
 
@@ -84,7 +84,7 @@ class LoginHandler(CompanyBaseHandler):
 
 
 class LogoutHandler(CompanyBaseHandler):
-    @company_user_required
+    #@company_user_required
     def get(self):
         self.auth.unset_session()
         self.redirect('/company/login')
