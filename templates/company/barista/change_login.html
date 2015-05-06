@@ -4,6 +4,7 @@
     <title>Изменение логина</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <form method="post">
         <label>Логин: <input type="text" size="40" name="login" value="{{ admin.login }}"></label><br>
         <input type="submit" value="Отправить"/>
