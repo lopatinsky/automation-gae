@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Типы оплат</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        {% for payment in payments %}
+             <label><input type="checkbox" {% if payment.status %} checked {% endif %} name={{ payment.key.id() }}>
+                 {{ payment.title }}
+             </label>
+             <br>
+        {% endfor %}
+        <br>
+        <label><input type="submit" value="Сохранить"></label>
+    </form>
+    <br>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кофейни</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    {% for venue in venues %}
+        <div>
+            {{ venue.title }}
+            <a href="{{ '/company/menu/venue/add_restrictions?venue_id=%s' % venue.key.id() }}">Выбрать продукты</a>
+        </div>
+    {% endfor %}
+    <a href="{{ '/company/menu/main' }}">Назад</a>
+</body>
+</html>

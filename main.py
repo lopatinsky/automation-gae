@@ -1,10 +1,10 @@
 from webapp2_extras import jinja2
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
-import handlers.web_admin.web.padmin as padmin
 from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
+import handlers.web_admin.web.company as company_admin
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -12,7 +12,7 @@ webapp2_config = {
                       '\xae\t@\xdc\x08d\xe9\xdb'
     },
     "webapp2_extras.auth": {
-        "user_model": "models.Admin"
+        "user_model": "models.User"
     }
 }
 
@@ -21,15 +21,6 @@ app = WSGIApplication([
 
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
-        Route('/create_company', maintenance.CreateCompanyHandler),
-        Route('/automation', maintenance.AutomationMainHandler),
-
-        Route('/venues', maintenance.EnableVenuesHandler),
-        Route('/venues/map', maintenance.MapVenuesHandler),
-        Route('/venues/<venue_id:\d+>', maintenance.EditVenueHandler),
-        Route('/venues/create', maintenance.CreateVenueHandler),
-
-        Route('/payment_types', maintenance.PaymentTypesHandler),
 
         Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
@@ -47,52 +38,7 @@ app = WSGIApplication([
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
-        PathPrefixRoute('/private_office', [
-            Route('/list', maintenance.ListPAdmins, 'padmin_main'),
-            Route('/create', maintenance.AutoCreatePAdmins),
-            Route('/<admin_id:\d+>/change_login', maintenance.ChangeLoginPAdmins),
-            Route('/<admin_id:\d+>/change_password', maintenance.ChangePasswordPAdmin),
-        ]),
 
-        PathPrefixRoute('/menu', [
-            Route('/main', maintenance.MainMenuHandler),
-            Route('/category/add', maintenance.CreateCategoryHandler),
-            Route('/category/list', maintenance.ListCategoriesHandler, 'mt_category_list'),
-            PathPrefixRoute('/item', [
-                Route('/list', maintenance.ListMenuItemsHandler),
-                Route('/info', maintenance.MenuItemInfoHandler),
-                Route('/add', maintenance.AddMenuItemHandler),
-                Route('/edit', maintenance.EditMenuItemHandler),
-                Route('/delete', maintenance.RemoveMenuItemHandler),
-                Route('/up', maintenance.UpProductHandler),
-                Route('/down', maintenance.DownProductHandler),
-            ]),
-            Route('/product/modifiers/list', maintenance.ModifiersForProductHandler),
-            Route('/product/modifiers/select', maintenance.SelectProductForModifierHandler),
-            PathPrefixRoute('/modifiers', [
-                Route('/list', maintenance.ModifierList, 'modifiers_list'),
-                Route('/add/single_modifier', maintenance.AddSingleModifierHandler),
-                Route('/add/group_modifier', maintenance.AddGroupModifierHandler),
-                Route('/add/<group_modifier_id:\d+>/group_modifier_item', maintenance.AddGroupModifierItemHandler),
-                Route('/edit/single_modifier', maintenance.EditSingleModifierHandler),
-                Route('/edit/group_modifier', maintenance.EditGroupModifierHandler),
-                Route('/edit/choice', maintenance.EditGroupModifierItemHandler),
-                Route('/choices/select', maintenance.SelectProductForChoiceHandler),
-            ]),
-            PathPrefixRoute('/venue', [
-                Route('/list', maintenance.VenueListHandler, 'venues_list'),
-                Route('/add_restrictions', maintenance.AddRestrictionHandler),
-            ]),
-        ]),
-
-        PathPrefixRoute('/stop_list', [
-            Route('/main', maintenance.MainStopListHandler, 'main_stop_list'),
-            Route('/list', maintenance.StopListsHandler),
-        ]),
-
-        PathPrefixRoute('/promos', [
-            Route('/list', maintenance.PromoListHandler),
-        ]),
 
         Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
@@ -128,29 +74,29 @@ app = WSGIApplication([
         ]),
 
         PathPrefixRoute('/payment', [
-            Route('/unbind.php', api.UnbindCardHandler),
-            Route('/register.php', api.PaymentRegisterHandler),
-            Route('/status.php', api.PaymentStatusHandler),
+            Route('/unbind', api.UnbindCardHandler),
+            Route('/register', api.PaymentRegisterHandler),
+            Route('/status', api.PaymentStatusHandler),
             Route('/extended_status', api.PaymentExtendedStatusHandler),
-            Route('/payment_binding.php', api.PaymentBindingHandler),
-            Route('/reverse.php', api.PaymentReverseHandler),
-            Route('/payment_types.php', api.PaymentTypesHandler),
+            Route('/payment_binding', api.PaymentBindingHandler),
+            Route('/reverse', api.PaymentReverseHandler),
+            Route('/payment_types', api.PaymentTypesHandler),
         ]),
 
         Route('/register', api.RegistrationHandler),
         Route('/demo_info', api.DemoInfoHandler),
-        Route('/venues.php', api.VenuesHandler),
-        Route('/client.php', api.ClientHandler),
-        Route('/menu.php', api.MenuHandler),
+        Route('/venues', api.VenuesHandler),
+        Route('/client', api.ClientHandler),
+        Route('/menu', api.MenuHandler),
         Route('/modifiers', api.ModifiersHandler),
         Route('/dynamic_info', api.DynamicInfoHandler),
-        Route('/order.php', api.OrderHandler),
+        Route('/order', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
         Route('/add_return_comment', api.AddReturnCommentHandler),
-        Route('/order_register.php', api.RegisterOrderHandler),
+        Route('/order_register', api.RegisterOrderHandler),
         Route('/check_order', api.CheckOrderHandler),
-        Route('/status.php', api.StatusHandler),
-        Route('/return.php', api.ReturnOrderHandler),
+        Route('/status', api.StatusHandler),
+        Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
 
         Route('/promos', api.PromoInfoHandler),
@@ -171,31 +117,86 @@ app = WSGIApplication([
         ]),
     ]),
 
-    PathPrefixRoute('/admin', [
-        PathPrefixRoute('/private_office', [
-            PathPrefixRoute('/report', [
-                Route('', padmin.ReportHandler, 'padmin_report'),
-                Route('/clients', padmin.ClientsReportHandler),
-                Route('/menu_items', padmin.MenuItemsReportHandler),
-                Route('/orders', padmin.OrdersReportHandler),
+    PathPrefixRoute('/company', [
+        Route('/create', company_admin.SignupHandler),
+        Route('/login', company_admin.LoginHandler, 'company_login'),
+        Route('/logout', company_admin.LogoutHandler),
+        Route('/main', company_admin.AutomationMainHandler, 'company_main'),
+        Route('/payment_types', company_admin.PaymentTypesHandler),
+
+        Route('/venues', company_admin.EnableVenuesHandler),
+        Route('/venues/map', company_admin.MapVenuesHandler),
+        Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
+        Route('/venues/create', company_admin.CreateVenueHandler),
+
+        PathPrefixRoute('/menu', [
+            Route('/main', company_admin.MainMenuHandler),
+            Route('/category/add', company_admin.CreateCategoryHandler),
+            Route('/category/list', company_admin.ListCategoriesHandler, 'mt_category_list'),
+            PathPrefixRoute('/item', [
+                Route('/list', company_admin.ListMenuItemsHandler),
+                Route('/info', company_admin.MenuItemInfoHandler),
+                Route('/add', company_admin.AddMenuItemHandler),
+                Route('/edit', company_admin.EditMenuItemHandler),
+                Route('/up', company_admin.UpProductHandler),
+                Route('/down', company_admin.DownProductHandler),
             ]),
-            Route('/login', padmin.LoginHandler, 'padmin_login'),
-            Route('/logout', padmin.LogoutHandler),
+            Route('/product/modifiers/list', company_admin.ModifiersForProductHandler),
+            Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
+            PathPrefixRoute('/modifiers', [
+                Route('/list', company_admin.ModifierList, 'modifiers_list'),
+                Route('/add/single_modifier', company_admin.AddSingleModifierHandler),
+                Route('/add/group_modifier', company_admin.AddGroupModifierHandler),
+                Route('/add/<group_modifier_id:\d+>/group_modifier_item', company_admin.AddGroupModifierItemHandler),
+                Route('/edit/single_modifier', company_admin.EditSingleModifierHandler),
+                Route('/edit/group_modifier', company_admin.EditGroupModifierHandler),
+                Route('/edit/choice', company_admin.EditGroupModifierItemHandler),
+                Route('/choices/select', company_admin.SelectProductForChoiceHandler),
+            ]),
+            PathPrefixRoute('/venue', [
+                Route('/list', company_admin.VenueListHandler, 'venues_list'),
+                Route('/add_restrictions', company_admin.AddRestrictionHandler),
+            ]),
         ]),
 
+        PathPrefixRoute('/stop_list', [
+            Route('/main', company_admin.MainStopListHandler, 'main_stop_list'),
+            Route('/list', company_admin.StopListsHandler),
+        ]),
+
+        PathPrefixRoute('/promos', [
+            Route('/list', company_admin.PromoListHandler),
+        ]),
+
+        PathPrefixRoute('/report', [
+            Route('/main', company_admin.ReportHandler),
+            Route('/clients', company_admin.ClientsReportHandler),
+            Route('/menu_items', company_admin.MenuItemsReportHandler),
+            Route('/orders', company_admin.OrdersReportHandler),
+        ]),
+
+        PathPrefixRoute('/barista', [
+            Route('/signup', company_admin.SignupHandler),
+            Route('/list', company_admin.ListAdmins, 'barista_main'),
+            Route('/create', company_admin.AutoCreateAdmins),
+            Route('/<admin_id:\d+>/change_login', company_admin.ChangeLoginAdmins),
+            Route('/<admin_id:\d+>/change_password', company_admin.ChangePasswordAdmin),
+        ]),
+    ]),
+
+    PathPrefixRoute('/admin', [
         Route('/login', web_admin.LoginHandler),
-        Route('/signup', web_admin.SignupHandler),
         Route('/logout', web_admin.LogoutHandler),
 
-        Route('/orders.php', web_admin.OrdersHandler),
-        Route('/backs.php', web_admin.ReturnsHandler),
-        Route('/history.php', web_admin.HistoryHandler),
+        Route('/orders', web_admin.OrdersHandler),
+        Route('/backs', web_admin.ReturnsHandler),
+        Route('/history', web_admin.HistoryHandler),
 
-        Route('/check_time.php', web_admin.CheckTimeHandler),
-        Route('/check_update.php', web_admin.CheckUpdateHandler),
-        Route('/done.php', web_admin.OrderDoneHandler),
-        Route('/return_barista.php', web_admin.OrderCancelHandler),
-        Route('/status_up.php', web_admin.OrderStatusUpdateHandler)
+        Route('/check_time', web_admin.CheckTimeHandler),
+        Route('/check_update', web_admin.CheckUpdateHandler),
+        Route('/done', web_admin.OrderDoneHandler),
+        Route('/return_barista', web_admin.OrderCancelHandler),
+        Route('/status_up', web_admin.OrderStatusUpdateHandler)
     ]),
 
     Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),

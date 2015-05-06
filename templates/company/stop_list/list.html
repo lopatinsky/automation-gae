@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <h3>Уберите галочку у того продукта, который хотите поместить в стоп-лист</h3>
+    <form method="post">
+        <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
+        <label><b>Продукты для {{ venue.title }}</b></label><br>
+        {% for product in products %}
+             <label>
+                 <input type="checkbox" {% if not product.stopped %} checked {% endif %} name={{ product.key.id() }}>
+                 {{ product.title }}
+             </label><br>
+        {% endfor %}
+        <label><input type="submit" value="Сохранить"></label>
+    </form>
+    <a href="/company/stop_list/main">Назад</a>
+</body>
+</html>

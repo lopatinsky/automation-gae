@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        {% if category %}
+            <input disabled type="text" name="category_id" value="{{ category.key.id() }}" hidden>
+        {% endif %}
+        {% if product %}
+            <input type="text" name="product_id" value="{{ product.key.id() }}" hidden>
+        {% endif %}
+        {% for param in ('title', 'description', 'kal', 'price', 'volume', 'weight', 'picture') %}
+            <div>
+                <label for="{{ param }}">{{ param }}</label>
+                <input type="text" name="{{ param }}" id="{{ param }}" size="100"
+                       {% if product %}
+                            value="{{ product[param] or "" }}"
+                       {% endif %}
+                />
+            </div>
+        {% endfor %}
+        <input type="submit" value="Отправить"/>
+        <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id()  }}">Назад</a>
+    </form>
+</body>
+</html>

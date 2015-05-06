@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Продукты</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+            <th>Цена</th>
+        </tr>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.title }}</td>
+                <td>{{ product.price }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

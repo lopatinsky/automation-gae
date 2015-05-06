@@ -1,45 +1,90 @@
 # coding=utf-8
+import logging
+from google.appengine.api import namespace_manager
+from google.appengine.ext.ndb import metadata
+from webapp2_extras import auth
+from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
+from methods.auth import set_current_user, company_user_required
+
 __author__ = 'dvpermyakov'
 
-from ..base import BaseHandler
+from base import CompanyBaseHandler
+from models import CompanyUser
+from methods.rendering import latinize
 
 
-class SignupHandler(BaseHandler):
+class SignupHandler(CompanyBaseHandler):
     def success(self):
-        self.redirect("orders.php")
+        self.redirect("/company/main")
 
     def get(self):
         if self.user is not None:
             self.success()
         else:
-            self.render('signup.html')
+            self.render('/signup.html')
 
     def post(self):
         if self.user is not None:
             self.success()
-        email, password, password2 = \
+        login, password, password2 = \
             self.request.get("email").strip().lower(), \
             self.request.get("password"), self.request.get("password2")
-        venue_id = self.request.get_range("venue_id", default=-1)
-        venue_ids = {v.key.id(): v.key for v in self.venues}
+        namespace = latinize(login)
         error = None
-        if not email:
+        for metadata_instance in metadata.get_namespaces():
+            if namespace == metadata_instance:
+                error = u"Введите другой email"
+        if error:
+            pass
+        elif not login:
             error = u"Не введен email"
         elif not password:
             error = u"Не введен пароль"
         elif password != password2:
             error = u"Пароли не совпадают"
-        elif venue_id and venue_id not in venue_ids:
-            error = u"Неправильно выбрана кофейня"
         else:
-            venue_key = venue_ids.get(venue_id, None)
-            success, user = self.auth.store.user_model.create_user(
-                email, email=email, password_raw=password, venue=venue_key)
-            if success:
-                set_current_user(self.auth, user)
-            else:
+            values = {
+                'namespace': namespace,
+                'login': login,
+                'password_raw': password
+            }
+            success, user = CompanyUser.create_user(login, **values)
+            if not success:
                 error = u"Пользователь с этим email уже зарегистрирован"
+            else:
+                set_current_user(self.auth, user)
         if error:
-            self.render('signup.html', email=email, error=error, venue_id=venue_id)
+            logging.info(error)
+            self.render('/signup.html', email=login, error=error)
         else:
             self.success()
+
+
+class LoginHandler(CompanyBaseHandler):
+    def success(self):
+        self.redirect('/company/main')
+
+    def get(self):
+        if self.user is not None:
+            self.success()
+        else:
+            self.render('/login.html')
+
+    def post(self):
+        if self.user is not None:
+            self.success()
+        login = self.request.POST.get("login").lower().strip()
+        password = self.request.POST.get("password")
+        try:
+            self.auth.get_user_by_password(login, password)
+        except (InvalidAuthIdError, InvalidPasswordError):
+            self.render('/login.html', login=login, error=u"Неверный логин или пароль")
+        else:
+            self.success()
+
+
+class LogoutHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        self.auth.unset_session()
+        self.redirect('/company/login')

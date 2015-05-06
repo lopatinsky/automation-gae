@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.up_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/mt/menu/item/up' }}",
+                    data: {
+                        product_id: this.id,
+                        category_id: {{ category.key.id() }}
+                    },
+                    //dataType: "json",
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.product_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/mt/menu/item/down' }}",
+                    data: {
+                        product_id: this.id,
+                        category_id: {{ category.key.id() }}
+                    },
+                    //dataType: "json",
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.next_id).after($('#tr_' + json.product_id));
+                        }
+                    }
+                });
+            });
+            $('#show_inactive').click(function(e){
+                e.preventDefault();
+                $('.0').toggle();
+            });
+         });
+    </script>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <a href="{{ '/company/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
+    <button id="show_inactive">
+        Показать/Скрыть неактивные
+    </button>
+    <form method="post">
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Статус</th>
+                <th>Изменить порядок</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Цена</th>
+                <th>Объм</th>
+                <th>Вес(если нет объема)</th>
+                <th>Картинка</th>
+            </tr>
+            {% for item in items %}
+                <tr id="{{ 'tr_%s' % item.key.id() }}" class="{{ item.status }}" {% if item.status == 0 %} hidden {% endif %}>
+                    <td>
+                        <input type="checkbox" name={{ item.key.id() }} {% if item.status %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <button class="up_button" id="{{ item.key.id() }}">
+                            Вверх
+                        </button>
+                        <br>
+                        <button class="down_button" id="{{ item.key.id() }}">
+                            Вниз
+                        </button>
+                    </td>
+                    <td>
+                        <a href="{{ '/company/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
+                    </td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.volume }}</td>
+                    <td>{{ item.weight }}</td>
+                    <td>
+                        <img src="{{ item.picture }}" height="75">
+                    </td>
+                    <!--
+                    <form method="post">
+                        <button formaction="{{ '/company/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
+                                name="button" value="delete">
+                            Удалить
+                        </button>
+                    </form>
+                    -->
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit">
+        <a href="/company/menu/category/list">Назад</a>
+    </form>
+</body>
+</html>

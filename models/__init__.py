@@ -121,8 +121,8 @@ class MenuItem(ndb.Model):
     picture = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
-    weight = ndb.FloatProperty(indexed=False)
-    volume = ndb.FloatProperty(indexed=False)
+    weight = ndb.FloatProperty(indexed=False, default=0)
+    volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
@@ -569,17 +569,28 @@ class Deposit(ndb.Model):
 
 
 class User(polymodel.PolyModel, models.User):
-    pass
+    namespace = ndb.StringProperty(default='')
+    login = ndb.StringProperty()
+
+    def get_role(self):
+        return NotImplemented
 
 
 class CompanyUser(User):
-    login = ndb.StringProperty()
+    ROLE = 'company'
+
+    def get_role(self):
+        return self.ROLE
 
 
 class Admin(User):
-    email = ndb.StringProperty(required=True, indexed=False)
+    ROLE = 'admin'
+
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
+
+    def get_role(self):
+        return self.ROLE
 
     def query_orders(self, *args, **kwargs):
         if self.venue:
@@ -596,10 +607,6 @@ class Admin(User):
 
     def get_sources(self):
         return [deposit.source for deposit in self.deposit_history]
-
-    @property
-    def login(self):
-        return self.email
 
     def delete_auth_ids(self):
         class_name = type(self).__name__

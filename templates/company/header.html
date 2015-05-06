@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <nav>
+        {% if user %}
+            <p>
+                {{ user.login }}
+                <a href="/company/logout">Выйти</a>
+            </p>
+        {% endif %}
+    </nav>
+</body>
+</html>

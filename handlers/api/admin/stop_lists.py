@@ -1,4 +1,6 @@
 # coding:utf-8
+import logging
+from urlparse import urlparse
 from base import AdminApiHandler
 import json
 from methods.auth import api_user_required
@@ -8,19 +10,26 @@ from models import MenuItem, STATUS_AVAILABLE, SingleModifier, GroupModifierChoi
 class MenuHandler(AdminApiHandler):
     def get(self):
         venue = self.venue_or_error
-        self.redirect('/api/menu.php?venue_id=%s&dynamic' % venue.key.id())
+        logging.info(venue)
+        url = u'http://%s.1.%s/api/menu?venue_id=%s&dynamic' % (self.user.namespace,
+                                                                urlparse(self.request.url).hostname, venue.key.id())
+        self.redirect(str(url))
 
 
 class ModifiersHandler(AdminApiHandler):
     def get(self):
         venue = self.venue_or_error
-        self.redirect('/api/modifiers?venue_id=%s' % venue.key.id())
+        url = u'http://%s.1.%s/api/modifiers?venue_id=%s' % (self.user.namespace, urlparse(self.request.url).hostname,
+                                                             venue.key.id())
+        self.redirect(str(url))
 
 
 class DynamicInfoHandler(AdminApiHandler):
     def get(self):
         venue = self.venue_or_error
-        self.redirect('/api/dynamic_info?venue_id=%s' % venue.key.id())
+        url = u'http://%s.1.%s/api/dynamic_info?venue_id=%s' % (self.user.namespace,
+                                                                urlparse(self.request.url).hostname, venue.key.id())
+        self.redirect(str(url))
 
 
 class SetStopListHandler(AdminApiHandler):
