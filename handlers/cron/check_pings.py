@@ -27,4 +27,4 @@ class CheckPingsHandler(RequestHandler):
 
         max_level = max(r.error_level for r in error_reports)
         subject = "Tablet monitoring " + ("warnings" if max_level == LEVEL_WARNING else "errors")
-        email.send_error("ping", subject, body)
+        #email.send_error("ping", subject, body)
