@@ -47,12 +47,10 @@ class SignupHandler(CompanyBaseHandler):
                 'venue': venue_key,
                 'password_raw': password
             }
+            namespace_manager.set_namespace('')
             success, user = Admin.create_user(login, **values)
             if success:
-                values.update({
-                    'namespace': ''
-                })
-                namespace_manager.set_namespace('')
+                namespace_manager.set_namespace(self.user.namespace)
                 success, user = Admin.create_user(login, **values)
                 if success:
                     logging.info(user)
@@ -93,7 +91,14 @@ class AutoCreateAdmins(CompanyBaseHandler):
                 'namespace': self.user.namespace,
                 'password_raw': '0000'
             }
+            namespace_manager.set_namespace('')
             success, info = Admin.create_user(auth_id, **values)
+            if success:
+                namespace_manager.set_namespace(self.user.namespace)
+                success, info = Admin.create_user(auth_id, **values)
+                if success:
+                    logging.info(info)
+            namespace_manager.set_namespace(self.user.namespace)
             if not success:
                 self.abort(500)
         self.redirect_to("barista_main")
@@ -113,10 +118,17 @@ class ChangeLoginAdmins(CompanyBaseHandler):
         admin = Admin.get_by_id(admin_id)
         if not admin:
             self.abort(500)
+        namespace_manager.set_namespace('')
+        login = admin.login
+        admin = Admin.query(Admin.login == login).get()
+        if not admin:
+            self.abort(500)
         login = self.request.get('login').strip().lower()
         values = {
-            'email': login,
+            'login': login,
             'venue': admin.venue,
+            'namespace': admin.namespace,
+            'deposit_history': admin.deposit_history
         }
         success, info = Admin.create_user(login, **values)
         if success:
@@ -124,7 +136,17 @@ class ChangeLoginAdmins(CompanyBaseHandler):
             info.put()
             admin.delete_auth_ids()
             admin.key.delete()
-            self.redirect_to('padmin_main')
+            namespace_manager.set_namespace(self.user.namespace)
+            admin = Admin.get_by_id(admin_id)
+            if not admin:
+                self.abort(500)
+            success, info = Admin.create_user(login, **values)
+            if success:
+                info.password = admin.password
+                info.put()
+                admin.delete_auth_ids()
+                admin.key.delete()
+            self.redirect_to('barista_main')
         else:
             self.render('/barista/change_login.html', admin=admin, error=u'Логин занят')
 
@@ -142,7 +164,17 @@ class ChangePasswordAdmin(CompanyBaseHandler):
         admin = Admin.get_by_id(admin_id)
         if not admin:
             self.abort(500)
+        namespace_manager.set_namespace('')
+        login = admin.login
+        admin = Admin.query(Admin.login == login).get()
+        if not admin:
+            self.abort(500)
         password = self.request.get('password')
         auth.set_password(admin, password)
         admin.put()
+        namespace_manager.set_namespace(self.user.namespace)
+        admin = Admin.get_by_id(admin_id)
+        if not admin:
+            self.abort(500)
+        auth.set_password(admin, password)
         self.redirect_to('barista_main')
