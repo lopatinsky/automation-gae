@@ -1,5 +1,6 @@
 import json
 import logging
+from google.appengine.api.namespace_manager import namespace_manager
 import webapp2
 
 
@@ -9,7 +10,7 @@ class ApiHandler(webapp2.RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
-
+        logging.debug('namespace=%s' % namespace_manager.get_namespace())
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)
