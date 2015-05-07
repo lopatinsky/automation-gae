@@ -2,6 +2,7 @@
 import time
 
 from .base import ApiHandler
+from config import config
 from methods import alfa_bank, empatika_wallet
 
 
@@ -49,7 +50,10 @@ class DepositToWalletHandler(ApiHandler):
 class WalletBalanceHandler(ApiHandler):
     def get(self):
         client_id = int(self.request.get("client_id"))
-        wallet_balance = empatika_wallet.get_balance(client_id)
+        if config.WALLET_API_KEY:
+            wallet_balance = empatika_wallet.get_balance(client_id)
+        else:
+            wallet_balance = 0
         self.render_json({
             "balance": wallet_balance / 100.0,
         })
