@@ -49,7 +49,10 @@ class DepositToWalletHandler(ApiHandler):
 
 class WalletBalanceHandler(ApiHandler):
     def get(self):
-        client_id = int(self.request.get("client_id"))
+        client_id = self.request.get("client_id")
+        if not client_id:
+            self.abort(400)
+        client_id = int(client_id)
         if config.WALLET_API_KEY:
             wallet_balance = empatika_wallet.get_balance(client_id)
         else:
