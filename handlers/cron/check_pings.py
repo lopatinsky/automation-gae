@@ -19,7 +19,7 @@ class CheckPingsHandler(RequestHandler):
         if not error_reports:
             return
 
-        error_messages = [_TEMPLATE % (report.admin_status.key.id(), report.admin_status.admin.email,
+        error_messages = [_TEMPLATE % (report.admin_status.key.id(), report.admin_status.admin.login,
                                        "\n".join(report.error_messages)) for report in error_reports]
         body = "\n\n".join(error_messages)
 
