@@ -20,8 +20,58 @@ class MainMenuHandler(CompanyBaseHandler):
 class ListCategoriesHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        categories = MenuCategory.query().fetch()
+        if not MenuCategory.query().get().sequence_number:  # todo: remove it or just comment it
+            for category in MenuCategory.query().fetch():
+                category.sequence_number = MenuCategory.generate_category_sequence_number()
+                category.put()
+        categories = MenuCategory.get_categories_in_order()
         self.render('/menu/categories.html', categories=categories)
+
+
+class UpCategoryHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        previous = category.get_previous_category()
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = category.sequence_number
+        category.sequence_number = number
+        category.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'category_id': category.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownCategoryHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        next_ = category.get_next_category()
+        if not next_:
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = category.sequence_number
+        category.sequence_number = number
+        category.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'category_id': category.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))
 
 
 class CreateCategoryHandler(CompanyBaseHandler):
@@ -32,7 +82,7 @@ class CreateCategoryHandler(CompanyBaseHandler):
     @company_user_required
     def post(self):
         title = self.request.get('title')
-        MenuCategory(title=title).put()
+        MenuCategory(title=title, sequence_number=MenuCategory.generate_category_sequence_number()).put()
         self.redirect_to('mt_category_list')
 
 

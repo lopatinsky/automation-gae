@@ -130,8 +130,12 @@ app = WSGIApplication([
 
         PathPrefixRoute('/menu', [
             Route('/main', company_admin.MainMenuHandler),
-            Route('/category/add', company_admin.CreateCategoryHandler),
-            Route('/category/list', company_admin.ListCategoriesHandler, 'mt_category_list'),
+            PathPrefixRoute('/category', [
+                Route('/add', company_admin.CreateCategoryHandler),
+                Route('/list', company_admin.ListCategoriesHandler, 'mt_category_list'),
+                Route('/up', company_admin.UpCategoryHandler),
+                Route('/down', company_admin.DownCategoryHandler),
+            ]),
             PathPrefixRoute('/item', [
                 Route('/list', company_admin.ListMenuItemsHandler),
                 Route('/info', company_admin.MenuItemInfoHandler),

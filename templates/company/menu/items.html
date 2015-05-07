@@ -9,7 +9,7 @@
                 e.preventDefault();
                  $.ajax({
                     type: "POST",
-                    url: "{{ '/mt/menu/item/up' }}",
+                    url: "{{ '/company/menu/item/up' }}",
                     data: {
                         product_id: this.id,
                         category_id: {{ category.key.id() }}
@@ -26,7 +26,7 @@
                 e.preventDefault();
                  $.ajax({
                     type: "POST",
-                    url: "{{ '/mt/menu/item/down' }}",
+                    url: "{{ '/company/menu/item/down' }}",
                     data: {
                         product_id: this.id,
                         category_id: {{ category.key.id() }}

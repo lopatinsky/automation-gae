@@ -2,16 +2,69 @@
 <html>
 <head>
     <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.up_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/category/up' }}",
+                    data: {
+                        category_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.category_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/category/down' }}",
+                    data: {
+                        category_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.next_id).after($('#tr_' + json.category_id));
+                        }
+                    }
+                });
+            });
+         });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
     <div>
         <a href="{{ '/company/menu/category/add' }}">Добавить категорию</a>
     </div>
-    <br>
-    {% for category in categories %}
-        <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a><br>
-    {% endfor %}
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Изменить порядок</th>
+            <th>Название</th>
+        </tr>
+        {% for category in categories %}
+            <tr id="{{ 'tr_%s' % category.key.id() }}">
+                <td>
+                    <button class="up_button" id="{{ category.key.id() }}">
+                        Вверх
+                    </button>
+                    <br>
+                    <button class="down_button" id="{{ category.key.id() }}">
+                        Вниз
+                    </button>
+                </td>
+                <td>
+                    <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
     <br>
     <div>
         <a href="{{ '/company/menu/main' }}">Назад</a>

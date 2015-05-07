@@ -161,8 +161,35 @@ class MenuCategory(ndb.Model):
     picture = ndb.StringProperty(indexed=False)
     menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
+    sequence_number = ndb.IntegerProperty()
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
+
+    @staticmethod
+    def generate_category_sequence_number():
+        fastcounter.incr("category", delta=100, update_interval=1)
+        return fastcounter.get_count("category") + random.randint(1, 100)
+
+    @staticmethod
+    def get_categories_in_order():
+        return sorted([category for category in MenuCategory.query().fetch()],
+                      key=lambda category: category.sequence_number)
+
+    def get_previous_category(self):
+        categories = self.get_categories_in_order()
+        index = categories.index(self)
+        if index == 0:
+            return None
+        else:
+            return categories[index - 1]
+
+    def get_next_category(self):
+        categories = self.get_categories_in_order()
+        index = categories.index(self)
+        if index == len(categories) - 1:
+            return None
+        else:
+            return categories[index + 1]
 
     def generate_sequence_number(self):
         fastcounter.incr("category_%s" % self.key.id(), delta=100, update_interval=1)
@@ -209,7 +236,8 @@ class MenuCategory(ndb.Model):
                 'pic': self.picture,
                 'restrictions': {
                     'venues': [str(restrict.id()) for restrict in self.restrictions]
-                }
+                },
+                'order': self.sequence_number if self.sequence_number else 0
             },
             'items': items
         }

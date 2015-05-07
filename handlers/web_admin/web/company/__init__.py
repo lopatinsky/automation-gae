@@ -11,7 +11,8 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     CreateCategoryHandler, DownProductHandler, EditGroupModifierHandler, ModifierList, \
     EditGroupModifierItemHandler, EditMenuItemHandler, EditSingleModifierHandler, ListCategoriesHandler, \
     ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, ModifiersForProductHandler, \
-    SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler
+    SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
+    DownCategoryHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler
 from stop_lists import MainStopListHandler, StopListsHandler
