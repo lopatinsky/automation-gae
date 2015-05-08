@@ -1,5 +1,13 @@
+# coding=utf-8
 import threading
 from google.appengine.ext import ndb
+
+VENUE = 0
+BAR = 1
+
+PLACE_TYPES = [
+    VENUE, BAR
+]
 
 
 class Config(ndb.Model):
@@ -11,6 +19,14 @@ class Config(ndb.Model):
     ALFA_BASE_URL = ndb.StringProperty(indexed=False, default="https://test.paymentgate.ru/testpayment")
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
     ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
+
+    PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)
+
+    def get_place_str(self):
+        if self.PLACE_TYPE == VENUE:
+            return u'Кофейня'
+        elif self.PLACE_TYPE == BAR:
+            return u'Бар'
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
 

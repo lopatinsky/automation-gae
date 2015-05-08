@@ -1,7 +1,7 @@
 # coding=utf-8
 import copy
 import logging
-from config import config
+from config import config, VENUE, BAR
 from methods import empatika_wallet
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
 from promos import apply_promos
@@ -47,13 +47,20 @@ def _check_venue(venue, delivery_time, errors):
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
-            errors.append(u"Это заведение сейчас недоступно")
+            if config.PLACE_TYPE == VENUE:
+                errors.append(u"Бар сейчас недоступен")
+            elif config.PLACE_TYPE == BAR:
+                errors.append(u"Кофейня сейчас недоступена")
             return False
         if not venue.is_open(minutes_offset=delivery_time):
-            errors.append(u"Это заведение сейчас закрыто")
+            if config.PLACE_TYPE == VENUE:
+                errors.append(u"Бар сейчас закрыт")
+            elif config.PLACE_TYPE == BAR:
+                errors.append(u"Кофейня сейчас закрыта")
             return False
         if venue.problem:
-            errors.append(u"Данное заведение временно не принимает заказы: %s" % venue.problem)
+            place_name = config.get_place_str()
+            errors.append(u"%s временно не принимает заказы: %s" % (place_name, venue.problem))
             return False
     return True
 
