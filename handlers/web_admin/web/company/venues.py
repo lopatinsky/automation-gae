@@ -59,7 +59,7 @@ class EditVenueHandler(CompanyBaseHandler):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
             self.abort(404)
-        self.render('/edit_venue.html', venue=venue)
+        self.render('/venues/edit_venue.html', venue=venue)
 
     @company_user_required
     def post(self, venue_id):
