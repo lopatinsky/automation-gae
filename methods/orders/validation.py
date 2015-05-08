@@ -47,13 +47,13 @@ def _check_venue(venue, delivery_time, errors):
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
-            errors.append(u"Эта кофейня сейчас недоступна")
+            errors.append(u"Это заведение сейчас недоступно")
             return False
         if not venue.is_open(minutes_offset=delivery_time):
-            errors.append(u"Эта кофейня сейчас закрыта")
+            errors.append(u"Это заведение сейчас закрыто")
             return False
         if venue.problem:
-            errors.append(u"Кофейня временно не принимает заказы: %s" % venue.problem)
+            errors.append(u"Данное заведение временно не принимает заказы: %s" % venue.problem)
             return False
     return True
 
