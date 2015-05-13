@@ -261,10 +261,11 @@ class PromoOutcome(ndb.Model):
 class PromoCondition(ndb.Model):
     CHECK_TYPE_DELIVERY = 0
     CHECK_FIRST_ORDER = 1
+    CHECK_MAX_ORDER_SUM = 2
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER], required=True)
+    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM], required=True)
     value = ndb.IntegerProperty()
 
 
