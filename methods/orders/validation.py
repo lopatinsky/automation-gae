@@ -273,7 +273,10 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
 
     logging.info(item_dicts)
 
-    grouped_item_dicts = group_item_dicts(item_dicts)
+    if len(item_dicts):
+        grouped_item_dicts = group_item_dicts(item_dicts)
+    else:
+        grouped_item_dicts = []
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
