@@ -86,7 +86,6 @@ app = WSGIApplication([
         Route('/venues', api.VenuesHandler),
         Route('/client', api.ClientHandler),
         Route('/menu', api.MenuHandler),
-        Route('/menu.php', api.MenuHandler),
         Route('/modifiers', api.ModifiersHandler),
         Route('/dynamic_info', api.DynamicInfoHandler),
         Route('/order', api.OrderHandler),
