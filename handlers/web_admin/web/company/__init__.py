@@ -10,7 +10,7 @@ from payment_type import PaymentTypesHandler
 from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuItemHandler, AddSingleModifierHandler,\
     CreateCategoryHandler, DownProductHandler, EditGroupModifierHandler, ModifierList, \
     EditGroupModifierItemHandler, EditMenuItemHandler, EditSingleModifierHandler, ListCategoriesHandler, \
-    ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, ModifiersForProductHandler, \
+    ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, \
     SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
     DownCategoryHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler

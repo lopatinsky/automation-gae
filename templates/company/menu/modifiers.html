@@ -47,7 +47,13 @@
                 </td>
                 <td>{{ modifier.price }}</td>
                 <td>{{ modifier.min_amount }}</td>
-                <td>{{ modifier.max_amount }}</td>
+                <td>
+                    {% if modifier.max_amount == inf %}
+                        Бесконечность
+                    {% else %}
+                        {{ modifier.max_amount }}
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>

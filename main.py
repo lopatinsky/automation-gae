@@ -143,7 +143,6 @@ app = WSGIApplication([
                 Route('/up', company_admin.UpProductHandler),
                 Route('/down', company_admin.DownProductHandler),
             ]),
-            Route('/product/modifiers/list', company_admin.ModifiersForProductHandler),
             Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
             PathPrefixRoute('/modifiers', [
                 Route('/list', company_admin.ModifierList, 'modifiers_list'),

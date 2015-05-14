@@ -20,10 +20,6 @@ class MainMenuHandler(CompanyBaseHandler):
 class ListCategoriesHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        if not MenuCategory.query().get().sequence_number:  # todo: remove it or just comment it
-            for category in MenuCategory.query().fetch():
-                category.sequence_number = MenuCategory.generate_category_sequence_number()
-                category.put()
         categories = MenuCategory.get_categories_in_order()
         self.render('/menu/categories.html', categories=categories)
 
@@ -317,17 +313,6 @@ class SelectProductForChoiceHandler(CompanyBaseHandler):
         self.redirect_to('modifiers_list')
 
 
-class ModifiersForProductHandler(CompanyBaseHandler):
-    @company_user_required
-    def get(self):
-        product = MenuItem.get_by_id(self.request.get('product_id'))
-        self.render('/menu/product_modifiers.html', {
-            'product': product,
-            'single_modifiers': [modifier.get().modifier.get() for modifier in product.single_modifiers],
-            'group_modifiers': [modifier.get() for modifier in product.group_modifiers]
-        })
-
-
 class ModifierList(CompanyBaseHandler):
     @company_user_required
     def get(self):
@@ -363,7 +348,8 @@ class ModifierList(CompanyBaseHandler):
                 group_modifier.enable = False
         self.render('/menu/modifiers.html', **{
             'single_modifiers': single_modifiers,
-            'group_modifiers': group_modifiers
+            'group_modifiers': group_modifiers,
+            'inf': SingleModifier.INFINITY
         })
 
 
@@ -380,6 +366,8 @@ class AddSingleModifierHandler(CompanyBaseHandler):
         price = self.request.get_range('price')
         min = self.request.get_range('min')
         max = self.request.get_range('max')
+        if max == 0:
+            max = SingleModifier.INFINITY
         SingleModifier(title=name, price=price, min_amount=min, max_amount=max).put()
         self.redirect_to('modifiers_list')
 

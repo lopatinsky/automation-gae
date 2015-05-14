@@ -42,6 +42,8 @@ IN_CAFE = 1
 
 
 class SingleModifier(ndb.Model):
+    INFINITY = 1000
+
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(required=True)
     min_amount = ndb.IntegerProperty(default=0)
