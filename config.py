@@ -30,8 +30,6 @@ class Config(ndb.Model):
 
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)
 
-    #password = ndb.StringProperty()  # todo: not used? should not
-
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'
