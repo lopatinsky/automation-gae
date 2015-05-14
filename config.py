@@ -1,6 +1,7 @@
 # coding=utf-8
 import threading
 from google.appengine.ext import ndb
+from webapp2 import cached_property
 
 VENUE = 0
 BAR = 1
@@ -33,6 +34,16 @@ class Config(ndb.Model):
     @property
     def WALLET_ENABLED(self):
         return self.WALLET_API_KEY is not None
+
+    PAYPAL_CLIENT_ID = ndb.StringProperty(indexed=False)
+    PAYPAL_CLIENT_SECRET = ndb.StringProperty(indexed=False)
+    PAYPAL_SANDBOX = ndb.BooleanProperty(indexed=False, required=True, default=True)
+
+    @cached_property
+    def PAYPAL_API(self):
+        from methods import paypalrestsdk
+        mode = "sandbox" if self.PAYPAL_SANDBOX else "live"
+        return paypalrestsdk.Api(mode=mode, client_id=self.PAYPAL_CLIENT_ID, client_secret=self.PAYPAL_CLIENT_SECRET)
 
     EMAILS = ndb.JsonProperty(default={
         "server": "admins",

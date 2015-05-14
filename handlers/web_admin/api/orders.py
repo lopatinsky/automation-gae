@@ -5,7 +5,7 @@ import datetime
 import logging
 from google.appengine.ext import ndb
 from .base import WebAdminApiHandler
-from methods import push, alfa_bank, empatika_promos, empatika_wallet
+from methods import push, alfa_bank, empatika_promos, empatika_wallet, paypal
 from methods.auth import api_user_required
 from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
     CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, Venue
@@ -104,6 +104,8 @@ class OrderDoneHandler(WebAdminApiHandler):
 
         if order.has_card_payment:
             alfa_bank.deposit(order.payment_id, 0)  # TODO check success
+        elif order.has_paypal_payment:
+            paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
         push.send_order_ready_push(order)
 
         response = {
@@ -125,6 +127,8 @@ class OrderCancelHandler(WebAdminApiHandler):
         if order.has_card_payment:
             return_result = alfa_bank.reverse(order.payment_id)
             success = str(return_result['errorCode']) == '0'
+        elif order.has_paypal_payment:
+            success, error = paypal.void(order.payment_id)
         elif order.payment_type_id == BONUS_PAYMENT_TYPE:
             try:
                 empatika_promos.cancel_activation(order.payment_id)

@@ -3,7 +3,7 @@ import logging
 import datetime
 from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
-from methods import alfa_bank, email
+from methods import alfa_bank, email, paypal
 from models import Order, Venue, NEW_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, Client, SharedFreeCup
 
 
@@ -21,6 +21,8 @@ class CloseOpenedOrdersHandler(ApiHandler):
             logging.info("closing order %s", order.key.id())
             if order.has_card_payment:
                 alfa_bank.deposit(order.payment_id, 0)  # TODO check success
+            elif order.has_paypal_payment:
+                paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
             order.status = READY_ORDER
             order.activate_cash_back()
             client_key = ndb.Key(Client, order.client_id)

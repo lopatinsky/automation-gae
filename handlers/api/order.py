@@ -8,10 +8,10 @@ from handlers.api.base import ApiHandler
 import json
 import re
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email, paypal
 from methods.orders.validation import validate_order, get_first_error
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, PAYPAL_PAYMENT_TYPE
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -138,6 +138,15 @@ class OrderHandler(ApiHandler):
                     if wallet_payment > 0:
                         empatika_wallet.reverse(client_id, order_id)
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
+            elif payment_type_id == PAYPAL_PAYMENT_TYPE and payment_amount > 0:
+                correlation_id = response_json['payment']['correlation_id']
+                success, info = paypal.pay(order_id, payment_amount / 100.0, client.paypal_refresh_token, correlation_id)
+
+                if success:
+                    self.order.payment_id = info
+                    self.order.put()
+                else:
+                    return self.render_error(u"Не удалось произвести оплату. " + (info or ''))
 
             client.put()
             self.order.status = NEW_ORDER
@@ -197,6 +206,10 @@ class ReturnOrderHandler(ApiHandler):
                     return_result = alfa_bank.reverse(order.payment_id)
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
+                        self.abort(400)
+                elif order.has_paypal_payment:
+                    success, error = paypal.void(order.payment_id)
+                    if not success:
                         self.abort(400)
                 elif order.payment_type_id == BONUS_PAYMENT_TYPE:
                     try:
