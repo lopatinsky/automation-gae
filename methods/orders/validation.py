@@ -226,7 +226,7 @@ def set_modifiers(items):
 
 def set_price_with_modifiers(items):
     for item in items:
-        price = item.price
+        price = float(item.price) + float(item.float_rest_price)
         for single_modifier in item.chosen_single_modifiers:
             price += single_modifier.price
         for group_modifier in item.chosen_group_modifiers:

@@ -90,6 +90,8 @@ class ListMenuItemsHandler(CompanyBaseHandler):
         if not category:
             self.abort(400)
         items = category.get_items_in_order()
+        for item in items:
+            item.float_price = float(item.price) + float(item.float_rest_price)
         self.render('/menu/items.html', items=items, category=category)
 
     @company_user_required
@@ -141,7 +143,10 @@ class AddMenuItemHandler(CompanyBaseHandler):
 
         item = MenuItem(title=self.request.get('title'))
         item.description = self.request.get('description')
-        item.price = self.request.get_range('price')
+        price = float(self.request.get('price'))
+        item.price = int(price)
+        item.float_rest_price = price - float(item.price)
+
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
             item.volume = float(self.request.get('volume'))
@@ -166,6 +171,7 @@ class EditMenuItemHandler(CompanyBaseHandler):
         product = MenuItem.get_by_id(product_id)
         if not product:
             self.abort(400)
+        product.float_price = float(product.price) + float(product.float_rest_price)
         self.render('/menu/add_item.html', product=product, category=category)
 
     @company_user_required
@@ -180,7 +186,9 @@ class EditMenuItemHandler(CompanyBaseHandler):
             self.abort(400)
         item.title = self.request.get('title')
         item.description = self.request.get('description')
-        item.price = self.request.get_range('price')
+        price = float(self.request.get('price'))
+        item.price = int(price)
+        item.float_rest_price = price - float(item.price)
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
             item.volume = float(self.request.get('volume'))

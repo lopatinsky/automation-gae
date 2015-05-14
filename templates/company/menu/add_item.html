@@ -12,10 +12,16 @@
         {% if product %}
             <input type="text" name="product_id" value="{{ product.key.id() }}" hidden>
         {% endif %}
-        {% for param in ('title', 'description', 'kal', 'price', 'volume', 'weight', 'picture') %}
+        {% for param in ('title', 'description', 'kal', 'float_price', 'volume', 'weight', 'picture') %}
             <div>
                 <label for="{{ param }}">{{ param }}</label>
-                <input type="text" name="{{ param }}" id="{{ param }}" size="100"
+                <input type="text"
+                       {% if param == 'float_price' %}
+                            name="price"
+                       {% else %}
+                            name="{{ param }}"
+                       {% endif %}
+                       id="{{ param }}" size="100"
                        {% if product %}
                             value="{{ product[param] or "" }}"
                        {% endif %}

@@ -126,6 +126,8 @@ class MenuItem(ndb.Model):
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(required=True, indexed=False)
+    float_rest_price = ndb.FloatProperty(indexed=False, default=0)
+
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
@@ -142,7 +144,7 @@ class MenuItem(ndb.Model):
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
-            'price':  self.price,
+            'price':  float(self.price) + float(self.float_rest_price),
             'kal': self.kal,
             'pic': self.picture,
             'weight': self.weight,
