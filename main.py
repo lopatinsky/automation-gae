@@ -19,6 +19,13 @@ webapp2_config = {
 
 app = WSGIApplication([
 
+    PathPrefixRoute('/docs', [
+        Route('/about.html', api.AboutHandler),
+        Route('/licence_agreement.html', api.LicenceHandler),
+        Route('/nda.html', api.NdaHandler),
+        Route('/payment_rules.html', api.PaymentRulesHandler),
+    ]),
+
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
 
@@ -126,6 +133,14 @@ app = WSGIApplication([
         Route('/venues/map', company_admin.MapVenuesHandler),
         Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
         Route('/venues/create', company_admin.CreateVenueHandler),
+
+        PathPrefixRoute('/docs', [
+            PathPrefixRoute('/set', [
+                Route('/about', company_admin.SetAboutCompanyHandler),
+            ]),
+            Route('/list', company_admin.ListDocsHandler),
+            Route('/about', company_admin.AboutCompanyHandler),
+        ]),
 
         PathPrefixRoute('/menu', [
             Route('/main', company_admin.MainMenuHandler),

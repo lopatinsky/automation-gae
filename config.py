@@ -22,23 +22,25 @@ class Config(ndb.Model):
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)
 
+    WALLET_API_KEY = ndb.StringProperty(indexed=False)
+
+    EMAILS = ndb.JsonProperty(default={
+        "server": "admins",
+    })
+
+    COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)
+
+    #password = ndb.StringProperty()  # todo: not used? should not
+
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'
         elif self.PLACE_TYPE == BAR:
             return u'Бар'
 
-    WALLET_API_KEY = ndb.StringProperty(indexed=False)
-
     @property
     def WALLET_ENABLED(self):
         return self.WALLET_API_KEY is not None
-
-    EMAILS = ndb.JsonProperty(default={
-        "server": "admins",
-    })
-
-    password = ndb.StringProperty()
 
     @classmethod
     def get(cls):
