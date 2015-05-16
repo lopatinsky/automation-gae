@@ -1,5 +1,4 @@
-import logging
-from models import Order, STATUS_AVAILABLE, NEW_ORDER, READY_ORDER, CREATING_ORDER
+from models import Order, NEW_ORDER, READY_ORDER, CREATING_ORDER
 
 
 def check_condition_by_value(condition, value):
