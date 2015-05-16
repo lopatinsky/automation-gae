@@ -5,6 +5,7 @@ from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 import handlers.web_admin.web.company as company_admin
+import handlers.web_admin.web.company.delivery as company_delivery
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -133,6 +134,17 @@ app = WSGIApplication([
         Route('/venues/map', company_admin.MapVenuesHandler),
         Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
         Route('/venues/create', company_admin.CreateVenueHandler),
+
+        PathPrefixRoute('/delivery', [
+            PathPrefixRoute('/orders', [
+                Route('/items', company_delivery.OrderItemsHandler),
+                Route('/confirm', company_delivery.ConfirmOrderHandler),
+                Route('/close', company_delivery.CloseOrderHandler),
+                Route('/cancel', company_delivery.CancelOrderHandler),
+                Route('/current', company_delivery.DeliveryOrdersHandler),
+                Route('/new', company_delivery.NewDeliveryOrdersHandler),
+            ]),
+        ]),
 
         PathPrefixRoute('/docs', [
             PathPrefixRoute('/set', [

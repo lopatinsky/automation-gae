@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Заказы</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        var last_time = {{ last_time }};
+        var statuses = [];
+        {% for status in statuses %}
+            statuses[{{ loop.index0 }}] = {{ status['value'] }};
+        {% endfor %}
+        function add_order(order) {
+            $('#order_table tr:last').after(
+                '<tr class="tr_' +  order.status + ' order_' + order.order_id + '">' +
+                    '<td>' + 123 + '</td>' +
+                    '<td>' + 123 + '</td>' +
+                    '<td>' + order.total_sum + '</td>' +
+                    '<td>' + order.client.name + '</td>' +
+                    '<td>' + order.client.surname + '</td>' +
+                    '<td>' + order.client.phone + '</td>' +
+                    '<td>' + order.status + '</td>' +
+                    '<td>' +
+                        '<a href="/company/delivery/orders/items?order_id=' + order.order_id + '">Продукты</a>' +
+                    '<td>' +
+                    '<td id="order_status_' + order.order_id + '">' + order.status_description + '</td>' +
+                    '<td>' +
+                        '<form>' +
+                            '<button class="confirm_btn" id="' + order.order_id + '">' +
+                                'Подтвердить' +
+                            '</button>' +
+                        '</form>' +
+                    '</td>' +
+                    '<td>' +
+                        '<button class="cancel_btn" id="cancel_' + order.order_id + '">' +
+                            'Отменить' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>'
+            );
+            $('.confirm_btn').click(confirm);
+            toggle_tr_appearance();
+        }
+        function check_orders() {
+            $.ajax({
+                type: "GET",
+                url: '/company/delivery/orders/new',
+                data: {
+                    last_time: last_time
+                },
+                dataType: "json",
+                success: function(json) {
+                    last_time = json.last_time;
+                    for (var i = 0; i < json.orders.length; i++) {
+                        add_order(json.orders[i]);
+                    }
+                }
+            });
+        }
+        function toggle_tr_appearance() {
+            for (var i = 0; i < statuses.length; i++) {
+                var jquery_cb = "#cb_" + statuses[i];
+                var jquery_td_id = '.tr_' + statuses[i];
+                if ($(jquery_cb).prop("checked")) {
+                    $(jquery_td_id).show();
+                } else {
+                    $(jquery_td_id).hide();
+                }
+
+            }
+        }
+        function confirm(e){
+            e.preventDefault();
+            var button_id = '#' + this.id;
+            if (!$(button_id).hasClass('confirm_btn')) {
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ '/company/delivery/orders/confirm' }}",
+                data: {
+                    order_id: this.id
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status_description);
+                    $(order_tr).removeClass('tr_' + json.old_status);
+                    $(order_tr).addClass('tr_' + json.status);
+                    $(button_id).html('Закрыть заказ');
+                    $(button_id).removeClass();
+                    $(button_id).addClass('close_btn');
+                    toggle_tr_appearance();
+                    $('.confirm_btn').click(confirm);
+                    $('.close_btn').click(close);
+                    $('.cancel_btn').click(cancel);
+                }
+            });
+        }
+        function close(e){
+            e.preventDefault();
+            var button_id = '#' + this.id;
+            var cancel_button_id = '#cancel_' + this.id;
+            if (!$(button_id).hasClass('close_btn')) {
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ '/company/delivery/orders/close' }}",
+                data: {
+                    order_id: this.id
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status_description);
+                    $(order_tr).removeClass('tr_' + json.old_status);
+                    $(order_tr).addClass('tr_' + json.status);
+                    $(button_id).attr("disabled", true);
+                    $(button_id).removeClass();
+                    $(cancel_button_id).attr("disabled", true);
+                    $(cancel_button_id).removeClass();
+                    toggle_tr_appearance();
+                    $('.confirm_btn').click(confirm);
+                    $('.close_btn').click(close);
+                    $('.cancel_btn').click(cancel);
+                }
+            });
+        }
+        function cancel(e){
+            e.preventDefault();
+            var id = this.id.split('_')[1];
+            var button_id = '#' + id;
+            var cancel_button_id = '#cancel_' + id;
+            alert(cancel_button_id);
+            if (!$(cancel_button_id).hasClass('cancel_btn')) {
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ '/company/delivery/orders/cancel' }}",
+                data: {
+                    order_id: id
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status_description);
+                    $(order_tr).removeClass('tr_' + json.old_status);
+                    $(order_tr).addClass('tr_' + json.status);
+                    $(button_id).attr("disabled", true);
+                    $(button_id).removeClass();
+                    $(cancel_button_id).attr("disabled", true);
+                    $(cancel_button_id).removeClass();
+                    toggle_tr_appearance();
+                    $('.confirm_btn').click(confirm);
+                    $('.close_btn').click(close);
+                    $('.cancel_btn').click(cancel);
+                }
+            });
+        }
+        $(document).ready(function() {
+            //setInterval(check_orders, 10000);
+            $('.confirm_btn').click(confirm);
+            $('.close_btn').click(close);
+            $('.cancel_btn').click(cancel);
+            $('.check_status').change(toggle_tr_appearance);
+        });
+    </script>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    {% for status in statuses %}
+        <label>
+            <input type="checkbox" class="check_status" id="cb_{{ status['value'] }}" checked>
+            {{ status['name'] }}
+        </label><br>
+    {% endfor %}
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Номер заказа</th>
+            <th>Время заказа</th>
+            <th>Время доставки</th>
+            <th>Сумма</th>
+            <th>Имя</th>
+            <th>Фамилия</th>
+            <th>Номер телефона</th>
+            <th>Позиции в заказе</th>
+            <th>Статус</th>
+            <th>Изменить статус</th>
+            <th>Отменить</th>
+        </tr>
+        {% for order in orders %}
+            <tr class="tr_{{ order.status }} order_{{ order.key.id() }}">
+                <td>{{ order.key.id() }}</td>
+                <td>{{ order.created_time }}</td>
+                <td>{{ order.delivery_time }}</td>
+                <td>{{ order.total_sum }}</td>
+                <td>{{ order.client.name }}</td>
+                <td>{{ order.client.surname }}</td>
+                <td>{{ order.client.phone }}</td>
+                <td>
+                    <a href="{{ '/company/delivery/orders/items?order_id=%s' % order.key.id() }}">Продукты</a>
+                </td>
+                <td id="{{ 'order_status_%s' % order.key.id()  }}">
+                    {{ order.status_description }}
+                </td>
+                <td>
+                    {% if order.status == status_new %}
+                        <button class="confirm_btn" id="{{ order.key.id() }}">
+                            Подтвердить
+                        </button>
+                    {% elif order.status == status_confirmed %}
+                        <button class="close_btn" id="{{ order.key.id() }}">
+                            Закрыть заказ
+                        </button>
+                    {% else %}
+                        <button disabled>
+                            Закрыть заказ
+                        </button>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="cancel_btn" id="cancel_{{ order.key.id() }}"
+                            {% if order.status in [status_cancelled, status_closed] %} disabled {% endif %} >
+                        Отменить
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

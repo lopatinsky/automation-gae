@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <p>
+        Заказ № {{ order.key.id() }}
+    </p>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+            <th>Цена</th>
+            <th>Одиночные модификаторы</th>
+            <th>Групповые модификаторы</th>
+        </tr>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.title }}</td>
+                <td>{{ item.float_price }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
