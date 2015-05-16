@@ -26,6 +26,7 @@ READY_ORDER = 1
 CANCELED_BY_CLIENT_ORDER = 2
 CANCELED_BY_BARISTA_ORDER = 3
 CREATING_ORDER = 4
+CONFIRM_ORDER = 5
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -39,21 +40,35 @@ GROUP_MODIFIER = 1
 
 SELF = 0
 IN_CAFE = 1
+DELIVERY = 2
+
+STATUS_MAP = {
+    NEW_ORDER: u"Новый",
+    READY_ORDER: u"Выдан",
+    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
+    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
+    CREATING_ORDER: u'Созданный заказ',
+    CONFIRM_ORDER: u'Подтвержденный заказ'
+}
 
 
 class SingleModifier(ndb.Model):
     INFINITY = 1000
 
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(required=True)
+    price = ndb.IntegerProperty(default=0)  # в копейках
     min_amount = ndb.IntegerProperty(default=0)
     max_amount = ndb.IntegerProperty(default=0)
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
 
     def dict(self):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
-            'price': self.price,
+            'price': float(self.price) / 100.0,  # в рублях
             'min': self.min_amount,
             'max': self.max_amount
         }
@@ -62,7 +77,11 @@ class SingleModifier(ndb.Model):
 class GroupModifierChoice(ndb.Model):
     choice_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(default=0)
+    price = ndb.IntegerProperty(default=0)  # в копейках
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
 
     @staticmethod
     def generate_id():
@@ -110,7 +129,7 @@ class GroupModifier(ndb.Model):
             'choices': [
                 {
                     'title': choice.title,
-                    'price': choice.price,
+                    'price': float(choice.price) / 100.0,  # в рублях
                     'id': str(choice.choice_id)
                 } for choice in choices
             ]
@@ -125,8 +144,7 @@ class MenuItem(ndb.Model):
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
-    price = ndb.IntegerProperty(required=True, indexed=False)
-    float_rest_price = ndb.FloatProperty(indexed=False, default=0)
+    price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
 
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
@@ -138,13 +156,17 @@ class MenuItem(ndb.Model):
     group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
     stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
 
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
+
     def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
-            'price':  float(self.price) + float(self.float_rest_price),
+            'price':  float(self.price) / 100.0,  # в рублях
             'kal': self.kal,
             'pic': self.picture,
             'weight': self.weight,
@@ -387,7 +409,7 @@ class ChosenGroupModifierDetails(ndb.Model):
 
 class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
-    price = ndb.IntegerProperty(required=True)
+    price = ndb.IntegerProperty(required=True)  # в копейках
     revenue = ndb.FloatProperty(required=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
@@ -399,16 +421,17 @@ class Order(ndb.Model):
     total_sum = ndb.FloatProperty(indexed=False)
     payment_sum = ndb.FloatProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
-                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
+                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER),
                                  default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
+    delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
                                                                   BONUS_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
-    venue_id = ndb.IntegerProperty(required=True)
+    venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
     comment = ndb.StringProperty(indexed=False)
@@ -423,6 +446,18 @@ class Order(ndb.Model):
     first_for_client = ndb.BooleanProperty()
 
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
+
+    def confirm_order(self):
+        self.status = CONFIRM_ORDER
+        self.put()
+
+    def cancel_order(self):
+        self.status = CANCELED_BY_BARISTA_ORDER
+        self.put()
+
+    def close_order(self):
+        self.status = READY_ORDER
+        self.put()
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")

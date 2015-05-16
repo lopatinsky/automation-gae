@@ -3,7 +3,8 @@ import copy
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet
-from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier
+from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, SELF, \
+    IN_CAFE
 from promos import apply_promos
 
 
@@ -226,11 +227,11 @@ def set_modifiers(items):
 
 def set_price_with_modifiers(items):
     for item in items:
-        price = float(item.price) + float(item.float_rest_price)
+        price = item.float_price
         for single_modifier in item.chosen_single_modifiers:
-            price += single_modifier.price
+            price += single_modifier.float_price
         for group_modifier in item.chosen_group_modifiers:
-            price += group_modifier.choice.price
+            price += group_modifier.choice.float_price
         item.total_price = price
     return items
 
@@ -256,10 +257,11 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
 
     errors = []
     valid = True
-    valid = _check_venue(venue, delivery_time, errors) and valid
+    if delivery_type in [SELF, IN_CAFE]:
+        valid = _check_venue(venue, delivery_time, errors) and valid
+        valid = _check_restrictions(venue, item_dicts, errors) and valid
+        valid = _check_stop_list(venue, item_dicts, errors) and valid
     valid = _check_modifier_consistency(item_dicts, errors) and valid
-    valid = _check_restrictions(venue, item_dicts, errors) and valid
-    valid = _check_stop_list(venue, item_dicts, errors) and valid
 
     if order:
         if valid:
@@ -299,7 +301,7 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
         for item_dict in item_dicts:
             details_item = OrderPositionDetails(
                 item=item_dict['item'].key,
-                price=item_dict['price'],
+                price=int(item_dict['price'] * 100),  # перевод в копейки
                 revenue=item_dict['revenue'],
                 promos=[promo.key for promo in item_dict['promos']],
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],

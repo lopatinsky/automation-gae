@@ -45,7 +45,7 @@
                         Выбрать
                     </a>
                 </td>
-                <td>{{ modifier.price }}</td>
+                <td>{{ modifier.float_price }}</td>
                 <td>{{ modifier.min_amount }}</td>
                 <td>
                     {% if modifier.max_amount == inf %}
@@ -106,7 +106,7 @@
                     <td>
                         <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
                     </td>
-                    <td>{{ choice.price }}</td>
+                    <td>{{ choice.float_price }}</td>
                     <td>
                         <a href="{{ '/company/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
                     </td>
