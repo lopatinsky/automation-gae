@@ -3,7 +3,7 @@ from collections import Counter
 from datetime import datetime, timedelta
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, \
-    CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, BONUS_PAYMENT_TYPE, Venue, CREATING_ORDER
+    CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, Venue, CREATING_ORDER
 
 
 _STATUS_STRINGS = {
@@ -16,8 +16,7 @@ _STATUS_STRINGS = {
 
 _PAYMENT_TYPE_STRINGS = {
     CASH_PAYMENT_TYPE: u"Наличные",
-    CARD_PAYMENT_TYPE: u"Карта",
-    BONUS_PAYMENT_TYPE: u"Бонусы"
+    CARD_PAYMENT_TYPE: u"Карта"
 }
 
 
@@ -30,7 +29,7 @@ def _order_data(order):
         "created_time": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
         "delivery_time": (order.delivery_time + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
         "payment_type": _PAYMENT_TYPE_STRINGS[order.payment_type_id],
-        "total_sum": order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0,
+        "total_sum": order.total_sum if order.payment_type_id != 666 else 0,
         "venue_revenue": sum(d.revenue for d in order.item_details),
         "venue": venue.title,
         "items": []

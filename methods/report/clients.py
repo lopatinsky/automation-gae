@@ -1,6 +1,6 @@
 __author__ = 'dvpermyakov'
 
-from models import Order, Client, Venue, READY_ORDER, BONUS_PAYMENT_TYPE,\
+from models import Order, Client, Venue, READY_ORDER, \
     CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
 from datetime import datetime
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
@@ -59,7 +59,7 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chose
     for order in query.fetch():
         client_id = order.client_id
         total_sum = sum(item.get().price for item in order.items)
-        payment = order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0
+        payment = order.total_sum if order.payment_type_id != 666 else 0
         venue_sum = sum(d_item.revenue for d_item in order.item_details)
         if client_id in clients:
             clients[client_id].add_order(venue_sum, total_sum, payment,
