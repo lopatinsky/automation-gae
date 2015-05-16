@@ -169,7 +169,6 @@ class EditMenuItemHandler(CompanyBaseHandler):
         product = MenuItem.get_by_id(product_id)
         if not product:
             self.abort(400)
-        product.float_price = product.price / 100.0
         self.render('/menu/add_item.html', product=product, category=category)
 
     @company_user_required
