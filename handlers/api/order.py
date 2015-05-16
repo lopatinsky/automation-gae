@@ -6,12 +6,12 @@ from google.appengine.ext.ndb import GeoPt, Key
 from config import config
 from handlers.api.base import ApiHandler
 import json
-import re
 from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
+from methods.orders.precheck import check_order_id, set_client_info
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER
+    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -33,49 +33,43 @@ class OrderHandler(ApiHandler):
         memcache.delete(self.cache_key)
 
     def post(self):
-        #TODO errors handling
         response_json = json.loads(self.request.get('order'))
+
         order_id = int(response_json['order_id'])
-        # check if order exists in DB or currently adding it
-        self.cache_key = "order_%s" % order_id
-        if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
+        success, cache_key = check_order_id(order_id)
+        if not success:
             self.abort(409)
+        else:
+            self.cache_key = cache_key
 
-        venue_id = response_json.get('venue_id')
-        if not venue_id:
-            return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать кофейню.")
-        venue_id = int(venue_id)
+        delivery_type = int(response_json.get('delivery_type'))
 
-        venue = Venue.get_by_id(venue_id)
-        if not venue:
-            return self.render_error("")
+        if delivery_type in [SELF, IN_CAFE]:
+            venue_id = response_json.get('venue_id')
+            if not venue_id:
+                return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать кофейню.")
+            venue_id = int(venue_id)
+            venue = Venue.get_by_id(venue_id)
+            if not venue:
+                return self.render_error("")
+        else:
+            venue_id = None
+            venue = None
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
         else:
             coordinates = None
+
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
         delivery_time_minutes = response_json['delivery_time']
         delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
         request_total_sum = response_json.get("total_sum")
-        client_id = int(response_json['client']['id'])
 
-        client = Client.get_by_id(int(client_id))
-        name = response_json['client']['name'].split(None, 1)
-        client_name = name[0]
-        client_surname = name[1] if len(name) > 1 else ""
-        client_tel = re.sub("[^0-9]", "", response_json['client']['phone'])
-        client_email = response_json['client'].get('email')
-        if client.name != client_name or client.surname != client_surname or client.tel != client_tel \
-                or client.email != client_email:
-            client.name = client_name
-            client.surname = client_surname
-            client.tel = client_tel
-            client.email = client_email
-            client.put()
-
-        delivery_type = int(response_json.get('delivery_type'))
+        client_id, client = set_client_info(response_json.get('client'))
+        if not client:
+            self.render_error("")
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
@@ -114,7 +108,7 @@ class OrderHandler(ApiHandler):
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details)
+                item_details=item_details, delivery_type=delivery_type)
             self.order.put()
 
             if wallet_payment > 0:
