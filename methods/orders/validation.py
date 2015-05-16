@@ -2,9 +2,9 @@
 import copy
 import logging
 from config import config, VENUE, BAR
-from methods import empatika_wallet
+from methods import empatika_wallet, empatika_promos
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, SELF, \
-    IN_CAFE
+    IN_CAFE, Promo, GiftMenuItem
 from promos import apply_promos
 
 
@@ -16,29 +16,34 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _check_modifier_consistency(item_dicts, errors):
-    description = None
-    for item_dict in item_dicts:
-        item = item_dict['item']
-        for single_modifier in item.chosen_single_modifiers:
-            if single_modifier.key not in item.single_modifiers:
-                description = u'%s нет для %s' % (single_modifier.title, item.title)
-                errors.append(description)
-                item_dict['errors'].append(description)
-        for group_modifier in item.chosen_group_modifiers:
-            if group_modifier.key not in item.group_modifiers:
-                description = u'%s нет для %s' % (group_modifier.title, item.title)
-                errors.append(description)
-                item_dict['errors'].append(description)
-            choice_confirmed = False
-            for choice in group_modifier.choices:
-                if choice.title == group_modifier.choice.title:
-                    choice_confirmed = True
-            if not choice_confirmed:
-                description = u'%s нет для %s' % (group_modifier.choice.title, group_modifier.title)
-                errors.append(description)
-                item_dict['errors'].append(description)
-    if description:
+def _check_modifier_consistency(item_dicts, gift_dicts, errors):
+    def check(item_dicts):
+        description = None
+        for item_dict in item_dicts:
+            item = item_dict['item']
+            for single_modifier in item.chosen_single_modifiers:
+                if single_modifier.key not in item.single_modifiers:
+                    description = u'%s нет для %s' % (single_modifier.title, item.title)
+                    errors.append(description)
+                    item_dict['errors'].append(description)
+            for group_modifier in item.chosen_group_modifiers:
+                if group_modifier.key not in item.group_modifiers:
+                    description = u'%s нет для %s' % (group_modifier.title, item.title)
+                    errors.append(description)
+                    item_dict['errors'].append(description)
+                choice_confirmed = False
+                for choice in group_modifier.choices:
+                    if choice.title == group_modifier.choice.title:
+                        choice_confirmed = True
+                if not choice_confirmed:
+                    description = u'%s нет для %s' % (group_modifier.choice.title, group_modifier.title)
+                    errors.append(description)
+                    item_dict['errors'].append(description)
+        return description
+
+    items_description = check(item_dicts)
+    gifts_description = check(gift_dicts)
+    if items_description or gifts_description:
         return False
     else:
         return True
@@ -66,42 +71,52 @@ def _check_venue(venue, delivery_time, errors):
     return True
 
 
-def _check_restrictions(venue, item_dicts, errors):
-    description = None
-    for item_dict in item_dicts:
-        item = item_dict['item']
-        if venue.key in item.restrictions:
-            description = u'%s не имеет %s' % (venue.title, item.title)
-            errors.append(description)
-            item_dict['errors'].append(description)
-    if description:
+def _check_restrictions(venue, item_dicts, gift_dicts, errors):
+    def check(item_dicts):
+        description = None
+        for item_dict in item_dicts:
+            item = item_dict['item']
+            if venue.key in item.restrictions:
+                description = u'%s не имеет %s' % (venue.title, item.title)
+                errors.append(description)
+                item_dict['errors'].append(description)
+        return description
+
+    items_description = check(item_dicts)
+    gifts_description = check(gift_dicts)
+    if items_description or gifts_description:
         return False
     else:
         return True
 
 
-def _check_stop_list(venue, item_dicts, errors):
-    description = None
-    stop_list_choices = [choice.get().choice_id for choice in venue.group_choice_modifier_stop_list]
-    for item_dict in item_dicts:
-        item = item_dict['item']
-        if item.key in venue.stop_lists:
-            description = u'%s положил %s в стоп лист' % (venue.title, item.title)
-            errors.append(description)
-            item_dict['errors'].append(description)
-        for single_modifier in item_dict['single_modifiers']:
-            if single_modifier.key in venue.single_modifiers_stop_list:
-                description = u'%s положил одиночный модификатор %s в стоп лист' % (venue.title, single_modifier.title)
+def _check_stop_list(venue, item_dicts, gift_dicts, errors):
+    def check(item_dicts):
+        description = None
+        stop_list_choices = [choice.get().choice_id for choice in venue.group_choice_modifier_stop_list]
+        for item_dict in item_dicts:
+            item = item_dict['item']
+            if item.key in venue.stop_lists:
+                description = u'%s положил %s в стоп лист' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
-        for group_modifier in item_dict['group_modifiers']:
-            if group_modifier.choice.choice_id in stop_list_choices or \
-                            group_modifier.choice.choice_id in item.stop_list_group_choices:
-                description = u'%s положил выбор группового модификатора %s в стоп лист' % \
-                              (venue.title, group_modifier.choice.title)
-                errors.append(description)
-                item_dict['errors'].append(description)
-    if description:
+            for single_modifier in item_dict['single_modifiers']:
+                if single_modifier.key in venue.single_modifiers_stop_list:
+                    description = u'%s положил одиночный модификатор %s в стоп лист' % (venue.title, single_modifier.title)
+                    errors.append(description)
+                    item_dict['errors'].append(description)
+            for group_modifier in item_dict['group_modifiers']:
+                if group_modifier.choice.choice_id in stop_list_choices or \
+                                group_modifier.choice.choice_id in item.stop_list_group_choices:
+                    description = u'%s положил выбор группового модификатора %s в стоп лист' % \
+                                  (venue.title, group_modifier.choice.title)
+                    errors.append(description)
+                    item_dict['errors'].append(description)
+        return description
+
+    items_description = check(item_dicts)
+    gifts_description = check(gift_dicts)
+    if items_description or gifts_description:
         return False
     else:
         return True
@@ -171,7 +186,21 @@ def _group_group_modifiers(modifiers):
     return result.values()
 
 
-def group_item_dicts(item_dicts):
+def group_item_dicts(item_dicts, gift_dicts=None):
+    def get_group_dict(item_dict):
+        return {
+            'id': str(item_dict['item'].key.id()),
+            'title': item_dict['item'].title,
+            'promos': item_dict.get('promos', []),
+            'errors': item_dict.get('errors'),
+            'image': item_dict.get('image'),
+            'quantity': 1,
+            'price_without_promos': item_dict['price'],
+            'single_modifiers': _group_single_modifiers(item_dict['single_modifier_keys']),
+            'group_modifiers': _group_group_modifiers(item_dict['group_modifier_keys']),
+            'item_dict': item_dict
+        }
+
     result = []
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'id': None}
@@ -182,22 +211,20 @@ def group_item_dicts(item_dicts):
             if item_dict.get('errors'):
                 possible_group['errors'].extend(item_dict['errors'])
         else:
-            if possible_group.get('item_dict'):
-                del possible_group['item_dict']
-            result.append({
-                'id': str(item_dict['item'].key.id()),
-                'title': item_dict['item'].title,
-                'promos': item_dict.get('promos'),
-                'errors': item_dict.get('errors'),
-                'image': item_dict.get('image'),
-                'quantity': 1,
-                'price_without_promos': item_dict['price'],
-                'single_modifiers': _group_single_modifiers(item_dict['single_modifier_keys']),
-                'group_modifiers': _group_group_modifiers(item_dict['group_modifier_keys']),
-                'item_dict': item_dict
-            })
-    if result[-1].get('item_dict'):
-            del result[-1]['item_dict']
+            result.append(get_group_dict(item_dict))
+    if gift_dicts:
+        for gift_dict in gift_dicts:
+            found = False
+            for group in result:
+                if _is_equal(gift_dict, group['item_dict']):
+                    group['quantity'] += 1
+                    if group.get('errors'):
+                        group['errors'].extend(gift_dict.get('errors'))
+                    found = True
+            if not found:
+                result.append(get_group_dict(gift_dict))
+    for group in result:
+        del group['item_dict']
     for dct in result:
         dct['promos'] = _group_promos(dct.get('promos'))
         dct['errors'] = _unique(dct.get('errors'))
@@ -236,10 +263,7 @@ def set_price_with_modifiers(items):
     return items
 
 
-def validate_order(client, items, payment_info, venue, delivery_time, delivery_type, with_details=False, order=None):
-    items = set_modifiers(items)
-    items = set_price_with_modifiers(items)
-
+def set_item_dicts(items, is_gift):
     item_dicts = []
     for item in items:
         item_dicts.append({
@@ -249,19 +273,63 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
             'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
                                     for modifier in item.chosen_group_modifiers],
-            'price': item.total_price,
-            'revenue': item.total_price,
+            'price': item.total_price if not is_gift else 0,
+            'revenue': item.total_price if not is_gift else 0,
             'errors': [],
             'promos': []
         })
+    return item_dicts
+
+
+def _check_gifts(gifts, client, errors):
+    spent_points = 0
+    for gift in gifts:
+        gift_item = GiftMenuItem.get_by_id(gift.key.id())
+        if not gift_item:
+            description = u'%s нет в списке подарков' % gift.title
+            errors.append(description)
+            return False, None
+        spent_points += gift_item.points
+    if config.PROMOS_API_KEY:
+        accum_points = empatika_promos.get_user_points(client.key.id())
+    else:
+        accum_points = 0
+    if accum_points < spent_points:
+        description = u'Недостаточно накопленных баллов'
+        errors.append(description)
+        return False, None
+    else:
+        return True, accum_points - spent_points
+
+
+def get_avail_gifts(points):
+    gifts = []
+    for gift in GiftMenuItem.query().fetch():
+        if gift.points <= points:
+            gifts.append(gift)
+    return gifts
+
+
+def validate_order(client, items, gifts, payment_info, venue, delivery_time, delivery_type, with_details=False, order=None):
+    items = set_modifiers(items)
+    items = set_price_with_modifiers(items)
+    item_dicts = set_item_dicts(items, False)
+
+    gifts = set_modifiers(gifts)
+    gift_dicts = set_item_dicts(gifts, True)
+
+    logging.info('gift_dicts = %s' % gift_dicts)
 
     errors = []
     valid = True
     if delivery_type in [SELF, IN_CAFE]:
         valid = _check_venue(venue, delivery_time, errors) and valid
-        valid = _check_restrictions(venue, item_dicts, errors) and valid
-        valid = _check_stop_list(venue, item_dicts, errors) and valid
-    valid = _check_modifier_consistency(item_dicts, errors) and valid
+        valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
+        valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
+    valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
+
+    success, rest_points = _check_gifts(gifts, client, errors)
+    valid = valid and success
 
     if order:
         if valid:
@@ -273,10 +341,10 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
     for item_dict in item_dicts:
         total_sum += item_dict['revenue']
 
-    logging.info(item_dicts)
+    logging.info('item_dicts = %s' % item_dicts)
 
     if len(item_dicts):
-        grouped_item_dicts = group_item_dicts(item_dicts)
+        grouped_item_dicts = group_item_dicts(item_dicts, gift_dicts)
     else:
         grouped_item_dicts = []
 
@@ -287,14 +355,16 @@ def validate_order(client, items, payment_info, venue, delivery_time, delivery_t
 
     result = {
         'valid': valid,
+        'more_gift': len(get_avail_gifts(rest_points)) > 0,
+        'rest_points': rest_points,
         'errors': _unique(errors),
         'items': grouped_item_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
     }
-    logging.info(result)
-    logging.info(total_sum)
+    logging.info('validation result = %s' % result)
+    logging.info('total sum = %s' % total_sum)
 
     if with_details:
         details = []

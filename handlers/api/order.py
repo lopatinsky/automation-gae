@@ -11,7 +11,7 @@ from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
 from methods.orders.precheck import check_order_id, set_client_info
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    BONUS_PAYMENT_TYPE, PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Promo
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -69,7 +69,7 @@ class OrderHandler(ApiHandler):
 
         client_id, client = set_client_info(response_json.get('client'))
         if not client:
-            self.render_error("")
+            return self.render_error("")
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
@@ -87,11 +87,13 @@ class OrderHandler(ApiHandler):
                                              Order.status.IN([READY_ORDER, NEW_ORDER]),
                                              Order.date_created >= five_mins_ago).get()
                 if previous_order and sorted(previous_order.items) == sorted(item_keys):
-                    self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
-                    return
+                    return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
-            validation_result = validate_order(client, response_json['items'], response_json['payment'], venue,
-                                               delivery_time_minutes, delivery_type, True)
+            validation_result = validate_order(client,
+                                               response_json['items'],
+                                               response_json.get('gifts', []),
+                                               response_json['payment'],
+                                               venue, delivery_time_minutes, delivery_type, True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -133,12 +135,22 @@ class OrderHandler(ApiHandler):
                         empatika_wallet.reverse(client_id, order_id)
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
 
+            gift_details = []
+            for gift in response_json.get('gifts', []):
+                gift_item = GiftMenuItem.get_by_id(int(gift['item_id']))
+                activation_dict = empatika_promos.activate_promo(client.key.id(), Promo.get_accum_gift_promo().key.id(),
+                                                                 gift_item.points)
+                gift_details.append(GiftPositionDetails(gift=gift_item.key,
+                                                        activation_id=activation_dict['activation']['id']))
+            self.order.gift_details = gift_details
+
             client.put()
             self.order.status = NEW_ORDER
-            self.order.put()
 
-            validate_order(client, response_json['items'], response_json['payment'], venue,  # it is used for creating
-                           delivery_time_minutes, delivery_type, False, self.order)             # db for promos
+            # it is used for creating db for promos
+            validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
+                           venue, delivery_time_minutes, delivery_type, False, self.order)
+            self.order.put()
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
@@ -192,9 +204,9 @@ class ReturnOrderHandler(ApiHandler):
                     if str(return_result.get('errorCode', 0)) != '0':
                         logging.error("payment return failed")
                         self.abort(400)
-                elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+                for gift_detail in order.gift_details:
                     try:
-                        empatika_promos.cancel_activation(order.payment_id)
+                        empatika_promos.cancel_activation(gift_detail.activation_id)
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
                         self.abort(400)
@@ -260,8 +272,12 @@ class CheckOrderHandler(ApiHandler):
 
         delivery_time = self.request.get_range('delivery_time')
         items = json.loads(self.request.get('items'))
+        if self.request.get('gifts'):
+            gifts = json.loads(self.request.get('gifts'))
+        else:
+            gifts = []
 
         delivery_type = int(self.request.get('delivery_type'))
 
-        result = orders.validate_order(client, items, payment_info, venue, delivery_time, delivery_type)
+        result = orders.validate_order(client, items, gifts, payment_info, venue, delivery_time, delivery_type)
         self.render_json(result)

@@ -1,4 +1,5 @@
-from models import CashBack
+from models import CashBack, GiftPointsDetails
+from methods import empatika_promos
 
 
 def _get_item_keys(item_dicts):
@@ -104,4 +105,22 @@ def set_discount_richest(outcome, item_dicts, promo):
         if item_dict:
             if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
+    return promo_applied
+
+
+def set_gift_points(outcome, item_dicts, client, promo, order):
+    item_keys = _get_item_keys(item_dicts)
+    promo_applied = False
+    if item_keys.get(outcome.item):
+        if order:
+            empatika_promos.register_order(client.key.id(), outcome.value, order.key.id())
+            order.points_details.append(GiftPointsDetails(item=outcome.item.key, points=outcome.value))
+            order.put()
+        promo_applied = True
+    if not outcome.item_required:
+        if order:
+            empatika_promos.activate_promo(client.key.id(), promo.key.id(), outcome.value * len(item_dicts))
+            order.points_details.append(GiftPointsDetails(points=outcome.value * len(item_dicts)))
+            order.put()
+        promo_applied = True
     return promo_applied

@@ -1,7 +1,7 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value
-from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest
+from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points
 
 
 def _get_initial_total_sum(item_dicts):
@@ -37,6 +37,8 @@ def _set_outcome(outcome, items, promo, client, order):
         return set_discount_cheapest(outcome, items, promo)
     if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
         return set_discount_richest(outcome, items, promo)
+    if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
+        return set_gift_points(outcome, items, client, promo, order)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order=None):

@@ -89,6 +89,13 @@ app = WSGIApplication([
             Route('/payment_types', api.PaymentTypesHandler),
         ]),
 
+        PathPrefixRoute('/promo', [
+            Route('/list', api.PromoInfoHandler),
+            PathPrefixRoute('/gift', [
+                Route('/items', api.GiftListHandler),
+            ]),
+        ]),
+
         Route('/register', api.RegistrationHandler),
         Route('/demo_info', api.DemoInfoHandler),
         Route('/venues', api.VenuesHandler),
@@ -104,8 +111,6 @@ app = WSGIApplication([
         Route('/status', api.StatusHandler),
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
-
-        Route('/promos', api.PromoInfoHandler),
 
         Route('/wallet/balance', api.WalletBalanceHandler),
         Route('/wallet/deposit', api.DepositToWalletHandler),

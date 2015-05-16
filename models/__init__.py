@@ -16,7 +16,6 @@ from methods.empatika_promos import register_order
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
-BONUS_PAYMENT_TYPE = 2
 
 STATUS_AVAILABLE = 1
 STATUS_UNAVAILABLE = 0
@@ -272,15 +271,29 @@ class MenuCategory(ndb.Model):
         return dct
 
 
+class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
+    item = ndb.KeyProperty(kind=MenuItem, required=True)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    points = ndb.IntegerProperty(required=True)  # how many spent
+
+
+class PointMenuItem(ndb.Model):  # self.key.id() == item.key.id()
+    item = ndb.KeyProperty(kind=MenuItem, required=True)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    points = ndb.IntegerProperty(default=1)  # how many accumulate
+
+
 class PromoOutcome(ndb.Model):
-    DISCOUNT = 0           # calculated by prices
-    CASH_BACK = 1          # calculated by prices
-    DISCOUNT_CHEAPEST = 2  # calculated by prices ## use priority to imply in the end
-    DISCOUNT_RICHEST = 3   # calculated by prices ## use priority to imply in the end
+    DISCOUNT = 0               # calculated by prices
+    CASH_BACK = 1              # calculated by prices
+    DISCOUNT_CHEAPEST = 2      # calculated by prices ## use priority to imply in the end
+    DISCOUNT_RICHEST = 3       # calculated by prices ## use priority to imply in the end
+    ACCUMULATE_GIFT_POINT = 4
+    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST], required=True)
+    method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
 
 
@@ -306,6 +319,13 @@ class Promo(ndb.Model):
     priority = ndb.IntegerProperty(default=0)
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+
+    @staticmethod
+    def get_accum_gift_promo():
+        for promo in Promo.query().fetch():
+            if PromoOutcome.ACCUMULATE_GIFT_POINT in promo.outcomes:
+                return promo
+        return None
 
     def dict(self):
         return {
@@ -416,6 +436,16 @@ class OrderPositionDetails(ndb.Model):
     group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
 
 
+class GiftPositionDetails(ndb.Model):
+    gift = ndb.KeyProperty(kind=GiftMenuItem, required=True)
+    activation_id = ndb.StringProperty(required=True)
+
+
+class GiftPointsDetails(ndb.Model):
+    item = ndb.KeyProperty(kind=PointMenuItem)  # applied for all items in order if not placed
+    points = ndb.IntegerProperty(required=True)
+
+
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.FloatProperty(indexed=False)
@@ -427,8 +457,7 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty(required=True)
-    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE))
+    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
@@ -440,6 +469,8 @@ class Order(ndb.Model):
     device_type = ndb.IntegerProperty(required=True)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
+    gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
+    points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
@@ -795,8 +826,7 @@ class SharedGift(ndb.Model):
     recipient_id = ndb.IntegerProperty()
     total_sum = ndb.IntegerProperty(required=True)
     order_id = ndb.StringProperty(required=True)
-    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE))
+    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
