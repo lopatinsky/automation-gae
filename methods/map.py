@@ -17,9 +17,13 @@ def _parse_collection(collection, kind='house'):  # used only for kind in ['hous
             continue
         address = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
         address = address['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']
+        city = address['LocalityName']
+        if address.get('DependentLocality'):
+            address = address['DependentLocality']
+        logging.info(address)
         candidates.append({
             'address': {
-                'city': address['LocalityName'],
+                'city': city,
                 'street': address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip(),
                 'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
             },
