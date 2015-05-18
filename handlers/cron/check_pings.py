@@ -2,7 +2,7 @@ import logging
 from webapp2 import RequestHandler
 from methods import email
 from methods.pings import PingReport, LEVEL_OK, LEVEL_WARNING
-from models import AdminStatus
+from models import AdminStatus, Admin
 
 
 _TEMPLATE = "Token: %s\n" \
@@ -14,7 +14,7 @@ class CheckPingsHandler(RequestHandler):
     def get(self):
         statuses = AdminStatus.query().fetch()
 
-        reports = [PingReport(status) for status in statuses]
+        reports = [PingReport(status) for status in statuses if status.admin.get_role() == Admin.ROLE]
         error_reports = [report for report in reports if report.error_level > LEVEL_OK]
         if not error_reports:
             return
