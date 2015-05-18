@@ -12,8 +12,10 @@ class DemoInfoHandler(ApiHandler):
 
 class PromoInfoHandler(ApiHandler):
     def get(self):
+        items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         self.render_json({
-            'promos': [promo.dict() for promo in Promo.query().fetch()]
+            'promos': [promo.dict() for promo in Promo.query().fetch()],
+            'items': items
         })
 
 
