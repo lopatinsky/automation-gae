@@ -40,6 +40,13 @@ GROUP_MODIFIER = 1
 SELF = 0
 IN_CAFE = 1
 DELIVERY = 2
+DELIVERY_TYPES = [SELF, IN_CAFE, DELIVERY]
+
+DELIVERY_MAP = {
+    SELF: u'С собой',
+    IN_CAFE: u'В кафе',
+    DELIVERY: u'Доставка'
+}
 
 STATUS_MAP = {
     NEW_ORDER: u"Новый",
@@ -49,6 +56,12 @@ STATUS_MAP = {
     CREATING_ORDER: u'Созданный заказ',
     CONFIRM_ORDER: u'Подтвержденный заказ'
 }
+
+
+class DeliveryType(ndb.Model):
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    min_sum = ndb.IntegerProperty(default=0)
 
 
 class SingleModifier(ndb.Model):
@@ -274,13 +287,15 @@ class MenuCategory(ndb.Model):
 class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
     item = ndb.KeyProperty(kind=MenuItem, required=True)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    promo_id = ndb.IntegerProperty(required=True)  # it relates to empatika-promos
     points = ndb.IntegerProperty(required=True)  # how many spent
 
-
-class PointMenuItem(ndb.Model):  # self.key.id() == item.key.id()
-    item = ndb.KeyProperty(kind=MenuItem, required=True)
-    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
-    points = ndb.IntegerProperty(default=1)  # how many accumulate
+    def dict(self):
+        dict = self.item.get().dict()
+        dict.update({
+            'points': self.points
+        })
+        return dict
 
 
 class PromoOutcome(ndb.Model):
@@ -301,10 +316,12 @@ class PromoCondition(ndb.Model):
     CHECK_TYPE_DELIVERY = 0
     CHECK_FIRST_ORDER = 1
     CHECK_MAX_ORDER_SUM = 2
+    CHECK_ITEM_IN_ORDER = 3
+    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM], required=True)
+    method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
 
 
@@ -319,13 +336,6 @@ class Promo(ndb.Model):
     priority = ndb.IntegerProperty(default=0)
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
-
-    @staticmethod
-    def get_accum_gift_promo():
-        for promo in Promo.query().fetch():
-            if PromoOutcome.ACCUMULATE_GIFT_POINT in promo.outcomes:
-                return promo
-        return None
 
     def dict(self):
         return {
@@ -349,8 +359,15 @@ class CashBack(ndb.Model):
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
 
+class Address(ndb.Model):
+    city = ndb.StringProperty()
+    street = ndb.StringProperty()
+    home = ndb.StringProperty()
+
+
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
+    address = ndb.StructuredProperty(Address)
     description = ndb.StringProperty(indexed=False)
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
@@ -438,12 +455,16 @@ class OrderPositionDetails(ndb.Model):
 
 class GiftPositionDetails(ndb.Model):
     gift = ndb.KeyProperty(kind=GiftMenuItem, required=True)
-    activation_id = ndb.StringProperty(required=True)
+    activation_id = ndb.IntegerProperty(required=True)
 
 
 class GiftPointsDetails(ndb.Model):
-    item = ndb.KeyProperty(kind=PointMenuItem)  # applied for all items in order if not placed
+    READY = 0
+    DONE = 1
+
+    item = ndb.KeyProperty(kind=MenuItem)  # applied for all items in order if not placed
     points = ndb.IntegerProperty(required=True)
+    status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
 
 class Order(ndb.Model):
@@ -500,6 +521,14 @@ class Order(ndb.Model):
                 cash_back.status = cash_back.DONE
         if total_cash_back > 0:
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
+        self.put()
+
+    def activate_gift_points(self):
+        from methods import empatika_promos
+        for point_detail in self.points_details:
+            if point_detail.status == GiftPointsDetails.READY:
+                empatika_promos.register_order(self.client_id, point_detail.points, self.key.id())
+                point_detail.status = GiftPointsDetails.DONE
         self.put()
 
     def dict(self):

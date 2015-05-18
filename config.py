@@ -30,7 +30,11 @@ class Config(ndb.Model):
         "server": "admins",
     })
 
+    APP_NAME = ndb.StringProperty(indexed=False)
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)
+    SUPPORT_PHONE = ndb.StringProperty(indexed=False)
+    SUPPORT_SITE = ndb.StringProperty(indexed=False)
+    SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
