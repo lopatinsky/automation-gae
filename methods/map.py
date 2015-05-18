@@ -74,3 +74,21 @@ def get_streets_by_address(city, street):
     collection = response['response']['GeoObjectCollection']['featureMember']
 
     return _parse_collection(collection, kind='street')
+
+
+def get_streets_or_houses_by_address(city, street):
+    params = {
+        'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
+        'format': 'json',
+        'results': 3
+    }
+    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
+    logging.info(url)
+    response = urlfetch.fetch(url)
+    response = json.loads(response.content)
+    collection = response['response']['GeoObjectCollection']['featureMember']
+
+    candidates = _parse_collection(collection, kind='house')
+    if not candidates:
+        candidates = _parse_collection(collection, kind='street')
+    return candidates
