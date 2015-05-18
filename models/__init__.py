@@ -58,12 +58,6 @@ STATUS_MAP = {
 }
 
 
-class DeliveryType(ndb.Model):
-    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
-    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
-    min_sum = ndb.IntegerProperty(default=0)
-
-
 class SingleModifier(ndb.Model):
     INFINITY = 1000
 
@@ -365,6 +359,25 @@ class Address(ndb.Model):
     home = ndb.StringProperty()
 
 
+class DeliveryType(ndb.Model):
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
+    min_sum = ndb.IntegerProperty(default=0)
+
+    def dict(self):
+        return {
+            'id': self.delivery_type,
+            'name': DELIVERY_MAP[self.delivery_type],
+            'min_sum': self.min_sum
+        }
+
+    @classmethod
+    def create(cls, delivery_type):
+        delivery = cls(id=delivery_type, delivery_type=delivery_type)
+        delivery.put()
+        return delivery
+
+
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     address = ndb.StructuredProperty(Address)
@@ -373,7 +386,8 @@ class Venue(ndb.Model):
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     working_days = ndb.StringProperty(indexed=False)
     working_hours = ndb.StringProperty(indexed=False)
-    takeout_only = ndb.BooleanProperty(indexed=False, default=False)
+    takeout_only = ndb.BooleanProperty(indexed=False, default=False)  # todo: need to remove it
+    delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)

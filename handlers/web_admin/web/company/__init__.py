@@ -21,6 +21,7 @@ from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, 
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler, ListDocsHandler
+from delivery_types import DeliveryTypesHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

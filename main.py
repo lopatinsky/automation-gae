@@ -158,6 +158,7 @@ app = WSGIApplication([
                 Route('/current', company_delivery.DeliveryOrdersHandler),
                 Route('/new', company_delivery.NewDeliveryOrdersHandler),
             ]),
+            Route('/types', company_admin.DeliveryTypesHandler),
         ]),
 
         PathPrefixRoute('/docs', [
