@@ -5,7 +5,21 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <p>{{ info }}</p>
+    <p>
+        <b>О копании: </b>{{ info }}
+    </p>
+    <p>
+        <b>Наименование: </b>{{ name }}
+    </p>
+    <p>
+        <b>Сайт: </b>{{ site }}
+    </p>
+    <p>
+        <b>Телефон: </b>{{ phone }}
+    </p>
+    <p>
+        <b>Emails: </b>{{ emails }}
+    </p>
     <a href="/company/docs/set/about">Изменить</a>
     <a href="/company/docs/list">Назад</a>
 </body>
