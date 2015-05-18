@@ -112,15 +112,18 @@ def set_gift_points(outcome, item_dicts, client, promo, order):
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
     if item_keys.get(outcome.item):
-        if order:
-            empatika_promos.register_order(client.key.id(), outcome.value, order.key.id())
-            order.points_details.append(GiftPointsDetails(item=outcome.item.key, points=outcome.value))
-            order.put()
-        promo_applied = True
+        for item_dict in item_dicts:
+            if item_dict['item'].key == outcome.item:
+                if order:
+                    order.points_details.append(GiftPointsDetails(item=outcome.item, points=outcome.value))
+                    order.put()
+                item_dict['promos'].append(promo)
+                promo_applied = True
     if not outcome.item_required:
         if order:
-            empatika_promos.activate_promo(client.key.id(), promo.key.id(), outcome.value * len(item_dicts))
             order.points_details.append(GiftPointsDetails(points=outcome.value * len(item_dicts)))
             order.put()
+            for item_dict in item_dicts:
+                item_dict['promos'].append(promo)
         promo_applied = True
     return promo_applied

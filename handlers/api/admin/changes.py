@@ -63,6 +63,7 @@ class DoneOrderHandler(AdminApiHandler):
             self.abort(400)
 
         order.activate_cash_back()
+        order.activate_gift_points()
 
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()

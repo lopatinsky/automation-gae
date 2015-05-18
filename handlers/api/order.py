@@ -138,8 +138,7 @@ class OrderHandler(ApiHandler):
             gift_details = []
             for gift in response_json.get('gifts', []):
                 gift_item = GiftMenuItem.get_by_id(int(gift['item_id']))
-                activation_dict = empatika_promos.activate_promo(client.key.id(), Promo.get_accum_gift_promo().key.id(),
-                                                                 gift_item.points)
+                activation_dict = empatika_promos.activate_promo(client.key.id(), gift_item.promo_id, 1)
                 gift_details.append(GiftPositionDetails(gift=gift_item.key,
                                                         activation_id=activation_dict['activation']['id']))
             self.order.gift_details = gift_details

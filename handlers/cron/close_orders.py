@@ -23,6 +23,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 alfa_bank.deposit(order.payment_id, 0)  # TODO check success
             order.status = READY_ORDER
             order.activate_cash_back()
+            order.activate_gift_points()
             client_key = ndb.Key(Client, order.client_id)
             free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
                                            SharedFreeCup.status == SharedFreeCup.READY).get()
