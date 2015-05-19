@@ -76,11 +76,15 @@ class LoginHandler(CompanyBaseHandler):
         login = self.request.POST.get("login").lower().strip()
         password = self.request.POST.get("password")
         try:
-            self.auth.get_user_by_password(login, password)
+            user_dict = self.auth.get_user_by_password(login, password)
         except (InvalidAuthIdError, InvalidPasswordError):
             self.render('/login.html', login=login, error=u"Неверный логин или пароль")
         else:
-            self.success()
+            user = CompanyUser.get_by_id(user_dict["user_id"])
+            if user.get_role() != CompanyUser.ROLE:
+                self.render('/login.html', login=login, error=u"Неверный логин или пароль")
+            else:
+                self.success()
 
 
 class LogoutHandler(CompanyBaseHandler):
