@@ -39,7 +39,7 @@ def get_houses_by_address(city, street, home):
     params = {
         'geocode': ('%s,%s,%s' % (city, street, home)).encode('utf-8'),
         'format': 'json',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     response = urlfetch.fetch(url)
@@ -54,7 +54,7 @@ def get_houses_by_coordinates(lat, lon):
         'geocode': '%s,%s' % (lon, lat),
         'format': 'json',
         'kind': 'house',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -69,7 +69,7 @@ def get_streets_by_address(city, street):
     params = {
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -84,7 +84,7 @@ def get_streets_or_houses_by_address(city, street):
     params = {
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
