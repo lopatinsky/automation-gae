@@ -9,9 +9,10 @@ import json
 from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
-from methods.orders.precheck import check_order_id, set_client_info
+from methods.map import get_houses_by_address
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Promo
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Address
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -44,6 +45,18 @@ class OrderHandler(ApiHandler):
 
         delivery_type = int(response_json.get('delivery_type'))
 
+        delivery_venue = None
+        address = response_json.get('address')
+        if address:
+            address_home = address['address']
+            if not address['address']['home']:
+                candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
+                if candidates:
+                    flat = address['address']['flat']
+                    address = candidates[0]
+                    address['address']['flat'] = flat
+            delivery_venue = get_venue_by_address(address)
+
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = response_json.get('venue_id')
             if not venue_id:
@@ -53,8 +66,12 @@ class OrderHandler(ApiHandler):
             if not venue:
                 return self.render_error("")
         else:
-            venue_id = None
-            venue = None
+            if delivery_venue:
+                venue_id = delivery_venue.key.id()
+                venue = delivery_venue
+            else:
+                venue_id = None
+                venue = None
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -63,8 +80,12 @@ class OrderHandler(ApiHandler):
 
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
-        delivery_time_minutes = response_json['delivery_time']
-        delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
+        delivery_time_minutes = response_json.get('delivery_time')
+        if delivery_time_minutes is not None:
+            delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
+        else:
+            delivery_time = None
+        delivery_slot = response_json.get('delivery_slot')
         request_total_sum = response_json.get("total_sum")
 
         client_id, client = set_client_info(response_json.get('client'))
@@ -93,7 +114,7 @@ class OrderHandler(ApiHandler):
                                                response_json['items'],
                                                response_json.get('gifts', []),
                                                response_json['payment'],
-                                               venue, delivery_time_minutes, delivery_type, True)
+                                               venue, address, delivery_time_minutes, delivery_slot, delivery_type, True)
             if not validation_result['valid']:
                 return self.render_error(get_first_error(validation_result))
 
@@ -106,11 +127,19 @@ class OrderHandler(ApiHandler):
             item_details = validation_result["details"]
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
 
+            if address:
+                address_args = {
+                    'lat': float(address['coordinates']['lat']) if address['coordinates']['lat'] else None,
+                    'lon': float(address['coordinates']['lon']) if address['coordinates']['lon'] else None
+                }
+                address_args.update(address['address'])
+                address = Address(**address_args)
+
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details, delivery_type=delivery_type)
+                item_details=item_details, delivery_type=delivery_type, delivery_slot=delivery_slot, address=address)
             self.order.put()
 
             if wallet_payment > 0:
@@ -148,7 +177,7 @@ class OrderHandler(ApiHandler):
 
             # it is used for creating db for promos
             validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
-                           venue, delivery_time_minutes, delivery_type, False, self.order)
+                           venue, address, delivery_time_minutes, delivery_type, delivery_slot, False, self.order)
             self.order.put()
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
@@ -258,10 +287,28 @@ class CheckOrderHandler(ApiHandler):
         if not client:
             self.abort(400)
 
-        venue_id = self.request.get_range('venue_id')
-        venue = Venue.get_by_id(venue_id)
-        if not venue:
-            self.abort(400)
+        delivery_type = int(self.request.get('delivery_type'))
+
+        delivery_venue = None
+        address = self.request.get('address')
+        if address:
+            address = json.loads(address)
+            address_home = address['address']
+            if not address['address']['home']:
+                candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
+                if candidates:
+                    flat = address['address']['flat']
+                    address = candidates[0]
+                    address['address']['flat'] = flat
+            delivery_venue = get_venue_by_address(address)
+
+        if delivery_type in [SELF, IN_CAFE]:
+            venue_id = self.request.get_range('venue_id')
+            venue = Venue.get_by_id(venue_id)
+            if not venue:
+                self.abort(400)
+        else:
+            venue = delivery_venue
 
         raw_payment_info = self.request.get('payment')
         try:
@@ -269,14 +316,16 @@ class CheckOrderHandler(ApiHandler):
         except ValueError:
             payment_info = None
 
-        delivery_time = self.request.get_range('delivery_time')
+        delivery_time = self.request.get('delivery_time')
+        if delivery_time:
+            delivery_time = int(delivery_time)
+        delivery_slot = self.request.get('delivery_slot')
+
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):
             gifts = json.loads(self.request.get('gifts'))
         else:
             gifts = []
 
-        delivery_type = int(self.request.get('delivery_type'))
-
-        result = orders.validate_order(client, items, gifts, payment_info, venue, delivery_time, delivery_type)
+        result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot, delivery_type)
         self.render_json(result)

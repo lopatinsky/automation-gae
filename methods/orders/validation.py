@@ -4,7 +4,7 @@ import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, SELF, \
-    IN_CAFE, Promo, GiftMenuItem
+    IN_CAFE, Promo, GiftMenuItem, STATUS_AVAILABLE, DELIVERY
 from promos import apply_promos
 
 
@@ -14,6 +14,41 @@ def _nice_join(strs):
     if len(strs) == 1:
         return strs[0]
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
+
+
+def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum, errors):
+    description = None
+    for delivery in venue.delivery_types:
+        if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
+            if delivery.min_sum > total_sum:
+                description = u'Минимальная сумма заказа %s' % delivery.min_sum
+                errors.append(description)
+            if delivery_time and not delivery.time_picker:
+                description = u'Выбор времени недоступен'
+                errors.append(description)
+            if delivery_slot and delivery_slot not in delivery.slots:
+                description = u'Данный слот недоступен'
+                errors.append(description)
+            if not description and delivery_type == DELIVERY:
+                address = address['address']
+                if not address['city']:
+                    description = u'Не выбран город'
+                    errors.append(description)
+                if not address['street']:
+                    description = u'Не выбрана улица'
+                    errors.append(description)
+                if not address['home']:
+                    description = u'Не выбран дом'
+                    errors.append(description)
+                if not address['flat']:
+                    description = u'Не выбрана квартира'
+                    errors.append(description)
+            if description:
+                return False
+            else:
+                return True
+    errors.append(u'Данный тип доставки недоступен')
+    return False
 
 
 def _check_modifier_consistency(item_dicts, gift_dicts, errors):
@@ -58,12 +93,13 @@ def _check_venue(venue, delivery_time, errors):
             elif config.PLACE_TYPE == BAR:
                 errors.append(u"Кофейня сейчас недоступена")
             return False
-        if not venue.is_open(minutes_offset=delivery_time):
-            if config.PLACE_TYPE == VENUE:
-                errors.append(u"Бар сейчас закрыт")
-            elif config.PLACE_TYPE == BAR:
-                errors.append(u"Кофейня сейчас закрыта")
-            return False
+        if delivery_time:
+            if not venue.is_open(minutes_offset=delivery_time):
+                if config.PLACE_TYPE == VENUE:
+                    errors.append(u"Бар сейчас закрыт")
+                elif config.PLACE_TYPE == BAR:
+                    errors.append(u"Кофейня сейчас закрыта")
+                return False
         if venue.problem:
             place_name = config.get_place_str()
             errors.append(u"%s временно не принимает заказы: %s" % (place_name, venue.problem))
@@ -310,10 +346,17 @@ def get_avail_gifts(points):
     return gifts
 
 
-def validate_order(client, items, gifts, payment_info, venue, delivery_time, delivery_type, with_details=False, order=None):
+def validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot, delivery_type,
+                   with_details=False, order=None):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items, False)
+
+    total_sum_without_promos = 0
+    for item in items:
+        total_sum_without_promos += item.total_price
+
+    logging.info('total sum without promos = %s' % total_sum_without_promos)
 
     gifts = set_modifiers(gifts)
     gift_dicts = set_item_dicts(gifts, True)
@@ -322,10 +365,11 @@ def validate_order(client, items, gifts, payment_info, venue, delivery_time, del
 
     errors = []
     valid = True
-    if delivery_type in [SELF, IN_CAFE]:
-        valid = _check_venue(venue, delivery_time, errors) and valid
-        valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
-        valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
+    valid = _check_venue(venue, delivery_time, errors) and valid
+    valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
+    valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
+    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos, errors)\
+        and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
 
     success, rest_points = _check_gifts(gifts, client, errors)
@@ -334,6 +378,8 @@ def validate_order(client, items, gifts, payment_info, venue, delivery_time, del
     if order:
         if valid:
             item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order)
+        else:
+            promos_info = []
     else:
         item_dicts, promos_info = apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type)
 
