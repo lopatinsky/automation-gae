@@ -1,3 +1,4 @@
+import logging
 from base import ApiHandler
 from methods.map import get_houses_by_address, get_streets_or_houses_by_address
 
@@ -11,6 +12,8 @@ class AddressByAddressHandler(ApiHandler):
         if ',' in street:
             home = street.split(',')[0]
             street = street.split(',')[1]
-            return self.render_json(get_houses_by_address(city, street, home))
+            response = get_houses_by_address(city, street, home)
         else:
-            return self.render_json(get_streets_or_houses_by_address(city, street))
+            response = get_streets_or_houses_by_address(city, street)
+        logging.info('response = %s' % response)
+        self.render_json(response)
