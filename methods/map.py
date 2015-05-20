@@ -20,7 +20,6 @@ def _parse_collection(collection, kind='house'):  # used only for kind in ['hous
         city = address['LocalityName']
         if address.get('DependentLocality'):
             address = address['DependentLocality']
-        logging.info(address)
         candidates.append({
             'address': {
                 'city': city,
