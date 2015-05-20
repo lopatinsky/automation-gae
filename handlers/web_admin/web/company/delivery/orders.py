@@ -1,6 +1,5 @@
 # coding=utf-8
 from datetime import datetime, timedelta
-import logging
 from ..base import CompanyBaseHandler
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
     CANCELED_BY_BARISTA_ORDER, Venue
@@ -88,7 +87,6 @@ class OrderItemsHandler(CompanyBaseHandler):
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
-        logging.info(order.dict())
         items = []
         for item_detail in order.item_details:
             item_obj = item_detail.item.get()
@@ -107,15 +105,12 @@ class OrderItemsHandler(CompanyBaseHandler):
 class NewDeliveryOrdersHandler(CompanyBaseHandler):
     def get(self):
         last_time = int(self.request.get('last_time'))
-        logging.info(last_time)
         start = datetime.fromtimestamp(last_time)
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES), Order.date_created > start)\
             .order(-Order.date_created).fetch()
         orders = _update_order_info(orders)
         if orders:
             last_time = timestamp(orders[0].date_created) + 1
-        logging.info(last_time)
-        logging.info(orders)
         self.render_json({
             'orders': [_order_delivery_dict(order, Client.get_by_id(order.client_id)) for order in orders],
             'last_time': last_time
