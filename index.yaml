@@ -67,6 +67,13 @@ indexes:
   - name: delivery_time
     direction: desc
 
+- kind: Order
+  properties:
+  - name: delivery_type
+  - name: status
+  - name: date_created
+    direction: desc
+
 - kind: TabletRequest
   properties:
   - name: admin_id

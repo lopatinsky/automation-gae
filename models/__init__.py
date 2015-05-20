@@ -354,21 +354,32 @@ class CashBack(ndb.Model):
 
 
 class Address(ndb.Model):
+    lat = ndb.FloatProperty()
+    lon = ndb.FloatProperty()
     city = ndb.StringProperty()
     street = ndb.StringProperty()
     home = ndb.StringProperty()
+    flat = ndb.StringProperty()
+
+    def str(self):
+        return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
 
 
 class DeliveryType(ndb.Model):
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
     min_sum = ndb.IntegerProperty(default=0)
+    time_picker = ndb.BooleanProperty(default=True)
+    delivery_zone = ndb.BooleanProperty(default=False)
+    slots = ndb.StringProperty(repeated=True)
 
     def dict(self):
         return {
             'id': self.delivery_type,
             'name': DELIVERY_MAP[self.delivery_type],
-            'min_sum': self.min_sum
+            'min_sum': self.min_sum,
+            'time_picker': self.time_picker,
+            'slots': self.slots
         }
 
     @classmethod
@@ -429,6 +440,7 @@ class Venue(ndb.Model):
             'coordinates': str(self.coordinates),
             'is_open': self.is_open(),
             'takeout_only': self.takeout_only,
+            'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
             'schedule': []
         }
         working_days = self.working_days.split(',')
@@ -456,6 +468,14 @@ class ChosenGroupModifierDetails(ndb.Model):
 
     def group_modifier_obj(self):
         return self.group_modifier, self.group_choice_id
+
+    @property
+    def title(self):
+        return '%s(%s)' % (self.group_modifier.get().title, self.group_modifier.get().get_choice_by_id(self.group_choice_id).title)
+
+    @property
+    def float_price(self):
+        return self.group_modifier.get().get_choice_by_id(self.group_choice_id).price / 100.0
 
 
 class OrderPositionDetails(ndb.Model):
@@ -491,7 +511,8 @@ class Order(ndb.Model):
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()
-    delivery_time = ndb.DateTimeProperty(required=True)
+    delivery_time = ndb.DateTimeProperty()
+    delivery_slot = ndb.StringProperty()
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
@@ -502,6 +523,7 @@ class Order(ndb.Model):
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
+    address = ndb.LocalStructuredProperty(Address)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
@@ -552,7 +574,7 @@ class Order(ndb.Model):
             "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "status": self.status,
-            "delivery_time": timestamp(self.delivery_time),
+            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
             "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
             "payment_type_id": self.payment_type_id,
             "client": Client.get_by_id(self.client_id).dict(),

@@ -10,18 +10,19 @@
             statuses[{{ loop.index0 }}] = {{ status['value'] }};
         {% endfor %}
         function add_order(order) {
-            $('#order_table tr:last').after(
+            $('#order_table tr:first').after(
                 '<tr class="tr_' +  order.status + ' order_' + order.order_id + '">' +
-                    '<td>' + 123 + '</td>' +
-                    '<td>' + 123 + '</td>' +
+                    '<td>' + order.order_id + '</td>' +
+                    '<td>' + order.address + '</td>' +
+                    '<td>' + order.date_str + '</td>' +
+                    '<td>' + order.delivery_time + '</td>' +
                     '<td>' + order.total_sum + '</td>' +
                     '<td>' + order.client.name + '</td>' +
                     '<td>' + order.client.surname + '</td>' +
                     '<td>' + order.client.phone + '</td>' +
-                    '<td>' + order.status + '</td>' +
                     '<td>' +
                         '<a href="/company/delivery/orders/items?order_id=' + order.order_id + '">Продукты</a>' +
-                    '<td>' +
+                    '</td>' +
                     '<td id="order_status_' + order.order_id + '">' + order.status_description + '</td>' +
                     '<td>' +
                         '<form>' +
@@ -162,7 +163,7 @@
             });
         }
         $(document).ready(function() {
-            //setInterval(check_orders, 10000);
+            setInterval(check_orders, 10000);
             $('.confirm_btn').click(confirm);
             $('.close_btn').click(close);
             $('.cancel_btn').click(cancel);
@@ -178,9 +179,10 @@
             {{ status['name'] }}
         </label><br>
     {% endfor %}
-    <table style="border-collapse:collapse; width:100%" border="1">
+    <table style="border-collapse:collapse; width:100%" border="1" id="order_table">
         <tr>
             <th>Номер заказа</th>
+            <th>Адрес</th>
             <th>Время заказа</th>
             <th>Время доставки</th>
             <th>Сумма</th>
@@ -195,12 +197,19 @@
         {% for order in orders %}
             <tr class="tr_{{ order.status }} order_{{ order.key.id() }}">
                 <td>{{ order.key.id() }}</td>
-                <td>{{ order.created_time }}</td>
-                <td>{{ order.delivery_time }}</td>
+                <td>{{ order.address_str }}</td>
+                <td>{{ order.date_str }}</td>
+                <td>
+                    {% if order.delivery_time %}
+                        {{ order.delivery_time }}
+                    {% else %}
+                        {{ order.delivery_slot }}
+                    {% endif %}
+                </td>
                 <td>{{ order.total_sum }}</td>
                 <td>{{ order.client.name }}</td>
                 <td>{{ order.client.surname }}</td>
-                <td>{{ order.client.phone }}</td>
+                <td>{{ order.client.tel }}</td>
                 <td>
                     <a href="{{ '/company/delivery/orders/items?order_id=%s' % order.key.id() }}">Продукты</a>
                 </td>
