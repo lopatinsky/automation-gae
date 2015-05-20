@@ -20,6 +20,7 @@ class VenuesHandler(ApiHandler):
             for delivery in venue.delivery_types:
                 if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE]:
                     venue_dicts.append(venue.dict(location))
+                    break
         if location:
             venue_dicts = sorted(venue_dicts, key=lambda v: v['distance'])
         else:
