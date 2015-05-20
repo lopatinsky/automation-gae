@@ -369,9 +369,13 @@ class DeliveryType(ndb.Model):
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
     min_sum = ndb.IntegerProperty(default=0)
-    time_picker = ndb.BooleanProperty(default=True)
+    time_picker = ndb.BooleanProperty(default=True)  # it's mark for show timepicker in client
+    time_picker_min = ndb.IntegerProperty(default=0)  # use only if time_picker
+    time_picker_max = ndb.IntegerProperty(default=86400)  # use only if time_picker
+    time_slot = ndb.BooleanProperty(default=False)  # it's mark for show to use slot_minute_values
     delivery_zone = ndb.BooleanProperty(default=False)
     slots = ndb.StringProperty(repeated=True)
+    slot_minute_values = ndb.IntegerProperty(repeated=True)  # it associates with slots
 
     def dict(self):
         return {
@@ -379,7 +383,13 @@ class DeliveryType(ndb.Model):
             'name': DELIVERY_MAP[self.delivery_type],
             'min_sum': self.min_sum,
             'time_picker': self.time_picker,
-            'slots': self.slots
+            'slots': [{
+                'id': index,
+                'name': slot,
+                'value': self.slot_minute_values[index] if index < len(self.slot_minute_values) else None
+            } for index, slot in enumerate(self.slots)],
+            'time_picker_min': self.time_picker_min if self.time_picker else None,
+            'time_picker_max': self.time_picker_max if self.time_picker else None
         }
 
     @classmethod
@@ -561,9 +571,9 @@ class Order(ndb.Model):
 
     def activate_gift_points(self):
         from methods import empatika_promos
-        for point_detail in self.points_details:
+        for index, point_detail in enumerate(self.points_details):
             if point_detail.status == GiftPointsDetails.READY:
-                empatika_promos.register_order(self.client_id, point_detail.points, self.key.id())
+                empatika_promos.register_order(self.client_id, point_detail.points, '%s_%s' % (self.key.id(), index))
                 point_detail.status = GiftPointsDetails.DONE
         self.put()
 

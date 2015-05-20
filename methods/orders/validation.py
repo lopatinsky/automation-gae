@@ -3,8 +3,8 @@ import copy
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
-from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, SELF, \
-    IN_CAFE, Promo, GiftMenuItem, STATUS_AVAILABLE, DELIVERY
+from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
+    GiftMenuItem, STATUS_AVAILABLE, DELIVERY
 from promos import apply_promos
 
 
@@ -23,10 +23,7 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
             if delivery.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery.min_sum
                 errors.append(description)
-            if delivery_time and not delivery.time_picker:
-                description = u'Выбор времени недоступен'
-                errors.append(description)
-            if delivery_slot and delivery_slot not in delivery.slots:
+            if delivery_slot and delivery_slot['name'] not in delivery.slots:  # it is import if slot hasn't value
                 description = u'Данный слот недоступен'
                 errors.append(description)
             if not description and delivery_type == DELIVERY:

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Address
 from google.appengine.api import taskqueue
@@ -80,12 +80,17 @@ class OrderHandler(ApiHandler):
 
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
+
         delivery_time_minutes = response_json.get('delivery_time')
+        delivery_slot = response_json.get('delivery_slot')
+        if venue and delivery_slot and not delivery_time_minutes:
+            success, delivery_time_minutes = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
+            if not success:
+                return self.render_error(u'Неправильно выбран слот для времени')
         if delivery_time_minutes is not None:
             delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
         else:
             delivery_time = None
-        delivery_slot = response_json.get('delivery_slot')
         request_total_sum = response_json.get("total_sum")
 
         client_id, client = set_client_info(response_json.get('client'))
@@ -133,13 +138,16 @@ class OrderHandler(ApiHandler):
                     'lon': float(address['coordinates']['lon']) if address['coordinates']['lon'] else None
                 }
                 address_args.update(address['address'])
-                address = Address(**address_args)
+                address_obj = Address(**address_args)
+            else:
+                address_obj = None
 
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details, delivery_type=delivery_type, delivery_slot=delivery_slot, address=address)
+                item_details=item_details, delivery_type=delivery_type, delivery_slot=delivery_slot.get('name'),
+                address=address_obj)
             self.order.put()
 
             if wallet_payment > 0:
@@ -177,7 +185,7 @@ class OrderHandler(ApiHandler):
 
             # it is used for creating db for promos
             validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
-                           venue, address, delivery_time_minutes, delivery_type, delivery_slot, False, self.order)
+                           venue, address, delivery_time_minutes, delivery_slot, delivery_type, False, self.order)
             self.order.put()
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
@@ -317,9 +325,15 @@ class CheckOrderHandler(ApiHandler):
             payment_info = None
 
         delivery_time = self.request.get('delivery_time')
+        delivery_slot = self.request.get('delivery_slot')
+        if delivery_slot:
+            delivery_slot = json.loads(delivery_slot)
         if delivery_time:
             delivery_time = int(delivery_time)
-        delivery_slot = self.request.get('delivery_slot')
+        if venue and delivery_slot and not delivery_time:
+            success, delivery_time = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
+            if not success:
+                self.abort(501)
 
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):
@@ -327,5 +341,6 @@ class CheckOrderHandler(ApiHandler):
         else:
             gifts = []
 
-        result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot, delivery_type)
+        result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot,
+                                       delivery_type)
         self.render_json(result)
