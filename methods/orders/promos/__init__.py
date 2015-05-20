@@ -40,7 +40,7 @@ def _set_outcome(outcome, items, promo, client, order):
     if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
         return set_discount_richest(outcome, items, promo)
     if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
-        return set_gift_points(outcome, items, client, promo, order)
+        return set_gift_points(outcome, items, promo, order)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order=None):

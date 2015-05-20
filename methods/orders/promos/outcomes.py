@@ -108,7 +108,7 @@ def set_discount_richest(outcome, item_dicts, promo):
     return promo_applied
 
 
-def set_gift_points(outcome, item_dicts, client, promo, order):
+def set_gift_points(outcome, item_dicts, promo, order):
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
     if item_keys.get(outcome.item):
