@@ -3,6 +3,10 @@ from methods import paypalrestsdk
 from methods.paypalrestsdk.payments import Authorization
 
 
+def get_refresh_token(auth_code):
+    return config.PAYPAL_API.get_refresh_token(auth_code)
+
+
 def authorize(order_id, amount, refresh_token, correlation_id):
     payment = paypalrestsdk.Payment({
         "intent": "authorize",

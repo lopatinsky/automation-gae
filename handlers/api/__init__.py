@@ -17,3 +17,4 @@ from wallet import DepositToWalletHandler, WalletBalanceHandler
 from update_order import UpdateOrderPromos
 from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, GetPreText
 from twilio import ReceiveSms
+from paypal import BindPaypalHandler, UnbindPaypalHandler
