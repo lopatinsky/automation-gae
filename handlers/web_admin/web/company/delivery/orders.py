@@ -55,6 +55,22 @@ def _update_order_info(orders):
     return orders
 
 
+def order_items_values(order):
+    items = []
+    for item_detail in order.item_details:
+        item_obj = item_detail.item.get()
+        item_obj.modifiers = []
+        for modifier in item_detail.single_modifiers:
+            item_obj.modifiers.append(modifier.get())
+        item_obj.modifiers.extend(item_detail.group_modifiers)
+        items.append(item_obj)
+    order = _update_order_info([order])[0]
+    return {
+        'order': order,
+        'items': items
+    }
+
+
 class DeliveryOrdersHandler(CompanyBaseHandler):
     def get(self):
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES))\
@@ -87,19 +103,7 @@ class OrderItemsHandler(CompanyBaseHandler):
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
-        items = []
-        for item_detail in order.item_details:
-            item_obj = item_detail.item.get()
-            item_obj.modifiers = []
-            for modifier in item_detail.single_modifiers:
-                item_obj.modifiers.append(modifier.get())
-            item_obj.modifiers.extend(item_detail.group_modifiers)
-            items.append(item_obj)
-        order = _update_order_info([order])[0]
-        self.render('/delivery/items.html', **{
-            'order': order,
-            'items': items
-        })
+        self.render('/delivery/items.html', **order_items_values(order))
 
 
 class NewDeliveryOrdersHandler(CompanyBaseHandler):

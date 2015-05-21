@@ -7,12 +7,16 @@ from config import config
 from handlers.api.base import ApiHandler
 import json
 from datetime import datetime, timedelta
+from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
+from methods.twilio import send_sms
+from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Address
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, \
+    Address, DELIVERY
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -192,6 +196,15 @@ class OrderHandler(ApiHandler):
             validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
                            venue, address, delivery_time_minutes, delivery_slot, delivery_type, False, self.order)
             self.order.put()
+
+            if delivery_type == DELIVERY:
+                text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
+                if config.DELIVERY_PHONE:
+                    send_sms([config.DELIVERY_PHONE], text)
+                if config.DELIVERY_EMAILS:
+                    for email in config.DELIVERY_EMAILS:
+                        send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html',
+                                                                                   **order_items_values(self.order)))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
