@@ -1,7 +1,7 @@
 # coding=utf-8
 import threading
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
-from webapp2 import cached_property
 
 VENUE = 0
 BAR = 1
@@ -51,11 +51,15 @@ class Config(ndb.Model):
     PAYPAL_CLIENT_SECRET = ndb.StringProperty(indexed=False)
     PAYPAL_SANDBOX = ndb.BooleanProperty(indexed=False, required=True, default=True)
 
-    @cached_property
+    @property
     def PAYPAL_API(self):
-        from methods import paypalrestsdk
-        mode = "sandbox" if self.PAYPAL_SANDBOX else "live"
-        return paypalrestsdk.Api(mode=mode, client_id=self.PAYPAL_CLIENT_ID, client_secret=self.PAYPAL_CLIENT_SECRET)
+        api = memcache.get('paypal_api')
+        if not api:
+            from methods import paypalrestsdk
+            mode = "sandbox" if self.PAYPAL_SANDBOX else "live"
+            api = paypalrestsdk.Api(mode=mode, client_id=self.PAYPAL_CLIENT_ID, client_secret=self.PAYPAL_CLIENT_SECRET)
+            memcache.set('paypal_api', api)
+        return api
 
     @classmethod
     def get(cls):
