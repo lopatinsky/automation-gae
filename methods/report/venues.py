@@ -1,6 +1,6 @@
 __author__ = 'dvpermyakov'
 
-from models import Order, Venue, READY_ORDER, BONUS_PAYMENT_TYPE
+from models import Order, Venue, READY_ORDER
 from datetime import datetime, timedelta
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
 
@@ -27,7 +27,7 @@ def venues_table_by_range(start, end):
     for order in query.fetch():
         venue_id = order.venue_id
         total_sum = sum(item.get().price for item in order.items)
-        payment = order.total_sum if order.payment_type_id != BONUS_PAYMENT_TYPE else 0
+        payment = order.total_sum if order.payment_type_id != 666 else 0
         if venue_id in venues:
             venues[venue_id].add_order(total_sum, payment)
         else:

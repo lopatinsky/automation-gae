@@ -1,5 +1,4 @@
 import json
-from google.appengine.ext import ndb
 from methods.auth import company_user_required
 from methods.unique import unique
 from base import CompanyBaseHandler
@@ -7,7 +6,7 @@ from base import CompanyBaseHandler
 __author__ = 'dvpermyakov'
 
 from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier,\
-    GROUP_MODIFIER, GroupModifier, GroupModifierChoice, Venue
+    GROUP_MODIFIER, GroupModifier, GroupModifierChoice
 import logging
 
 
@@ -141,7 +140,11 @@ class AddMenuItemHandler(CompanyBaseHandler):
 
         item = MenuItem(title=self.request.get('title'))
         item.description = self.request.get('description')
-        item.price = self.request.get_range('price')
+
+        if self.request.get('price'):
+            price = float(self.request.get('price'))
+            item.price = int(price * 100)
+
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
             item.volume = float(self.request.get('volume'))
@@ -180,7 +183,11 @@ class EditMenuItemHandler(CompanyBaseHandler):
             self.abort(400)
         item.title = self.request.get('title')
         item.description = self.request.get('description')
-        item.price = self.request.get_range('price')
+        if self.request.get('price'):
+            price = float(self.request.get('price'))
+            item.price = int(price * 100)
+        else:
+            item.price = 0
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
             item.volume = float(self.request.get('volume'))
@@ -363,7 +370,11 @@ class AddSingleModifierHandler(CompanyBaseHandler):
     @company_user_required
     def post(self):
         name = self.request.get('name')
-        price = self.request.get_range('price')
+        if self.request.get('price'):
+            price = float(self.request.get('price'))
+            price = int(price * 100)
+        else:
+            price = 0
         min = self.request.get_range('min')
         max = self.request.get_range('max')
         if max == 0:
@@ -391,7 +402,11 @@ class EditSingleModifierHandler(CompanyBaseHandler):
         if not single_modifier:
             self.abort(400)
         single_modifier.title = self.request.get('name')
-        single_modifier.price = self.request.get_range('price')
+        if self.request.get('price'):
+            price = float(self.request.get('price'))
+            single_modifier.price = int(price * 100)
+        else:
+            single_modifier.price = 0
         single_modifier.min_amount = self.request.get_range('min')
         single_modifier.max_amount = self.request.get_range('max')
         single_modifier.put()
@@ -449,7 +464,8 @@ class AddGroupModifierItemHandler(CompanyBaseHandler):
         for price in prices:
             if not len(price):
                 continue
-            price = int(price)
+            price = float(price)
+            price = int(price * 100)
             choice = GroupModifierChoice.create(title=name, price=price)
             group_modifier.choices.append(choice)
         group_modifier.put()
@@ -475,7 +491,11 @@ class EditGroupModifierItemHandler(CompanyBaseHandler):
         if not choice:
             self.abort(400)
         choice.title = self.request.get('name')
-        choice.price = self.request.get_range('price')
+        if self.request.get('price'):
+            price = float(self.request.get('price'))
+            choice.price = int(price * 100)
+        else:
+            choice.price = 0
         choice.put()
         modifier = GroupModifier.get_modifier_by_choice(choice_id)
         for m_choice in modifier.choices:

@@ -7,8 +7,8 @@ from google.appengine.ext import ndb
 from .base import WebAdminApiHandler
 from methods import push, alfa_bank, empatika_promos, empatika_wallet, paypal
 from methods.auth import api_user_required
-from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, CARD_PAYMENT_TYPE, \
-    CANCELED_BY_BARISTA_ORDER, BONUS_PAYMENT_TYPE, SharedFreeCup, Venue
+from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, READY_ORDER, \
+    CANCELED_BY_BARISTA_ORDER, SharedFreeCup, Venue
 
 
 def format_order(order):
@@ -95,6 +95,7 @@ class OrderDoneHandler(WebAdminApiHandler):
         order.put()
 
         order.activate_cash_back()
+        order.activate_gift_points()
 
         client_key = ndb.Key(Client, order.client_id)
         free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
@@ -129,9 +130,10 @@ class OrderCancelHandler(WebAdminApiHandler):
             success = str(return_result['errorCode']) == '0'
         elif order.has_paypal_payment:
             success, error = paypal.void(order.payment_id)
-        elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+
+        for gift_detail in order.gift_details:
             try:
-                empatika_promos.cancel_activation(order.payment_id)
+                empatika_promos.cancel_activation(gift_detail.activation_id)
             except empatika_promos.EmpatikaPromosError as e:
                 logging.exception(e)
                 success = False

@@ -21,15 +21,27 @@ class Config(ndb.Model):
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
     ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
 
+    PROMOS_API_KEY = ndb.StringProperty(indexed=False)
+
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)
+
+    WALLET_API_KEY = ndb.StringProperty(indexed=False)
+
+    EMAILS = ndb.JsonProperty(default={
+        "server": "admins",
+    })
+
+    APP_NAME = ndb.StringProperty(indexed=False)
+    COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)
+    SUPPORT_PHONE = ndb.StringProperty(indexed=False)
+    SUPPORT_SITE = ndb.StringProperty(indexed=False)
+    SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'
         elif self.PLACE_TYPE == BAR:
             return u'Бар'
-
-    WALLET_API_KEY = ndb.StringProperty(indexed=False)
 
     @property
     def WALLET_ENABLED(self):
@@ -44,12 +56,6 @@ class Config(ndb.Model):
         from methods import paypalrestsdk
         mode = "sandbox" if self.PAYPAL_SANDBOX else "live"
         return paypalrestsdk.Api(mode=mode, client_id=self.PAYPAL_CLIENT_ID, client_secret=self.PAYPAL_CLIENT_SECRET)
-
-    EMAILS = ndb.JsonProperty(default={
-        "server": "admins",
-    })
-
-    password = ndb.StringProperty()
 
     @classmethod
     def get(cls):

@@ -1,3 +1,4 @@
+import json
 import logging
 from google.appengine.api import namespace_manager
 from webapp2 import cached_property
@@ -15,6 +16,10 @@ class CompanyBaseHandler(AuthBaseHandler):
             namespace_manager.set_namespace('')
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         super(CompanyBaseHandler, self).dispatch()
+
+    def render_json(self, obj):
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps(obj, separators=(',', ':')))
 
     @cached_property
     def jinja2(self):

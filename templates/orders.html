@@ -80,7 +80,7 @@
                     <ul class="nav" id="side-menu">
                         
                         <li id='active_menu' id='menu_link_orders'>
-                            <a href="orders.php">
+                            <a href="orders">
                                 <div class='navi_img_div'>
                                 		<img class='navi_img' src='images/current.png'>
                                 </div>
@@ -88,7 +88,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="backs.php">
+                            <a href="backs">
                                 <div class='navi_img_div'>
                                 		<img class='navi_img' src='images/return.png'>
                                 </div>
@@ -96,7 +96,7 @@
                             </a>
                         </li>
                         <!--<li>
-                            <a href="orders_list.php">
+                            <a href="orders_list">
                                 <div class='navi_img_div'>
                                 		<img class='navi_img' src='images/today.png'>
                                 </div>
@@ -105,7 +105,7 @@
                         </li>
                         -->
                         <li>
-                            <a href="history.php">
+                            <a href="history">
                                 <div class='navi_img_div'>
                                 		<img class='navi_img' src='images/history.png'>
                                 </div>
@@ -245,7 +245,7 @@
 	
 	var order_id=$(this).last().parent().prop('id');
 	
-	$.post('status_up.php',{"order_id":order_id,"status":$(this).val()}, 
+	$.post('status_up',{"order_id":order_id,"status":$(this).val()},
 		function(resp)
 		{
 						//alert(resp);
@@ -270,7 +270,7 @@
 function timerMethod() {
   
  //console.log($('.max_id').html())
- $.post('check_update.php',{"last_order_datetime":$('.last_order_datetime').html()},
+ $.post('check_update',{"last_order_datetime":$('.last_order_datetime').html()},
  function(resp)
  {
 	    var response=JSON.parse(resp)
@@ -782,7 +782,7 @@ $( "body" ).on( "click", ".submit", function(e){
     if (sendingDone[order_id]) return;
     sendingDone[order_id] = true;
 	console.log(order_id);
-	$.post('done.php',{"order_id":order_id},function(resp)
+	$.post('done',{"order_id":order_id},function(resp)
 	{
 	     var response=JSON.parse(resp)
 		 console.log(response)
@@ -904,7 +904,7 @@ $('.submit_without').click(function(){
     if (sendingDone[order_id]) return;
     sendingDone[order_id] = true;
 	 
-	 $.post('done.php',{"order_id":order_id},function(resp)
+	 $.post('done',{"order_id":order_id},function(resp)
 	{
 	     var response=JSON.parse(resp)
 		
@@ -946,7 +946,7 @@ $('#change_time').click(function(){
 	var number=$('.order_number').html();
 
 	
-$.post('check_time.php',{'mins':mins,"time":time,"order_id":number}, function(resp){
+$.post('check_time',{'mins':mins,"time":time,"order_id":number}, function(resp){
 	     
 	 var response=JSON.parse(resp)
 	 var order_id=response['info']['order_id']
@@ -991,7 +991,7 @@ $('body').on('click','.confirm_return', function(){
     var order_id=$('.order_number').html();
 	var comment=$('.return_comments').val();
 
-	$.post('return_barista.php',{"order_id":order_id, "comment":comment},function(resp){
+	$.post('return_barista',{"order_id":order_id, "comment":comment},function(resp){
 	         var response=JSON.parse(resp)
 			 if(response['error']==0)
         {

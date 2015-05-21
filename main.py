@@ -5,6 +5,7 @@ from handlers.api import admin
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 import handlers.web_admin.web.company as company_admin
+import handlers.web_admin.web.company.delivery as company_delivery
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -18,6 +19,13 @@ webapp2_config = {
 
 
 app = WSGIApplication([
+
+    PathPrefixRoute('/docs', [
+        Route('/about.html', api.AboutHandler),
+        Route('/licence_agreement.html', api.LicenceHandler),
+        Route('/nda.html', api.NdaHandler),
+        Route('/payment_rules.html', api.PaymentRulesHandler),
+    ]),
 
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
@@ -86,6 +94,17 @@ app = WSGIApplication([
             Route('/payment_types', api.PaymentTypesHandler),
         ]),
 
+        PathPrefixRoute('/address', [
+            Route('/by_street', api.AddressByAddressHandler),
+        ]),
+
+        PathPrefixRoute('/promo', [
+            Route('/list', api.PromoInfoHandler),
+            PathPrefixRoute('/gift', [
+                Route('/items', api.GiftListHandler),
+            ]),
+        ]),
+
         Route('/register', api.RegistrationHandler),
         Route('/demo_info', api.DemoInfoHandler),
         Route('/venues', api.VenuesHandler),
@@ -102,12 +121,15 @@ app = WSGIApplication([
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
 
-        Route('/promos', api.PromoInfoHandler),
-
         Route('/wallet/balance', api.WalletBalanceHandler),
         Route('/wallet/deposit', api.DepositToWalletHandler),
 
         Route('/update/promo', api.UpdateOrderPromos),
+
+        PathPrefixRoute('/company', [
+            Route('/info', api.CompanyInfoHandler),
+        ]),
+
         PathPrefixRoute('/shared', [
             Route('/info', api.GetSharedInfo),
             PathPrefixRoute('/invitation', [
@@ -131,6 +153,26 @@ app = WSGIApplication([
         Route('/venues/map', company_admin.MapVenuesHandler),
         Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
         Route('/venues/create', company_admin.CreateVenueHandler),
+
+        PathPrefixRoute('/delivery', [
+            PathPrefixRoute('/orders', [
+                Route('/items', company_delivery.OrderItemsHandler),
+                Route('/confirm', company_delivery.ConfirmOrderHandler),
+                Route('/close', company_delivery.CloseOrderHandler),
+                Route('/cancel', company_delivery.CancelOrderHandler),
+                Route('/current', company_delivery.DeliveryOrdersHandler),
+                Route('/new', company_delivery.NewDeliveryOrdersHandler),
+            ]),
+            Route('/types', company_admin.DeliveryTypesHandler),
+        ]),
+
+        PathPrefixRoute('/docs', [
+            PathPrefixRoute('/set', [
+                Route('/about', company_admin.SetAboutCompanyHandler),
+            ]),
+            Route('/list', company_admin.ListDocsHandler),
+            Route('/about', company_admin.AboutCompanyHandler),
+        ]),
 
         PathPrefixRoute('/menu', [
             Route('/main', company_admin.MainMenuHandler),

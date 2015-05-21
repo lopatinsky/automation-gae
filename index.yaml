@@ -60,6 +60,20 @@ indexes:
   - name: venue_id
   - name: updated
 
+- kind: Order
+  properties:
+  - name: delivery_type
+  - name: status
+  - name: delivery_time
+    direction: desc
+
+- kind: Order
+  properties:
+  - name: delivery_type
+  - name: status
+  - name: date_created
+    direction: desc
+
 - kind: TabletRequest
   properties:
   - name: admin_id

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="POST">
+        {% for venue in venues %}
+            <b>{{ venue.title }}</b><br>
+            {% for type in venue.deliveries %}
+                <label>
+                    {{ type['name'] }}
+                    <input type="checkbox" name="{{ 'type_%s_%s' % (venue.key.id(), type['id']) }}" {% if type['value'] %} checked {% endif %}>
+                </label><br>
+                <label>
+                    Мин.сумма заказа
+                    <input type="number" name="{{ 'min_sum_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['min_sum'] }}">
+                </label><br><br>
+            {% endfor %}
+        {% endfor %}
+        <input type="submit">
+    </form>
+    <br>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

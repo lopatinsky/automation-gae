@@ -17,9 +17,12 @@ def _parse_collection(collection, kind='house'):  # used only for kind in ['hous
             continue
         address = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
         address = address['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']
+        city = address['LocalityName']
+        if address.get('DependentLocality'):
+            address = address['DependentLocality']
         candidates.append({
             'address': {
-                'city': address['LocalityName'],
+                'city': city,
                 'street': address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip(),
                 'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
             },
@@ -35,7 +38,7 @@ def get_houses_by_address(city, street, home):
     params = {
         'geocode': ('%s,%s,%s' % (city, street, home)).encode('utf-8'),
         'format': 'json',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     response = urlfetch.fetch(url)
@@ -50,7 +53,7 @@ def get_houses_by_coordinates(lat, lon):
         'geocode': '%s,%s' % (lon, lat),
         'format': 'json',
         'kind': 'house',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -65,7 +68,7 @@ def get_streets_by_address(city, street):
     params = {
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
-        'results': 3
+        'results': 5
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -74,3 +77,21 @@ def get_streets_by_address(city, street):
     collection = response['response']['GeoObjectCollection']['featureMember']
 
     return _parse_collection(collection, kind='street')
+
+
+def get_streets_or_houses_by_address(city, street):
+    params = {
+        'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
+        'format': 'json',
+        'results': 5
+    }
+    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
+    logging.info(url)
+    response = urlfetch.fetch(url)
+    response = json.loads(response.content)
+    collection = response['response']['GeoObjectCollection']['featureMember']
+
+    candidates = _parse_collection(collection, kind='house')
+    if not candidates:
+        candidates = _parse_collection(collection, kind='street')
+    return candidates

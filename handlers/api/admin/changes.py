@@ -6,8 +6,7 @@ from handlers.api.admin.base import AdminApiHandler
 from methods import push, alfa_bank, empatika_promos, empatika_wallet, email, paypal
 from methods.auth import write_access_required
 from methods.rendering import timestamp
-from models import CARD_PAYMENT_TYPE, CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, BONUS_PAYMENT_TYPE, \
-    NEW_ORDER, SharedFreeCup, Venue
+from models import CANCELED_BY_BARISTA_ORDER, Client, READY_ORDER, NEW_ORDER, SharedFreeCup, Venue
 
 __author__ = 'ilyazorin'
 
@@ -24,9 +23,10 @@ class CancelOrderHandler(AdminApiHandler):
             success = str(return_result['errorCode']) == '0'
         elif order.has_paypal_payment:
             success, error = paypal.void(order.payment_id)
-        elif order.payment_type_id == BONUS_PAYMENT_TYPE:
+
+        for gift_detail in order.gift_details:
             try:
-                empatika_promos.cancel_activation(order.payment_id)
+                empatika_promos.cancel_activation(gift_detail.activation_id)
             except empatika_promos.EmpatikaPromosError as e:
                 logging.exception(e)
                 success = False
@@ -66,6 +66,7 @@ class DoneOrderHandler(AdminApiHandler):
             self.abort(400)
 
         order.activate_cash_back()
+        order.activate_gift_points()
 
         order.status = READY_ORDER
         order.actual_delivery_time = datetime.datetime.utcnow()

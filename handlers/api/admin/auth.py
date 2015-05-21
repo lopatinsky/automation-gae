@@ -4,7 +4,7 @@ from webapp2_extras import security
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from .base import AdminApiHandler
 from methods.auth import api_user_required
-from models import AdminStatus
+from models import AdminStatus, Admin
 
 
 class LoginHandler(AdminApiHandler):
@@ -19,6 +19,9 @@ class LoginHandler(AdminApiHandler):
         except (InvalidAuthIdError, InvalidPasswordError):
             self.abort(401)
         uid = user_dict["user_id"]
+        admin = Admin.get_by_id(uid)
+        if not admin or admin.get_role() != Admin.ROLE:
+            self.abort(401)
         token = security.generate_random_string(entropy=256)
         full_token = "%s_%s" % (uid, token)
         AdminStatus.create(uid, token, GeoPt(lat, lon), readonly)

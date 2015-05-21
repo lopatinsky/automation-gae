@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 from webapp2 import RequestHandler
 from methods.rendering import timestamp
-from models import BONUS_PAYMENT_TYPE, Order, Client, READY_ORDER, JsonStorage
+from models import Order, Client, READY_ORDER, JsonStorage
 
 
 class BuildSquareTableHandler(RequestHandler):
@@ -14,7 +14,7 @@ class BuildSquareTableHandler(RequestHandler):
         for order in orders:
             goods_number += len(order.items)
             order_sum += order.total_sum
-            if order.payment_type_id == BONUS_PAYMENT_TYPE:
+            if order.payment_type_id == 666:
                 gift_number += 1
             if not order.client_id in client_ids:
                 client_ids.append(order.client_id)

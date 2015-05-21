@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Описание компании:
+            <input type="text" value="{{ info }}" name="info">
+        </label><br>
+        <label>
+            Наименование:
+            <input type="text" value="{{ name }}" name="name">
+        </label><br>
+        <label>
+            Сайт:
+            <input type="text" value="{{ site }}" name="site">
+        </label><br>
+        <label>
+            Телефон:
+            <input type="text" value="{{ phone }}" name="phone">
+        </label><br>
+        <label>
+            Emails:
+            <input type="text" value="{{ emails }}" name="emails">
+        </label><br>
+        <input type="submit">
+    </form>
+    <a href="/company/docs/about">Назад</a>
+</body>
+</html>

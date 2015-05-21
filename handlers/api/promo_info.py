@@ -2,7 +2,7 @@
 
 from .base import ApiHandler
 from config import config
-from models import Promo
+from models import Promo, GiftMenuItem, STATUS_AVAILABLE
 
 
 class DemoInfoHandler(ApiHandler):
@@ -12,6 +12,17 @@ class DemoInfoHandler(ApiHandler):
 
 class PromoInfoHandler(ApiHandler):
     def get(self):
+        items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         self.render_json({
-            'promos': [promo.dict() for promo in Promo.query().fetch()]
+            'wallet_enable': config.WALLET_ENABLED,
+            'promos': [promo.dict() for promo in Promo.query().fetch()],
+            'items': items
+        })
+
+
+class GiftListHandler(ApiHandler):
+    def get(self):
+        items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
+        self.render_json({
+            'items': items
         })

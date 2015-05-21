@@ -16,7 +16,6 @@ from methods.empatika_promos import register_order
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
-BONUS_PAYMENT_TYPE = 2
 PAYPAL_PAYMENT_TYPE = 4
 
 STATUS_AVAILABLE = 1
@@ -27,6 +26,7 @@ READY_ORDER = 1
 CANCELED_BY_CLIENT_ORDER = 2
 CANCELED_BY_BARISTA_ORDER = 3
 CREATING_ORDER = 4
+CONFIRM_ORDER = 5
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -40,21 +40,42 @@ GROUP_MODIFIER = 1
 
 SELF = 0
 IN_CAFE = 1
+DELIVERY = 2
+DELIVERY_TYPES = [SELF, IN_CAFE, DELIVERY]
+
+DELIVERY_MAP = {
+    SELF: u'С собой',
+    IN_CAFE: u'В кафе',
+    DELIVERY: u'Доставка'
+}
+
+STATUS_MAP = {
+    NEW_ORDER: u"Новый",
+    READY_ORDER: u"Выдан",
+    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
+    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
+    CREATING_ORDER: u'Созданный заказ',
+    CONFIRM_ORDER: u'Подтвержденный заказ'
+}
 
 
 class SingleModifier(ndb.Model):
     INFINITY = 1000
 
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(required=True)
+    price = ndb.IntegerProperty(default=0)  # в копейках
     min_amount = ndb.IntegerProperty(default=0)
     max_amount = ndb.IntegerProperty(default=0)
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
 
     def dict(self):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
-            'price': self.price,
+            'price': float(self.price) / 100.0,  # в рублях
             'min': self.min_amount,
             'max': self.max_amount
         }
@@ -63,7 +84,11 @@ class SingleModifier(ndb.Model):
 class GroupModifierChoice(ndb.Model):
     choice_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(default=0)
+    price = ndb.IntegerProperty(default=0)  # в копейках
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
 
     @staticmethod
     def generate_id():
@@ -111,7 +136,7 @@ class GroupModifier(ndb.Model):
             'choices': [
                 {
                     'title': choice.title,
-                    'price': choice.price,
+                    'price': float(choice.price) / 100.0,  # в рублях
                     'id': str(choice.choice_id)
                 } for choice in choices
             ]
@@ -126,7 +151,8 @@ class MenuItem(ndb.Model):
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
-    price = ndb.IntegerProperty(required=True, indexed=False)
+    price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
+
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
@@ -137,13 +163,17 @@ class MenuItem(ndb.Model):
     group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
     stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
 
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
+
     def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
-            'price':  self.price,
+            'price':  float(self.price) / 100.0,  # в рублях
             'kal': self.kal,
             'pic': self.picture,
             'weight': self.weight,
@@ -249,15 +279,31 @@ class MenuCategory(ndb.Model):
         return dct
 
 
+class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
+    item = ndb.KeyProperty(kind=MenuItem, required=True)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    promo_id = ndb.IntegerProperty(required=True)  # it relates to empatika-promos
+    points = ndb.IntegerProperty(required=True)  # how many spent
+
+    def dict(self):
+        dict = self.item.get().dict()
+        dict.update({
+            'points': self.points
+        })
+        return dict
+
+
 class PromoOutcome(ndb.Model):
-    DISCOUNT = 0           # calculated by prices
-    CASH_BACK = 1          # calculated by prices
-    DISCOUNT_CHEAPEST = 2  # calculated by prices ## use priority to imply in the end
-    DISCOUNT_RICHEST = 3   # calculated by prices ## use priority to imply in the end
+    DISCOUNT = 0               # calculated by prices
+    CASH_BACK = 1              # calculated by prices
+    DISCOUNT_CHEAPEST = 2      # calculated by prices ## use priority to imply in the end
+    DISCOUNT_RICHEST = 3       # calculated by prices ## use priority to imply in the end
+    ACCUMULATE_GIFT_POINT = 4
+    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST], required=True)
+    method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
 
 
@@ -265,10 +311,12 @@ class PromoCondition(ndb.Model):
     CHECK_TYPE_DELIVERY = 0
     CHECK_FIRST_ORDER = 1
     CHECK_MAX_ORDER_SUM = 2
+    CHECK_ITEM_IN_ORDER = 3
+    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
-    method = ndb.IntegerProperty(choices=[CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM], required=True)
+    method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
 
 
@@ -306,14 +354,62 @@ class CashBack(ndb.Model):
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
 
+class Address(ndb.Model):
+    lat = ndb.FloatProperty()
+    lon = ndb.FloatProperty()
+    city = ndb.StringProperty()
+    street = ndb.StringProperty()
+    home = ndb.StringProperty()
+    flat = ndb.StringProperty()
+
+    def str(self):
+        return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
+
+
+class DeliveryType(ndb.Model):
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
+    min_sum = ndb.IntegerProperty(default=0)
+    time_picker = ndb.BooleanProperty(default=True)  # it's mark for show timepicker in client
+    time_picker_min = ndb.IntegerProperty(default=0)  # use only if time_picker
+    time_picker_max = ndb.IntegerProperty(default=86400)  # use only if time_picker
+    time_slot = ndb.BooleanProperty(default=False)  # it's mark for show to use slot_minute_values
+    delivery_zone = ndb.BooleanProperty(default=False)
+    slots = ndb.StringProperty(repeated=True)
+    slot_minute_values = ndb.IntegerProperty(repeated=True)  # it associates with slots
+
+    def dict(self):
+        return {
+            'id': self.delivery_type,
+            'name': DELIVERY_MAP[self.delivery_type],
+            'min_sum': self.min_sum,
+            'time_picker': self.time_picker,
+            'slots': [{
+                'id': index,
+                'name': slot,
+                'value': self.slot_minute_values[index] if index < len(self.slot_minute_values) else None
+            } for index, slot in enumerate(self.slots)],
+            'time_picker_min': self.time_picker_min if self.time_picker else None,
+            'time_picker_max': self.time_picker_max if self.time_picker else None
+        }
+
+    @classmethod
+    def create(cls, delivery_type):
+        delivery = cls(id=delivery_type, delivery_type=delivery_type)
+        delivery.put()
+        return delivery
+
+
 class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
+    address = ndb.StructuredProperty(Address)
     description = ndb.StringProperty(indexed=False)
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     working_days = ndb.StringProperty(indexed=False)
     working_hours = ndb.StringProperty(indexed=False)
-    takeout_only = ndb.BooleanProperty(indexed=False, default=False)
+    takeout_only = ndb.BooleanProperty(indexed=False, default=False)  # todo: need to remove it
+    delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
     holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
@@ -355,6 +451,7 @@ class Venue(ndb.Model):
             'coordinates': str(self.coordinates),
             'is_open': self.is_open(),
             'takeout_only': self.takeout_only,
+            'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
             'schedule': []
         }
         working_days = self.working_days.split(',')
@@ -383,14 +480,36 @@ class ChosenGroupModifierDetails(ndb.Model):
     def group_modifier_obj(self):
         return self.group_modifier, self.group_choice_id
 
+    @property
+    def title(self):
+        return '%s(%s)' % (self.group_modifier.get().title, self.group_modifier.get().get_choice_by_id(self.group_choice_id).title)
+
+    @property
+    def float_price(self):
+        return self.group_modifier.get().get_choice_by_id(self.group_choice_id).price / 100.0
+
 
 class OrderPositionDetails(ndb.Model):
     item = ndb.KeyProperty(MenuItem, required=True)
-    price = ndb.IntegerProperty(required=True)
+    price = ndb.IntegerProperty(required=True)  # в копейках
     revenue = ndb.FloatProperty(required=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
+
+
+class GiftPositionDetails(ndb.Model):
+    gift = ndb.KeyProperty(kind=GiftMenuItem, required=True)
+    activation_id = ndb.IntegerProperty(required=True)
+
+
+class GiftPointsDetails(ndb.Model):
+    READY = 0
+    DONE = 1
+
+    item = ndb.KeyProperty(kind=MenuItem)  # applied for all items in order if not placed
+    points = ndb.IntegerProperty(required=True)
+    status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
 
 class Order(ndb.Model):
@@ -398,30 +517,47 @@ class Order(ndb.Model):
     total_sum = ndb.FloatProperty(indexed=False)
     payment_sum = ndb.FloatProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
-                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER),
+                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER),
                                  default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
-    delivery_time = ndb.DateTimeProperty(required=True)
+    delivery_type = ndb.IntegerProperty()
+    delivery_time = ndb.DateTimeProperty()
+    delivery_slot = ndb.StringProperty()
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE))
+                                                                  PAYPAL_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
-    venue_id = ndb.IntegerProperty(required=True)
+    venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
     comment = ndb.StringProperty(indexed=False)
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
+    address = ndb.LocalStructuredProperty(Address)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
+    gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
+    points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
     first_for_client = ndb.BooleanProperty()
 
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
+
+    def confirm_order(self):
+        self.status = CONFIRM_ORDER
+        self.put()
+
+    def cancel_order(self):
+        self.status = CANCELED_BY_BARISTA_ORDER
+        self.put()
+
+    def close_order(self):
+        self.status = READY_ORDER
+        self.put()
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")
@@ -435,6 +571,14 @@ class Order(ndb.Model):
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
         self.put()
 
+    def activate_gift_points(self):
+        from methods import empatika_promos
+        for index, point_detail in enumerate(self.points_details):
+            if point_detail.status == GiftPointsDetails.READY:
+                empatika_promos.register_order(self.client_id, point_detail.points, '%s_%s' % (self.key.id(), index))
+                point_detail.status = GiftPointsDetails.DONE
+        self.put()
+
     def dict(self):
         dct = {
             "order_id": self.key.id(),
@@ -442,7 +586,7 @@ class Order(ndb.Model):
             "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "status": self.status,
-            "delivery_time": timestamp(self.delivery_time),
+            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
             "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
             "payment_type_id": self.payment_type_id,
             "client": Client.get_by_id(self.client_id).dict(),
@@ -766,7 +910,7 @@ class SharedGift(ndb.Model):
     total_sum = ndb.IntegerProperty(required=True)
     order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
-                                                                  BONUS_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE))
+                                                                  PAYPAL_PAYMENT_TYPE))
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 
