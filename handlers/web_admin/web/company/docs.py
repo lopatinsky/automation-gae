@@ -19,7 +19,9 @@ class AboutCompanyHandler(CompanyBaseHandler):
             'name': config.APP_NAME if config.APP_NAME else '',
             'phone': config.SUPPORT_PHONE if config.SUPPORT_PHONE else '',
             'site': config.SUPPORT_SITE if config.SUPPORT_SITE else '',
-            'emails': u''.join(config.SUPPORT_EMAILS)
+            'emails': u''.join(config.SUPPORT_EMAILS),
+            'delivery_phone': config.DELIVERY_PHONE if config.DELIVERY_PHONE else '',
+            'delivery_emails':  u''.join(config.DELIVERY_EMAILS)
         })
 
 
@@ -31,7 +33,9 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
             'name': config.APP_NAME if config.APP_NAME else '',
             'phone': config.SUPPORT_PHONE if config.SUPPORT_PHONE else '',
             'site': config.SUPPORT_SITE if config.SUPPORT_SITE else '',
-            'emails': u''.join(config.SUPPORT_EMAILS)
+            'emails': u''.join(config.SUPPORT_EMAILS),
+            'delivery_phone': config.DELIVERY_PHONE if config.DELIVERY_PHONE else '',
+            'delivery_emails':  u''.join(config.DELIVERY_EMAILS)
         })
 
     @company_user_required
@@ -41,11 +45,15 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         phone = self.request.get('phone')
         site = self.request.get('site')
         emails = self.request.get('emails').split(',')
+        delivery_phone = self.request.get('delivery_phone')
+        delivery_emails = self.request.get('delivery_emails').split(',')
         config = Config.get()
         config.COMPANY_DESCRIPTION = info
         config.APP_NAME = name
         config.SUPPORT_PHONE = phone
         config.SUPPORT_SITE = site
         config.SUPPORT_EMAILS = emails
+        config.DELIVERY_PHONE = delivery_phone
+        config.DELIVERY_EMAILS = delivery_emails
         config.put()
         self.redirect('/company/docs/about')

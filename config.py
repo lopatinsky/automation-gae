@@ -35,6 +35,8 @@ class Config(ndb.Model):
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
+    DELIVERY_PHONE = ndb.StringProperty(indexed=False)
+    DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
