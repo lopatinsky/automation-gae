@@ -250,6 +250,7 @@ class ReturnOrderHandler(ApiHandler):
                         empatika_promos.cancel_activation(gift_detail.activation_id)
                     except empatika_promos.EmpatikaPromosError as e:
                         logging.exception(e)
+                        email.send_error("payment", "Cancel activation", str(e))
                         self.abort(400)
 
                 if order.wallet_payment > 0:

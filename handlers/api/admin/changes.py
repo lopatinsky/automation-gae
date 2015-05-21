@@ -21,12 +21,14 @@ class CancelOrderHandler(AdminApiHandler):
         if order.has_card_payment:
             return_result = alfa_bank.reverse(order.payment_id)
             success = str(return_result['errorCode']) == '0'
-        for gift_detail in order.gift_details:
-            try:
-                empatika_promos.cancel_activation(gift_detail.activation_id)
-            except empatika_promos.EmpatikaPromosError as e:
-                logging.exception(e)
-                success = False
+        if success:
+            for gift_detail in order.gift_details:
+                try:
+                    empatika_promos.cancel_activation(gift_detail.activation_id)
+                except empatika_promos.EmpatikaPromosError as e:
+                    logging.exception(e)
+                    email.send_error("payment", "Cancel activation", str(e))
+                    success = False
 
         if success:
             if order.wallet_payment > 0:
