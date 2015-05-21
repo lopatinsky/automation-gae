@@ -18,5 +18,5 @@ from update_order import UpdateOrderPromos
 from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, GetPreText
 from twilio import ReceiveSms
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler
-from company import CompanyInfoHandler
+from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler

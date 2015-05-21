@@ -1,5 +1,8 @@
+from urlparse import urlparse
+from google.appengine.api.namespace_manager import namespace_manager
+from google.appengine.ext.ndb import metadata
 from base import ApiHandler
-from config import config
+from config import config, Config
 from models import STATUS_AVAILABLE, Venue
 
 __author__ = 'dvpermyakov'
@@ -23,4 +26,18 @@ class CompanyInfoHandler(ApiHandler):
             'phone': config.SUPPORT_PHONE,
             'site': config.SUPPORT_SITE,
             'emails': config.SUPPORT_EMAILS
+        })
+
+
+class CompanyBaseUrlsHandler(ApiHandler):
+    def get(self):
+        companies = []
+        for namespace in metadata.get_namespaces():
+            namespace_manager.set_namespace(namespace)
+            companies.append({
+                'base_url': u'http://%s.1.%s' % (namespace, urlparse(self.request.url).hostname),
+                'app_name': Config.get().APP_NAME
+            })
+        self.render_json({
+            'companies': companies
         })

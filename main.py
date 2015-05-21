@@ -123,6 +123,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 
         PathPrefixRoute('/shared', [
