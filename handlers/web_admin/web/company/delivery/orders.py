@@ -1,6 +1,7 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 from ..base import CompanyBaseHandler
+from methods.auth import company_user_required
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
     CANCELED_BY_BARISTA_ORDER, Venue
 from methods.rendering import timestamp
@@ -72,6 +73,7 @@ def order_items_values(order):
 
 
 class DeliveryOrdersHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES))\
             .order(-Order.date_created).fetch()
@@ -98,6 +100,7 @@ class DeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class OrderItemsHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -107,6 +110,7 @@ class OrderItemsHandler(CompanyBaseHandler):
 
 
 class NewDeliveryOrdersHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         last_time = int(self.request.get('last_time'))
         start = datetime.fromtimestamp(last_time)
@@ -133,6 +137,7 @@ class ConfirmOrderHandler(CompanyBaseHandler):
 
 
 class CloseOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -144,6 +149,7 @@ class CloseOrderHandler(CompanyBaseHandler):
 
 
 class CancelOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
