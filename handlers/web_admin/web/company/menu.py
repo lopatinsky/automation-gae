@@ -10,6 +10,12 @@ from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE,
 import logging
 
 
+class NoneHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        self.redirect('/company/menu/main')
+
+
 class MainMenuHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):

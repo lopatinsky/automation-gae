@@ -12,7 +12,7 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     EditGroupModifierItemHandler, EditMenuItemHandler, EditSingleModifierHandler, ListCategoriesHandler, \
     ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, \
     SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
-    DownCategoryHandler
+    DownCategoryHandler, NoneHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler
 from stop_lists import MainStopListHandler, StopListsHandler

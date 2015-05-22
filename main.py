@@ -185,6 +185,7 @@ app = WSGIApplication([
                 Route('/edit', company_admin.EditMenuItemHandler),
                 Route('/up', company_admin.UpProductHandler),
                 Route('/down', company_admin.DownProductHandler),
+                Route('/None', company_admin.NoneHandler),  # just erase 404 error
             ]),
             Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
             PathPrefixRoute('/modifiers', [
