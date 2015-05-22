@@ -31,7 +31,7 @@ def cancel_order(order, status, comment=None, with_push=True):
                 # main payment reversed -- do not abort
 
         order.status = status
-        order.return_datetime = datetime.datetime.utcnow()
+        order.return_datetime = datetime.utcnow()
         order.return_comment = comment
         order.put()
 
