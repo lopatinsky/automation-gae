@@ -7,7 +7,7 @@ import json
 import logging
 
 
-def _parse_collection(collection, kind='house'):  # used only for kind in ['house', 'street']
+def _parse_collection(collection, kind='house', city_request=None):  # used only for kind in ['house', 'street']
     if kind not in ['house', 'street']:
         return
     candidates = []
@@ -18,6 +18,8 @@ def _parse_collection(collection, kind='house'):  # used only for kind in ['hous
         address = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
         address = address['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']
         city = address['LocalityName']
+        if city_request and city != city_request:
+            continue
         if address.get('DependentLocality'):
             address = address['DependentLocality']
         candidates.append({
@@ -45,7 +47,7 @@ def get_houses_by_address(city, street, home):
     response = json.loads(response.content)
     collection = response['response']['GeoObjectCollection']['featureMember']
 
-    return _parse_collection(collection, kind='house')
+    return _parse_collection(collection, kind='house', city_request=city)
 
 
 def get_houses_by_coordinates(lat, lon):
@@ -91,7 +93,7 @@ def get_streets_or_houses_by_address(city, street):
     response = json.loads(response.content)
     collection = response['response']['GeoObjectCollection']['featureMember']
 
-    candidates = _parse_collection(collection, kind='house')
+    candidates = _parse_collection(collection, kind='house', city_request=city)
     if not candidates:
-        candidates = _parse_collection(collection, kind='street')
+        candidates = _parse_collection(collection, kind='street', city_request=city)
     return candidates
