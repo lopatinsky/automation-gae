@@ -39,6 +39,9 @@ class OrderHandler(ApiHandler):
         memcache.delete(self.cache_key)
 
     def post(self):
+        if not config.IN_PRODUCTION:
+            return self.render_json(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
+
         response_json = json.loads(self.request.get('order'))
 
         order_id = int(response_json['order_id'])

@@ -30,6 +30,8 @@ class Config(ndb.Model):
         "server": "admins",
     })
 
+    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
+
     APP_NAME = ndb.StringProperty(indexed=False)
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
