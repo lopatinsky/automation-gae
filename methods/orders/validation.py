@@ -332,7 +332,7 @@ def _check_gifts(gifts, client, errors):
         errors.append(description)
         return False, None
     else:
-        return True, accum_points - spent_points
+        return True, accum_points - spent_points, accum_points
 
 
 def get_avail_gifts(points):
@@ -369,7 +369,7 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
         and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
 
-    success, rest_points = _check_gifts(gifts, client, errors)
+    success, rest_points, full_points = _check_gifts(gifts, client, errors)
     valid = valid and success
 
     if order:
@@ -400,6 +400,7 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
         'rest_points': rest_points,
+        'full_points': full_points,
         'errors': _unique(errors),
         'items': grouped_item_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
