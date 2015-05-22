@@ -8,9 +8,10 @@ from handlers.api.base import ApiHandler
 import json
 from datetime import datetime, timedelta
 from handlers.web_admin.web.company.delivery.orders import order_items_values
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
+from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes
@@ -252,37 +253,19 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                # return money
-                if order.has_card_payment:
-                    return_result = alfa_bank.reverse(order.payment_id)
-                    if str(return_result.get('errorCode', 0)) != '0':
-                        logging.error("payment return failed")
-                        self.abort(400)
-                for gift_detail in order.gift_details:
-                    try:
-                        empatika_promos.cancel_activation(gift_detail.activation_id)
-                    except empatika_promos.EmpatikaPromosError as e:
-                        logging.exception(e)
-                        email.send_error("payment", "Cancel activation", str(e))
-                        self.abort(400)
-
-                if order.wallet_payment > 0:
-                    try:
-                        empatika_wallet.reverse(order.client_id, order_id)
-                    except empatika_wallet.EmpatikaWalletError as e:
-                        logging.exception(e)
-                        email.send_error("payment", "Wallet reversal failed", str(e))
-                        # main payment reversed -- do not abort
-
-                order.status = CANCELED_BY_CLIENT_ORDER
-                order.return_datetime = datetime.utcnow()
-                order.put()
-
-                self.render_json({
-                    'error': 0,
-                    'order_id': order.key.id()
-                })
-                logging.info(u'заказ %d отменен' % order_id)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, with_push=False)
+                if success:
+                    self.render_json({
+                        'error': 0,
+                        'order_id': order.key.id()
+                    })
+                    logging.info(u'заказ %d отменен' % order_id)
+                else:
+                    self.response.status_int = 422
+                    self.render_json({
+                        'error': 1,
+                        'description': u'При отмене возникла ошибка'  # todo: change this text
+                    })
             else:
                 self.response.status_int = 412
                 self.render_json({
