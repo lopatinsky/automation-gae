@@ -5,6 +5,9 @@ from methods.auth import company_user_required
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
     CANCELED_BY_BARISTA_ORDER, Venue
 from methods.rendering import timestamp
+from methods.orders.done import done_order
+from methods.orders.cancel import cancel_order
+from methods.orders.confirm import confirm_order
 
 __author__ = 'dvpermyakov'
 
@@ -126,13 +129,14 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class ConfirmOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        order.confirm_order()
+        confirm_order(order)
         self.render_json(_order_json(order, old_status))
 
 
@@ -144,7 +148,7 @@ class CloseOrderHandler(CompanyBaseHandler):
         if not order:
             self.abort(400)
         old_status = order.status
-        order.close_order()
+        done_order(order)
         self.render_json(_order_json(order, old_status))
 
 
@@ -156,5 +160,9 @@ class CancelOrderHandler(CompanyBaseHandler):
         if not order:
             self.abort(400)
         old_status = order.status
-        order.cancel_order()
-        self.render_json(_order_json(order, old_status))
+        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER)
+        response = _order_json(order, old_status)
+        response.update({
+            'success': success
+        })
+        self.render_json(response)

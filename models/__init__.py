@@ -542,20 +542,7 @@ class Order(ndb.Model):
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
     first_for_client = ndb.BooleanProperty()
-
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
-
-    def confirm_order(self):
-        self.status = CONFIRM_ORDER
-        self.put()
-
-    def cancel_order(self):
-        self.status = CANCELED_BY_BARISTA_ORDER
-        self.put()
-
-    def close_order(self):
-        self.status = READY_ORDER
-        self.put()
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")
