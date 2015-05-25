@@ -51,6 +51,8 @@
             </tr>
         {% endfor %}
     </table>
-    <a href="/company/delivery/orders/current">Назад</a>
+    {% if user %}
+        <a href="/company/delivery/orders/current">Назад</a>
+    {% endif %}
 </body>
 </html>
