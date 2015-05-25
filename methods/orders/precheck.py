@@ -13,6 +13,13 @@ def check_order_id(order_id):
         return True, cache_key
 
 
+def check_items_and_gifts(items, gifts):
+    if len(items) == 0 and len(gifts) == 0:
+        return False
+    else:
+        return True
+
+
 def set_client_info(client_json):
     client_id = int(client_json.get('id'))
     if not client_id:
