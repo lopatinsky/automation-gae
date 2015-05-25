@@ -317,7 +317,7 @@ class CheckOrderHandler(ApiHandler):
 
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = self.request.get_range('venue_id')
-            if not venue_id:
+            if not venue_id or venue_id == -1:
                 self.abort(400)
             venue = Venue.get_by_id(venue_id)
             if not venue:
