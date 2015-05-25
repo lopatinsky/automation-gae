@@ -7,6 +7,9 @@ import json
 import logging
 
 
+MAX_RESULT = 25
+
+
 def _parse_collection(collection, kind='house', city_request=None):  # used only for kind in ['house', 'street']
     if kind not in ['house', 'street']:
         return
@@ -40,7 +43,7 @@ def get_houses_by_address(city, street, home):
     params = {
         'geocode': ('%s,%s,%s' % (city, street, home)).encode('utf-8'),
         'format': 'json',
-        'results': 5
+        'results': MAX_RESULT
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     response = urlfetch.fetch(url)
@@ -55,7 +58,7 @@ def get_houses_by_coordinates(lat, lon):
         'geocode': '%s,%s' % (lon, lat),
         'format': 'json',
         'kind': 'house',
-        'results': 5
+        'results': MAX_RESULT
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -70,7 +73,7 @@ def get_streets_by_address(city, street):
     params = {
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
-        'results': 5
+        'results': MAX_RESULT
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
@@ -85,7 +88,7 @@ def get_streets_or_houses_by_address(city, street):
     params = {
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
-        'results': 5
+        'results': MAX_RESULT
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
     logging.info(url)
