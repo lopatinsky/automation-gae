@@ -145,7 +145,9 @@ class GroupModifier(ndb.Model):
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
-    picture = ndb.StringProperty(indexed=False)
+    picture = ndb.StringProperty(indexed=False)  # source
+    cut_picture = ndb.StringProperty(indexed=False)
+    icon = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False, default=0)
@@ -174,7 +176,8 @@ class MenuItem(ndb.Model):
             'description': self.description,
             'price':  float(self.price) / 100.0,  # в рублях
             'kal': self.kal,
-            'pic': self.picture,
+            'pic': self.picture if not self.cut_picture else self.cut_picture,
+            'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],

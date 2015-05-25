@@ -1,5 +1,6 @@
 import json
 from methods.auth import company_user_required
+from methods.images import save_item_image, resize_image, MAX_SIZE, ICON_SIZE
 from methods.unique import unique
 from base import CompanyBaseHandler
 
@@ -10,7 +11,7 @@ from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE,
 import logging
 
 
-class NoneHandler(CompanyBaseHandler):
+class NoneHandler(CompanyBaseHandler):  # use to erase 404 error
     @company_user_required
     def get(self):
         self.redirect('/company/menu/main')
@@ -158,6 +159,9 @@ class AddMenuItemHandler(CompanyBaseHandler):
             item.weight = float(self.request.get('weight'))
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.sequence_number = category.generate_sequence_number()
+        save_item_image(item, str(self.request.get('image_file')))
+        resize_image(item, item.picture, MAX_SIZE)
+        resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
         category.menu_items.append(item.key)
         category.put()
@@ -175,6 +179,7 @@ class EditMenuItemHandler(CompanyBaseHandler):
         product = MenuItem.get_by_id(product_id)
         if not product:
             self.abort(400)
+        #blobstore.create_upload_url('/company/menu/item/edit')
         self.render('/menu/add_item.html', product=product, category=category)
 
     @company_user_required
@@ -200,6 +205,9 @@ class EditMenuItemHandler(CompanyBaseHandler):
         if self.request.get('weight'):
             item.weight = float(self.request.get('weight'))
         item.picture = self.request.get('picture') if self.request.get('picture') else None
+        save_item_image(item, str(self.request.get('image_file')))
+        resize_image(item, item.picture, MAX_SIZE)
+        resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 

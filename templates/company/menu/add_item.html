@@ -5,29 +5,39 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% if category %}
             <input disabled type="text" name="category_id" value="{{ category.key.id() }}" hidden>
         {% endif %}
         {% if product %}
             <input type="text" name="product_id" value="{{ product.key.id() }}" hidden>
         {% endif %}
-        {% for param in ('title', 'description', 'kal', 'float_price', 'volume', 'weight', 'picture') %}
-            <div>
-                <label for="{{ param }}">{{ param }}</label>
-                <input type="text"
-                       {% if param == 'float_price' %}
-                            name="price"
-                       {% else %}
-                            name="{{ param }}"
-                       {% endif %}
-                       id="{{ param }}" size="100"
-                       {% if product %}
-                            value="{{ product[param] or "" }}"
-                       {% endif %}
-                />
-            </div>
-        {% endfor %}
+        <label>
+            Название: <input type="text" name="title" {% if product %} value="{{ product.title }}" {% endif %}>
+        </label><br>
+        <label>
+            Описание: <input type="text" name="description" {% if product %} value="{{ product.description }}" {% endif %}>
+        </label><br>
+        <label>
+            Каллории: <input type="text" name="kal" {% if product %} value="{{ product.kal }}" {% endif %}>
+        </label><br>
+        <label>
+            Цена: <input type="text" name="price" {% if product %} value="{{ product.float_price }}" {% endif %}>
+        </label><br>
+        <label>
+            Объем: <input type="text" name="volume" {% if product %} value="{{ product.volume }}" {% endif %}>
+        </label><br>
+        <label>
+            Вес: <input type="text" name="weight" {% if product %} value="{{ product.weight }}" {% endif %}>
+        </label><br>
+        <label>
+            Картинка url: <input type="text" name="picture" {% if product %} value="{{ product.picture }}" {% endif %}>
+        </label><br>
+        <br>
+        <label>
+            Картинка файл: <input type="file" name="image_file">
+        </label><br>
+        <br>
         <input type="submit" value="Отправить"/>
         <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id()  }}">Назад</a>
     </form>

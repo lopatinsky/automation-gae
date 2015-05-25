@@ -39,3 +39,7 @@ cron:
 - description: check creating orders
   url: /cron/creating_orders
   schedule: every 10 minutes
+
+#- description: resize image
+#  url: /cron/resize_image
+#  schedule: every 1 minutes
