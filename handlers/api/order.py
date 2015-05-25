@@ -14,7 +14,8 @@ from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes, \
+    check_items_and_gifts
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, \
     Address, DELIVERY
@@ -40,9 +41,13 @@ class OrderHandler(ApiHandler):
 
     def post(self):
         if not config.IN_PRODUCTION:
-            return self.render_json(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
+            return self.render_error(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
 
         response_json = json.loads(self.request.get('order'))
+
+        success = check_items_and_gifts(response_json['items'], response_json.get('gifts', []))
+        if not success:
+            self.render_error(u'Выберите что-нибудь')
 
         order_id = int(response_json['order_id'])
         success, cache_key = check_order_id(order_id)
