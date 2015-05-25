@@ -25,6 +25,8 @@ def _parse_collection(collection, kind='house', city_request=None):  # used only
             continue
         if address.get('DependentLocality'):
             address = address['DependentLocality']
+        if not address.get('Thoroughfare'):
+            continue
         candidates.append({
             'address': {
                 'city': city,
