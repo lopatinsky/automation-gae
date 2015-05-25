@@ -40,6 +40,8 @@ class Config(ndb.Model):
     DELIVERY_PHONE = ndb.StringProperty(indexed=False)
     DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
 
+    COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
+
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'

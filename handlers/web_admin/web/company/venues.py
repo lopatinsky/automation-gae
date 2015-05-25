@@ -2,8 +2,9 @@
 import logging
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
+from config import Config, config
 from methods.auth import company_user_required
-from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE
+from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address
 from methods import map
 
 
@@ -33,6 +34,14 @@ class CreateVenueHandler(CompanyBaseHandler):
             setattr(venue, param, self.request.get(param))
         venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
         venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
+        candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
+        if candidates:
+            address = candidates[0]
+            venue.address = Address(**address['address'])
+            config = Config.get()
+            if venue.address.country not in config.COUNTRIES:
+                config.COUNTRIES.append(venue.address.country)
+                config.put()
         venue.put()
         self.redirect('/company/venues')
 
@@ -73,7 +82,14 @@ class EditVenueHandler(CompanyBaseHandler):
 
         venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
         venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
-
+        candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
+        if candidates:
+            address = candidates[0]
+            venue.address = Address(**address['address'])
+            config = Config.get()
+            if venue.address.country not in config.COUNTRIES:
+                config.COUNTRIES.append(venue.address.country)
+                config.put()
         venue.put()
         self.render('/venues/edit_venue.html', venue=venue, success=True)
 

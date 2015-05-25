@@ -1,16 +1,18 @@
 # coding:utf-8
+
 __author__ = 'dvpermyakov'
 
 from google.appengine.api import urlfetch
 import urllib
 import json
 import logging
+from config import config
 
 
 MAX_RESULT = 25
 
 
-def _parse_collection(collection, kind='house', city_request=None):  # used only for kind in ['house', 'street']
+def _parse_collection(collection, kind='house', city_request=None):
     if kind not in ['house', 'street']:
         return
     candidates = []
@@ -18,9 +20,14 @@ def _parse_collection(collection, kind='house', city_request=None):  # used only
         item = item['GeoObject']
         if item['metaDataProperty']['GeocoderMetaData']['kind'] not in kind:
             continue
-        address = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
-        address = address['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']
-        city = address['LocalityName']
+        address_details = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
+        country = address_details['Country']
+        if u''.join([country['CountryName']]) not in config.COUNTRIES:
+            continue
+        if not country.get('AdministrativeArea'):
+            continue
+        address = country['AdministrativeArea']['SubAdministrativeArea']['Locality']
+        city = address.get('LocalityName')
         if city_request and city != city_request:
             continue
         if address.get('DependentLocality'):
@@ -29,6 +36,7 @@ def _parse_collection(collection, kind='house', city_request=None):  # used only
             continue
         candidates.append({
             'address': {
+                'country': country['CountryName'],
                 'city': city,
                 'street': address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip(),
                 'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
