@@ -359,6 +359,7 @@ class CashBack(ndb.Model):
 class Address(ndb.Model):
     lat = ndb.FloatProperty()
     lon = ndb.FloatProperty()
+    country = ndb.StringProperty()
     city = ndb.StringProperty()
     street = ndb.StringProperty()
     home = ndb.StringProperty()
@@ -502,6 +503,8 @@ class OrderPositionDetails(ndb.Model):
 
 class GiftPositionDetails(ndb.Model):
     gift = ndb.KeyProperty(kind=GiftMenuItem, required=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
     activation_id = ndb.IntegerProperty(required=True)
 
 
@@ -567,6 +570,35 @@ class Order(ndb.Model):
                 point_detail.status = GiftPointsDetails.DONE
         self.put()
 
+    def _grouped_item_dict(self, details, gift=False):
+        item_dicts = []
+        for item_detail in details:
+            if not gift:
+                item= item_detail.item.get()
+            else:
+                gift = item_detail.gift.get()
+                item = gift.item.get()
+            item_dicts.append({
+                'item': item,
+                'price': item_detail.price if not gift else 0,
+                'image': item.picture,
+                'single_modifier_keys':  item_detail.single_modifiers,
+                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
+            })
+        from methods.orders.validation import group_item_dicts
+        response = []
+        for item_dict in group_item_dicts(item_dicts):
+            response.append({
+                "id": item_dict['id'],
+                "title": item_dict['title'],
+                "price": item_dict['price_without_promos'],
+                "image": item_dict.get('image'),
+                "quantity": item_dict['quantity'],
+                "single_modifiers": item_dict['single_modifiers'],
+                "group_modifiers": item_dict['group_modifiers']
+            })
+        return response
+
     def dict(self):
         dct = {
             "order_id": self.key.id(),
@@ -581,30 +613,9 @@ class Order(ndb.Model):
             "pan": self.pan,
             "comment": self.comment,
             "return_comment": self.return_comment,
-            "items": []
+            "items": self._grouped_item_dict(self.item_details),
+            "gifts": self._grouped_item_dict(self.gift_details, gift=True)
         }
-        item_dicts = []
-        for item_detail in self.item_details:
-            item = item_detail.item.get()
-            item_dicts.append({
-                'item': item,
-                'price': item_detail.price,
-                'image': item.picture,
-                'single_modifier_keys':  item_detail.single_modifiers,
-                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
-            })
-
-        from methods.orders.validation import group_item_dicts
-        for item_dict in group_item_dicts(item_dicts):
-            dct["items"].append({
-                "id": item_dict['id'],
-                "title": item_dict['title'],
-                "price": item_dict['price_without_promos'],
-                "image": item_dict.get('image'),
-                "quantity": item_dict['quantity'],
-                "single_modifiers": item_dict['single_modifiers'],
-                "group_modifiers": item_dict['group_modifiers']
-            })
         return dct
 
     def status_dict(self):
@@ -623,28 +634,9 @@ class Order(ndb.Model):
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
-            "items": []
+            "items": self._grouped_item_dict(self.item_details),
+            "gifts": self._grouped_item_dict(self.gift_details, gift=True)
         }
-
-        item_dicts = []
-        for item_detail in self.item_details:
-            item_dicts.append({
-                'item': item_detail.item.get(),
-                'price': item_detail.price,
-                'single_modifier_keys':  item_detail.single_modifiers,
-                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
-            })
-
-        from methods.orders.validation import group_item_dicts
-        for item_dict in group_item_dicts(item_dicts):
-            dct["items"].append({
-                "id": item_dict['id'],
-                "title": item_dict['title'],
-                "price": item_dict['price_without_promos'],
-                "quantity": item_dict['quantity'],
-                "single_modifiers": item_dict['single_modifiers'],
-                "group_modifiers": item_dict['group_modifiers']
-            })
         return dct
 
     @staticmethod

@@ -4,7 +4,7 @@ import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DELIVERY
+    GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails
 from promos import apply_promos
 
 
@@ -219,7 +219,7 @@ def _group_group_modifiers(modifiers):
     return result.values()
 
 
-def group_item_dicts(item_dicts, gift_dicts=None):
+def group_item_dicts(item_dicts):
     def get_group_dict(item_dict):
         return {
             'id': str(item_dict['item'].key.id()),
@@ -245,17 +245,6 @@ def group_item_dicts(item_dicts, gift_dicts=None):
                 possible_group['errors'].extend(item_dict['errors'])
         else:
             result.append(get_group_dict(item_dict))
-    if gift_dicts:
-        for gift_dict in gift_dicts:
-            found = False
-            for group in result:
-                if _is_equal(gift_dict, group['item_dict']):
-                    group['quantity'] += 1
-                    if group.get('errors'):
-                        group['errors'].extend(gift_dict.get('errors'))
-                    found = True
-            if not found:
-                result.append(get_group_dict(gift_dict))
     for group in result:
         del group['item_dict']
     for dct in result:
@@ -330,7 +319,7 @@ def _check_gifts(gifts, client, errors):
     if accum_points < spent_points:
         description = u'Недостаточно накопленных баллов'
         errors.append(description)
-        return False, None
+        return False, None, accum_points
     else:
         return True, accum_points - spent_points, accum_points
 
@@ -387,9 +376,11 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
     logging.info('item_dicts = %s' % item_dicts)
 
     if len(item_dicts):
-        grouped_item_dicts = group_item_dicts(item_dicts, gift_dicts)
+        grouped_item_dicts = group_item_dicts(item_dicts)
+        grouped_gift_dicts = group_item_dicts(gift_dicts)
     else:
         grouped_item_dicts = []
+        grouped_gift_dicts = []
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
@@ -403,6 +394,7 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
         'full_points': full_points,
         'errors': _unique(errors),
         'items': grouped_item_dicts,
+        'gifts': grouped_gift_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
@@ -426,6 +418,17 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
             details_item.errors = item_dict['errors']
             details.append(details_item)
         result['details'] = details
+        details = []
+        for item_dict in gift_dicts:
+            details_item = GiftPositionDetails(
+                gift=GiftMenuItem.get_by_id(item_dict['item'].key.id()).key,
+                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                            group_modifier=modifier.key)
+                                 for modifier in item_dict['group_modifiers']]
+            )
+            details.append(details_item)
+        result['gift_details'] = details
 
     return result
 

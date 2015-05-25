@@ -191,11 +191,11 @@ class OrderHandler(ApiHandler):
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
 
             gift_details = []
-            for gift in response_json.get('gifts', []):
-                gift_item = GiftMenuItem.get_by_id(int(gift['item_id']))
+            for gift_detail in validation_result['gift_details']:
+                gift_item = gift_detail.gift.get()
                 activation_dict = empatika_promos.activate_promo(client.key.id(), gift_item.promo_id, 1)
-                gift_details.append(GiftPositionDetails(gift=gift_item.key,
-                                                        activation_id=activation_dict['activation']['id']))
+                gift_detail.activation_id = activation_dict['activation']['id']
+                gift_details.append(gift_detail)
             self.order.gift_details = gift_details
 
             client.put()
