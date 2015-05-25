@@ -4,13 +4,13 @@
     <title></title>
 </head>
 <body>
-    <nav>
-        {% if user %}
+    {% if user %}
+        <nav>
             <p>
                 {{ user.login }}
                 <a href="/company/logout">Выйти</a>
             </p>
-        {% endif %}
-    </nav>
+        </nav>
+    {% endif %}
 </body>
 </html>
