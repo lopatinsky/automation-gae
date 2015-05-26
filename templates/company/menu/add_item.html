@@ -19,7 +19,7 @@
             Описание: <input type="text" name="description" {% if product %} value="{{ product.description }}" {% endif %}>
         </label><br>
         <label>
-            Каллории: <input type="text" name="kal" {% if product %} value="{{ product.kal }}" {% endif %}>
+            Калории: <input type="text" name="kal" {% if product %} value="{{ product.kal }}" {% endif %}>
         </label><br>
         <label>
             Цена: <input type="text" name="price" {% if product %} value="{{ product.float_price }}" {% endif %}>
@@ -31,7 +31,7 @@
             Вес: <input type="text" name="weight" {% if product %} value="{{ product.weight }}" {% endif %}>
         </label><br>
         <label>
-            Картинка url: <input type="text" name="picture" {% if product %} value="{{ product.picture }}" {% endif %}>
+            Картинка url: <input type="text" name="picture" {% if product and product.picture %} value="{{ product.picture }}" {% endif %}>
         </label><br>
         <br>
         <label>
