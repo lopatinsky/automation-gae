@@ -5,6 +5,12 @@
 </head>
 <body>
     {% include '/company/header.html' %}
+    <form method="post" action="/company/excel/menu" enctype="multipart/form-data">
+        <div>
+            <label>Загрузить меню через excel: <input type="file" name="excel"></label><br>
+        </div>
+        <input type="submit" value="Отправить"/>
+    </form><br><br>
     <a href="/company/menu/category/list">Общее меню</a><br>
     <a href="/company/menu/venue/list">Кофейни</a><br>
     <a href="/company/menu/modifiers/list">Модификаторы</a><br>

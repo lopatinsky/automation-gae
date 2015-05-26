@@ -6,6 +6,7 @@ from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 import handlers.web_admin.web.company as company_admin
 import handlers.web_admin.web.company.delivery as company_delivery
+import handlers.web_admin.web.company.excel as company_excel
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -168,6 +169,10 @@ app = WSGIApplication([
             ]),
             Route('/list', company_admin.ListDocsHandler),
             Route('/about', company_admin.AboutCompanyHandler),
+        ]),
+
+        PathPrefixRoute('/excel', [
+            Route('/menu', company_excel.ParseMenuHandler),
         ]),
 
         PathPrefixRoute('/menu', [
