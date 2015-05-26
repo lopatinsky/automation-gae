@@ -319,7 +319,7 @@ def _check_gifts(gifts, client, errors):
     if accum_points < spent_points:
         description = u'Недостаточно накопленных баллов'
         errors.append(description)
-        return False, None, accum_points
+        return False, 0, accum_points
     else:
         return True, accum_points - spent_points, accum_points
 

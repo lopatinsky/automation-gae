@@ -574,7 +574,7 @@ class Order(ndb.Model):
         item_dicts = []
         for item_detail in details:
             if not gift:
-                item= item_detail.item.get()
+                item = item_detail.item.get()
             else:
                 gift = item_detail.gift.get()
                 item = gift.item.get()
@@ -630,7 +630,7 @@ class Order(ndb.Model):
         dct = {
             "order_id": str(self.key.id()),
             "status": self.status,
-            "delivery_time": timestamp(self.delivery_time),
+            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
