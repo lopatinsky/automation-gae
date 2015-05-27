@@ -29,8 +29,13 @@ def _resize(image, size):
 
 def _save(image, filename):
     image_file = cloudstorage.open(filename, "w", 'image/jpeg')
-    image.save(image_file, 'JPEG')
-    image_file.close()
+    try:
+        image.save(image_file, 'JPEG')
+    except:
+        logging.warning('can not save JPG')
+        image_file.close()
+        return False
+    return True
 
 
 def _get_serving_url(image, filename):
@@ -58,14 +63,15 @@ def resize_image(item, url, size=None, icon=False):
         image = _resize(image, size)
 
         filename = _get_filename('MenuItem', item.key.id(), size)
-        _save(image, filename)
-        serving_url = _get_serving_url(image, filename)
+        success = _save(image, filename)
+        if success:
+            serving_url = _get_serving_url(image, filename)
 
-        if not icon:
-            item.cut_picture = serving_url
-        else:
-            item.icon = serving_url
-        item.put()
+            if not icon:
+                item.cut_picture = serving_url
+            else:
+                item.icon = serving_url
+            item.put()
 
 
 def save_item_image(item, image_data):
@@ -73,8 +79,8 @@ def save_item_image(item, image_data):
     image = _resize(image, MAX_SIZE)
 
     filename = _get_filename('MenuItem', item.key.id(), 'init')
-    _save(image, filename)
-    serving_url = _get_serving_url(image, filename)
-
-    item.picture = serving_url
-    item.put()
+    success = _save(image, filename)
+    if success:
+        serving_url = _get_serving_url(image, filename)
+        item.picture = serving_url
+        item.put()
