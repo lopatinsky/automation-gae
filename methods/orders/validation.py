@@ -3,8 +3,9 @@ import copy
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
+from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails
+    GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails, DeliverySlot
 from promos import apply_promos
 
 
@@ -16,15 +17,12 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum, errors):
+def _check_delivery_type(venue, address, delivery_type, total_sum, errors):
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
             if delivery.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery.min_sum
-                errors.append(description)
-            if delivery_slot and delivery_slot['name'] not in delivery.slots:  # it is import if slot hasn't value
-                description = u'Данный слот недоступен'
                 errors.append(description)
             if not description and delivery_type == DELIVERY:
                 address = address['address']
@@ -86,16 +84,19 @@ def _check_venue(venue, delivery_time, errors):
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
             if config.PLACE_TYPE == VENUE:
-                errors.append(u"Бар сейчас недоступен")
+                errors.append(u"Кофейня сейчас недоступна")
             elif config.PLACE_TYPE == BAR:
-                errors.append(u"Кофейня сейчас недоступена")
+                errors.append(u"Бар сейчас недоступен")
+            else:
+                errors.append(u'Заведение сейчас недоступно')
             return False
         if delivery_time:
-            if not venue.is_open(minutes_offset=delivery_time):
-                if config.PLACE_TYPE == VENUE:
-                    errors.append(u"Бар сейчас закрыт")
-                elif config.PLACE_TYPE == BAR:
-                    errors.append(u"Кофейня сейчас закрыта")
+            if not venue.is_open_by_delivery_time(delivery_time):
+                valid, error = is_valid_weekday(venue.working_days, venue.working_hours, delivery_time)
+                if not valid:
+                    errors.append(error)
+                else:
+                    errors.append(get_valid_time_str(venue.working_days, venue.working_hours, delivery_time))
                 return False
         if venue.problem:
             place_name = config.get_place_str()
@@ -110,7 +111,7 @@ def _check_restrictions(venue, item_dicts, gift_dicts, errors):
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
-                description = u'%s не имеет %s' % (venue.title, item.title)
+                description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
         return description
@@ -130,18 +131,18 @@ def _check_stop_list(venue, item_dicts, gift_dicts, errors):
         for item_dict in item_dicts:
             item = item_dict['item']
             if item.key in venue.stop_lists:
-                description = u'%s положил %s в стоп лист' % (venue.title, item.title)
+                description = u'В "%s" позиция "%s" временно недоступна' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
             for single_modifier in item_dict['single_modifiers']:
                 if single_modifier.key in venue.single_modifiers_stop_list:
-                    description = u'%s положил одиночный модификатор %s в стоп лист' % (venue.title, single_modifier.title)
+                    description = u'В "%s" добавка "%s" временно недоступна' % (venue.title, single_modifier.title)
                     errors.append(description)
                     item_dict['errors'].append(description)
             for group_modifier in item_dict['group_modifiers']:
                 if group_modifier.choice.choice_id in stop_list_choices or \
                                 group_modifier.choice.choice_id in item.stop_list_group_choices:
-                    description = u'%s положил выбор группового модификатора %s в стоп лист' % \
+                    description = u'В "%s" выбор "%s" временно недоступен' % \
                                   (venue.title, group_modifier.choice.title)
                     errors.append(description)
                     item_dict['errors'].append(description)
@@ -354,8 +355,7 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
     valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
-    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos, errors)\
-        and valid
+    valid = _check_delivery_type(venue, address, delivery_type, total_sum_without_promos, errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
 
     success, rest_points, full_points = _check_gifts(gifts, client, errors)

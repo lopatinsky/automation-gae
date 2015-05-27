@@ -15,7 +15,7 @@
                     '<td>' + order.order_id + '</td>' +
                     '<td>' + order.address + '</td>' +
                     '<td>' + order.date_str + '</td>' +
-                    '<td>' + order.delivery_time + '</td>' +
+                    '<td>' + order.delivery_time_str + '</td>' +
                     '<td>' + order.total_sum + '</td>' +
                     '<td>' + order.client.name + '</td>' +
                     '<td>' + order.client.surname + '</td>' +
@@ -198,13 +198,7 @@
                 <td>{{ order.key.id() }}</td>
                 <td>{{ order.address_str }}</td>
                 <td>{{ order.date_str }}</td>
-                <td>
-                    {% if order.delivery_time %}
-                        {{ order.delivery_time }}
-                    {% else %}
-                        {{ order.delivery_slot }}
-                    {% endif %}
-                </td>
+                <td>{{ order.delivery_time_str }} </td>
                 <td>{{ order.total_sum }}</td>
                 <td>{{ order.client.name }}</td>
                 <td>{{ order.client.surname }}</td>

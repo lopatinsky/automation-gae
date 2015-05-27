@@ -14,11 +14,9 @@ from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes, \
-    check_items_and_gifts
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, \
-    Address, DELIVERY
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -76,7 +74,7 @@ class OrderHandler(ApiHandler):
             venue_id = int(venue_id)
             venue = Venue.get_by_id(venue_id)
             if not venue:
-                return self.render_error("")
+                return self.render_error(u"Кофейня не найдена")
         else:
             if delivery_venue:
                 venue_id = delivery_venue.key.id()
@@ -93,21 +91,47 @@ class OrderHandler(ApiHandler):
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
 
-        delivery_time_minutes = response_json.get('delivery_time')
-        delivery_slot = response_json.get('delivery_slot')
-        if venue and delivery_slot and not delivery_time_minutes:
-            success, delivery_time_minutes = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
-            if not success:
-                return self.render_error(u'Неправильно выбран слот для времени')
-        if delivery_time_minutes is not None:
-            delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
+        delivery_slot_id = response_json.get('delivery_slot_id')
+        if delivery_slot_id:
+            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
         else:
-            delivery_time = None
+            delivery_slot = None
+            delivery_slot_id = None
+
+        delivery_time_minutes = response_json.get('delivery_time')    # used for old versions todo: remove
+        if delivery_time_minutes:                                     # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
+        delivery_time_picker = response_json.get('time_picker_value')
+        logging.info(delivery_time_picker)
+        if delivery_time_picker:
+            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+        else:
+            if not delivery_time_minutes:                              # used for old versions todo: remove
+                return self.render_error(u'Необходимо выбрать время')
+
+        if delivery_slot:
+            if delivery_slot.slot_type == DeliverySlot.MINUTES:
+                delivery_time_minutes = delivery_slot.value
+            elif delivery_slot.slot_type == DeliverySlot.STRINGS:
+                if delivery_time_minutes:
+                    return self.render_error(u'Невозможно выьрать минуты для данного слота')
+            if delivery_time_picker:
+                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
+
+        delivery_time = None
+        if delivery_time_picker:
+            delivery_time = delivery_time_picker
+        if delivery_time_minutes or delivery_time_minutes == 0:
+            if not delivery_time:
+                delivery_time = datetime.utcnow()
+            else:
+                delivery_time += timedelta(minutes=delivery_time_minutes)
+
         request_total_sum = response_json.get("total_sum")
 
         client_id, client = set_client_info(response_json.get('client'))
         if not client:
-            return self.render_error("")
+            return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
@@ -131,8 +155,9 @@ class OrderHandler(ApiHandler):
                                                response_json['items'],
                                                response_json.get('gifts', []),
                                                response_json['payment'],
-                                               venue, address, delivery_time_minutes, delivery_slot, delivery_type, True)
+                                               venue, address, delivery_time, delivery_slot, delivery_type, True)
             if not validation_result['valid']:
+                logging.warning('Fail in validation')
                 return self.render_error(get_first_error(validation_result))
 
             total_sum = validation_result['total_sum']
@@ -154,16 +179,11 @@ class OrderHandler(ApiHandler):
             else:
                 address_obj = None
 
-            if delivery_slot:
-                delivery_slot_name = delivery_slot.get('name')
-            else:
-                delivery_slot_name = None
-
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details, delivery_type=delivery_type, delivery_slot=delivery_slot_name,
+                item_details=item_details, delivery_type=delivery_type, delivery_slot_id=delivery_slot_id,
                 address=address_obj)
             self.order.put()
 
@@ -202,17 +222,17 @@ class OrderHandler(ApiHandler):
 
             # it is used for creating db for promos
             validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
-                           venue, address, delivery_time_minutes, delivery_slot, delivery_type, False, self.order)
+                           venue, address, delivery_time, delivery_slot, delivery_type, False, self.order)
             self.order.put()
 
-            if delivery_type == DELIVERY:
-                text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
-                if config.DELIVERY_PHONE:
-                    send_sms([config.DELIVERY_PHONE], text)
-                if config.DELIVERY_EMAILS:
-                    for email in config.DELIVERY_EMAILS:
-                        send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html',
-                                                                                   **order_items_values(self.order)))
+            # use delivery phone and delivery emails for all delivery types
+            text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
+            if config.DELIVERY_PHONE:
+                send_sms([config.DELIVERY_PHONE], text)
+            if config.DELIVERY_EMAILS:
+                for email in config.DELIVERY_EMAILS:
+                    send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html',
+                                                                               **order_items_values(self.order)))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
@@ -335,16 +355,36 @@ class CheckOrderHandler(ApiHandler):
         except ValueError:
             payment_info = None
 
-        delivery_time = self.request.get('delivery_time')
-        delivery_slot = self.request.get('delivery_slot')
+        delivery_slot_id = self.request.get('delivery_slot_id')
+        if delivery_slot_id:
+            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+        else:
+            delivery_slot = None
+
+        delivery_time_minutes = self.request.get('delivery_time')
+        if delivery_time_minutes:
+            delivery_time_minutes = int(delivery_time_minutes)
+        delivery_time_picker = self.request.get('time_picker_value')
+        if delivery_time_picker:
+            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+
         if delivery_slot:
-            delivery_slot = json.loads(delivery_slot)
-        if delivery_time:
-            delivery_time = int(delivery_time)
-        if venue and delivery_slot and not delivery_time:
-            success, delivery_time = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
-            if not success:
-                self.abort(501)
+            if delivery_slot.slot_type == DeliverySlot.MINUTES:
+                delivery_time_minutes = delivery_slot.value
+            elif delivery_slot.slot_type == DeliverySlot.STRINGS:
+                if delivery_time_minutes:
+                    self.abort(400)
+            if delivery_time_picker:
+                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
+
+        delivery_time = None
+        if delivery_time_picker:
+            delivery_time = delivery_time_picker
+        if delivery_time_minutes or delivery_time_minutes == 0:
+            if not delivery_time:
+                delivery_time = datetime.utcnow()
+            else:
+                delivery_time += timedelta(minutes=delivery_time_minutes)
 
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):

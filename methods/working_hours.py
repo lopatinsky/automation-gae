@@ -1,9 +1,19 @@
+# coding=utf-8
 import datetime
 
 
 def _date_str_to_date(date_str):
     year, month, date = int(date_str[:4]), int(date_str[4:6]), int(date_str[6:])
     return datetime.datetime(year, month, date)
+
+
+def _get_schedule(working_days, working_hours):
+    working_days = working_days.split(',')
+    working_hours = [s.split("-") for s in working_hours.split(',')]
+    schedule = {
+        int(d): [int(h) for h in working_hours[i]] for i in xrange(len(working_days)) for d in working_days[i]
+    }
+    return schedule
 
 
 def _parse_overrides(overrides):
@@ -25,11 +35,7 @@ def _parse_overrides(overrides):
 
 
 def check(working_days, working_hours, time, overrides=None):
-    working_days = working_days.split(',')
-    working_hours = [s.split("-") for s in working_hours.split(',')]
-    schedule = {int(d): [int(h) for h in working_hours[i]]
-                for i in xrange(len(working_days))
-                for d in working_days[i]}
+    schedule = _get_schedule(working_days, working_hours)
 
     overrides_dict = _parse_overrides(overrides)
 
@@ -51,3 +57,23 @@ def check(working_days, working_hours, time, overrides=None):
     today = datetime.datetime.combine(time.date(), datetime.time())
     yesterday = today - datetime.timedelta(days=1)
     return check_day(today) or check_day(yesterday)
+
+
+def get_valid_time_str(working_days, working_hours, time):
+    schedule = _get_schedule(working_days, working_hours)
+    weekday = time.isoweekday()
+    start, end = schedule.get(weekday)
+    if start < 10:
+        start = '0%s' % start
+    if end < 10:
+        end = '0%s' % end
+    return u'Заказы в этот день доступны c %s:00 до %s:00.' % (start, end)
+
+
+def is_valid_weekday(working_days, working_hours, time):
+    schedule = _get_schedule(working_days, working_hours)
+    weekday = time.isoweekday()
+    if weekday not in schedule:
+        return False, u'Заказы в этот день недели недоступны. Выберите другой день.'
+    else:
+        return True, None

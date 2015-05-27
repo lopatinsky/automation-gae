@@ -48,14 +48,3 @@ def get_venue_by_address(address):
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE and not delivery.delivery_zone:
                 if address['address']['city'] == venue.address.city:
                     return venue
-
-
-def get_delivery_time_minutes(venue, delivery_type, delivery_slot):
-    for delivery in venue.delivery_types:
-        if delivery.delivery_type == delivery_type:
-            if delivery.time_slot:
-                slot_value = delivery.slot_minute_values[delivery_slot['id']]
-                if slot_value != delivery_slot['value']:
-                    return False, None
-                return True, slot_value
-    return True, None

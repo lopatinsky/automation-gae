@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
-    CANCELED_BY_BARISTA_ORDER, Venue
+    CANCELED_BY_BARISTA_ORDER, Venue, DeliverySlot
 from methods.rendering import timestamp
 from methods.orders.done import done_order
 from methods.orders.cancel import cancel_order
@@ -32,9 +32,8 @@ def _order_delivery_dict(order, client):
     return {
         'order_id': order.key.id(),
         'address': order.address.str() if order.address else u'Адрес не найден',
-        'date_str': datetime.strftime(order.date_created + timedelta(hours=Venue.get_by_id(order.venue_id).timezone_offset),
-                                      "%Y-%m-%d %H:%M:%S"),
-        'delivery_time': order.delivery_time if order.delivery_time else order.delivery_slot,
+        'date_str': order.date_str,
+        'delivery_time_str': order.delivery_time_str,
         'total_sum': order.total_sum,
         'client': {
             'name': client.name,
@@ -48,13 +47,26 @@ def _order_delivery_dict(order, client):
 
 def _update_order_info(orders):
     for order in orders:
+        hours_offset = Venue.get_by_id(order.venue_id).timezone_offset
+        if order.delivery_time:
+            delivery_time_str = datetime.strftime(order.delivery_time + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        else:
+            delivery_time_str = u''
+        if order.delivery_slot_id:
+            slot = DeliverySlot.get_by_id(order.delivery_slot_id)
+            if slot.slot_type == DeliverySlot.STRINGS:
+                if order.delivery_time:
+                    delivery_time_date = datetime.strftime(order.delivery_time, "%Y-%m-%d")
+                else:
+                    delivery_time_date = u''
+                delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
         order.client = Client.get_by_id(order.client_id)
         if order.address:
             order.address_str = order.address.str()
         else:
             order.address_str = u'Адрес не найден'
-        order.date_str = datetime.strftime(order.date_created + timedelta(hours=Venue.get_by_id(order.venue_id).timezone_offset),
-                                           "%Y-%m-%d %H:%M:%S")
+        order.date_str = datetime.strftime(order.date_created + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        order.delivery_time_str = delivery_time_str
         order.status_description = STATUS_MAP[order.status]
     return orders
 

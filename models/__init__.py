@@ -369,38 +369,49 @@ class Address(ndb.Model):
         return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
 
 
-class DeliveryType(ndb.Model):
-    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
-    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
-    min_sum = ndb.IntegerProperty(default=0)
-    time_picker = ndb.BooleanProperty(default=True)  # it's mark for show timepicker in client
-    time_picker_min = ndb.IntegerProperty(default=0)  # use only if time_picker
-    time_picker_max = ndb.IntegerProperty(default=86400)  # use only if time_picker
-    time_slot = ndb.BooleanProperty(default=False)  # it's mark for show to use slot_minute_values
-    delivery_zone = ndb.BooleanProperty(default=False)
-    slots = ndb.StringProperty(repeated=True)
-    slot_minute_values = ndb.IntegerProperty(repeated=True)  # it associates with slots
+class DeliverySlot(ndb.Model):
+    MINUTES = 0
+    STRINGS = 1
+    CHOICES = [MINUTES, STRINGS]
+
+    name = ndb.StringProperty(required=True)
+    slot_type = ndb.IntegerProperty(choices=CHOICES, default=MINUTES)
+    value = ndb.IntegerProperty()
 
     def dict(self):
         return {
-            'id': self.delivery_type,
-            'name': DELIVERY_MAP[self.delivery_type],
-            'min_sum': self.min_sum,
-            'time_picker': self.time_picker,
-            'slots': [{
-                'id': index,
-                'name': slot,
-                'value': self.slot_minute_values[index] if index < len(self.slot_minute_values) else None
-            } for index, slot in enumerate(self.slots)],
-            'time_picker_min': self.time_picker_min if self.time_picker else None,
-            'time_picker_max': self.time_picker_max if self.time_picker else None
+            'id': str(self.key.id()),
+            'name': self.name,
+            'value': self.value
         }
+
+
+class DeliveryType(ndb.Model):
+    MAX_DAYS = 7
+
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
+    min_sum = ndb.IntegerProperty(default=0)
+    min_time = ndb.IntegerProperty(default=0)
+    max_time = ndb.IntegerProperty(default=86400 * MAX_DAYS)
+    delivery_zone = ndb.BooleanProperty(default=False)
+    delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
 
     @classmethod
     def create(cls, delivery_type):
         delivery = cls(id=delivery_type, delivery_type=delivery_type)
         delivery.put()
         return delivery
+
+    def dict(self):
+        return {
+            'id': str(self.delivery_type),
+            'name': DELIVERY_MAP[self.delivery_type],
+            'min_sum': self.min_sum,
+            'time_picker_min': self.min_time,
+            'time_picker_max': self.max_time,
+            'slots': [slot.get().dict() for slot in self.delivery_slots]
+        }
 
 
 class Venue(ndb.Model):
@@ -471,9 +482,13 @@ class Venue(ndb.Model):
             'address': self.description
         }
 
-    def is_open(self, minutes_offset=0):
-        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset) + datetime.timedelta(hours=self.timezone_offset)
+    def is_open_by_delivery_time(self, delivery_time):
+        now = delivery_time + datetime.timedelta(hours=self.timezone_offset)
         return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
+
+    def is_open(self, minutes_offset=0):
+        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
+        return self.is_open_by_delivery_time(now)
 
 
 class ChosenGroupModifierDetails(ndb.Model):
@@ -528,7 +543,7 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty()
-    delivery_slot = ndb.StringProperty()
+    delivery_slot_id = ndb.IntegerProperty()
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
@@ -599,44 +614,38 @@ class Order(ndb.Model):
             })
         return response
 
-    def dict(self):
-        dct = {
-            "order_id": self.key.id(),
-            "total_sum": self.total_sum,
-            "wallet_payment": self.wallet_payment,
-            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
-            "status": self.status,
-            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
-            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
-            "payment_type_id": self.payment_type_id,
-            "client": Client.get_by_id(self.client_id).dict(),
-            "pan": self.pan,
-            "comment": self.comment,
-            "return_comment": self.return_comment,
-            "items": self._grouped_item_dict(self.item_details),
-            "gifts": self._grouped_item_dict(self.gift_details, gift=True)
-        }
-        return dct
-
     def status_dict(self):
         dct = {
             'order_id': str(self.key.id()),
             'status': self.status
         }
-
         return dct
 
     def history_dict(self):
-        dct = {
-            "order_id": str(self.key.id()),
-            "status": self.status,
+        dct = self.status_dict()
+        dct.update({
             "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
+            "delivery_slot": DeliverySlot.get_by_id(self.delivery_slot_id).dict() if self.delivery_slot_id else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
             "items": self._grouped_item_dict(self.item_details),
             "gifts": self._grouped_item_dict(self.gift_details, gift=True)
-        }
+        })
+        return dct
+
+    def dict(self):
+        dct = self.history_dict()
+        dct.update({
+            "total_sum": self.total_sum,
+            "wallet_payment": self.wallet_payment,
+            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
+            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
+            "client": Client.get_by_id(self.client_id).dict(),
+            "pan": self.pan,
+            "comment": self.comment,
+            "return_comment": self.return_comment
+        })
         return dct
 
     @staticmethod
