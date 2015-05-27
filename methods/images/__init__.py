@@ -35,6 +35,7 @@ def _save(image, filename):
         logging.warning('can not save JPG')
         image_file.close()
         return False
+    image_file.close()
     return True
 
 
