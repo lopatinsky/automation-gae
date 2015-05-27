@@ -1,5 +1,5 @@
 application: doubleb-automation-production
-version: 1
+version: test
 runtime: python27
 api_version: 1
 threadsafe: yes
