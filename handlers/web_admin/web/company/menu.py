@@ -157,6 +157,8 @@ class AddMenuItemHandler(CompanyBaseHandler):
             item.volume = float(self.request.get('volume'))
         if self.request.get('weight'):
             item.weight = float(self.request.get('weight'))
+        item.sequence_number = category.generate_sequence_number()
+        item.put()  # it is need to get id in saving image
         item.picture = self.request.get('picture') if self.request.get('picture') else None
         if self.request.get('image_file'):
             save_item_image(item, str(self.request.get('image_file')))

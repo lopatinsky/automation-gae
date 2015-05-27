@@ -40,21 +40,20 @@ class OrderHandler(ApiHandler):
         memcache.delete(self.cache_key)
 
     def post(self):
-        if not config.IN_PRODUCTION:
-            return self.render_error(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
-
         response_json = json.loads(self.request.get('order'))
-
-        success = check_items_and_gifts(response_json['items'], response_json.get('gifts', []))
-        if not success:
-            self.render_error(u'Выберите что-нибудь')
-
         order_id = int(response_json['order_id'])
         success, cache_key = check_order_id(order_id)
         if not success:
             self.abort(409)
         else:
             self.cache_key = cache_key
+
+        if not config.IN_PRODUCTION:
+            return self.render_error(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
+
+        success = check_items_and_gifts(response_json['items'], response_json.get('gifts', []))
+        if not success:
+            self.render_error(u'Выберите что-нибудь')
 
         delivery_type = int(response_json.get('delivery_type'))
 
