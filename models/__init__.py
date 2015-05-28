@@ -388,12 +388,13 @@ class DeliverySlot(ndb.Model):
 
 class DeliveryType(ndb.Model):
     MAX_DAYS = 7
+    ONE_DAY_SEC = 86400
 
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
     min_sum = ndb.IntegerProperty(default=0)
     min_time = ndb.IntegerProperty(default=0)
-    max_time = ndb.IntegerProperty(default=86400 * MAX_DAYS)
+    max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
     delivery_zone = ndb.BooleanProperty(default=False)
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
 
