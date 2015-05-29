@@ -12,6 +12,7 @@ from methods import alfa_bank, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
+from methods.rendering import timestamp
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts
@@ -102,9 +103,9 @@ class OrderHandler(ApiHandler):
         if delivery_time_minutes:                                     # used for old versions todo: remove
             delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
         delivery_time_picker = response_json.get('time_picker_value')
-        logging.info(delivery_time_picker)
         if delivery_time_picker:
-            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+            delivery_time_picker = datetime.strptime(delivery_time_picker, "%Y-%m-%d %H:%M:%S")
+            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
         else:
             if not delivery_time_minutes:                              # used for old versions todo: remove
                 return self.render_error(u'Необходимо выбрать время')
@@ -240,7 +241,10 @@ class OrderHandler(ApiHandler):
             memcache.delete(self.cache_key)
 
             self.response.status_int = 201
-            self.render_json({'order_id': order_id})
+            self.render_json({
+                'order_id': order_id,
+                'delivery_time': timestamp(delivery_time - timedelta(hours=venue.timezone_offset))
+            })
         else:
             self.render_error(u"Выбранный способ оплаты недоступен.")
 
@@ -366,7 +370,8 @@ class CheckOrderHandler(ApiHandler):
             delivery_time_minutes = int(delivery_time_minutes)
         delivery_time_picker = self.request.get('time_picker_value')
         if delivery_time_picker:
-            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+            delivery_time_picker = datetime.strptime(delivery_time_picker, "%Y-%m-%d %H:%M:%S")
+            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
         if delivery_slot:
             if delivery_slot.slot_type == DeliverySlot.MINUTES:
