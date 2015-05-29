@@ -373,6 +373,10 @@ class DeliverySlot(ndb.Model):
     MINUTES = 0
     STRINGS = 1
     CHOICES = [MINUTES, STRINGS]
+    CHOICES_MAP = {
+        MINUTES: u'Минуты',
+        STRINGS: u'Без значения'
+    }
 
     name = ndb.StringProperty(required=True)
     slot_type = ndb.IntegerProperty(choices=CHOICES, default=MINUTES)
@@ -381,8 +385,7 @@ class DeliverySlot(ndb.Model):
     def dict(self):
         return {
             'id': str(self.key.id()),
-            'name': self.name,
-            'value': self.value
+            'name': self.name
         }
 
 
@@ -450,6 +453,11 @@ class Venue(ndb.Model):
                 'group_modifier_choices': [str(item.get().choice_id) for item in self.group_choice_modifier_stop_list]
             }
         }
+
+    def get_delivery_type(self, delivery_type):
+        for delivery in self.delivery_types:
+            if delivery.delivery_type == delivery_type:
+                return delivery
 
     def dict(self, user_location=None):
         distance = 0

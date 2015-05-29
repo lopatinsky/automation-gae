@@ -4,7 +4,6 @@ __author__ = 'dvpermyakov'
 
 from auth import CompanySignupHandler, LoginHandler, LogoutHandler
 from base import CompanyBaseHandler
-from payment_type import PaymentTypesHandler
 
 
 from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuItemHandler, AddSingleModifierHandler,\
@@ -21,7 +20,8 @@ from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, 
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler, ListDocsHandler
-from delivery_types import DeliveryTypesHandler
+from payment_type import PaymentTypesHandler
+from delivery_types import DeliveryTypesHandler, DeliverySlotListHandler, DeliverySlotAddHandler, ChooseSlotsHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

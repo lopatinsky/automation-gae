@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбрать слоты</title>
+</head>
+<body>
+    <h3>Выберите слоты для {{ venue.title }}</h3>
+    <form method="post">
+        <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
+        <input type="text" name="delivery_type" value="{{ delivery_type.delivery_type }}" hidden="">
+        <br>
+        {% for slot in slots %}
+             <label>
+                 <input type="checkbox" {% if slot.key in delivery_type.delivery_slots %} checked {% endif %} name={{ slot.key.id() }}>
+                 {{ slot.name }}
+             </label><br>
+        {% endfor %}
+        <label><input type="submit" value="Сохранить"></label>
+        <a href="/company/delivery/types">Назад</a>
+    </form>
+</body>
+</html>

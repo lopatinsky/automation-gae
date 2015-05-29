@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить слот</title>
+</head>
+<body>
+    <form>
+        <label>
+            Тип:
+            <select name="type">
+            {% for type in types %}
+              <option value="{{ type['value'] }}" {% if slot and slot.slot_type == type['value'] %} selected {% endif %}>
+                  {{ type['name'] }}
+              </option>
+            {% endfor %}
+         </select>
+        </label><br>
+        <label>
+            Название:
+            <input type="text" name="name" value="{{ slot.name if slot else '' }}">
+        </label><br>
+        <label>
+            Значение
+            <input type="text" name="value" value="{{ slot.value if slot else '' }}">
+        </label><br>
+        <input type="submit">
+        <a href="/company/delivery/slots/list">Назад</a>
+    </form>
+</body>
+</html>
