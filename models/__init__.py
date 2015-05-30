@@ -27,6 +27,18 @@ CANCELED_BY_BARISTA_ORDER = 3
 CREATING_ORDER = 4
 CONFIRM_ORDER = 5
 
+STATUSES = [NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER]
+NOT_CANCELED_STATUSES = [NEW_ORDER, READY_ORDER, CREATING_ORDER, CONFIRM_ORDER]
+
+STATUS_MAP = {
+    NEW_ORDER: u"Новый",
+    READY_ORDER: u"Выдан",
+    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
+    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
+    CREATING_ORDER: u'Созданный заказ',
+    CONFIRM_ORDER: u'Подтвержденный заказ'
+}
+
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
@@ -46,15 +58,6 @@ DELIVERY_MAP = {
     SELF: u'С собой',
     IN_CAFE: u'В кафе',
     DELIVERY: u'Доставка'
-}
-
-STATUS_MAP = {
-    NEW_ORDER: u"Новый",
-    READY_ORDER: u"Выдан",
-    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
-    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
-    CREATING_ORDER: u'Созданный заказ',
-    CONFIRM_ORDER: u'Подтвержденный заказ'
 }
 
 
@@ -314,7 +317,8 @@ class PromoCondition(ndb.Model):
     CHECK_FIRST_ORDER = 1
     CHECK_MAX_ORDER_SUM = 2
     CHECK_ITEM_IN_ORDER = 3
-    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER]
+    CHECK_REPEATED_ORDERS = 4
+    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
@@ -324,13 +328,13 @@ class PromoCondition(ndb.Model):
 
 class Promo(ndb.Model):
     title = ndb.StringProperty(required=True)
-    title_for_user = ndb.StringProperty()
+    #title_for_user = ndb.StringProperty()  # not used todo: sure?
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
-    priority = ndb.IntegerProperty(default=0)
+    priority = ndb.IntegerProperty(default=0)                 # Not Implemented
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
 
@@ -344,7 +348,7 @@ class Promo(ndb.Model):
     def validation_dict(self):
         return {
             'id': self.key.id(),
-            'text': self.title_for_user if self.title_for_user else self.title
+            'text': self.title
         }
 
 
