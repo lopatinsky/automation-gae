@@ -12,6 +12,7 @@ from methods import alfa_bank, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
+from methods.rendering import timestamp, STR_TIME_FORMAT, STR_DATE_FORMAT
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts
@@ -102,9 +103,10 @@ class OrderHandler(ApiHandler):
         if delivery_time_minutes:                                     # used for old versions todo: remove
             delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
         delivery_time_picker = response_json.get('time_picker_value')
-        logging.info(delivery_time_picker)
         if delivery_time_picker:
-            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+            delivery_time_picker = datetime.strptime(delivery_time_picker, STR_TIME_FORMAT)
+            if delivery_slot.slot_type != DeliverySlot.STRINGS:
+                delivery_time_picker -= timedelta(hours=venue.timezone_offset)
         else:
             if not delivery_time_minutes:                              # used for old versions todo: remove
                 return self.render_error(u'Необходимо выбрать время')
@@ -113,10 +115,8 @@ class OrderHandler(ApiHandler):
             if delivery_slot.slot_type == DeliverySlot.MINUTES:
                 delivery_time_minutes = delivery_slot.value
             elif delivery_slot.slot_type == DeliverySlot.STRINGS:
-                if delivery_time_minutes:
-                    return self.render_error(u'Невозможно выьрать минуты для данного слота')
-            if delivery_time_picker:
-                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
+                if delivery_time_picker:
+                    delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
 
         delivery_time = None
         if delivery_time_picker:
@@ -124,8 +124,7 @@ class OrderHandler(ApiHandler):
         if delivery_time_minutes or delivery_time_minutes == 0:
             if not delivery_time:
                 delivery_time = datetime.utcnow()
-            else:
-                delivery_time += timedelta(minutes=delivery_time_minutes)
+            delivery_time += timedelta(minutes=delivery_time_minutes)
 
         request_total_sum = response_json.get("total_sum")
 
@@ -240,7 +239,16 @@ class OrderHandler(ApiHandler):
             memcache.delete(self.cache_key)
 
             self.response.status_int = 201
-            self.render_json({'order_id': order_id})
+            self.render_json({
+                'order_id': order_id,
+                'delivery_time': datetime.strftime(delivery_time - timedelta(hours=venue.timezone_offset),
+                                                   STR_DATE_FORMAT)
+                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
+                else datetime.strftime(delivery_time - timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
+                'delivery_slot_name': delivery_slot.name
+                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
+                else None
+            })
         else:
             self.render_error(u"Выбранный способ оплаты недоступен.")
 
@@ -366,7 +374,8 @@ class CheckOrderHandler(ApiHandler):
             delivery_time_minutes = int(delivery_time_minutes)
         delivery_time_picker = self.request.get('time_picker_value')
         if delivery_time_picker:
-            delivery_time_picker = datetime.fromtimestamp(delivery_time_picker)
+            delivery_time_picker = datetime.strptime(delivery_time_picker, "%Y-%m-%d %H:%M:%S")
+            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
         if delivery_slot:
             if delivery_slot.slot_type == DeliverySlot.MINUTES:

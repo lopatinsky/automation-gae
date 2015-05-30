@@ -373,6 +373,10 @@ class DeliverySlot(ndb.Model):
     MINUTES = 0
     STRINGS = 1
     CHOICES = [MINUTES, STRINGS]
+    CHOICES_MAP = {
+        MINUTES: u'Минуты',
+        STRINGS: u'Без значения'
+    }
 
     name = ndb.StringProperty(required=True)
     slot_type = ndb.IntegerProperty(choices=CHOICES, default=MINUTES)
@@ -381,19 +385,19 @@ class DeliverySlot(ndb.Model):
     def dict(self):
         return {
             'id': str(self.key.id()),
-            'name': self.name,
-            'value': self.value
+            'name': self.name
         }
 
 
 class DeliveryType(ndb.Model):
     MAX_DAYS = 7
+    ONE_DAY_SEC = 86400
 
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
     min_sum = ndb.IntegerProperty(default=0)
     min_time = ndb.IntegerProperty(default=0)
-    max_time = ndb.IntegerProperty(default=86400 * MAX_DAYS)
+    max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
     delivery_zone = ndb.BooleanProperty(default=False)
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
 
@@ -449,6 +453,11 @@ class Venue(ndb.Model):
                 'group_modifier_choices': [str(item.get().choice_id) for item in self.group_choice_modifier_stop_list]
             }
         }
+
+    def get_delivery_type(self, delivery_type):
+        for delivery in self.delivery_types:
+            if delivery.delivery_type == delivery_type:
+                return delivery
 
     def dict(self, user_location=None):
         distance = 0
@@ -555,7 +564,7 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     address = ndb.LocalStructuredProperty(Address)
-    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
+    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)

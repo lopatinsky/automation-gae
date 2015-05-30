@@ -4,7 +4,6 @@ __author__ = 'dvpermyakov'
 
 from auth import CompanySignupHandler, LoginHandler, LogoutHandler
 from base import CompanyBaseHandler
-from payment_type import PaymentTypesHandler
 
 
 from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuItemHandler, AddSingleModifierHandler,\

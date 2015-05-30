@@ -1,5 +1,6 @@
 # coding=utf-8
 import copy
+from datetime import datetime, timedelta
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
@@ -7,6 +8,41 @@ from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails, DeliverySlot
 from promos import apply_promos
+
+DAY_SECONDS = 24 * 60 * 60
+HOUR_SECONDS = 60 * 60
+MINUTE_SECONDS = 60
+
+MAX_SECONDS_LOSS = 30
+
+
+def _get_now(delivery_slot, only_day=False):
+    now = datetime.utcnow()
+    if delivery_slot.slot_type == DeliverySlot.STRINGS or only_day:
+        now = now.replace(hour=0, minute=0, second=0)
+    return now
+
+
+def _parse_time(time):
+    def parse(time):
+        if time / 10 == 0:
+            time = '0%s' % time
+        return time
+
+    days = time / DAY_SECONDS
+    time %= DAY_SECONDS
+    hours = parse(time / HOUR_SECONDS)
+    time %= HOUR_SECONDS
+    minutes = parse(time / MINUTE_SECONDS)
+
+    description = u''
+    if days or minutes != '00' or hours != '00':
+        description += u' на'
+    if days:
+        description += u' %s дн.' % days
+    if minutes != '00' or hours != '00':
+        description += u' %sч:%sм' % (hours, minutes)
+    return description
 
 
 def _nice_join(strs):
@@ -17,12 +53,23 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _check_delivery_type(venue, address, delivery_type, total_sum, errors):
+def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum, errors):
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
             if delivery.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery.min_sum
+                errors.append(description)
+            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
+                description = u'Выберите время больше текущего'
+                if delivery_slot.slot_type == DeliverySlot.STRINGS:
+                    description += u' дня'
+                else:
+                    description += u' времени'
+                description += _parse_time(delivery.min_time)
+                errors.append(description)
+            if delivery_time > _get_now(delivery_slot, only_day=True) + timedelta(seconds=delivery.max_time):
+                description = u'Невозможно выбрать время больше текущего дня%s' % _parse_time(delivery.max_time)
                 errors.append(description)
             if not description and delivery_type == DELIVERY:
                 address = address['address']
@@ -355,7 +402,8 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
     valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
-    valid = _check_delivery_type(venue, address, delivery_type, total_sum_without_promos, errors) and valid
+    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos,
+                                 errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
 
     success, rest_points, full_points = _check_gifts(gifts, client, errors)
