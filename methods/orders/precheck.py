@@ -1,6 +1,9 @@
+from datetime import datetime, timedelta
+import logging
 import re
 from google.appengine.api import memcache
-from models import Order, Client, Venue, DELIVERY, STATUS_AVAILABLE
+from methods.rendering import STR_TIME_FORMAT
+from models import Order, Client, Venue, DELIVERY, STATUS_AVAILABLE, DeliverySlot
 
 __author__ = 'dvpermyakov'
 
@@ -48,3 +51,29 @@ def get_venue_by_address(address):
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE and not delivery.delivery_zone:
                 if address['address']['city'] == venue.address.city:
                     return venue
+
+
+def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
+    if delivery_time_picker:
+        delivery_time_picker = datetime.strptime(delivery_time_picker, STR_TIME_FORMAT)
+        if not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS:
+            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
+
+    if delivery_slot:
+        logging.info(delivery_slot)
+        if delivery_slot.slot_type == DeliverySlot.MINUTES:
+            delivery_time_minutes = delivery_slot.value
+        elif delivery_slot.slot_type == DeliverySlot.STRINGS:
+            if delivery_time_picker:
+                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
+
+    delivery_time = None
+    if delivery_time_picker:
+        delivery_time = delivery_time_picker
+    if delivery_time_minutes or delivery_time_minutes == 0:
+        if not delivery_time:
+            delivery_time = datetime.utcnow()
+        delivery_time += timedelta(minutes=delivery_time_minutes)
+    logging.info(delivery_time)
+    logging.info(delivery_slot)
+    return delivery_time

@@ -15,7 +15,8 @@ from methods.orders.cancel import cancel_order
 from methods.rendering import timestamp, STR_TIME_FORMAT, STR_DATE_FORMAT
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts, \
+    get_delivery_time
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot
 from google.appengine.api import taskqueue
@@ -103,28 +104,10 @@ class OrderHandler(ApiHandler):
         if delivery_time_minutes:                                     # used for old versions todo: remove
             delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
         delivery_time_picker = response_json.get('time_picker_value')
-        if delivery_time_picker:
-            delivery_time_picker = datetime.strptime(delivery_time_picker, STR_TIME_FORMAT)
-            if delivery_slot.slot_type != DeliverySlot.STRINGS:
-                delivery_time_picker -= timedelta(hours=venue.timezone_offset)
-        else:
-            if not delivery_time_minutes:                              # used for old versions todo: remove
-                return self.render_error(u'Необходимо выбрать время')
 
-        if delivery_slot:
-            if delivery_slot.slot_type == DeliverySlot.MINUTES:
-                delivery_time_minutes = delivery_slot.value
-            elif delivery_slot.slot_type == DeliverySlot.STRINGS:
-                if delivery_time_picker:
-                    delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
-
-        delivery_time = None
-        if delivery_time_picker:
-            delivery_time = delivery_time_picker
-        if delivery_time_minutes or delivery_time_minutes == 0:
-            if not delivery_time:
-                delivery_time = datetime.utcnow()
-            delivery_time += timedelta(minutes=delivery_time_minutes)
+        delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
+        if not delivery_time:
+            return self.render_error(u'Неправильный формат времени')
 
         request_total_sum = response_json.get("total_sum")
 
@@ -241,13 +224,8 @@ class OrderHandler(ApiHandler):
             self.response.status_int = 201
             self.render_json({
                 'order_id': order_id,
-                'delivery_time': datetime.strftime(delivery_time - timedelta(hours=venue.timezone_offset),
-                                                   STR_DATE_FORMAT)
-                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-                else datetime.strftime(delivery_time - timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
-                'delivery_slot_name': delivery_slot.name
-                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-                else None
+                'delivery_time': validation_result['delivery_time'],
+                'delivery_slot_name': validation_result['delivery_slot_name']
             })
         else:
             self.render_error(u"Выбранный способ оплаты недоступен.")
@@ -365,42 +343,25 @@ class CheckOrderHandler(ApiHandler):
 
         delivery_slot_id = self.request.get('delivery_slot_id')
         if delivery_slot_id:
+            delivery_slot_id = int(delivery_slot_id)
             delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
         else:
             delivery_slot = None
 
-        delivery_time_minutes = self.request.get('delivery_time')
-        if delivery_time_minutes:
-            delivery_time_minutes = int(delivery_time_minutes)
+        delivery_time_minutes = self.request.get('delivery_time')     # used for old versions todo: remove
+        if delivery_time_minutes:                                     # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
         delivery_time_picker = self.request.get('time_picker_value')
-        if delivery_time_picker:
-            delivery_time_picker = datetime.strptime(delivery_time_picker, "%Y-%m-%d %H:%M:%S")
-            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
-        if delivery_slot:
-            if delivery_slot.slot_type == DeliverySlot.MINUTES:
-                delivery_time_minutes = delivery_slot.value
-            elif delivery_slot.slot_type == DeliverySlot.STRINGS:
-                if delivery_time_minutes:
-                    self.abort(400)
-            if delivery_time_picker:
-                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
-
-        delivery_time = None
-        if delivery_time_picker:
-            delivery_time = delivery_time_picker
-        if delivery_time_minutes or delivery_time_minutes == 0:
-            if not delivery_time:
-                delivery_time = datetime.utcnow()
-            else:
-                delivery_time += timedelta(minutes=delivery_time_minutes)
+        delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
+        if not delivery_time:
+            self.abort(400)
 
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):
             gifts = json.loads(self.request.get('gifts'))
         else:
             gifts = []
-
         result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot,
                                        delivery_type)
         self.render_json(result)

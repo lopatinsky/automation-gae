@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
+from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
 from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails, DeliverySlot
@@ -18,7 +19,7 @@ MAX_SECONDS_LOSS = 30
 
 def _get_now(delivery_slot, only_day=False):
     now = datetime.utcnow()
-    if delivery_slot.slot_type == DeliverySlot.STRINGS or only_day:
+    if (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS) or only_day:
         now = now.replace(hour=0, minute=0, second=0)
     return now
 
@@ -62,7 +63,7 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
                 errors.append(description)
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
-                if delivery_slot.slot_type == DeliverySlot.STRINGS:
+                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
                     description += u' дня'
                 else:
                     description += u' времени'
@@ -446,6 +447,11 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
         'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
+        'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATE_FORMAT)
+        if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
+        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
+        'delivery_slot_name': delivery_slot.name
+        if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }
     logging.info('validation result = %s' % result)
     logging.info('total sum = %s' % total_sum)
