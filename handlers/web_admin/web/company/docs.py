@@ -32,6 +32,8 @@ class AboutCompanyHandler(CompanyBaseHandler):
     def get(self):
         values = _get_values()
         namespace = namespace_manager.get_namespace()
+        if not namespace:
+            namespace = '1'
         values.update({
             'licence_url': u'http://%s.%s/docs/licence_agreement.html' % (namespace, urlparse(self.request.url).hostname),
             'payment_rules_url': u'http://%s.%s/docs/payment_rules.html' % (namespace, urlparse(self.request.url).hostname)
