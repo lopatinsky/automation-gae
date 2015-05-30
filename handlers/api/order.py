@@ -105,7 +105,8 @@ class OrderHandler(ApiHandler):
         delivery_time_picker = response_json.get('time_picker_value')
         if delivery_time_picker:
             delivery_time_picker = datetime.strptime(delivery_time_picker, "%Y-%m-%d %H:%M:%S")
-            delivery_time_picker -= timedelta(hours=venue.timezone_offset)
+            if delivery_slot.slot_type != DeliverySlot.STRINGS:
+                delivery_time_picker -= timedelta(hours=venue.timezone_offset)
         else:
             if not delivery_time_minutes:                              # used for old versions todo: remove
                 return self.render_error(u'Необходимо выбрать время')
@@ -114,10 +115,8 @@ class OrderHandler(ApiHandler):
             if delivery_slot.slot_type == DeliverySlot.MINUTES:
                 delivery_time_minutes = delivery_slot.value
             elif delivery_slot.slot_type == DeliverySlot.STRINGS:
-                if delivery_time_minutes:
-                    return self.render_error(u'Невозможно выьрать минуты для данного слота')
-            if delivery_time_picker:
-                delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
+                if delivery_time_picker:
+                    delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
 
         delivery_time = None
         if delivery_time_picker:
@@ -125,8 +124,7 @@ class OrderHandler(ApiHandler):
         if delivery_time_minutes or delivery_time_minutes == 0:
             if not delivery_time:
                 delivery_time = datetime.utcnow()
-            else:
-                delivery_time += timedelta(minutes=delivery_time_minutes)
+            delivery_time += timedelta(minutes=delivery_time_minutes)
 
         request_total_sum = response_json.get("total_sum")
 
