@@ -7,16 +7,16 @@ __author__ = 'dvpermyakov'
 
 def _get_values():
     return {
-        'company_name': 'Meat Me Co',
-        'app_name': 'Meat Me',
-        'legal_person': u'ИП Иванов Иван Иванович',
-        'site': 'www.site.ru',
-        'legal_address': u'ул. Пушкина, дом. Колотушкина',
-        'legal_inn': 1241241241,
-        'legal_kpp': 412412412,
-        'legal_ogrn': 14124124124,
-        'legal_contacts': '+79152965155',
-        'legal_support_email': 'dvpermyakov1@gmail.com'
+        'company_name': config.COMPANY_NAME,
+        'app_name': config.APP_NAME,
+        'legal_person': config.LEGAL_PERSON,
+        'site': config.SUPPORT_SITE,
+        'legal_address': config.COMPANY_ADDRESS,
+        'legal_inn': config.INN,
+        'legal_kpp': config.KPP,
+        'legal_ogrn': config.OGRN,
+        'legal_contacts': config.LEGAL_CONTACTS,
+        'legal_support_email': config.LEGAL_EMAIL
     }
 
 

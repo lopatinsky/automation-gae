@@ -167,7 +167,6 @@ app = WSGIApplication([
             PathPrefixRoute('/set', [
                 Route('/about', company_admin.SetAboutCompanyHandler),
             ]),
-            Route('/list', company_admin.ListDocsHandler),
             Route('/about', company_admin.AboutCompanyHandler),
         ]),
 

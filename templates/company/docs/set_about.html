@@ -7,12 +7,20 @@
     {% include '/company/header.html' %}
     <form method="post">
         <label>
-            Описание компании:
+            Наименование приложения:
+            <input type="text" value="{{ name }}" name="name">
+        </label><br>
+        <label>
+            Описание приложения:
             <input type="text" value="{{ info }}" name="info">
         </label><br>
         <label>
-            Наименование:
-            <input type="text" value="{{ name }}" name="name">
+            Наименование организации:
+            <input type="text" value="{{ company_name }}" name="company_name">
+        </label><br>
+        <label>
+            Адрес организации:
+            <input type="text" value="{{ company_address }}" name="company_address">
         </label><br>
         <label>
             Сайт:
@@ -27,12 +35,36 @@
             <input type="text" value="{{ emails }}" name="emails">
         </label><br>
         <label>
-            Телефон для доставки:
+            Телефон для оповещений о заказах:
             <input type="text" value="{{ delivery_phone }}" name="delivery_phone">
         </label><br>
         <label>
-            Emails для доставки:
+            Emails для оповещений о заказах:
             <input type="text" value="{{ delivery_emails }}" name="delivery_emails">
+        </label><br>
+        <label>
+            Юридическое лицо:
+            <input type="text" value="{{ legal_person }}" name="legal_person">
+        </label><br>
+        <label>
+            Контакты юридического лица:
+            <input type="text" value="{{ legal_contacts }}" name="legal_contacts">
+        </label><br>
+        <label>
+            Email юридического лица:
+            <input type="text" value="{{ legal_email }}" name="legal_email">
+        </label><br>
+        <label>
+            ИНН:
+            <input type="text" value="{{ inn }}" name="inn">
+        </label><br>
+        <label>
+            КПП:
+            <input type="text" value="{{ kpp }}" name="kpp">
+        </label><br>
+        <label>
+            ОГРН:
+            <input type="text" value="{{ ogrn }}" name="ogrn">
         </label><br>
         <input type="submit">
     </form>
