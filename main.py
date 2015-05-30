@@ -31,7 +31,6 @@ app = WSGIApplication([
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
 
-        Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
         PathPrefixRoute('/report', [
             Route('/clients', maintenance.ClientsReportHandler),
@@ -47,7 +46,6 @@ app = WSGIApplication([
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
-        Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 
