@@ -93,9 +93,11 @@ class OrderHandler(ApiHandler):
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
 
-        delivery_slot_id = response_json.get('delivery_slot_id')
+        delivery_slot_id = int(response_json.get('delivery_slot_id'))
         if delivery_slot_id:
             delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+            if not delivery_slot:
+                return self.render_error(u'Неправильный формат времени')
         else:
             delivery_slot = None
             delivery_slot_id = None
@@ -164,9 +166,9 @@ class OrderHandler(ApiHandler):
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
-                payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details, delivery_type=delivery_type, delivery_slot_id=delivery_slot_id,
-                address=address_obj)
+                delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
+                promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
+                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj)
             self.order.put()
 
             if wallet_payment > 0:

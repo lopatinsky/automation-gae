@@ -556,6 +556,7 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty()
+    delivery_time_str = ndb.StringProperty()
     delivery_slot_id = ndb.IntegerProperty()
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
@@ -638,6 +639,7 @@ class Order(ndb.Model):
         dct = self.status_dict()
         dct.update({
             "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
+            "delivery_time_str": self.delivery_time_str,
             "delivery_slot": DeliverySlot.get_by_id(self.delivery_slot_id).dict() if self.delivery_slot_id else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
