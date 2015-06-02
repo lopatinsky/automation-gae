@@ -12,7 +12,6 @@ from methods import alfa_bank, empatika_promos, orders, empatika_wallet
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
-from methods.rendering import timestamp, STR_TIME_FORMAT, STR_DATE_FORMAT
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts, \
@@ -93,9 +92,9 @@ class OrderHandler(ApiHandler):
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
 
-        delivery_slot_id = int(response_json.get('delivery_slot_id'))
+        delivery_slot_id = response_json.get('delivery_slot_id')
         if delivery_slot_id:
-            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+            delivery_slot = DeliverySlot.get_by_id(int(delivery_slot_id))
             if not delivery_slot:
                 return self.render_error(u'Неправильный формат времени')
         else:
