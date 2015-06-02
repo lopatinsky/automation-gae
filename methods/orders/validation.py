@@ -17,6 +17,16 @@ MINUTE_SECONDS = 60
 MAX_SECONDS_LOSS = 30
 
 
+def _get_substitute(origin_item, venue):
+    for item in MenuItem.query(MenuItem.title == origin_item.title).fetch():
+        if origin_item.key == item.key:
+            continue
+        if venue.key not in item.restrictions:
+            return {
+                'item_id': item.key.id()
+            }
+
+
 def _get_now(delivery_slot, only_day=False):
     now = datetime.utcnow()
     if (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS) or only_day:
@@ -162,6 +172,9 @@ def _check_restrictions(venue, item_dicts, gift_dicts, errors):
                 description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
+                substitute = _get_substitute(item, venue)
+                if substitute:
+                    item_dict['substitutes'].append(substitute)
         return description
 
     items_description = check(item_dicts)
@@ -182,6 +195,9 @@ def _check_stop_list(venue, item_dicts, gift_dicts, errors):
                 description = u'В "%s" позиция "%s" временно недоступна' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
+                substitute = _get_substitute(item, venue)
+                if substitute:
+                    item_dict['substitutes'].append(substitute)
             for single_modifier in item_dict['single_modifiers']:
                 if single_modifier.key in venue.single_modifiers_stop_list:
                     description = u'В "%s" добавка "%s" временно недоступна' % (venue.title, single_modifier.title)
@@ -347,7 +363,8 @@ def set_item_dicts(items, is_gift):
             'price': item.total_price if not is_gift else 0,
             'revenue': item.total_price if not is_gift else 0,
             'errors': [],
-            'promos': []
+            'promos': [],
+            'substitutes': []
         })
     return item_dicts
 
