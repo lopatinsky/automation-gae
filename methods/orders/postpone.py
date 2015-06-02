@@ -1,7 +1,8 @@
 # coding=utf-8
 from datetime import timedelta
 from methods import push
-from models import Venue, Client
+from methods.rendering import STR_TIME_FORMAT, STR_DATE_FORMAT
+from models import Venue, Client, DeliverySlot
 
 __author__ = 'dvpermyakov'
 
@@ -12,7 +13,14 @@ def postpone_order(order, minutes):
     venue = Venue.get_by_id(order.venue_id)
     local_delivery_time = order.delivery_time + timedelta(hours=venue.timezone_offset)
 
-    order.delivery_time_str = local_delivery_time.strftime("%Y-%m-%d %H:%M:%S")
+    delivery_slot = None
+    if order.delivery_slot_id:
+        delivery_slot = DeliverySlot.get_by_id(order.delivery_slot_id)
+    if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
+        delivery_time_str = local_delivery_time.strftime(STR_TIME_FORMAT)
+    else:
+        delivery_time_str = local_delivery_time.strftime(STR_DATE_FORMAT)
+    order.delivery_time_str = delivery_time_str
     order.put()
 
     time_str = local_delivery_time.strftime("%H:%M")
