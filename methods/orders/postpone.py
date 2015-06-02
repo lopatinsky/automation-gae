@@ -8,10 +8,13 @@ __author__ = 'dvpermyakov'
 
 def postpone_order(order, minutes):
     order.delivery_time += timedelta(minutes=minutes)
-    order.put()
 
     venue = Venue.get_by_id(order.venue_id)
     local_delivery_time = order.delivery_time + timedelta(hours=venue.timezone_offset)
+
+    order.delivery_time_str = local_delivery_time.strftime("%Y-%m-%d %H:%M:%S")
+    order.put()
+
     time_str = local_delivery_time.strftime("%H:%M")
     client = Client.get_by_id(order.client_id)
     push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order.key.id(), time_str)
