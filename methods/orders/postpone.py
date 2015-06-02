@@ -17,9 +17,9 @@ def postpone_order(order, minutes):
     if order.delivery_slot_id:
         delivery_slot = DeliverySlot.get_by_id(order.delivery_slot_id)
     if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
-        delivery_time_str = local_delivery_time.strftime(STR_TIME_FORMAT)
-    else:
         delivery_time_str = local_delivery_time.strftime(STR_DATE_FORMAT)
+    else:
+        delivery_time_str = local_delivery_time.strftime(STR_TIME_FORMAT)
     order.delivery_time_str = delivery_time_str
     order.put()
 
