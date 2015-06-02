@@ -1,5 +1,6 @@
 import json
 from methods.auth import company_user_required
+from methods.images import save_item_image, resize_image, MAX_SIZE, ICON_SIZE
 from methods.unique import unique
 from base import CompanyBaseHandler
 
@@ -8,6 +9,12 @@ __author__ = 'dvpermyakov'
 from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier,\
     GROUP_MODIFIER, GroupModifier, GroupModifierChoice
 import logging
+
+
+class NoneHandler(CompanyBaseHandler):  # use to erase 404 error
+    @company_user_required
+    def get(self):
+        self.redirect('/company/menu/main')
 
 
 class MainMenuHandler(CompanyBaseHandler):
@@ -150,8 +157,13 @@ class AddMenuItemHandler(CompanyBaseHandler):
             item.volume = float(self.request.get('volume'))
         if self.request.get('weight'):
             item.weight = float(self.request.get('weight'))
-        item.picture = self.request.get('picture') if self.request.get('picture') else None
         item.sequence_number = category.generate_sequence_number()
+        item.put()  # it is need to get id in saving image
+        item.picture = self.request.get('picture') if self.request.get('picture') else None
+        if self.request.get('image_file'):
+            save_item_image(item, str(self.request.get('image_file')))
+        if item.picture:
+            resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
         category.menu_items.append(item.key)
         category.put()
@@ -193,7 +205,14 @@ class EditMenuItemHandler(CompanyBaseHandler):
             item.volume = float(self.request.get('volume'))
         if self.request.get('weight'):
             item.weight = float(self.request.get('weight'))
+        item.picture = None
+        item.cut_picture = None
+        item.icon = None
         item.picture = self.request.get('picture') if self.request.get('picture') else None
+        if self.request.get('image_file'):
+            save_item_image(item, str(self.request.get('image_file')))
+        if item.picture:
+            resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 

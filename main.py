@@ -6,6 +6,7 @@ from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 import handlers.web_admin.web.company as company_admin
 import handlers.web_admin.web.company.delivery as company_delivery
+import handlers.web_admin.web.company.excel as company_excel
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -30,7 +31,6 @@ app = WSGIApplication([
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
 
-        Route('/admins', maintenance.AdminsHandler),
         Route('/report', maintenance.ReportHandler),
         PathPrefixRoute('/report', [
             Route('/clients', maintenance.ClientsReportHandler),
@@ -46,7 +46,6 @@ app = WSGIApplication([
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
 
-        Route('/check_menu', maintenance.CheckMenuHandler),
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 
@@ -128,6 +127,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 
         PathPrefixRoute('/shared', [
@@ -164,14 +164,22 @@ app = WSGIApplication([
                 Route('/new', company_delivery.NewDeliveryOrdersHandler),
             ]),
             Route('/types', company_admin.DeliveryTypesHandler),
+            PathPrefixRoute('/slots', [
+                Route('/list', company_admin.DeliverySlotListHandler),
+                Route('/add', company_admin.DeliverySlotAddHandler),
+                Route('/choose', company_admin.ChooseSlotsHandler),
+            ]),
         ]),
 
         PathPrefixRoute('/docs', [
             PathPrefixRoute('/set', [
                 Route('/about', company_admin.SetAboutCompanyHandler),
             ]),
-            Route('/list', company_admin.ListDocsHandler),
             Route('/about', company_admin.AboutCompanyHandler),
+        ]),
+
+        PathPrefixRoute('/excel', [
+            Route('/menu', company_excel.ParseMenuHandler),
         ]),
 
         PathPrefixRoute('/menu', [
@@ -189,6 +197,7 @@ app = WSGIApplication([
                 Route('/edit', company_admin.EditMenuItemHandler),
                 Route('/up', company_admin.UpProductHandler),
                 Route('/down', company_admin.DownProductHandler),
+                Route('/None', company_admin.NoneHandler),  # just erase 404 error
             ]),
             Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
             PathPrefixRoute('/modifiers', [

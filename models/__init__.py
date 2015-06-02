@@ -28,6 +28,18 @@ CANCELED_BY_BARISTA_ORDER = 3
 CREATING_ORDER = 4
 CONFIRM_ORDER = 5
 
+STATUSES = [NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER]
+NOT_CANCELED_STATUSES = [NEW_ORDER, READY_ORDER, CREATING_ORDER, CONFIRM_ORDER]
+
+STATUS_MAP = {
+    NEW_ORDER: u"Новый",
+    READY_ORDER: u"Выдан",
+    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
+    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
+    CREATING_ORDER: u'Созданный заказ',
+    CONFIRM_ORDER: u'Подтвержденный заказ'
+}
+
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
 
@@ -47,15 +59,6 @@ DELIVERY_MAP = {
     SELF: u'С собой',
     IN_CAFE: u'В кафе',
     DELIVERY: u'Доставка'
-}
-
-STATUS_MAP = {
-    NEW_ORDER: u"Новый",
-    READY_ORDER: u"Выдан",
-    CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
-    CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
-    CREATING_ORDER: u'Созданный заказ',
-    CONFIRM_ORDER: u'Подтвержденный заказ'
 }
 
 
@@ -146,7 +149,9 @@ class GroupModifier(ndb.Model):
 class MenuItem(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     description = ndb.StringProperty(indexed=False)
-    picture = ndb.StringProperty(indexed=False)
+    picture = ndb.StringProperty(indexed=False)  # source
+    cut_picture = ndb.StringProperty(indexed=False)
+    icon = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
     cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False, default=0)
@@ -175,7 +180,8 @@ class MenuItem(ndb.Model):
             'description': self.description,
             'price':  float(self.price) / 100.0,  # в рублях
             'kal': self.kal,
-            'pic': self.picture,
+            'pic': self.picture if not self.cut_picture else self.cut_picture,
+            'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
             'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
@@ -312,7 +318,8 @@ class PromoCondition(ndb.Model):
     CHECK_FIRST_ORDER = 1
     CHECK_MAX_ORDER_SUM = 2
     CHECK_ITEM_IN_ORDER = 3
-    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER]
+    CHECK_REPEATED_ORDERS = 4
+    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
@@ -322,13 +329,13 @@ class PromoCondition(ndb.Model):
 
 class Promo(ndb.Model):
     title = ndb.StringProperty(required=True)
-    title_for_user = ndb.StringProperty()
+    #title_for_user = ndb.StringProperty()  # not used todo: sure?
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
-    priority = ndb.IntegerProperty(default=0)
+    priority = ndb.IntegerProperty(default=0)                 # Not Implemented
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
 
@@ -342,7 +349,7 @@ class Promo(ndb.Model):
     def validation_dict(self):
         return {
             'id': self.key.id(),
-            'text': self.title_for_user if self.title_for_user else self.title
+            'text': self.title
         }
 
 
@@ -357,6 +364,7 @@ class CashBack(ndb.Model):
 class Address(ndb.Model):
     lat = ndb.FloatProperty()
     lon = ndb.FloatProperty()
+    country = ndb.StringProperty()
     city = ndb.StringProperty()
     street = ndb.StringProperty()
     home = ndb.StringProperty()
@@ -366,38 +374,53 @@ class Address(ndb.Model):
         return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
 
 
-class DeliveryType(ndb.Model):
-    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
-    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
-    min_sum = ndb.IntegerProperty(default=0)
-    time_picker = ndb.BooleanProperty(default=True)  # it's mark for show timepicker in client
-    time_picker_min = ndb.IntegerProperty(default=0)  # use only if time_picker
-    time_picker_max = ndb.IntegerProperty(default=86400)  # use only if time_picker
-    time_slot = ndb.BooleanProperty(default=False)  # it's mark for show to use slot_minute_values
-    delivery_zone = ndb.BooleanProperty(default=False)
-    slots = ndb.StringProperty(repeated=True)
-    slot_minute_values = ndb.IntegerProperty(repeated=True)  # it associates with slots
+class DeliverySlot(ndb.Model):
+    MINUTES = 0
+    STRINGS = 1
+    CHOICES = [MINUTES, STRINGS]
+    CHOICES_MAP = {
+        MINUTES: u'Минуты',
+        STRINGS: u'Без значения'
+    }
+
+    name = ndb.StringProperty(required=True)
+    slot_type = ndb.IntegerProperty(choices=CHOICES, default=MINUTES)
+    value = ndb.IntegerProperty()
 
     def dict(self):
         return {
-            'id': self.delivery_type,
-            'name': DELIVERY_MAP[self.delivery_type],
-            'min_sum': self.min_sum,
-            'time_picker': self.time_picker,
-            'slots': [{
-                'id': index,
-                'name': slot,
-                'value': self.slot_minute_values[index] if index < len(self.slot_minute_values) else None
-            } for index, slot in enumerate(self.slots)],
-            'time_picker_min': self.time_picker_min if self.time_picker else None,
-            'time_picker_max': self.time_picker_max if self.time_picker else None
+            'id': str(self.key.id()),
+            'name': self.name
         }
+
+
+class DeliveryType(ndb.Model):
+    MAX_DAYS = 7
+    ONE_DAY_SEC = 86400
+
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
+    min_sum = ndb.IntegerProperty(default=0)
+    min_time = ndb.IntegerProperty(default=0)
+    max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
+    delivery_zone = ndb.BooleanProperty(default=False)
+    delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
 
     @classmethod
     def create(cls, delivery_type):
         delivery = cls(id=delivery_type, delivery_type=delivery_type)
         delivery.put()
         return delivery
+
+    def dict(self):
+        return {
+            'id': str(self.delivery_type),
+            'name': DELIVERY_MAP[self.delivery_type],
+            'min_sum': self.min_sum,
+            'time_picker_min': self.min_time,
+            'time_picker_max': self.max_time,
+            'slots': [slot.get().dict() for slot in self.delivery_slots]
+        }
 
 
 class Venue(ndb.Model):
@@ -436,6 +459,11 @@ class Venue(ndb.Model):
             }
         }
 
+    def get_delivery_type(self, delivery_type):
+        for delivery in self.delivery_types:
+            if delivery.delivery_type == delivery_type:
+                return delivery
+
     def dict(self, user_location=None):
         distance = 0
         if user_location:
@@ -468,9 +496,13 @@ class Venue(ndb.Model):
             'address': self.description
         }
 
-    def is_open(self, minutes_offset=0):
-        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset) + datetime.timedelta(hours=self.timezone_offset)
+    def is_open_by_delivery_time(self, delivery_time):
+        now = delivery_time + datetime.timedelta(hours=self.timezone_offset)
         return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
+
+    def is_open(self, minutes_offset=0):
+        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
+        return self.is_open_by_delivery_time(now)
 
 
 class ChosenGroupModifierDetails(ndb.Model):
@@ -500,6 +532,8 @@ class OrderPositionDetails(ndb.Model):
 
 class GiftPositionDetails(ndb.Model):
     gift = ndb.KeyProperty(kind=GiftMenuItem, required=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_modifiers = ndb.StructuredProperty(ChosenGroupModifierDetails, repeated=True)
     activation_id = ndb.IntegerProperty(required=True)
 
 
@@ -523,7 +557,8 @@ class Order(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty()
-    delivery_slot = ndb.StringProperty()
+    delivery_time_str = ndb.StringProperty()
+    delivery_slot_id = ndb.IntegerProperty()
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
                                                                   PAYPAL_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
@@ -536,7 +571,7 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(required=True)
     address = ndb.LocalStructuredProperty(Address)
-    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)
+    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
@@ -544,20 +579,7 @@ class Order(ndb.Model):
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
     first_for_client = ndb.BooleanProperty()
-
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
-
-    def confirm_order(self):
-        self.status = CONFIRM_ORDER
-        self.put()
-
-    def cancel_order(self):
-        self.status = CANCELED_BY_BARISTA_ORDER
-        self.put()
-
-    def close_order(self):
-        self.status = READY_ORDER
-        self.put()
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")
@@ -579,36 +601,25 @@ class Order(ndb.Model):
                 point_detail.status = GiftPointsDetails.DONE
         self.put()
 
-    def dict(self):
-        dct = {
-            "order_id": self.key.id(),
-            "total_sum": self.total_sum,
-            "wallet_payment": self.wallet_payment,
-            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
-            "status": self.status,
-            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
-            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
-            "payment_type_id": self.payment_type_id,
-            "client": Client.get_by_id(self.client_id).dict(),
-            "pan": self.pan,
-            "comment": self.comment,
-            "return_comment": self.return_comment,
-            "items": []
-        }
+    def _grouped_item_dict(self, details, gift=False):
         item_dicts = []
-        for item_detail in self.item_details:
-            item = item_detail.item.get()
+        for item_detail in details:
+            if not gift:
+                item = item_detail.item.get()
+            else:
+                gift = item_detail.gift.get()
+                item = gift.item.get()
             item_dicts.append({
                 'item': item,
-                'price': item_detail.price,
+                'price': item_detail.price if not gift else 0,
                 'image': item.picture,
                 'single_modifier_keys':  item_detail.single_modifiers,
                 'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
             })
-
         from methods.orders.validation import group_item_dicts
+        response = []
         for item_dict in group_item_dicts(item_dicts):
-            dct["items"].append({
+            response.append({
                 "id": item_dict['id'],
                 "title": item_dict['title'],
                 "price": item_dict['price_without_promos'],
@@ -617,46 +628,41 @@ class Order(ndb.Model):
                 "single_modifiers": item_dict['single_modifiers'],
                 "group_modifiers": item_dict['group_modifiers']
             })
-        return dct
+        return response
 
     def status_dict(self):
         dct = {
             'order_id': str(self.key.id()),
             'status': self.status
         }
-
         return dct
 
     def history_dict(self):
-        dct = {
-            "order_id": str(self.key.id()),
-            "status": self.status,
-            "delivery_time": timestamp(self.delivery_time),
+        dct = self.status_dict()
+        dct.update({
+            "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
+            "delivery_time_str": self.delivery_time_str,
+            "delivery_slot": DeliverySlot.get_by_id(self.delivery_slot_id).dict() if self.delivery_slot_id else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
-            "items": []
-        }
+            "items": self._grouped_item_dict(self.item_details),
+            "gifts": self._grouped_item_dict(self.gift_details, gift=True)
+        })
+        return dct
 
-        item_dicts = []
-        for item_detail in self.item_details:
-            item_dicts.append({
-                'item': item_detail.item.get(),
-                'price': item_detail.price,
-                'single_modifier_keys':  item_detail.single_modifiers,
-                'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
-            })
-
-        from methods.orders.validation import group_item_dicts
-        for item_dict in group_item_dicts(item_dicts):
-            dct["items"].append({
-                "id": item_dict['id'],
-                "title": item_dict['title'],
-                "price": item_dict['price_without_promos'],
-                "quantity": item_dict['quantity'],
-                "single_modifiers": item_dict['single_modifiers'],
-                "group_modifiers": item_dict['group_modifiers']
-            })
+    def dict(self):
+        dct = self.history_dict()
+        dct.update({
+            "total_sum": self.total_sum,
+            "wallet_payment": self.wallet_payment,
+            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
+            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
+            "client": Client.get_by_id(self.client_id).dict(),
+            "pan": self.pan,
+            "comment": self.comment,
+            "return_comment": self.return_comment
+        })
         return dct
 
     @staticmethod

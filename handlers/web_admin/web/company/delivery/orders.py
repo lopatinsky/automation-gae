@@ -1,9 +1,13 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 from ..base import CompanyBaseHandler
+from methods.auth import company_user_required
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
-    CANCELED_BY_BARISTA_ORDER, Venue
+    CANCELED_BY_BARISTA_ORDER, Venue, DeliverySlot
 from methods.rendering import timestamp
+from methods.orders.done import done_order
+from methods.orders.cancel import cancel_order
+from methods.orders.confirm import confirm_order
 
 __author__ = 'dvpermyakov'
 
@@ -28,9 +32,8 @@ def _order_delivery_dict(order, client):
     return {
         'order_id': order.key.id(),
         'address': order.address.str() if order.address else u'Адрес не найден',
-        'date_str': datetime.strftime(order.date_created + timedelta(hours=Venue.get_by_id(order.venue_id).timezone_offset),
-                                      "%Y-%m-%d %H:%M:%S"),
-        'delivery_time': order.delivery_time if order.delivery_time else order.delivery_slot,
+        'date_str': order.date_str,
+        'delivery_time_str': order.delivery_time_str,
         'total_sum': order.total_sum,
         'client': {
             'name': client.name,
@@ -44,18 +47,48 @@ def _order_delivery_dict(order, client):
 
 def _update_order_info(orders):
     for order in orders:
+        hours_offset = Venue.get_by_id(order.venue_id).timezone_offset
+        if order.delivery_time:
+            delivery_time_str = datetime.strftime(order.delivery_time + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        else:
+            delivery_time_str = u''
+        if order.delivery_slot_id:
+            slot = DeliverySlot.get_by_id(order.delivery_slot_id)
+            if slot.slot_type == DeliverySlot.STRINGS:
+                if order.delivery_time:
+                    delivery_time_date = datetime.strftime(order.delivery_time, "%Y-%m-%d")
+                else:
+                    delivery_time_date = u''
+                delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
         order.client = Client.get_by_id(order.client_id)
         if order.address:
             order.address_str = order.address.str()
         else:
             order.address_str = u'Адрес не найден'
-        order.date_str = datetime.strftime(order.date_created + timedelta(hours=Venue.get_by_id(order.venue_id).timezone_offset),
-                                           "%Y-%m-%d %H:%M:%S")
+        order.date_str = datetime.strftime(order.date_created + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        order.delivery_time_str = delivery_time_str
         order.status_description = STATUS_MAP[order.status]
     return orders
 
 
+def order_items_values(order):
+    items = []
+    for item_detail in order.item_details:
+        item_obj = item_detail.item.get()
+        item_obj.modifiers = []
+        for modifier in item_detail.single_modifiers:
+            item_obj.modifiers.append(modifier.get())
+        item_obj.modifiers.extend(item_detail.group_modifiers)
+        items.append(item_obj)
+    order = _update_order_info([order])[0]
+    return {
+        'order': order,
+        'items': items
+    }
+
+
 class DeliveryOrdersHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES))\
             .order(-Order.date_created).fetch()
@@ -82,27 +115,17 @@ class DeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class OrderItemsHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
-        items = []
-        for item_detail in order.item_details:
-            item_obj = item_detail.item.get()
-            item_obj.modifiers = []
-            for modifier in item_detail.single_modifiers:
-                item_obj.modifiers.append(modifier.get())
-            item_obj.modifiers.extend(item_detail.group_modifiers)
-            items.append(item_obj)
-        order = _update_order_info([order])[0]
-        self.render('/delivery/items.html', **{
-            'order': order,
-            'items': items
-        })
+        self.render('/delivery/items.html', **order_items_values(order))
 
 
 class NewDeliveryOrdersHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         last_time = int(self.request.get('last_time'))
         start = datetime.fromtimestamp(last_time)
@@ -118,33 +141,40 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class ConfirmOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        order.confirm_order()
+        confirm_order(order)
         self.render_json(_order_json(order, old_status))
 
 
 class CloseOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        order.close_order()
+        done_order(order)
         self.render_json(_order_json(order, old_status))
 
 
 class CancelOrderHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        order.cancel_order()
-        self.render_json(_order_json(order, old_status))
+        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER)
+        response = _order_json(order, old_status)
+        response.update({
+            'success': success
+        })
+        self.render_json(response)

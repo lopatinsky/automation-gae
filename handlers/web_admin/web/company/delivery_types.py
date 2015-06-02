@@ -1,6 +1,7 @@
+import logging
 from base import CompanyBaseHandler
 from methods.auth import company_user_required
-from models import DELIVERY_TYPES, DELIVERY_MAP, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DeliveryType
+from models import DELIVERY_TYPES, DELIVERY_MAP, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DeliveryType, DeliverySlot
 
 __author__ = 'dvpermyakov'
 
@@ -13,7 +14,9 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                 'id': delivery.delivery_type,
                 'name': DELIVERY_MAP[delivery.delivery_type],
                 'value': delivery.status,
-                'min_sum': delivery.min_sum
+                'min_sum': delivery.min_sum,
+                'min_time': delivery.min_time,
+                'max_time': delivery.max_time
             }
 
         venues = Venue.query().fetch()
@@ -28,7 +31,7 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                     deliveries[delivery.delivery_type] = delivery_dict(delivery)
                     venue.put()
             venue.deliveries = deliveries.values()
-        self.render('/delivery_types.html', venues=venues)
+        self.render('/delivery_settings/delivery_types.html', venues=venues)
 
     @company_user_required
     def post(self):
@@ -41,5 +44,73 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                     else:
                         delivery.status = STATUS_UNAVAILABLE
                 delivery.min_sum = self.request.get_range('min_sum_%s_%s' % (venue.key.id(), delivery.delivery_type))
+                min_time = self.request.get('min_time_%s_%s' % (venue.key.id(), delivery.delivery_type))
+                if min_time:
+                    delivery.min_time = int(min_time)
+                max_time = self.request.get('max_time_%s_%s' % (venue.key.id(), delivery.delivery_type))
+                if max_time:
+                    delivery.max_time = int(max_time)
             venue.put()
         self.redirect('/company/main')
+
+
+class DeliverySlotListHandler(CompanyBaseHandler):
+    def get(self):
+        slots = DeliverySlot.query().fetch()
+        for slot in slots:
+            slot.slot_type_str = DeliverySlot.CHOICES_MAP[slot.slot_type]
+        self.render('/delivery_settings/delivery_slot_list.html', slots=slots)
+
+
+class DeliverySlotAddHandler(CompanyBaseHandler):
+    def get(self):
+        types = []
+        for type in DeliverySlot.CHOICES:
+            types.append({
+                'name': DeliverySlot.CHOICES_MAP[type],
+                'value': type
+            })
+        self.render('/delivery_settings/delivery_slot_add.html', types=types)
+
+    def post(self):
+        slot = DeliverySlot()
+        slot.name = self.request.get('name')
+        slot.slot_type = self.request.get_range('type')
+        value = self.request.get('value')
+        if value:
+            slot.value = value
+        slot.put()
+        self.redirect('/company/delivery/slots/list')
+
+
+class ChooseSlotsHandler(CompanyBaseHandler):
+    def get(self):
+        venue_id = int(self.request.get('venue_id'))
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        delivery_type = int(self.request.get('delivery_type'))
+        delivery_type = venue.get_delivery_type(delivery_type)
+        self.render('/delivery_settings/choose_delivery_slots.html', **{
+            'venue': venue,
+            'delivery_type': delivery_type,
+            'slots': DeliverySlot.query().fetch()
+        })
+
+    def post(self):
+        venue_id = int(self.request.get('venue_id'))
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        delivery_type = int(self.request.get('delivery_type'))
+        delivery_type = venue.get_delivery_type(delivery_type)
+
+        selected_slots = []
+        for slot in DeliverySlot.query().fetch():
+            confirmed = bool(self.request.get(str(slot.key.id())))
+            if confirmed:
+                selected_slots.append(slot.key)
+        delivery_type.delivery_slots = selected_slots
+        venue.put()
+
+        self.redirect('/company/delivery/types')

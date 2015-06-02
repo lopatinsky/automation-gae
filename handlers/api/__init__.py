@@ -19,5 +19,5 @@ from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, Ge
 from twilio import ReceiveSms
 from paypal import BindPaypalHandler, UnbindPaypalHandler
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler
-from company import CompanyInfoHandler
+from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Слоты</title>
+</head>
+<body>
+    <a href="/company/delivery/slots/add">Добавить</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>Значение</th>
+        </tr>
+        {% for slot in slots %}
+            <tr>
+                <td>{{ slot.name }}</td>
+                <td>{{ slot.slot_type_str }}</td>
+                <td>{{ slot.value if slot.value else '' }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

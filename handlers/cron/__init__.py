@@ -6,6 +6,7 @@ from handlers.cron.build_square_table import BuildSquareTableHandler
 from inactive_clients import SeveralDaysInactiveClientsHandler, SuccessBindingCardHandler, BindingCardHandler
 from clear_pings import ClearPingsHandler
 from creating_orders import CheckCreatingOrdersHandler
+from images import ResizeImageHandler
 
 __author__ = 'ilyazorin'
 
@@ -20,4 +21,5 @@ app = webapp2.WSGIApplication([
     ('/cron/clear_pings', ClearPingsHandler),
     ('/cron/build_square_table', BuildSquareTableHandler),
     ('/cron/creating_orders', CheckCreatingOrdersHandler),
+    ('/cron/resize_image', ResizeImageHandler),
 ], debug=True)

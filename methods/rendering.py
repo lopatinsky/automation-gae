@@ -1,6 +1,9 @@
 # coding=utf-8
 import time
 
+STR_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+STR_DATE_FORMAT = "%Y-%m-%d"
+
 
 def timestamp(datetime_object):
     return int(time.mktime(datetime_object.timetuple()))

@@ -4,7 +4,6 @@ __author__ = 'dvpermyakov'
 
 from auth import CompanySignupHandler, LoginHandler, LogoutHandler
 from base import CompanyBaseHandler
-from payment_type import PaymentTypesHandler
 
 
 from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuItemHandler, AddSingleModifierHandler,\
@@ -12,7 +11,7 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     EditGroupModifierItemHandler, EditMenuItemHandler, EditSingleModifierHandler, ListCategoriesHandler, \
     ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, \
     SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
-    DownCategoryHandler
+    DownCategoryHandler, NoneHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler
 from stop_lists import MainStopListHandler, StopListsHandler
@@ -20,8 +19,8 @@ from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, 
     VenueListHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
-from docs import AboutCompanyHandler, SetAboutCompanyHandler, ListDocsHandler
-from delivery_types import DeliveryTypesHandler
+from docs import AboutCompanyHandler, SetAboutCompanyHandler
+from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseSlotsHandler, DeliverySlotListHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

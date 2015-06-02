@@ -1,6 +1,6 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
-    check_condition_min_by_value, check_item_in_order
+    check_condition_min_by_value, check_item_in_order, check_repeated_order
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points
 
 
@@ -28,6 +28,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_condition_max_by_value(condition, _get_initial_total_sum(item_dicts))
     if condition.method == PromoCondition.CHECK_ITEM_IN_ORDER:
         return check_item_in_order(condition, item_dicts)
+    if condition.method == PromoCondition.CHECK_REPEATED_ORDERS:
+        return check_repeated_order(condition, client)
 
 
 def _set_outcome(outcome, items, promo, client, order):

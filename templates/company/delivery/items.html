@@ -13,12 +13,7 @@
     </p>
     <p>
         <b>Время заказа:</b> {{ order.date_str }}<br>
-        <b>Время доставки:</b>
-        {% if order.delivery_time %}
-            {{ order.delivery_time }}
-        {% else %}
-            {{ order.delivery_slot }}
-        {% endif %}
+        <b>Время доставки:</b> {{ order.delivery_time_str }}<br>
     </p>
     <p>
         <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
@@ -51,6 +46,8 @@
             </tr>
         {% endfor %}
     </table>
-    <a href="/company/delivery/orders/current">Назад</a>
+    {% if user %}
+        <a href="/company/delivery/orders/current">Назад</a>
+    {% endif %}
 </body>
 </html>

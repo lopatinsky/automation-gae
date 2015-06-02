@@ -86,7 +86,7 @@
                     <td>{{ item.volume }}</td>
                     <td>{{ item.weight }}</td>
                     <td>
-                        <img src="{{ item.picture }}" height="75">
+                        <img src="{% if item.icon %} {{ item.icon }} {% else %} {{ item.picture }} {% endif %}" height="75">
                     </td>
                     <!--
                     <form method="post">

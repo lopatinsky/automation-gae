@@ -1,11 +1,49 @@
 # coding=utf-8
 import copy
+from datetime import datetime, timedelta
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_wallet, empatika_promos
+from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
+from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DELIVERY
+    GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails, DeliverySlot
 from promos import apply_promos
+
+DAY_SECONDS = 24 * 60 * 60
+HOUR_SECONDS = 60 * 60
+MINUTE_SECONDS = 60
+
+MAX_SECONDS_LOSS = 30
+
+
+def _get_now(delivery_slot, only_day=False):
+    now = datetime.utcnow()
+    if (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS) or only_day:
+        now = now.replace(hour=0, minute=0, second=0)
+    return now
+
+
+def _parse_time(time):
+    def parse(time):
+        if time / 10 == 0:
+            time = '0%s' % time
+        return time
+
+    days = time / DAY_SECONDS
+    time %= DAY_SECONDS
+    hours = parse(time / HOUR_SECONDS)
+    time %= HOUR_SECONDS
+    minutes = parse(time / MINUTE_SECONDS)
+
+    description = u''
+    if days or minutes != '00' or hours != '00':
+        description += u' на'
+    if days:
+        description += u' %s дн.' % days
+    if minutes != '00' or hours != '00':
+        description += u' %sч:%sм' % (hours, minutes)
+    return description
 
 
 def _nice_join(strs):
@@ -23,8 +61,16 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
             if delivery.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery.min_sum
                 errors.append(description)
-            if delivery_slot and delivery_slot['name'] not in delivery.slots:  # it is import if slot hasn't value
-                description = u'Данный слот недоступен'
+            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
+                description = u'Выберите время больше текущего'
+                if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
+                    description += u' дня'
+                else:
+                    description += u' времени'
+                description += _parse_time(delivery.min_time)
+                errors.append(description)
+            if delivery_time > _get_now(delivery_slot, only_day=True) + timedelta(seconds=delivery.max_time):
+                description = u'Невозможно выбрать время больше текущего дня%s' % _parse_time(delivery.max_time)
                 errors.append(description)
             if not description and delivery_type == DELIVERY:
                 address = address['address']
@@ -86,16 +132,19 @@ def _check_venue(venue, delivery_time, errors):
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
             if config.PLACE_TYPE == VENUE:
-                errors.append(u"Бар сейчас недоступен")
+                errors.append(u"Кофейня сейчас недоступна")
             elif config.PLACE_TYPE == BAR:
-                errors.append(u"Кофейня сейчас недоступена")
+                errors.append(u"Бар сейчас недоступен")
+            else:
+                errors.append(u'Заведение сейчас недоступно')
             return False
         if delivery_time:
-            if not venue.is_open(minutes_offset=delivery_time):
-                if config.PLACE_TYPE == VENUE:
-                    errors.append(u"Бар сейчас закрыт")
-                elif config.PLACE_TYPE == BAR:
-                    errors.append(u"Кофейня сейчас закрыта")
+            if not venue.is_open_by_delivery_time(delivery_time):
+                valid, error = is_valid_weekday(venue.working_days, venue.working_hours, delivery_time)
+                if not valid:
+                    errors.append(error)
+                else:
+                    errors.append(get_valid_time_str(venue.working_days, venue.working_hours, delivery_time))
                 return False
         if venue.problem:
             place_name = config.get_place_str()
@@ -110,7 +159,7 @@ def _check_restrictions(venue, item_dicts, gift_dicts, errors):
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
-                description = u'%s не имеет %s' % (venue.title, item.title)
+                description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
         return description
@@ -130,18 +179,18 @@ def _check_stop_list(venue, item_dicts, gift_dicts, errors):
         for item_dict in item_dicts:
             item = item_dict['item']
             if item.key in venue.stop_lists:
-                description = u'%s положил %s в стоп лист' % (venue.title, item.title)
+                description = u'В "%s" позиция "%s" временно недоступна' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
             for single_modifier in item_dict['single_modifiers']:
                 if single_modifier.key in venue.single_modifiers_stop_list:
-                    description = u'%s положил одиночный модификатор %s в стоп лист' % (venue.title, single_modifier.title)
+                    description = u'В "%s" добавка "%s" временно недоступна' % (venue.title, single_modifier.title)
                     errors.append(description)
                     item_dict['errors'].append(description)
             for group_modifier in item_dict['group_modifiers']:
                 if group_modifier.choice.choice_id in stop_list_choices or \
                                 group_modifier.choice.choice_id in item.stop_list_group_choices:
-                    description = u'%s положил выбор группового модификатора %s в стоп лист' % \
+                    description = u'В "%s" выбор "%s" временно недоступен' % \
                                   (venue.title, group_modifier.choice.title)
                     errors.append(description)
                     item_dict['errors'].append(description)
@@ -219,7 +268,7 @@ def _group_group_modifiers(modifiers):
     return result.values()
 
 
-def group_item_dicts(item_dicts, gift_dicts=None):
+def group_item_dicts(item_dicts):
     def get_group_dict(item_dict):
         return {
             'id': str(item_dict['item'].key.id()),
@@ -245,17 +294,6 @@ def group_item_dicts(item_dicts, gift_dicts=None):
                 possible_group['errors'].extend(item_dict['errors'])
         else:
             result.append(get_group_dict(item_dict))
-    if gift_dicts:
-        for gift_dict in gift_dicts:
-            found = False
-            for group in result:
-                if _is_equal(gift_dict, group['item_dict']):
-                    group['quantity'] += 1
-                    if group.get('errors'):
-                        group['errors'].extend(gift_dict.get('errors'))
-                    found = True
-            if not found:
-                result.append(get_group_dict(gift_dict))
     for group in result:
         del group['item_dict']
     for dct in result:
@@ -330,9 +368,9 @@ def _check_gifts(gifts, client, errors):
     if accum_points < spent_points:
         description = u'Недостаточно накопленных баллов'
         errors.append(description)
-        return False, None
+        return False, 0, accum_points
     else:
-        return True, accum_points - spent_points
+        return True, accum_points - spent_points, accum_points
 
 
 def get_avail_gifts(points):
@@ -365,11 +403,11 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
     valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_restrictions(venue, item_dicts, gift_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, errors) and valid
-    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos, errors)\
-        and valid
+    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos,
+                                 errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, errors) and valid
 
-    success, rest_points = _check_gifts(gifts, client, errors)
+    success, rest_points, full_points = _check_gifts(gifts, client, errors)
     valid = valid and success
 
     if order:
@@ -387,9 +425,11 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
     logging.info('item_dicts = %s' % item_dicts)
 
     if len(item_dicts):
-        grouped_item_dicts = group_item_dicts(item_dicts, gift_dicts)
+        grouped_item_dicts = group_item_dicts(item_dicts)
+        grouped_gift_dicts = group_item_dicts(gift_dicts)
     else:
         grouped_item_dicts = []
+        grouped_gift_dicts = []
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
@@ -400,11 +440,18 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
         'rest_points': rest_points,
+        'full_points': full_points,
         'errors': _unique(errors),
         'items': grouped_item_dicts,
+        'gifts': grouped_gift_dicts,
         'promos': [promo.validation_dict() for promo in promos_info],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
+        'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATE_FORMAT)
+        if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
+        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
+        'delivery_slot_name': delivery_slot.name
+        if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }
     logging.info('validation result = %s' % result)
     logging.info('total sum = %s' % total_sum)
@@ -425,6 +472,17 @@ def validate_order(client, items, gifts, payment_info, venue, address, delivery_
             details_item.errors = item_dict['errors']
             details.append(details_item)
         result['details'] = details
+        details = []
+        for item_dict in gift_dicts:
+            details_item = GiftPositionDetails(
+                gift=GiftMenuItem.get_by_id(item_dict['item'].key.id()).key,
+                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                            group_modifier=modifier.key)
+                                 for modifier in item_dict['group_modifiers']]
+            )
+            details.append(details_item)
+        result['gift_details'] = details
 
     return result
 

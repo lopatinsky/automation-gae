@@ -7,13 +7,18 @@ from config import config
 from handlers.api.base import ApiHandler
 import json
 from datetime import datetime, timedelta
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet, email, paypal
+from handlers.web_admin.web.company.delivery.orders import order_items_values
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, get_delivery_time_minutes
+from methods.orders.cancel import cancel_order
+from methods.rendering import timestamp, STR_TIME_FORMAT, STR_DATE_FORMAT
+from methods.twilio import send_sms
+from methods.email_mandrill import send_email
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts, \
+    get_delivery_time
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, GiftMenuItem, GiftPositionDetails, Address, \
-    PAYPAL_PAYMENT_TYPE
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, PAYPAL_PAYMENT_TYPE
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -36,13 +41,19 @@ class OrderHandler(ApiHandler):
 
     def post(self):
         response_json = json.loads(self.request.get('order'))
-
         order_id = int(response_json['order_id'])
         success, cache_key = check_order_id(order_id)
         if not success:
             self.abort(409)
         else:
             self.cache_key = cache_key
+
+        if not config.IN_PRODUCTION:
+            return self.render_error(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
+
+        success = check_items_and_gifts(response_json['items'], response_json.get('gifts', []))
+        if not success:
+            self.render_error(u'Выберите что-нибудь')
 
         delivery_type = int(response_json.get('delivery_type'))
 
@@ -65,7 +76,7 @@ class OrderHandler(ApiHandler):
             venue_id = int(venue_id)
             venue = Venue.get_by_id(venue_id)
             if not venue:
-                return self.render_error("")
+                return self.render_error(u"Кофейня не найдена")
         else:
             if delivery_venue:
                 venue_id = delivery_venue.key.id()
@@ -82,21 +93,29 @@ class OrderHandler(ApiHandler):
         comment = response_json['comment']
         device_type = response_json.get('device_type', IOS_DEVICE)
 
-        delivery_time_minutes = response_json.get('delivery_time')
-        delivery_slot = response_json.get('delivery_slot')
-        if venue and delivery_slot and not delivery_time_minutes:
-            success, delivery_time_minutes = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
-            if not success:
-                return self.render_error(u'Неправильно выбран слот для времени')
-        if delivery_time_minutes is not None:
-            delivery_time = datetime.utcnow() + timedelta(minutes=delivery_time_minutes)
+        delivery_slot_id = int(response_json.get('delivery_slot_id'))
+        if delivery_slot_id:
+            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+            if not delivery_slot:
+                return self.render_error(u'Неправильный формат времени')
         else:
-            delivery_time = None
+            delivery_slot = None
+            delivery_slot_id = None
+
+        delivery_time_minutes = response_json.get('delivery_time')    # used for old versions todo: remove
+        if delivery_time_minutes:                                     # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
+        delivery_time_picker = response_json.get('time_picker_value')
+
+        delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
+        if not delivery_time:
+            return self.render_error(u'Неправильный формат времени')
+
         request_total_sum = response_json.get("total_sum")
 
         client_id, client = set_client_info(response_json.get('client'))
         if not client:
-            return self.render_error("")
+            return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
 
         payment_type_id = response_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(payment_type_id))
@@ -120,8 +139,9 @@ class OrderHandler(ApiHandler):
                                                response_json['items'],
                                                response_json.get('gifts', []),
                                                response_json['payment'],
-                                               venue, address, delivery_time_minutes, delivery_slot, delivery_type, True)
+                                               venue, address, delivery_time, delivery_slot, delivery_type, True)
             if not validation_result['valid']:
+                logging.warning('Fail in validation')
                 return self.render_error(get_first_error(validation_result))
 
             total_sum = validation_result['total_sum']
@@ -143,17 +163,12 @@ class OrderHandler(ApiHandler):
             else:
                 address_obj = None
 
-            if delivery_slot:
-                delivery_slot_name = delivery_slot.get('name')
-            else:
-                delivery_slot_name = None
-
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
-                payment_type_id=payment_type_id, promos=promo_list, items=item_keys, wallet_payment=wallet_payment,
-                item_details=item_details, delivery_type=delivery_type, delivery_slot=delivery_slot_name,
-                address=address_obj)
+                delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
+                promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
+                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj)
             self.order.put()
 
             if wallet_payment > 0:
@@ -188,11 +203,11 @@ class OrderHandler(ApiHandler):
                     return self.render_error(u"Не удалось произвести оплату. " + (info or ''))
 
             gift_details = []
-            for gift in response_json.get('gifts', []):
-                gift_item = GiftMenuItem.get_by_id(int(gift['item_id']))
+            for gift_detail in validation_result['gift_details']:
+                gift_item = gift_detail.gift.get()
                 activation_dict = empatika_promos.activate_promo(client.key.id(), gift_item.promo_id, 1)
-                gift_details.append(GiftPositionDetails(gift=gift_item.key,
-                                                        activation_id=activation_dict['activation']['id']))
+                gift_detail.activation_id = activation_dict['activation']['id']
+                gift_details.append(gift_detail)
             self.order.gift_details = gift_details
 
             client.put()
@@ -200,8 +215,17 @@ class OrderHandler(ApiHandler):
 
             # it is used for creating db for promos
             validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
-                           venue, address, delivery_time_minutes, delivery_slot, delivery_type, False, self.order)
+                           venue, address, delivery_time, delivery_slot, delivery_type, False, self.order)
             self.order.put()
+
+            # use delivery phone and delivery emails for all delivery types
+            text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
+            if config.DELIVERY_PHONE:
+                send_sms([config.DELIVERY_PHONE], text)
+            if config.DELIVERY_EMAILS:
+                for email in config.DELIVERY_EMAILS:
+                    send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html',
+                                                                               **order_items_values(self.order)))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
@@ -209,7 +233,11 @@ class OrderHandler(ApiHandler):
             memcache.delete(self.cache_key)
 
             self.response.status_int = 201
-            self.render_json({'order_id': order_id})
+            self.render_json({
+                'order_id': order_id,
+                'delivery_time': validation_result['delivery_time'],
+                'delivery_slot_name': validation_result['delivery_slot_name']
+            })
         else:
             self.render_error(u"Выбранный способ оплаты недоступен.")
 
@@ -249,40 +277,19 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                # return money
-                if order.has_card_payment:
-                    return_result = alfa_bank.reverse(order.payment_id)
-                    if str(return_result.get('errorCode', 0)) != '0':
-                        logging.error("payment return failed")
-                        self.abort(400)
-                elif order.has_paypal_payment:
-                    success, error = paypal.void(order.payment_id)
-                    if not success:
-                        self.abort(400)
-                for gift_detail in order.gift_details:
-                    try:
-                        empatika_promos.cancel_activation(gift_detail.activation_id)
-                    except empatika_promos.EmpatikaPromosError as e:
-                        logging.exception(e)
-                        self.abort(400)
-
-                if order.wallet_payment > 0:
-                    try:
-                        empatika_wallet.reverse(order.client_id, order_id)
-                    except empatika_wallet.EmpatikaWalletError as e:
-                        logging.exception(e)
-                        email.send_error("payment", "Wallet reversal failed", str(e))
-                        # main payment reversed -- do not abort
-
-                order.status = CANCELED_BY_CLIENT_ORDER
-                order.return_datetime = datetime.utcnow()
-                order.put()
-
-                self.render_json({
-                    'error': 0,
-                    'order_id': order.key.id()
-                })
-                logging.info(u'заказ %d отменен' % order_id)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, with_push=False)
+                if success:
+                    self.render_json({
+                        'error': 0,
+                        'order_id': order.key.id()
+                    })
+                    logging.info(u'заказ %d отменен' % order_id)
+                else:
+                    self.response.status_int = 422
+                    self.render_json({
+                        'error': 1,
+                        'description': u'При отмене возникла ошибка'  # todo: change this text
+                    })
             else:
                 self.response.status_int = 412
                 self.render_json({
@@ -331,6 +338,8 @@ class CheckOrderHandler(ApiHandler):
 
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = self.request.get_range('venue_id')
+            if not venue_id or venue_id == -1:
+                self.abort(400)
             venue = Venue.get_by_id(venue_id)
             if not venue:
                 self.abort(400)
@@ -343,23 +352,27 @@ class CheckOrderHandler(ApiHandler):
         except ValueError:
             payment_info = None
 
-        delivery_time = self.request.get('delivery_time')
-        delivery_slot = self.request.get('delivery_slot')
-        if delivery_slot:
-            delivery_slot = json.loads(delivery_slot)
-        if delivery_time:
-            delivery_time = int(delivery_time)
-        if venue and delivery_slot and not delivery_time:
-            success, delivery_time = get_delivery_time_minutes(venue, delivery_type, delivery_slot)
-            if not success:
-                self.abort(501)
+        delivery_slot_id = self.request.get('delivery_slot_id')
+        if delivery_slot_id:
+            delivery_slot_id = int(delivery_slot_id)
+            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+        else:
+            delivery_slot = None
+
+        delivery_time_minutes = self.request.get('delivery_time')     # used for old versions todo: remove
+        if delivery_time_minutes:                                     # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
+        delivery_time_picker = self.request.get('time_picker_value')
+
+        delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
+        if not delivery_time:
+            self.abort(400)
 
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):
             gifts = json.loads(self.request.get('gifts'))
         else:
             gifts = []
-
         result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot,
                                        delivery_type)
         self.render_json(result)

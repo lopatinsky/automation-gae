@@ -1,5 +1,5 @@
 application: doubleb-automation-production
-version: 1
+version: test
 runtime: python27
 api_version: 1
 threadsafe: yes
@@ -41,6 +41,9 @@ handlers:
 libraries:
 - name: webapp2
   version: latest
+
+- name: PIL
+  version: "1.1.7"
 
 - name: jinja2
   version: latest

@@ -2,6 +2,33 @@
 <html>
 <head>
     <title>Выбирите продукты</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        var cats = [];
+        {% for category in categories %}
+            var i = {{ loop.index0 }};
+            cats[i] = [];
+            {% for product in category.products %}
+                var j = {{ loop.index0 }};
+                cats[i][j] = {{ product.key.id() }};
+            {% endfor %}
+        {% endfor %}
+        function toggle_tr_appearance(index) {
+            for (var i = 0; i < cats[index].length; i++) {
+                var jquery_cb = "#cb_" + cats[index][i];
+                if ($(jquery_cb).prop('checked')) {
+                    $(jquery_cb).prop('checked', false);
+                } else {
+                    $(jquery_cb).prop('checked', true);
+                }
+            }
+        }
+        $(document).ready(function() {
+            $('.check_category').change(function() {
+                toggle_tr_appearance(this.id);
+            });
+        });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
@@ -12,10 +39,15 @@
         <br>
         {% for category in categories %}
             <h3>{{ category.title }}</h3>
+            <label>
+                Выбрать всех :
+                <input type="checkbox" class="check_category" id="{{ loop.index0 }}">
+            </label>
             {% for product in category.products %}
                 <div>
                     <label>
-                         <input type="checkbox" {% if product.has_modifier %} checked {% endif %} name={{ product.key.id() }}>
+                         <input type="checkbox" {% if product.has_modifier %} checked {% endif %} name="{{ product.key.id() }}"
+                                id="{{ 'cb_%s' % product.key.id() }}">
                          {{ product.title }}
                      </label><br>
                 </div>
