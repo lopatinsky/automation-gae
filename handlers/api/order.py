@@ -8,7 +8,7 @@ from handlers.api.base import ApiHandler
 import json
 from datetime import datetime, timedelta
 from handlers.web_admin.web.company.delivery.orders import order_items_values
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet
+from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
 from methods.orders.validation import validate_order, get_first_error
 from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
@@ -17,7 +17,7 @@ from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts, \
     get_delivery_time
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, PAYPAL_PAYMENT_TYPE
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -191,6 +191,16 @@ class OrderHandler(ApiHandler):
                     if wallet_payment > 0:
                         empatika_wallet.reverse(client_id, order_id)
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
+            elif payment_type_id == PAYPAL_PAYMENT_TYPE and payment_amount > 0:
+                correlation_id = response_json['payment']['correlation_id']
+                success, info = paypal.authorize(order_id, payment_amount / 100.0, client.paypal_refresh_token,
+                                                 correlation_id)
+
+                if success:
+                    self.order.payment_id = info
+                    self.order.put()
+                else:
+                    return self.render_error(u"Не удалось произвести оплату. " + (info or ''))
 
             gift_details = []
             for gift_detail in validation_result['gift_details']:

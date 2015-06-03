@@ -1,5 +1,6 @@
 from methods.auth import company_user_required
-from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, STATUS_AVAILABLE
+from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, STATUS_AVAILABLE, \
+    PAYPAL_PAYMENT_TYPE
 from base import CompanyBaseHandler
 
 
@@ -15,6 +16,9 @@ class PaymentTypesHandler(CompanyBaseHandler):
         card = PaymentType.get_by_id(str(CARD_PAYMENT_TYPE))
         if not card:
             PaymentType(id=str(CARD_PAYMENT_TYPE), title='card', status=STATUS_UNAVAILABLE).put()
+        paypal = PaymentType.get_by_id(str(PAYPAL_PAYMENT_TYPE))
+        if not paypal:
+            PaymentType(id=str(PAYPAL_PAYMENT_TYPE), title='paypal', status=STATUS_UNAVAILABLE).put()
         self.render('/payment_types.html', payments=PaymentType.query().fetch())
 
     @company_user_required
