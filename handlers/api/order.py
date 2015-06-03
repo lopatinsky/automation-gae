@@ -94,7 +94,8 @@ class OrderHandler(ApiHandler):
 
         delivery_slot_id = response_json.get('delivery_slot_id')
         if delivery_slot_id:
-            delivery_slot = DeliverySlot.get_by_id(int(delivery_slot_id))
+            delivery_slot_id = int(delivery_slot_id)
+            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
             if not delivery_slot:
                 return self.render_error(u'Неправильный формат времени')
         else:
