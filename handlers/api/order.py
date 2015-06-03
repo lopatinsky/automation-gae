@@ -194,7 +194,8 @@ class OrderHandler(ApiHandler):
                     return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
             elif payment_type_id == PAYPAL_PAYMENT_TYPE and payment_amount > 0:
                 correlation_id = response_json['payment']['correlation_id']
-                success, info = paypal.pay(order_id, payment_amount / 100.0, client.paypal_refresh_token, correlation_id)
+                success, info = paypal.authorize(order_id, payment_amount / 100.0, client.paypal_refresh_token,
+                                                 correlation_id)
 
                 if success:
                     self.order.payment_id = info
