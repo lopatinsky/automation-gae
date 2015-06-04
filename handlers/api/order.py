@@ -138,6 +138,8 @@ class OrderHandler(ApiHandler):
             validation_result = validate_order(client,
                                                response_json['items'],
                                                response_json.get('gifts', []),
+                                               response_json.get('order_gifts', []),
+                                               response_json.get('cancelled_order_gifts', []),
                                                response_json['payment'],
                                                venue, address, delivery_time, delivery_slot, delivery_type, True)
             if not validation_result['valid']:
@@ -215,8 +217,10 @@ class OrderHandler(ApiHandler):
             self.order.status = NEW_ORDER
 
             # it is used for creating db for promos
-            validate_order(client, response_json['items'], response_json.get('gifts', []), response_json['payment'],
-                           venue, address, delivery_time, delivery_slot, delivery_type, False, self.order)
+            validate_order(client, response_json['items'], response_json.get('gifts', []),
+                           response_json.get('order_gifts', []), response_json.get('cancelled_order_gifts', []),
+                           response_json['payment'], venue, address, delivery_time, delivery_slot, delivery_type,
+                           False, self.order)
             self.order.put()
 
             # use delivery phone and delivery emails for all delivery types
@@ -374,6 +378,14 @@ class CheckOrderHandler(ApiHandler):
             gifts = json.loads(self.request.get('gifts'))
         else:
             gifts = []
-        result = orders.validate_order(client, items, gifts, payment_info, venue, address, delivery_time, delivery_slot,
-                                       delivery_type)
+        if self.request.get('order_gifts'):
+            order_gifts = json.loads(self.request.get('order_gifts'))
+        else:
+            order_gifts = []
+        if self.request.get('cancelled_order_gifts'):
+            cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
+        else:
+            cancelled_order_gifts = []
+        result = orders.validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
+                                       address, delivery_time, delivery_slot, delivery_type)
         self.render_json(result)

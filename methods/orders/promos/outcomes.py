@@ -1,6 +1,7 @@
 # coding=utf-8
 from models import CashBack, GiftPointsDetails, MenuItem
 
+
 def _get_item_keys(item_dicts):
     result = {}
     for item_dict in item_dicts:
@@ -128,7 +129,7 @@ def set_gift_points(outcome, item_dicts, promo, order):
     return promo_applied
 
 
-def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order):
+def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
     from methods.orders.validation import set_item_dicts
     gift = MenuItem.get_by_id(int(outcome.value))
     if not gift:
@@ -147,6 +148,9 @@ def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dict
                 order_gift_dict['promos'].append(promo)
                 break
     if not found:
-        gift.chosen_single_modifiers = []
-        gift.chosen_group_modifiers = []
-        new_order_gift_dicts.append(set_item_dicts([gift], True)[0])
+        gift.chosen_single_modifiers = []  # todo: is it flexible?
+        gift.chosen_group_modifiers = []   # todo: is it flexible?
+        item_dict = set_item_dicts([gift], True)[0]
+        item_dict['promos'].append(promo)
+        new_order_gift_dicts.append(item_dict)
+    return True

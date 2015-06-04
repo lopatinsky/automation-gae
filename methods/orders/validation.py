@@ -383,7 +383,7 @@ def _check_gifts(gifts, client, errors):
         if not gift_item:
             description = u'%s нет в списке подарков' % gift.title
             errors.append(description)
-            return False, None
+            return False, 0, None
         spent_points += gift_item.points
     if config.PROMOS_API_KEY:
         accum_points = empatika_promos.get_user_points(client.key.id())
@@ -397,21 +397,47 @@ def _check_gifts(gifts, client, errors):
         return True, accum_points - spent_points, accum_points
 
 
-def _check_order_gifts(gifts, cancelled_gifts):
-    valid = True
+def _check_order_gifts(gifts, cancelled_gifts, errors, order=None):
+    def get_error():
+        description = u'Невозможно добавить %s, как подарок' % gift['item'].title
+        errors.append(description)
+        return description
+
+    description = None
     for gift in gifts:
+        if not gift['promos']:
+            description = get_error()
         for promo in gift['promos']:
-            if PromoOutcome.ORDER_GIFT not in promo.outcomes:
-                valid = False
-        for promo in cancelled_gifts['promos']:
-            if PromoOutcome.ORDER_GIFT not in promo.outcomes:
-                valid = False
-    return valid
+            if PromoOutcome.ORDER_GIFT not in [outcome.method for outcome in promo.outcomes]:
+                description = get_error()
+    for gift in cancelled_gifts:
+        if not gift['promos']:
+            description = get_error()
+        for promo in gift['promos']:
+            if PromoOutcome.ORDER_GIFT not in [outcome.method for outcome in promo.outcomes]:
+                description = get_error()
+    if description:
+        return False
+    else:
+        if order:
+            gift_details = []
+            for gift in gifts:
+                gift_details.append(OrderPositionDetails(
+                    item=gift['item'].key,
+                    price=0,
+                    revenue=0,
+                    promos=[promo.key for promo in gift['promos']],
+                    single_modifiers=[],  # todo: is it flexible?
+                    group_modifiers=[]    # todo: is it flexible?
+                ))
+            order.order_gift_details = gift_details
+            order.put()
+        return True
 
 
 def get_avail_gifts(points):
     gifts = []
-    for gift in GiftMenuItem.query().fetch():
+    for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch():
         if gift.points <= points:
             gifts.append(gift)
     return gifts
@@ -457,16 +483,17 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     success, rest_points, full_points = _check_gifts(gifts, client, errors)
     valid = valid and success
 
-    errors, new_order_gift_dicts, item_dicts, promos_info = \
+    promo_errors, new_order_gift_dicts, item_dicts, promos_info = \
         apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                      cancelled_order_gift_dicts)
-    valid = valid and not errors
-    valid = _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts) and valid
+    valid = valid and not promo_errors
+    valid = _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts, errors) and valid
     if order:
         if valid:
             errors, new_order_gift_dicts, item_dicts, promos_info = \
                 apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                              cancelled_order_gift_dicts, order)
+            _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts, errors, order)
         else:
             promos_info = []
 

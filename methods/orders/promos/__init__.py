@@ -46,7 +46,7 @@ def _set_outcome(errors, outcome, items, promo, client, new_order_gift_dicts, or
     if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
         return set_gift_points(outcome, items, promo, order)
     if outcome.method == PromoOutcome.ORDER_GIFT:
-        return add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order)
+        return add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,

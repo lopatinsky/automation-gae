@@ -147,7 +147,7 @@ class GroupModifier(ndb.Model):
 
 
 class MenuItem(ndb.Model):
-    title = ndb.StringProperty(required=True, indexed=False)
+    title = ndb.StringProperty(required=True)
     description = ndb.StringProperty(indexed=False)
     picture = ndb.StringProperty(indexed=False)  # source
     cut_picture = ndb.StringProperty(indexed=False)
@@ -589,6 +589,7 @@ class Order(ndb.Model):
     address = ndb.LocalStructuredProperty(Address)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
+    order_gift_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
@@ -671,7 +672,8 @@ class Order(ndb.Model):
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
             "items": self._grouped_item_dict(self.item_details),
-            "gifts": self._grouped_item_dict(self.gift_details, gift=True)
+            "gifts": self._grouped_item_dict(self.gift_details, gift=True),
+            "order_gifts": self._grouped_item_dict(self.order_gift_details)
         })
         return dct
 
