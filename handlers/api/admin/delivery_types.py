@@ -12,5 +12,5 @@ class DeliveryTypesHandler(AdminApiHandler):
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type not in deliveries:
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
         self.render_json({
-            'deliveries': deliveries
+            'deliveries': deliveries.values()
         })

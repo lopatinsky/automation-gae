@@ -654,12 +654,18 @@ class Order(ndb.Model):
 
     def history_dict(self):
         dct = self.status_dict()
+        if self.delivery_slot_id:
+            delivery_slot = DeliverySlot.get_by_id(self.delivery_slot_id)
+        else:
+            delivery_slot = None
         dct.update({
             "delivery_type": self.delivery_type,
             "address": self.address.dict() if self.address else None,
             "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
             "delivery_time_str": self.delivery_time_str,
-            "delivery_slot": DeliverySlot.get_by_id(self.delivery_slot_id).dict() if self.delivery_slot_id else None,
+            "delivery_slot": delivery_slot.dict() if delivery_slot else None,
+            "delivery_slot_str": delivery_slot.name if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
+            else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
