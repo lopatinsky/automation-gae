@@ -372,6 +372,21 @@ class Address(ndb.Model):
     def str(self):
         return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
 
+    def dict(self):
+        return {
+            'address': {
+                'country': self.country,
+                'city': self.city,
+                'street': self.street,
+                'home': self.home,
+                'flat': self.flat
+            },
+            'coordinates': {
+                'lon': self.lat,
+                'lat': self.lon
+            }
+        }
+
 
 class DeliverySlot(ndb.Model):
     MINUTES = 0
@@ -638,6 +653,8 @@ class Order(ndb.Model):
     def history_dict(self):
         dct = self.status_dict()
         dct.update({
+            "delivery_type": self.delivery_type,
+            "address": self.address.dict() if self.address else None,
             "delivery_time": timestamp(self.delivery_time) if self.delivery_time else 0,
             "delivery_time_str": self.delivery_time_str,
             "delivery_slot": DeliverySlot.get_by_id(self.delivery_slot_id).dict() if self.delivery_slot_id else None,

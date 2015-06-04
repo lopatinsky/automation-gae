@@ -55,6 +55,8 @@ app = WSGIApplication([
             Route('/logout', admin.LogoutHandler),
             Route('/ping', admin.PingHandler),
 
+            Route('/delivery_types', admin.DeliveryTypesHandler),
+
             Route('/orders/current', admin.CurrentOrdersHandler),
             Route('/orders/updates', admin.UpdatesHandler),
 

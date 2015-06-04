@@ -7,3 +7,4 @@ from stop_lists import SetStopListHandler, MenuHandler, DynamicInfoHandler, Modi
 from wallet import WalletDepositHandler, WalletDepositHistoryHandler
 from client_history import ClientHistoryHandler
 from revenue import RevenueReportMonthHandler, RevenueReportTodayHandler
+from delivery_types import DeliveryTypesHandler
