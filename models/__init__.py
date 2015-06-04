@@ -305,7 +305,8 @@ class PromoOutcome(ndb.Model):
     DISCOUNT_CHEAPEST = 2      # calculated by prices ## use priority to imply in the end
     DISCOUNT_RICHEST = 3       # calculated by prices ## use priority to imply in the end
     ACCUMULATE_GIFT_POINT = 4
-    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT]
+    ORDER_GIFT = 5
+    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)
@@ -329,7 +330,7 @@ class PromoCondition(ndb.Model):
 
 class Promo(ndb.Model):
     title = ndb.StringProperty(required=True)
-    #title_for_user = ndb.StringProperty()  # not used todo: sure?
+    #title_for_user = ndb.StringProperty()  # not used todo: sure? 90% sure
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)

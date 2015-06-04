@@ -1,6 +1,5 @@
-from models import CashBack, GiftPointsDetails
-from methods import empatika_promos
-
+# coding=utf-8
+from models import CashBack, GiftPointsDetails, MenuItem
 
 def _get_item_keys(item_dicts):
     result = {}
@@ -127,3 +126,27 @@ def set_gift_points(outcome, item_dicts, promo, order):
                 item_dict['promos'].append(promo)
         promo_applied = True
     return promo_applied
+
+
+def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order):
+    from methods.orders.validation import set_item_dicts
+    gift = MenuItem.get_by_id(int(outcome.value))
+    if not gift:
+        errors.append(u'Акция подарок по заказу не привязана к продукту')
+        return False
+    found = False
+    for order_gift_dict in order_gift_dicts:
+        if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+            found = True
+            order_gift_dict['promos'].append(promo)
+            break
+    if not found:
+        for order_gift_dict in cancelled_order_gift_dicts:
+            if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+                found = True
+                order_gift_dict['promos'].append(promo)
+                break
+    if not found:
+        gift.chosen_single_modifiers = []
+        gift.chosen_group_modifiers = []
+        new_order_gift_dicts.append(set_item_dicts([gift], True)[0])

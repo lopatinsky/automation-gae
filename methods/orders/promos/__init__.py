@@ -1,7 +1,8 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order
-from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points
+from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
+    add_order_gift
 
 
 def _get_initial_total_sum(item_dicts):
@@ -19,7 +20,7 @@ def _get_promos(venue):
     return promos
 
 
-def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
+def _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
     if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
         return check_condition_by_value(condition, delivery_type)
     if condition.method == PromoCondition.CHECK_FIRST_ORDER:
@@ -32,7 +33,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_repeated_order(condition, client)
 
 
-def _set_outcome(outcome, items, promo, client, order):
+def _set_outcome(errors, outcome, items, promo, client, new_order_gift_dicts, order_gift_dicts,
+                 cancelled_order_gift_dicts, order):
     if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(outcome, items, promo)
     if outcome.method == PromoOutcome.CASH_BACK:
@@ -43,19 +45,25 @@ def _set_outcome(outcome, items, promo, client, order):
         return set_discount_richest(outcome, items, promo)
     if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
         return set_gift_points(outcome, items, promo, order)
+    if outcome.method == PromoOutcome.ORDER_GIFT:
+        return add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order)
 
 
-def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order=None):
+def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
+                 cancelled_order_gift_dicts, order=None):
+    errors = []
     promos = []
+    new_order_gift_dicts = []
     for promo in _get_promos(venue):
         apply_promo = True
         for condition in promo.conditions:
-            if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
+            if not _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
                 apply_promo = False
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                if _set_outcome(outcome, item_dicts, promo, client, order):
+                if _set_outcome(errors, outcome, item_dicts, promo, client, new_order_gift_dicts, order_gift_dicts,
+                                cancelled_order_gift_dicts, order):
                     if promo.key.id() not in promos:
                         promos.append(promo)
-    return item_dicts, promos
+    return errors, new_order_gift_dicts, item_dicts, promos
