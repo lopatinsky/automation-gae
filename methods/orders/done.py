@@ -1,6 +1,6 @@
 from datetime import datetime
 from google.appengine.ext import ndb
-from methods import alfa_bank, push
+from methods import alfa_bank, push, paypal
 from models import READY_ORDER, SharedFreeCup, Client
 
 __author__ = 'dvpermyakov'
@@ -22,4 +22,6 @@ def done_order(order):
 
     if order.has_card_payment:
         alfa_bank.deposit(order.payment_id, 0)  # TODO check success
+    elif order.has_paypal_payment:
+        paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
     push.send_order_ready_push(order)

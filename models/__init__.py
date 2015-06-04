@@ -16,6 +16,7 @@ from methods.empatika_promos import register_order
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
+PAYPAL_PAYMENT_TYPE = 4
 
 STATUS_AVAILABLE = 1
 STATUS_UNAVAILABLE = 0
@@ -573,7 +574,8 @@ class Order(ndb.Model):
     delivery_time = ndb.DateTimeProperty()
     delivery_time_str = ndb.StringProperty()
     delivery_slot_id = ndb.IntegerProperty()
-    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
+    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
+                                                                  PAYPAL_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
     venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
@@ -690,6 +692,10 @@ class Order(ndb.Model):
     def has_card_payment(self):
         return bool(self.payment_type_id == CARD_PAYMENT_TYPE and self.payment_id)
 
+    @property
+    def has_paypal_payment(self):
+        return bool(self.payment_type_id == PAYPAL_PAYMENT_TYPE and self.payment_id)
+
 
 class Notification(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
@@ -710,6 +716,8 @@ class Client(ndb.Model):
     user_agent = ndb.StringProperty(indexed=False)
     tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
+
+    paypal_refresh_token = ndb.StringProperty(indexed=False)
 
     @classmethod
     def create(cls):
@@ -924,7 +932,8 @@ class SharedGift(ndb.Model):
     recipient_id = ndb.IntegerProperty()
     total_sum = ndb.IntegerProperty(required=True)
     order_id = ndb.StringProperty(required=True)
-    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE))
+    payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
+                                                                  PAYPAL_PAYMENT_TYPE))
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
 

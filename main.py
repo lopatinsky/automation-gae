@@ -81,6 +81,11 @@ app = WSGIApplication([
         ]),
 
         PathPrefixRoute('/payment', [
+            PathPrefixRoute('/paypal', [
+                Route('/bind', api.BindPaypalHandler),
+                Route('/unbind', api.UnbindPaypalHandler),
+            ]),
+
             Route('/unbind', api.UnbindCardHandler),
             Route('/register', api.PaymentRegisterHandler),
             Route('/status', api.PaymentStatusHandler),

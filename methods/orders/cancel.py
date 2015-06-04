@@ -1,5 +1,5 @@
 # coding=utf-8
-from methods import email, empatika_wallet, push
+from methods import email, empatika_wallet, push, paypal
 import logging
 from methods import alfa_bank, empatika_promos
 from datetime import datetime
@@ -13,6 +13,8 @@ def cancel_order(order, status, comment=None, with_push=True):
     if order.has_card_payment:
         return_result = alfa_bank.reverse(order.payment_id)
         success = str(return_result['errorCode']) == '0'
+    elif order.has_paypal_payment:
+        success, error = paypal.void(order.payment_id)
     if success:
         for gift_detail in order.gift_details:
             try:
