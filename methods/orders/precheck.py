@@ -60,7 +60,6 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
     if delivery_slot:
-        logging.info(delivery_slot)
         if delivery_slot.slot_type == DeliverySlot.MINUTES:
             delivery_time_minutes = delivery_slot.value
         elif delivery_slot.slot_type == DeliverySlot.STRINGS:
@@ -74,6 +73,4 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
         if not delivery_time:
             delivery_time = datetime.utcnow()
         delivery_time += timedelta(minutes=delivery_time_minutes)
-    logging.info(delivery_time)
-    logging.info(delivery_slot)
     return delivery_time
