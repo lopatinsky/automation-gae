@@ -22,7 +22,7 @@ def _parse_collection(collection, kind='house', city_request=None):
             continue
         address_details = item['metaDataProperty']['GeocoderMetaData']['AddressDetails']
         country = address_details['Country']
-        if u''.join([country['CountryName']]) not in config.COUNTRIES:
+        if u''.join([country['CountryName']]) not in (config.COUNTRIES if config.COUNTRIES else [u'Россия']):
             continue
         if not country.get('AdministrativeArea'):
             continue
