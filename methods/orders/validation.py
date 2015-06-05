@@ -282,9 +282,10 @@ def _group_group_modifiers(modifiers):
             result[key]['quantity'] += 1
         else:
             modifier_obj = modifier[0].get()
+            choice = modifier_obj.get_choice_by_id(modifier[1])
             result[key] = {
                 'id': str(modifier[0].id()),
-                'name': modifier_obj.title,
+                'name': choice.title,
                 'choice': str(modifier[1]),
                 'quantity': 1
             }
