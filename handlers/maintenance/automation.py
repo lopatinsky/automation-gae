@@ -1,7 +1,6 @@
 # coding:utf-8
 from urlparse import urlparse
 from google.appengine.ext.ndb import metadata
-from models import DeliverySlot, Venue, MenuCategory
 
 __author__ = 'dvpermyakov'
 
