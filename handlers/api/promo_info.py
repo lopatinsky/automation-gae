@@ -22,7 +22,7 @@ class PromoInfoHandler(ApiHandler):
                 'enable': config.WALLET_ENABLED,
                 'text': self.WALLET_TEXT
             },
-            'promos': [promo.dict() for promo in Promo.query().fetch()],
+            'promos': [promo.dict() for promo in Promo.query(Promo.status == STATUS_AVAILABLE).fetch()],
             'bonuses': {
                 'items': items,
                 'text': self.BONUS_TEXT
