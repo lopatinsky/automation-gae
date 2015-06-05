@@ -339,7 +339,6 @@ class PromoCondition(ndb.Model):
 
 class Promo(ndb.Model):
     title = ndb.StringProperty(required=True)
-    #title_for_user = ndb.StringProperty()  # not used todo: sure? 90% sure
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
