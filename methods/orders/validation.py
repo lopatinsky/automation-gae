@@ -15,13 +15,14 @@ from promos import apply_promos
 MAX_SECONDS_LOSS = 30
 
 
-def _get_substitute(origin_item, venue):
+def _get_substitute(origin_item, venue, description=None):
     for item in MenuItem.query(MenuItem.title == origin_item.title).fetch():
         if origin_item.key == item.key:
             continue
         if venue.key not in item.restrictions:
             return {
-                'item_id': item.key.id()
+                'item_id': str(item.key.id()),
+                'description': description if description else u'Сделайте замену'
             }
 
 
@@ -171,7 +172,9 @@ def _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors)
                 description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue)
+                substitute = _get_substitute(item, venue,
+                                             u'Позиция "%s" имеет другую цену в выбранной точке %s. '
+                                             u'Заменить?' % (item.title, venue.title))
                 if substitute:
                     item_dict['substitutes'].append(substitute)
         return description
@@ -297,6 +300,7 @@ def group_item_dicts(item_dicts):
             'title': item_dict['item'].title,
             'promos': item_dict.get('promos', []),
             'errors': item_dict.get('errors'),
+            'substitutes': item_dict.get('substitutes'),
             'image': item_dict.get('image'),
             'quantity': 1,
             'price_without_promos': item_dict['price'],
@@ -376,7 +380,9 @@ def set_item_dicts(items, is_gift):
 
 
 def _check_wallet_payment(total_sum, payment_info):
-    return not payment_info.get('wallet_payment') or payment_info['wallet_payment'] <= Config.GET_MAX_WALLET_SUM(total_sum)
+    return not payment_info or \
+           not payment_info.get('wallet_payment') or \
+           payment_info['wallet_payment'] <= Config.GET_MAX_WALLET_SUM(total_sum)
 
 
 def _check_gifts(gifts, client, errors):
@@ -505,8 +511,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     for item_dict in item_dicts:
         total_sum += item_dict['revenue']
 
-    valid = _check_wallet_payment(total_sum, payment_info) and valid
-
     logging.info('item_dicts = %s' % item_dicts)
 
     if len(item_dicts) or len(gift_dicts):
@@ -524,6 +528,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
+        valid = _check_wallet_payment(total_sum, payment_info) and valid
         wallet_balance = empatika_wallet.get_balance(client.key.id())
         max_wallet_payment = min(Config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
 
