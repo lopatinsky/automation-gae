@@ -306,7 +306,9 @@ class PromoOutcome(ndb.Model):
     DISCOUNT_RICHEST = 3       # calculated by prices ## use priority to imply in the end
     ACCUMULATE_GIFT_POINT = 4
     ORDER_GIFT = 5
-    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT]
+    ORDER_ACCUMULATE_GIFT_POINT = 6
+    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
+               ORDER_ACCUMULATE_GIFT_POINT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=True)

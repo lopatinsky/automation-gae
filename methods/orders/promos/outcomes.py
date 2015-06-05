@@ -129,6 +129,13 @@ def set_gift_points(outcome, item_dicts, promo, order):
     return promo_applied
 
 
+def set_order_gift_points(outcome, order):
+    if order:
+        order.points_details.append(GiftPointsDetails(points=outcome.value))
+        order.put()
+    return True
+
+
 def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
     from methods.orders.validation import set_item_dicts
     gift = MenuItem.get_by_id(int(outcome.value))
