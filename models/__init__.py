@@ -13,6 +13,9 @@ from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
 from config import config
 from methods.empatika_promos import register_order
 
+MINUTE_SECONDS = 60
+HOUR_SECONDS = 60 * MINUTE_SECONDS
+DAY_SECONDS = 24 * HOUR_SECONDS
 
 CASH_PAYMENT_TYPE = 0
 CARD_PAYMENT_TYPE = 1
@@ -53,12 +56,14 @@ GROUP_MODIFIER = 1
 SELF = 0
 IN_CAFE = 1
 DELIVERY = 2
-DELIVERY_TYPES = [SELF, IN_CAFE, DELIVERY]
+PICKUP = 3
+DELIVERY_TYPES = [SELF, IN_CAFE, DELIVERY, PICKUP]
 
 DELIVERY_MAP = {
     SELF: u'С собой',
     IN_CAFE: u'В кафе',
-    DELIVERY: u'Доставка'
+    DELIVERY: u'Доставка',
+    PICKUP: u'Самовывоз'
 }
 
 

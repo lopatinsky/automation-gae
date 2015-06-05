@@ -1,7 +1,8 @@
-import logging
+# coding=utf-8
 from base import CompanyBaseHandler
 from methods.auth import company_user_required
-from models import DELIVERY_TYPES, DELIVERY_MAP, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DeliveryType, DeliverySlot
+from models import DELIVERY_TYPES, DELIVERY_MAP, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DeliveryType, \
+    DeliverySlot, SELF, IN_CAFE, DELIVERY, PICKUP, HOUR_SECONDS, DAY_SECONDS
 
 __author__ = 'dvpermyakov'
 
@@ -19,6 +20,15 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                 'max_time': delivery.max_time
             }
 
+        if not DeliverySlot.query().fetch():
+            DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put()
+            DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put()
+            DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put()
+            DeliverySlot(name=u'Через 15 минут', slot_type=0, value=15).put()
+            DeliverySlot(name=u'Через 20 минут', slot_type=0, value=20).put()
+            DeliverySlot(name=u'Через 25 минут', slot_type=0, value=25).put()
+            DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()
+
         venues = Venue.query().fetch()
         for venue in venues:
             deliveries = {}
@@ -27,9 +37,13 @@ class DeliveryTypesHandler(CompanyBaseHandler):
             for delivery_type in DELIVERY_TYPES:
                 if delivery_type not in deliveries:
                     delivery = DeliveryType.create(delivery_type)
+                    if delivery.delivery_type in [SELF, IN_CAFE]:
+                        delivery.max_time = DAY_SECONDS
+                    if delivery.delivery_type in [DELIVERY, PICKUP]:
+                        delivery.min_time = HOUR_SECONDS
                     venue.delivery_types.append(delivery)
                     deliveries[delivery.delivery_type] = delivery_dict(delivery)
-                    venue.put()
+            venue.put()
             venue.deliveries = deliveries.values()
         self.render('/delivery_settings/delivery_types.html', venues=venues)
 
@@ -56,7 +70,7 @@ class DeliveryTypesHandler(CompanyBaseHandler):
 
 class DeliverySlotListHandler(CompanyBaseHandler):
     def get(self):
-        slots = DeliverySlot.query().fetch()
+        slots = DeliverySlot.query().order(DeliverySlot.value).fetch()
         for slot in slots:
             slot.slot_type_str = DeliverySlot.CHOICES_MAP[slot.slot_type]
         self.render('/delivery_settings/delivery_slot_list.html', slots=slots)
