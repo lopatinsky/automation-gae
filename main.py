@@ -211,6 +211,7 @@ app = WSGIApplication([
                 Route('/edit/group_modifier', company_admin.EditGroupModifierHandler),
                 Route('/edit/choice', company_admin.EditGroupModifierItemHandler),
                 Route('/choices/select', company_admin.SelectProductForChoiceHandler),
+                Route('/choices/default', company_admin.SelectDefaultChoiceHandler),
             ]),
             PathPrefixRoute('/venue', [
                 Route('/list', company_admin.VenueListHandler, 'venues_list'),

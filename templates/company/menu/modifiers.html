@@ -72,6 +72,7 @@
         <tr>
             <th>Имя модификатора</th>
             <th>Продукты с модификатором</th>
+            <th>Выбор по умолчанию</th>
             <th>Имя выбора</th>
             <th>Цена выбора</th>
             <th>Выбрать продукты для выбора</th>
@@ -91,6 +92,11 @@
                 </td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/company/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
+                        Выбрать
+                    </a>
+                </td>
+                <td rowspan="{{ modifier.choices|length + 1 }}">
+                    <a href="{{ '/company/menu/modifiers/choices/default?modifier_id=%s' % modifier.key.id() }}">
                         Выбрать
                     </a>
                 </td>

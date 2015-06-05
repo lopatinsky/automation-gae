@@ -88,6 +88,7 @@ class GroupModifierChoice(ndb.Model):
     choice_id = ndb.IntegerProperty(required=True)
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(default=0)  # в копейках
+    default = ndb.BooleanProperty(default=False)
 
     @property
     def float_price(self):  # в рублях
@@ -138,6 +139,7 @@ class GroupModifier(ndb.Model):
             'title': self.title,
             'choices': [
                 {
+                    'default': choice.default,
                     'title': choice.title,
                     'price': float(choice.price) / 100.0,  # в рублях
                     'id': str(choice.choice_id)

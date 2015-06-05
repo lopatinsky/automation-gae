@@ -335,7 +335,31 @@ class SelectProductForChoiceHandler(CompanyBaseHandler):
             if not confirmed and choice.choice_id not in product.group_choice_restrictions:
                 product.group_choice_restrictions.append(choice.choice_id)
                 product.put()
+        self.redirect_to('modifiers_list')
 
+
+class SelectDefaultChoiceHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = GroupModifier.get_by_id(modifier_id)
+        if not modifier:
+            self.abort(400)
+        self.render('/menu/select_default_choice.html', **{
+            'modifier': modifier,
+            'choices': modifier.choices
+        })
+
+    @company_user_required
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = GroupModifier.get_by_id(modifier_id)
+        if not modifier:
+            self.abort(400)
+        choice_id = self.request.get_range('choice_id')
+        for choice in modifier.choices:
+            choice.default = choice.choice_id == choice_id
+        modifier.put()
         self.redirect_to('modifiers_list')
 
 

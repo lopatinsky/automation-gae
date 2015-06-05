@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбор по умолчанию</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.clear_radio').click(function(e){
+                $("input:radio").removeAttr("checked");
+            });
+         });
+    </script>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <h3>Выберите выбор по умолчанию для {{ modifier.title }}</h3>
+    <form method="post">
+        <button class="clear_radio">
+            Убрать выбор по умолчанию
+        </button>
+        <input type="text" name="modifier_id" value="{{ modifier.key.id() }}" hidden>
+        <br>
+        {% for choice in choices %}
+             <label>
+                 <input type="radio" {% if choice.default %} checked {% endif %} name="choice_id" value="{{ choice.choice_id }}">
+                 {{ choice.title }}
+             </label><br>
+        {% endfor %}
+        <label><input type="submit" value="Сохранить"></label>
+    </form>
+    <a href="{{ '/company/menu/modifiers/list' }}">Назад</a>
+</body>
+</html>
