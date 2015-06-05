@@ -26,6 +26,7 @@ class Config(ndb.Model):
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
+    WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
 
     EMAILS = ndb.JsonProperty(default={
         "server": "admins",
@@ -50,7 +51,6 @@ class Config(ndb.Model):
     KPP = ndb.StringProperty(indexed=False)
     OGRN = ndb.StringProperty(indexed=False)
 
-
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
 
     def get_place_str(self):
@@ -62,6 +62,11 @@ class Config(ndb.Model):
     @property
     def WALLET_ENABLED(self):
         return self.WALLET_API_KEY is not None
+
+    @classmethod
+    def GET_MAX_WALLET_SUM(cls, total_sum):
+        config = cls.get()
+        return total_sum * config.WALLET_MAX_PERCENT / 100.0
 
     PAYPAL_CLIENT_ID = ndb.StringProperty(indexed=False)
     PAYPAL_CLIENT_SECRET = ndb.StringProperty(indexed=False)

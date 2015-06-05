@@ -2,7 +2,7 @@
 import copy
 from datetime import datetime, timedelta
 import logging
-from config import config, VENUE, BAR
+from config import config, VENUE, BAR, Config
 from methods import empatika_wallet, empatika_promos
 from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
 from methods.working_hours import get_valid_time_str, is_valid_weekday
@@ -375,6 +375,10 @@ def set_item_dicts(items, is_gift):
     return item_dicts
 
 
+def _check_wallet_payment(total_sum, payment_info):
+    return not payment_info.get('wallet_payment') or payment_info['wallet_payment'] <= Config.GET_MAX_WALLET_SUM(total_sum)
+
+
 def _check_gifts(gifts, client, errors):
     spent_points = 0
     for gift in gifts:
@@ -478,27 +482,30 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos,
                                  errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts, errors) and valid
-
     success, rest_points, full_points = _check_gifts(gifts, client, errors)
     valid = valid and success
 
-    promo_errors, new_order_gift_dicts, item_dicts, promos_info = \
-        apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
-                     cancelled_order_gift_dicts)
-    valid = valid and not promo_errors
     valid = _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts, errors) and valid
-    if order:
+
+    if not order:
+        promo_errors, new_order_gift_dicts, item_dicts, promos_info = \
+            apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
+                         cancelled_order_gift_dicts)
+        valid = valid and not promo_errors
+    else:
         if valid:
             errors, new_order_gift_dicts, item_dicts, promos_info = \
                 apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                              cancelled_order_gift_dicts, order)
-            _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts, errors, order)
         else:
+            new_order_gift_dicts = []
             promos_info = []
 
     total_sum = 0
     for item_dict in item_dicts:
         total_sum += item_dict['revenue']
+
+    valid = _check_wallet_payment(total_sum, payment_info) and valid
 
     logging.info('item_dicts = %s' % item_dicts)
 
@@ -518,7 +525,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
         wallet_balance = empatika_wallet.get_balance(client.key.id())
-        max_wallet_payment = min(total_sum, wallet_balance / 100.0)
+        max_wallet_payment = min(Config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
 
     result = {
         'valid': valid,

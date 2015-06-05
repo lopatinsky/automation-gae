@@ -22,12 +22,12 @@ def _apply_discounts(item_dict, promo, discount):
 
 
 def _apply_cash_back(item_dict, promo, cash_back, order=None):
-        if promo not in item_dict['promos']:
-            if order:
-                order.cash_backs.append(CashBack(amount=int(cash_back * item_dict['price'] * 100)))
-            item_dict['promos'].append(promo)
-            return True
-        return False
+    if promo not in item_dict['promos']:
+        if order:
+            order.cash_backs.append(CashBack(amount=int(cash_back * item_dict['price'] * 100)))
+        item_dict['promos'].append(promo)
+        return True
+    return False
 
 
 def set_discounts(outcome, item_dicts, promo):
