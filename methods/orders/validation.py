@@ -15,14 +15,22 @@ from promos import apply_promos
 MAX_SECONDS_LOSS = 30
 
 
-def _get_substitute(origin_item, venue, description=None):
+def _get_substitute(origin_item, venue):
     for item in MenuItem.query(MenuItem.title == origin_item.title).fetch():
         if origin_item.key == item.key:
             continue
         if venue.key not in item.restrictions:
+            if item.price != origin_item.price:
+                description = u'Позиция "%s" имеет другую цену в выбранной точке %s. ' \
+                              u'Заменить?' % (item.title, venue.title)
+                auto = False
+            else:
+                description = u'Позиция должна автоматически замениться'
+                auto = True
             return {
                 'item_id': str(item.key.id()),
-                'description': description if description else u'Сделайте замену'
+                'description': description,
+                'auto_replace': auto
             }
 
 
@@ -172,9 +180,7 @@ def _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors)
                 description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 errors.append(description)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue,
-                                             u'Позиция "%s" имеет другую цену в выбранной точке %s. '
-                                             u'Заменить?' % (item.title, venue.title))
+                substitute = _get_substitute(item, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
         return description
