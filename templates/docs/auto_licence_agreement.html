@@ -95,11 +95,12 @@
     </div>
     <br>
     <div>
-        {{ legal_person }}<br>
+        {% if legal_person %} {{ legal_person }} {% else %} {{ legal_person_ip }} {% endif %}<br>
         Адрес: {{ legal_address }}<br>
         ИНН: {{ legal_inn }}<br>
-        КПП: {{ legal_kpp }}<br>
-        ОРГН: {{ legal_kpp }}<br>
+        {% if legal_person %} КПП: {{ legal_kpp }}<br> {% endif %}
+        {% if legal_person %} ОРГН: {{ legal_ogrn }}<br> {% endif %}
+        {% if legal_person_ip %} ОРГНИП: {{ legal_ogrnip }}<br> {% endif %}
         Телефон: {{ legal_contacts }}<br>
         Email: {{ legal_support_email }}<br>
     </div>

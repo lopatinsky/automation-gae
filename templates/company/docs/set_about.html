@@ -43,8 +43,12 @@
             <input type="text" value="{{ delivery_emails }}" name="delivery_emails">
         </label><br>
         <label>
-            Юридическое лицо:
+            Юридическое лицо (ООО):
             <input type="text" value="{{ legal_person }}" name="legal_person">
+        </label><br>
+        <label>
+            Юридическое лицо (ИП):
+            <input type="text" value="{{ legal_person_ip }}" name="legal_person_ip">
         </label><br>
         <label>
             Контакты юридического лица:
@@ -65,6 +69,10 @@
         <label>
             ОГРН:
             <input type="text" value="{{ ogrn }}" name="ogrn">
+        </label><br>
+        <label>
+            ОГРНИП:
+            <input type="text" value="{{ ogrnip }}" name="ogrnip">
         </label><br>
         <input type="submit">
     </form>

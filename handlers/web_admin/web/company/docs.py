@@ -19,11 +19,13 @@ def _get_values():
         'delivery_phone': config.DELIVERY_PHONE if config.DELIVERY_PHONE else '',
         'delivery_emails':  u''.join(config.DELIVERY_EMAILS),
         'legal_person': config.LEGAL_PERSON if config.LEGAL_PERSON else '',
+        'legal_person_ip': config.LEGAL_PERSON_IP if config.LEGAL_PERSON_IP else '',
         'legal_contacts': config.LEGAL_CONTACTS if config.LEGAL_CONTACTS else '',
         'legal_email': config.LEGAL_EMAIL if config.LEGAL_EMAIL else '',
         'inn': config.INN if config.INN else '',
         'kpp': config.KPP if config.KPP else '',
-        'ogrn': config.OGRN if config.OGRN else ''
+        'ogrn': config.OGRN if config.OGRN else '',
+        'ogrnip': config.OGRNIP if config.OGRNIP else ''
     }
 
 
@@ -57,10 +59,12 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.DELIVERY_PHONE = self.request.get('delivery_phone')
         config.DELIVERY_EMAILS = self.request.get('delivery_emails').split(',')
         config.LEGAL_PERSON = self.request.get('legal_person')
+        config.LEGAL_PERSON_IP = self.request.get('legal_person_ip')
         config.LEGAL_CONTACTS = self.request.get('legal_contacts')
         config.LEGAL_EMAIL = self.request.get('legal_email')
         config.INN = self.request.get('inn')
         config.KPP = self.request.get('kpp')
         config.OGRN = self.request.get('ogrn')
+        config.OGRNIP = self.request.get('ogrnip')
         config.put()
         self.redirect('/company/docs/about')
