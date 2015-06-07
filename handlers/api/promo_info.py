@@ -1,13 +1,9 @@
 # coding=utf-8
+from urlparse import urlparse
 
 from .base import ApiHandler
 from config import config
 from models import Promo, GiftMenuItem, STATUS_AVAILABLE
-
-
-class DemoInfoHandler(ApiHandler):
-    def get(self):
-        self.render_json({"demo": config.CARD_BINDING_REQUIRED})
 
 
 class PromoInfoHandler(ApiHandler):
@@ -17,12 +13,13 @@ class PromoInfoHandler(ApiHandler):
 
     def get(self):
         items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
+        hostname = urlparse(self.request.url).hostname
         self.render_json({
             'wallet': {
                 'enable': config.WALLET_ENABLED,
                 'text': self.WALLET_TEXT
             },
-            'promos': [promo.dict() for promo in Promo.query(Promo.status == STATUS_AVAILABLE).fetch()],
+            'promos': [promo.dict(hostname) for promo in Promo.query(Promo.status == STATUS_AVAILABLE).fetch()],
             'bonuses': {
                 'items': items,
                 'text': self.BONUS_TEXT

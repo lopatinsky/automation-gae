@@ -338,6 +338,14 @@ class PromoCondition(ndb.Model):
 
 
 class Promo(ndb.Model):
+    def _get_url(self, hostname, param):
+        return u'http://%s/%s' % (hostname, param)
+
+    BONUS_ICON = u'images/promo_icons/bonus.png'
+    CASHBACK_ICON = u'images/promo_icons/cashback.png'
+    DISCOUNT_ICON = u'images/promo_icons/discount.png'
+    GIFT_ICON = u'images/promo_icons/gift.png'
+
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty()
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
@@ -348,11 +356,23 @@ class Promo(ndb.Model):
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
 
-    def dict(self):
+    def dict(self, hostname):
+        icon = None
+        if self.outcomes:
+            outcome = self.outcomes[0]
+            if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT]:
+                icon = self._get_url(hostname, self.BONUS_ICON)
+            elif outcome.method in [PromoOutcome.CASH_BACK]:
+                icon = self._get_url(hostname, self.CASHBACK_ICON)
+            elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST]:
+                icon = self._get_url(hostname, self.DISCOUNT_ICON)
+            elif outcome.method in [PromoOutcome.ORDER_GIFT]:
+                icon = self._get_url(hostname, self.GIFT_ICON)
         return {
             'id': self.key.id(),
             'title': self.title,
-            'description': self.description
+            'description': self.description,
+            'icon': icon
         }
 
     def validation_dict(self):

@@ -107,7 +107,6 @@ app = WSGIApplication([
         ]),
 
         Route('/register', api.RegistrationHandler),
-        Route('/demo_info', api.DemoInfoHandler),
         Route('/venues', api.VenuesHandler),
         Route('/client', api.ClientHandler),
         Route('/menu', api.MenuHandler),
