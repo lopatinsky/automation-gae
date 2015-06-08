@@ -463,7 +463,6 @@ class DeliveryType(ndb.Model):
 
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
-    min_sum = ndb.IntegerProperty()  # todo: remove
     min_time = ndb.IntegerProperty(default=0)
     max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
     delivery_zones = ndb.KeyProperty(kind=DeliveryZone, repeated=True)

@@ -15,7 +15,6 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                 'id': delivery.delivery_type,
                 'name': DELIVERY_MAP[delivery.delivery_type],
                 'value': delivery.status,
-                'min_sum': delivery.min_sum,
                 'min_time': delivery.min_time,
                 'max_time': delivery.max_time
             }
@@ -48,7 +47,6 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                         delivery.status = STATUS_AVAILABLE
                     else:
                         delivery.status = STATUS_UNAVAILABLE
-                delivery.min_sum = self.request.get_range('min_sum_%s_%s' % (venue.key.id(), delivery.delivery_type))
                 min_time = self.request.get('min_time_%s_%s' % (venue.key.id(), delivery.delivery_type))
                 if min_time:
                     delivery.min_time = int(min_time)

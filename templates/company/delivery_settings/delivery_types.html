@@ -7,22 +7,18 @@
     {% include '/company/header.html' %}
     <form method="POST">
         {% for venue in venues %}
-            <b>{{ venue.title }}</b><br>
+            <h3><u>{{ venue.title }}</u></h3><br>
             {% for type in venue.deliveries %}
                 <label>
-                    {{ type['name'] }}
+                    {% if type['value'] %} <b>{{ type['name'] }}</b> {% else %} {{ type['name'] }} {% endif %}
                     <input type="checkbox" name="{{ 'type_%s_%s' % (venue.key.id(), type['id']) }}" {% if type['value'] %} checked {% endif %}>
-                </label><br>
-                <label>
-                    Мин.сумма заказа
-                    <input type="number" name="{{ 'min_sum_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['min_sum'] }}">
                 </label><br>
                 <label>
                     Мин. время
                     <input type="number" name="{{ 'min_time_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['min_time'] }}">
                 </label><br>
                 <label>
-                    Макс. время
+                    Макс. <время></время>
                     <input type="number" name="{{ 'max_time_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['max_time'] }}">
                 </label><br>
                 <a href="{{ '/company/delivery/slots/choose?venue_id=%s&delivery_type=%s' % (venue.key.id(), type['id']) }}">
