@@ -130,8 +130,6 @@ app = WSGIApplication([
             Route('/deposit', api.DepositToWalletHandler),
         ]),
 
-        Route('/update/promo', api.UpdateOrderPromos),  # todo: is it need?
-
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
             Route('/base_urls', api.CompanyBaseUrlsHandler),
