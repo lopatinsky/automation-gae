@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Добавить слот</title>
+    <title>Добавить/Изменить слот</title>
 </head>
 <body>
-    <form>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <input type="text" name="slot_id" value="{{ slot.key.id() if slot else '' }}" hidden>
         <label>
             Тип:
             <select name="type">
@@ -21,7 +23,7 @@
         </label><br>
         <label>
             Значение
-            <input type="text" name="value" value="{{ slot.value if slot else '' }}">
+            <input type="text" name="value" value="{{ slot.value if slot and slot.value else '' }}">
         </label><br>
         <input type="submit">
         <a href="/company/delivery/slots/list">Назад</a>

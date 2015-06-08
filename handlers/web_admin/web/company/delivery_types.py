@@ -92,7 +92,35 @@ class DeliverySlotAddHandler(CompanyBaseHandler):
         slot.slot_type = self.request.get_range('type')
         value = self.request.get('value')
         if value:
-            slot.value = value
+            slot.value = int(value)
+        slot.put()
+        self.redirect('/company/delivery/slots/list')
+
+
+class DeliverySlotEditHandler(CompanyBaseHandler):
+    def get(self):
+        slot_id = self.request.get_range('slot_id')
+        slot = DeliverySlot.get_by_id(slot_id)
+        if not slot:
+            self.abort(400)
+        types = []
+        for type in DeliverySlot.CHOICES:
+            types.append({
+                'name': DeliverySlot.CHOICES_MAP[type],
+                'value': type
+            })
+        self.render('/delivery_settings/delivery_slot_add.html', types=types, slot=slot)
+
+    def post(self):
+        slot_id = self.request.get_range('slot_id')
+        slot = DeliverySlot.get_by_id(slot_id)
+        if not slot:
+            self.abort(400)
+        slot.name = self.request.get('name')
+        slot.slot_type = self.request.get_range('type')
+        value = self.request.get('value')
+        if value:
+            slot.value = int(value)
         slot.put()
         self.redirect('/company/delivery/slots/list')
 

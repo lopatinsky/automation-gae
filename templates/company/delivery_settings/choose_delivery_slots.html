@@ -4,6 +4,7 @@
     <title>Выбрать слоты</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <h3>Выберите слоты для {{ venue.title }}</h3>
     <form method="post">
         <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>

@@ -168,6 +168,7 @@ app = WSGIApplication([
             PathPrefixRoute('/slots', [
                 Route('/list', company_admin.DeliverySlotListHandler),
                 Route('/add', company_admin.DeliverySlotAddHandler),
+                Route('/edit', company_admin.DeliverySlotEditHandler),
                 Route('/choose', company_admin.ChooseSlotsHandler),
             ]),
         ]),

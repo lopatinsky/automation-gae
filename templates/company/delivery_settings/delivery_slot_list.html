@@ -4,6 +4,7 @@
     <title>Слоты</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <a href="/company/delivery/slots/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
@@ -13,7 +14,9 @@
         </tr>
         {% for slot in slots %}
             <tr>
-                <td>{{ slot.name }}</td>
+                <td>
+                    <a href="{{ '/company/delivery/slots/edit?slot_id=%s' % slot.key.id() }}">{{ slot.name }}</a>
+                </td>
                 <td>{{ slot.slot_type_str }}</td>
                 <td>{{ slot.value if slot.value else '' }}</td>
             </tr>
