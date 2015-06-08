@@ -203,8 +203,12 @@ class EditMenuItemHandler(CompanyBaseHandler):
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
             item.volume = float(self.request.get('volume'))
+        else:
+            item.volume = 0
         if self.request.get('weight'):
             item.weight = float(self.request.get('weight'))
+        else:
+            item.weight = 0
         item.picture = None
         item.cut_picture = None
         item.icon = None
