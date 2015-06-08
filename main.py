@@ -30,7 +30,6 @@ app = WSGIApplication([
 
     PathPrefixRoute('/mt', [
         Route('/companies', maintenance.CompaniesListHandler),
-
         Route('/report', maintenance.ReportHandler),
         PathPrefixRoute('/report', [
             Route('/clients', maintenance.ClientsReportHandler),
@@ -45,7 +44,6 @@ app = WSGIApplication([
             Route('/notification', maintenance.NotificationsReportHandler),
             Route('/card_binding', maintenance.CardBindingReportHandler),
         ]),
-
         Route('/name_confirmation', maintenance.NameConfirmationHandler),
     ]),
 
@@ -54,32 +52,37 @@ app = WSGIApplication([
             Route('/login', admin.LoginHandler),
             Route('/logout', admin.LogoutHandler),
             Route('/ping', admin.PingHandler),
-
             Route('/delivery_types', admin.DeliveryTypesHandler),
 
-            Route('/orders/current', admin.CurrentOrdersHandler),
-            Route('/orders/updates', admin.UpdatesHandler),
-
-            Route('/orders/returns', admin.ReturnsHandler),
-            Route('/orders/history', admin.HistoryHandler),
-
-            Route('/orders/<order_id:\d+>/cancel', admin.CancelOrderHandler),
-            Route('/orders/<order_id:\d+>/close', admin.DoneOrderHandler),
-            Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
-            Route('/orders/<order_id:\d+>/confirm', admin.ConfirmOrderHandler),
-            Route('/orders/<order_id:\d+>/wrong_venue', admin.WrongVenueHandler),
+            PathPrefixRoute('/orders', [
+                Route('/current', admin.CurrentOrdersHandler),
+                Route('/updates', admin.UpdatesHandler),
+                Route('/returns', admin.ReturnsHandler),
+                Route('/history', admin.HistoryHandler),
+                PathPrefixRoute('/<order_id:\d+>', [
+                    Route('/cancel', admin.CancelOrderHandler),
+                    Route('/close', admin.DoneOrderHandler),
+                    Route('/postpone', admin.PostponeOrderHandler),
+                    Route('/confirm', admin.ConfirmOrderHandler),
+                    Route('/wrong_venue', admin.WrongVenueHandler),
+                ])
+            ]),
 
             Route('/menu', admin.MenuHandler),
             Route('/modifiers', admin.ModifiersHandler),
             Route('/dynamic_info', admin.DynamicInfoHandler),
-            Route('/stop_list/set', admin.SetStopListHandler),
-            Route('/wallet/deposit', admin.WalletDepositHandler),
-            Route('/wallet/deposit_history', admin.WalletDepositHistoryHandler),
-
+            PathPrefixRoute('/stop_list', [
+                Route('/set', admin.SetStopListHandler),
+            ]),
+            PathPrefixRoute('/wallet', [
+                Route('/deposit', admin.WalletDepositHandler),
+                Route('/deposit_history', admin.WalletDepositHistoryHandler),
+            ]),
             Route('/clients/<client_id:\d+>/history', admin.ClientHistoryHandler),
-            
-            Route('/revenue/today', admin.RevenueReportTodayHandler),
-            Route('/revenue/month', admin.RevenueReportMonthHandler),
+            PathPrefixRoute('/revenue', [
+                Route('/today', admin.RevenueReportTodayHandler),
+                Route('/month', admin.RevenueReportMonthHandler),
+            ]),
         ]),
 
         PathPrefixRoute('/payment', [
@@ -87,7 +90,6 @@ app = WSGIApplication([
                 Route('/bind', api.BindPaypalHandler),
                 Route('/unbind', api.UnbindPaypalHandler),
             ]),
-
             Route('/unbind', api.UnbindCardHandler),
             Route('/register', api.PaymentRegisterHandler),
             Route('/status', api.PaymentStatusHandler),
@@ -123,10 +125,12 @@ app = WSGIApplication([
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
 
-        Route('/wallet/balance', api.WalletBalanceHandler),
-        Route('/wallet/deposit', api.DepositToWalletHandler),
+        PathPrefixRoute('/wallet', [
+            Route('/balance', api.WalletBalanceHandler),
+            Route('/deposit', api.DepositToWalletHandler),
+        ]),
 
-        Route('/update/promo', api.UpdateOrderPromos),
+        Route('/update/promo', api.UpdateOrderPromos),  # todo: is it need?
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
@@ -152,12 +156,15 @@ app = WSGIApplication([
         Route('/main', company_admin.AutomationMainHandler, 'company_main'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
-        Route('/venues', company_admin.EnableVenuesHandler),
-        Route('/venues/map', company_admin.MapVenuesHandler),
-        Route('/venues/<venue_id:\d+>', company_admin.EditVenueHandler),
-        Route('/venues/create', company_admin.CreateVenueHandler),
+        PathPrefixRoute('/venues', [
+            Route('', company_admin.EnableVenuesHandler),
+            Route('/<venue_id:\d+>', company_admin.EditVenueHandler),
+            Route('/map', company_admin.MapVenuesHandler),
+            Route('/create', company_admin.CreateVenueHandler),
+        ]),
 
         PathPrefixRoute('/delivery', [
+            Route('/types', company_admin.DeliveryTypesHandler),
             PathPrefixRoute('/orders', [
                 Route('/items', company_delivery.OrderItemsHandler),
                 Route('/confirm', company_delivery.ConfirmOrderHandler),
@@ -166,7 +173,6 @@ app = WSGIApplication([
                 Route('/current', company_delivery.DeliveryOrdersHandler),
                 Route('/new', company_delivery.NewDeliveryOrdersHandler),
             ]),
-            Route('/types', company_admin.DeliveryTypesHandler),
             PathPrefixRoute('/slots', [
                 Route('/list', company_admin.DeliverySlotListHandler),
                 Route('/add', company_admin.DeliverySlotAddHandler),
@@ -206,14 +212,20 @@ app = WSGIApplication([
             Route('/product/modifiers/select', company_admin.SelectProductForModifierHandler),
             PathPrefixRoute('/modifiers', [
                 Route('/list', company_admin.ModifierList, 'modifiers_list'),
-                Route('/add/single_modifier', company_admin.AddSingleModifierHandler),
-                Route('/add/group_modifier', company_admin.AddGroupModifierHandler),
-                Route('/add/<group_modifier_id:\d+>/group_modifier_item', company_admin.AddGroupModifierItemHandler),
-                Route('/edit/single_modifier', company_admin.EditSingleModifierHandler),
-                Route('/edit/group_modifier', company_admin.EditGroupModifierHandler),
-                Route('/edit/choice', company_admin.EditGroupModifierItemHandler),
-                Route('/choices/select', company_admin.SelectProductForChoiceHandler),
-                Route('/choices/default', company_admin.SelectDefaultChoiceHandler),
+                PathPrefixRoute('/add', [
+                    Route('/single_modifier', company_admin.AddSingleModifierHandler),
+                    Route('/group_modifier', company_admin.AddGroupModifierHandler),
+                    Route('/<group_modifier_id:\d+>/group_modifier_item', company_admin.AddGroupModifierItemHandler),
+                ]),
+                PathPrefixRoute('/edit', [
+                    Route('/single_modifier', company_admin.EditSingleModifierHandler),
+                    Route('/group_modifier', company_admin.EditGroupModifierHandler),
+                    Route('/choice', company_admin.EditGroupModifierItemHandler),
+                ]),
+                PathPrefixRoute('/choices', [
+                    Route('/select', company_admin.SelectProductForChoiceHandler),
+                    Route('/default', company_admin.SelectDefaultChoiceHandler),
+                ]),
             ]),
             PathPrefixRoute('/venue', [
                 Route('/list', company_admin.VenueListHandler, 'venues_list'),
@@ -241,19 +253,19 @@ app = WSGIApplication([
             Route('/signup', company_admin.SignupHandler),
             Route('/list', company_admin.ListAdmins, 'barista_main'),
             Route('/create', company_admin.AutoCreateAdmins),
-            Route('/<admin_id:\d+>/change_login', company_admin.ChangeLoginAdmins),
-            Route('/<admin_id:\d+>/change_password', company_admin.ChangePasswordAdmin),
+            PathPrefixRoute('/<admin_id:\d+>', [
+                Route('/change_login', company_admin.ChangeLoginAdmins),
+                Route('/change_password', company_admin.ChangePasswordAdmin),
+            ]),
         ]),
     ]),
 
-    PathPrefixRoute('/admin', [
+    PathPrefixRoute('/admin', [  # now work with modifiers
         Route('/login', web_admin.LoginHandler),
         Route('/logout', web_admin.LogoutHandler),
-
         Route('/orders', web_admin.OrdersHandler),
         Route('/backs', web_admin.ReturnsHandler),
         Route('/history', web_admin.HistoryHandler),
-
         Route('/check_time', web_admin.CheckTimeHandler),
         Route('/check_update', web_admin.CheckUpdateHandler),
         Route('/done', web_admin.OrderDoneHandler),
