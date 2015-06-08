@@ -668,7 +668,7 @@ class Order(ndb.Model):
                 point_detail.status = GiftPointsDetails.DONE
         self.put()
 
-    def _grouped_item_dict(self, details, gift=False):
+    def grouped_item_dict(self, details, gift=False):
         item_dicts = []
         for item_detail in details:
             if not gift:
@@ -721,9 +721,9 @@ class Order(ndb.Model):
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
             "venue_id": str(self.venue_id),
-            "items": self._grouped_item_dict(self.item_details),
-            "gifts": self._grouped_item_dict(self.gift_details, gift=True),
-            "order_gifts": self._grouped_item_dict(self.order_gift_details)
+            "items": self.grouped_item_dict(self.item_details),
+            "gifts": self.grouped_item_dict(self.gift_details, gift=True),
+            "order_gifts": self.grouped_item_dict(self.order_gift_details)
         })
         return dct
 

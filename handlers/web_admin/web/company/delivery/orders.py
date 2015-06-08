@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
 from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
-    CANCELED_BY_BARISTA_ORDER, Venue, DeliverySlot
+    CANCELED_BY_BARISTA_ORDER, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
 from methods.rendering import timestamp
 from methods.orders.done import done_order
 from methods.orders.cancel import cancel_order
@@ -73,12 +73,22 @@ def _update_order_info(orders):
 
 def order_items_values(order):
     items = []
-    for item_detail in order.item_details:
-        item_obj = item_detail.item.get()
+    for item_dict in order.grouped_item_dict(order.item_details):
+        item_obj = MenuItem.get_by_id(int(item_dict['id']))
+        item_obj.amount = item_dict['quantity']
+        item_obj.total_float_price = item_obj.float_price * item_obj.amount
         item_obj.modifiers = []
-        for modifier in item_detail.single_modifiers:
-            item_obj.modifiers.append(modifier.get())
-        item_obj.modifiers.extend(item_detail.group_modifiers)
+        for modifier_dict in item_dict['single_modifiers']:
+            modifier = SingleModifier.get_by_id(int(modifier_dict['id']))
+            modifier.amount = modifier_dict['quantity']
+            item_obj.total_float_price += modifier.float_price * modifier.amount
+            item_obj.modifiers.append(modifier)
+        for modifier_dict in item_dict['group_modifiers']:
+            modifier = GroupModifier.get_by_id(int(modifier_dict['id']))
+            choice = modifier.get_choice_by_id(int(modifier_dict['choice']))
+            choice.amount = modifier_dict['quantity']
+            item_obj.total_float_price += choice.float_price * choice.amount * item_obj.amount
+            item_obj.modifiers.append(choice)
         items.append(item_obj)
     order = _update_order_info([order])[0]
     return {
