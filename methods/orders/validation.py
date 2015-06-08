@@ -77,7 +77,7 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
-            if delivery_zone.min_sum > total_sum:
+            if delivery_zone and delivery_zone.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
                 errors.append(description)
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
