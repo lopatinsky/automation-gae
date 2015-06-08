@@ -14,8 +14,8 @@ from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_by_address, check_items_and_gifts, \
-    get_delivery_time
+from methods.orders.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
+    check_items_and_gifts, get_delivery_time
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
     PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, PAYPAL_PAYMENT_TYPE
 from google.appengine.api import taskqueue
@@ -57,6 +57,7 @@ class OrderHandler(ApiHandler):
         delivery_type = int(response_json.get('delivery_type'))
 
         delivery_venue = None
+        delivery_zone = None
         address = response_json.get('address')
         if address:
             address_home = address['address']
@@ -66,7 +67,7 @@ class OrderHandler(ApiHandler):
                     flat = address['address']['flat']
                     address = candidates[0]
                     address['address']['flat'] = flat
-            delivery_venue = get_venue_by_address(address)
+            delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
 
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = response_json.get('venue_id')
@@ -141,7 +142,8 @@ class OrderHandler(ApiHandler):
                                                response_json.get('order_gifts', []),
                                                response_json.get('cancelled_order_gifts', []),
                                                response_json['payment'],
-                                               venue, address, delivery_time, delivery_slot, delivery_type, True)
+                                               venue, address, delivery_time, delivery_slot, delivery_type,
+                                               delivery_zone, True)
             if not validation_result['valid']:
                 logging.warning('Fail in validation')
                 return self.render_error(get_first_error(validation_result))
@@ -170,7 +172,8 @@ class OrderHandler(ApiHandler):
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
-                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj)
+                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
+                delivery_zone=delivery_zone.key)
             self.order.put()
 
             if wallet_payment > 0:
@@ -220,7 +223,7 @@ class OrderHandler(ApiHandler):
             validate_order(client, response_json['items'], response_json.get('gifts', []),
                            response_json.get('order_gifts', []), response_json.get('cancelled_order_gifts', []),
                            response_json['payment'], venue, address, delivery_time, delivery_slot, delivery_type,
-                           False, self.order)
+                           delivery_zone, False, self.order)
             self.order.put()
 
             # use delivery phone and delivery emails for all delivery types
@@ -329,6 +332,7 @@ class CheckOrderHandler(ApiHandler):
         delivery_type = int(self.request.get('delivery_type'))
 
         delivery_venue = None
+        delivery_zone = None
         address = self.request.get('address')
         if address:
             address = json.loads(address)
@@ -339,7 +343,7 @@ class CheckOrderHandler(ApiHandler):
                     flat = address['address']['flat']
                     address = candidates[0]
                     address['address']['flat'] = flat
-            delivery_venue = get_venue_by_address(address)
+            delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
 
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = self.request.get_range('venue_id')
@@ -387,5 +391,5 @@ class CheckOrderHandler(ApiHandler):
         else:
             cancelled_order_gifts = []
         result = orders.validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                       address, delivery_time, delivery_slot, delivery_type)
+                                       address, delivery_time, delivery_slot, delivery_type, delivery_zone)
         self.render_json(result)

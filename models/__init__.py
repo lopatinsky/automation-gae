@@ -438,16 +438,29 @@ class DeliverySlot(ndb.Model):
         }
 
 
+class GeoRib(ndb.LocalStructuredProperty):
+    x = ndb.GeoPtProperty(required=True)
+    y = ndb.GeoPtProperty(required=True)
+
+
+class DeliveryZone(ndb.Model):
+    address = ndb.LocalStructuredProperty(Address)
+    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    price = ndb.IntegerProperty(default=0)
+    min_sum = ndb.IntegerProperty(default=0)
+    geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
+
+
 class DeliveryType(ndb.Model):
     MAX_DAYS = 7
     ONE_DAY_SEC = 86400
 
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_UNAVAILABLE)
-    min_sum = ndb.IntegerProperty(default=0)
+    min_sum = ndb.IntegerProperty()  # todo: remove
     min_time = ndb.IntegerProperty(default=0)
     max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
-    delivery_zone = ndb.BooleanProperty(default=False)
+    delivery_zones = ndb.KeyProperty(kind=DeliveryZone, repeated=True)
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
 
     @classmethod
@@ -460,7 +473,7 @@ class DeliveryType(ndb.Model):
         return {
             'id': str(self.delivery_type),
             'name': DELIVERY_MAP[self.delivery_type],
-            'min_sum': self.min_sum,
+            #'min_sum': self.min_sum,
             'time_picker_min': self.min_time,
             'time_picker_max': self.max_time,
             'slots': [slot.get().dict() for slot in self.delivery_slots]
@@ -603,6 +616,7 @@ class Order(ndb.Model):
     delivery_time = ndb.DateTimeProperty()
     delivery_time_str = ndb.StringProperty()
     delivery_slot_id = ndb.IntegerProperty()
+    delivery_zone = ndb.KeyProperty(kind=DeliveryZone)
     payment_type_id = ndb.IntegerProperty(required=True, choices=(CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE,
                                                                   PAYPAL_PAYMENT_TYPE))
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)

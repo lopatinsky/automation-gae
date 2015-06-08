@@ -71,12 +71,12 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum, errors):
+def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum, errors):
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
-            if delivery.min_sum > total_sum:
-                description = u'Минимальная сумма заказа %s' % delivery.min_sum
+            if delivery_zone.min_sum > total_sum:
+                description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
                 errors.append(description)
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
@@ -459,7 +459,7 @@ def get_avail_gifts(points):
 
 
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
-                   delivery_time, delivery_slot, delivery_type, with_details=False, order=None):
+                   delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
@@ -491,8 +491,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
-    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, total_sum_without_promos,
-                                 errors) and valid
+    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, delivery_zone,
+                                 total_sum_without_promos, errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts, errors) and valid
     success, rest_points, full_points = _check_gifts(gifts, client, errors)
     valid = valid and success

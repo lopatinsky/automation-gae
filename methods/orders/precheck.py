@@ -45,12 +45,14 @@ def set_client_info(client_json):
     return client_id, client
 
 
-def get_venue_by_address(address):
+def get_venue_and_zone_by_address(address):
     for venue in Venue.query().fetch():
         for delivery in venue.delivery_types:
-            if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE and not delivery.delivery_zone:
-                if address['address']['city'] == venue.address.city:
-                    return venue
+            if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                for zone in delivery.delivery_zones:
+                    zone = zone.get()
+                    if address['address']['city'] == zone.address.city:
+                        return venue, zone
 
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
