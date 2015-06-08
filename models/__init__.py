@@ -66,6 +66,12 @@ DELIVERY_MAP = {
     PICKUP: u'Самовывоз'
 }
 
+CONFUSED_TIME = 0
+CONFUSED_VENUE = 1
+CONFUSED_SELF = 2
+CONFUSED_OTHER = 3
+CONFUSED_CHOICES = [CONFUSED_VENUE, CONFUSED_TIME, CONFUSED_SELF, CONFUSED_OTHER]
+
 
 class SingleModifier(ndb.Model):
     INFINITY = 1000
@@ -639,6 +645,8 @@ class Order(ndb.Model):
     response_success = ndb.BooleanProperty(default=False, indexed=False)
     first_for_client = ndb.BooleanProperty()
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
+    cancel_reason = ndb.IntegerProperty(choices=CONFUSED_CHOICES)
+    cancel_reason_text = ndb.StringProperty()
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")

@@ -17,7 +17,8 @@ from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time
 from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, PAYPAL_PAYMENT_TYPE
+    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, \
+    PAYPAL_PAYMENT_TYPE, CONFUSED_CHOICES, CONFUSED_OTHER
 from google.appengine.api import taskqueue
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -287,6 +288,13 @@ class ReturnOrderHandler(ApiHandler):
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
                 success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, with_push=False)
                 if success:
+                    reason_id = self.request.get('reason_id')
+                    if reason_id:
+                        reason_id = int(reason_id)
+                        if reason_id in CONFUSED_CHOICES:
+                            order.cancel_reason = reason_id
+                        if reason_id == CONFUSED_OTHER:
+                            order.cancel_reason_text = self.request.get('reason_text')
                     self.render_json({
                         'error': 0,
                         'order_id': order.key.id()
