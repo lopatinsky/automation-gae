@@ -1,5 +1,6 @@
 # coding=utf-8
-from models import CashBack, GiftPointsDetails, MenuItem
+from models import MenuItem
+from models.order import CashBack, GiftPointsDetails
 
 
 def _get_item_keys(item_dicts):

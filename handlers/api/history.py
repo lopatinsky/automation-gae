@@ -1,5 +1,6 @@
 from .base import ApiHandler
-from models import Order, CREATING_ORDER
+from models import Order
+from models.order import CREATING_ORDER
 
 
 class HistoryHandler(ApiHandler):

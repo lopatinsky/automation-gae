@@ -1,5 +1,5 @@
 import re
-from models import IOS_DEVICE, ANDROID_DEVICE
+from models.client import IOS_DEVICE, ANDROID_DEVICE
 
 
 def get_platform_and_version(request):

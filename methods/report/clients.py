@@ -1,7 +1,8 @@
+from models.order import READY_ORDER, CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
+
 __author__ = 'dvpermyakov'
 
-from models import Order, Client, Venue, READY_ORDER, \
-    CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
+from models import Order, Client, Venue
 from datetime import datetime
 from report_methods import PROJECT_STARTING_YEAR, suitable_date
 from google.appengine.ext import ndb

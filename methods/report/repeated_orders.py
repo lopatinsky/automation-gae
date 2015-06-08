@@ -1,6 +1,8 @@
+from models.order import READY_ORDER
+
 __author__ = 'dvpermyakov'
 
-from models import Order, Client, READY_ORDER
+from models import Order, Client
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 import calendar
 from datetime import datetime

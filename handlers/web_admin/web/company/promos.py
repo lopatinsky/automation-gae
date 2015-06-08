@@ -1,7 +1,8 @@
 # coding:utf-8
 from methods.auth import company_user_required
-from models import Promo, PromoCondition, PromoOutcome, IN_CAFE, SELF
+from models import Promo, PromoCondition, PromoOutcome
 from base import CompanyBaseHandler
+from models.venue import IN_CAFE, SELF
 
 __author__ = 'dvpermyakov'
 

@@ -1,6 +1,8 @@
+from models.specials import SMS_PASSIVE
+
 __author__ = 'dvpermyakov'
 
-from models import Client, CardBindingPayment, Notification, SMS_PASSIVE
+from models import Client, CardBindingPayment, Notification
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from datetime import datetime
 

@@ -7,7 +7,8 @@ from methods import push
 from methods.auth import api_user_required
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
-from models import Order, Client, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, Venue
+from models import Order, Client, Venue
+from models.order import CANCELED_BY_CLIENT_ORDER, NEW_ORDER, CANCELED_BY_BARISTA_ORDER
 
 
 def format_order(order):

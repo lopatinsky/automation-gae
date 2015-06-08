@@ -1,7 +1,8 @@
 from datetime import datetime
 from google.appengine.ext import ndb
 from methods import alfa_bank, push, paypal
-from models import READY_ORDER, SharedFreeCup, Client
+from models import SharedFreeCup, Client
+from models.order import READY_ORDER
 
 __author__ = 'dvpermyakov'
 

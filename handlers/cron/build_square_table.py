@@ -1,7 +1,8 @@
 from datetime import timedelta, datetime
 from webapp2 import RequestHandler
 from methods.rendering import timestamp
-from models import Order, Client, READY_ORDER, JsonStorage
+from models import Order, Client, JsonStorage
+from models.order import READY_ORDER
 
 
 class BuildSquareTableHandler(RequestHandler):

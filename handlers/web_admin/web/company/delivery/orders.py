@@ -2,21 +2,15 @@
 from datetime import datetime, timedelta
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
-from models import Order, DELIVERY, NEW_ORDER, Client, STATUS_MAP, CONFIRM_ORDER, READY_ORDER, \
-    CANCELED_BY_BARISTA_ORDER, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
+from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
 from methods.rendering import timestamp
 from methods.orders.done import done_order
 from methods.orders.cancel import cancel_order
 from methods.orders.confirm import confirm_order
+from models.order import STATUS_MAP, NOT_CANCELED_STATUSES, NEW_ORDER, CONFIRM_ORDER, READY_ORDER, CANCELED_BY_BARISTA_ORDER
+from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
-
-STATUSES = [
-    NEW_ORDER,
-    CONFIRM_ORDER,
-    READY_ORDER,
-    CANCELED_BY_BARISTA_ORDER
-]
 
 
 def _order_json(order, old_status):
@@ -100,11 +94,11 @@ def order_items_values(order):
 class DeliveryOrdersHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES))\
+        orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(NOT_CANCELED_STATUSES))\
             .order(-Order.date_created).fetch()
         orders = _update_order_info(orders)
         proxy_statuses = []
-        for status in STATUSES:
+        for status in NOT_CANCELED_STATUSES:
             proxy_statuses.append({
                 'value': status,
                 'name': STATUS_MAP[status]
@@ -139,7 +133,8 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
     def get(self):
         last_time = int(self.request.get('last_time'))
         start = datetime.fromtimestamp(last_time)
-        orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(STATUSES), Order.date_created > start)\
+        orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(NOT_CANCELED_STATUSES),
+                             Order.date_created > start)\
             .order(-Order.date_created).fetch()
         orders = _update_order_info(orders)
         if orders:

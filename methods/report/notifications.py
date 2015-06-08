@@ -1,6 +1,5 @@
-__author__ = 'dvpermyakov'
-
-from models import Order, Notification, SMS_SUCCESS, PUSH_NOTIFICATION
+from models.specials import SMS_SUCCESS, PUSH_NOTIFICATION
+from models import Order, Notification
 from datetime import datetime, timedelta
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 import calendar

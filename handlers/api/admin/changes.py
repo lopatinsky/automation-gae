@@ -6,7 +6,7 @@ from methods.orders.postpone import postpone_order
 from methods.orders.confirm import confirm_order
 from methods.auth import write_access_required
 from methods.rendering import timestamp
-from models import CANCELED_BY_BARISTA_ORDER, NEW_ORDER, CONFIRM_ORDER
+from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
 
 __author__ = 'ilyazorin'
 

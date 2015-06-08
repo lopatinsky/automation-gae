@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import logging
-from models import Order, NOT_CANCELED_STATUSES
+from models import Order
+from models.order import NOT_CANCELED_STATUSES
 
 
 def check_condition_by_value(condition, value):

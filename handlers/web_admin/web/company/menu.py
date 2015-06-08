@@ -6,8 +6,8 @@ from base import CompanyBaseHandler
 
 __author__ = 'dvpermyakov'
 
-from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SINGLE_MODIFIER, SingleModifier,\
-    GROUP_MODIFIER, GroupModifier, GroupModifierChoice
+from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SingleModifier, GroupModifier, \
+    GroupModifierChoice
 import logging
 
 

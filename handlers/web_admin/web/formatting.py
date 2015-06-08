@@ -1,5 +1,7 @@
 from collections import Counter
-from models import Client, CASH_PAYMENT_TYPE, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
+from models import Client
+from models.order import CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
+from models.payment_types import CASH_PAYMENT_TYPE
 
 
 def format_phone(phone):

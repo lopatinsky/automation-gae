@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from base import AdminApiHandler
 from methods.auth import api_user_required
-from models import Order, READY_ORDER
+from models import Order
+from models.order import READY_ORDER
 
 
 class RevenueReportTodayHandler(AdminApiHandler):

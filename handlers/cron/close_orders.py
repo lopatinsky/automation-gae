@@ -2,8 +2,9 @@
 import logging
 from handlers.api.base import ApiHandler
 from methods import email
-from models import Order, Venue, NEW_ORDER
+from models import Order, Venue
 from methods.orders.done import done_order
+from models.order import NEW_ORDER
 
 
 class CloseOpenedOrdersHandler(ApiHandler):

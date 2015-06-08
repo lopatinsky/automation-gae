@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import random
 import time
+from models.payment_types import CARD_PAYMENT_TYPE
 
 __author__ = 'dvpermyakov'
 
 from base import ApiHandler
 from methods import branch_io, alfa_bank
-from models import Share, Client, PaymentType, STATUS_AVAILABLE, CARD_PAYMENT_TYPE, SharedGift
+from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift
 import logging
 
 TEXT = (u'Роскошный кофе, дружелюбные бариста. '

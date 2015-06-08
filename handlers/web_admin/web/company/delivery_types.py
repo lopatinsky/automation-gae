@@ -1,8 +1,8 @@
 # coding=utf-8
 from base import CompanyBaseHandler
 from methods.auth import company_user_required
-from models import DELIVERY_TYPES, DELIVERY_MAP, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DeliveryType, \
-    DeliverySlot, SELF, IN_CAFE, DELIVERY, PICKUP, HOUR_SECONDS, DAY_SECONDS
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DAY_SECONDS, HOUR_SECONDS, DeliverySlot
+from models.venue import DELIVERY_MAP, DELIVERY_TYPES, SELF, IN_CAFE, DELIVERY, PICKUP, DeliveryType
 
 __author__ = 'dvpermyakov'
 

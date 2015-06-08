@@ -2,18 +2,12 @@
 import datetime
 import json
 import logging
-import random
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
-from models import IOS_DEVICE, ANDROID_DEVICE
+from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
 
 PARSE_APPLICATION_ID = 'sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe'
 PARSE_API_KEY = 'kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3'
-
-DEVICE_TYPE_MAP = {
-    IOS_DEVICE: 'ios',
-    ANDROID_DEVICE: 'android'
-}
 
 
 def send_push(channel, data, device_type):

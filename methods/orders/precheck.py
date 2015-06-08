@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-import logging
 import re
 from google.appengine.api import memcache
 from methods.rendering import STR_TIME_FORMAT
-from models import Order, Client, Venue, DELIVERY, STATUS_AVAILABLE, DeliverySlot
+from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot
+from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
 

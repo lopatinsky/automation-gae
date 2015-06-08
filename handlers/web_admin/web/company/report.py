@@ -1,7 +1,4 @@
 from methods.auth import company_user_required
-
-__author__ = 'dvpermyakov'
-
 from base import CompanyBaseHandler
 from methods import excel
 from methods.report import clients, menu_items, orders

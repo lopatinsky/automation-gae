@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-__author__ = 'dvpermyakov'
-
 from google.appengine.api import urlfetch
 import json
 from config import config

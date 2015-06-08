@@ -1,6 +1,7 @@
 from .base import AdminApiHandler
 from methods.auth import api_user_required
-from models import Order, CREATING_ORDER
+from models import Order
+from models.order import CREATING_ORDER
 
 
 class ClientHistoryHandler(AdminApiHandler):

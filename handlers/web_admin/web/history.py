@@ -4,8 +4,9 @@ from .base import BaseHandler
 from .formatting import format_order
 from methods.auth import user_required
 from methods.orders import search_orders
-from models import Order, NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CARD_PAYMENT_TYPE, \
-    CASH_PAYMENT_TYPE
+from models import Order
+from models.order import STATUS_MAP
+from models.payment_types import PAYMENT_TYPE_MAP
 
 
 class HistoryHandler(BaseHandler):
@@ -27,16 +28,8 @@ class HistoryHandler(BaseHandler):
             for item in order_data['items']:
                 total_cost_price += item['cost_price']
 
-        status_strings = {
-            NEW_ORDER: u"Новый заказ",
-            READY_ORDER: u"Выдано",
-            CANCELED_BY_CLIENT_ORDER: u"Отменено клиентом",
-            CANCELED_BY_BARISTA_ORDER: u"Отменено баристой"
-        }
-        payment_type_strings = {
-            CARD_PAYMENT_TYPE: u"Карта",
-            CASH_PAYMENT_TYPE: u"Наличными"
-        }
+        status_strings = STATUS_MAP
+        payment_type_strings = PAYMENT_TYPE_MAP
 
         self.render('history.html', orders=orders_data, status_strings=status_strings,
                     payment_type_strings=payment_type_strings)

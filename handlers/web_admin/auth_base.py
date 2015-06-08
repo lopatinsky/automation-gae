@@ -1,4 +1,3 @@
-import logging
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import auth, sessions
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from models.specials import SMS_SUCCESS
 
 __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
-from models import Client, Order, Notification, SMS_SUCCESS, CardBindingPayment
+from models import Client, Order, Notification, CardBindingPayment
 from methods import email
 from datetime import datetime, timedelta
 from methods import sms_pilot

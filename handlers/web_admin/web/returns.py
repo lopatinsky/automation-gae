@@ -3,7 +3,8 @@ import datetime
 from .base import BaseHandler
 from .formatting import format_order
 from methods.auth import user_required
-from models import CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, Order
+from models import Order
+from models.order import CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 
 
 class ReturnsHandler(BaseHandler):

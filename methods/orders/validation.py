@@ -6,9 +6,11 @@ from config import config, VENUE, BAR, Config
 from methods import empatika_wallet, empatika_promos
 from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
 from methods.working_hours import get_valid_time_str, is_valid_weekday
-from models import OrderPositionDetails, ChosenGroupModifierDetails, MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DELIVERY, GiftPositionDetails, DeliverySlot, PromoOutcome, MINUTE_SECONDS, \
+from models import MenuItem, SingleModifier, GroupModifier, \
+    GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, PromoOutcome, MINUTE_SECONDS, \
     HOUR_SECONDS, DAY_SECONDS
+from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
+from models.venue import DELIVERY
 from promos import apply_promos
 
 

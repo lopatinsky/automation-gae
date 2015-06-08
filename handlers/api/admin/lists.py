@@ -3,7 +3,8 @@ from .base import AdminApiHandler
 from methods.auth import api_user_required
 from methods.orders import search_orders
 from methods.rendering import timestamp
-from models import Order, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CREATING_ORDER
+from models import Order
+from models.order import CREATING_ORDER, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 
 
 class OrderListBaseHandler(AdminApiHandler):

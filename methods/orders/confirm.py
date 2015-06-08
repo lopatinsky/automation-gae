@@ -1,6 +1,7 @@
 # coding=utf-8
 from methods import push
-from models import CONFIRM_ORDER, Client
+from models import Client
+from models.order import CONFIRM_ORDER
 
 __author__ = 'dvpermyakov'
 

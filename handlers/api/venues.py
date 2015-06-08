@@ -1,7 +1,8 @@
 from google.appengine.api.datastore_errors import BadValueError
 from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
-from models import Venue, SELF, IN_CAFE, STATUS_AVAILABLE
+from models import Venue, STATUS_AVAILABLE
+from models.venue import SELF, IN_CAFE
 
 __author__ = 'ilyazorin'
 

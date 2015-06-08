@@ -1,7 +1,7 @@
 from methods.auth import company_user_required
-from models import PaymentType, CASH_PAYMENT_TYPE, STATUS_UNAVAILABLE, CARD_PAYMENT_TYPE, STATUS_AVAILABLE, \
-    PAYPAL_PAYMENT_TYPE
+from models import PaymentType, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from base import CompanyBaseHandler
+from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 
 
 __author__ = 'dvpermyakov'

@@ -16,10 +16,12 @@ from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time
-from models import Client, CARD_PAYMENT_TYPE, Order, NEW_ORDER, Venue, CANCELED_BY_CLIENT_ORDER, IOS_DEVICE, \
-    PaymentType, STATUS_AVAILABLE, READY_ORDER, CREATING_ORDER, SELF, IN_CAFE, Address, DeliverySlot, \
-    PAYPAL_PAYMENT_TYPE, CONFUSED_CHOICES, CONFUSED_OTHER
 from google.appengine.api import taskqueue
+from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Address, Client
+from models.client import IOS_DEVICE
+from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, CONFUSED_OTHER
+from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
+from models.venue import SELF, IN_CAFE
 
 SECONDS_WAITING_BEFORE_SMS = 15
 

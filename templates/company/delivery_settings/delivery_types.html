@@ -18,7 +18,7 @@
                     <input type="number" name="{{ 'min_time_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['min_time'] }}">
                 </label><br>
                 <label>
-                    Макс. <время></время>
+                    Макс. время
                     <input type="number" name="{{ 'max_time_%s_%s' % (venue.key.id(), type['id']) }}" value="{{ type['max_time'] }}">
                 </label><br>
                 <a href="{{ '/company/delivery/slots/choose?venue_id=%s&delivery_type=%s' % (venue.key.id(), type['id']) }}">

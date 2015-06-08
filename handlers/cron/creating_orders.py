@@ -1,7 +1,8 @@
 import datetime
 import webapp2
 from methods import email, alfa_bank
-from models import CREATING_ORDER, Order, CARD_PAYMENT_TYPE
+from models import Order
+from models.order import CREATING_ORDER
 
 
 class CheckCreatingOrdersHandler(webapp2.RequestHandler):
