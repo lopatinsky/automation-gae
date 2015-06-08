@@ -66,6 +66,8 @@ app = WSGIApplication([
             Route('/orders/<order_id:\d+>/cancel', admin.CancelOrderHandler),
             Route('/orders/<order_id:\d+>/close', admin.DoneOrderHandler),
             Route('/orders/<order_id:\d+>/postpone', admin.PostponeOrderHandler),
+            Route('/orders/<order_id:\d+>/confirm', admin.ConfirmOrderHandler),
+            Route('/orders/<order_id:\d+>/wrong_venue', admin.WrongVenueHandler),
 
             Route('/menu', admin.MenuHandler),
             Route('/modifiers', admin.ModifiersHandler),

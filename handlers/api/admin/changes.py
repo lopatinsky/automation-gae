@@ -3,9 +3,10 @@ from handlers.api.admin.base import AdminApiHandler
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from methods.orders.postpone import postpone_order
+from methods.orders.confirm import confirm_order
 from methods.auth import write_access_required
 from methods.rendering import timestamp
-from models import CANCELED_BY_BARISTA_ORDER, NEW_ORDER
+from models import CANCELED_BY_BARISTA_ORDER, NEW_ORDER, CONFIRM_ORDER
 
 __author__ = 'ilyazorin'
 
@@ -25,7 +26,7 @@ class DoneOrderHandler(AdminApiHandler):
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
-        if order.status != NEW_ORDER:
+        if order.status not in [NEW_ORDER, CONFIRM_ORDER]:
             self.abort(400)
         done_order(order)
         self.render_json({
@@ -40,4 +41,24 @@ class PostponeOrderHandler(AdminApiHandler):
         mins = self.request.get_range("mins")
         order = self.user.order_by_id(int(order_id))
         postpone_order(order, mins)
+        self.render_json({})
+
+
+class ConfirmOrderHandler(AdminApiHandler):
+    @write_access_required
+    def post(self, order_id):
+        order = self.user.order_by_id(int(order_id))
+        if order.status != NEW_ORDER:
+            self.abort(400)
+        confirm_order(order)
+        self.render_json({})
+
+
+class WrongVenueHandler(AdminApiHandler):
+    @write_access_required
+    def post(self, order_id):
+        order = self.user.order_by_id(int(order_id))
+        if order.status != NEW_ORDER:
+            self.abort(400)
+        # todo: set code here
         self.render_json({})
