@@ -295,6 +295,7 @@ class ReturnOrderHandler(ApiHandler):
                             order.cancel_reason = reason_id
                         if reason_id == CONFUSED_OTHER:
                             order.cancel_reason_text = self.request.get('reason_text')
+                        order.put()
                     self.render_json({
                         'error': 0,
                         'order_id': order.key.id()
