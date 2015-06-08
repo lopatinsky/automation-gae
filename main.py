@@ -99,6 +99,21 @@ app = WSGIApplication([
             Route('/payment_types', api.PaymentTypesHandler),
         ]),
 
+        Route('/register', api.RegistrationHandler),
+        Route('/client', api.ClientHandler),
+        Route('/venues', api.VenuesHandler),
+        Route('/menu', api.MenuHandler),
+        Route('/modifiers', api.ModifiersHandler),
+        Route('/dynamic_info', api.DynamicInfoHandler),
+        Route('/check_order', api.CheckOrderHandler),
+        Route('/order_register', api.RegisterOrderHandler),
+        Route('/order', api.OrderHandler),
+        Route('/set_order_success', api.ClientSettingSuccessHandler),
+        Route('/add_return_comment', api.AddReturnCommentHandler),
+        Route('/status', api.StatusHandler),
+        Route('/return', api.ReturnOrderHandler),
+        Route('/history', api.HistoryHandler),
+
         PathPrefixRoute('/address', [
             Route('/by_street', api.AddressByAddressHandler),
         ]),
@@ -109,21 +124,6 @@ app = WSGIApplication([
                 Route('/items', api.GiftListHandler),
             ]),
         ]),
-
-        Route('/register', api.RegistrationHandler),
-        Route('/venues', api.VenuesHandler),
-        Route('/client', api.ClientHandler),
-        Route('/menu', api.MenuHandler),
-        Route('/modifiers', api.ModifiersHandler),
-        Route('/dynamic_info', api.DynamicInfoHandler),
-        Route('/order', api.OrderHandler),
-        Route('/set_order_success', api.ClientSettingSuccessHandler),
-        Route('/add_return_comment', api.AddReturnCommentHandler),
-        Route('/order_register', api.RegisterOrderHandler),
-        Route('/check_order', api.CheckOrderHandler),
-        Route('/status', api.StatusHandler),
-        Route('/return', api.ReturnOrderHandler),
-        Route('/history', api.HistoryHandler),
 
         PathPrefixRoute('/wallet', [
             Route('/balance', api.WalletBalanceHandler),
@@ -271,8 +271,10 @@ app = WSGIApplication([
         Route('/status_up', web_admin.OrderStatusUpdateHandler)
     ]),
 
-    Route('/task/counter_persist_incr', fastcounter.CounterPersistIncr),
-    Route('/task/check_order_success', api.CheckOrderSuccessHandler),
+    PathPrefixRoute('/task', [
+        Route('/counter_persist_incr', fastcounter.CounterPersistIncr),
+        Route('/check_order_success', api.CheckOrderSuccessHandler),
+    ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),
 

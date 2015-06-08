@@ -252,13 +252,11 @@ class OrderHandler(ApiHandler):
 
 
 class RegisterOrderHandler(ApiHandler):
-
     def get(self):
         self.render_json({'order_id': Order.generate_id()})
 
 
 class StatusHandler(ApiHandler):
-
     def post(self):
         response_json = json.loads(self.request.get('orders'))
         orders = []
@@ -270,7 +268,6 @@ class StatusHandler(ApiHandler):
 
 
 class ReturnOrderHandler(ApiHandler):
-
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
