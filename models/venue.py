@@ -104,7 +104,7 @@ class DeliveryType(ndb.Model):
             'name': DELIVERY_MAP[self.delivery_type],
             'time_picker_min': self.min_time,
             'time_picker_max': self.max_time,
-            'slots': [slot.get().dict() for slot in self.delivery_slots]
+            'slots': [slot.dict() for slot in sorted([slot.get() for slot in self.delivery_slots], key=lambda x: x.value)]
         }
 
 
