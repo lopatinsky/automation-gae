@@ -57,7 +57,7 @@ class AddNewsHandler(CompanyBaseHandler):
         taskqueue.add(url='/task/news/start', method='POST', eta=start, params={
             'news_id': news.key.id()
         })
-        taskqueue.add(url='/task/news/end', method='POST', eta=end, params={
+        taskqueue.add(url='/task/news/close', method='POST', eta=end, params={
             'news_id': news.key.id()
         })
         self.redirect('/company/notifications/news/list')
