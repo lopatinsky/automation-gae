@@ -15,18 +15,24 @@ class Notification(ndb.Model):
 class News(ndb.Model):
     text = ndb.StringProperty(required=True, indexed=False)
     image_url = ndb.StringProperty(required=True, indexed=False)
-    active = ndb.BooleanProperty(required=True, default=True)
-    created_at = ndb.DateTimeProperty(auto_now_add=True, indexed=False)
+    active = ndb.BooleanProperty(required=True, default=False)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+
+    def activate(self):
+        self.active = True
+        self.put()
+
+    def deactivate(self):
+        self.active = False
+        self.put()
 
     def dict(self):
-        dct = {
+        return {
             "id": self.key.id(),
             "text": self.text,
-            "created_at": timestamp(self.created_at)
+            "created": timestamp(self.created),
+            "image_url": self.image_url if self.image_url else None
         }
-        if self.image_url:
-            dct["image_url"] = self.image_url
-        return dct
 
 
 class Deposit(ndb.Model):
