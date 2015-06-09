@@ -4,20 +4,27 @@ from google.appengine.ext.ndb import metadata
 from base import ApiHandler
 from config import config, Config
 from models import STATUS_AVAILABLE, Venue
+from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
 
 
 class CompanyInfoHandler(ApiHandler):
     def get(self):
-        cities = []
+        zones = {}
         deliveries = {}
         for venue in Venue.query(Venue.active == True).fetch():
-            if venue.address.city not in cities:
-                cities.append(venue.address.city)
             for venue_delivery in venue.delivery_types:
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type not in deliveries:
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
+                if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type == DELIVERY:
+                    for zone in venue_delivery.delivery_zones:
+                        if zone not in zones:
+                            zones[zone] = zone.get()
+        cities = []
+        for zone in zones.values():
+            cities.append(zone.address.city)
+
         self.render_json({
             'app_name': config.APP_NAME,
             'description': config.COMPANY_DESCRIPTION,

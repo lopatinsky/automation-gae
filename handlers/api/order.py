@@ -172,16 +172,13 @@ class OrderHandler(ApiHandler):
             else:
                 address_obj = None
 
-            if delivery_zone:
-                delivery_zone = delivery_zone.key
-
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
                 delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
-                delivery_zone=delivery_zone)
+                delivery_zone=delivery_zone.key if delivery_zone else None)
             self.order.put()
 
             if wallet_payment > 0:
