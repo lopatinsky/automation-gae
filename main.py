@@ -7,6 +7,7 @@ from webapp2_extras.routes import PathPrefixRoute
 import handlers.web_admin.web.company as company_admin
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
+import handlers.api.proxy.unified_app as unified_app
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -113,6 +114,12 @@ app = WSGIApplication([
         Route('/status', api.StatusHandler),
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
+
+        PathPrefixRoute('/proxy', [
+            PathPrefixRoute('/unified_app', [
+                Route('/companies', unified_app.CompaniesHandler),
+            ]),
+        ]),
 
         PathPrefixRoute('/address', [
             Route('/by_street', api.AddressByAddressHandler),

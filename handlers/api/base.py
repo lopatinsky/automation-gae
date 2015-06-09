@@ -15,6 +15,10 @@ class ApiHandler(webapp2.RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
+        logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
+        namespace = self.request.get('namespace')
+        if namespace:
+            namespace_manager.set_namespace(namespace)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
