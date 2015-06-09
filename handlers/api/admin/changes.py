@@ -7,6 +7,7 @@ from methods.orders.confirm import confirm_order
 from methods.auth import write_access_required
 from methods.rendering import timestamp
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
+from models.venue import DELIVERY, PICKUP
 
 __author__ = 'ilyazorin'
 
@@ -23,13 +24,23 @@ class CancelOrderHandler(AdminApiHandler):
 
 
 class DoneOrderHandler(AdminApiHandler):
+    def render_error(self, description):
+        self.response.set_status(400)
+        self.render_json({
+            'success': True,
+            'description': description
+        })
+
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
         if order.status not in [NEW_ORDER, CONFIRM_ORDER]:
             self.abort(400)
+        if order.status == NEW_ORDER and order.delivery_type in [DELIVERY, PICKUP]:
+            return self.render_error(u'Необходимо сначала подтвердить заказ')
         done_order(order)
         self.render_json({
+            "success": True,
             "delivery_time": timestamp(order.delivery_time),
             "actual_delivery_time": timestamp(order.actual_delivery_time)
         })

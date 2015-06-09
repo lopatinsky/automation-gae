@@ -4,7 +4,7 @@ from methods.auth import api_user_required
 from methods.orders import search_orders
 from methods.rendering import timestamp
 from models import Order
-from models.order import CREATING_ORDER, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
+from models.order import CREATING_ORDER, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER
 
 
 class OrderListBaseHandler(AdminApiHandler):
@@ -29,10 +29,10 @@ class CurrentOrdersHandler(OrderListBaseHandler):
         now = datetime.datetime.now()
         today = datetime.datetime.combine(now.date(), datetime.time())
         orders = self.user.query_orders(Order.date_created >= today,
-                                        Order.status == NEW_ORDER) \
+                                        Order.status.IN([NEW_ORDER, CONFIRM_ORDER])) \
                           .order(Order.date_created).fetch()
         orders = orders[::-1]
-        return [o for o in orders if o.status == NEW_ORDER or o.delivery_time >= now]
+        return [o for o in orders if o.status in [NEW_ORDER, CONFIRM_ORDER] or o.delivery_time >= now]
 
 
 class ReturnsHandler(OrderListBaseHandler):
