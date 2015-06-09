@@ -87,6 +87,8 @@ class OrderHandler(ApiHandler):
             else:
                 venue_id = None
                 venue = None
+        if not venue:
+            return self.render_error(u'Невозможно определить точку для обработки заказа')
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])

@@ -53,6 +53,7 @@ def get_venue_and_zone_by_address(address):
                     zone = zone.get()
                     if address['address']['city'] == zone.address.city:
                         return venue, zone
+    return None, None
 
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
