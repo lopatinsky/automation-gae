@@ -3,6 +3,7 @@ from methods.auth import company_user_required
 from methods.images import save_item_image, resize_image, MAX_SIZE, ICON_SIZE
 from methods.unique import unique
 from base import CompanyBaseHandler
+from models.menu import SINGLE_MODIFIER, GROUP_MODIFIER
 
 __author__ = 'dvpermyakov'
 

@@ -1,13 +1,13 @@
 # coding=utf-8
 __author__ = 'dvpermyakov'
 
-import webapp2
+from webapp2 import RequestHandler
 from models import Order, Client
 from methods import email, sms_pilot
 import logging
 
 
-class CheckOrderSuccessHandler(webapp2.RequestHandler):
+class CheckOrderSuccessHandler(RequestHandler):
     def post(self):
         order_id = self.request.get_range('order_id')
         order = Order.get_by_id(order_id)

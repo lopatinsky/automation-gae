@@ -13,10 +13,12 @@ class Notification(ndb.Model):
 
 
 class News(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    start = ndb.DateTimeProperty(required=True)
+    end = ndb.DateTimeProperty(required=True)
     text = ndb.StringProperty(required=True, indexed=False)
     image_url = ndb.StringProperty(required=True, indexed=False)
     active = ndb.BooleanProperty(required=True, default=False)
-    created = ndb.DateTimeProperty(auto_now_add=True)
 
     def activate(self):
         self.active = True

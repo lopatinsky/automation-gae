@@ -22,6 +22,7 @@ from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCrea
 from docs import AboutCompanyHandler, SetAboutCompanyHandler
 from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseSlotsHandler, DeliverySlotListHandler, \
     DeliverySlotEditHandler
+from notifications import ListNewsHandler, AddNewsHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

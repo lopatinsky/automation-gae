@@ -249,6 +249,13 @@ app = WSGIApplication([
             Route('/list', company_admin.PromoListHandler),
         ]),
 
+        PathPrefixRoute('/notifications', [
+            PathPrefixRoute('/news', [
+                Route('/list', company_admin.ListNewsHandler),
+                Route('/add', company_admin.AddNewsHandler),
+            ]),
+        ]),
+
         PathPrefixRoute('/report', [
             Route('/main', company_admin.ReportHandler),
             Route('/clients', company_admin.ClientsReportHandler),
@@ -283,10 +290,14 @@ app = WSGIApplication([
     PathPrefixRoute('/task', [
         Route('/counter_persist_incr', fastcounter.CounterPersistIncr),
         Route('/check_order_success', tasks.CheckOrderSuccessHandler),
+        PathPrefixRoute('/news', [
+            Route('/start', tasks.StartNewsHandler),
+            Route('/close', tasks.CloseNewsHandler),
+        ]),
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),
-    
+
     PathPrefixRoute('/get', [
         Route('/<t:[abcd]?><platform:[ia]>', share.GATrackDownloadHandler),
         Route('/<t:[abcd]?><platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),

@@ -4,6 +4,8 @@ import time
 STR_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 STR_DATE_FORMAT = "%Y-%m-%d"
 
+HTML_STR_TIME_FORMAT = "%Y-%m-%dT%H:%M"
+
 
 def timestamp(datetime_object):
     return int(time.mktime(datetime_object.timetuple()))
