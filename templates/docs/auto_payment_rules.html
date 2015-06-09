@@ -4,11 +4,11 @@
 <p><strong>Банк</strong> - кредитная организация, которая имеет исключительное право осуществлять в совокупности следующие банковские операции: привлечение во вклады денежных средств физических и юридических лиц, размещение указанных средств от своего имени и за свой счет на условиях возвратности, платности, срочности, открытие и ведение банковских счетов физических и юридических лиц</p>
 <p><strong>Банковская карта</strong> - банковская карта международной платежной системы MasterCard, Visa.</p>
 <div>
-    Компания: {% if legal_person %} {{ legal_person }} {% else %} {{ legal_person_ip }} {% endif %}<br>
+    Компания: {% if not legal_person_ip %} {{ legal_person }} {% else %} {{ legal_person_ip }} {% endif %}<br>
     Адрес: {{ legal_address }}<br>
     ИНН: {{ legal_inn }}<br>
-    {% if legal_person %} КПП: {{ legal_kpp }}<br> {% endif %}
-    {% if legal_person %} ОРГН: {{ legal_ogrn }}<br> {% endif %}
+    {% if not legal_person_ip %} КПП: {{ legal_kpp }}<br> {% endif %}
+    {% if not legal_person_ip %} ОРГН: {{ legal_ogrn }}<br> {% endif %}
     {% if legal_person_ip %} ОРГНИП: {{ legal_ogrnip }}<br> {% endif %}
     Контакты: {{ legal_contacts }}<br>
 </div>
@@ -145,13 +145,12 @@
 </div>
 <br>
 <div>
-    {% if legal_person %} {{ legal_person }} {% else %} {{ legal_person_ip }} {% endif %}<br>
+    {% if not legal_person_ip %} {{ legal_person }} {% else %} {{ legal_person_ip }} {% endif %}<br>
     Адрес: {{ legal_address }}<br>
     ИНН: {{ legal_inn }}<br>
-    {% if legal_person %} КПП: {{ legal_kpp }}<br> {% endif %}
-    {% if legal_person %} ОРГН: {{ legal_ogrn }}<br> {% endif %}
+    {% if not legal_person_ip %} КПП: {{ legal_kpp }}<br> {% endif %}
+    {% if not legal_person_ip %} ОРГН: {{ legal_ogrn }}<br> {% endif %}
     {% if legal_person_ip %} ОРГНИП: {{ legal_ogrnip }}<br> {% endif %}
     Телефон: {{ legal_contacts }}<br>
     Email: {{ legal_support_email }}<br>
 </div>
-
