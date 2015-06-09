@@ -8,6 +8,7 @@ import handlers.web_admin.web.company as company_admin
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
 import handlers.api.proxy.unified_app as unified_app
+import handlers.tasks as tasks
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -114,6 +115,7 @@ app = WSGIApplication([
         Route('/status', api.StatusHandler),
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
+        Route('/news', api.NewsHandler),
 
         PathPrefixRoute('/proxy', [
             PathPrefixRoute('/unified_app', [
@@ -280,16 +282,19 @@ app = WSGIApplication([
 
     PathPrefixRoute('/task', [
         Route('/counter_persist_incr', fastcounter.CounterPersistIncr),
-        Route('/check_order_success', api.CheckOrderSuccessHandler),
+        Route('/check_order_success', tasks.CheckOrderSuccessHandler),
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),
-
-    Route('/get/<t:[abcd]?><platform:[ia]>', share.GATrackDownloadHandler),
-    Route('/get/<t:[abcd]?><platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
-
-    Route('/get/splash', share.GATrackSplashHandler),
-    Route('/get/splash/<button:[ia]>', share.GATrackSplashHandler),
+    
+    PathPrefixRoute('/get', [
+        Route('/<t:[abcd]?><platform:[ia]>', share.GATrackDownloadHandler),
+        Route('/<t:[abcd]?><platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
+        PathPrefixRoute('/splash', [
+            Route('', share.GATrackSplashHandler),
+            Route('/<button:[ia]>', share.GATrackSplashHandler),
+        ]),
+    ]),
 ], config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)

@@ -261,17 +261,6 @@ class RegisterOrderHandler(ApiHandler):
         self.render_json({'order_id': Order.generate_id()})
 
 
-class StatusHandler(ApiHandler):
-    def post(self):
-        response_json = json.loads(self.request.get('orders'))
-        orders = []
-        for order_id in response_json['orders']:
-            order = Order.get_by_id(int(order_id))
-            if order:
-                orders.append(order)
-        self.render_json({'status': [order.status_dict() for order in orders]})
-
-
 class ReturnOrderHandler(ApiHandler):
     def post(self):
         order_id = int(self.request.get('order_id'))

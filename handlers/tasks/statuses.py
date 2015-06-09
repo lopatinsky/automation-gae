@@ -3,7 +3,6 @@ __author__ = 'dvpermyakov'
 
 import webapp2
 from models import Order, Client
-from .base import ApiHandler
 from methods import email, sms_pilot
 import logging
 
@@ -26,12 +25,3 @@ class CheckOrderSuccessHandler(webapp2.RequestHandler):
             if len(phone) == 11 and phone[0] == "8":
                 phone = "7" + phone[1:]
             sms_pilot.send_sms("DoubleB", [phone], sms_text)
-
-
-class ClientSettingSuccessHandler(ApiHandler):
-    def post(self):
-        order_id = self.request.get_range('order_id')
-        order = Order.get_by_id(order_id)
-        order.response_success = True
-        order.put()
-        self.render_json({})

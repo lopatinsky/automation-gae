@@ -7,12 +7,11 @@ from venues import VenuesHandler
 from payment_types import PaymentTypesHandler
 from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler
 from registration import RegistrationHandler
-from order import OrderHandler, RegisterOrderHandler, StatusHandler, ReturnOrderHandler, CheckOrderHandler, \
+from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler, \
     AddReturnCommentHandler
-from promo_info import PromoInfoHandler, GiftListHandler
+from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler
 from client import ClientHandler
 from history import HistoryHandler
-from response_order_status import CheckOrderSuccessHandler, ClientSettingSuccessHandler
 from wallet import DepositToWalletHandler, WalletBalanceHandler
 from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, GetPreText
 from twilio import ReceiveSms
@@ -20,3 +19,4 @@ from paypal import BindPaypalHandler, UnbindPaypalHandler
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler
 from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler
+from statuses import StatusHandler, ClientSettingSuccessHandler
