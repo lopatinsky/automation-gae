@@ -1,15 +1,51 @@
 from google.appengine.ext import ndb
 from methods.rendering import timestamp
+from models.client import Client
 
-PUSH_NOTIFICATION = 0
 SMS_SUCCESS = 1
 SMS_PASSIVE = 2
+SMS_CHOICES = [SMS_SUCCESS, SMS_PASSIVE]
+
+VENUE_CHANNEL = 'venue_%s'
+CATEGORY_CHANNEL = 'category_%s'
+
+STATUS_CREATED = 0
+STATUS_PUSHED = 1
+STATUS_CANCELLED = 2
+PUSH_STATUS_CHOICES = [STATUS_CREATED, STATUS_PUSHED, STATUS_CANCELLED]
+
+
+class Channel(ndb.Model):
+    name = ndb.StringProperty(required=True)
+    channel = ndb.StringProperty(required=True)
 
 
 class Notification(ndb.Model):
-    client_id = ndb.IntegerProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
-    type = ndb.IntegerProperty(required=True, choices=(PUSH_NOTIFICATION, SMS_SUCCESS, SMS_PASSIVE))
+    status = ndb.IntegerProperty(choices=PUSH_STATUS_CHOICES, default=STATUS_CREATED)
+    start = ndb.DateTimeProperty(required=True)
+    text = ndb.StringProperty(required=True)
+    popup_text = ndb.StringProperty()
+    header = ndb.StringProperty()  # it is used for Android
+    channels = ndb.LocalStructuredProperty(Channel, repeated=True)
+
+    def closed(self):
+        self.status = STATUS_PUSHED
+        self.put()
+
+    def cancel(self):
+        self.status = STATUS_CANCELLED
+        self.put()
+
+
+class ClientNotification(Notification):
+    client = ndb.KeyProperty(required=True)
+
+
+class ClientSmsSending(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    client = ndb.KeyProperty(kind=Client, required=True)
+    sms_type = ndb.IntegerProperty(choices=SMS_CHOICES, required=True)
 
 
 class News(ndb.Model):
@@ -30,9 +66,9 @@ class News(ndb.Model):
 
     def dict(self):
         return {
-            "id": self.key.id(),
+            "id": str(self.key.id()),
             "text": self.text,
-            "created": timestamp(self.created),
+            "start": timestamp(self.start),
             "image_url": self.image_url if self.image_url else None
         }
 

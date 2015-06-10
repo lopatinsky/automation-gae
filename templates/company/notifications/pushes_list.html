@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>История пушей</title>
+</head>
+<body>
+    <a href="/company/notifications/pushes/add">Отправить новые пуши</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Время создания</th>
+            <th>Время отправки</th>
+            <th>Текст</th>
+            <th>Заголовок</th>
+            <th>Расширенный текст</th>
+            <th>Каналы</th>
+        </tr>
+        {% for push in pushes %}
+            {% set height=push.channels|length %}
+            <tr>
+                <td rowspan="{{ height }}">{{ push.created }}</td>
+                <td rowspan="{{ height }}">{{ push.start }}</td>
+                <td rowspan="{{ height }}">{{ push.text }}</td>
+                <td rowspan="{{ height }}">{{ push.header }}</td>
+                <td rowspan="{{ height }}">{{ push.popup_text }}</td>
+                {% for channel in push.channels %}
+                    <td>{{ channel }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

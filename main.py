@@ -254,6 +254,10 @@ app = WSGIApplication([
                 Route('/list', company_admin.ListNewsHandler),
                 Route('/add', company_admin.AddNewsHandler),
             ]),
+            PathPrefixRoute('/pushes', [
+                Route('/list', company_admin.PushesListHandler),
+                Route('/add', company_admin.AddPushesHandler),
+            ]),
         ]),
 
         PathPrefixRoute('/report', [
@@ -293,6 +297,9 @@ app = WSGIApplication([
         PathPrefixRoute('/news', [
             Route('/start', tasks.StartNewsHandler),
             Route('/close', tasks.CloseNewsHandler),
+        ]),
+        PathPrefixRoute('/pushes', [
+            Route('/start', tasks.StartPushesHandler),
         ]),
     ]),
 

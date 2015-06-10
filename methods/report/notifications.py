@@ -1,4 +1,4 @@
-from models.specials import SMS_SUCCESS, PUSH_NOTIFICATION
+from models.specials import SMS_SUCCESS
 from models import Order, Notification
 from datetime import datetime, timedelta
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
@@ -8,7 +8,7 @@ import calendar
 DAYS_AFTER_NOTIFICATION = 7
 
 
-def get(chosen_year, chosen_month, chosen_type):
+def get(chosen_year, chosen_month, chosen_type):  # todo: not work!!!
     if not chosen_year:
         chosen_year = datetime.now().year
         chosen_month = datetime.now().month
@@ -68,7 +68,7 @@ def get(chosen_year, chosen_month, chosen_type):
         'chosen_month': chosen_month,
         'chosen_type': chosen_type,
         'sms_type': SMS_SUCCESS,
-        'push_type': PUSH_NOTIFICATION,
+        #'push_type': PUSH_NOTIFICATION,
         'days_after_notification': DAYS_AFTER_NOTIFICATION,
         'total': total
     }

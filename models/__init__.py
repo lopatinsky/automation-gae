@@ -1,8 +1,13 @@
+# coding=utf-8
 STATUS_UNAVAILABLE = 0
 STATUS_AVAILABLE = 1
 STATUS_CHOICES = [STATUS_AVAILABLE, STATUS_UNAVAILABLE]
 
-# coding=utf-8
+STATUS_MAP = {
+    STATUS_UNAVAILABLE: u'недоступен',
+    STATUS_AVAILABLE: u'доступен'
+}
+
 from tablet_request import TabletRequest
 from error_statistics import PaymentErrorsStatistics, AlfaBankRequest
 from client import Client, CardBindingPayment

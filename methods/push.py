@@ -10,9 +10,9 @@ PARSE_APPLICATION_ID = 'sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe'
 PARSE_API_KEY = 'kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3'
 
 
-def send_push(channel, data, device_type):
+def send_push(channels, data, device_type):
     payload = {
-        'channel': channel,
+        'channels': channels,
         'type': DEVICE_TYPE_MAP[device_type],
         'expiry': timestamp(datetime.datetime.utcnow() + datetime.timedelta(days=365)),
         'data': data
@@ -26,6 +26,20 @@ def send_push(channel, data, device_type):
                             headers=headers, validate_certificate=False, deadline=10).content
     logging.info(result)
     return json.loads(result)
+
+
+def make_push_data(text, header, device_type):
+    if device_type == IOS_DEVICE:
+        return {
+            'alert': text,
+        }
+    elif device_type == ANDROID_DEVICE:
+        return {
+            'text': text,
+            'head': header,
+            'action': 'com.empatika.doubleb.push'  # todo: set it
+        }
+    return None
 
 
 def make_order_push_data(order_id, order_status, text, device_type):
@@ -51,7 +65,7 @@ def send_order_push(order_id, order_status, text, device_type, new_time=None, si
         data['timestamp'] = timestamp(new_time)
     if silent:
         data['content-available'] = 1
-    return send_push("order_%s" % order_id, data, device_type)
+    return send_push(["order_%s" % order_id], data, device_type)
 
 
 def send_reminder_push(client_id, client_name, client_score):
@@ -70,7 +84,7 @@ def send_reminder_push(client_id, client_name, client_score):
         'action': 'com.empatika.doubleb.push',
         'marker': 'send_reminder'
     }
-    return send_push('client_%s' % client_id, data, ANDROID_DEVICE)
+    return send_push(['client_%s' % client_id], data, ANDROID_DEVICE)
 
 
 def send_order_ready_push(order):

@@ -10,6 +10,7 @@
         <tr>
             <th>Текст</th>
             <th>Картинка</th>
+            <th>Время создания</th>
             <th>Начало</th>
             <th>Конец</th>
             <th>Активность</th>
@@ -20,6 +21,7 @@
                 <td>
                     <img src="{{ new.image_url }}" height="120">
                 </td>
+                <td>{{ new.created }}</td>
                 <td>{{ new.start }}</td>
                 <td>{{ new.end }}</td>
                 <td>{{ new.active }}</td>
