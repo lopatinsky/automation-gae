@@ -14,7 +14,7 @@ from models.venue import DELIVERY
 from promos import apply_promos
 
 
-MAX_SECONDS_LOSS = 30
+MAX_SECONDS_LOSS = 120
 
 
 def _get_substitute(origin_item, venue):
