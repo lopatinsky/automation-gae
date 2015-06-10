@@ -55,7 +55,7 @@ class OrderHandler(ApiHandler):
 
         success = check_items_and_gifts(response_json['items'], response_json.get('gifts', []))
         if not success:
-            self.render_error(u'Выберите что-нибудь')
+            return self.render_error(u'Выберите что-нибудь')
 
         delivery_type = int(response_json.get('delivery_type'))
 
