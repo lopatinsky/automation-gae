@@ -5,39 +5,65 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <table style="border-collapse:collapse; width:100%" border="1">
-        <tr>
-            <th rowspan="2">Название</th>
-            <th rowspan="2">Описание</th>
-            <th colspan="3">Условия</th>
-            <th colspan="3">Последствия</th>
-        </tr>
-        <tr>
-            <th>Выберите продукты</th>
-            <th>Метод</th>
-            <th>Значение</th>
-            <!-- -->
-            <th>Выберите продукты</th>
-            <th>Метод</th>
-            <th>Значение</th>
-        </tr>
-        {% for promo in promos %}
+    <form method="post">
+        <a href="/company/promos/add">Добавить</a>
+        <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
-                <td>{{ promo.title }}</td>
-                <td>{{ promo.description }}</td>
-                {% for condition in promo.conditions %}
-                    <td>{{ condition.items }}</td>
-                    <td>{{ condition_map[condition.method] }}</td>
-                    <td>{{ condition.value_string }}</td>
-                {% endfor %}
-                {% for outcome in promo.outcomes %}
-                    <td>{{ outcome.items }}</td>
-                    <td>{{ outcome_map[outcome.method] }}</td>
-                    <td>{{ outcome.value if outcome.value else "" }}</td>
-                {% endfor %}
+                <th rowspan="2">Статус</th>
+                <th rowspan="2">Название</th>
+                <th rowspan="2">Описание</th>
+                <th colspan="3">Условия</th>
+                <th colspan="3">Последствия</th>
             </tr>
-        {% endfor %}
-    </table>
-    <a href="{{ '/company/main' }}">Назад</a>
+            <tr>
+                <th>Выберите продукт</th>
+                <th>Метод</th>
+                <th>Значение</th>
+                <!-- -->
+                <th>Выберите продукт</th>
+                <th>Метод</th>
+                <th>Значение</th>
+            </tr>
+            {% for promo in promos %}
+                {% set height = promo.outcomes|length if promo.outcomes|length > promo.conditions|length
+                                                      else promo.conditions|length %}
+                <tr>
+                    <td rowspan="{{ height }}">
+                        <input type="checkbox" name={{ promo.key.id() }} {% if promo.status %} checked {% endif %}>
+                    </td>
+                    <td rowspan="{{ height }}">{{ promo.title }}</td>
+                    <td rowspan="{{ height }}">{{ promo.description }}</td>
+                    {% for index in range(height) %}
+                        {% if index < promo.conditions|length %}
+                            <td>
+                                <a href="/company/promos/condition/choose">Выбрать</a>
+                            </td>
+                            <td>{{ condition_map[promo.conditions[index].method] }}</td>
+                            <td>{{ promo.conditions[index].value_string }}</td>
+                        {% else %}
+                            <td>---</td>
+                            <td>---</td>
+                            <td>---</td>
+                        {% endif %}
+                        {% if index < promo.outcomes|length %}
+                            <td>
+                                <a href="/company/promos/outcome/choose">Выбрать</a>
+                            </td>
+                            <td>{{ outcome_map[promo.outcomes[index].method] }}</td>
+                            <td>{{ promo.outcomes[index].value if promo.outcomes[index].value else "" }}</td>
+                        {% else %}
+                            <td>---</td>
+                            <td>---</td>
+                            <td>---</td>
+                        {% endif %}
+                        </tr><tr>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit">
+        <a href="{{ '/company/main' }}">Назад</a>
+    </form>
 </body>
 </html>
