@@ -247,13 +247,9 @@ app = WSGIApplication([
 
         PathPrefixRoute('/promos', [
             Route('/list', company_admin.PromoListHandler),
+            Route('/api_keys', company_admin.ChangeApiKeysHandler),
             Route('/add', company_admin.AddPromoHandler),
-            PathPrefixRoute('/condition', [
-                Route('/choose', company_admin.ConditionChooseMenuItemHandler),
-            ]),
-            PathPrefixRoute('/outcome', [
-                Route('/choose', company_admin.OutcomeChooseMenuItemHandler),
-            ]),
+            Route('/choose', company_admin.ChooseMenuItemHandler),
         ]),
 
         PathPrefixRoute('/notifications', [

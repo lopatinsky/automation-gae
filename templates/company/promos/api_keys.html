@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Api ключ для накопления баллов:
+            <input type="text" name="promo_api_key" value="{% if promo_api_key %} {{ promo_api_key }} {% endif %}">
+        </label><br>
+        <label>
+            Api ключ для кошелька
+            <input type="text" name="wallet_api_key" value="{% if wallet_api_key %} {{ wallet_api_key }} {% endif %}">
+        </label><br>
+        <input type="submit">
+    </form>
+</body>
+</html>

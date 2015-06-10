@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбрать продукт</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.clear_radio').click(function(e){
+                $("input:radio").removeAttr("checked");
+            });
+         });
+    </script>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <h3>Выберите продукт для условия/последствия <u>{{ feature_name }}</u> для акции <u>{{ promo.title }}</u></h3>
+    <form method="post">
+        <button class="clear_radio">
+            Без выбора продуктов
+        </button>
+        <input type="text" name="promo_id" value="{{ promo.key.id() }}" hidden>
+        <input type="text" name="feature_number" value="{{ feature_number }}" hidden>
+        <br>
+        {% for category in categories %}
+            <br>
+            <b>{{ category.title }}</b><br>
+            {% for product in category.items %}
+                 <label>
+                     <input type="radio" {% if product.has %} checked {% endif %} name="product_id" value="{{ product.key.id() }}">
+                     {{ product.title }}
+                 </label><br>
+            {% endfor %}
+        {% endfor %}
+        <br>
+        <input type="submit" value="Сохранить">
+        <a href="{{ '/company/promos/list' }}">Назад</a>
+    </form>
+</body>
+</html>

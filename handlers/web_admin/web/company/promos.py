@@ -1,33 +1,16 @@
 # coding:utf-8
+from config import config, Config
 from methods.auth import company_user_required
-from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import Promo, PromoCondition, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem
 from base import CompanyBaseHandler
-from models.venue import IN_CAFE, SELF
+from models.promo import CONDITION_MAP, OUTCOME_MAP
+from models.venue import DELIVERY_MAP
 
 __author__ = 'dvpermyakov'
 
-CONDITION_MAP = {
-    PromoCondition.CHECK_FIRST_ORDER: u"Первый заказ",
-    PromoCondition.CHECK_TYPE_DELIVERY: u"Тип доставки",
-    PromoCondition.CHECK_MAX_ORDER_SUM: u'Максимальная сумма',
-    PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
-    PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ'
-}
-
-OUTCOME_MAP = {
-    PromoOutcome.CASH_BACK: u"Кэшбек",
-    PromoOutcome.DISCOUNT: u"Скидка",
-    PromoOutcome.DISCOUNT_RICHEST: u'Скидка на самый дорогой продукт в заказе',
-    PromoOutcome.DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе',
-    PromoOutcome.ACCUMULATE_GIFT_POINT: u'Баллы',
-    PromoOutcome.ORDER_GIFT: u'Подарок',
-    PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ'
-}
-
-DELIVERY_MAP = {
-    IN_CAFE: u"В кафе",
-    SELF: u"С собой"
-}
+CONDITION = 0
+OUTCOME = 1
+FEATURES_TYPES = [CONDITION, OUTCOME]
 
 
 class PromoListHandler(CompanyBaseHandler):
@@ -39,11 +22,13 @@ class PromoListHandler(CompanyBaseHandler):
                 condition.value_string = str(condition.value) if condition.value else ""
                 if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
                     condition.value_string = DELIVERY_MAP[condition.value]
-
-        self.render('/promos/list.html',
-                    promos=promos,
-                    condition_map=CONDITION_MAP,
-                    outcome_map=OUTCOME_MAP)
+        self.render('/promos/list.html', **{
+            'promo_api_key': config.PROMOS_API_KEY if config.PROMOS_API_KEY else '',
+            'wallet_api_key': config.WALLET_API_KEY if config.WALLET_API_KEY else '',
+            'promos': promos,
+            'condition_map': CONDITION_MAP,
+            'outcome_map': OUTCOME_MAP
+        })
 
     def post(self):
         for promo in Promo.query().fetch():
@@ -56,16 +41,106 @@ class PromoListHandler(CompanyBaseHandler):
         self.redirect('/company/main')
 
 
+class ChangeApiKeysHandler(CompanyBaseHandler):
+    def get(self):
+        self.render('/promos/api_keys.html', **{
+            'promo_api_key': config.PROMOS_API_KEY,
+            'wallet_api_key': config.WALLET_API_KEY
+        })
+
+    def post(self):
+        config = Config.get()
+        config.PROMOS_API_KEY = self.request.get('promo_api_key')
+        if not config.PROMOS_API_KEY:
+            config.PROMOS_API_KEY = None
+        config.WALLET_API_KEY = self.request.get('wallet_api_key')
+        if not config.WALLET_API_KEY:
+            config.WALLET_API_KEY = None
+        config.put()
+        self.redirect('/company/promos/list')
+
+
 class AddPromoHandler(CompanyBaseHandler):
     def get(self):
-        pass
+        self.render('/promos/add.html')
+
+    def post(self):
+        promo = Promo()
+        promo.title = self.request.get('name')
+        promo.description = self.request.get('description')
+        promo.put()
+        self.redirect('/company/promos/list')
 
 
-class ConditionChooseMenuItemHandler(CompanyBaseHandler):
+class ChooseMenuItemHandler(CompanyBaseHandler):
     def get(self):
-        pass
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        feature_type = self.request.get_range('feature_type')
+        if feature_type not in FEATURES_TYPES:
+            self.abort(400)
+        number = self.request.get_range('number')
+        if feature_type == OUTCOME:
+            if len(promo.outcomes) <= number:
+                self.abort(400)
+            feature = promo.outcomes[number]
+            feature_name = OUTCOME_MAP[feature.method]
+        elif feature_type == CONDITION:
+            if len(promo.conditions) <= number:
+                self.abort(400)
+            feature = promo.conditions[number]
+            feature_name = CONDITION_MAP[feature.method]
+        else:
+            feature_name = u'Не найдено'
+            feature = None
+        categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
+        for category in categories:
+            items = []
+            for item in category.menu_items:
+                item = item.get()
+                item.has = False
+                if item.status == STATUS_AVAILABLE:
+                    if feature.item_required:
+                        if item.key == feature.item:
+                            item.has = True
+                    items.append(item)
+            category.items = items
+        self.render('/promos/choose_product.html', **{
+            'categories': categories,
+            'promo': promo,
+            'feature_name': feature_name,
+            'feature_number': number,
+        })
 
-
-class OutcomeChooseMenuItemHandler(CompanyBaseHandler):
-    def get(self):
-        pass
+    def post(self):
+        item_id = self.request.get('product_id')
+        if item_id:
+            item = MenuItem.get_by_id(int(item_id))
+        else:
+            item = None
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        feature_type = self.request.get_range('feature_type')
+        if feature_type not in FEATURES_TYPES:
+            self.abort(400)
+        number = self.request.get_range('number')
+        feature = None
+        if feature_type == OUTCOME:
+            if len(promo.outcomes) <= number:
+                self.abort(400)
+            feature = promo.outcomes[number]
+        elif feature_type == CONDITION:
+            if len(promo.conditions) <= number:
+                self.abort(400)
+            feature = promo.conditions[number]
+        if item:
+            feature.item = item.key
+            feature.item_required = True
+        else:
+            feature.item_required = False
+        promo.put()
+        self.redirect('/company/promos/list')

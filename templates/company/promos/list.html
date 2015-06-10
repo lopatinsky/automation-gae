@@ -5,8 +5,13 @@
 </head>
 <body>
     {% include '/company/header.html' %}
+    <p>
+        <u>Api ключ для накопления баллов:</u> {{ promo_api_key }}<br>
+        <u>Api ключ для кошелька:</u> {{ wallet_api_key }}<br>
+        <a href="/company/promos/api_keys">Изменить</a>
+    </p>
+    <a href="/company/promos/add">Добавить</a>
     <form method="post">
-        <a href="/company/promos/add">Добавить</a>
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th rowspan="2">Статус</th>
@@ -36,7 +41,11 @@
                     {% for index in range(height) %}
                         {% if index < promo.conditions|length %}
                             <td>
-                                <a href="/company/promos/condition/choose">Выбрать</a>
+                                <a href="
+                                {{ '/company/promos/choose?promo_id=%s&feature_type=0&number=%s' % (promo.key.id(), loop.index0) }}
+                                ">
+                                    Выбрать
+                                </a>
                             </td>
                             <td>{{ condition_map[promo.conditions[index].method] }}</td>
                             <td>{{ promo.conditions[index].value_string }}</td>
@@ -47,7 +56,11 @@
                         {% endif %}
                         {% if index < promo.outcomes|length %}
                             <td>
-                                <a href="/company/promos/outcome/choose">Выбрать</a>
+                                <a href="
+                                {{ '/company/promos/choose?promo_id=%s&feature_type=1&number=%s' % (promo.key.id(), loop.index0) }}
+                                ">
+                                    Выбрать
+                                </a>
                             </td>
                             <td>{{ outcome_map[promo.outcomes[index].method] }}</td>
                             <td>{{ promo.outcomes[index].value if promo.outcomes[index].value else "" }}</td>

@@ -1,3 +1,4 @@
+# coding=utf-8
 from google.appengine.ext import ndb
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.menu import MenuItem
@@ -31,7 +32,7 @@ class PromoOutcome(ndb.Model):
                ORDER_ACCUMULATE_GIFT_POINT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=True)
+    item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
 
@@ -45,7 +46,7 @@ class PromoCondition(ndb.Model):
     CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=True)
+    item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
 
@@ -93,3 +94,21 @@ class Promo(ndb.Model):
             'id': self.key.id(),
             'text': self.title
         }
+
+CONDITION_MAP = {
+    PromoCondition.CHECK_FIRST_ORDER: u"Первый заказ",
+    PromoCondition.CHECK_TYPE_DELIVERY: u"Тип доставки",
+    PromoCondition.CHECK_MAX_ORDER_SUM: u'Максимальная сумма',
+    PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
+    PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ'
+}
+
+OUTCOME_MAP = {
+    PromoOutcome.CASH_BACK: u"Кэшбек",
+    PromoOutcome.DISCOUNT: u"Скидка",
+    PromoOutcome.DISCOUNT_RICHEST: u'Скидка на самый дорогой продукт в заказе',
+    PromoOutcome.DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе',
+    PromoOutcome.ACCUMULATE_GIFT_POINT: u'Баллы',
+    PromoOutcome.ORDER_GIFT: u'Подарок',
+    PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ'
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить акцию</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Название:
+            <input type="text" name="name">
+        </label><br>
+        <label>
+            Описание:
+            <input type="text" name="description">
+        </label><br>
+        <input type="submit">
+        <a href="/company/promos/list">Назад</a>
+    </form>
+</body>
+</html>
