@@ -260,6 +260,7 @@ app = WSGIApplication([
             PathPrefixRoute('/pushes', [
                 Route('/list', company_admin.PushesListHandler),
                 Route('/add', company_admin.AddPushesHandler),
+                Route('/api_keys', company_admin.ChangeParseApiKeys),
             ]),
         ]),
 

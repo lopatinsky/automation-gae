@@ -21,6 +21,9 @@ class Config(ndb.Model):
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
     ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
 
+    PARSE_APP_API_KEY = ndb.StringProperty(indexed=False, default='sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe')
+    PARSE_REST_API_KEY = ndb.StringProperty(indexed=False, default='kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3')
+
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)

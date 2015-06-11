@@ -5,9 +5,7 @@ import logging
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
-
-PARSE_APPLICATION_ID = 'sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe'
-PARSE_API_KEY = 'kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3'
+from config import config
 
 
 def send_push(channels, data, device_type):
@@ -19,8 +17,8 @@ def send_push(channels, data, device_type):
     }
     headers = {
         'Content-Type': 'application/json',
-        'X-Parse-Application-Id': PARSE_APPLICATION_ID,
-        'X-Parse-REST-API-Key': PARSE_API_KEY
+        'X-Parse-Application-Id': config.PARSE_APP_API_KEY,
+        'X-Parse-REST-API-Key': config.PARSE_REST_API_KEY
     }
     result = urlfetch.fetch('https://api.parse.com/1/push', payload=json.dumps(payload), method='POST',
                             headers=headers, validate_certificate=False, deadline=10).content
@@ -54,7 +52,7 @@ def make_order_push_data(order_id, order_status, text, device_type):
         return {
             'text': text,
             'head': u"Заказ %s" % order_id,
-            'action': 'com.empatika.doubleb.push'
+            'action': 'com.empatika.doubleb.push'  # todo: set it
         }
     return None
 

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import logging
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.taskqueue import taskqueue
+from config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.rendering import HTML_STR_TIME_FORMAT
 from models import News, Notification, Venue
@@ -68,7 +69,7 @@ class AddNewsHandler(CompanyBaseHandler):
 class PushesListHandler(CompanyBaseHandler):
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
-        self.render('/notifications/pushes_list.html', pushes=pushes)
+        self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get())
 
 
 class AddPushesHandler(CompanyBaseHandler):
@@ -110,4 +111,16 @@ class AddPushesHandler(CompanyBaseHandler):
         taskqueue.add(url='/task/pushes/start', method='POST', eta=start, params={
             'notification_id': notification.key.id()
         })
+        self.redirect('/company/notifications/pushes/list')
+
+
+class ChangeParseApiKeys(CompanyBaseHandler):
+    def get(self):
+        self.render('/notifications/parse_api_keys.html', config=Config.get())
+
+    def post(self):
+        config = Config.get()
+        config.PARSE_APP_API_KEY = self.request.get('app_key')
+        config.PARSE_REST_API_KEY = self.request.get('rest_key')
+        config.put()
         self.redirect('/company/notifications/pushes/list')

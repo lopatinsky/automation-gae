@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            PARSE APP API KEY:
+            <input type="text" name="app_key" value="{% if config.PARSE_APP_API_KEY %} {{ config.PARSE_APP_API_KEY }} {% endif %}">
+        </label><br>
+        <label>
+            PARSE REST API KEY:
+            <input type="text" name="rest_key" value="{% if config.PARSE_REST_API_KEY %} {{ config.PARSE_REST_API_KEY }} {% endif %}">
+        </label><br>
+        <input type="submit">
+        <a href="/company/notifications/pushes/list">Назад</a>
+    </form>
+</body>
+</html>

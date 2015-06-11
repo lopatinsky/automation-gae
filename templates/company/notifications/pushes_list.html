@@ -4,6 +4,12 @@
     <title>История пушей</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
+    <p>
+        <u>PARSE APP API KEY:</u> {{ config.PARSE_APP_API_KEY }}<br>
+        <u>PARSE REST API KEY:</u> {{ config.PARSE_REST_API_KEY }}<br>
+        <a href="/company/notifications/pushes/api_keys">Изменить</a>
+    </p>
     <a href="/company/notifications/pushes/add">Отправить новые пуши</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
