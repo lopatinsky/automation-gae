@@ -1,4 +1,4 @@
-from handlers.web_admin.web.company import CompanyBaseHandler
+from webapp2 import RequestHandler
 from models import Notification
 from models.specials import STATUS_CREATED
 from methods.push import send_push, make_push_data
@@ -7,7 +7,7 @@ from models.client import IOS_DEVICE, ANDROID_DEVICE
 __author__ = 'dvpermyakov'
 
 
-class StartPushesHandler(CompanyBaseHandler):
+class StartPushesHandler(RequestHandler):
     def post(self):
         notification_id = self.request.get_range('notification_id')
         notification = Notification.get_by_id(notification_id)

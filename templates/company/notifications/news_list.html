@@ -2,9 +2,34 @@
 <html>
 <head>
     <title>News</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.cancel_btn').click(function(e){
+                e.preventDefault();
+                cancel_btn = '#' + this.id;
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/notifications/news/cancel' }}",
+                    data: {
+                        news_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('.status_' + json.news_id).html(json.status_str);
+                            $(cancel_btn).attr('disabled', true)
+                        }
+                    }
+                });
+            });
+         });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
+    <p>
+        <u>Текущее время в utc:</u> {{ utc_time }}
+    </p>
     <a href="/company/notifications/news/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
@@ -13,7 +38,8 @@
             <th>Время создания</th>
             <th>Начало</th>
             <th>Конец</th>
-            <th>Активность</th>
+            <th>Статус</th>
+            <th>Отменить</th>
         </tr>
         {% for new in news %}
             <tr>
@@ -24,7 +50,13 @@
                 <td>{{ new.created_str }}</td>
                 <td>{{ new.start }}</td>
                 <td>{{ new.end }}</td>
-                <td>{{ new.active }}</td>
+                <td class="{{ 'status_%s' % new.key.id() }}">{{ NOTIFICATION_STATUS_MAP[new.status] }}</td>
+                <td rowspan="{{ height }}">
+                    <button class="cancel_btn" id="{{ new.key.id() }}"
+                                {% if new.status not in [STATUS_CREATED, STATUS_ACTIVE] %} disabled {% endif %}>
+                        Отменить
+                    </button>
+                </td>
             </tr>
         {% endfor %}
     </table>

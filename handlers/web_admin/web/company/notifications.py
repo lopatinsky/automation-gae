@@ -1,12 +1,12 @@
 # coding=utf-8
 from datetime import datetime, timedelta
-import logging
 from google.appengine.api.taskqueue import taskqueue
 from config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.rendering import HTML_STR_TIME_FORMAT, STR_TIME_FORMAT
 from models import News, Notification, Venue
-from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL
+from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL, NOTIFICATION_STATUS_MAP, STATUS_CREATED, \
+    STATUS_ACTIVE
 
 __author__ = 'dvpermyakov'
 
@@ -18,7 +18,10 @@ class ListNewsHandler(CompanyBaseHandler):
         news = News.query().order(-News.start).fetch()
         for new in news:
             new.created_str = datetime.strftime(new.created, STR_TIME_FORMAT)
-        self.render('/notifications/news_list.html', news=news)
+        utc_time = datetime.strftime(datetime.utcnow(), STR_TIME_FORMAT)
+        self.render('/notifications/news_list.html', news=news, utc_time=utc_time,
+                    NOTIFICATION_STATUS_MAP=NOTIFICATION_STATUS_MAP,
+                    STATUS_ACTIVE=STATUS_ACTIVE, STATUS_CREATED=STATUS_CREATED)
 
 
 class AddNewsHandler(CompanyBaseHandler):
@@ -29,7 +32,6 @@ class AddNewsHandler(CompanyBaseHandler):
         def error(description):
             self.render('/notifications/news_add.html', error=description)
 
-        logging.info(self.request.POST)
         text = self.request.get('text')
         if not text:
             return error(u'Введите текст')
@@ -67,24 +69,49 @@ class AddNewsHandler(CompanyBaseHandler):
         self.redirect('/company/notifications/news/list')
 
 
+class CancelNewsHandler(CompanyBaseHandler):
+    def post(self):
+        news_id = self.request.get_range('news_id')
+        news = News.get_by_id(news_id)
+        if not news:
+            self.abort(400)
+        if news.status in [STATUS_CREATED, STATUS_ACTIVE]:
+            news.cancel()
+            self.render_json({
+                'success': True,
+                'news_id': news_id,
+                'status_str': NOTIFICATION_STATUS_MAP[news.status]
+            })
+        else:
+            self.render_json({
+                'success': False
+            })
+
+
 class PushesListHandler(CompanyBaseHandler):
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
         for push in pushes:
             push.created_str = datetime.strftime(push.created, STR_TIME_FORMAT)
-        self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get())
+        utc_time = datetime.strftime(datetime.utcnow(), STR_TIME_FORMAT)
+        self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get(), utc_time=utc_time,
+                    PUSH_STATUS_MAP=NOTIFICATION_STATUS_MAP, STATUS_CREATED=STATUS_CREATED)
 
 
 class AddPushesHandler(CompanyBaseHandler):
-    def get(self):
+    def render_template(self, error=None):
         values = {
-            'venues': Venue.query(Venue.active == True).fetch()
+            'venues': Venue.query(Venue.active == True).fetch(),
+            'error': error
         }
         self.render('/notifications/pushes_add.html', **values)
 
+    def get(self):
+        self.render_template()
+
     def post(self):
         def error(description):
-            self.render('/notifications/pushes_add.html', error=description)
+            return self.render_template(description)
 
         text = self.request.get('text')
         if not text:
@@ -103,6 +130,8 @@ class AddPushesHandler(CompanyBaseHandler):
                 return error(u'Неверное время отправки')
         else:
             return error(u'Введите время отправки')
+        if start < datetime.utcnow() + timedelta(seconds=MAX_SECONDS_LOSS):
+            return error(u'Введите время больше текущего в utc')
         channels = []
         if self.request.get('company'):
             channels.append(Channel(name=u'Всем', channel=COMPANY_CHANNEL))
@@ -115,6 +144,25 @@ class AddPushesHandler(CompanyBaseHandler):
             'notification_id': notification.key.id()
         })
         self.redirect('/company/notifications/pushes/list')
+
+
+class CancelPushHandler(CompanyBaseHandler):
+    def post(self):
+        notification_id = self.request.get_range('notification_id')
+        notification = Notification.get_by_id(notification_id)
+        if not notification:
+            self.abort(400)
+        if notification.status == STATUS_CREATED:
+            notification.cancel()
+            self.render_json({
+                'success': True,
+                'notification_id': notification_id,
+                'status_str': NOTIFICATION_STATUS_MAP[notification.status]
+            })
+        else:
+            self.render_json({
+                'success': False
+            })
 
 
 class ChangeParseApiKeys(CompanyBaseHandler):

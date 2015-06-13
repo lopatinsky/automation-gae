@@ -4,6 +4,7 @@ from urlparse import urlparse
 from .base import ApiHandler
 from config import config
 from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News
+from models.specials import STATUS_ACTIVE
 
 
 class PromoInfoHandler(ApiHandler):
@@ -37,7 +38,7 @@ class GiftListHandler(ApiHandler):
 
 class NewsHandler(ApiHandler):
     def get(self):
-        news = News.query(News.active == True).fetch()
+        news = News.query(News.status == STATUS_ACTIVE).fetch()
         self.render_json({
             'news': [new.dict() for new in news]
         })

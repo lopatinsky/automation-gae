@@ -256,10 +256,12 @@ app = WSGIApplication([
             PathPrefixRoute('/news', [
                 Route('/list', company_admin.ListNewsHandler),
                 Route('/add', company_admin.AddNewsHandler),
+                Route('/cancel', company_admin.CancelNewsHandler),
             ]),
             PathPrefixRoute('/pushes', [
                 Route('/list', company_admin.PushesListHandler),
                 Route('/add', company_admin.AddPushesHandler),
+                Route('/cancel', company_admin.CancelPushHandler),
                 Route('/api_keys', company_admin.ChangeParseApiKeys),
             ]),
         ]),

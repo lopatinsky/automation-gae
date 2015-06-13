@@ -2,6 +2,28 @@
 <html>
 <head>
     <title>История пушей</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.cancel_btn').click(function(e){
+                e.preventDefault();
+                cancel_btn = '#' + this.id;
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/notifications/pushes/cancel' }}",
+                    data: {
+                        notification_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('.status_' + json.notification_id).html(json.status_str);
+                            $(cancel_btn).attr('disabled', true)
+                        }
+                    }
+                });
+            });
+         });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
@@ -10,14 +32,19 @@
         <u>PARSE REST API KEY:</u> {{ config.PARSE_REST_API_KEY }}<br>
         <a href="/company/notifications/pushes/api_keys">Изменить</a>
     </p>
+    <p>
+        <u>Текущее время в utc:</u> {{ utc_time }}
+    </p>
     <a href="/company/notifications/pushes/add">Отправить новые пуши</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Время создания</th>
             <th>Время отправки</th>
+            <th>Статус</th>
             <th>Текст</th>
             <th>Заголовок</th>
             <th>Расширенный текст</th>
+            <th>Отменить</th>
             <th>Каналы</th>
         </tr>
         {% for push in pushes %}
@@ -25,9 +52,16 @@
             <tr>
                 <td rowspan="{{ height }}">{{ push.created_str }}</td>
                 <td rowspan="{{ height }}">{{ push.start }}</td>
+                <td rowspan="{{ height }}" class="{{ 'status_%s' % push.key.id() }}">{{ PUSH_STATUS_MAP[push.status] }}</td>
                 <td rowspan="{{ height }}">{{ push.text }}</td>
                 <td rowspan="{{ height }}">{{ push.header }}</td>
                 <td rowspan="{{ height }}">{{ push.popup_text }}</td>
+                <td rowspan="{{ height }}">
+                    <button class="cancel_btn" id="{{ push.key.id() }}"
+                            {% if push.status != STATUS_CREATED %} disabled {% endif %}>
+                        Отменить
+                    </button>
+                </td>
                 {% for channel in push.channels %}
                     <td>{{ channel.name }}</td>
                     </tr><tr>

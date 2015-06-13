@@ -1,5 +1,6 @@
 from webapp2 import RequestHandler
 from models import News
+from models.specials import STATUS_CREATED, STATUS_ACTIVE
 
 __author__ = 'dvpermyakov'
 
@@ -10,7 +11,8 @@ class StartNewsHandler(RequestHandler):
         news = News.get_by_id(news_id)
         if not news:
             self.abort(400)
-        news.activate()
+        if news.status == STATUS_CREATED:
+            news.activate()
 
 
 class CloseNewsHandler(RequestHandler):
@@ -19,4 +21,5 @@ class CloseNewsHandler(RequestHandler):
         news = News.get_by_id(news_id)
         if not news:
             self.abort(400)
-        news.deactivate()
+        if news.status == STATUS_ACTIVE:
+            news.deactivate()
