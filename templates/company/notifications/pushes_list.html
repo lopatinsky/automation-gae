@@ -23,13 +23,14 @@
         {% for push in pushes %}
             {% set height=push.channels|length %}
             <tr>
-                <td rowspan="{{ height }}">{{ push.created }}</td>
+                <td rowspan="{{ height }}">{{ push.created_str }}</td>
                 <td rowspan="{{ height }}">{{ push.start }}</td>
                 <td rowspan="{{ height }}">{{ push.text }}</td>
                 <td rowspan="{{ height }}">{{ push.header }}</td>
                 <td rowspan="{{ height }}">{{ push.popup_text }}</td>
                 {% for channel in push.channels %}
-                    <td>{{ channel }}</td>
+                    <td>{{ channel.name }}</td>
+                    </tr><tr>
                 {% endfor %}
             </tr>
         {% endfor %}

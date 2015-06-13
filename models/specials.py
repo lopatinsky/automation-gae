@@ -1,3 +1,4 @@
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from methods.rendering import timestamp
 from models.client import Client
@@ -6,8 +7,11 @@ SMS_SUCCESS = 1
 SMS_PASSIVE = 2
 SMS_CHOICES = [SMS_SUCCESS, SMS_PASSIVE]
 
-VENUE_CHANNEL = 'venue_%s'
-CATEGORY_CHANNEL = 'category_%s'
+namespace = namespace_manager.get_namespace()
+COMPANY_CHANNEL = '%s_company' % namespace
+ORDER_CHANNEL = '%s_order_%s' % (namespace, '%s')
+CLIENT_CHANNEL = '%s_client_%s' % (namespace, '%s')
+VENUE_CHANNEL = '%s_venue_%s' % (namespace, '%s')
 
 STATUS_CREATED = 0
 STATUS_PUSHED = 1

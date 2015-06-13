@@ -5,6 +5,7 @@ import logging
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
+from models.specials import ORDER_CHANNEL
 from config import config
 
 
@@ -41,20 +42,17 @@ def make_push_data(text, header, device_type):
 
 
 def make_order_push_data(order_id, order_status, text, device_type):
-    if device_type == IOS_DEVICE:
-        return {
-            'alert': text,
-            'sound': 'push.caf',
-            'order_id': str(order_id),
-            'order_status': int(order_status)
-        }
-    elif device_type == ANDROID_DEVICE:
-        return {
-            'text': text,
-            'head': u"Заказ %s" % order_id,
-            'action': 'com.empatika.doubleb.push'  # todo: set it
-        }
-    return None
+    data = make_push_data(text, u"Заказ %s" % order_id, device_type)
+    if data:
+        if device_type == IOS_DEVICE:
+            data.update({
+                'sound': 'push.caf',
+                'order_id': str(order_id),
+                'order_status': int(order_status)
+            })
+        return data
+    else:
+        return None
 
 
 def send_order_push(order_id, order_status, text, device_type, new_time=None, silent=False):
@@ -63,10 +61,10 @@ def send_order_push(order_id, order_status, text, device_type, new_time=None, si
         data['timestamp'] = timestamp(new_time)
     if silent:
         data['content-available'] = 1
-    return send_push(["order_%s" % order_id], data, device_type)
+    return send_push([ORDER_CHANNEL % order_id], data, device_type)
 
 
-def send_reminder_push(client_id, client_name, client_score):
+def send_reminder_push(client_id, client_name, client_score):  # todo: update this
     if client_name:
         text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
     else:
@@ -86,11 +84,6 @@ def send_reminder_push(client_id, client_name, client_score):
 
 
 def send_order_ready_push(order):
-    '''strings = [u"А мы открыли новую кофейню :)", u"Как Вам напитки без очереди?", u"Надеемся, напиток Вам понравится.",
-               u"Если Вам понравится напиток - расскажите о нас друзьям :)",
-               u"Есть идеи как улучшить приложение? Напишите нам.", u"И пусть весь мир подождет.",
-               u"Акция от MasterCard продлена до конца марта.", u"Заказы выдаются, баллы копятся.",
-               u"Хвалите наших бариста :)", u"Поставьте оценку нашему приложению."]'''
     send_order_push(order.key.id(), order.status,
                     u"Заказ №%s выдан." % str(order.key.id()),
                     order.device_type, silent=True)

@@ -1,13 +1,12 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
-from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.taskqueue import taskqueue
 from config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
-from methods.rendering import HTML_STR_TIME_FORMAT
+from methods.rendering import HTML_STR_TIME_FORMAT, STR_TIME_FORMAT
 from models import News, Notification, Venue
-from models.specials import Channel, CATEGORY_CHANNEL, VENUE_CHANNEL
+from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL
 
 __author__ = 'dvpermyakov'
 
@@ -17,6 +16,8 @@ MAX_SECONDS_LOSS = 30
 class ListNewsHandler(CompanyBaseHandler):
     def get(self):
         news = News.query().order(-News.start).fetch()
+        for new in news:
+            new.created_str = datetime.strftime(new.created, STR_TIME_FORMAT)
         self.render('/notifications/news_list.html', news=news)
 
 
@@ -69,6 +70,8 @@ class AddNewsHandler(CompanyBaseHandler):
 class PushesListHandler(CompanyBaseHandler):
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
+        for push in pushes:
+            push.created_str = datetime.strftime(push.created, STR_TIME_FORMAT)
         self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get())
 
 
@@ -102,7 +105,7 @@ class AddPushesHandler(CompanyBaseHandler):
             return error(u'Введите время отправки')
         channels = []
         if self.request.get('company'):
-            channels.append(Channel(name=u'Всем', channel=namespace_manager.get_namespace()))
+            channels.append(Channel(name=u'Всем', channel=COMPANY_CHANNEL))
         for venue in Venue.query(Venue.active == True).fetch():
             if self.request.get(str(venue.key.id())):
                 channels.append(Channel(name=venue.title, channel=VENUE_CHANNEL % venue.key.id()))
