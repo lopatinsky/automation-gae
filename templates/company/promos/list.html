@@ -33,11 +33,18 @@
                 {% set height = promo.outcomes|length if promo.outcomes|length > promo.conditions|length
                                                       else promo.conditions|length %}
                 <tr>
-                    <td rowspan="{{ height }}">
+                    <td rowspan="{{ height + 1 }}">
                         <input type="checkbox" name={{ promo.key.id() }} {% if promo.status %} checked {% endif %}>
                     </td>
-                    <td rowspan="{{ height }}">{{ promo.title }}</td>
-                    <td rowspan="{{ height }}">{{ promo.description }}</td>
+                    <td rowspan="{{ height + 1 }}">{{ promo.title }}</td>
+                    <td rowspan="{{ height + 1 }}">{{ promo.description }}</td>
+                    <td colspan="3">
+                        <a href="{{ '/company/promos/conditions/add?promo_id=%s' % promo.key.id() }}">Добавить условие</a>
+                    </td>
+                    <td colspan="3">
+                        <a href="{{ '/company/promos/outcomes/add?promo_id=%s' % promo.key.id() }}">Добавить последствие</a>
+                    </td>
+                    </tr><tr>
                     {% for index in range(height) %}
                         {% if index < promo.conditions|length %}
                             <td>

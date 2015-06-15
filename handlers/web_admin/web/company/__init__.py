@@ -13,7 +13,7 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
     DownCategoryHandler, NoneHandler, SelectDefaultChoiceHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
-from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, ChooseMenuItemHandler
+from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, ChooseMenuItemHandler, AddPromoConditionHandler, AddPromoOutcomeHandler
 from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
     VenueListHandler

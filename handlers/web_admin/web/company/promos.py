@@ -1,7 +1,7 @@
 # coding:utf-8
 from config import config, Config
 from methods.auth import company_user_required
-from models import Promo, PromoCondition, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem
+from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem
 from base import CompanyBaseHandler
 from models.promo import CONDITION_MAP, OUTCOME_MAP
 from models.venue import DELIVERY_MAP
@@ -142,5 +142,59 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
             feature.item_required = True
         else:
             feature.item_required = False
+        promo.put()
+        self.redirect('/company/promos/list')
+
+
+class AddPromoConditionHandler(CompanyBaseHandler):
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        methods = []
+        for condition in PromoCondition.CHOICES:
+            methods.append({
+                'name': CONDITION_MAP[condition],
+                'value': condition
+            })
+        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
+
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        condition = PromoCondition()
+        condition.method = self.request.get_range('method')
+        condition.value = self.request.get_range('value')
+        promo.conditions.append(condition)
+        promo.put()
+        self.redirect('/company/promos/list')
+
+
+class AddPromoOutcomeHandler(CompanyBaseHandler):
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        methods = []
+        for condition in PromoOutcome.CHOICES:
+            methods.append({
+                'name': OUTCOME_MAP[condition],
+                'value': condition
+            })
+        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
+
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        outcome = PromoOutcome()
+        outcome.method = self.request.get_range('method')
+        outcome.value = self.request.get_range('value')
+        promo.outcomes.append(outcome)
         promo.put()
         self.redirect('/company/promos/list')
