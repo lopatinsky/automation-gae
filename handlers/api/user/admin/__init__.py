@@ -8,3 +8,4 @@ from handlers.api.user.admin.wallet import WalletDepositHandler, WalletDepositHi
 from handlers.api.user.admin.client_history import ClientHistoryHandler
 from handlers.api.user.admin.revenue import RevenueReportMonthHandler, RevenueReportTodayHandler
 from handlers.api.user.admin.delivery_types import DeliveryTypesHandler
+from handlers.api.user.admin.courier import CourierListHandler

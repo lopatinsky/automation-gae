@@ -4,7 +4,7 @@ from collections import Counter
 import datetime
 from .base import WebAdminApiHandler
 from methods import push
-from methods.auth import api_user_required
+from methods.auth import api_admin_required
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from models import Order, Client, Venue
@@ -37,7 +37,7 @@ def format_order(order):
 
 
 class CheckTimeHandler(WebAdminApiHandler):
-    @api_user_required
+    api_admin_required()
     def post(self):
         mins = self.request.get_range("mins")
         order_id = self.request.get_range("order_id")
@@ -64,7 +64,7 @@ class CheckTimeHandler(WebAdminApiHandler):
 
 
 class CheckUpdateHandler(WebAdminApiHandler):
-    @api_user_required
+    api_admin_required()
     def post(self):
         last_date_str = self.request.get("last_order_datetime")
         last_date = datetime.datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S")
@@ -86,7 +86,7 @@ class CheckUpdateHandler(WebAdminApiHandler):
 
 
 class OrderDoneHandler(WebAdminApiHandler):
-    @api_user_required
+    api_admin_required()
     def post(self):
         order_id = self.request.get_range("order_id")
         order = self.user.order_by_id(order_id)
@@ -100,7 +100,7 @@ class OrderDoneHandler(WebAdminApiHandler):
 
 
 class OrderCancelHandler(WebAdminApiHandler):
-    @api_user_required
+    api_admin_required()
     def post(self):
         order_id = self.request.get_range('order_id')
         comment = self.request.get('comment')
@@ -121,7 +121,7 @@ class OrderCancelHandler(WebAdminApiHandler):
 
 
 class OrderStatusUpdateHandler(WebAdminApiHandler):
-    @api_user_required
+    api_admin_required()
     def post(self):
         order_id = self.request.get_range("order_id")
         status = self.request.get_range("status")

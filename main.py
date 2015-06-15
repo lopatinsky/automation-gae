@@ -87,6 +87,9 @@ app = WSGIApplication([
                 Route('/today', admin.RevenueReportTodayHandler),
                 Route('/month', admin.RevenueReportMonthHandler),
             ]),
+            PathPrefixRoute('/courier', [
+                Route('/list', admin.CourierListHandler),
+            ]),
         ]),
 
         PathPrefixRoute('/payment', [
