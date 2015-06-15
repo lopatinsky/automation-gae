@@ -1,13 +1,15 @@
 # coding:utf-8
 import logging
 from urlparse import urlparse
-from base import AdminApiHandler
 import json
-from methods.auth import api_user_required
+
+from handlers.api.user.admin.base import AdminApiHandler
+from methods.auth import api_admin_required
 from models import MenuItem, STATUS_AVAILABLE, SingleModifier, GroupModifierChoice, GroupModifier
 
 
 class MenuHandler(AdminApiHandler):
+    @api_admin_required
     def get(self):
         venue = self.venue_or_error
         logging.info(venue)
@@ -17,6 +19,7 @@ class MenuHandler(AdminApiHandler):
 
 
 class ModifiersHandler(AdminApiHandler):
+    @api_admin_required
     def get(self):
         venue = self.venue_or_error
         url = u'http://%s.1.%s/api/modifiers?venue_id=%s' % (self.user.namespace, urlparse(self.request.url).hostname,
@@ -25,6 +28,7 @@ class ModifiersHandler(AdminApiHandler):
 
 
 class DynamicInfoHandler(AdminApiHandler):
+    @api_admin_required
     def get(self):
         venue = self.venue_or_error
         url = u'http://%s.1.%s/api/dynamic_info?venue_id=%s' % (self.user.namespace,
@@ -33,7 +37,7 @@ class DynamicInfoHandler(AdminApiHandler):
 
 
 class SetStopListHandler(AdminApiHandler):
-    @api_user_required
+    @api_admin_required
     def post(self):
         venue = self.venue_or_error
         stop_list = json.loads(self.request.get('stop_list'))

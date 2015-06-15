@@ -1,9 +1,8 @@
-from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import GeoPt
 from webapp2_extras import security
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from .base import AdminApiHandler
-from methods.auth import api_user_required
+from handlers.api.user.admin.base import AdminApiHandler
+from methods.auth import api_admin_required
 from models import AdminStatus, Admin
 
 
@@ -29,9 +28,8 @@ class LoginHandler(AdminApiHandler):
 
 
 class LogoutHandler(AdminApiHandler):
-    @api_user_required
+    @api_admin_required
     def post(self):
-        namespace_manager.set_namespace('')
         password = self.request.get("password")
         try:
             self.auth.store.validate_password(self.user.login, password)

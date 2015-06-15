@@ -3,7 +3,7 @@ import logging
 
 from webapp2 import cached_property
 from webapp2_extras import auth
-from ..base import ApiHandler
+from ...base import ApiHandler
 from models import AdminStatus
 from google.appengine.api.namespace_manager import namespace_manager
 

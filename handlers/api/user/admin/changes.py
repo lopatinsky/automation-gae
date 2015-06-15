@@ -1,10 +1,10 @@
 # coding=utf-8
-from handlers.api.admin.base import AdminApiHandler
+from handlers.api.user.admin.base import AdminApiHandler
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from methods.orders.postpone import postpone_order
 from methods.orders.confirm import confirm_order
-from methods.auth import write_access_required
+from methods.auth import write_access_required, api_admin_required
 from methods.rendering import timestamp
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
 from models.venue import DELIVERY, PICKUP
@@ -13,6 +13,7 @@ __author__ = 'ilyazorin'
 
 
 class CancelOrderHandler(AdminApiHandler):
+    @api_admin_required
     @write_access_required
     def post(self, order_id):
         comment = self.request.get('comment')
@@ -31,6 +32,7 @@ class DoneOrderHandler(AdminApiHandler):
             'description': description
         })
 
+    @api_admin_required
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
@@ -47,6 +49,7 @@ class DoneOrderHandler(AdminApiHandler):
 
 
 class PostponeOrderHandler(AdminApiHandler):
+    @api_admin_required
     @write_access_required
     def post(self, order_id):
         mins = self.request.get_range("mins")
@@ -56,6 +59,7 @@ class PostponeOrderHandler(AdminApiHandler):
 
 
 class ConfirmOrderHandler(AdminApiHandler):
+    @api_admin_required
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
@@ -66,6 +70,7 @@ class ConfirmOrderHandler(AdminApiHandler):
 
 
 class WrongVenueHandler(AdminApiHandler):
+    @api_admin_required
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))

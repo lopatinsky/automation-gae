@@ -54,21 +54,25 @@ class Admin(User):
         self.unique_model.delete_multi(ids)
 
 
-class AdminStatus(ndb.Model):
-    location = ndb.GeoPtProperty()
+class Courier(User):
+    ROLE = 'courier'
+
+    admin = ndb.KeyProperty(kind=Admin)
+
+    def get_role(self):
+        return self.ROLE
+
+
+class UserStatus(ndb.Model):
     time = ndb.DateTimeProperty(auto_now=True)
-    readonly = ndb.BooleanProperty(default=False)
+
+    @classmethod
+    def create(cls, uid, token, location=None, readonly=None):
+        pass
 
     @staticmethod
     def _make_key_name(uid, token):
         return "%s_%s" % (uid, token)
-
-    @classmethod
-    def create(cls, uid, token, location, readonly):
-        key_name = cls._make_key_name(uid, token)
-        entity = cls(id=key_name, location=location, readonly=readonly)
-        entity.put()
-        return entity
 
     @classmethod
     def get(cls, uid, token):
@@ -76,13 +80,35 @@ class AdminStatus(ndb.Model):
         return cls.get_by_id(key_name)
 
     @property
-    def admin_id(self):
+    def user_id(self):
         return int(self.key.id().split("_")[0])
-
-    @property
-    def admin(self):
-        return Admin.get_by_id(self.admin_id)
 
     @property
     def token(self):
         return self.key.id().split("_")[1]
+
+    @property
+    def user(self):
+        return User.get_by_id(self.user_id)
+
+
+class AdminStatus(UserStatus):
+    location = ndb.GeoPtProperty()
+    readonly = ndb.BooleanProperty(default=False)
+
+    @classmethod
+    def create(cls, uid, token, location=None, readonly=None):
+        key_name = cls._make_key_name(uid, token)
+        entity = cls(id=key_name, location=location, readonly=readonly)
+        entity.put()
+        return entity
+
+
+class CourierStatus(UserStatus):
+
+    @classmethod
+    def create(cls, uid, token, location=None, readonly=None):
+        key_name = cls._make_key_name(uid, token)
+        entity = cls(id=key_name)
+        entity.put()
+        return entity

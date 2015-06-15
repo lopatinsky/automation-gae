@@ -54,7 +54,11 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=0&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    Выбрать
+                                    {% if promo.conditions[index].item %}
+                                        {{ promo.conditions[index].item.get().title }}
+                                    {% else %}
+                                        Выбрать
+                                    {% endif %}
                                 </a>
                             </td>
                             <td>{{ condition_map[promo.conditions[index].method] }}</td>
@@ -69,7 +73,11 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=1&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    Выбрать
+                                    {% if promo.outcomes[index].item %}
+                                        {{ promo.outcomes[index].item.get().title }}
+                                    {% else %}
+                                        Выбрать
+                                    {% endif %}
                                 </a>
                             </td>
                             <td>{{ outcome_map[promo.outcomes[index].method] }}</td>
