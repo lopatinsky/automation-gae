@@ -1,7 +1,7 @@
 # coding:utf-8
 from config import config, Config
 from methods.auth import company_user_required
-from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem
+from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem
 from base import CompanyBaseHandler
 from models.promo import CONDITION_MAP, OUTCOME_MAP
 from models.venue import DELIVERY_MAP
@@ -209,3 +209,45 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
         promo.outcomes.append(outcome)
         promo.put()
         self.redirect('/company/promos/list')
+
+
+class ListGiftsHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        gifts = GiftMenuItem.query().fetch()
+        for gift in gifts:
+            gift.title = gift.item.get().title
+        self.render('/promos/gift_list.html', gifts=gifts)
+
+    @company_user_required
+    def post(self):
+        for gift in GiftMenuItem.query().fetch():
+            confirmed = bool(self.request.get(str(gift.key.id())))
+            if confirmed:
+                gift.status = STATUS_AVAILABLE
+            else:
+                gift.status = STATUS_UNAVAILABLE
+            gift.put()
+        self.redirect('/company/promos/list')
+
+
+class AddGiftHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        categories = MenuCategory.query().fetch()
+        for category in categories:
+            category.items = []
+            for item in category.menu_items:
+                category.items.append(item.get())
+        self.render('/promos/gift_add.html', categories=categories)
+
+    @company_user_required
+    def post(self):
+        for item in MenuItem.query().fetch():
+            confirmed = bool(self.request.get(str(item.key.id())))
+            if confirmed:
+                gift = GiftMenuItem(id=item.key.id(), item=item.key)
+                gift.promo_id = self.request.get_range('promo_id')
+                gift.points = self.request.get_range('points')
+                gift.put()
+        self.redirect('/company/promos/gifts/list')

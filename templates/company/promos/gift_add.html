@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Кол-во баллов:
+            <input type="number" name="points">
+        </label><br>
+        <label>
+            Промо ID:
+            <input type="number" name="promo_id">
+        </label><br>
+        {% for category in categories %}
+            <h3>category.title</h3>
+            {% for item in category.items %}
+                <label>
+                    {{ item.title }}
+                    <input type="checkbox" name={{ item.key.id() }}>
+                </label><br>
+            {% endfor %}
+        {% endfor %}
+        <input type="submit">
+        <a href="/company/promos/gifts/list">Назад</a>
+    </form>
+</body>
+</html>

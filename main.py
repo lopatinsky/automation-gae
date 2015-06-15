@@ -255,7 +255,11 @@ app = WSGIApplication([
             ]),
             PathPrefixRoute('/outcomes', [
                 Route('/add', company_admin.AddPromoOutcomeHandler),
-            ])
+            ]),
+            PathPrefixRoute('/gifts', [
+                Route('/list', company_admin.ListGiftsHandler),
+                Route('/add', company_admin.AddGiftHandler),
+            ]),
         ]),
 
         PathPrefixRoute('/notifications', [

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список подарков</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <a href="/company/promos/gifts/add">Добавить</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Статус</th>
+            <th>Название</th>
+            <th>Кол-во баллов</th>
+            <th>Промо ID</th>
+        </tr>
+        {% for gift in gifts %}
+            <tr>
+                <td>
+                    <input type="checkbox" name={{ gift.key.id() }} {% if gift.status %} checked {% endif %}>
+                </td>
+                <td>{{ gift.title }}</td>
+                <td>{{ gift.points }}</td>
+                <td>{{ gift.promo_id }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="/company/promos/list">Назад</a>
+</body>
+</html>
