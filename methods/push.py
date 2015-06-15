@@ -55,13 +55,16 @@ def make_order_push_data(order_id, order_status, text, device_type):
         return None
 
 
-def send_order_push(order_id, order_status, text, device_type, new_time=None, silent=False):
+def send_order_push(order_id, order_status, text, device_type, new_time=None, silent=False, namespace=None):
     data = make_order_push_data(order_id, order_status, text, device_type)
     if new_time:
         data['timestamp'] = timestamp(new_time)
     if silent:
         data['content-available'] = 1
-    return send_push([ORDER_CHANNEL % order_id], data, device_type)
+    order_channel = ORDER_CHANNEL % order_id
+    if namespace:
+        order_channel = '%s%s' % (namespace, order_channel)
+    return send_push([order_channel], data, device_type)
 
 
 def send_reminder_push(client_id, client_name, client_score):  # todo: update this
@@ -83,7 +86,7 @@ def send_reminder_push(client_id, client_name, client_score):  # todo: update th
     return send_push(['client_%s' % client_id], data, ANDROID_DEVICE)
 
 
-def send_order_ready_push(order):
+def send_order_ready_push(order, namespace=None):
     send_order_push(order.key.id(), order.status,
                     u"Заказ №%s выдан." % str(order.key.id()),
-                    order.device_type, silent=True)
+                    order.device_type, silent=True, namespace=namespace)

@@ -8,7 +8,7 @@ from models import Client
 __author__ = 'dvpermyakov'
 
 
-def cancel_order(order, status, comment=None, with_push=True):
+def cancel_order(order, status, comment=None, with_push=True, namespace=None):
     success = True
     if order.has_card_payment:
         return_result = alfa_bank.reverse(order.payment_id)
@@ -42,6 +42,6 @@ def cancel_order(order, status, comment=None, with_push=True):
             push_text = u"%s, заказ №%s отменен." % (client.name, order.key.id())
             if order.has_card_payment:
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут.\n"
-                push_text += comment
-            push.send_order_push(order.key.id(), order.status, push_text, order.device_type)
+            push_text += comment
+            push.send_order_push(order.key.id(), order.status, push_text, order.device_type, namespace)
     return success

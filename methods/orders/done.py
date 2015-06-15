@@ -7,7 +7,7 @@ from models.order import READY_ORDER
 __author__ = 'dvpermyakov'
 
 
-def done_order(order):
+def done_order(order, namespace=None):
     order.activate_cash_back()
     order.activate_gift_points()
 
@@ -25,4 +25,4 @@ def done_order(order):
         alfa_bank.deposit(order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
-    push.send_order_ready_push(order)
+    push.send_order_ready_push(order, namespace)
