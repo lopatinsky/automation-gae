@@ -9,18 +9,17 @@ __author__ = 'dvpermyakov'
 
 
 class User(polymodel.PolyModel, models.User):
+    ROLE = None
+
     namespace = ndb.StringProperty(default='')
     login = ndb.StringProperty()
 
     def get_role(self):
-        return NotImplemented
+        return self.ROLE
 
 
 class CompanyUser(User):
     ROLE = 'company'
-
-    def get_role(self):
-        return self.ROLE
 
 
 class Admin(User):
@@ -28,9 +27,6 @@ class Admin(User):
 
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
-
-    def get_role(self):
-        return self.ROLE
 
     def query_orders(self, *args, **kwargs):
         if self.venue:
@@ -58,9 +54,6 @@ class Courier(User):
     ROLE = 'courier'
 
     admin = ndb.KeyProperty(kind=Admin)
-
-    def get_role(self):
-        return self.ROLE
 
 
 class UserStatus(ndb.Model):
@@ -103,6 +96,10 @@ class AdminStatus(UserStatus):
         entity.put()
         return entity
 
+    @property
+    def user(self):
+        return Admin.get_by_id(self.user_id)
+
 
 class CourierStatus(UserStatus):
 
@@ -112,3 +109,7 @@ class CourierStatus(UserStatus):
         entity = cls(id=key_name)
         entity.put()
         return entity
+
+    @property
+    def user(self):
+        return Courier.get_by_id(self.user_id)

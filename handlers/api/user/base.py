@@ -4,7 +4,6 @@ from webapp2 import cached_property
 from webapp2_extras import auth
 from handlers.api.base import ApiHandler
 from google.appengine.api.namespace_manager import namespace_manager
-from models.user import UserStatus
 
 
 class UserApiHandler(ApiHandler):
@@ -19,10 +18,6 @@ class UserApiHandler(ApiHandler):
 
     @cached_property
     def _token_entity(self):
-        full_token = self.request.get("token")
-        if full_token:
-            uid, token = full_token.split("_", 1)
-            return UserStatus.get(uid, token)
         return None
 
     @cached_property
