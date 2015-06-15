@@ -47,10 +47,12 @@ class CreateVenueHandler(CompanyBaseHandler):
 
 
 class EnableVenuesHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         venues = Venue.query().fetch()
         self.render('/venues/enable_venues.html', venues=venues)
 
+    @company_user_required
     def post(self):
         venues = Venue.query().fetch()
         for v in venues:

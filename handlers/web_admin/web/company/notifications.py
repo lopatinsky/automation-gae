@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from google.appengine.api.taskqueue import taskqueue
 from config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
+from methods.auth import company_user_required
 from methods.rendering import HTML_STR_TIME_FORMAT, STR_TIME_FORMAT
 from models import News, Notification, Venue
 from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL, NOTIFICATION_STATUS_MAP, STATUS_CREATED, \
@@ -14,6 +15,7 @@ MAX_SECONDS_LOSS = 30
 
 
 class ListNewsHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         news = News.query().order(-News.start).fetch()
         for new in news:
@@ -25,9 +27,11 @@ class ListNewsHandler(CompanyBaseHandler):
 
 
 class AddNewsHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.render('/notifications/news_add.html')
 
+    @company_user_required
     def post(self):
         def error(description):
             self.render('/notifications/news_add.html', error=description)
@@ -70,6 +74,7 @@ class AddNewsHandler(CompanyBaseHandler):
 
 
 class CancelNewsHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         news_id = self.request.get_range('news_id')
         news = News.get_by_id(news_id)
@@ -89,6 +94,7 @@ class CancelNewsHandler(CompanyBaseHandler):
 
 
 class PushesListHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
         for push in pushes:
@@ -106,9 +112,11 @@ class AddPushesHandler(CompanyBaseHandler):
         }
         self.render('/notifications/pushes_add.html', **values)
 
+    @company_user_required
     def get(self):
         self.render_template()
 
+    @company_user_required
     def post(self):
         def error(description):
             return self.render_template(description)
@@ -147,6 +155,7 @@ class AddPushesHandler(CompanyBaseHandler):
 
 
 class CancelPushHandler(CompanyBaseHandler):
+    @company_user_required
     def post(self):
         notification_id = self.request.get_range('notification_id')
         notification = Notification.get_by_id(notification_id)
@@ -166,9 +175,11 @@ class CancelPushHandler(CompanyBaseHandler):
 
 
 class ChangeParseApiKeys(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.render('/notifications/parse_api_keys.html', config=Config.get())
 
+    @company_user_required
     def post(self):
         config = Config.get()
         config.PARSE_APP_API_KEY = self.request.get('app_key')

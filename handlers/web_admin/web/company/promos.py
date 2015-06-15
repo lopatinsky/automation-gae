@@ -30,6 +30,7 @@ class PromoListHandler(CompanyBaseHandler):
             'outcome_map': OUTCOME_MAP
         })
 
+    @company_user_required
     def post(self):
         for promo in Promo.query().fetch():
             confirmed = bool(self.request.get(str(promo.key.id())))
@@ -42,12 +43,14 @@ class PromoListHandler(CompanyBaseHandler):
 
 
 class ChangeApiKeysHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.render('/promos/api_keys.html', **{
             'promo_api_key': config.PROMOS_API_KEY,
             'wallet_api_key': config.WALLET_API_KEY
         })
 
+    @company_user_required
     def post(self):
         config = Config.get()
         config.PROMOS_API_KEY = self.request.get('promo_api_key')
@@ -61,9 +64,11 @@ class ChangeApiKeysHandler(CompanyBaseHandler):
 
 
 class AddPromoHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         self.render('/promos/add.html')
 
+    @company_user_required
     def post(self):
         promo = Promo()
         promo.title = self.request.get('name')
@@ -73,6 +78,7 @@ class AddPromoHandler(CompanyBaseHandler):
 
 
 class ChooseMenuItemHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -114,6 +120,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
             'feature_number': number,
         })
 
+    @company_user_required
     def post(self):
         item_id = self.request.get('product_id')
         if item_id:
@@ -147,6 +154,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
 
 
 class AddPromoConditionHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -160,6 +168,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
             })
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
+    @company_user_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -174,6 +183,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
 
 
 class AddPromoOutcomeHandler(CompanyBaseHandler):
+    @company_user_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -187,6 +197,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
             })
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
+    @company_user_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
