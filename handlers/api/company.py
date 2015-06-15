@@ -5,7 +5,7 @@ from base import ApiHandler
 from config import config, Config
 from models import STATUS_AVAILABLE, Venue
 from models.venue import DELIVERY
-from models.specials import COMPANY_CHANNEL, VENUE_CHANNEL, CLIENT_CHANNEL, ORDER_CHANNEL
+from models.specials import get_channels
 
 __author__ = 'dvpermyakov'
 
@@ -33,12 +33,7 @@ class CompanyInfoHandler(ApiHandler):
             'phone': config.SUPPORT_PHONE,
             'site': config.SUPPORT_SITE,
             'emails': config.SUPPORT_EMAILS,
-            'push_channels': {
-                'company': COMPANY_CHANNEL,
-                'venue': VENUE_CHANNEL,
-                'client': CLIENT_CHANNEL,
-                'order': ORDER_CHANNEL
-            }
+            'push_channels': get_channels(namespace_manager.get_namespace())
         })
 
 

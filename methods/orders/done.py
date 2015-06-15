@@ -7,7 +7,7 @@ from models.order import READY_ORDER
 __author__ = 'dvpermyakov'
 
 
-def done_order(order, namespace=None):
+def done_order(order, namespace):
     order.activate_cash_back()
     order.activate_gift_points()
 

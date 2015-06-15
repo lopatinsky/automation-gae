@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+from google.appengine.api.namespace_manager import namespace_manager
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
 from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
@@ -153,7 +154,7 @@ class ConfirmOrderHandler(CompanyBaseHandler):
         if not order:
             self.abort(400)
         old_status = order.status
-        confirm_order(order)
+        confirm_order(order, self.user.namespace)
         self.render_json(_order_json(order, old_status))
 
 
@@ -165,7 +166,7 @@ class CloseOrderHandler(CompanyBaseHandler):
         if not order:
             self.abort(400)
         old_status = order.status
-        done_order(order)
+        done_order(order, self.user.namespace)
         self.render_json(_order_json(order, old_status))
 
 
@@ -177,7 +178,7 @@ class CancelOrderHandler(CompanyBaseHandler):
         if not order:
             self.abort(400)
         old_status = order.status
-        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER)
+        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER, self.user.namespace)
         response = _order_json(order, old_status)
         response.update({
             'success': success

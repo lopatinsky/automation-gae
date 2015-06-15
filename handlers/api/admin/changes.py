@@ -17,7 +17,7 @@ class CancelOrderHandler(AdminApiHandler):
     def post(self, order_id):
         comment = self.request.get('comment')
         order = self.user.order_by_id(int(order_id))
-        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER, comment, namespace=self.user.namespace)
+        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER, self.user.namespace, comment=comment)
         if not success:
             self.response.status_int = 400
         self.render_json({})
@@ -38,7 +38,7 @@ class DoneOrderHandler(AdminApiHandler):
             self.abort(400)
         if order.status == NEW_ORDER and order.delivery_type in [DELIVERY, PICKUP]:
             return self.render_error(u'Необходимо сначала подтвердить заказ')
-        done_order(order, namespace=self.user.namespace)
+        done_order(order, self.user.namespace)
         self.render_json({
             "success": True,
             "delivery_time": timestamp(order.delivery_time),
@@ -51,7 +51,7 @@ class PostponeOrderHandler(AdminApiHandler):
     def post(self, order_id):
         mins = self.request.get_range("mins")
         order = self.user.order_by_id(int(order_id))
-        postpone_order(order, mins, namespace=self.user.namespace)
+        postpone_order(order, mins, self.user.namespace)
         self.render_json({})
 
 
@@ -61,7 +61,7 @@ class ConfirmOrderHandler(AdminApiHandler):
         order = self.user.order_by_id(int(order_id))
         if order.status != NEW_ORDER:
             self.abort(400)
-        confirm_order(order, namespace=self.user.namespace)
+        confirm_order(order, self.user.namespace)
         self.render_json({})
 
 

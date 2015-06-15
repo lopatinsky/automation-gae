@@ -8,7 +8,7 @@ from models import Client
 __author__ = 'dvpermyakov'
 
 
-def cancel_order(order, status, comment=None, with_push=True, namespace=None):
+def cancel_order(order, status, namespace, comment=None, with_push=True):
     success = True
     if order.has_card_payment:
         return_result = alfa_bank.reverse(order.payment_id)

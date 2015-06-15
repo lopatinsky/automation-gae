@@ -1,6 +1,7 @@
 # coding:utf-8
 import logging
 from google.appengine.api import memcache
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt, Key
 from config import config
@@ -276,7 +277,8 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, with_push=False)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace(),
+                                       with_push=False)
                 if success:
                     reason_id = self.request.get('reason_id')
                     if reason_id:

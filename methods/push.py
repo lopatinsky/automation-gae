@@ -5,7 +5,7 @@ import logging
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
-from models.specials import ORDER_CHANNEL
+from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from config import config
 
 
@@ -55,19 +55,17 @@ def make_order_push_data(order_id, order_status, text, device_type):
         return None
 
 
-def send_order_push(order_id, order_status, text, device_type, new_time=None, silent=False, namespace=None):
+def send_order_push(order_id, order_status, text, device_type, namespace, new_time=None, silent=False):
     data = make_order_push_data(order_id, order_status, text, device_type)
     if new_time:
         data['timestamp'] = timestamp(new_time)
     if silent:
         data['content-available'] = 1
-    order_channel = ORDER_CHANNEL % order_id
-    if namespace:
-        order_channel = '%s%s' % (namespace, order_channel)
+    order_channel = get_channels(namespace)[ORDER_CHANNEL] % order_id
     return send_push([order_channel], data, device_type)
 
 
-def send_reminder_push(client_id, client_name, client_score):  # todo: update this
+def send_reminder_push(client_id, client_name, client_score, namespace):  # todo: update this
     if client_name:
         text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
     else:
@@ -83,10 +81,11 @@ def send_reminder_push(client_id, client_name, client_score):  # todo: update th
         'action': 'com.empatika.doubleb.push',
         'marker': 'send_reminder'
     }
-    return send_push(['client_%s' % client_id], data, ANDROID_DEVICE)
+    client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client_id
+    return send_push([client_channel], data, ANDROID_DEVICE)
 
 
-def send_order_ready_push(order, namespace=None):
+def send_order_ready_push(order, namespace):
     send_order_push(order.key.id(), order.status,
                     u"Заказ №%s выдан." % str(order.key.id()),
-                    order.device_type, silent=True, namespace=namespace)
+                    order.device_type, namespace, silent=True)

@@ -7,7 +7,7 @@ from models import Venue, Client, DeliverySlot
 __author__ = 'dvpermyakov'
 
 
-def postpone_order(order, minutes, namespace=None):
+def postpone_order(order, minutes, namespace):
     order.delivery_time += timedelta(minutes=minutes)
 
     venue = Venue.get_by_id(order.venue_id)
@@ -26,5 +26,5 @@ def postpone_order(order, minutes, namespace=None):
     time_str = local_delivery_time.strftime("%H:%M")
     client = Client.get_by_id(order.client_id)
     push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order.key.id(), time_str)
-    push.send_order_push(order.key.id(), order.status, push_text, order.device_type, new_time=order.delivery_time,
-                         namespace=namespace)
+    push.send_order_push(order.key.id(), order.status, push_text, order.device_type, namespace,
+                         new_time=order.delivery_time)

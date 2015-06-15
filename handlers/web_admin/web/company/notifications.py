@@ -7,7 +7,7 @@ from methods.auth import company_user_required
 from methods.rendering import HTML_STR_TIME_FORMAT, STR_TIME_FORMAT
 from models import News, Notification, Venue
 from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL, NOTIFICATION_STATUS_MAP, STATUS_CREATED, \
-    STATUS_ACTIVE
+    STATUS_ACTIVE, get_channels
 
 __author__ = 'dvpermyakov'
 
@@ -142,10 +142,12 @@ class AddPushesHandler(CompanyBaseHandler):
             return error(u'Введите время больше текущего в utc')
         channels = []
         if self.request.get('company'):
-            channels.append(Channel(name=u'Всем', channel=COMPANY_CHANNEL))
+            company_channel = get_channels(self.user.namespace)[COMPANY_CHANNEL]
+            channels.append(Channel(name=u'Всем', channel=company_channel))
         for venue in Venue.query(Venue.active == True).fetch():
             if self.request.get(str(venue.key.id())):
-                channels.append(Channel(name=venue.title, channel=VENUE_CHANNEL % venue.key.id()))
+                venue_channel = get_channels(self.user.namespace)[VENUE_CHANNEL]
+                channels.append(Channel(name=venue.title, channel=venue_channel))
         notification = Notification(start=start, text=text, popup_text=full_text, header=header, channels=channels)
         notification.put()
         taskqueue.add(url='/task/pushes/start', method='POST', eta=start, params={
