@@ -539,6 +539,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         valid = _check_wallet_payment(total_sum, payment_info) and valid
         wallet_balance = empatika_wallet.get_balance(client.key.id())
         max_wallet_payment = min(Config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
+        max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
     result = {
         'valid': valid,
