@@ -240,14 +240,18 @@ def _unique(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def _group_promos(promos):
+def _unique_promos(promos):
     if not promos:
         return []
-    result = {}
+    result = []
     for promo in promos:
-        if promo.key.id() not in result:
-            result[promo.key.id()] = promo
-    return [promo.validation_dict() for promo in result.values()]
+        if promo not in result:
+            result.append(promo)
+    return result
+
+
+def _group_promos(promos):
+    return [promo.validation_dict() for promo in _unique_promos(promos)]
 
 
 def _is_equal(item_dict1, item_dict2):
@@ -552,7 +556,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'new_order_gifts': grouped_new_order_gift_dicts,
         'order_gifts': grouped_order_gift_dicts,
         'cancelled_order_gifts': grouped_cancelled_order_gift_dicts,
-        'promos': [promo.validation_dict() for promo in promos_info],
+        'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
         'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATE_FORMAT)

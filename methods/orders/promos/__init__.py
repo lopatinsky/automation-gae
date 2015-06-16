@@ -66,6 +66,6 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
             for outcome in promo.outcomes:
                 if _set_outcome(errors, outcome, item_dicts, promo, client, new_order_gift_dicts, order_gift_dicts,
                                 cancelled_order_gift_dicts, order):
-                    if promo.key.id() not in promos:
+                    if promo not in promos:
                         promos.append(promo)
     return errors, new_order_gift_dicts, item_dicts, promos
