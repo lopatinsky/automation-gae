@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from google.appengine.ext.ndb import polymodel
-from models.order import Order
+from models.order import Order, ON_THE_WAY
 from models.specials import Deposit
 from models.venue import Venue
 
@@ -70,6 +70,9 @@ class Courier(User):
             'surname': self.surname
         })
         return dict
+
+    def query_orders(self, *args, **kwargs):
+        return Order.query(Order.venue_id == self.admin.get().venue.id(), Order.status == ON_THE_WAY, *args, **kwargs)
 
 
 class UserStatus(ndb.Model):
