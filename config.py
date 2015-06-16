@@ -14,8 +14,6 @@ PLACE_TYPES = [
 class Config(ndb.Model):
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
-
-    CARD_BINDING_REQUIRED = True
     
     ALFA_BASE_URL = ndb.StringProperty(indexed=False, default="https://test.paymentgate.ru/testpayment")
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
@@ -34,6 +32,14 @@ class Config(ndb.Model):
     EMAILS = ndb.JsonProperty(default={
         "server": "admins",
     })
+
+    SHARE_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARE_TEXT = ndb.StringProperty(indexed=False)
+
+    BRANCH_API_KEY = ndb.StringProperty(indexed=False)
+    BRANCH_DESKTOP_URL = ndb.StringProperty(indexed=False)
+    BRANCH_ANDROID_URL = ndb.StringProperty(indexed=False)
+    BRANCH_IOS_URL = ndb.StringProperty(indexed=False)
 
     IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
 

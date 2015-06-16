@@ -1,46 +1,25 @@
-# -*- coding: utf-8 -*-
-import random
-import time
-from models.payment_types import CARD_PAYMENT_TYPE
+# coding: utf-8
+from config import Config
 
 __author__ = 'dvpermyakov'
 
+import time
+from models.payment_types import CARD_PAYMENT_TYPE
 from base import ApiHandler
 from methods import branch_io, alfa_bank
-from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift
+from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift, MenuItem
 import logging
-
-TEXT = (u'Роскошный кофе, дружелюбные бариста. '
-        u'Подарки при заказе через мобильное приложение Даблби. '
-        u'50% скидка на первый напиток. И без очереди')
-
-#TEXTS = [
-#    ("a", u"Заказываю кофе через приложение Даблби. Экспертам хорошего кофе каждая шестая кружка в подарок. Вот как "
-#          u"сейчас."),
-#    ("b", u"Кофе встроился в мой метаболизм. Если у тебя то же самое, скачай приложение Даблби и получай каждую "
-#          u"шестую доз... кружку в подарок"),
-#    ("c", u"Этот колумбийский кофе вштыривает как надо, бро. Скачай приложение Даблби и получай качественный кофе "
-#          u"в подарок"),
-#]
-random.seed()
 
 
 def get_general_shared_dict():
-    text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок. '
-                           u'Ты делишься ссылкой c друзьями. '
-                           u'Друг ставит приложение Даблби и заказывает кофе с 50% скидкой. '
-                           u'Ты получаешь бесплатную кружку кофе'))
-    return text_id, {
-        'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
-        'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
-        'text_share_new_order': TEXT,
-        'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
-        'screen_title': text,
-        'screen_text': ' '
+    config = Config.get()
+    return {
+        'image': config.SHARE_IMAGE_URL,
+        'text': config.SHARE_TEXT
     }
 
 
-class GetPreText(ApiHandler):
+class GetPreText(ApiHandler):  # todo: remove?
     def get(self):
         self.render_json({
             'head': 'Подари кофе другу',
@@ -53,7 +32,7 @@ class GetPreText(ApiHandler):
         })
 
 
-class GetSharedInfo(ApiHandler):
+class GetSharedInfo(ApiHandler):  # todo: remove?
     def get(self):
         text_id, text = ('a', (u'Пригласи друга и получи кружку кофе в подарок. '
                                u'Ты делишься ссылкой c друзьями. '
@@ -70,7 +49,7 @@ class GetSharedInfo(ApiHandler):
         self.render_json({
             'image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
             'fb_android_image_url': 'http://empatika-doubleb-test.appspot.com/images/shared_image_2.png',
-            'text_share_new_order': TEXT,
+            #'text_share_new_order': TEXT,
             'text_share_about_app': "Советую попробовать это интересное приложение для заказа кофе в 3 клика:",
             'app_url': campaign_url_template % text_id,
             'about_url': campaign_url_template % 'd',
@@ -88,7 +67,7 @@ class GetInvitationUrlHandler(ApiHandler):
         share = Share(share_type=branch_io.INVITATION, sender=client.key)
         share.put()
 
-        text_id, values = get_general_shared_dict()
+        values = get_general_shared_dict()
 
         if 'iOS' in self.request.headers["User-Agent"]:
             user_agent = 'ios'
@@ -97,8 +76,7 @@ class GetInvitationUrlHandler(ApiHandler):
         else:
             user_agent = 'unknown'
         urls = [{
-            'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent,
-                                        custom_tags={"text_id": text_id}),
+            'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent),
             'channel': channel
         } for channel in branch_io.CHANNELS]
         share.urls = [url['url'] for url in urls]
@@ -110,8 +88,6 @@ class GetInvitationUrlHandler(ApiHandler):
 
 
 class GetGiftUrlHandler(ApiHandler):
-    FIX_GIFT_SUM = 350
-
     def send_error(self, error):
         logging.info(error)
 
@@ -152,6 +128,13 @@ class GetGiftUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
+        item_id = self.request.get_range('item_id')
+        item = MenuItem.get_by_id(item_id)
+        if not item:
+            self.abort(400)
+        total_sum = self.request.get('total_sum')
+        if float(total_sum) != item.float_price:
+            return self.send_error(u'Сумма была пересчитана')
         recipient_phone = "".join(c for c in self.request.get('recipient_phone') if '0' <= c <= '9')
         recipient_name = self.request.get('recipient_name')
         payment_type_id = self.request.get_range('payment_type_id')
@@ -163,7 +146,7 @@ class GetGiftUrlHandler(ApiHandler):
                 return_url = self.request.get('return_url')
 
                 order_id = "gift_%s_%s" % (client_id, int(time.time()))
-                success, result = alfa_bank.create_simple(self.FIX_GIFT_SUM, order_id, return_url, alpha_client_id)
+                success, result = alfa_bank.create_simple(item.float_price, order_id, return_url, alpha_client_id)
                 if success:
                     success, error = alfa_bank.hold_and_check(result, binding_id)
                 else:
@@ -171,7 +154,7 @@ class GetGiftUrlHandler(ApiHandler):
                 if not success:
                     self.send_error(error)
                 else:
-                    gift = SharedGift(client_id=client_id, total_sum=self.FIX_GIFT_SUM, order_id=order_id,
+                    gift = SharedGift(client_id=client_id, total_sum=item.float_price, order_id=order_id,
                                       payment_type_id=payment_type_id, payment_id=result)
                     self.success(client, gift=gift, name=recipient_name, phone=recipient_phone)
             else:

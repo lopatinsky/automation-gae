@@ -4,7 +4,7 @@ from webapp2_extras.routes import PathPrefixRoute
 
 from handlers.api.user import admin
 from methods import fastcounter
-from handlers import api, web_admin, maintenance, share, handle_500
+from handlers import api, web_admin, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
 from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
@@ -164,13 +164,13 @@ app = WSGIApplication([
         ]),
 
         PathPrefixRoute('/shared', [
-            Route('/info', api.GetSharedInfo),
+            #Route('/info', api.GetSharedInfo),  # todo: not used
             PathPrefixRoute('/invitation', [
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),
             PathPrefixRoute('/gift', [
                 Route('/get_url', api.GetGiftUrlHandler),
-                Route('/text', api.GetPreText),
+                #Route('/text', api.GetPreText),  # todo: not used
             ]),
         ]),
     ]),
@@ -339,15 +339,6 @@ app = WSGIApplication([
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),
-
-    PathPrefixRoute('/get', [
-        Route('/<t:[abcd]?><platform:[ia]>', share.GATrackDownloadHandler),
-        Route('/<t:[abcd]?><platform:[ia]>/<client_id:\d+>', share.GATrackDownloadHandler),
-        PathPrefixRoute('/splash', [
-            Route('', share.GATrackSplashHandler),
-            Route('/<button:[ia]>', share.GATrackSplashHandler),
-        ]),
-    ]),
 ], config=webapp2_config)
 
 jinja2.set_jinja2(jinja2.Jinja2(app), app=app)

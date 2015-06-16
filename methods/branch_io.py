@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 from google.appengine.api import urlfetch
 import json
-from config import config
+from config import Config
 
-APP_KEY = '99124067684057799'
 BASE_URL = 'https://api.branch.io'
-
-ANDROID_URL = "https://play.google.com/store/apps/details?id=com.empatika.doubleb"
-IOS_URL = "https://itunes.apple.com/ru/app/dablbi-kofe-i-caj/id908237281"
-DESKTOP_URL = "http://dblb.mobi/"
 
 VK = 0
 FACEBOOK = 1
@@ -41,27 +36,27 @@ GIFT = 2
 FEATURE_MAP = {
     SHARE: u'Расскажи друзьям',
     INVITATION: u'Пригласи друга',
-    GIFT: u'Подари кружку другу'
+    GIFT: u'Подари другу'
 }
 
 
 def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
+    config = Config.get()
     params = {
-        'app_id': APP_KEY,
+        'app_id': config.BRANCH_API_KEY,
         'data': {
             'phone': recipient.get('phone') if recipient else None,
             'name': recipient.get('name') if recipient else None,
             'share_id': share_id,
-            '$desktop_url': DESKTOP_URL,
-            '$android_url': ANDROID_URL,
-            '$ios_url': IOS_URL,
+            '$desktop_url': config.BRANCH_DESKTOP_URL,
+            '$android_url': config.BRANCH_ANDROID_URL,
+            '$ios_url': config.BRANCH_IOS_URL,
             '$deeplink_path': '',
             '$always_deeplink': False
         },
         'alias': alias if alias else None,
         'identity': share_id,
         'tags': [config.BRANCH_IO_TAG, user_agent],
-        'campaign': u'Новые пользователи (запуск 03.03.2015)',
         'feature': FEATURE_MAP[feature],
         'channel': CHANNEL_MAP[channel]
     }
