@@ -1,6 +1,5 @@
 # coding:utf-8
 import logging
-from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt, Key
