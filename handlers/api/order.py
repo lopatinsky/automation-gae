@@ -20,7 +20,8 @@ from methods.orders.precheck import check_order_id, set_client_info, get_venue_a
 from google.appengine.api import taskqueue
 from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Address, Client
 from models.client import IOS_DEVICE
-from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, CONFUSED_OTHER
+from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
+    CONFUSED_OTHER
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE
 
@@ -28,7 +29,6 @@ SECONDS_WAITING_BEFORE_SMS = 15
 
 
 class OrderHandler(ApiHandler):
-    cache_key = None
     order = None
 
     def render_error(self, description, title=u"Ошибка"):
@@ -40,16 +40,13 @@ class OrderHandler(ApiHandler):
         })
         if self.order:
             self.order.key.delete()
-        memcache.delete(self.cache_key)
 
     def post(self):
         response_json = json.loads(self.request.get('order'))
         order_id = int(response_json['order_id'])
-        success, cache_key = check_order_id(order_id)
+        success, order_id = check_order_id(order_id)
         if not success:
             self.abort(409)
-        else:
-            self.cache_key = cache_key
 
         if not config.IN_PRODUCTION:
             return self.render_error(u'Приложение работает в тестовом режиме, оставайтесь с нами, мы скоро запустимся!')
@@ -243,8 +240,6 @@ class OrderHandler(ApiHandler):
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
-
-            memcache.delete(self.cache_key)
 
             self.response.status_int = 201
             self.render_json({

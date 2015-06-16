@@ -9,11 +9,14 @@ __author__ = 'dvpermyakov'
 
 
 def check_order_id(order_id):
-    cache_key = "order_%s" % order_id
-    if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
-        return False, None
+    if order_id:
+        order = Order.get_by_id(order_id)
+        if order:
+            return False, None
+        else:
+            return True, order_id
     else:
-        return True, cache_key
+        return True, Order.generate_id()
 
 
 def check_items_and_gifts(items, gifts):
