@@ -17,6 +17,12 @@ class User(polymodel.PolyModel, models.User):
     def get_role(self):
         return self.ROLE
 
+    def dict(self):
+        return {
+            'id': self.key.id(),
+            'login': self.login
+        }
+
 
 class CompanyUser(User):
     ROLE = 'company'
@@ -54,6 +60,16 @@ class Courier(User):
     ROLE = 'courier'
 
     admin = ndb.KeyProperty(kind=Admin)
+    name = ndb.StringProperty()
+    surname = ndb.StringProperty()
+
+    def dict(self):
+        dict = super(Courier, self).dict()
+        dict.update({
+            'name': self.name,
+            'surname': self.surname
+        })
+        return dict
 
 
 class UserStatus(ndb.Model):

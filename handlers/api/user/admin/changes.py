@@ -4,6 +4,7 @@ from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from methods.orders.postpone import postpone_order
 from methods.orders.confirm import confirm_order
+from methods.orders.courier import send_to_courier
 from methods.auth import write_access_required, api_admin_required
 from methods.rendering import timestamp
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
@@ -66,6 +67,17 @@ class ConfirmOrderHandler(AdminApiHandler):
         if order.status != NEW_ORDER:
             self.abort(400)
         confirm_order(order, self.user.namespace)
+        self.render_json({})
+
+
+class SendToCourierHandler(AdminApiHandler):
+    @api_admin_required
+    @write_access_required
+    def post(self, order_id):
+        order = self.user.order_by_id(int(order_id))
+        if order.status != CONFIRM_ORDER:
+            self.abort(400)
+        send_to_courier(order, self.user.namespace)
         self.render_json({})
 
 

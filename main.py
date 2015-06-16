@@ -6,6 +6,7 @@ from handlers.api.user import admin
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, share, handle_500
 import handlers.web_admin.web.company as company_admin
+from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
 import handlers.api.proxy.unified_app as unified_app
@@ -52,6 +53,19 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/api', [
+        PathPrefixRoute('/courier', [
+            Route('/login', courier.LoginHandler),
+            Route('/logout', courier.LogoutHandler),
+            PathPrefixRoute('/orders', [
+                Route('/current', admin.CurrentOrdersHandler),  # todo: set it
+                Route('/updates', admin.UpdatesHandler),        # todo: set it
+                Route('/history', admin.HistoryHandler),        # todo: set it
+                PathPrefixRoute('/<order_id:\d+>', [
+                    Route('/done', courier.DoneOrderHandler),
+                ]),
+            ]),
+        ]),
+
         PathPrefixRoute('/admin', [
             Route('/login', admin.LoginHandler),
             Route('/logout', admin.LogoutHandler),
@@ -68,6 +82,7 @@ app = WSGIApplication([
                     Route('/close', admin.DoneOrderHandler),
                     Route('/postpone', admin.PostponeOrderHandler),
                     Route('/confirm', admin.ConfirmOrderHandler),
+                    Route('/send_to_courier', admin.SendToCourierHandler),
                     Route('/wrong_venue', admin.WrongVenueHandler),
                 ])
             ]),
