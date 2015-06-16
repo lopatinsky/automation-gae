@@ -32,7 +32,7 @@ class CurrentOrdersHandler(OrderListBaseHandler):
                                         Order.status.IN([NEW_ORDER, CONFIRM_ORDER])) \
                           .order(Order.date_created).fetch()
         orders = orders[::-1]
-        return [o for o in orders if o.delivery_time >= now]
+        return [o for o in orders if o.status in [NEW_ORDER, CONFIRM_ORDER] or o.delivery_time >= now]
 
 
 class ReturnsHandler(OrderListBaseHandler):
