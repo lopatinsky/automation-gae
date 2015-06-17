@@ -28,6 +28,6 @@ class LoginHandler(CourierBaseHandler):
 class LogoutHandler(CourierBaseHandler):
     @api_courier_required
     def post(self):
-        CourierStatus.get(self.user.key.id(), self.token).key.delete()
+        self._token_entity.key.delete()
         self.auth.unset_session()
         self.render_json({})

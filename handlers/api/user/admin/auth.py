@@ -35,5 +35,5 @@ class LogoutHandler(AdminApiHandler):
             self.auth.store.validate_password(self.user.login, password)
         except (InvalidAuthIdError, InvalidPasswordError):
             self.abort(403)
-        AdminStatus.get(self.user.key.id(), self.token).key.delete()
+        self._token_entity.key.delete()
         self.render_json({})
