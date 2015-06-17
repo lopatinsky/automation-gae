@@ -44,7 +44,8 @@ def _parse_collection(collection, kind='house', city_request=None):
             'coordinates': {
                 'lon': item['Point']['pos'].split(' ')[0],
                 'lat': item['Point']['pos'].split(' ')[1],
-            }
+            },
+            'address_str': item['metaDataProperty']['GeocoderMetaData']['text']
         })
     return candidates
 

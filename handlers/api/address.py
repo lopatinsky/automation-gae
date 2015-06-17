@@ -10,8 +10,8 @@ class AddressByAddressHandler(ApiHandler):
         city = self.request.get('city')
         street = self.request.get('street')
         if ',' in street:
-            home = street.split(',')[0]
-            street = street.split(',')[1]
+            home = street.split(',')[1]
+            street = street.split(',')[0]
             response = get_houses_by_address(city, street, home)
         else:
             response = get_streets_or_houses_by_address(city, street)
