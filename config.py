@@ -33,8 +33,23 @@ class Config(ndb.Model):
         "server": "admins",
     })
 
-    SHARE_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARE_TEXT = ndb.StringProperty(indexed=False)
+    SHARED_SHARE_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARED_SHARE_HEAD = ndb.StringProperty(indexed=False)
+    SHARED_SHARE_TEXT = ndb.StringProperty(indexed=False)
+
+    SHARED_ABOUT_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARED_ABOUT_GIFT_HEAD = ndb.StringProperty(indexed=False)
+    SHARED_ABOUT_GIFT_TEXT = ndb.StringProperty(indexed=False)
+    SHARED_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARED_GIFT_HEAD = ndb.StringProperty(indexed=False)
+    SHARED_GIFT_TEXT = ndb.StringProperty(indexed=False)
+
+    SHARED_ABOUT_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARED_ABOUT_INVITATION_HEAD = ndb.StringProperty(indexed=False)
+    SHARED_ABOUT_INVITATION_TEXT = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_HEAD = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
     BRANCH_DESKTOP_URL = ndb.StringProperty(indexed=False)

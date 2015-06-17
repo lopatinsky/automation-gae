@@ -5,6 +5,7 @@ from .base import ApiHandler
 from config import config
 from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News
 from models.specials import STATUS_ACTIVE
+from models.share import SharedGiftMenuItem
 
 
 class PromoInfoHandler(ApiHandler):
@@ -31,6 +32,14 @@ class PromoInfoHandler(ApiHandler):
 class GiftListHandler(ApiHandler):
     def get(self):
         items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
+        self.render_json({
+            'items': items
+        })
+
+
+class ShareGiftListHandler(ApiHandler):
+    def get(self):
+        items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         self.render_json({
             'items': items
         })

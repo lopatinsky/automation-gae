@@ -33,6 +33,8 @@ SHARE = 0
 INVITATION = 1
 GIFT = 2
 
+FEATURE_CHOICES = [SHARE, INVITATION, GIFT]
+
 FEATURE_MAP = {
     SHARE: u'Расскажи друзьям',
     INVITATION: u'Пригласи друга',

@@ -9,11 +9,11 @@ from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler
 from registration import RegistrationHandler
 from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler, \
     AddReturnCommentHandler
-from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler
+from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler, SharedGiftMenuItem
 from client import ClientHandler
 from history import HistoryHandler
 from wallet import DepositToWalletHandler, WalletBalanceHandler
-from shared import GetSharedInfo, GetInvitationUrlHandler, GetGiftUrlHandler, GetPreText
+from shared import GetInvitationUrlHandler, GetGiftUrlHandler, GiftInfoHandler, GetShareUrlHandler
 from twilio import ReceiveSms
 from paypal import BindPaypalHandler, UnbindPaypalHandler
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler
