@@ -90,9 +90,7 @@ class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
     total_sum = ndb.FloatProperty(indexed=False)
     payment_sum = ndb.FloatProperty(indexed=False)
-    status = ndb.IntegerProperty(required=True, choices=(NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER,
-                                                         CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER),
-                                 default=CREATING_ORDER)
+    status = ndb.IntegerProperty(required=True, choices=STATUSES, default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     delivery_type = ndb.IntegerProperty()

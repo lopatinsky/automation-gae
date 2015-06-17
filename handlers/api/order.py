@@ -42,7 +42,9 @@ class OrderHandler(ApiHandler):
 
     def post(self):
         response_json = json.loads(self.request.get('order'))
-        order_id = int(response_json['order_id'])
+        order_id = response_json.get('order_id')
+        if order_id:
+            order_id = int(order_id)
         success, order_id = check_order_id(order_id)
         if not success:
             self.abort(409)
