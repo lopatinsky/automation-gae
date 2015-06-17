@@ -19,7 +19,6 @@ class User(polymodel.PolyModel, models.User):
 
     def dict(self):
         return {
-            'id': self.key.id(),
             'login': self.login
         }
 
@@ -54,6 +53,13 @@ class Admin(User):
         class_name = type(self).__name__
         ids = ["%s.auth_id:%s" % (class_name, i) for i in self.auth_ids]
         self.unique_model.delete_multi(ids)
+
+    def dict(self):
+        dict = super(Admin, self).dict()
+        dict.update({
+            'venue': self.venue.get().dict()
+        })
+        return dict
 
 
 class Courier(User):
