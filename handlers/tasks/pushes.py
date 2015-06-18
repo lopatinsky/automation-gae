@@ -1,7 +1,7 @@
 from webapp2 import RequestHandler
 from models import Notification
 from models.specials import STATUS_CREATED
-from methods.push import send_push, make_push_data
+from methods.push import send_multichannel_push
 from models.client import IOS_DEVICE, ANDROID_DEVICE
 
 __author__ = 'dvpermyakov'
@@ -17,10 +17,7 @@ class StartPushesHandler(RequestHandler):
             channels = []
             for channel in notification.channels:
                 channels.append(channel.channel)
-            data = make_push_data(notification.text, notification.header, ANDROID_DEVICE)
-            send_push(channels, data, ANDROID_DEVICE)
-
-            data = make_push_data(notification.text, notification.header, IOS_DEVICE)
-            send_push(channels, data, IOS_DEVICE)
+            send_multichannel_push(notification.text, notification.header, channels, ANDROID_DEVICE)
+            send_multichannel_push(notification.text, notification.header, channels, IOS_DEVICE)
 
             notification.closed()

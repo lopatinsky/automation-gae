@@ -1,9 +1,11 @@
 import json
 import logging
+from google.appengine.api.namespace_manager import namespace_manager
 from .base import ApiHandler
 from models import Client, Share, SharedGift
 from methods.branch_io import INVITATION, GIFT
 from models.share import SharedPromo
+from models.client import IOS_DEVICE, ANDROID_DEVICE
 
 
 def perform_registration(request):
@@ -26,6 +28,10 @@ def perform_registration(request):
     if not client:
         client = Client.create()
         client.user_agent = request.headers["User-Agent"]
+        if 'iOS' in client.user_agent:
+            client.device_type = IOS_DEVICE
+        elif 'Android' in client.user_agent:
+            client.device_type = ANDROID_DEVICE
         client.device_phone = device_phone
         client.put()
         logging.info("issued new client_id: %s", client.key.id())
@@ -55,7 +61,7 @@ def perform_registration(request):
                 if share.status == Share.ACTIVE:
                     gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
                     if gift.status == SharedGift.READY:
-                        gift.deactivate(client)
+                        gift.deactivate(client, namespace_manager.get_namespace())
                     response['branch_name'] = share_data.get('name')
                     response['branch_phone'] = share_data.get('phone')
     return response

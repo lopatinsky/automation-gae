@@ -89,6 +89,7 @@ class GiftPointsDetails(ndb.Model):
 
 
 class Order(ndb.Model):
+    from models.client import DEVICE_CHOICES
     client_id = ndb.IntegerProperty(required=True)
     user_agent = ndb.StringProperty()
     total_sum = ndb.FloatProperty(indexed=False)
@@ -110,7 +111,7 @@ class Order(ndb.Model):
     comment = ndb.StringProperty(indexed=False)
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
-    device_type = ndb.IntegerProperty(required=True)
+    device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
     address = ndb.LocalStructuredProperty(Address)
     items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)

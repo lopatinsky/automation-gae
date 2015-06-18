@@ -4,7 +4,7 @@ import json
 import logging
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
-from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
+from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from config import config
 
@@ -12,7 +12,10 @@ IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1']
 ANDROID_FUCKUP = []
 
 
-def send_push(channels, data, device_type):
+def _send_push(channels, data, device_type):
+    if not data or device_type not in DEVICE_CHOICES:
+        logging.warning(u'Невозможно послать уведомление, data=%s, device_type=%s' % (data, device_type))
+        return
     payload = {
         'channels': channels,
         'type': DEVICE_TYPE_MAP[device_type],
@@ -30,7 +33,7 @@ def send_push(channels, data, device_type):
     return json.loads(result)
 
 
-def make_push_data(text, header, device_type):
+def _make_push_data(text, header, device_type):
     if device_type == IOS_DEVICE:
         return {
             'alert': text,
@@ -44,8 +47,8 @@ def make_push_data(text, header, device_type):
     return None
 
 
-def make_order_push_data(order, text):
-    data = make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type)
+def _make_order_push_data(order, text):
+    data = _make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type)
     if data:
         if order.device_type == IOS_DEVICE:
             data.update({
@@ -58,8 +61,19 @@ def make_order_push_data(order, text):
         return None
 
 
+def _make_share_gift_push_data(client, text):
+    data = _make_push_data(text, u'Вам прислали подарок!', client.device_type)
+    if data:
+        data.update({
+            'share_gift': True
+        })
+        return data
+    else:
+        return None
+
+
 def send_order_push(order, text, namespace, new_time=None, silent=False):
-    data = make_order_push_data(order, text)
+    data = _make_order_push_data(order, text)
     if new_time:
         data['timestamp'] = timestamp(new_time)
     if silent:
@@ -75,29 +89,21 @@ def send_order_push(order, text, namespace, new_time=None, silent=False):
             if fuckup in order.user_agent:
                 order_channel = 'order_%s' % order.key.id()
     #######
-    return send_push([order_channel], data, order.device_type)
+    return _send_push([order_channel], data, order.device_type)
 
 
-def send_reminder_push(client_id, client_name, client_score, namespace):  # todo: update this
-    if client_name:
-        text = u'%s, Вас давно не было в Даблби. Заходите, как будете рядом.' % client_name
-    else:
-        text = u'Вас давно не было в Даблби. Заходите, как будете рядом.'
-    if client_score:
-        if client_score == 1:
-            text += u' Вы уже накопили %s балл. За 5 вам полагается подарок.' % client_score
-        elif client_score == 2 or client_score == 3 or client_score == 4:
-            text += u' Вы уже накопили %s балла. За 5 вам полагается подарок.' % client_score
-    data = {
-        'text': text,
-        'head': 'DoubleB',
-        'action': 'com.empatika.doubleb.push',
-        'marker': 'send_reminder'
-    }
-    client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client_id
-    return send_push([client_channel], data, ANDROID_DEVICE)
+def send_client_push(client, text, header, namespace):
+    data = _make_push_data(text, header, client.device_type)
+    client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
+    return _send_push([client_channel], data, client.device_type)
 
 
-def send_order_ready_push(order, namespace):
-    text = u"Заказ №%s выдан." % order.key.id()
-    send_order_push(order, text, namespace, silent=True)
+def send_multichannel_push(text, header, channels, device_type):
+    data = _make_push_data(text, header, device_type)
+    return _send_push(channels, data, device_type)
+
+
+def send_share_gift_push(client, text, namespace):
+    data = _make_share_gift_push_data(client, text)
+    client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
+    return _send_push([client_channel], data, client.device_type)

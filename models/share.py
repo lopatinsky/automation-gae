@@ -50,16 +50,27 @@ class SharedPromo(ndb.Model):
     accumulated_points = ndb.IntegerProperty()
     wallet_points = ndb.IntegerProperty()
 
-    def deactivate(self):
+    def deactivate(self, namespace):
+        from methods.push import send_client_push
         config = Config.get()
-        sender_order_id = "sender_referral_%s" % self.recipient.id()
-        register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
-                       order_id=sender_order_id)
-        deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS, source=sender_order_id)
-        recipient_order_id = "recipient_referral_%s" % self.recipient.id()
-        register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
-                       order_id=recipient_order_id)
-        deposit(self.sender.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS, source=recipient_order_id)
+        if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS or config.SHARED_INVITATION_SENDER_WALLET_POINTS:
+            sender_order_id = "sender_referral_%s" % self.recipient.id()
+            register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
+                           order_id=sender_order_id)
+            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS, source=sender_order_id)
+            sender = self.sender.get()
+            text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
+            header = u'Бонусы!'
+            send_client_push(sender, text, header, namespace)
+        if config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS or config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS:
+            recipient_order_id = "recipient_referral_%s" % self.recipient.id()
+            register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
+                           order_id=recipient_order_id)
+            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS, source=recipient_order_id)
+            recipient = self.recipient.get()
+            text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'
+            header = u'Бонусы!'
+            send_client_push(recipient, text, header, namespace)
         self.status = self.DONE
         self.put()
 
@@ -97,15 +108,20 @@ class SharedGift(ndb.Model):
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
-    def deactivate(self, client):
+    def deactivate(self, client, namespace):
+        from methods.push import send_share_gift_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
         self.status = self.DONE
         self.recipient_id = client.key.id()
         self.put()
+        sender = Client.get_by_id(self.client_id)
+        text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
+        send_share_gift_push(client, text, namespace)
 
-    def cancel(self):
+    def cancel(self, namespace):
         from methods.alfa_bank import reverse
+        from methods.push import send_client_push
 
         if self.status == self.READY:
             reverse(self.payment_id)
@@ -113,6 +129,10 @@ class SharedGift(ndb.Model):
             share.deactivate()
             self.status = self.CANCELED
             self.put()
+            recipient = Client.get_by_id(self.recipient_id)
+            text = u'Ваш подарок не был получен. Ссылка более не будет активна, а деньги вернутся в ближайшее время.'
+            header = u'Отмена подарка'
+            send_client_push(recipient, text, header, namespace)
 
     def dict(self):
         from models import Client

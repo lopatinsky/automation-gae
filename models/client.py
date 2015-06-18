@@ -3,7 +3,7 @@ from methods import fastcounter
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
-
+DEVICE_CHOICES = [IOS_DEVICE, ANDROID_DEVICE]
 DEVICE_TYPE_MAP = {
     IOS_DEVICE: 'ios',
     ANDROID_DEVICE: 'android'
@@ -13,6 +13,7 @@ DEVICE_TYPE_MAP = {
 class Client(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     user_agent = ndb.StringProperty(indexed=False)
+    device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
     tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
     name = ndb.StringProperty()

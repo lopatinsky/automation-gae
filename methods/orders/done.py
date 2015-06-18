@@ -1,4 +1,6 @@
+# coding=utf-8
 from datetime import datetime
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from methods import alfa_bank, push, paypal
 from models import Client
@@ -21,10 +23,12 @@ def done_order(order, namespace):
     client_key = ndb.Key(Client, order.client_id)
     shared_promo = SharedPromo.query(SharedPromo.recipient == client_key, SharedPromo.status == SharedPromo.READY).get()
     if shared_promo:
-        shared_promo.deactivate()
+        shared_promo.deactivate(namespace_manager.get_namespace())
 
     if order.has_card_payment:
         alfa_bank.deposit(order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
-    push.send_order_ready_push(order, namespace)
+
+    text = u"Заказ №%s выдан." % order.key.id()
+    push.send_order_push(order, text, namespace, silent=True)
