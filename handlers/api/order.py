@@ -1,7 +1,9 @@
 # coding:utf-8
 import logging
+from urlparse import urlparse
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
+from webapp2_extras import security
 from google.appengine.ext.ndb import GeoPt, Key
 from config import config
 from handlers.api.base import ApiHandler
@@ -235,9 +237,16 @@ class OrderHandler(ApiHandler):
             if config.DELIVERY_PHONE:
                 send_sms([config.DELIVERY_PHONE], text)
             if config.DELIVERY_EMAILS:
+                item_values = order_items_values(self.order)
+                if config.EMAIL_REQUESTS:
+                    self.order.email_key_done = security.generate_random_string(entropy=256)
+                    self.order.email_key_cancel = security.generate_random_string(entropy=256)
+                    self.order.put()
+                    base_url = urlparse(self.request.url).hostname
+                    item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
+                    item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
                 for email in config.DELIVERY_EMAILS:
-                    send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html',
-                                                                               **order_items_values(self.order)))
+                    send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)

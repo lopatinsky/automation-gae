@@ -35,6 +35,8 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
         order.status = status
         order.return_datetime = datetime.utcnow()
         order.return_comment = comment
+        order.email_key_done = None
+        order.email_key_cancel = None
         order.put()
 
         if with_push:
@@ -42,6 +44,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
             push_text = u"%s, заказ №%s отменен." % (client.name, order.key.id())
             if order.has_card_payment:
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут.\n"
-            push_text += comment
+            if comment:
+                push_text += comment
             push.send_order_push(order.key.id(), order.status, push_text, order.device_type, namespace)
     return success
