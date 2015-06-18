@@ -1,7 +1,9 @@
 import json
 import logging
 from .base import ApiHandler
-from models import Client, Share, SharedFreeCup, SharedGift
+from models import Client, Share, SharedGift
+from methods.branch_io import INVITATION, GIFT
+from models.share import SharedPromo
 
 
 def perform_registration(request):
@@ -43,23 +45,19 @@ def perform_registration(request):
     if share_data:
         share_data = json.loads(share_data)
         share_id = share_data.get('share_id')
-        share = None
         if share_id:
             share = Share.get_by_id(share_id)
-
-        if share:
             response["share_type"] = share.share_type
-            if share.share_type == Share.INVITATION:
+            if share.share_type == INVITATION:
                 if not request_client_id:
-                    SharedFreeCup(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
-            elif share.share_type == Share.GIFT:
+                    SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
+            elif share.share_type == GIFT:
                 if share.status == Share.ACTIVE:
                     gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
                     if gift.status == SharedGift.READY:
-                        gift.deactivate_cup(client)
+                        gift.deactivate(client)
                     response['branch_name'] = share_data.get('name')
                     response['branch_phone'] = share_data.get('phone')
-
     return response
 
 

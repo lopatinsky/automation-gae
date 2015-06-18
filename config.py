@@ -52,6 +52,10 @@ class Config(ndb.Model):
     SHARED_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
     SHARED_INVITATION_HEAD = ndb.StringProperty(indexed=False)
     SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
+    SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
+    SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
+    SHARED_INVITATION_RECIPIENT_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
     BRANCH_DESKTOP_URL = ndb.StringProperty(indexed=False)

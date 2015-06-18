@@ -1,7 +1,8 @@
 from datetime import datetime
 from google.appengine.ext import ndb
 from methods import alfa_bank, push, paypal
-from models import SharedFreeCup, Client
+from models import Client
+from models.share import SharedPromo
 from models.order import READY_ORDER
 
 __author__ = 'dvpermyakov'
@@ -18,10 +19,9 @@ def done_order(order, namespace):
     order.put()
 
     client_key = ndb.Key(Client, order.client_id)
-    free_cup = SharedFreeCup.query(SharedFreeCup.recipient == client_key,
-                                   SharedFreeCup.status == SharedFreeCup.READY).get()
-    if free_cup:
-        free_cup.deactivate_cup()
+    shared_promo = SharedPromo.query(SharedPromo.recipient == client_key, SharedPromo.status == SharedPromo.READY).get()
+    if shared_promo:
+        shared_promo.deactivate()
 
     if order.has_card_payment:
         alfa_bank.deposit(order.payment_id, 0)  # TODO check success

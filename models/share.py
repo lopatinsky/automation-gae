@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
-import config
+from config import Config
 from methods.empatika_promos import register_order
+from methods.empatika_wallet import deposit
 from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
@@ -26,7 +27,7 @@ class Share(ndb.Model):
         self.put()
 
 
-class SharedFreeCup(ndb.Model):  # free cup is avail after recipient orders smth and should be deleted after that
+class SharedPromo(ndb.Model):
     READY = 0
     DONE = 1
 
@@ -35,10 +36,19 @@ class SharedFreeCup(ndb.Model):  # free cup is avail after recipient orders smth
     share_id = ndb.IntegerProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
     status = ndb.IntegerProperty(choices=[READY, DONE], default=READY)
+    accumulated_points = ndb.IntegerProperty()
+    wallet_points = ndb.IntegerProperty()
 
-    def deactivate_cup(self):
-        order_id = "referral_%s" % self.recipient.id()
-        register_order(user_id=self.sender.id(), points=config.POINTS_PER_CUP, order_id=order_id)
+    def deactivate(self):
+        config = Config.get()
+        sender_order_id = "sender_referral_%s" % self.recipient.id()
+        register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
+                       order_id=sender_order_id)
+        deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS, source=sender_order_id)
+        recipient_order_id = "recipient_referral_%s" % self.recipient.id()
+        register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
+                       order_id=recipient_order_id)
+        deposit(self.sender.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS, source=recipient_order_id)
         self.status = self.DONE
         self.put()
 
@@ -70,11 +80,12 @@ class SharedGift(ndb.Model):
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
-    def deactivate_cup(self, client):  # todo: rewrite this
-        register_order(user_id=client.key.id(), points=config.POINTS_PER_CUP,
-                       order_id=self.order_id)
+    def deactivate(self, client):
         share = Share.get_by_id(self.share_id)
         share.deactivate()
         self.status = self.DONE
         self.recipient_id = client.key.id()
         self.put()
+
+    def dict(self):
+        return self.share_item.get().dict()
