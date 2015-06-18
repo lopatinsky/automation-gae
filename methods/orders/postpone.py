@@ -26,5 +26,4 @@ def postpone_order(order, minutes, namespace):
     time_str = local_delivery_time.strftime("%H:%M")
     client = Client.get_by_id(order.client_id)
     push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order.key.id(), time_str)
-    push.send_order_push(order.key.id(), order.status, push_text, order.device_type, namespace,
-                         new_time=order.delivery_time)
+    push.send_order_push(order, push_text, namespace, new_time=order.delivery_time)

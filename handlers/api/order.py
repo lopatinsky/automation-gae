@@ -177,7 +177,8 @@ class OrderHandler(ApiHandler):
                 delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
                 delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
-                delivery_zone=delivery_zone.key if delivery_zone else None)
+                delivery_zone=delivery_zone.key if delivery_zone else None,
+                user_agent=self.request.headers["User-Agent"])
             self.order.put()
 
             if wallet_payment > 0:

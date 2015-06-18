@@ -8,6 +8,9 @@ from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from config import config
 
+IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1']
+ANDROID_FUCKUP = []
+
 
 def send_push(channels, data, device_type):
     payload = {
@@ -36,33 +39,43 @@ def make_push_data(text, header, device_type):
         return {
             'text': text,
             'head': header,
-            'action': 'com.empatika.doubleb.push'  # todo: set it
+            'action': 'com.empatika.doubleb.push'
         }
     return None
 
 
-def make_order_push_data(order_id, order_status, text, device_type):
-    data = make_push_data(text, u"Заказ %s" % order_id, device_type)
+def make_order_push_data(order, text):
+    data = make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type)
     if data:
-        if device_type == IOS_DEVICE:
+        if order.device_type == IOS_DEVICE:
             data.update({
                 'sound': 'push.caf',
-                'order_id': str(order_id),
-                'order_status': int(order_status)
+                'order_id': str(order.key.id()),
+                'order_status': int(order.status)
             })
         return data
     else:
         return None
 
 
-def send_order_push(order_id, order_status, text, device_type, namespace, new_time=None, silent=False):
-    data = make_order_push_data(order_id, order_status, text, device_type)
+def send_order_push(order, text, namespace, new_time=None, silent=False):
+    data = make_order_push_data(order, text)
     if new_time:
         data['timestamp'] = timestamp(new_time)
     if silent:
         data['content-available'] = 1
-    order_channel = get_channels(namespace)[ORDER_CHANNEL] % order_id
-    return send_push([order_channel], data, device_type)
+    order_channel = get_channels(namespace)[ORDER_CHANNEL] % order.key.id()
+    ####### IOS, ANDROID FUCKUP
+    if 'Android' in order.user_agent:
+        for fuckup in ANDROID_FUCKUP:
+            if fuckup in order.user_agent:
+                order_channel = 'order_%s' % order.key.id()
+    if 'iOS' in order.user_agent:
+        for fuckup in IOS_FUCKUP:
+            if fuckup in order.user_agent:
+                order_channel = 'order_%s' % order.key.id()
+    #######
+    return send_push([order_channel], data, order.device_type)
 
 
 def send_reminder_push(client_id, client_name, client_score, namespace):  # todo: update this
@@ -86,6 +99,5 @@ def send_reminder_push(client_id, client_name, client_score, namespace):  # todo
 
 
 def send_order_ready_push(order, namespace):
-    send_order_push(order.key.id(), order.status,
-                    u"Заказ №%s выдан." % str(order.key.id()),
-                    order.device_type, namespace, silent=True)
+    text = u"Заказ №%s выдан." % order.key.id()
+    send_order_push(order, text, namespace, silent=True)

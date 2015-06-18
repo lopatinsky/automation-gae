@@ -88,6 +88,7 @@ class GiftPointsDetails(ndb.Model):
 
 class Order(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)
+    user_agent = ndb.StringProperty(required=True)
     total_sum = ndb.FloatProperty(indexed=False)
     payment_sum = ndb.FloatProperty(indexed=False)
     status = ndb.IntegerProperty(required=True, choices=STATUSES, default=CREATING_ORDER)

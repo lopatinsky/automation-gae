@@ -12,4 +12,4 @@ def send_to_courier(order, namespace):
 
     client = Client.get_by_id(order.client_id)
     text = u"%s, заказ №%s был послан курьеру." % (client.name, order.key.id())
-    push.send_order_push(order.key.id(), order.status, text, order.device_type, namespace)
+    push.send_order_push(order, text, namespace)
