@@ -1,7 +1,9 @@
+# coding=utf-8
 from google.appengine.ext import ndb
 from config import Config
 from methods.empatika_promos import register_order
 from methods.empatika_wallet import deposit
+from methods.rendering import timestamp
 from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
@@ -12,19 +14,28 @@ __author__ = 'dvpermyakov'
 class Share(ndb.Model):
     from methods.branch_io import FEATURE_CHOICES
 
-    ACTIVE = 0
-    INACTIVE = 1
+    INACTIVE = 0
+    ACTIVE = 1
+    STATUS_CHOICES = [ACTIVE, INACTIVE]
 
     sender = ndb.KeyProperty(required=True, kind=Client)
     share_type = ndb.IntegerProperty(required=True, choices=FEATURE_CHOICES)
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
-    status = ndb.IntegerProperty(default=ACTIVE)
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=ACTIVE)
     urls = ndb.StringProperty(repeated=True)
 
     def deactivate(self):
         self.status = self.INACTIVE
         self.put()
+
+    def dict(self):
+        return {
+            'sender': self.sender.get().dict(),
+            'created': timestamp(self.created),
+            'updated': timestamp(self.updated),
+            'status': self.status
+        }
 
 
 class SharedPromo(ndb.Model):
@@ -65,7 +76,12 @@ class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
     CANCELED = 2
-    CHOICES = [READY, DONE]
+    CHOICES = [READY, DONE, CANCELED]
+    CHOICES_MAP = {
+        READY: u'Оплачено',
+        DONE: u'Получено',
+        CANCELED: u'Отменено'
+    }
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
@@ -99,4 +115,21 @@ class SharedGift(ndb.Model):
             self.put()
 
     def dict(self):
-        return self.share_item.get().dict()
+        from models import Client
+        item_dict = self.share_item.get().dict()
+        item_dict.update({
+            'gift_status': self.CHOICES_MAP[self.status]
+        })
+        recipient_dict = Client.get_by_id(self.recipient_id).dict()
+        recipient_dict.update({
+            'initial_name': self.recipient_name,
+            'initial_phone': self.recipient_phone
+        })
+        sender_dict = Client.get_by_id(self.client_id).dict()
+        return {
+            'item': item_dict,
+            'recipient': recipient_dict,
+            'sender': sender_dict,
+            'created': timestamp(self.created),
+            'updated': timestamp(self.updated)
+        }

@@ -160,9 +160,6 @@ app = WSGIApplication([
             PathPrefixRoute('/gift', [
                 Route('/items', api.GiftListHandler),
             ]),
-            PathPrefixRoute('/share_gifts', [
-                Route('/items', api.SharedGiftMenuItem),
-            ]),
         ]),
 
         PathPrefixRoute('/wallet', [
@@ -180,10 +177,13 @@ app = WSGIApplication([
                 Route('/get_url', api.GetShareUrlHandler),
             ]),
             PathPrefixRoute('/invitation', [
+                Route('/history', api.SharedInvitationHistoryHandler),
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),
             PathPrefixRoute('/gift', [
                 Route('/info', api.GiftInfoHandler),
+                Route('/items', api.SharedGiftListHandler),
+                Route('/history', api.SharedGiftHistoryHandler),
                 Route('/get_url', api.GetGiftUrlHandler),
             ]),
         ]),

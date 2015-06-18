@@ -51,7 +51,7 @@ class GiftListHandler(ApiHandler):
         })
 
 
-class ShareGiftListHandler(ApiHandler):
+class SharedGiftListHandler(ApiHandler):
     def get(self):
         items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         self.render_json({
