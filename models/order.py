@@ -7,6 +7,7 @@ from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
 from models.promo import Promo, GiftMenuItem
+from models.user import Courier
 from models.venue import Venue, DeliveryZone, Address, DeliverySlot
 
 NEW_ORDER = 0
@@ -124,6 +125,7 @@ class Order(ndb.Model):
     cancel_reason_text = ndb.StringProperty()
     email_key_done = ndb.StringProperty()
     email_key_cancel = ndb.StringProperty()
+    courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")
