@@ -1,3 +1,4 @@
+from config import Config
 from methods.auth import company_user_required
 from models import PaymentType, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from base import CompanyBaseHandler
@@ -19,7 +20,8 @@ class PaymentTypesHandler(CompanyBaseHandler):
         paypal = PaymentType.get_by_id(str(PAYPAL_PAYMENT_TYPE))
         if not paypal:
             PaymentType(id=str(PAYPAL_PAYMENT_TYPE), title='paypal', status=STATUS_UNAVAILABLE).put()
-        self.render('/payment_types.html', payments=PaymentType.query().fetch())
+        self.render('/payment_types.html', payments=PaymentType.query().fetch(), config=Config.get(),
+                    CARD_PAYMENT_TYPE=str(CARD_PAYMENT_TYPE))
 
     @company_user_required
     def post(self):

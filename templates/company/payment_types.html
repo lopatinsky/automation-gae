@@ -7,10 +7,19 @@
     {% include '/company/header.html' %}
     <form method="post">
         {% for payment in payments %}
-             <label><input type="checkbox" {% if payment.status %} checked {% endif %} name={{ payment.key.id() }}>
-                 {{ payment.title }}
-             </label>
-             <br>
+            <label><input type="checkbox" {% if payment.status %} checked {% endif %} name={{ payment.key.id() }}>
+                {{ payment.title }}
+                {% if payment.key.id() == CARD_PAYMENT_TYPE %}
+                    {% if config.ALFA_BASE_URL == 'https://test.paymentgate.ru/testpayment' %}
+                        (Тестовая оплата)
+                    {% elif config.ALFA_BASE_URL == 'https://engine.paymentgate.ru/payment' %}
+                        (Боевая оплата)
+                    {% else %}
+                        (Непонятная оплата)
+                    {% endif %}
+                {% endif %}
+            </label>
+            <br>
         {% endfor %}
         <br>
         <label><input type="submit" value="Сохранить"></label>
