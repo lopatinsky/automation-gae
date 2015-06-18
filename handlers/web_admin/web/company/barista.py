@@ -166,21 +166,18 @@ class ChangePasswordAdmin(CompanyBaseHandler):
 
     @company_user_required
     def post(self, admin_id):
+        password = self.request.get('password')
         admin_id = int(admin_id)
         admin = Admin.get_by_id(admin_id)
         if not admin:
             self.abort(500)
-        namespace_manager.set_namespace('')
-        login = admin.login
-        admin = Admin.query(Admin.login == login).get()
-        if not admin:
-            self.abort(500)
-        password = self.request.get('password')
         auth.set_password(admin, password)
         admin.put()
-        namespace_manager.set_namespace(self.user.namespace)
-        admin = Admin.get_by_id(admin_id)
-        if not admin:
+        namespace_manager.set_namespace('')
+        login = admin.login
+        general_admin = Admin.query(Admin.login == login).get()
+        if not general_admin:
             self.abort(500)
-        auth.set_password(admin, password)
+        auth.set_password(general_admin, password)
+        general_admin.put()
         self.redirect_to('barista_main')
