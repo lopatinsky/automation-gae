@@ -27,3 +27,14 @@ class CurrentOrdersHandler(OrderListBaseHandler):
 
     def _get_orders(self):
         return self.user.query_orders()
+
+
+class HistoryHandler(OrderListBaseHandler):
+    def _get_orders(self):
+        start_timestamp = self.request.get_range("start")
+        end_timestamp = self.request.get_range("end")
+        if not start_timestamp or not end_timestamp:
+            self.abort(400)
+        start = datetime.datetime.fromtimestamp(start_timestamp)
+        end = datetime.datetime.fromtimestamp(end_timestamp)
+        return self.user.query_orders(Order.date_created >= start, Order.date_created < end).fetch()

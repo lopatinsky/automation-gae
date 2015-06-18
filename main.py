@@ -67,6 +67,7 @@ app = WSGIApplication([
             PathPrefixRoute('/orders', [
                 Route('/current', courier.CurrentOrdersHandler),
                 Route('/updates', courier.UpdatesHandler),
+                Route('/history', courier.HistoryHandler),
                 PathPrefixRoute('/<order_id:\d+>', [
                     Route('/done', courier.DoneOrderHandler),
                 ]),
