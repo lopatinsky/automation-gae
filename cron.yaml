@@ -43,3 +43,9 @@ cron:
 #- description: resize image
 #  url: /cron/resize_image
 #  schedule: every 1 minutes
+
+
+- description: cancel unused gifts
+  url: /cron/cancel_gifts
+  schedule: every day 0:00
+  timezone: Europe/Moscow

@@ -64,6 +64,7 @@ class SharedGiftMenuItem(ndb.Model):  # self.id() == item.key.id()
 class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
+    CANCELED = 2
     CHOICES = [READY, DONE]
 
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -86,6 +87,16 @@ class SharedGift(ndb.Model):
         self.status = self.DONE
         self.recipient_id = client.key.id()
         self.put()
+
+    def cancel(self):
+        from methods.alfa_bank import reverse
+
+        if self.status == self.READY:
+            reverse(self.payment_id)
+            share = Share.get_by_id(self.share_id)
+            share.deactivate()
+            self.status = self.CANCELED
+            self.put()
 
     def dict(self):
         return self.share_item.get().dict()
