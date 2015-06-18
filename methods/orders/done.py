@@ -12,6 +12,8 @@ def done_order(order, namespace):
     order.activate_gift_points()
 
     order.status = READY_ORDER
+    order.email_key_done = None
+    order.email_key_cancel = None
     order.actual_delivery_time = datetime.utcnow()
     order.put()
 

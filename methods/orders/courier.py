@@ -6,8 +6,9 @@ from models.order import ON_THE_WAY
 __author__ = 'dvpermyakov'
 
 
-def send_to_courier(order, namespace):
+def send_to_courier(order, namespace, courier):
     order.status = ON_THE_WAY
+    order.courier = courier.key
     order.put()
 
     client = Client.get_by_id(order.client_id)

@@ -22,6 +22,8 @@ class Config(ndb.Model):
     PARSE_APP_API_KEY = ndb.StringProperty(indexed=False, default='sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe')
     PARSE_REST_API_KEY = ndb.StringProperty(indexed=False, default='kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3')
 
+    EMAIL_REQUESTS = ndb.BooleanProperty(default=False)
+
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)

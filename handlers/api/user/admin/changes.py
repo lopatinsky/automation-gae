@@ -8,6 +8,7 @@ from methods.orders.courier import send_to_courier
 from methods.auth import write_access_required, api_admin_required
 from methods.rendering import timestamp
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
+from models.user import Courier
 from models.venue import DELIVERY, PICKUP
 
 __author__ = 'ilyazorin'
@@ -74,10 +75,14 @@ class SendToCourierHandler(AdminApiHandler):
     @api_admin_required
     @write_access_required
     def post(self, order_id):
+        courier_id = self.request.get_range('courier_id')
+        courier = Courier.get_by_id(courier_id)
+        if not courier:
+            self.abort(400)
         order = self.user.order_by_id(int(order_id))
         if order.status != CONFIRM_ORDER:
             self.abort(400)
-        send_to_courier(order, self.user.namespace)
+        send_to_courier(order, self.user.namespace, courier)
         self.render_json({})
 
 

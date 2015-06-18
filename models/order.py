@@ -7,6 +7,7 @@ from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
 from models.promo import Promo, GiftMenuItem
+from models.user import Courier
 from models.venue import Venue, DeliveryZone, Address, DeliverySlot
 
 NEW_ORDER = 0
@@ -27,7 +28,8 @@ STATUS_MAP = {
     CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
     CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
     CREATING_ORDER: u'Созданный заказ',
-    CONFIRM_ORDER: u'Подтвержденный заказ'
+    CONFIRM_ORDER: u'Подтвержденный заказ',
+    ON_THE_WAY: u'В пути'
 }
 
 CONFUSED_TIME = 0
@@ -122,6 +124,9 @@ class Order(ndb.Model):
     cash_backs = ndb.StructuredProperty(CashBack, repeated=True)
     cancel_reason = ndb.IntegerProperty(choices=CONFUSED_CHOICES)
     cancel_reason_text = ndb.StringProperty()
+    email_key_done = ndb.StringProperty()
+    email_key_cancel = ndb.StringProperty()
+    courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
         logging.info("activate_cash_back")

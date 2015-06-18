@@ -9,8 +9,9 @@ import handlers.web_admin.web.company as company_admin
 from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
-import handlers.api.proxy.unified_app as unified_app
-import handlers.tasks as tasks
+from handlers.api.proxy import unified_app
+from handlers import tasks
+from handlers import email_api
 
 
 webapp2_config = {
@@ -25,6 +26,12 @@ webapp2_config = {
 
 
 app = WSGIApplication([
+    PathPrefixRoute('/email', [
+        PathPrefixRoute('/order', [
+            Route('/close', email_api.DoneOrderHandler),
+            Route('/cancel', email_api.CancelOrderHandler),
+        ]),
+    ]),
 
     PathPrefixRoute('/docs', [
         Route('/about.html', api.AboutHandler),

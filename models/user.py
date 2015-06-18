@@ -1,7 +1,6 @@
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from google.appengine.ext.ndb import polymodel
-from models.order import Order, ON_THE_WAY
 from models.specials import Deposit
 from models.venue import Venue
 
@@ -19,6 +18,7 @@ class User(polymodel.PolyModel, models.User):
 
     def dict(self):
         return {
+            'id': self.key.id(),
             'login': self.login
         }
 
@@ -28,17 +28,20 @@ class CompanyUser(User):
 
 
 class Admin(User):
+
     ROLE = 'admin'
 
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
     deposit_history = ndb.StructuredProperty(Deposit, repeated=True)
 
     def query_orders(self, *args, **kwargs):
+        from models.order import Order
         if self.venue:
             return Order.query(Order.venue_id == self.venue.id(), *args, **kwargs)
         return Order.query(*args, **kwargs)
 
     def order_by_id(self, order_id):
+        from models.order import Order
         order = Order.get_by_id(order_id)
         if not order:
             return None
@@ -78,7 +81,8 @@ class Courier(User):
         return dict
 
     def query_orders(self, *args, **kwargs):
-        return Order.query(Order.venue_id == self.admin.get().venue.id(), Order.status == ON_THE_WAY, *args, **kwargs)
+        from models.order import Order, ON_THE_WAY
+        return Order.query(Order.courier == self.key, Order.status == ON_THE_WAY, *args, **kwargs)
 
 
 class UserStatus(ndb.Model):
