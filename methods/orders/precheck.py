@@ -50,12 +50,13 @@ def set_client_info(client_json):
 
 def validate_address(address):
     address_home = address['address']
-    if not address['address']['home']:
+    if not address['address']['home'] or not address['coordinates']['lat'] or not address['coordinates']['lon']:
         candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
         if candidates:
             flat = address['address']['flat']
             address = candidates[0]
             address['address']['flat'] = flat
+    return address
 
 
 def get_venue_and_zone_by_address(address):
@@ -64,8 +65,11 @@ def get_venue_and_zone_by_address(address):
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                 for zone in delivery.delivery_zones:
                     zone = zone.get()
-                    if address['address']['city'] == zone.address.city:
-                        return venue, zone
+                    if not zone.geo_ribs:
+                        if address['address']['city'] == zone.address.city:
+                            return venue, zone
+                    else:
+                        pass
     return None, None
 
 

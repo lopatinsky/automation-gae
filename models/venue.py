@@ -69,8 +69,20 @@ class DeliverySlot(ndb.Model):
 
 
 class GeoRib(ndb.LocalStructuredProperty):
-    x = ndb.GeoPtProperty(required=True)
-    y = ndb.GeoPtProperty(required=True)
+    point1 = ndb.GeoPtProperty(required=True)
+    point2 = ndb.GeoPtProperty(required=True)
+
+    @staticmethod
+    def square(a, b, c):
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
+
+    @property
+    def x(self):
+        return self.point1
+
+    @property
+    def y(self):
+        return self.point2
 
 
 class DeliveryZone(ndb.Model):
@@ -79,6 +91,20 @@ class DeliveryZone(ndb.Model):
     price = ndb.IntegerProperty(default=0)
     min_sum = ndb.IntegerProperty(default=0)
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
+
+    '''def is_included(self, point):
+        c = GeoPt(lat=address.lat, lon=address.lon)
+        d = GeoPoint(lat=90.0, lon=180)
+        amount = 0
+        for rib in self.first_rib.get_ribs():
+            a = rib.get_points()[0]
+            b = rib.get_points()[1]
+            result = GeoPoint.square(a, b, c) * GeoPoint.square(a, b, d) < 0.0 \
+                and GeoPoint.square(c, d, a) * GeoPoint.square(c, d, b) < 0.0
+            if result:
+                amount += 1
+        logging.error(amount)
+        return amount % 2 == 1'''
 
 
 class DeliveryType(ndb.Model):
