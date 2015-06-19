@@ -559,9 +559,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
-        'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATE_FORMAT)
-        if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
+        'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }
