@@ -14,6 +14,10 @@ def get_user_info(refresh_token):
     access_token = config.PAYPAL_API.get_access_token(refresh_token=refresh_token)
     paypal_base_url = "https://api.sandbox.paypal.com" if config.PAYPAL_SANDBOX else "https://api.paypal.com"
     url = paypal_base_url + "/v1/identity/openidconnect/userinfo/?schema=openid"
+
+    logging.info("url: %s", url)
+    logging.info("token: %s", access_token)
+
     result = urlfetch.fetch(url, headers={"Authorization": "Bearer %s" % access_token})
     logging.info(result.content)
     return json.loads(result.content)
