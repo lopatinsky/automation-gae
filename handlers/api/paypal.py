@@ -16,7 +16,8 @@ class BindPaypalHandler(ApiHandler):
             self.abort(400)
         else:
             client.put()
-            self.render_json({})
+            user_data = paypal.get_user_info(client.paypal_refresh_token)
+            self.render_json({'user': user_data})
 
 
 class UnbindPaypalHandler(ApiHandler):

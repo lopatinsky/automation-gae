@@ -1,3 +1,6 @@
+import json
+import logging
+from google.appengine.api import urlfetch
 from config import config
 from methods import paypalrestsdk
 from methods.paypalrestsdk.payments import Authorization
@@ -5,6 +8,15 @@ from methods.paypalrestsdk.payments import Authorization
 
 def get_refresh_token(auth_code):
     return config.PAYPAL_API.get_refresh_token(auth_code)
+
+
+def get_user_info(refresh_token):
+    access_token = config.PAYPAL_API.get_access_token(refresh_token=refresh_token)
+    paypal_base_url = "https://api.sandbox.paypal.com" if config.PAYPAL_SANDBOX else "https://api.paypal.com"
+    url = paypal_base_url + "/v1/identity/openidconnect/userinfo/?schema=openid"
+    result = urlfetch.fetch(url, headers={"Authorization": "Bearer %s" % access_token})
+    logging.info(result.content)
+    return json.loads(result.content)
 
 
 def authorize(order_id, amount, refresh_token, correlation_id):
