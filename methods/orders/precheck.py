@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import re
-from google.appengine.api import memcache
+from methods.map import get_houses_by_address
 from methods.rendering import STR_TIME_FORMAT
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot
 from models.venue import DELIVERY
@@ -46,6 +46,16 @@ def set_client_info(client_json):
         client.email = client_email
         client.put()
     return client_id, client
+
+
+def validate_address(address):
+    address_home = address['address']
+    if not address['address']['home']:
+        candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
+        if candidates:
+            flat = address['address']['flat']
+            address = candidates[0]
+            address['address']['flat'] = flat
 
 
 def get_venue_and_zone_by_address(address):

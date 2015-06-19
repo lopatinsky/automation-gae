@@ -12,12 +12,11 @@ from datetime import datetime, timedelta
 from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
 from methods.orders.validation import validate_order, get_first_error
-from methods.map import get_houses_by_address
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
 from methods.orders.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
-    check_items_and_gifts, get_delivery_time
+    check_items_and_gifts, get_delivery_time, validate_address
 from google.appengine.api import taskqueue
 from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Address, Client
 from models.client import IOS_DEVICE
@@ -66,13 +65,7 @@ class OrderHandler(ApiHandler):
         delivery_zone = None
         address = response_json.get('address')
         if address:
-            address_home = address['address']
-            if not address['address']['home']:
-                candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
-                if candidates:
-                    flat = address['address']['flat']
-                    address = candidates[0]
-                    address['address']['flat'] = flat
+            address = validate_address(address)
             delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
 
         if delivery_type in [SELF, IN_CAFE]:
@@ -346,13 +339,7 @@ class CheckOrderHandler(ApiHandler):
         address = self.request.get('address')
         if address:
             address = json.loads(address)
-            address_home = address['address']
-            if not address['address']['home']:
-                candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
-                if candidates:
-                    flat = address['address']['flat']
-                    address = candidates[0]
-                    address['address']['flat'] = flat
+            address = validate_address(address)
             delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
 
         if delivery_type in [SELF, IN_CAFE]:
