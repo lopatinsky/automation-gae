@@ -22,6 +22,11 @@
         <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
         <b>Телефон:</b> {{ order.client.tel }}
     </p>
+    {% if venue %}
+        <p>
+            <b>В заведение:</b> {{ venue.title }}
+        </p>
+    {% endif %}
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Номер</th>

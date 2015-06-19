@@ -28,6 +28,8 @@ from models.venue import SELF, IN_CAFE
 
 SECONDS_WAITING_BEFORE_SMS = 15
 
+EMAIL_FROM = 'noreply-order@ru-beacon.ru'
+
 
 class OrderHandler(ApiHandler):
     order = None
@@ -239,6 +241,7 @@ class OrderHandler(ApiHandler):
                 send_sms([config.DELIVERY_PHONE], text)
             if config.DELIVERY_EMAILS:
                 item_values = order_items_values(self.order)
+                item_values['venue'] = venue
                 if config.EMAIL_REQUESTS:
                     self.order.email_key_done = security.generate_random_string(entropy=256)
                     self.order.email_key_cancel = security.generate_random_string(entropy=256)
@@ -247,7 +250,7 @@ class OrderHandler(ApiHandler):
                     item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
                     item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
                 for email in config.DELIVERY_EMAILS:
-                    send_email(email, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
+                    send_email(EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
