@@ -13,7 +13,7 @@ DEVICE_TYPE_MAP = {
 class Client(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     user_agent = ndb.StringProperty(indexed=False)
-    device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
+    device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES)
     tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
     name = ndb.StringProperty()
