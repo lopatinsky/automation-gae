@@ -3,6 +3,7 @@ import logging
 from google.appengine.api.namespace_manager import namespace_manager
 import webapp2
 from webapp2_extras import jinja2
+from models.proxy.unified_app import AutomationCompany
 
 
 class ApiHandler(webapp2.RequestHandler):
@@ -16,9 +17,13 @@ class ApiHandler(webapp2.RequestHandler):
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
         logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
-        namespace = self.request.get('namespace')
+        namespace = self.request.headers.get('Namespace')
+        self.request.init_namespace = None
         if namespace:
-            namespace_manager.set_namespace(namespace)
+            proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
+            if proxy_company:
+                self.request.init_namespace = namespace_manager.get_namespace()
+                namespace_manager.set_namespace(namespace)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:

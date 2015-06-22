@@ -27,8 +27,10 @@ class Client(ndb.Model):
     paypal_refresh_token = ndb.StringProperty(indexed=False)
 
     @classmethod
-    def create(cls):
-        return cls(id=cls.generate_id())
+    def create(cls, client_id=None):
+        if not client_id:
+            client_id = cls.generate_id()
+        return cls(id=client_id)
 
     @staticmethod
     def generate_id():
