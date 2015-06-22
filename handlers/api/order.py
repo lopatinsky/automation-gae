@@ -22,8 +22,8 @@ from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Ad
 from models.client import IOS_DEVICE
 from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
     CONFUSED_OTHER
-from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
-from models.venue import SELF, IN_CAFE
+from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_MAP
+from models.venue import SELF, IN_CAFE, DELIVERY_MAP
 
 SECONDS_WAITING_BEFORE_SMS = 15
 
@@ -235,6 +235,8 @@ class OrderHandler(ApiHandler):
             if config.DELIVERY_EMAILS:
                 item_values = order_items_values(self.order)
                 item_values['venue'] = venue
+                item_values['delivery_type_str'] = DELIVERY_MAP[self.order.device_type]
+                self.order.payment_type_str = PAYMENT_TYPE_MAP[self.order.payment_type_id]
                 if config.EMAIL_REQUESTS:
                     self.order.email_key_done = security.generate_random_string(entropy=256)
                     self.order.email_key_cancel = security.generate_random_string(entropy=256)

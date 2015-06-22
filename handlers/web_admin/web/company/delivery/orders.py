@@ -9,6 +9,7 @@ from methods.orders.done import done_order
 from methods.orders.cancel import cancel_order
 from methods.orders.confirm import confirm_order
 from models.order import STATUS_MAP, NOT_CANCELED_STATUSES, NEW_ORDER, CONFIRM_ORDER, READY_ORDER, CANCELED_BY_BARISTA_ORDER
+from models.payment_types import PAYMENT_TYPE_MAP
 from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
@@ -86,6 +87,7 @@ def order_items_values(order):
             item_obj.modifiers.append(choice)
         items.append(item_obj)
     order = _update_order_info([order])[0]
+    order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
     return {
         'order': order,
         'items': items

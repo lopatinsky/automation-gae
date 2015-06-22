@@ -9,6 +9,9 @@
         <b>Заказ № {{ order.key.id() }}</b>
     </p>
     <p>
+        <b>Тип оплаты:</b> {{ order.payment_type_str }}
+    </p>    
+    <p>
         <b>Адрес:</b> {{ order.address_str }}
     </p>
     <p>
@@ -22,9 +25,10 @@
         <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
         <b>Телефон:</b> {{ order.client.tel }}
     </p>
-    {% if venue %}
+    {% if venue and delivery_type_str %}
         <p>
-            <b>В заведение:</b> {{ venue.title }}
+            <b>В заведение:</b> {{ venue.title }}<br>
+            <b>Тип заказа:</b> {{ delivery_type_str }}
         </p>
     {% endif %}
     <table style="border-collapse:collapse; width:100%" border="1">
