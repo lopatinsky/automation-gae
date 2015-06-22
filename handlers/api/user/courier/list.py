@@ -26,7 +26,7 @@ class CurrentOrdersHandler(OrderListBaseHandler):
     _with_timestamp = True
 
     def _get_orders(self):
-        return self.user.query_orders()
+        return self.user.query_orders(Order.status == ON_THE_WAY)
 
 
 class HistoryHandler(OrderListBaseHandler):

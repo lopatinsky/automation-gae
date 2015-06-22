@@ -81,8 +81,17 @@ class Courier(User):
         return dict
 
     def query_orders(self, *args, **kwargs):
-        from models.order import Order, ON_THE_WAY
-        return Order.query(Order.courier == self.key, Order.status == ON_THE_WAY, *args, **kwargs)
+        from models.order import Order
+        return Order.query(Order.courier == self.key, *args, **kwargs)
+
+    def order_by_id(self, order_id):
+        from models.order import Order
+        order = Order.get_by_id(order_id)
+        if not order:
+            return None
+        if order.courier != self.key:
+            return None
+        return order
 
 
 class UserStatus(ndb.Model):
