@@ -8,8 +8,8 @@ from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CH
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from config import config
 
-IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1']
-ANDROID_FUCKUP = ['pastadeli/4', 'pastadeli/5']
+IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1', 'ElephantBoutique/1.0', 'MeatMe/1.0']
+ANDROID_FUCKUP = ['pastadeli/4', 'pastadeli/5', 'meatme/4', 'meatme/5']
 
 
 def _send_push(channels, data, device_type):
