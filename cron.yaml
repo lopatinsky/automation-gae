@@ -2,7 +2,7 @@ cron:
 
 - description: close opened orders
   url: /cron/close_orders
-  schedule: every day 7:00
+  schedule: every day 6:00
   timezone: Europe/Moscow
 
 #- description: check pings
@@ -13,28 +13,28 @@ cron:
   url: /cron/alfa_errors
   schedule: every 10 minutes synchronized
 
-- description: success binding card
-  url: /cron/sms_notify
-  schedule: every day 10:00
-  timezone: Europe/Moscow
+#- description: success binding card
+#  url: /cron/sms_notify
+#  schedule: every day 10:00
+#  timezone: Europe/Moscow
 
-- description: email report binding card
-  url: /cron/email_notify
-  schedule: every day 7:00
-  timezone: Europe/Moscow
+#- description: email report binding card
+#  url: /cron/email_notify
+#  schedule: every day 7:00
+#  timezone: Europe/Moscow
 
-- description: check weekly inactive clients
-  url: /cron/push_notify
-  schedule: every day 07:00
-  timezone: Europe/Moscow
+#- description: check weekly inactive clients
+#  url: /cron/push_notify
+#  schedule: every day 07:00
+#  timezone: Europe/Moscow
 
 - description: clear old pings
   url: /cron/clear_pings
   schedule: every day 0:00
 
-- description: build square table report
-  url: /cron/build_square_table
-  schedule: every day 0:00
+#- description: build square table report
+#  url: /cron/build_square_table
+#  schedule: every day 0:00
 
 - description: check creating orders
   url: /cron/creating_orders
