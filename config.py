@@ -100,6 +100,10 @@ class Config(ndb.Model):
         config = cls.get()
         return total_sum * config.WALLET_MAX_PERCENT / 100.0
 
+    @property
+    def GIFT_ENABLED(self):
+        return self.PROMOS_API_KEY is not None
+
     PAYPAL_CLIENT_ID = ndb.StringProperty(indexed=False)
     PAYPAL_CLIENT_SECRET = ndb.StringProperty(indexed=False)
     PAYPAL_SANDBOX = ndb.BooleanProperty(indexed=False, required=True, default=True)

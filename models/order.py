@@ -20,14 +20,14 @@ ON_THE_WAY = 6
 
 STATUSES = [NEW_ORDER, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CREATING_ORDER, CONFIRM_ORDER,
             ON_THE_WAY]
-NOT_CANCELED_STATUSES = [NEW_ORDER, READY_ORDER, CREATING_ORDER, CONFIRM_ORDER, ON_THE_WAY]
+NOT_CANCELED_STATUSES = [NEW_ORDER, READY_ORDER, CONFIRM_ORDER, ON_THE_WAY]  # not include CREATING_ORDER
 
 STATUS_MAP = {
     NEW_ORDER: u"Новый",
     READY_ORDER: u"Выдан",
     CANCELED_BY_CLIENT_ORDER: u"Отменен клиентом",
     CANCELED_BY_BARISTA_ORDER: u"Отменен бариста",
-    CREATING_ORDER: u'Созданный заказ',
+    CREATING_ORDER: u'Заказ с ошибкой оплаты',
     CONFIRM_ORDER: u'Подтвержденный заказ',
     ON_THE_WAY: u'В пути'
 }
@@ -131,7 +131,6 @@ class Order(ndb.Model):
     courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
-        logging.info("activate_cash_back")
         from methods.empatika_wallet import deposit
         total_cash_back = 0
         for cash_back in self.cash_backs:
@@ -139,6 +138,7 @@ class Order(ndb.Model):
                 total_cash_back += cash_back.amount
                 cash_back.status = cash_back.DONE
         if total_cash_back > 0:
+            logging.info('cash back with sum=%s' % total_cash_back)
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
         self.put()
 

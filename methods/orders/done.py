@@ -2,6 +2,7 @@
 from datetime import datetime
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
+from config import config
 from methods import alfa_bank, push, paypal
 from models import Client
 from models.share import SharedPromo
@@ -10,9 +11,11 @@ from models.order import READY_ORDER
 __author__ = 'dvpermyakov'
 
 
-def done_order(order, namespace):
-    order.activate_cash_back()
-    order.activate_gift_points()
+def done_order(order, namespace, with_push=True):
+    if config.WALLET_ENABLED:
+        order.activate_cash_back()
+    if config.GIFT_ENABLED:
+        order.activate_gift_points()
 
     order.status = READY_ORDER
     order.email_key_done = None
@@ -31,5 +34,6 @@ def done_order(order, namespace):
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
 
-    text = u"Заказ №%s выдан." % order.key.id()
-    push.send_order_push(order, text, namespace, silent=True)
+    if with_push:
+        text = u"Заказ №%s выдан." % order.key.id()
+        push.send_order_push(order, text, namespace, silent=True)
