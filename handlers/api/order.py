@@ -24,6 +24,7 @@ from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLI
     CONFUSED_OTHER
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_MAP
 from models.venue import SELF, IN_CAFE, DELIVERY_MAP
+from handlers.email_api.order import POSTPONE_MINUTES
 
 SECONDS_WAITING_BEFORE_SMS = 15
 
@@ -240,10 +241,13 @@ class OrderHandler(ApiHandler):
                 if config.EMAIL_REQUESTS:
                     self.order.email_key_done = security.generate_random_string(entropy=256)
                     self.order.email_key_cancel = security.generate_random_string(entropy=256)
+                    self.order.email_key_postpone = security.generate_random_string(entropy=256)
                     self.order.put()
                     base_url = urlparse(self.request.url).hostname
                     item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
                     item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
+                    item_values['postpone_url'] = 'http://%s/email/order/postpone?key=%s' % (base_url, self.order.email_key_postpone)
+                    item_values['minutes'] = POSTPONE_MINUTES
                 for email in config.DELIVERY_EMAILS:
                     send_email(EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 

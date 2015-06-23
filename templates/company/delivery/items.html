@@ -63,9 +63,10 @@
     {% if user %}
         <a href="/company/delivery/orders/current">Назад</a>
     {% endif %}
-    {% if cancel_url and done_url %}
+    {% if cancel_url and done_url and postpone_url %}
         <a href="{{ done_url }}">Выдать</a>
         <a href="{{ cancel_url }}">Отменить</a>
+        <a href="{{ postpone_url }}">Перенести на {{ minutes }} минут</a>
     {% endif %}
 </body>
 </html>

@@ -30,6 +30,7 @@ app = WSGIApplication([
         PathPrefixRoute('/order', [
             Route('/close', email_api.DoneOrderHandler),
             Route('/cancel', email_api.CancelOrderHandler),
+            Route('/postpone', email_api.PostponeOrderHandler),
         ]),
     ]),
 
