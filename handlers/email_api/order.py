@@ -42,5 +42,7 @@ class PostponeOrderHandler(RequestHandler):
         if not email_key:
             self.abort(403)
         order = Order.query(Order.email_key_postpone == email_key).get()
+        if not order:
+            return self.response.write(u'Невозможно перенести заказ. Возможно, он выдан, отменен или уже был перенесен.')
         postpone_order(order, POSTPONE_MINUTES, namespace_manager.get_namespace())
         self.response.write(u'Заказ был успешно перенесен на %s минут' % POSTPONE_MINUTES)

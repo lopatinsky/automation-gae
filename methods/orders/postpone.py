@@ -21,6 +21,7 @@ def postpone_order(order, minutes, namespace):
     else:
         delivery_time_str = local_delivery_time.strftime(STR_TIME_FORMAT)
     order.delivery_time_str = delivery_time_str
+    order.email_key_postpone = None
     order.put()
 
     time_str = local_delivery_time.strftime("%H:%M")
