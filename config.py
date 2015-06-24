@@ -84,6 +84,7 @@ class Config(ndb.Model):
     OGRNIP = ndb.StringProperty(indexed=False)
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
+    COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:

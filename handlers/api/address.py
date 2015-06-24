@@ -1,6 +1,9 @@
+import json
 import logging
 from base import ApiHandler
+from methods.address_validation import check_address
 from methods.map import get_houses_by_address, get_streets_or_houses_by_address
+from methods.orders.precheck import validate_address
 
 __author__ = 'dvpermyakov'
 
@@ -17,3 +20,17 @@ class AddressByAddressHandler(ApiHandler):
             response = get_streets_or_houses_by_address(city, street)
         logging.info('response = %s' % response)
         self.render_json(response)
+
+
+class ValidateAddressHandler(ApiHandler):
+    def get(self):
+        address = self.request.get('address')
+        if not address:
+            self.abort(400)
+        address = json.loads(address)
+        address = validate_address(address)
+        success, description = check_address(address)
+        self.render_json({
+            'success': success,
+            'description': description
+        })

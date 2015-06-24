@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import logging
 from config import config, VENUE, BAR, Config
 from methods import empatika_wallet, empatika_promos
+from methods.address_validation import check_address
 from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
 from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import MenuItem, SingleModifier, GroupModifier, \
@@ -111,6 +112,21 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
                 return True
     errors.append(u'Данный тип доставки недоступен')
     return False
+
+
+def _check_payment(payment_info, errors):
+    if not payment_info:
+        errors.append(u'Не выбран тип оплаты')
+        return False
+    else:
+        return True
+
+
+def _check_address(address, errors):
+    success, description = check_address(address)
+    if not success:
+        errors.append(description)
+    return success
 
 
 def _check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts, errors):
@@ -495,6 +511,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     errors = []
     valid = True
     valid = _check_venue(venue, delivery_time, errors) and valid
+    valid = _check_payment(payment_info, errors) and valid
+    valid = _check_address(address, errors) and valid
     valid = _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
     valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, delivery_zone,
@@ -559,6 +577,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
         'total_sum': total_sum,
         'max_wallet_payment': max_wallet_payment,
+        # todo: should be two types of datetime without timezoneoffset
         'delivery_time': datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None

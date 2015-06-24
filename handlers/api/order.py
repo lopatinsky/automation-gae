@@ -80,6 +80,8 @@ class OrderHandler(ApiHandler):
                 venue, delivery_zone = get_venue_and_zone_by_address(address)
             else:
                 return self.render_error(u'Адрес не найден')
+        if not venue:
+            return self.render_error(u'Недостаточно информации для обработки заказа')
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -323,8 +325,10 @@ class AddReturnCommentHandler(ApiHandler):
         self.render_json({})
 
 
-# venue can be None, send error in orders.validate_order
-# payment
+#  all required fields should invoke 400
+#  all errors should be catch in orders.validate_order
+## address can be None => send error
+## payment can be None => send error
 class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
@@ -351,15 +355,16 @@ class CheckOrderHandler(ApiHandler):
             if address:
                 address = json.loads(address)
                 address = validate_address(address)
-                venue, delivery_zone = get_venue_and_zone_by_address(address)
-            else:
-                self.abort(400)
+            venue, delivery_zone = get_venue_and_zone_by_address(address)
+        if not venue:  # not enough fields for catch venue
+            self.abort(400)
 
         raw_payment_info = self.request.get('payment')
         payment_info = None
         if raw_payment_info:
             payment_info = json.loads(raw_payment_info)
-            if not payment_info.get('type_id') or payment_info.get('type_id') == -1:
+            if (not payment_info.get('type_id') and payment_info.get('type_id') != 0) or \
+                            payment_info.get('type_id') == -1:
                 payment_info = None
 
         delivery_slot_id = self.request.get('delivery_slot_id')

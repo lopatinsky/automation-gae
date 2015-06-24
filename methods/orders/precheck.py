@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import re
-from methods.map import get_houses_by_address
+from config import config
+from methods.map import get_houses_by_address, get_houses_by_coordinates
 from methods.rendering import STR_TIME_FORMAT
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot
 from models.venue import DELIVERY
@@ -49,34 +50,72 @@ def set_client_info(client_json):
 
 
 def validate_address(address):
-    address_home = address['address']
-    if not address['address']['home'] or not address['coordinates']['lat'] or not address['coordinates']['lon']:
-        candidates = get_houses_by_address(address_home['city'], address_home['street'], address_home['home'])
-        if candidates:
-            flat = address['address']['flat']
-            address = candidates[0]
-            address['address']['flat'] = flat
+    # check coordinates
+    candidates = get_houses_by_coordinates(address['coordinates']['lat'], address['coordinates']['lon'])
+    coord_found = False
+    for candidate in candidates:
+        if candidate['address']['city'] == address['address']['city']:
+            if candidate['address']['street'] == address['address']['street']:
+                if candidate['address']['home'] == address['address']['home']:
+                    coord_found = True
+    if not coord_found:
+        address['coordinates']['lat'] = None
+        address['coordinates']['lon'] = None
+
+    # trim blank spaces
+    address['address']['city'] = address['address']['city'].strip()
+    address['address']['street'] = address['address']['street'].strip()
+    address['address']['home'] = address['address']['home'].strip()
+    if address['address'].get('flat'):
+        address['address']['flat'] = address['address']['flat'].strip()
+
+    # get coordinates if address has not coordinates
+    if not address['coordinates']['lat'] or not address['coordinates']['lat']:
+        candidates = get_houses_by_address(address['address']['city'], address['address']['street'], address['address']['home'])
+        for candidate in candidates:
+            if candidate['address']['city'] == address['address']['city']:
+                if candidate['address']['street'] == address['address']['street']:
+                    if candidate['address']['home'] == address['address']['home']:
+                        address['coordinates']['lat'] = address['coordinates']['lat']
+                        address['coordinates']['lon'] = address['coordinates']['lon']
     return address
 
 
 def get_venue_and_zone_by_address(address):
-    for venue in Venue.query().fetch():
+    if address:
+        # case 1: get venue by city or polygons
+        venues = Venue.query(Venue.active == True).fetch()
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in delivery.delivery_zones:
+                        zone = zone.get()
+                        if not zone.geo_ribs:
+                            if address['address']['city'] == zone.address.city:
+                                return venue, zone
+                        else:
+                            pass
+    # case 2: get first venue with default flag
+    venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
+    for venue in venues:
         for delivery in venue.delivery_types:
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                 for zone in delivery.delivery_zones:
-                    zone = zone.get()
-                    if not zone.geo_ribs:
-                        if address['address']['city'] == zone.address.city:
-                            return venue, zone
-                    else:
-                        pass
+                    return venue, zone
+    # case 3: get first venue
+    venues = Venue.query(Venue.active == True).fetch()
+    for venue in venues:
+        for delivery in venue.delivery_types:
+            if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                for zone in delivery.delivery_zones:
+                    return venue, zone
     return None, None
 
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
     if delivery_time_picker:
         delivery_time_picker = datetime.strptime(delivery_time_picker, STR_TIME_FORMAT)
-        if not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS:
+        if venue and not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS:
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
     if delivery_slot:

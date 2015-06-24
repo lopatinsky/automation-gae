@@ -153,6 +153,7 @@ app = WSGIApplication([
         ]),
 
         PathPrefixRoute('/address', [
+            Route('/validate', api.ValidateAddressHandler),
             Route('/by_street', api.AddressByAddressHandler),
         ]),
 

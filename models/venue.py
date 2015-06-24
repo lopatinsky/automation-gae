@@ -157,6 +157,7 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    default = ndb.BooleanProperty(default=False)
 
     def dynamic_info(self):
         items = []
