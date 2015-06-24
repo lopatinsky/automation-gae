@@ -108,7 +108,7 @@ class Order(ndb.Model):
     venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
-    comment = ndb.StringProperty(indexed=False)
+    #comment = ndb.StringProperty(indexed=False)  # todo: is used?
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
