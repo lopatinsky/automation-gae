@@ -65,7 +65,7 @@ class OrderHandler(ApiHandler):
         venue = None
         delivery_zone = None
         address = response_json.get('address')
-        if delivery_type in [SELF, IN_CAFE]:
+        if delivery_type in [SELF, IN_CAFE, PICKUP]:
             venue_id = response_json.get('venue_id')
             if not venue_id:
                 return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать кофейню.")
@@ -73,7 +73,7 @@ class OrderHandler(ApiHandler):
             venue = Venue.get_by_id(venue_id)
             if not venue:
                 return self.render_error(u"Кофейня не найдена")
-        elif delivery_type in [DELIVERY, PICKUP]:
+        elif delivery_type in [DELIVERY]:
             if address:
                 address = validate_address(address)
                 venue, delivery_zone = get_venue_and_zone_by_address(address)
@@ -345,14 +345,14 @@ class CheckOrderHandler(ApiHandler):
         delivery_zone = None
         address = self.request.get('address')
 
-        if delivery_type in [SELF, IN_CAFE]:
+        if delivery_type in [SELF, IN_CAFE, PICKUP]:
             venue_id = self.request.get_range('venue_id')
             if not venue_id or venue_id == -1:
                 self.abort(400)
             venue = Venue.get_by_id(venue_id)
             if not venue:
                 self.abort(400)
-        elif delivery_type in [DELIVERY, PICKUP]:
+        elif delivery_type in [DELIVERY]:
             if address:
                 address = json.loads(address)
                 address = validate_address(address)
