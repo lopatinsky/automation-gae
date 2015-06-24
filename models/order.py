@@ -141,6 +141,7 @@ class Order(ndb.Model):
             logging.info('cash back with sum=%s' % total_cash_back)
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
         self.put()
+        return total_cash_back
 
     def activate_gift_points(self):
         from methods import empatika_promos
