@@ -171,8 +171,9 @@ class Order(ndb.Model):
             response.append({
                 "id": item_dict['id'],
                 "title": item_dict['title'],
-                "price": item_dict['price_without_promos'],
+                "price": item_dict['price_without_promos'] / 100.0,  # в рублях
                 "image": item_dict.get('image'),
+                "pic": item_dict.get('image'),
                 "quantity": item_dict['quantity'],
                 "single_modifiers": item_dict['single_modifiers'],
                 "group_modifiers": item_dict['group_modifiers']
