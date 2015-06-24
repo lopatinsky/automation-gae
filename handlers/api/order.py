@@ -75,13 +75,12 @@ class OrderHandler(ApiHandler):
                 return self.render_error(u"Кофейня не найдена")
         elif delivery_type in [DELIVERY, PICKUP]:
             if address:
-                address = json.loads(address)
                 address = validate_address(address)
                 venue, delivery_zone = get_venue_and_zone_by_address(address)
-            else:
-                return self.render_error(u'Адрес не найден')
         if not venue:
             return self.render_error(u'Недостаточно информации для обработки заказа')
+        else:
+            venue_id = venue.key.id()
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
