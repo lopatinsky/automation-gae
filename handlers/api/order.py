@@ -23,7 +23,7 @@ from models.client import IOS_DEVICE
 from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
     CONFUSED_OTHER
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_MAP
-from models.venue import SELF, IN_CAFE, DELIVERY_MAP
+from models.venue import SELF, IN_CAFE, DELIVERY_MAP, DELIVERY, PICKUP
 from handlers.email_api.order import POSTPONE_MINUTES
 
 SECONDS_WAITING_BEFORE_SMS = 15
@@ -62,13 +62,9 @@ class OrderHandler(ApiHandler):
 
         delivery_type = int(response_json.get('delivery_type'))
 
-        delivery_venue = None
+        venue = None
         delivery_zone = None
         address = response_json.get('address')
-        if address:
-            address = validate_address(address)
-            delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
-
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = response_json.get('venue_id')
             if not venue_id:
@@ -77,15 +73,13 @@ class OrderHandler(ApiHandler):
             venue = Venue.get_by_id(venue_id)
             if not venue:
                 return self.render_error(u"Кофейня не найдена")
-        else:
-            if delivery_venue:
-                venue_id = delivery_venue.key.id()
-                venue = delivery_venue
+        elif delivery_type in [DELIVERY, PICKUP]:
+            if address:
+                address = json.loads(address)
+                address = validate_address(address)
+                venue, delivery_zone = get_venue_and_zone_by_address(address)
             else:
-                venue_id = None
-                venue = None
-        if not venue:
-            return self.render_error(u'Невозможно определить точку для обработки заказа')
+                return self.render_error(u'Адрес не найден')
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -329,6 +323,8 @@ class AddReturnCommentHandler(ApiHandler):
         self.render_json({})
 
 
+# venue can be None, send error in orders.validate_order
+# payment
 class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
@@ -340,13 +336,9 @@ class CheckOrderHandler(ApiHandler):
 
         delivery_type = int(self.request.get('delivery_type'))
 
-        delivery_venue = None
+        venue = None
         delivery_zone = None
         address = self.request.get('address')
-        if address:
-            address = json.loads(address)
-            address = validate_address(address)
-            delivery_venue, delivery_zone = get_venue_and_zone_by_address(address)
 
         if delivery_type in [SELF, IN_CAFE]:
             venue_id = self.request.get_range('venue_id')
@@ -355,14 +347,20 @@ class CheckOrderHandler(ApiHandler):
             venue = Venue.get_by_id(venue_id)
             if not venue:
                 self.abort(400)
-        else:
-            venue = delivery_venue
+        elif delivery_type in [DELIVERY, PICKUP]:
+            if address:
+                address = json.loads(address)
+                address = validate_address(address)
+                venue, delivery_zone = get_venue_and_zone_by_address(address)
+            else:
+                self.abort(400)
 
         raw_payment_info = self.request.get('payment')
-        try:
+        payment_info = None
+        if raw_payment_info:
             payment_info = json.loads(raw_payment_info)
-        except ValueError:
-            payment_info = None
+            if not payment_info.get('type_id') or payment_info.get('type_id') == -1:
+                payment_info = None
 
         delivery_slot_id = self.request.get('delivery_slot_id')
         if delivery_slot_id:
