@@ -91,6 +91,8 @@ class OrderHandler(ApiHandler):
         device_type = response_json.get('device_type', IOS_DEVICE)
 
         delivery_slot_id = response_json.get('delivery_slot_id')
+        if delivery_slot_id == '-1':
+            return self.render_error(u'Неверно выбран слот времени')
         if delivery_slot_id:
             delivery_slot_id = int(delivery_slot_id)
             delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
@@ -367,6 +369,8 @@ class CheckOrderHandler(ApiHandler):
                 payment_info = None
 
         delivery_slot_id = self.request.get('delivery_slot_id')
+        if delivery_slot_id == '-1':
+            self.abort(400)
         if delivery_slot_id:
             delivery_slot_id = int(delivery_slot_id)
             delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
