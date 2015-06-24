@@ -524,22 +524,19 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid = _check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts, errors) and valid
 
     if not order:
-        promo_errors, new_order_gift_dicts, item_dicts, promos_info = \
+        promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
             apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                          cancelled_order_gift_dicts)
         valid = valid and not promo_errors
     else:
         if valid:
-            errors, new_order_gift_dicts, item_dicts, promos_info = \
+            errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
                 apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                              cancelled_order_gift_dicts, order)
         else:
             new_order_gift_dicts = []
             promos_info = []
-
-    total_sum = 0
-    for item_dict in item_dicts:
-        total_sum += item_dict['revenue']
+            total_sum = 0
 
     logging.info('item_dicts = %s' % item_dicts)
 

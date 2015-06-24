@@ -31,7 +31,7 @@ def _apply_cash_back(item_dict, promo, cash_back, order=None):
     return False
 
 
-def set_discounts(outcome, item_dicts, promo):
+def set_discounts(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
@@ -43,10 +43,11 @@ def set_discounts(outcome, item_dicts, promo):
         for item_dict in item_dicts:
             if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
-    return promo_applied
+    response.success = promo_applied
+    return response
 
 
-def set_cash_back(outcome, item_dicts, promo, order):
+def set_cash_back(response, outcome, item_dicts, promo, order):
     cash_back = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
@@ -60,10 +61,11 @@ def set_cash_back(outcome, item_dicts, promo, order):
                 promo_applied = True
     if order:
         order.put()
-    return promo_applied
+    response.success = promo_applied
+    return response
 
 
-def set_discount_cheapest(outcome, item_dicts, promo):
+def set_discount_cheapest(response, outcome, item_dicts, promo):
     def get_cheapest(item_dicts):
         if not len(item_dicts):
             return
@@ -83,10 +85,11 @@ def set_discount_cheapest(outcome, item_dicts, promo):
         if item_dict:
             if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
-    return promo_applied
+    response.success = promo_applied
+    return response
 
 
-def set_discount_richest(outcome, item_dicts, promo):
+def set_discount_richest(response, outcome, item_dicts, promo):
     def get_richest(item_dicts):
         if not len(item_dicts):
             return
@@ -106,10 +109,11 @@ def set_discount_richest(outcome, item_dicts, promo):
         if item_dict:
             if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
-    return promo_applied
+    response.success = promo_applied
+    return response
 
 
-def set_gift_points(outcome, item_dicts, promo, order):
+def set_gift_points(response, outcome, item_dicts, promo, order):
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
     if item_keys.get(outcome.item):
@@ -127,22 +131,25 @@ def set_gift_points(outcome, item_dicts, promo, order):
             for item_dict in item_dicts:
                 item_dict['promos'].append(promo)
         promo_applied = True
-    return promo_applied
+    response.success = promo_applied
+    return response
 
 
-def set_order_gift_points(outcome, order):
+def set_order_gift_points(response, outcome, order):
     if order:
         order.points_details.append(GiftPointsDetails(points=outcome.value))
         order.put()
-    return True
+    response.success = True
+    return response
 
 
-def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
+def add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
     from methods.orders.validation import set_item_dicts
     gift = MenuItem.get_by_id(int(outcome.value))
     if not gift:
         errors.append(u'Акция подарок по заказу не привязана к продукту')
-        return False
+        response.success = False
+        return response
     found = False
     for order_gift_dict in order_gift_dicts:
         if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
@@ -161,4 +168,14 @@ def add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dict
         item_dict = set_item_dicts([gift], True)[0]
         item_dict['promos'].append(promo)
         new_order_gift_dicts.append(item_dict)
-    return True
+    response.success = True
+    return response
+
+
+def set_fix_discount(response, outcome, init_total_sum):
+    discount = outcome.value
+    if discount > init_total_sum:
+        discount = init_total_sum
+    response.success = True
+    response.discount = discount
+    return response

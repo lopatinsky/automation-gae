@@ -28,8 +28,9 @@ class PromoOutcome(ndb.Model):
     ACCUMULATE_GIFT_POINT = 4
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
+    FIX_DISCOUNT = 7
     CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT]
+               ORDER_ACCUMULATE_GIFT_POINT,FIX_DISCOUNT]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -43,7 +44,9 @@ class PromoCondition(ndb.Model):
     CHECK_MAX_ORDER_SUM = 2
     CHECK_ITEM_IN_ORDER = 3
     CHECK_REPEATED_ORDERS = 4
-    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS]
+    CHECK_MIN_ORDER_SUM = 5
+    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
+               CHECK_MIN_ORDER_SUM]
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -78,7 +81,8 @@ class Promo(ndb.Model):
                 icon = self._get_url(hostname, self.BONUS_ICON)
             elif outcome.method in [PromoOutcome.CASH_BACK]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
-            elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST]:
+            elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
+                                    PromoOutcome.FIX_DISCOUNT]:
                 icon = self._get_url(hostname, self.DISCOUNT_ICON)
             elif outcome.method in [PromoOutcome.ORDER_GIFT]:
                 icon = self._get_url(hostname, self.GIFT_ICON)
@@ -98,9 +102,10 @@ class Promo(ndb.Model):
 CONDITION_MAP = {
     PromoCondition.CHECK_FIRST_ORDER: u"Первый заказ",
     PromoCondition.CHECK_TYPE_DELIVERY: u"Тип доставки",
-    PromoCondition.CHECK_MAX_ORDER_SUM: u'Максимальная сумма',
+    PromoCondition.CHECK_MAX_ORDER_SUM: u'Максимальная сумма заказа',
     PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
-    PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ'
+    PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ',
+    PromoCondition.CHECK_MIN_ORDER_SUM: u'Минимальная сумма заказа'
 }
 
 OUTCOME_MAP = {
@@ -110,5 +115,6 @@ OUTCOME_MAP = {
     PromoOutcome.DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе',
     PromoOutcome.ACCUMULATE_GIFT_POINT: u'Баллы',
     PromoOutcome.ORDER_GIFT: u'Подарок',
-    PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ'
+    PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
+    PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка'
 }

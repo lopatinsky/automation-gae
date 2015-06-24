@@ -2,13 +2,25 @@ from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
-    add_order_gift, set_order_gift_points
+    add_order_gift, set_order_gift_points, set_fix_discount
+
+
+class OutcomeResult:
+    def __init__(self):
+        self.success = False
+        self.discount = 0.0
 
 
 def _get_initial_total_sum(item_dicts):
     total_sum = 0
     for item_dict in item_dicts:
         total_sum += item_dict['price']
+    return total_sum
+
+
+def _get_final_total_sum(total_sum, item_dicts):
+    for item_dict in item_dicts:
+        total_sum -= item_dict['price'] - item_dict['revenue']
     return total_sum
 
 
@@ -31,28 +43,34 @@ def _check_condition(errors, condition, venue, client, item_dicts, payment_info,
         return check_item_in_order(condition, item_dicts)
     if condition.method == PromoCondition.CHECK_REPEATED_ORDERS:
         return check_repeated_order(condition, client)
+    if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM:
+        return check_condition_min_by_value(condition, _get_initial_total_sum(item_dicts))
 
 
 def _set_outcome(errors, outcome, items, promo, client, new_order_gift_dicts, order_gift_dicts,
                  cancelled_order_gift_dicts, order):
+    response = OutcomeResult()
     if outcome.method == PromoOutcome.DISCOUNT:
-        return set_discounts(outcome, items, promo)
+        return set_discounts(response, outcome, items, promo)
     if outcome.method == PromoOutcome.CASH_BACK:
-        return set_cash_back(outcome, items, promo, order)
+        return set_cash_back(response, outcome, items, promo, order)
     if outcome.method == PromoOutcome.DISCOUNT_CHEAPEST:
-        return set_discount_cheapest(outcome, items, promo)
+        return set_discount_cheapest(response, outcome, items, promo)
     if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
-        return set_discount_richest(outcome, items, promo)
+        return set_discount_richest(response, outcome, items, promo)
     if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
-        return set_gift_points(outcome, items, promo, order)
+        return set_gift_points(response, outcome, items, promo, order)
     if outcome.method == PromoOutcome.ORDER_GIFT:
-        return add_order_gift(errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
+        return add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
     if outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
-        return set_order_gift_points(outcome, order)
+        return set_order_gift_points(response, outcome, order)
+    if outcome.method == PromoOutcome.FIX_DISCOUNT:
+        return set_fix_discount(response, outcome, _get_initial_total_sum(items))
 
 
 def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
                  cancelled_order_gift_dicts, order=None):
+    total_sum = float(_get_initial_total_sum(item_dicts))
     errors = []
     promos = []
     new_order_gift_dicts = []
@@ -64,8 +82,13 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                if _set_outcome(errors, outcome, item_dicts, promo, client, new_order_gift_dicts, order_gift_dicts,
-                                cancelled_order_gift_dicts, order):
+                outcome_response = _set_outcome(errors, outcome, item_dicts, promo, client, new_order_gift_dicts,
+                                                order_gift_dicts, cancelled_order_gift_dicts, order)
+                if outcome_response.success:
                     if promo not in promos:
                         promos.append(promo)
-    return errors, new_order_gift_dicts, item_dicts, promos
+                    if outcome_response.discount:
+                        total_sum -= outcome_response.discount
+    total_sum = _get_final_total_sum(total_sum, item_dicts)
+    total_sum = max(0, total_sum)
+    return errors, new_order_gift_dicts, item_dicts, promos, total_sum
