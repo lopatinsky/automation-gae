@@ -163,6 +163,7 @@ class OrderHandler(ApiHandler):
                 }
                 address_args.update(address['address'])
                 address_obj = Address(**address_args)
+                address_obj.comment = address['comment'] if address.get('comment') else None
             else:
                 address_obj = None
 

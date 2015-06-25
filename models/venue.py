@@ -28,9 +28,10 @@ class Address(ndb.Model):
     street = ndb.StringProperty()
     home = ndb.StringProperty()
     flat = ndb.StringProperty()
+    comment = ndb.StringProperty()
 
     def str(self):
-        return u'г. %s, ул. %s, д. %s, кв. %s' % (self.city, self.street, self.home, self.flat)
+        return u'г. %s, ул. %s, д. %s, кв. %s (%s)' % (self.city, self.street, self.home, self.flat, self.comment)
 
     def dict(self):
         return {
