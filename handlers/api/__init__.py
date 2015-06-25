@@ -7,8 +7,7 @@ from venues import VenuesHandler
 from payment_types import PaymentTypesHandler
 from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler
 from registration import RegistrationHandler
-from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler, \
-    AddReturnCommentHandler
+from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler
 from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler, SharedGiftListHandler
 from client import ClientHandler
 from history import HistoryHandler, SharedGiftHistoryHandler, SharedInvitationHistoryHandler
