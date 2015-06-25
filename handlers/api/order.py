@@ -230,7 +230,11 @@ class OrderHandler(ApiHandler):
             # use delivery phone and delivery emails for all delivery types
             text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
             if config.DELIVERY_PHONE:
-                send_sms([config.DELIVERY_PHONE], text)
+                try:
+                    send_sms([config.DELIVERY_PHONE], text)
+                except:
+                    logging.warning(u'Неверный номер телефона для оповещения')
+
             if config.DELIVERY_EMAILS:
                 item_values = order_items_values(self.order)
                 item_values['venue'] = venue
