@@ -30,6 +30,8 @@ class CloseOpenedOrdersHandler(ApiHandler):
         mail_body = u"List of orders not closed:\n"
         for namespace in namespace_orders.keys():
             mail_body += u'In namespace = %s:\n' % namespace
-            mail_body += u''.join("%s (%s),\n\n" % (str(order.key.id()), Venue.get_by_id(order.venue_id).title)
-                                  for order in namespace_orders[namespace])
+            for order in namespace_orders[namespace]:
+                venue = Venue.get_by_id(order.venue_id)
+                venue_title = venue.title if venue else u'Не определено'
+                mail_body += u'%s (%s),\n\n' % (order.key.id(), venue_title)
         email.send_error("order", "Orders not closed", mail_body)
