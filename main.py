@@ -140,7 +140,6 @@ app = WSGIApplication([
         Route('/order_register', api.RegisterOrderHandler),
         Route('/order', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
-        #Route('/add_return_comment', api.AddReturnCommentHandler),  # todo: is used?
         Route('/status', api.StatusHandler),
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),

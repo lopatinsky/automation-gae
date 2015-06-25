@@ -313,19 +313,6 @@ class ReturnOrderHandler(ApiHandler):
                 })
 
 
-class AddReturnCommentHandler(ApiHandler):
-    def post(self):
-        order_id = self.request.get_range('order_id')
-        order = Order.get_by_id(order_id)
-        if order.status != CANCELED_BY_CLIENT_ORDER:
-            self.abort(400)
-
-        text = self.request.get('text')
-        order.return_comment = text
-        order.put()
-        self.render_json({})
-
-
 #  all required fields should invoke 400
 #  all errors should be catch in orders.validate_order
 ## address can be None => send error
