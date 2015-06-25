@@ -5,13 +5,13 @@ import logging
 from config import config, VENUE, BAR, Config
 from methods import empatika_wallet, empatika_promos
 from methods.address_validation import check_address
-from methods.rendering import STR_DATE_FORMAT, STR_TIME_FORMAT
+from methods.rendering import STR_TIME_FORMAT
 from methods.working_hours import get_valid_time_str, is_valid_weekday
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, PromoOutcome, MINUTE_SECONDS, \
     HOUR_SECONDS, DAY_SECONDS
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
-from models.venue import DELIVERY
+from models.venue import DELIVERY, DELIVERY_MAP
 from promos import apply_promos
 
 
@@ -74,7 +74,7 @@ def _nice_join(strs):
     return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
-def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum, errors):
+def _check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum, errors):
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
@@ -92,20 +92,6 @@ def _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_
             if delivery_time > _get_now(delivery_slot, only_day=True) + timedelta(seconds=delivery.max_time):
                 description = u'Невозможно выбрать время больше текущего дня%s' % _parse_time(delivery.max_time)
                 errors.append(description)
-            if not description and delivery_type == DELIVERY:
-                address = address['address']
-                if not address['city']:
-                    description = u'Не выбран город'
-                    errors.append(description)
-                if not address['street']:
-                    description = u'Не выбрана улица'
-                    errors.append(description)
-                if not address['home']:
-                    description = u'Не выбран дом'
-                    errors.append(description)
-                if not address['flat']:
-                    description = u'Не выбрана квартира'
-                    errors.append(description)
             if description:
                 return False
             else:
@@ -192,9 +178,16 @@ def _check_venue(venue, delivery_time, errors):
     return True
 
 
-def _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors):
+def _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type, errors):
     def check(item_dicts):
         description = None
+        delivery_items = []
+        delivery_categories = []
+        for delivery in venue.delivery_types:
+            if delivery.delivery_type == delivery_type:
+                delivery_items = delivery.item_restrictions
+                delivery_categories = delivery.category_restrictions
+        found_categories = []
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
@@ -204,6 +197,16 @@ def _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors)
                 substitute = _get_substitute(item, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
+            if item.key in delivery_items:
+                description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
+                errors.append(description)
+            category = item.get_category()
+            if category and category not in found_categories:
+                found_categories.append(category)
+        for category in found_categories:
+            if category.key in delivery_categories:
+                description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (category.title, DELIVERY_MAP[delivery_type])
+                errors.append(description)
         return description
 
     items_description = check(item_dicts)
@@ -516,9 +519,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid = _check_venue(venue, delivery_time, errors) and valid
     valid = _check_payment(payment_info, errors) and valid
     valid = _check_address(delivery_type, address, errors) and valid
-    valid = _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
+    valid = _check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type, errors) and valid
     valid = _check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts, errors) and valid
-    valid = _check_delivery_type(venue, address, delivery_type, delivery_time, delivery_slot, delivery_zone,
+    valid = _check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
                                  total_sum_without_promos, errors) and valid
     valid = _check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts, errors) and valid
     success, rest_points, full_points = _check_gifts(gifts, client, errors)
@@ -576,6 +579,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'cancelled_order_gifts': grouped_cancelled_order_gift_dicts,
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
         'total_sum': total_sum,
+        'delivery_sum': None,      # todo: set
+        'delivery_sum_str': None,  # todo: set
         'max_wallet_payment': max_wallet_payment,
         'delivery_time': datetime.strftime(delivery_time, STR_TIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS

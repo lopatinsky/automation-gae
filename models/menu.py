@@ -101,7 +101,6 @@ class MenuItem(ndb.Model):
     cut_picture = ndb.StringProperty(indexed=False)
     icon = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
-    #cost_price = ndb.IntegerProperty(default=0)  # TODO: what is it?
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
@@ -119,6 +118,12 @@ class MenuItem(ndb.Model):
     @property
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
+
+    def get_category(self):
+        from models import MenuCategory
+        for category in MenuCategory.query().fetch():
+            if self.key in category.menu_items:
+                return category
 
     def dict(self, without_restrictions=False):
         dct = {

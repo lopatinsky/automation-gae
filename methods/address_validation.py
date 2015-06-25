@@ -6,7 +6,7 @@ __author__ = 'dvpermyakov'
 
 
 def check_address(address):
-    address = address.get('address')
+    address = address.get('address') if address else None
     if not address:
         return False, u'Введите адрес'
     if not address['city']:

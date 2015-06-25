@@ -2,7 +2,7 @@
 import datetime
 from google.appengine.ext import ndb
 from methods import location, working_hours
-from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
 
@@ -118,6 +118,8 @@ class DeliveryType(ndb.Model):
     max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
     delivery_zones = ndb.KeyProperty(kind=DeliveryZone, repeated=True)
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
+    item_restrictions = ndb.KeyProperty(kind=MenuItem, repeated=True)
+    category_restrictions = ndb.KeyProperty(kind=MenuCategory, repeated=True)
 
     @classmethod
     def create(cls, delivery_type):

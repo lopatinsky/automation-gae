@@ -107,6 +107,7 @@ def get_venue_and_zone_by_address(address):
         for delivery in venue.delivery_types:
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                 for zone in delivery.delivery_zones:
+                    zone = zone.get()
                     return venue, zone
     # case 3: get first venue
     venues = Venue.query(Venue.active == True).fetch()
@@ -114,6 +115,7 @@ def get_venue_and_zone_by_address(address):
         for delivery in venue.delivery_types:
             if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                 for zone in delivery.delivery_zones:
+                    zone = zone.get()
                     return venue, zone
     return None, None
 
