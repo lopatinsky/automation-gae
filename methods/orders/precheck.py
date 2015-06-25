@@ -63,6 +63,11 @@ def validate_address(address):
         address['coordinates']['lat'] = None
         address['coordinates']['lon'] = None
 
+    # case of street and home are separated by comma
+    if ',' in address['address']['street']:
+        address['address']['home'] = address['address']['street'].split(',')[1]
+        address['address']['street'] = address['address']['street'].split(',')[0]
+
     # trim blank spaces
     address['address']['city'] = address['address']['city'].strip()
     address['address']['street'] = address['address']['street'].strip()
