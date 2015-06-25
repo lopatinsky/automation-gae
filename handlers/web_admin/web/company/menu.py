@@ -381,7 +381,7 @@ class ModifierList(CompanyBaseHandler):
             for modifier in product.single_modifiers:
                 if modifier.id not in single_modifier_ids:
                     single_modifier_ids.append(modifier.id())
-        single_modifiers = SingleModifier.query().order(SingleModifier.title).fetch()
+        single_modifiers = SingleModifier.query().order(SingleModifier.sequence_number).fetch()
         for single_modifier in single_modifiers:
             single_modifier.products = []
             for product in products:
@@ -459,6 +459,52 @@ class EditSingleModifierHandler(CompanyBaseHandler):
         single_modifier.max_amount = self.request.get_range('max')
         single_modifier.put()
         self.redirect_to('modifiers_list')
+
+
+class UpSingleModifierHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = SingleModifier.get_by_id(modifier_id)
+        previous = modifier.get_previous_modifier()
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = modifier.sequence_number
+        modifier.sequence_number = number
+        modifier.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'modifier_id': modifier.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownSingleModifierHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = SingleModifier.get_by_id(modifier_id)
+        if not modifier:
+            logging.info('123')
+            self.abort(400)
+        next_ = modifier.get_next_modifier()
+        if not next_:
+            logging.info('5678')
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = modifier.sequence_number
+        modifier.sequence_number = number
+        modifier.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'modifier_id': modifier.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))
 
 
 class AddGroupModifierHandler(CompanyBaseHandler):

@@ -15,10 +15,37 @@ class SingleModifier(ndb.Model):
     price = ndb.IntegerProperty(default=0)  # в копейках
     min_amount = ndb.IntegerProperty(default=0)
     max_amount = ndb.IntegerProperty(default=0)
+    sequence_number = ndb.IntegerProperty(default=0)
 
     @property
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
+
+    @staticmethod
+    def generate_sequence_number():
+        fastcounter.incr("category", delta=100, update_interval=1)
+        return fastcounter.get_count("category") + random.randint(1, 100)
+
+    @staticmethod
+    def get_modifiers_in_order():
+        return sorted([modifier for modifier in SingleModifier.query().fetch()],
+                      key=lambda modifier: modifier.sequence_number)
+
+    def get_previous_modifier(self):
+        modifiers = self.get_modifiers_in_order()
+        index = modifiers.index(self)
+        if index == 0:
+            return None
+        else:
+            return modifiers[index - 1]
+
+    def get_next_modifier(self):
+        modifiers = self.get_modifiers_in_order()
+        index = modifiers.index(self)
+        if index == len(modifiers) - 1:
+            return None
+        else:
+            return modifiers[index + 1]
 
     def dict(self):
         return {
@@ -26,7 +53,8 @@ class SingleModifier(ndb.Model):
             'title': self.title,
             'price': float(self.price) / 100.0,  # в рублях
             'min': self.min_amount,
-            'max': self.max_amount
+            'max': self.max_amount,
+            'order': self.sequence_number
         }
 
 

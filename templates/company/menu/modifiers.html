@@ -5,6 +5,38 @@
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
          $(document).ready(function() {
+             $('.up_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/up/single_modifier' }}",
+                    data: {
+                        modifier_id: this.id
+                    },
+                    //dataType: "json",
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/down/single_modifier' }}",
+                    data: {
+                        modifier_id: this.id
+                    },
+                    //dataType: "json",
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
+                        }
+                    }
+                });
+            });
             $('.show_products').click(function(e){
                 $('#tr_' + this.id).toggle();
             });
@@ -32,9 +64,10 @@
             <th>Цена</th>
             <th>Минимальное кол-во</th>
             <th>Максимальное кол-во</th>
+            <th>Изменить порядок</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
+            <tr id="{{ 'tr_%s' % modifier.key.id() }}" {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
                 <td>
                     <a href="{{ '/company/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -53,6 +86,14 @@
                     {% else %}
                         {{ modifier.max_amount }}
                     {% endif %}
+                </td>
+                <td>
+                    <button class="up_button" id="{{ modifier.key.id() }}">
+                        Вверх
+                    </button>
+                    <button class="down_button" id="{{ modifier.key.id() }}">
+                        Вниз
+                    </button>
                 </td>
             </tr>
         {% endfor %}

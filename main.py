@@ -263,6 +263,12 @@ app = WSGIApplication([
                     Route('/group_modifier', company_admin.EditGroupModifierHandler),
                     Route('/choice', company_admin.EditGroupModifierItemHandler),
                 ]),
+                PathPrefixRoute('/up', [
+                    Route('/single_modifier', company_admin.UpSingleModifierHandler),
+                ]),
+                PathPrefixRoute('/down', [
+                    Route('/single_modifier', company_admin.DownSingleModifierHandler),
+                ]),
                 PathPrefixRoute('/choices', [
                     Route('/select', company_admin.SelectProductForChoiceHandler),
                     Route('/default', company_admin.SelectDefaultChoiceHandler),
