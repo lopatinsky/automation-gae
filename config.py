@@ -31,6 +31,7 @@ class Config(ndb.Model):
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
 
+    SEND_ERRORS_500 = ndb.BooleanProperty(indexed=False, default=False)
     EMAILS = ndb.JsonProperty(default={
         "server": "admins",
     })
