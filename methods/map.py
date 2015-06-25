@@ -16,6 +16,7 @@ def _parse_collection(collection, kind='house', city_request=None):
     if kind not in ['house', 'street']:
         return
     candidates = []
+    streets = []
     for item in collection:
         item = item['GeoObject']
         if item['metaDataProperty']['GeocoderMetaData']['kind'] not in kind:
@@ -34,21 +35,30 @@ def _parse_collection(collection, kind='house', city_request=None):
             address = address['DependentLocality']
         if not address.get('Thoroughfare'):
             continue
-        candidates.append({
-            'address': {
-                'country': country['CountryName'],
-                'city': city,
-                'street': address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip(),
-                'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
-            },
-            'coordinates': {
-                'lon': item['Point']['pos'].split(' ')[0],
-                'lat': item['Point']['pos'].split(' ')[1],
-            },
-            'address_str': item['metaDataProperty']['GeocoderMetaData']['text'],
-            'global_address_str': item['description'],
-            'local_address_str': item['name']
-        })
+        candidate_append = False
+        street = address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip()
+        if kind == 'street':
+            if street not in streets:
+                streets.append(street)
+                candidate_append = True
+        else:
+            candidate_append = True
+        if candidate_append:
+            candidates.append({
+                'address': {
+                    'country': country['CountryName'],
+                    'city': city,
+                    'street': street,
+                    'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
+                },
+                'coordinates': {
+                    'lon': item['Point']['pos'].split(' ')[0],
+                    'lat': item['Point']['pos'].split(' ')[1],
+                },
+                'address_str': item['metaDataProperty']['GeocoderMetaData']['text'],
+                'global_address_str': item['description'],
+                'local_address_str': item['name']
+            })
     return candidates
 
 
