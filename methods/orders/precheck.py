@@ -51,13 +51,14 @@ def set_client_info(client_json):
 
 def validate_address(address):
     # check coordinates
-    candidates = get_houses_by_coordinates(address['coordinates']['lat'], address['coordinates']['lon'])
     coord_found = False
-    for candidate in candidates:
-        if candidate['address']['city'] == address['address']['city']:
-            if candidate['address']['street'] == address['address']['street']:
-                if candidate['address']['home'] == address['address']['home']:
-                    coord_found = True
+    if address.get('coordinates') and address['coordinates'].get('lat') and address['coordinates'].get('lon'):
+        candidates = get_houses_by_coordinates(address['coordinates']['lat'], address['coordinates']['lon'])
+        for candidate in candidates:
+            if candidate['address']['city'] == address['address']['city']:
+                if candidate['address']['street'] == address['address']['street']:
+                    if candidate['address']['home'] == address['address']['home']:
+                        coord_found = True
     if not coord_found:
         address['coordinates']['lat'] = None
         address['coordinates']['lon'] = None
