@@ -38,5 +38,5 @@ def done_order(order, namespace, with_push=True):
     if with_push:
         text = u"Заказ №%s выдан." % order.key.id()
         if total_cash_back:
-            text += u" Начислены бонусы на Ваш счет в размере %s" % total_cash_back
+            text += u" Начислены бонусы на Ваш счет в размере %s" % (total_cash_back / 100.0)
         push.send_order_push(order, text, namespace, silent=True)
