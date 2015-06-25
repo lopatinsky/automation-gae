@@ -12,7 +12,7 @@ def check_address(address):
     if not address['city']:
         return False, u'Не выбран город'
     if not address['street']:
-        return False, u'Не Выбрана улица'
+        return False, u'Не выбрана улица'
     if config.COMPULSORY_ADDRESS_VALIDATES:
         street_found = False
         candidates = get_streets_by_address(address['city'], address['street'])
