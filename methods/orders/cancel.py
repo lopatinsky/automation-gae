@@ -47,7 +47,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
             push_text = u"%s, заказ №%s отменен." % (client.name, order.key.id())
             if order.has_card_payment:
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут.\n"
-            if order.success_wallet_payment_reverse:
+            if success_wallet_payment_reverse:
                 push_text += u" Бонусные баллы были возвращены на Ваш счет.\n"
             if comment:
                 push_text += comment
