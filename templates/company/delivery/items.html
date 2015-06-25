@@ -23,7 +23,8 @@
     </p>
     <p>
         <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
-        <b>Телефон:</b> {{ order.client.tel }}
+        <b>Телефон:</b> {{ order.client.tel }}<br>
+        <b>Комментарий</b> {{ order.comment }}
     </p>
     {% if venue and delivery_type_str %}
         <p>
