@@ -67,7 +67,7 @@ def _get_collection(params):
     url = '%s?%s' % (BASE_URL, urllib.urlencode(params))
     logging.info(url)
     try:
-        response = urlfetch.fetch(url)
+        response = urlfetch.fetch(url, deadline=3)
         response = json.loads(response.content)
     except Exception as e:
         text = str(e)
