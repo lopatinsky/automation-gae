@@ -57,7 +57,7 @@ def validate_address(address):
 
     # trim blank spaces
     address['address']['city'] = address['address']['city'].strip()
-    address['address']['street'] = address['address']['street'].strip().title()
+    address['address']['street'] = address['address']['street'].strip().capitalize()
     address['address']['home'] = address['address']['home'].strip()
     if address['address'].get('flat'):
         address['address']['flat'] = address['address']['flat'].strip()

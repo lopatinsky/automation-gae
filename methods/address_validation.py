@@ -39,7 +39,10 @@ def check_address(address):
                     if candidate['address']['home'] == address['home']:
                         home_found = True
         if not home_found:
-            return False, u'Введенный дом не найден'
+            error = u'Введенный дом не найден'
+            if candidates:
+                error += u'. Возможно, Вы имели ввиду дом "%s"' % candidates[0]['address']['home']
+            return False, error
     if not address['flat']:
         return False, u'Не выбрана квартира'
     return True, None
