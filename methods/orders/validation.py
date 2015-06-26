@@ -37,8 +37,10 @@ def _get_substitute(origin_item, venue):
             }
 
 
-def _get_now(delivery_slot, only_day=False):
+def _get_now(delivery_slot, venue, only_day=False):
     now = datetime.utcnow()
+    if venue and not (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS):
+        now += timedelta(hours=venue.timezone_offset)
     if (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS) or only_day:
         now = now.replace(hour=0, minute=0, second=0)
     return now
@@ -81,7 +83,7 @@ def _check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, del
             if delivery_zone and delivery_zone.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
                 errors.append(description)
-            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
+            if delivery_time < _get_now(delivery_slot, venue) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
                 if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
                     description += u' дня'
@@ -89,7 +91,7 @@ def _check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, del
                     description += u' времени'
                 description += _parse_time(delivery.min_time)
                 errors.append(description)
-            if delivery_time > _get_now(delivery_slot, only_day=True) + timedelta(seconds=delivery.max_time):
+            if delivery_time > _get_now(delivery_slot, venue, only_day=True) + timedelta(seconds=delivery.max_time):
                 description = u'Невозможно выбрать время больше текущего дня%s' % _parse_time(delivery.max_time)
                 errors.append(description)
             if description:
