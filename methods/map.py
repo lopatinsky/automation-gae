@@ -69,6 +69,7 @@ def get_houses_by_address(city, street, home):
         'results': MAX_RESULT
     }
     url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
+    logging.info(url)
     response = urlfetch.fetch(url)
     response = json.loads(response.content)
     collection = response['response']['GeoObjectCollection']['featureMember']

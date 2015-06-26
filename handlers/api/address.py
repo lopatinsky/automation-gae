@@ -11,7 +11,7 @@ __author__ = 'dvpermyakov'
 class AddressByAddressHandler(ApiHandler):
     def get(self):
         city = self.request.get('city')
-        street = self.request.get('street')
+        street = self.request.get('street').title()
         if ',' in street:
             home = street.split(',')[1]
             street = street.split(',')[0]

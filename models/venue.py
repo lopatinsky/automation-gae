@@ -43,8 +43,8 @@ class Address(ndb.Model):
                 'flat': self.flat
             },
             'coordinates': {
-                'lon': self.lat,
-                'lat': self.lon
+                'lon': self.lon,
+                'lat': self.lat
             }
         }
 

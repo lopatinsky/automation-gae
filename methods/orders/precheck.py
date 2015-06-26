@@ -50,19 +50,6 @@ def set_client_info(client_json):
 
 
 def validate_address(address):
-    # check coordinates
-    coord_found = False
-    if address.get('coordinates') and address['coordinates'].get('lat') and address['coordinates'].get('lon'):
-        candidates = get_houses_by_coordinates(address['coordinates']['lat'], address['coordinates']['lon'])
-        for candidate in candidates:
-            if candidate['address']['city'] == address['address']['city']:
-                if candidate['address']['street'] == address['address']['street']:
-                    if candidate['address']['home'] == address['address']['home']:
-                        coord_found = True
-    if not coord_found:
-        address['coordinates']['lat'] = None
-        address['coordinates']['lon'] = None
-
     # case of street and home are separated by comma
     if ',' in address['address']['street']:
         address['address']['home'] = address['address']['street'].split(',')[1]
@@ -70,20 +57,23 @@ def validate_address(address):
 
     # trim blank spaces
     address['address']['city'] = address['address']['city'].strip()
-    address['address']['street'] = address['address']['street'].strip()
+    address['address']['street'] = address['address']['street'].strip().title()
     address['address']['home'] = address['address']['home'].strip()
     if address['address'].get('flat'):
         address['address']['flat'] = address['address']['flat'].strip()
 
-    # get coordinates if address has not coordinates
-    if not address['coordinates']['lat'] or not address['coordinates']['lat']:
-        candidates = get_houses_by_address(address['address']['city'], address['address']['street'], address['address']['home'])
-        for candidate in candidates:
-            if candidate['address']['city'] == address['address']['city']:
-                if candidate['address']['street'] == address['address']['street']:
-                    if candidate['address']['home'] == address['address']['home']:
-                        address['coordinates']['lat'] = address['coordinates']['lat']
-                        address['coordinates']['lon'] = address['coordinates']['lon']
+    # not trust
+    address['coordinates']['lat'] = None
+    address['coordinates']['lon'] = None
+
+    # try to get coordinates
+    candidates = get_houses_by_address(address['address']['city'], address['address']['street'], address['address']['home'])
+    for candidate in candidates:
+        if candidate['address']['city'] == address['address']['city']:
+            if candidate['address']['street'] == address['address']['street']:
+                if candidate['address']['home'] == address['address']['home']:
+                    address['coordinates']['lat'] = candidate['coordinates']['lat']
+                    address['coordinates']['lon'] = candidate['coordinates']['lon']
     return address
 
 
