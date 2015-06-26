@@ -1,4 +1,5 @@
 # coding:utf-8
+from methods.email_mandrill import send_email
 
 __author__ = 'dvpermyakov'
 
@@ -8,8 +9,8 @@ import json
 import logging
 from config import config
 
-
-MAX_RESULT = 25
+BASE_URL = 'http://geocode-maps.yandex.ru/1.x/'
+MAX_RESULT = 15
 
 
 def _parse_collection(collection, kind='house', city_request=None):
@@ -62,65 +63,69 @@ def _parse_collection(collection, kind='house', city_request=None):
     return candidates
 
 
+def _get_collection(params):
+    url = '%s?%s' % (BASE_URL, urllib.urlencode(params))
+    logging.info(url)
+    try:
+        response = urlfetch.fetch(url)
+        response = json.loads(response.content)
+    except Exception as e:
+        text = str(e)
+        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка геокодера', text)
+        response = None
+    if response:
+        return response['response']['GeoObjectCollection']['featureMember']
+    else:
+        return None
+
+
 def get_houses_by_address(city, street, home):
-    params = {
+    collection = _get_collection({
         'geocode': ('%s,%s,%s' % (city, street, home)).encode('utf-8'),
         'format': 'json',
         'results': MAX_RESULT
-    }
-    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
-    logging.info(url)
-    response = urlfetch.fetch(url)
-    response = json.loads(response.content)
-    collection = response['response']['GeoObjectCollection']['featureMember']
-
-    return _parse_collection(collection, kind='house', city_request=city)
+    })
+    if collection:
+        return _parse_collection(collection, kind='house', city_request=city)
+    else:
+        return []
 
 
 def get_houses_by_coordinates(lat, lon):
-    params = {
+    collection = _get_collection({
         'geocode': '%s,%s' % (lon, lat),
         'format': 'json',
         'kind': 'house',
         'results': MAX_RESULT
-    }
-    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
-    logging.info(url)
-    response = urlfetch.fetch(url)
-    response = json.loads(response.content)
-    collection = response['response']['GeoObjectCollection']['featureMember']
-
-    return _parse_collection(collection, kind='house')
+    })
+    if collection:
+        return _parse_collection(collection, kind='house')
+    else:
+        return []
 
 
 def get_streets_by_address(city, street):
-    params = {
+    collection = _get_collection({
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
         'results': MAX_RESULT
-    }
-    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
-    logging.info(url)
-    response = urlfetch.fetch(url)
-    response = json.loads(response.content)
-    collection = response['response']['GeoObjectCollection']['featureMember']
-
-    return _parse_collection(collection, kind='street')
+    })
+    if collection:
+        return _parse_collection(collection, kind='street')
+    else:
+        return []
 
 
 def get_streets_or_houses_by_address(city, street):
-    params = {
+    collection = _get_collection({
         'geocode': ('%s,%s' % (city, street)).encode('utf-8'),
         'format': 'json',
         'results': MAX_RESULT
-    }
-    url = 'http://geocode-maps.yandex.ru/1.x/?%s' % urllib.urlencode(params)
-    logging.info(url)
-    response = urlfetch.fetch(url)
-    response = json.loads(response.content)
-    collection = response['response']['GeoObjectCollection']['featureMember']
-
-    candidates = _parse_collection(collection, kind='house', city_request=city)
-    if not candidates:
-        candidates = _parse_collection(collection, kind='street', city_request=city)
-    return candidates
+    })
+    if collection:
+        candidates = _parse_collection(collection, kind='house', city_request=city)
+        if not candidates:
+            candidates = _parse_collection(collection, kind='street', city_request=city)
+        return candidates
+    else:
+        return []
