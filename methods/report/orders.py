@@ -11,6 +11,7 @@ def _order_data(order):
     venue = Venue.get_by_id(order.venue_id)
     dct = {
         "order_id": order.key.id(),
+        "comment": order.comment if order.comment else '',
         "return_comment": order.return_comment if order.return_comment else '',
         "status": STATUS_MAP[order.status],
         "date": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%d.%m.%Y"),

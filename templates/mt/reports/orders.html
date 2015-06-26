@@ -60,7 +60,8 @@
             <th>Время заказа</th>
             <th>Время самовывоза</th>
             <th>Статус заказа</th>
-            <th>Комментарий</th>
+            <th>Комментарий клиента</th>
+            <th>Комментарий отмены</th>
             <th>Тип оплаты</th>
             <th>Полная сумма</th>
             <th>Сумма с учетом MasterCard и бесплатных кружек</th>
@@ -80,6 +81,7 @@
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.created_time }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.delivery_time }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.status }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.comment }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.return_comment }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.payment_type }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.venue_revenue }}</td>
