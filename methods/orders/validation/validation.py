@@ -188,7 +188,7 @@ def get_avail_gifts(points):
     return gifts
 
 
-def _get_response_dict(valid, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error=None):
+def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error=None):
     return {
         'valid': valid,
         'more_gift': False,
@@ -201,7 +201,7 @@ def _get_response_dict(valid, item_dicts, gift_dicts, order_gifts, cancelled_ord
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
         'promos': [],
-        'total_sum': 0,
+        'total_sum': total_sum,
         'delivery_sum': 0,
         'delivery_sum_str': '',
         'max_wallet_payment': 0,
@@ -213,7 +213,7 @@ def _get_response_dict(valid, item_dicts, gift_dicts, order_gifts, cancelled_ord
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
-        return _get_response_dict(False, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error)
+        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
@@ -249,25 +249,25 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_delivery_time(delivery_time)
     if not valid:
         return send_error(error)
-    valid, error = check_address(delivery_type, address)
-    if not valid:
-        return send_error(error)
-    valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
+    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum_without_promos)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
     if not valid:
         return send_error(error)
-    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum_without_promos)
-    if not valid:
-        return send_error(error)
     valid, error = check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts)
     if not valid:
         return send_error(error)
-    success, error, rest_points, full_points = check_gifts(gifts, client)
+    valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
+    if not valid:
+        return send_error(error)
+    valid, error = check_address(delivery_type, address)
     if not valid:
         return send_error(error)
     valid, error = check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts)
+    if not valid:
+        return send_error(error)
+    success, error, rest_points, full_points = check_gifts(gifts, client)
     if not valid:
         return send_error(error)
 

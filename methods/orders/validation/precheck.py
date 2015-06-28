@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import re
-from config import config
-from methods.map import get_houses_by_address, get_houses_by_coordinates
+from methods.map import get_houses_by_address
 from methods.rendering import STR_TIME_FORMAT
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot
 from models.venue import DELIVERY
@@ -113,7 +112,7 @@ def get_venue_and_zone_by_address(address):
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
     if delivery_time_picker:
         delivery_time_picker = datetime.strptime(delivery_time_picker, STR_TIME_FORMAT)
-        if venue and not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS:
+        if venue and (not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS):
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
     if delivery_slot:

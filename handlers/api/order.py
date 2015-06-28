@@ -322,9 +322,11 @@ class ReturnOrderHandler(ApiHandler):
 
 
 #  all required fields should invoke 400
-#  all errors should be catch in orders.validate_order
-## address can be None => send error
-## payment can be None => send error
+#  all errors should be catch in validate_order
+## venue can be None         => send error
+## delivery time can be None => send error
+## address can be None       => send error
+## payment can be None       => send error
 class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
@@ -343,17 +345,14 @@ class CheckOrderHandler(ApiHandler):
         if delivery_type in [SELF, IN_CAFE, PICKUP]:
             venue_id = self.request.get_range('venue_id')
             if not venue_id or venue_id == -1:
-                self.abort(400)
-            venue = Venue.get_by_id(venue_id)
-            if not venue:
-                self.abort(400)
+                venue = None
+            else:
+                venue = Venue.get_by_id(venue_id)
         elif delivery_type in [DELIVERY]:
             if address:
                 address = json.loads(address)
                 address = validate_address(address)
             venue, delivery_zone = get_venue_and_zone_by_address(address)
-        if not venue:  # not enough fields for catch venue
-            self.abort(400)
 
         raw_payment_info = self.request.get('payment')
         payment_info = None

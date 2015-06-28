@@ -3,12 +3,11 @@ from datetime import timedelta, datetime
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_promos
-from methods.address_validation import check_address
+from methods.map import get_houses_by_address, get_streets_by_address
 from methods.working_hours import is_valid_weekday, get_valid_time_str
-from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem
+from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
 from models.order import OrderPositionDetails
 from models.venue import DELIVERY, DELIVERY_MAP
-from methods.address_validation import check_address as full_address_validation
 
 __author__ = 'dvpermyakov'
 
@@ -34,10 +33,8 @@ def _get_substitute(origin_item, venue):
             }
 
 
-def _get_now(delivery_slot, venue, only_day=False):
+def _get_now(delivery_slot, only_day=False):
     now = datetime.utcnow()
-    if venue and not (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS):
-        now += timedelta(hours=venue.timezone_offset)
     if (delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS) or only_day:
         now = now.replace(hour=0, minute=0, second=0)
     return now
@@ -71,14 +68,14 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, deli
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
             if delivery_zone and delivery_zone.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
-            if delivery_time < _get_now(delivery_slot, venue) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
+            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
                 if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
                     description += u' дня'
                 else:
                     description += u' времени'
                 description += _parse_time(delivery.min_time)
-            if delivery_time > _get_now(delivery_slot, venue, only_day=True) + timedelta(seconds=delivery.max_time):
+            if delivery_time > _get_now(delivery_slot, only_day=True) + timedelta(seconds=delivery.max_time):
                 description = u'Невозможно выбрать время больше текущего дня%s' % _parse_time(delivery.max_time)
             if description:
                 return False, description
@@ -97,13 +94,6 @@ def check_delivery_time(delivery_time):
 def check_payment(payment_info):
     if not payment_info:
         return False, u'Не выбран тип оплаты'
-    else:
-        return True, None
-
-
-def check_address(delivery_type, address):
-    if delivery_type == DELIVERY:
-        return full_address_validation(address)
     else:
         return True, None
 
@@ -177,7 +167,7 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
             if delivery.delivery_type == delivery_type:
                 delivery_items = delivery.item_restrictions
                 delivery_categories = delivery.category_restrictions
-        found_categories = []
+        items = []
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
@@ -188,12 +178,13 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
                     item_dict['substitutes'].append(substitute)
             if item.key in delivery_items:
                 description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
-            category = item.get_category()
-            if category and category not in found_categories:
-                found_categories.append(category)
-        for category in found_categories:
-            if category.key in delivery_categories:
-                description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (category.title, DELIVERY_MAP[delivery_type])
+            if item not in items:
+                items.append(item)
+        if delivery_categories:
+            for item in items:
+                for category in MenuCategory.query().fetch():
+                    if item.key in category.menu_items and category.key in delivery_categories:
+                        description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (category.title, DELIVERY_MAP[delivery_type])
         return description
 
     items_description = check(item_dicts)
@@ -307,3 +298,47 @@ def check_order_gifts(gifts, cancelled_gifts, order=None):
             order.order_gift_details = gift_details
             order.put()
         return True, None
+
+
+def check_address(delivery_type, address):
+    if delivery_type == DELIVERY:
+        address = address.get('address') if address else None
+        if not address:
+            return False, u'Введите адрес'
+        if not address['city']:
+            return False, u'Не выбран город'
+        if not address['street']:
+            return False, u'Не выбрана улица'
+        if config.COMPULSORY_ADDRESS_VALIDATES:
+            street_found = False
+            candidates = get_streets_by_address(address['city'], address['street'])
+            for candidate in candidates:
+                if candidate['address']['city'] == address['city']:
+                    if candidate['address']['street'] == address['street']:
+                        street_found = True
+            if not street_found:
+                error = u'Введенная улица не найдена'
+                if address['home']:
+                    if candidates:
+                        error += u'. Возможно, Вы имели ввиду улицу "%s"' % candidates[0]['address']['street']
+                    return False, error
+                else:
+                    return False, u'. Возможно, Вы пропустили разграничитель между улицей и домом - запятую'
+            else:
+                if not address['home']:
+                    return False, u'Введите номер дома'
+            home_found = False
+            candidates = get_houses_by_address(address['city'], address['street'], address['home'])
+            for candidate in candidates:
+                if candidate['address']['city'] == address['city']:
+                    if candidate['address']['street'] == address['street']:
+                        if candidate['address']['home'] == address['home']:
+                            home_found = True
+            if not home_found:
+                error = u'Введенный дом не найден'
+                if candidates:
+                    error += u'. Возможно, Вы имели ввиду дом "%s"' % candidates[0]['address']['home']
+                return False, error
+        if not address['flat']:
+            return False, u'Не выбрана квартира'
+    return True, None

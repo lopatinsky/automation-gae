@@ -147,12 +147,6 @@ class MenuItem(ndb.Model):
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
 
-    def get_category(self):
-        from models import MenuCategory
-        for category in MenuCategory.query().fetch():
-            if self.key in category.menu_items:
-                return category
-
     def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
