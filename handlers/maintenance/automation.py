@@ -1,6 +1,8 @@
 # coding:utf-8
 from urlparse import urlparse
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
+from config import Config
 
 __author__ = 'dvpermyakov'
 
@@ -9,8 +11,14 @@ from base import BaseHandler
 
 class CompaniesListHandler(BaseHandler):
     def get(self):
+        namespaces = []
+        for namespace in metadata.get_namespaces():
+            namespace_manager.set_namespace(namespace)
+            config = Config.get()
+            if config:
+                namespaces.append(namespace)
         self.render('/companies.html', **{
-            'companies': metadata.get_namespaces()
+            'companies': namespaces
         })
 
     def post(self):
