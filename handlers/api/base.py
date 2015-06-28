@@ -4,6 +4,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 import webapp2
 from webapp2_extras import jinja2
 from models.proxy.unified_app import AutomationCompany
+from config import Config
 
 
 class ApiHandler(webapp2.RequestHandler):
@@ -16,6 +17,9 @@ class ApiHandler(webapp2.RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
+        config = Config.get()
+        if not config:
+            self.abort(434)
         logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
         namespace = self.request.headers.get('Namespace')
         self.request.init_namespace = None

@@ -1,10 +1,9 @@
 # coding=utf-8
 import logging
-from google.appengine.api import namespace_manager
 from google.appengine.ext.ndb import metadata
-from webapp2_extras import auth
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from methods.auth import set_current_user, company_user_required
+from config import Config
+from methods.auth import set_current_user
 
 __author__ = 'dvpermyakov'
 
@@ -15,6 +14,7 @@ from methods.rendering import latinize
 
 class CompanySignupHandler(CompanyBaseHandler):
     def success(self):
+        Config(id=1).put()
         self.redirect("/company/main")
 
     def get(self):

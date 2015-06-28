@@ -9,9 +9,9 @@ _APP_ID = app_identity.get_application_id()
 def handle_500(request, response, exception):
     if config.SEND_ERRORS_500:
         body = """URL: %s
-                User-Agent: %s
-                Exception: %s
-                Logs: https://appengine.google.com/logs?app_id=s~%s&severity_level_override=0&severity_level=3""" \
+User-Agent: %s
+Exception: %s
+Logs: https://appengine.google.com/logs?app_id=s~%s&severity_level_override=0&severity_level=3""" \
                         % (request.url, request.headers['User-Agent'], exception, _APP_ID)
         email.send_error("server", "Error 500", body)
     exc_info = sys.exc_info()

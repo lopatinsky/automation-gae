@@ -166,7 +166,7 @@ class Order(ndb.Model):
                 'single_modifier_keys':  item_detail.single_modifiers,
                 'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
             })
-        from methods.orders.validation import group_item_dicts
+        from methods.orders.validation.validation import group_item_dicts
         response = []
         for item_dict in group_item_dicts(item_dicts):
             response.append({
