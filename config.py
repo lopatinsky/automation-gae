@@ -19,8 +19,8 @@ class Config(ndb.Model):
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
     ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
 
-    PARSE_APP_API_KEY = ndb.StringProperty(indexed=False, default='sSS9VgN9K2sU3ycxzwQlwrBZPFlEe7OvSNZQDjQe')
-    PARSE_REST_API_KEY = ndb.StringProperty(indexed=False, default='kD69rsD7G0ZpxUgkutIF4eFwJF0tnWDQSghVMLt3')
+    PARSE_APP_API_KEY = ndb.StringProperty(indexed=False)
+    PARSE_REST_API_KEY = ndb.StringProperty(indexed=False)
 
     EMAIL_REQUESTS = ndb.BooleanProperty(default=False)
 
@@ -123,9 +123,6 @@ class Config(ndb.Model):
     @classmethod
     def get(cls):
         config = cls.get_by_id(1)
-        if not config:
-            config = Config(id=1)
-            config.put()
         return config
 
 

@@ -3,7 +3,7 @@ import logging
 from base import ApiHandler
 from methods.address_validation import check_address
 from methods.map import get_houses_by_address, get_streets_or_houses_by_address
-from methods.orders.precheck import validate_address
+from methods.orders.validation.precheck import validate_address
 
 __author__ = 'dvpermyakov'
 

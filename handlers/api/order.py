@@ -1,23 +1,25 @@
 # coding:utf-8
 import logging
 from urlparse import urlparse
+import json
+from datetime import datetime, timedelta
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from webapp2_extras import security
 from google.appengine.ext.ndb import GeoPt, Key
+from google.appengine.api import taskqueue
+
 from config import config
 from handlers.api.base import ApiHandler
-import json
-from datetime import datetime, timedelta
 from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
-from methods.orders.validation import validate_order, get_first_error
+from methods.orders.validation.validation import validate_order, get_first_error
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
 from methods.email_mandrill import send_email
-from methods.orders.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
+from methods.orders.validation.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address
-from google.appengine.api import taskqueue
 from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Address, Client
 from models.client import IOS_DEVICE
 from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
@@ -25,6 +27,7 @@ from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLI
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_MAP
 from models.venue import SELF, IN_CAFE, DELIVERY_MAP, DELIVERY, PICKUP
 from handlers.email_api.order import POSTPONE_MINUTES
+
 
 SECONDS_WAITING_BEFORE_SMS = 15
 
@@ -375,8 +378,6 @@ class CheckOrderHandler(ApiHandler):
         delivery_time_picker = self.request.get('time_picker_value')
 
         delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
-        if not delivery_time:
-            self.abort(400)
 
         items = json.loads(self.request.get('items'))
         if self.request.get('gifts'):
@@ -391,6 +392,6 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
-        result = orders.validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                       address, delivery_time, delivery_slot, delivery_type, delivery_zone)
+        result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
+                                address, delivery_time, delivery_slot, delivery_type, delivery_zone)
         self.render_json(result)

@@ -28,7 +28,7 @@ class DeliveryTypesHandler(CompanyBaseHandler):
                 if delivery_type not in deliveries:
                     delivery = DeliveryType.create(delivery_type)
                     if delivery.delivery_type in [SELF, IN_CAFE]:
-                        delivery.max_time = DAY_SECONDS
+                        delivery.max_time = DAY_SECONDS + HOUR_SECONDS  # need hour to order on tomorrow
                     if delivery.delivery_type in [DELIVERY, PICKUP]:
                         delivery.min_time = HOUR_SECONDS
                     venue.delivery_types.append(delivery)
