@@ -1,13 +1,14 @@
 import sys
 from google.appengine.api import app_identity
-from config import config
+from config import Config
 from methods import email
 
 _APP_ID = app_identity.get_application_id()
 
 
 def handle_500(request, response, exception):
-    if config.SEND_ERRORS_500:
+    config = Config.get()
+    if config and config.SEND_ERRORS_500:
         body = """URL: %s
 User-Agent: %s
 Exception: %s

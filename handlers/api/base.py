@@ -19,7 +19,7 @@ class ApiHandler(webapp2.RequestHandler):
             logging.debug("%s: %s" % (key, value))
         config = Config.get()
         if not config:
-            self.abort(434)
+            self.abort(423)
         logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
         namespace = self.request.headers.get('Namespace')
         self.request.init_namespace = None
