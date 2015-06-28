@@ -18,6 +18,7 @@ def check_condition_min_by_value(condition, value):
 
 def check_first_order(client):
     order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
+    logging.info('check first order, order = %s' % order)
     return order is None
 
 
