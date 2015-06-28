@@ -61,7 +61,7 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     if not chosen_month:
         chosen_day = 0
 
-    if chosen_day:
+    if chosen_day is not None:
         start = suitable_date(chosen_day, chosen_month, chosen_year, True)
         end = suitable_date(chosen_day, chosen_month, chosen_year, False)
     else:
