@@ -150,6 +150,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
             feature.item = item.key
             feature.item_required = True
         else:
+            feature.item = None
             feature.item_required = False
         promo.put()
         self.redirect('/company/promos/list')
