@@ -115,6 +115,7 @@ class OrderHandler(ApiHandler):
             return self.render_error(u'Неправильный формат времени')
 
         request_total_sum = response_json.get("total_sum")
+        request_delivery_sum = int(response_json.get('delivery_sum')) if response_json.get('delivery_sum') else 0
 
         client_id, client = set_client_info(response_json.get('client'))
         if not client:
@@ -151,10 +152,14 @@ class OrderHandler(ApiHandler):
                 return self.render_error(get_first_error(validation_result))
 
             total_sum = validation_result['total_sum']
+            delivery_sum = validation_result['delivery_sum']
             if request_total_sum and int(total_sum * 100) != int(request_total_sum * 100):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
+            if request_delivery_sum and int(delivery_sum * 100) != int(request_delivery_sum * 100):
+                return self.render_error(u"Сумма доставки была пересчитана", u"")
             if wallet_payment and int(wallet_payment * 100) != int(validation_result['max_wallet_payment'] * 100):
                 return self.render_error(u"Сумма оплаты баллами была пересчитана", u"")
+            total_sum += delivery_sum
 
             item_details = validation_result["details"]
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
@@ -177,7 +182,7 @@ class OrderHandler(ApiHandler):
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
                 delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
                 delivery_zone=delivery_zone.key if delivery_zone else None,
-                user_agent=self.request.headers["User-Agent"])
+                user_agent=self.request.headers["User-Agent"], delivery_sum=delivery_sum)
             self.order.put()
 
             if wallet_payment > 0:

@@ -100,6 +100,7 @@ class Order(ndb.Model):
     delivery_type = ndb.IntegerProperty()
     delivery_time = ndb.DateTimeProperty()
     delivery_time_str = ndb.StringProperty()
+    delivery_sum = ndb.IntegerProperty(default=0)
     delivery_slot_id = ndb.IntegerProperty()
     delivery_zone = ndb.KeyProperty(kind=DeliveryZone)
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
@@ -204,6 +205,7 @@ class Order(ndb.Model):
             else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
+            "delivery_sum": self.delivery_sum,
             "venue_id": str(self.venue_id),
             "items": self.grouped_item_dict(self.item_details),
             "gifts": self.grouped_item_dict(self.gift_details, gift=True),

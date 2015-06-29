@@ -11,6 +11,7 @@ from models import MenuItem, SingleModifier, GroupModifier, \
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, check_order_gifts, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
+from models.venue import DELIVERY
 
 
 def _nice_join(strs):
@@ -306,6 +307,14 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         max_wallet_payment = min(Config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
+    delivery_sum = delivery_zone.price if delivery_zone else 0
+    if delivery_sum:
+        delivery_sum_str = u'Стоимость доставки %s р.' % delivery_sum
+    else:
+        if delivery_type == DELIVERY:
+            delivery_sum_str = u'Бесплатная доставка'
+        else:
+            delivery_sum_str = u''
     result = {
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
@@ -319,8 +328,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'cancelled_order_gifts': grouped_cancelled_order_gift_dicts,
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
         'total_sum': total_sum,
-        'delivery_sum': None,      # todo: set
-        'delivery_sum_str': None,  # todo: set
+        'delivery_sum': delivery_sum,
+        'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
         'delivery_time': datetime.strftime(delivery_time, STR_TIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
