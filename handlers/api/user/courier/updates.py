@@ -12,7 +12,7 @@ class UpdatesHandler(CourierBaseHandler):
     def get(self):
         now = datetime.utcnow()
         timestamp_from = self.request.get_range("timestamp")
-        time = datetime.datetime.fromtimestamp(timestamp_from)
+        time = datetime.fromtimestamp(timestamp_from)
         orders = self.user.query_orders(Order.updated >= time).fetch()
         new = [order for order in orders if order.date_created > time]
         updated = [order for order in orders if order.date_created <= time]

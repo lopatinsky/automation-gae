@@ -84,6 +84,11 @@ indexes:
   - name: client_id
   - name: status
 
+- kind: Order
+  properties:
+  - name: courier
+  - name: updated
+
 - kind: TabletRequest
   properties:
   - name: admin_id
