@@ -81,11 +81,6 @@ indexes:
 
 - kind: Order
   properties:
-  - name: client_id
-  - name: status
-
-- kind: Order
-  properties:
   - name: courier
   - name: updated
 
