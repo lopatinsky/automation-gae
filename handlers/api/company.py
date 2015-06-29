@@ -42,10 +42,12 @@ class CompanyBaseUrlsHandler(ApiHandler):
         companies = []
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            companies.append({
-                'base_url': u'http://%s.1.%s' % (namespace, urlparse(self.request.url).hostname),
-                'app_name': Config.get().APP_NAME
-            })
+            config = Config.get()
+            if config and config.APP_NAME:
+                companies.append({
+                    'base_url': u'http://%s.1.%s' % (namespace, urlparse(self.request.url).hostname),
+                    'app_name': config.APP_NAME
+                })
         self.render_json({
             'companies': companies
         })
