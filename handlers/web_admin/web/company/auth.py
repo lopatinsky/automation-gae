@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from config import Config
@@ -14,7 +15,6 @@ from methods.rendering import latinize
 
 class CompanySignupHandler(CompanyBaseHandler):
     def success(self):
-        Config(id=1).put()
         self.redirect("/company/main")
 
     def get(self):
@@ -57,6 +57,8 @@ class CompanySignupHandler(CompanyBaseHandler):
             logging.info(error)
             self.render('/signup.html', email=login, error=error)
         else:
+            namespace_manager.set_namespace(namespace)
+            Config(id=1).put()
             self.success()
 
 
