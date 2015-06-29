@@ -308,13 +308,17 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
-    if delivery_sum:
-        delivery_sum_str = u'Стоимость доставки %s р.' % delivery_sum
+    if not item_dicts and not gift_dicts:
+        delivery_sum = 0
+        delivery_sum_str = u''
     else:
-        if delivery_type == DELIVERY:
-            delivery_sum_str = u'Бесплатная доставка'
+        if delivery_sum:
+            delivery_sum_str = u'Стоимость доставки %s р.' % delivery_sum
         else:
-            delivery_sum_str = u''
+            if delivery_type == DELIVERY:
+                delivery_sum_str = u'Бесплатная доставка'
+            else:
+                delivery_sum_str = u''
     result = {
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
