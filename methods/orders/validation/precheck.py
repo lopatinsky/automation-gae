@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 import re
 from methods.map import get_houses_by_address
 from methods.rendering import STR_TIME_FORMAT
@@ -49,6 +50,8 @@ def set_client_info(client_json):
 
 
 def validate_address(address):
+    logging.info('initial address = %s' % address)
+
     # case of street and home are separated by comma
     if ',' in address['address']['street']:
         address['address']['home'] = address['address']['street'].split(',')[1]
@@ -68,11 +71,13 @@ def validate_address(address):
     # try to get coordinates
     candidates = get_houses_by_address(address['address']['city'], address['address']['street'], address['address']['home'])
     for candidate in candidates:
-        if candidate['address']['city'] == address['address']['city']:
-            if candidate['address']['street'] == address['address']['street']:
-                if candidate['address']['home'] == address['address']['home']:
+        if candidate['address']['city'].lower() == address['address']['city'].lower():
+            if candidate['address']['street'].lower() == address['address']['street'].lower():
+                if candidate['address']['home'].lower() == address['address']['home'].lower():
                     address['coordinates']['lat'] = candidate['coordinates']['lat']
                     address['coordinates']['lon'] = candidate['coordinates']['lon']
+
+    logging.info('result address = %s' % address)
     return address
 
 
