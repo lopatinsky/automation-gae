@@ -237,10 +237,10 @@ class OrderHandler(ApiHandler):
                     try:
                         send_sms([phone], text)
                     except Exception as e:
-                        text = str(e)
-                        text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
-                        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка оповещения через смс', text)
-                        send_email('dvpermyakov1@gmail.com', 'elenamarchenkolm@gmail.com', u'Ошибка оповещения через смс', text)
+                        error_text = str(e)
+                        error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
+                        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка оповещения через смс', error_text)
+                        send_email('dvpermyakov1@gmail.com', 'elenamarchenkolm@gmail.com', u'Ошибка оповещения через смс', error_text)
                         logging.warning(u'Неверный номер телефона для оповещения')
 
             if config.DELIVERY_EMAILS:
