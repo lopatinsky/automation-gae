@@ -16,7 +16,7 @@ def _get_values():
         'phone': config.SUPPORT_PHONE if config.SUPPORT_PHONE else '',
         'site': config.SUPPORT_SITE if config.SUPPORT_SITE else '',
         'emails': u','.join(config.SUPPORT_EMAILS),
-        'delivery_phone': config.DELIVERY_PHONE if config.DELIVERY_PHONE else '',
+        'delivery_phones': u','.join(config.DELIVERY_PHONES),
         'delivery_emails':  u','.join(config.DELIVERY_EMAILS),
         'legal_person': config.LEGAL_PERSON if config.LEGAL_PERSON else '',
         'legal_person_ip': config.LEGAL_PERSON_IP if config.LEGAL_PERSON_IP else '',
@@ -56,7 +56,7 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.SUPPORT_PHONE = self.request.get('phone')
         config.SUPPORT_SITE = self.request.get('site')
         config.SUPPORT_EMAILS = self.request.get('emails').split(',')
-        config.DELIVERY_PHONE = self.request.get('delivery_phone')
+        config.DELIVERY_PHONES = self.request.get('delivery_phones').split(',')
         config.DELIVERY_EMAILS = self.request.get('delivery_emails').split(',')
         config.LEGAL_PERSON = self.request.get('legal_person')
         config.LEGAL_PERSON_IP = self.request.get('legal_person_ip')

@@ -72,7 +72,7 @@ class Config(ndb.Model):
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
-    DELIVERY_PHONE = ndb.StringProperty(indexed=False)
+    DELIVERY_PHONES = ndb.StringProperty(indexed=False, repeated=True)
     DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
 
     LEGAL_PERSON = ndb.StringProperty(indexed=False)     # OOO
