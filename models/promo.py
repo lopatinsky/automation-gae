@@ -53,7 +53,8 @@ class PromoCondition(ndb.Model):
     item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
-    string_value = ndb.StringProperty()  # it is used only for happy hours
+    hh_days = ndb.StringProperty()   # it is used only for happy hours
+    hh_hours = ndb.StringProperty()  # it is used only for happy hours
 
 
 class Promo(ndb.Model):

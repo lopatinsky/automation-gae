@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from google.appengine.api.namespace_manager import namespace_manager
+from methods import working_hours
 from models import Order
 from models.order import NOT_CANCELED_STATUSES
 
@@ -45,3 +46,8 @@ def check_item_in_order(condition, item_dicts):
         if item_dict['item'].key == condition.item:
             amount += 1
     return amount >= condition.value
+
+
+def check_happy_hours(condition, venue, delivery_time):
+    now = delivery_time + timedelta(hours=venue.timezone_offset)
+    return working_hours.check(condition.hh_days, condition.hh_hours, now)
