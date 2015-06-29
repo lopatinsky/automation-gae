@@ -21,6 +21,16 @@
             Значение:
             <input type="number" name="value" value="{% if feature %} {{ feature.value }} {% endif %}">
         </label><br>
+        {% if feature_condition %}
+            <label>
+                Дни для счастливых часов:
+                <input type="text" name="hh_days" value="{% if feature %} {{ feature.hh_days }} {% endif %}">
+            </label><br>
+            <label>
+                Часы для счастливых часов:
+                <input type="text" name="hh_hours" value="{% if feature %} {{ feature.hh_hours }} {% endif %}">
+            </label><br>
+        {% endif %}
         <input type="submit">
         <a href="/company/promos/list">Назад</a>
     </form>

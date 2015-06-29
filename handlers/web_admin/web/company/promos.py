@@ -22,6 +22,8 @@ class PromoListHandler(CompanyBaseHandler):
                 condition.value_string = str(condition.value) if condition.value else ""
                 if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
                     condition.value_string = DELIVERY_MAP[condition.value]
+                elif condition.method == PromoCondition.CHECK_HAPPY_HOURS:
+                    condition.additional_info = '(%s;%s)' % (condition.hh_days, condition.hh_hours)
         self.render('/promos/list.html', **{
             'promo_api_key': config.PROMOS_API_KEY if config.PROMOS_API_KEY else '',
             'wallet_api_key': config.WALLET_API_KEY if config.WALLET_API_KEY else '',
@@ -166,7 +168,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
                 'name': CONDITION_MAP[condition],
                 'value': condition
             })
-        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
+        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods, feature_condition=True)
 
     @company_user_required
     def post(self):
@@ -177,6 +179,12 @@ class AddPromoConditionHandler(CompanyBaseHandler):
         condition = PromoCondition()
         condition.method = self.request.get_range('method')
         condition.value = self.request.get_range('value')
+        hh_days = self.request.get('hh_days')
+        hh_hours = self.request.get('hh_hours')
+        # todo: need validate days and hours
+        if condition.method == PromoCondition.CHECK_HAPPY_HOURS and hh_days and hh_hours:
+            condition.hh_days = hh_days
+            condition.hh_hours = hh_hours
         promo.conditions.append(condition)
         promo.put()
         self.redirect('/company/promos/list')

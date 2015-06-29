@@ -61,7 +61,11 @@
                                     {% endif %}
                                 </a>
                             </td>
-                            <td>{{ condition_map[promo.conditions[index].method] }}</td>
+                            <td>{{ condition_map[promo.conditions[index].method] }}
+                                {% if promo.conditions[index].additional_info %}
+                                    {{ promo.conditions[index].additional_info }}
+                                {% endif %}
+                            </td>
                             <td>{{ promo.conditions[index].value_string }}</td>
                         {% else %}
                             <td>---</td>
