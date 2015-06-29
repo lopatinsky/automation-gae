@@ -15,7 +15,7 @@
             <input type="number" name="promo_id">
         </label><br>
         {% for category in categories %}
-            <h3>category.title</h3>
+            <h3>{{ category.title }}</h3>
             {% for item in category.items %}
                 <label>
                     {{ item.title }}
