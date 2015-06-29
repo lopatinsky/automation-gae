@@ -237,11 +237,11 @@ def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
 
 
 def check_wallet_payment(total_sum, payment_info):
-    valid = not payment_info.get('wallet_payment') or payment_info['wallet_payment'] <= config.Config.GET_MAX_WALLET_SUM(total_sum)
+    valid = not payment_info.get('wallet_payment') or payment_info['wallet_payment'] <= config.GET_MAX_WALLET_SUM(total_sum)
     if valid:
         return True, None
     else:
-        return False, u'Невозможно оплатить бонусами сумму большую, чем %s' % config.Config.GET_MAX_WALLET_SUM(total_sum)
+        return False, u'Невозможно оплатить бонусами сумму большую, чем %s' % config.GET_MAX_WALLET_SUM(total_sum)
 
 
 def check_gifts(gifts, client):
