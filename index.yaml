@@ -79,6 +79,11 @@ indexes:
   - name: status
   - name: delivery_time
 
+- kind: Order
+  properties:
+  - name: client_id
+  - name: status
+
 - kind: TabletRequest
   properties:
   - name: admin_id
