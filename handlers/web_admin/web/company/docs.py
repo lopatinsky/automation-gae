@@ -56,8 +56,8 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.SUPPORT_PHONE = self.request.get('phone')
         config.SUPPORT_SITE = self.request.get('site')
         config.SUPPORT_EMAILS = self.request.get('emails').split(',')
-        config.DELIVERY_PHONES = self.request.get('delivery_phones').split(',')
-        config.DELIVERY_EMAILS = self.request.get('delivery_emails').split(',')
+        config.DELIVERY_PHONES = self.request.get('delivery_phones').split(',') if self.request.get('delivery_phones') else []
+        config.DELIVERY_EMAILS = self.request.get('delivery_emails').split(',') if self.request.get('delivery_emails') else []
         config.LEGAL_PERSON = self.request.get('legal_person')
         config.LEGAL_PERSON_IP = self.request.get('legal_person_ip')
         config.LEGAL_CONTACTS = self.request.get('legal_contacts')
