@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Зона Доставки</title>
+</head>
+<body>
+    <form method="post">
+        <label>
+            Минимальная сумма:
+            <input type="number" name="min_sum" {% if zone %} value="{{ zone.min_sum }}" {% endif %}>
+        </label><br>
+        <label>
+            Стоимость доставки:
+            <input type="number" name="price" {% if zone %} value="{{ zone.price }}" {% endif %}>
+        </label><br>
+        <input type="submit">
+        <a href="/company/delivery/zone/list">Назад</a>
+    </form>
+</body>
+</html>

@@ -4,8 +4,9 @@ from google.appengine.ext import ndb
 from base import CompanyBaseHandler
 from config import Config, config
 from methods.auth import company_user_required
-from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address
+from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address, DeliveryZone
 from methods import map
+from models.venue import DELIVERY
 
 
 class CreateVenueHandler(CompanyBaseHandler):
@@ -158,3 +159,48 @@ class MapVenuesHandler(CompanyBaseHandler):
         self.render('/venues/map.html', **{
             'venues': venues
         })
+
+
+class ChooseDeliveryZonesHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        venue_zone_keys = []
+        for delivery in venue.delivery_types:
+            if delivery.delivery_type == DELIVERY:
+                venue_zone_keys = delivery.delivery_zones
+        zones = DeliveryZone.query().fetch()
+        for zone in zones:
+            zone.address_str = zone.address.str()
+            if zone.key in venue_zone_keys:
+                zone.has = True
+            else:
+                zone.has = False
+        self.render('/venues/choose_zones.html', zones=zones, venue=venue)
+
+    @company_user_required
+    def post(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        found_delivery = None
+        for delivery in venue.delivery_types:
+            if delivery.delivery_type == DELIVERY:
+                found_delivery = delivery
+        if not found_delivery:
+            self.abort(400)
+        zones = DeliveryZone.query().fetch()
+        for zone in zones:
+            confirmed = bool(self.request.get(str(zone.key.id())))
+            if confirmed:
+                if zone.key not in found_delivery.delivery_zones:
+                    found_delivery.delivery_zones.append(zone.key)
+            else:
+                if zone.key in found_delivery.delivery_zones:
+                    found_delivery.delivery_zones.remove(zone.key)
+        venue.put()
+        self.redirect('/company/venues')

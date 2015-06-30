@@ -17,7 +17,7 @@ from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, Choo
     AddPromoConditionHandler, AddPromoOutcomeHandler, ListGiftsHandler, AddGiftHandler, EditPromoHandler
 from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
-    VenueListHandler
+    VenueListHandler, ChooseDeliveryZonesHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler
@@ -25,6 +25,7 @@ from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseS
     DeliverySlotEditHandler
 from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, AddPushesHandler, ChangeParseApiKeys, \
     CancelPushHandler, CancelNewsHandler
+from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

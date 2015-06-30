@@ -203,10 +203,15 @@ app = WSGIApplication([
             Route('/<venue_id:\d+>', company_admin.EditVenueHandler),
             Route('/map', company_admin.MapVenuesHandler),
             Route('/create', company_admin.CreateVenueHandler),
+            Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
         ]),
 
         PathPrefixRoute('/delivery', [
             Route('/types', company_admin.DeliveryTypesHandler),
+            PathPrefixRoute('/zone', [
+                Route('/list', company_admin.ListDeliveryZonesHandler),
+                Route('/edit', company_admin.EditDeliveryZoneHandler),
+            ]),
             PathPrefixRoute('/orders', [
                 Route('/items', company_delivery.OrderItemsHandler),
                 Route('/confirm', company_delivery.ConfirmOrderHandler),

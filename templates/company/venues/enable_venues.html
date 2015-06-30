@@ -18,20 +18,36 @@
         <a href="/company/venues/map">Карта</a>
     </div>
     <form method="post">
-        {% for v in venues %}
-            <label style="display: block;">
-                <input type="checkbox" name="{{ v.key.id() }}" {% if v.active %}checked{% endif %}/>
-                <a href="/company/venues/{{ v.key.id() }}">
-                    {{ v.title }}
-                    {% if v.problem %}
-                        <b style="color: red">({{ v.problem }})</b>
-                    {% endif %}
-                </a>
-            </label>
-        {% endfor %}
-        <input type="submit" value="Сохранить"/>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Статус</th>
+                <th>Название</th>
+                <th>Адрес</th>
+                <th>Дни</th>
+                <th>Часы</th>
+                <th>Выбрать зоны</th>
+            </tr>
+            {% for venue in venues %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
+                    </td>
+                    <td>
+                        <a href="/company/venues/{{ venue.key.id() }}">
+                            {{ venue.title }}
+                        </a>
+                    </td>
+                    <td>{{ venue.description }}</td>
+                    <td>{{ venue.working_days }}</td>
+                    <td>{{ venue.working_hours }}</td>
+                    <td>
+                        <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit"/>
+        <a href="/company/main">Назад</a>
     </form>
-    <br>
-    <a href="/company/main">Назад</a>
 </body>
 </html>

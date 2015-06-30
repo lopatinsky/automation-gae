@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Зоны доставок</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Статус</th>
+                <th>Адрес</th>
+                <th>Минимальная сумма</th>
+                <th>Стоимость доставки</th>
+                <th>Ограничения на карте</th>
+            </tr>
+            {% for zone in zones %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name={{ zone.key.id() }} {% if zone.status %} checked {% endif %}>
+                    </td>
+                    <td>
+                        <a href="{{ '/company/delivery/zone/edit?zone_id=%s' % zone.key.id() }}">
+                            {{ zone.address_str }}
+                        </a>
+                    </td>
+                    <td>{{ zone.min_sum }}</td>
+                    <td>{{ zone.price }}</td>
+                    <td>501</td> <!-- todo: set link here -->
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit">
+        <a href="/company/main">Назад</a>
+    </form>
+</body>
+</html>

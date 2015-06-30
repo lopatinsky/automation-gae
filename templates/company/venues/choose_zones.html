@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выберите зоны</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <h3>Выберите зоны для {{ venue.title }}</h3>
+    <form method="post">
+        <input type="text" value="{{ venue.key.id() }}" name="venue_id" hidden>
+        {% for zone in zones %}
+            <label>
+                <input type="checkbox" name={{ zone.key.id() }} {% if zone.has %} checked {% endif %}>
+                {{ zone.address_str }}
+            </label><br>
+        {% endfor %}
+        <br>
+        <input type="submit">
+        <a href="/company/venues">Назад</a>
+    </form>
+</body>
+</html>
