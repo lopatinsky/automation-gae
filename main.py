@@ -290,6 +290,7 @@ app = WSGIApplication([
             Route('/list', company_admin.PromoListHandler),
             Route('/api_keys', company_admin.ChangeApiKeysHandler),
             Route('/add', company_admin.AddPromoHandler),
+            Route('/edit', company_admin.EditPromoHandler),
             Route('/choose', company_admin.ChooseMenuItemHandler),
             PathPrefixRoute('/conditions', [
                 Route('/add', company_admin.AddPromoConditionHandler),

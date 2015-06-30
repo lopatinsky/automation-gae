@@ -79,6 +79,27 @@ class AddPromoHandler(CompanyBaseHandler):
         self.redirect('/company/promos/list')
 
 
+class EditPromoHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        self.render('/promos/add.html', promo=promo)
+
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        promo.title = self.request.get('name')
+        promo.description = self.request.get('description')
+        promo.put()
+        self.redirect('/company/promos/list')
+
+
 class ChooseMenuItemHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):

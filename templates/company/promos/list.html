@@ -39,7 +39,11 @@
                     <td rowspan="{{ height + 1 }}">
                         <input type="checkbox" name={{ promo.key.id() }} {% if promo.status %} checked {% endif %}>
                     </td>
-                    <td rowspan="{{ height + 1 }}">{{ promo.title }}</td>
+                    <td rowspan="{{ height + 1 }}">
+                        <a href="{{ '/company/promos/edit?promo_id=%s' % promo.key.id() }}">
+                            {{ promo.title }}
+                        </a>
+                    </td>
                     <td rowspan="{{ height + 1 }}">{{ promo.description }}</td>
                     <td colspan="3">
                         <a href="{{ '/company/promos/conditions/add?promo_id=%s' % promo.key.id() }}">Добавить условие</a>

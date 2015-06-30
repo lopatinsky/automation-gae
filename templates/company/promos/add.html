@@ -6,13 +6,16 @@
 <body>
     {% include '/company/header.html' %}
     <form method="post">
+        {% if promo %}
+            <input type="text" value="{{ promo.key.id() }}" hidden>
+        {% endif %}
         <label>
             Название:
-            <input type="text" name="name">
+            <input type="text" name="name" {% if promo %} value="{{ promo.title }}" {% endif %}>
         </label><br>
         <label>
             Описание:
-            <input type="text" name="description">
+            <input type="text" name="description" {% if promo %} value="{{ promo.description }}" {% endif %}>
         </label><br>
         <input type="submit">
         <a href="/company/promos/list">Назад</a>
