@@ -14,7 +14,7 @@ HOURS_BEFORE = 3
 
 class CloseOpenedOrdersHandler(ApiHandler):
     def get(self):
-        statuses = NOT_CANCELED_STATUSES
+        statuses = NOT_CANCELED_STATUSES[:]
         statuses.remove(READY_ORDER)
         namespace_orders = {}
         for namespace in metadata.get_namespaces():
@@ -34,4 +34,5 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 venue = Venue.get_by_id(order.venue_id)
                 venue_title = venue.title if venue else u'Не определено'
                 mail_body += u'%s (%s),\n\n' % (order.key.id(), venue_title)
-        email.send_error("order", "Orders not closed", mail_body)
+        if namespace_orders:
+            email.send_error("order", "Orders not closed", mail_body)
