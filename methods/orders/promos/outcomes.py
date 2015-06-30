@@ -144,7 +144,7 @@ def set_order_gift_points(response, outcome, order):
 
 
 def add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
-    from methods.orders.validation import set_item_dicts
+    from methods.orders.validation.validation import set_item_dicts
     gift = MenuItem.get_by_id(int(outcome.value))
     if not gift:
         errors.append(u'Акция подарок по заказу не привязана к продукту')
