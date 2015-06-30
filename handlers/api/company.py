@@ -45,7 +45,7 @@ class CompanyBaseUrlsHandler(ApiHandler):
             config = Config.get()
             if config and config.APP_NAME:
                 companies.append({
-                    'base_url': u'http://%s.1.%s' % (namespace, urlparse(self.request.url).hostname),
+                    'base_url': u'http://%s.test.%s' % (namespace, urlparse(self.request.url).hostname),
                     'app_name': config.APP_NAME
                 })
         self.render_json({
