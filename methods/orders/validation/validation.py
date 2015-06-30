@@ -316,12 +316,16 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         delivery_sum_str = u''
     else:
         if delivery_sum:
-            delivery_sum_str = u'Стоимость доставки %s р.' % delivery_sum
+            delivery_sum_str = u'Стоимость доставки %sр' % delivery_sum
         else:
             if delivery_type == DELIVERY:
                 delivery_sum_str = u'Бесплатная доставка'
             else:
                 delivery_sum_str = u''
+        if config.ADDITION_INFO_ABOUT_DELIVERY:
+            delivery_sum_str += u' %s. ' % config.ADDITION_INFO_ABOUT_DELIVERY
+    if delivery_type != DELIVERY:
+        delivery_sum_str = u''
     result = {
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
