@@ -10,7 +10,7 @@ SELF = 0
 IN_CAFE = 1
 DELIVERY = 2
 PICKUP = 3
-DELIVERY_TYPES = [SELF, IN_CAFE, DELIVERY, PICKUP]
+DELIVERY_TYPES = (SELF, IN_CAFE, DELIVERY, PICKUP)
 
 DELIVERY_MAP = {
     SELF: u'С собой',
@@ -52,7 +52,7 @@ class Address(ndb.Model):
 class DeliverySlot(ndb.Model):
     MINUTES = 0
     STRINGS = 1
-    CHOICES = [MINUTES, STRINGS]
+    CHOICES = (MINUTES, STRINGS)
     CHOICES_MAP = {
         MINUTES: u'Минуты',
         STRINGS: u'Без значения'

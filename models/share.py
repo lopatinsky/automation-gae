@@ -16,7 +16,7 @@ class Share(ndb.Model):
 
     INACTIVE = 0
     ACTIVE = 1
-    STATUS_CHOICES = [ACTIVE, INACTIVE]
+    STATUS_CHOICES = (ACTIVE, INACTIVE)
 
     sender = ndb.KeyProperty(required=True, kind=Client)
     share_type = ndb.IntegerProperty(required=True, choices=FEATURE_CHOICES)
@@ -87,7 +87,7 @@ class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
     CANCELED = 2
-    CHOICES = [READY, DONE, CANCELED]
+    CHOICES = (READY, DONE, CANCELED)
     CHOICES_MAP = {
         READY: u'Оплачено',
         DONE: u'Получено',

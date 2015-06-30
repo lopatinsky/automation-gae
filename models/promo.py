@@ -29,8 +29,8 @@ class PromoOutcome(ndb.Model):
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
     FIX_DISCOUNT = 7
-    CHOICES = [DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT]
+    CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
+               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -46,8 +46,8 @@ class PromoCondition(ndb.Model):
     CHECK_REPEATED_ORDERS = 4
     CHECK_MIN_ORDER_SUM = 5
     CHECK_HAPPY_HOURS = 6
-    CHOICES = [CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
-               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS]
+    CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
+               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
