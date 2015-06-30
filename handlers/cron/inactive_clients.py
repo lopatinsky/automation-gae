@@ -34,7 +34,7 @@ class SuccessBindingCardHandler(RequestHandler):
                             u"Теперь можно получить кофе без очереди в кассу. "
                             u"А если у Вас MasterCard, Вас ждут дополнительные подарки. "
                             u"Хорошего дня!") % client.name_for_sms
-                sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
+                #sms_pilot.send_sms("DoubleB", [client.tel], sms_text)
                 notification = Notification(client_id=client.key.id(), type=SMS_SUCCESS)
                 notification.put()
 
