@@ -236,8 +236,8 @@ def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
     return True, None
 
 
-def check_wallet_payment(total_sum, payment_info):
-    valid = not payment_info.get('wallet_payment') or payment_info['wallet_payment'] <= config.GET_MAX_WALLET_SUM(total_sum)
+def check_wallet_payment(total_sum, wallet_payment_sum):
+    valid = not config.WALLET_ENABLED or wallet_payment_sum <= config.GET_MAX_WALLET_SUM(total_sum)
     if valid:
         return True, None
     else:

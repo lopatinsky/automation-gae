@@ -95,7 +95,7 @@ class Config(ndb.Model):
         return self.WALLET_API_KEY is not None
 
     @classmethod
-    def GET_MAX_WALLET_SUM(cls, total_sum):
+    def GET_MAX_WALLET_SUM(cls, total_sum):  # must be positive
         config = cls.get()
         return total_sum * config.WALLET_MAX_PERCENT / 100.0
 

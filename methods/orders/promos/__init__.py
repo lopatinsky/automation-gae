@@ -2,7 +2,7 @@ from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
-    add_order_gift, set_order_gift_points, set_fix_discount
+    add_order_gift, set_order_gift_points, set_fix_discount, set_cash_back_without_wallet
 
 
 class OutcomeResult:
@@ -49,7 +49,7 @@ def _check_condition(errors, condition, venue, client, item_dicts, payment_info,
         return check_happy_hours(condition, venue, delivery_time)
 
 
-def _set_outcome(errors, outcome, items, promo, client, new_order_gift_dicts, order_gift_dicts,
+def _set_outcome(errors, outcome, items, promo, client, wallet_payment_sum, new_order_gift_dicts, order_gift_dicts,
                  cancelled_order_gift_dicts, order):
     response = OutcomeResult()
     if outcome.method == PromoOutcome.DISCOUNT:
@@ -68,9 +68,11 @@ def _set_outcome(errors, outcome, items, promo, client, new_order_gift_dicts, or
         return set_order_gift_points(response, outcome, order)
     if outcome.method == PromoOutcome.FIX_DISCOUNT:
         return set_fix_discount(response, outcome, _get_initial_total_sum(items))
+    if outcome.method == PromoOutcome.CASH_BACK_WITHOUT_WALLET_PAYMENT:
+        return set_cash_back_without_wallet(response, outcome, _get_initial_total_sum(items), wallet_payment_sum, order)
 
 
-def apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
+def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type, order_gift_dicts,
                  cancelled_order_gift_dicts, order=None):
     total_sum = float(_get_initial_total_sum(item_dicts))
     errors = []
@@ -84,8 +86,8 @@ def apply_promos(venue, client, item_dicts, payment_info, delivery_time, deliver
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                outcome_response = _set_outcome(errors, outcome, item_dicts, promo, client, new_order_gift_dicts,
-                                                order_gift_dicts, cancelled_order_gift_dicts, order)
+                outcome_response = _set_outcome(errors, outcome, item_dicts, promo, client, wallet_payment_sum,
+                                                new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order)
                 if outcome_response.success:
                     if promo not in promos:
                         promos.append(promo)

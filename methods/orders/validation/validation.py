@@ -2,7 +2,7 @@
 import copy
 from datetime import datetime, timedelta
 import logging
-from config import config, Config
+from config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_TIME_FORMAT
@@ -272,16 +272,28 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     if not valid:
         return send_error(error)
 
+    wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
+    if config.WALLET_ENABLED:
+        valid, error = check_wallet_payment(total_sum_without_promos, wallet_payment_sum)
+        if not valid:
+            return send_error(error)
+
     if not order:
         promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
-            apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
-                         cancelled_order_gift_dicts)
+            apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
+                         order_gift_dicts, cancelled_order_gift_dicts)
         if promo_errors:
             return send_error(promo_errors[0])
     else:
         errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
-            apply_promos(venue, client, item_dicts, payment_info, delivery_time, delivery_type, order_gift_dicts,
-                         cancelled_order_gift_dicts, order)
+            apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
+                         order_gift_dicts, cancelled_order_gift_dicts, order)
+
+    max_wallet_payment = 0.0
+    if config.WALLET_ENABLED:
+        wallet_balance = empatika_wallet.get_balance(client.key.id())
+        max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum_without_promos), wallet_balance / 100.0)
+        max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
     logging.info('item_dicts = %s' % item_dicts)
 
@@ -297,15 +309,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         grouped_new_order_gift_dicts = []
         grouped_order_gift_dicts = []
         grouped_cancelled_order_gift_dicts = []
-
-    max_wallet_payment = 0.0
-    if config.WALLET_ENABLED:
-        valid, error = check_wallet_payment(total_sum, payment_info)
-        if not valid:
-            return send_error(error)
-        wallet_balance = empatika_wallet.get_balance(client.key.id())
-        max_wallet_payment = min(Config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
-        max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
     if not item_dicts and not gift_dicts:

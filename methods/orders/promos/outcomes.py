@@ -31,6 +31,12 @@ def _apply_cash_back(item_dict, promo, cash_back, order=None):
     return False
 
 
+def _apply_total_cash_back(sum_without_wallet, cash_back, order=None):
+    if order:
+        order.cash_backs.append(CashBack(amount=int(cash_back * sum_without_wallet * 100)))
+    return True
+
+
 def set_discounts(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
@@ -178,4 +184,12 @@ def set_fix_discount(response, outcome, init_total_sum):
         discount = init_total_sum
     response.success = True
     response.discount = discount
+    return response
+
+
+def set_cash_back_without_wallet(response, outcome, init_total_sum, wallet_payment, order):
+    sum_without_wallet = init_total_sum - wallet_payment
+    cash_back = float(outcome.value) / 100.0
+    _apply_total_cash_back(sum_without_wallet, cash_back, order)
+    response.success = True
     return response
