@@ -14,7 +14,7 @@ HOURS_BEFORE = 3
 
 class CloseOpenedOrdersHandler(ApiHandler):
     def get(self):
-        statuses = NOT_CANCELED_STATUSES[:]
+        statuses = list(NOT_CANCELED_STATUSES)
         statuses.remove(READY_ORDER)
         namespace_orders = {}
         for namespace in metadata.get_namespaces():
