@@ -1,6 +1,8 @@
 # coding=utf-8
 import datetime
+import logging
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import GeoPt
 from methods import location, working_hours
 from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
@@ -75,21 +77,23 @@ class DeliverySlot(ndb.Model):
         }
 
 
-class GeoRib(ndb.Model):
-    point1 = ndb.GeoPtProperty(required=True)
-    point2 = ndb.GeoPtProperty(required=True)
-
+class GeoPtProxy(ndb.GeoPt):
     @staticmethod
     def square(a, b, c):
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
 
     @property
     def x(self):
-        return self.point1
+        return self.lat
 
     @property
     def y(self):
-        return self.point2
+        return self.lon
+
+
+class GeoRib(ndb.Model):
+    point1 = ndb.GeoPtProperty(required=True)
+    point2 = ndb.GeoPtProperty(required=True)
 
 
 class DeliveryZone(ndb.Model):
@@ -98,6 +102,7 @@ class DeliveryZone(ndb.Model):
     price = ndb.IntegerProperty(default=0)
     min_sum = ndb.IntegerProperty(default=0)
     comment = ndb.StringProperty()
+    default = ndb.BooleanProperty(default=False)
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
 
     @property
@@ -107,19 +112,24 @@ class DeliveryZone(ndb.Model):
             points.append(rib.point1)
         return points
 
-    '''def is_included(self, point):
-        c = GeoPt(lat=address.lat, lon=address.lon)
-        d = GeoPoint(lat=90.0, lon=180)
+    def is_included(self, address):
+        if not address.get('coordinates'):
+            return False
+        if not address['coordinates'].get('lat') or not address['coordinates'].get('lon'):
+            return False
+        c = GeoPtProxy(lat=address['coordinates']['lat'], lon=address['coordinates']['lon'])
+        d = GeoPtProxy(lat=90.0, lon=180)
         amount = 0
-        for rib in self.first_rib.get_ribs():
-            a = rib.get_points()[0]
-            b = rib.get_points()[1]
-            result = GeoPoint.square(a, b, c) * GeoPoint.square(a, b, d) < 0.0 \
-                and GeoPoint.square(c, d, a) * GeoPoint.square(c, d, b) < 0.0
+        for rib in self.geo_ribs:
+            a = GeoPtProxy(lat=rib.point1.lat, lon=rib.point1.lon)
+            b = GeoPtProxy(lat=rib.point2.lat, lon=rib.point2.lon)
+            result = GeoPtProxy.square(a, b, c) * GeoPtProxy.square(a, b, d) < 0.0 \
+                and GeoPtProxy.square(c, d, a) * GeoPtProxy.square(c, d, b) < 0.0
             if result:
                 amount += 1
-        logging.error(amount)
-        return amount % 2 == 1'''
+        logging.info('address = %s' % address)
+        logging.info('in zone = %s' % (amount % 2 == 1))
+        return amount % 2 == 1
 
 
 class DeliveryType(ndb.Model):

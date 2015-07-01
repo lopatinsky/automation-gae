@@ -240,8 +240,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     cancelled_order_gift_dicts = set_item_dicts(cancelled_order_gifts, True)
 
     logging.info('cancelled_order_gift_dicts = %s' % cancelled_order_gift_dicts)
-
-    valid, error = check_venue(venue, delivery_time)
+    valid, error = check_address(delivery_type, address)
+    if not valid:
+        return send_error(error)
+    valid, error = check_venue(venue, delivery_time, delivery_type)
     if not valid:
         return send_error(error)
     valid, error = check_payment(payment_info)
@@ -260,9 +262,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     if not valid:
         return send_error(error)
     valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
-    if not valid:
-        return send_error(error)
-    valid, error = check_address(delivery_type, address)
     if not valid:
         return send_error(error)
     valid, error = check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts)
@@ -324,6 +323,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                 delivery_sum_str = u''
         if config.ADDITION_INFO_ABOUT_DELIVERY:
             delivery_sum_str += u' %s. ' % config.ADDITION_INFO_ABOUT_DELIVERY
+        if delivery_zone and not delivery_zone.found:
+            delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
     if delivery_type != DELIVERY:
         delivery_sum_str = u''
     result = {

@@ -132,7 +132,7 @@ def check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts):
     return True, None
 
 
-def check_venue(venue, delivery_time):
+def check_venue(venue, delivery_time, delivery_type):
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())
@@ -154,7 +154,10 @@ def check_venue(venue, delivery_time):
             place_name = config.get_place_str()
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
     else:
-        return False, u'Не выбрано заведение'
+        if delivery_type == DELIVERY:
+            return False, u'На Ваш адрес доставки нет'
+        else:
+            return False, u'Не выбрано заведение'
     return True, None
 
 
