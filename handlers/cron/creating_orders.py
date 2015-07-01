@@ -2,7 +2,7 @@ import datetime
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
-from methods import email, alfa_bank
+from methods import email, alfa_bank, paypal
 from models import Order
 from models.order import CREATING_ORDER
 
@@ -46,6 +46,17 @@ class CheckCreatingOrdersHandler(RequestHandler):
                                 # any other status is OK to delete
                                 else:
                                     to_delete = True
+                        except Exception as e:
+                            info.append(("exception", repr(e)))
+                    elif order.has_paypal_payment:
+                        try:
+                            # authorization exists (we have payment_id) and should be non-void
+                            void_success, void_error = paypal.void(order.payment_id)
+                            info.append(("void successful?", void_success))
+                            if void_success:
+                                to_delete = True
+                            else:
+                                info.append(("void error", void_error))
                         except Exception as e:
                             info.append(("exception", repr(e)))
                     else:
