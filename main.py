@@ -39,6 +39,8 @@ app = WSGIApplication([
         Route('/licence_agreement.html', api.LicenceHandler),
         Route('/nda.html', api.NdaHandler),
         Route('/payment_rules.html', api.PaymentRulesHandler),
+        Route('/paypal_privacy_policy.html', api.PaypalPrivacyPolicyHandler),
+        Route('/paypal_user_agreement.html', api.PaypalUserAgreementHandler),
     ]),
 
     PathPrefixRoute('/mt', [

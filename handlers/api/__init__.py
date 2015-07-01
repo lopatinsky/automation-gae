@@ -15,7 +15,8 @@ from wallet import DepositToWalletHandler, WalletBalanceHandler
 from shared import GetInvitationUrlHandler, GetGiftUrlHandler, GiftInfoHandler, GetShareUrlHandler
 from twilio import ReceiveSms
 from paypal import BindPaypalHandler, UnbindPaypalHandler
-from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler
+from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler, PaypalPrivacyPolicyHandler, \
+    PaypalUserAgreementHandler
 from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler, ValidateAddressHandler
 from statuses import StatusHandler, ClientSettingSuccessHandler

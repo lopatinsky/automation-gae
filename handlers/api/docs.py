@@ -42,3 +42,13 @@ class NdaHandler(ApiHandler):
 class PaymentRulesHandler(ApiHandler):
     def get(self):
         self.render_doc('auto_payment_rules.html', **_get_values())
+
+
+class PaypalPrivacyPolicyHandler(ApiHandler):
+    def get(self):
+        self.render_doc('auto_paypal_privacy_policy.html', **_get_values())
+
+
+class PaypalUserAgreementHandler(ApiHandler):
+    def get(self):
+        self.render_doc('auto_paypal_user_agreement.html', **_get_values())

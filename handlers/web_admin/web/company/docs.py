@@ -36,7 +36,9 @@ class AboutCompanyHandler(CompanyBaseHandler):
         namespace = namespace_manager.get_namespace()
         values.update({
             'licence_url': u'http://%s.1.%s/docs/licence_agreement.html' % (namespace, urlparse(self.request.url).hostname),
-            'payment_rules_url': u'http://%s.1.%s/docs/payment_rules.html' % (namespace, urlparse(self.request.url).hostname)
+            'payment_rules_url': u'http://%s.1.%s/docs/payment_rules.html' % (namespace, urlparse(self.request.url).hostname),
+            'paypal_privacy_policy_url': u'http://%s.1.%s/docs/paypal_privacy_policy.html' % (namespace, urlparse(self.request.url).hostname),
+            'paypal_user_agreement_url': u'http://%s.1.%s/docs/paypal_user_agreement.html' % (namespace, urlparse(self.request.url).hostname),
         })
         self.render('/docs/about.html', **values)
 
