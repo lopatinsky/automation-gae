@@ -55,7 +55,7 @@ class CheckCreatingOrdersHandler(RequestHandler):
                         info.append(("deleted", True))
                     infos.append(info)
                 namespace_infos[namespace] = infos
-        mail_body = "Orders with creating status"
+        mail_body = "Orders with creating status\n"
         for namespace in namespace_infos.keys():
             mail_body += 'In namespace = %s:\n' % namespace
             mail_body += "List of orders:\n" + \
