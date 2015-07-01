@@ -30,6 +30,7 @@ class CloseOpenedOrdersHandler(ApiHandler):
         mail_body = u"List of orders not closed:\n"
         for namespace in namespace_orders.keys():
             mail_body += u'In namespace = %s:\n' % namespace
+            namespace_manager.set_namespace(namespace)
             for order in namespace_orders[namespace]:
                 venue = Venue.get_by_id(order.venue_id)
                 venue_title = venue.title if venue else u'Не определено'
