@@ -34,6 +34,6 @@ class CloseOpenedOrdersHandler(ApiHandler):
             for order in namespace_orders[namespace]:
                 venue = Venue.get_by_id(order.venue_id)
                 venue_title = venue.title if venue else u'Не определено'
-                mail_body += u'%s (%s),\n\n' % (order.key.id(), venue_title)
+                mail_body += u'%s (%s),\n' % (order.key.id(), venue_title)
         if namespace_orders:
             email.send_error("order", "Orders not closed", mail_body)
