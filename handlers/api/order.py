@@ -337,6 +337,9 @@ class ReturnOrderHandler(ApiHandler):
 ## delivery time can be None => send error
 ## address can be None       => send error
 ## payment can be None       => send error
+
+## delivery slot can't be None => it violates logic
+## client can't be None => it violates logic
 class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
@@ -378,6 +381,8 @@ class CheckOrderHandler(ApiHandler):
         if delivery_slot_id:
             delivery_slot_id = int(delivery_slot_id)
             delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+            if not delivery_slot:
+                self.abort(400)
         else:
             delivery_slot = None
 
