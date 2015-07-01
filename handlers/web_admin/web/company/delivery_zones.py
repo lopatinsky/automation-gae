@@ -2,7 +2,8 @@ import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
-from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue
+from methods.map import get_houses_by_coordinates
+from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
 
 __author__ = 'dvpermyakov'
@@ -45,6 +46,29 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 zone.status = STATUS_UNAVAILABLE
             zone.put()
         self.redirect('/company/main')
+
+
+class AddingMapDeliveryZoneHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        self.render('/delivery_settings/map.html')
+
+
+class AddDeliveryZoneHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        lat = float(self.request.get('lat'))
+        lon = float(self.request.get('lon'))
+        candidates = get_houses_by_coordinates(lat, lon)
+        if candidates:
+            address = candidates[0]['address']
+            address_obj = Address(**address)
+            address_obj.lat = lat
+            address_obj.lon = lon
+            DeliveryZone(address=address_obj).put()
+            self.redirect('/company/delivery/zone/list')
+        else:
+            self.redirect('/company/delivery/zone/add')
 
 
 class EditDeliveryZoneHandler(CompanyBaseHandler):
