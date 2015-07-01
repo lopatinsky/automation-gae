@@ -24,7 +24,8 @@ class CompanyInfoHandler(ApiHandler):
                             zones[zone] = zone.get()
         cities = []
         for zone in zones.values():
-            cities.append(zone.address.city)
+            if zone.address.city not in cities:
+                cities.append(zone.address.city)
         self.render_json({
             'app_name': config.APP_NAME,
             'description': config.COMPANY_DESCRIPTION,
