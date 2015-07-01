@@ -75,7 +75,7 @@ class DeliverySlot(ndb.Model):
         }
 
 
-class GeoRib(ndb.LocalStructuredProperty):
+class GeoRib(ndb.Model):
     point1 = ndb.GeoPtProperty(required=True)
     point2 = ndb.GeoPtProperty(required=True)
 
@@ -97,7 +97,15 @@ class DeliveryZone(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     price = ndb.IntegerProperty(default=0)
     min_sum = ndb.IntegerProperty(default=0)
+    comment = ndb.StringProperty()
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
+
+    @property
+    def polygon(self):
+        points = []
+        for rib in self.geo_ribs:
+            points.append(rib.point1)
+        return points
 
     '''def is_included(self, point):
         c = GeoPt(lat=address.lat, lon=address.lon)

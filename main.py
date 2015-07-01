@@ -213,6 +213,7 @@ app = WSGIApplication([
             PathPrefixRoute('/zone', [
                 Route('/list', company_admin.ListDeliveryZonesHandler),
                 Route('/edit', company_admin.EditDeliveryZoneHandler),
+                Route('/map', company_admin.MapDeliveryZoneHandler),
             ]),
             PathPrefixRoute('/orders', [
                 Route('/items', company_delivery.OrderItemsHandler),

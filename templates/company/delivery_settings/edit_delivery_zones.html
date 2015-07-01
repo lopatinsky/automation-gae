@@ -4,6 +4,7 @@
     <title>Зона Доставки</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
     <form method="post">
         <label>
             Минимальная сумма:
@@ -12,6 +13,10 @@
         <label>
             Стоимость доставки:
             <input type="number" name="price" {% if zone %} value="{{ zone.price }}" {% endif %}>
+        </label><br>
+        <label>
+            Комментарий:
+            <input type="text" name="comment" {% if zone and zone.comment %} value="{{ zone.comment }}" {% endif %}>
         </label><br>
         <input type="submit">
         <a href="/company/delivery/zone/list">Назад</a>

@@ -12,6 +12,7 @@
                 <th>Адрес</th>
                 <th>Минимальная сумма</th>
                 <th>Стоимость доставки</th>
+                <th>Комментарий</th>
                 <th>Ограничения на карте</th>
             </tr>
             {% for zone in zones %}
@@ -26,7 +27,10 @@
                     </td>
                     <td>{{ zone.min_sum }}</td>
                     <td>{{ zone.price }}</td>
-                    <td>501</td> <!-- todo: set link here -->
+                    <td>{% if zone.comment %} {{ zone.comment }} {% endif %}</td>
+                    <td>
+                        <a href="{{ '/company/delivery/zone/map?zone_id=%s' % zone.key.id() }}">Карта зон</a>
+                    </td>
                 </tr>
             {% endfor %}
         </table>
