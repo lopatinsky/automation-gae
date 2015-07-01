@@ -28,9 +28,9 @@ cron:
 #  schedule: every day 07:00
 #  timezone: Europe/Moscow
 
-- description: clear old pings
-  url: /cron/clear_pings
-  schedule: every day 0:00
+#- description: clear old pings
+#  url: /cron/clear_pings
+#  schedule: every day 0:00
 
 #- description: build square table report
 #  url: /cron/build_square_table
@@ -47,5 +47,5 @@ cron:
 
 - description: cancel unused gifts
   url: /cron/cancel_gifts
-  schedule: every day 0:00
+  schedule: every day 12:00
   timezone: Europe/Moscow
