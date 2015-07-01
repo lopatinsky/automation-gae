@@ -427,7 +427,9 @@ class AddSingleModifierHandler(CompanyBaseHandler):
         max = self.request.get_range('max')
         if max == 0:
             max = SingleModifier.INFINITY
-        SingleModifier(title=name, price=price, min_amount=min, max_amount=max).put()
+        modifier = SingleModifier(title=name, price=price, min_amount=min, max_amount=max)
+        modifier.sequence_number = SingleModifier.generate_sequence_number()
+        modifier.put()
         self.redirect_to('modifiers_list')
 
 
