@@ -216,6 +216,8 @@ app = WSGIApplication([
                 Route('/edit', company_admin.EditDeliveryZoneHandler),
                 Route('/add_by_map', company_admin.AddingMapDeliveryZoneHandler),
                 Route('/map', company_admin.MapDeliveryZoneHandler),
+                Route('/up', company_admin.UpDeliveryZoneHandler),
+                Route('/down', company_admin.DownDeliveryZoneHandler),
             ]),
             PathPrefixRoute('/orders', [
                 Route('/items', company_delivery.OrderItemsHandler),

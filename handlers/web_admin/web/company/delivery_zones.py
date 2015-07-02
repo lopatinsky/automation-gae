@@ -1,3 +1,4 @@
+import json
 import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
@@ -12,7 +13,7 @@ __author__ = 'dvpermyakov'
 class ListDeliveryZonesHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        zones = DeliveryZone.query().fetch()
+        zones = DeliveryZone.query().order(DeliveryZone.sequence_number).fetch()
         for venue in Venue.query(Venue.active == True).fetch():
             found = False
             for zone in zones:
@@ -68,7 +69,9 @@ class AddDeliveryZoneHandler(CompanyBaseHandler):
             candidates = get_areas_by_coordinates(lat, lon)
             if candidates:
                 address_obj.area = candidates[0]['address']['area']
-            DeliveryZone(address=address_obj).put()
+            zone = DeliveryZone(address=address_obj)
+            zone.sequence_number = DeliveryZone.generate_sequence_number()
+            zone.put()
             self.redirect('/company/delivery/zone/list')
         else:
             self.redirect('/company/delivery/zone/add')
@@ -150,3 +153,49 @@ class MapDeliveryZoneHandler(CompanyBaseHandler):
         logging.info(ribs)
         zone.put()
         self.redirect('/company/delivery/zone/list')
+
+
+class UpDeliveryZoneHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        zone_id = self.request.get_range('zone_id')
+        zone = DeliveryZone.get_by_id(zone_id)
+        if not zone:
+            self.abort(400)
+        previous = zone.get_previous()
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = zone.sequence_number
+        zone.sequence_number = number
+        zone.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'zone_id': zone.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownDeliveryZoneHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        zone_id = self.request.get_range('zone_id')
+        zone = DeliveryZone.get_by_id(zone_id)
+        if not zone:
+            self.abort(400)
+        next_ = zone.get_next()
+        if not next_:
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = zone.sequence_number
+        zone.sequence_number = number
+        zone.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'zone_id': zone.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))

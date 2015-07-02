@@ -322,9 +322,13 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             else:
                 delivery_sum_str = u''
         if config.ADDITION_INFO_ABOUT_DELIVERY:
-            delivery_sum_str += u' %s. ' % config.ADDITION_INFO_ABOUT_DELIVERY
-        if delivery_zone and not delivery_zone.found:
-            delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
+            delivery_sum_str += u' %s.' % config.ADDITION_INFO_ABOUT_DELIVERY
+        if delivery_zone:
+            if not delivery_zone.found:
+                delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
+            else:
+                if delivery_zone.comment:
+                    delivery_sum_str += u'. %s' % delivery_zone.comment
     if delivery_type != DELIVERY:
         delivery_sum_str = u''
     result = {

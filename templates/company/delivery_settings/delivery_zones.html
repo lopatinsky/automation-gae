@@ -2,6 +2,41 @@
 <html>
 <head>
     <title>Зоны доставок</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.up_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/delivery/zone/up' }}",
+                    data: {
+                        zone_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.zone_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/delivery/zone/down' }}",
+                    data: {
+                        zone_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            $('#tr_' + json.next_id).after($('#tr_' + json.zone_id));
+                        }
+                    }
+                });
+            });
+         });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
@@ -10,6 +45,7 @@
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th>Статус</th>
+                <th>Приоритет</th>
                 <th>Адрес</th>
                 <th>Район</th>
                 <th>Тип поиска</th>
@@ -19,9 +55,18 @@
                 <th>Ограничения на карте</th>
             </tr>
             {% for zone in zones %}
-                <tr>
+                <tr id="{{ 'tr_%s' % zone.key.id() }}">
                     <td>
                         <input type="checkbox" name={{ zone.key.id() }} {% if zone.status %} checked {% endif %}>
+                    </td>
+                    <td>
+                        <button class="up_button" id="{{ zone.key.id() }}">
+                            Вверх
+                        </button>
+                        <br>
+                        <button class="down_button" id="{{ zone.key.id() }}">
+                            Вниз
+                        </button>
                     </td>
                     <td>
                         <a href="{{ '/company/delivery/zone/edit?zone_id=%s' % zone.key.id() }}">

@@ -155,7 +155,7 @@ def check_venue(venue, delivery_time, delivery_type):
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
     else:
         if delivery_type == DELIVERY:
-            return False, u'На Ваш адрес доставки нет'
+            return False, u'На Ваш адрес доставки нет. Подробности в настройках о компании.'
         else:
             return False, u'Не выбрано заведение'
     return True, None

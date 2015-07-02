@@ -82,19 +82,19 @@ def validate_address(address):
 
 
 def get_venue_and_zone_by_address(address):
+    area = None
     if address:
         has_coords = False
         if address.get('coordinates'):
             if address['coordinates'].get('lat') and address['coordinates'].get('lon'):
                 has_coords = True
-        area = None
         # case 1: get venue by city or polygons
         venues = Venue.query(Venue.active == True).fetch()
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                    for zone in delivery.delivery_zones:
-                        zone = zone.get()
+                    for zone in sorted([zone_key.get() for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
                         zone.found = True  # it is used for mark precise address receipt
                         if zone.search_type == DeliveryZone.CITY:
                             if address['address']['city'] == zone.address.city:
@@ -113,7 +113,11 @@ def get_venue_and_zone_by_address(address):
                         elif zone.search_type == DeliveryZone.ZONE:
                             if has_coords and zone.is_included(address):
                                 return venue, zone
-    if not address or not address.get('coordinates') or not address['coordinates'].get('lat') or not address['coordinates'].get('lon'):
+    if not address or\
+            not address.get('coordinates') or\
+            not address['coordinates'].get('lat') or\
+            not address['coordinates'].get('lon') or\
+            not area:
         # case 2: get first venue with default flag
         venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
         for venue in venues:

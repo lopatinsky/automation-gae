@@ -1,9 +1,10 @@
 # coding=utf-8
 import datetime
 import logging
+import random
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
-from methods import location, working_hours
+from methods import location, working_hours, fastcounter
 from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
@@ -108,6 +109,7 @@ class DeliveryZone(ndb.Model):
         ZONE: u'Собственная зона'
     }
     search_type = ndb.IntegerProperty(choices=SEARCH_TYPES, default=CITY)
+    sequence_number = ndb.IntegerProperty()
     address = ndb.LocalStructuredProperty(Address)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     price = ndb.IntegerProperty(default=0)
@@ -115,6 +117,32 @@ class DeliveryZone(ndb.Model):
     comment = ndb.StringProperty()
     default = ndb.BooleanProperty(default=False)
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
+
+    @staticmethod
+    def generate_sequence_number():
+        fastcounter.incr("delivery_zones", delta=100, update_interval=1)
+        return fastcounter.get_count("delivery_zones") + random.randint(1, 100)
+
+    @staticmethod
+    def get_zones_in_order():
+        return sorted([zone for zone in DeliveryZone.query().fetch()],
+                      key=lambda zone: zone.sequence_number)
+
+    def get_previous(self):
+        zones = self.get_zones_in_order()
+        index = zones.index(self)
+        if index == 0:
+            return None
+        else:
+            return zones[index - 1]
+
+    def get_next(self):
+        zones = self.get_zones_in_order()
+        index = zones.index(self)
+        if index == len(zones) - 1:
+            return None
+        else:
+            return zones[index + 1]
 
     @property
     def polygon(self):
