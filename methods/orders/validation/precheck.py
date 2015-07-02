@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 import logging
 import re
-from methods.map import get_houses_by_address
+from methods.map import get_houses_by_address, get_areas_by_coordinates
 from methods.rendering import STR_TIME_FORMAT
-from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot
+from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone
 from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
@@ -83,6 +83,11 @@ def validate_address(address):
 
 def get_venue_and_zone_by_address(address):
     if address:
+        has_coords = False
+        if address.get('coordinates'):
+            if address['coordinates'].get('lat') and address['coordinates'].get('lon'):
+                has_coords = True
+        area = None
         # case 1: get venue by city or polygons
         venues = Venue.query(Venue.active == True).fetch()
         for venue in venues:
@@ -91,13 +96,24 @@ def get_venue_and_zone_by_address(address):
                     for zone in delivery.delivery_zones:
                         zone = zone.get()
                         zone.found = True  # it is used for mark precise address receipt
-                        if not zone.geo_ribs:
+                        if zone.search_type == DeliveryZone.CITY:
                             if address['address']['city'] == zone.address.city:
                                 return venue, zone
-                        else:
-                            if zone.is_included(address):
+                        elif zone.search_type == DeliveryZone.DISTRICT:
+                            if has_coords and zone.address.area:
+                                if not area:
+                                    candidates = get_areas_by_coordinates(address['coordinates']['lat'],
+                                                                          address['coordinates']['lon'])
+                                    if candidates:
+                                        area = candidates[0]['address']['area']
+                                    if not area:
+                                        area = u'Not found'
+                                if zone.address.area == area:
+                                    return venue, zone
+                        elif zone.search_type == DeliveryZone.ZONE:
+                            if has_coords and zone.is_included(address):
                                 return venue, zone
-    if not address.get('coordinates') or not address['coordinates'].get('lat') or not address['coordinates'].get('lon'):
+    if not address or not address.get('coordinates') or not address['coordinates'].get('lat') or not address['coordinates'].get('lon'):
         # case 2: get first venue with default flag
         venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
         for venue in venues:

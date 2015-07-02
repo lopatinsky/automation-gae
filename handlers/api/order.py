@@ -80,10 +80,6 @@ class OrderHandler(ApiHandler):
             if address:
                 address = validate_address(address)
                 venue, delivery_zone = get_venue_and_zone_by_address(address)
-        if not venue:
-            return self.render_error(u'Недостаточно информации для обработки заказа')
-        else:
-            venue_id = venue.key.id()
 
         if 'coordinates' in response_json:
             coordinates = GeoPt(response_json['coordinates'])
@@ -175,6 +171,7 @@ class OrderHandler(ApiHandler):
             else:
                 address_obj = None
 
+            venue_id = venue.key.id() if venue else None
             self.order = Order(
                 id=order_id, client_id=client_id, venue_id=venue_id, total_sum=total_sum, coordinates=coordinates,
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
