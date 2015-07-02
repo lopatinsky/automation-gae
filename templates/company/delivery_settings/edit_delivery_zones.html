@@ -7,6 +7,16 @@
     {% include '/company/header.html' %}
     <form method="post">
         <label>
+            Тип поиска:
+            <select name="search_type">
+                {% for search_type in search_types %}
+                  <option value="{{ search_type['value'] }}" {% if zone and zone.search_type == search_type['value'] %} selected {% endif %}>
+                      {{ search_type['name'] }}
+                  </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>
             Минимальная сумма:
             <input type="number" name="min_sum" {% if zone %} value="{{ zone.min_sum }}" {% endif %}>
         </label><br>

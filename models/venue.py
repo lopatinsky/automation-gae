@@ -28,6 +28,7 @@ class Address(ndb.Model):
     country = ndb.StringProperty()
     city = ndb.StringProperty()
     street = ndb.StringProperty()
+    area = ndb.StringProperty()  # районы (not district, district is округ по-русски)
     home = ndb.StringProperty()
     flat = ndb.StringProperty()
     comment = ndb.StringProperty()
@@ -97,6 +98,16 @@ class GeoRib(ndb.Model):
 
 
 class DeliveryZone(ndb.Model):
+    CITY = 0
+    DISTRICT = 1
+    ZONE = 2
+    SEARCH_TYPES = (CITY, DISTRICT, ZONE)
+    SEARCH_MAP = {
+        CITY: u'По городу',
+        DISTRICT: u'По району',
+        ZONE: u'Собственная зона'
+    }
+    search_type = ndb.IntegerProperty(choices=SEARCH_TYPES, default=CITY)
     address = ndb.LocalStructuredProperty(Address)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     price = ndb.IntegerProperty(default=0)

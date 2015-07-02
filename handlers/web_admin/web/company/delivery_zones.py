@@ -2,7 +2,7 @@ import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
-from methods.map import get_houses_by_coordinates
+from methods.map import get_houses_by_coordinates, get_areas_by_coordinates
 from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
 
@@ -33,7 +33,7 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 zones.append(zone)
         for zone in zones:
             zone.address_str = zone.address.str()
-        self.render('/delivery_settings/delivery_zones.html', zones=zones)
+        self.render('/delivery_settings/delivery_zones.html', zones=zones, ZONE_MAP=DeliveryZone.SEARCH_MAP)
 
     @company_user_required
     def post(self):
@@ -65,6 +65,9 @@ class AddDeliveryZoneHandler(CompanyBaseHandler):
             address_obj = Address(**address)
             address_obj.lat = lat
             address_obj.lon = lon
+            candidates = get_areas_by_coordinates(lat, lon)
+            if candidates:
+                address_obj.area = candidates[0]['address']['area']
             DeliveryZone(address=address_obj).put()
             self.redirect('/company/delivery/zone/list')
         else:
@@ -78,7 +81,13 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
         zone = DeliveryZone.get_by_id(zone_id)
         if not zone:
             self.abort(400)
-        self.render('/delivery_settings/edit_delivery_zones.html', zone=zone)
+        search_types = []
+        for search_type in DeliveryZone.SEARCH_TYPES:
+            search_types.append({
+                'name': DeliveryZone.SEARCH_MAP[search_type],
+                'value': search_type
+            })
+        self.render('/delivery_settings/edit_delivery_zones.html', zone=zone, search_types=search_types)
 
     @company_user_required
     def post(self):
@@ -86,6 +95,7 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
         zone = DeliveryZone.get_by_id(zone_id)
         if not zone:
             self.abort(400)
+        zone.search_type = self.request.get_range('search_type')
         zone.min_sum = self.request.get_range('min_sum')
         zone.price = self.request.get_range('price')
         zone.comment = self.request.get('comment')

@@ -11,10 +11,13 @@ from config import config
 
 BASE_URL = 'http://geocode-maps.yandex.ru/1.x/'
 MAX_RESULT = 15
+DISTRICT = 'district'
+STREET = 'street'
+HOUSE = 'house'
 
 
-def _parse_collection(collection, kind='house', city_request=None):
-    if kind not in ['house', 'street']:
+def _parse_collection(collection, kind=HOUSE, city_request=None):
+    if kind not in [HOUSE, STREET, DISTRICT]:
         return
     candidates = []
     streets = []
@@ -34,11 +37,16 @@ def _parse_collection(collection, kind='house', city_request=None):
             continue
         if address.get('DependentLocality'):
             address = address['DependentLocality']
-        if not address.get('Thoroughfare'):
-            continue
+        if address.get('Thoroughfare'):
+            street = address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip()
+            home = address['Thoroughfare']['Premise']['PremiseNumber'] if kind == HOUSE else None
+        else:
+            if kind in [STREET, HOUSE]:
+                continue
+            street = None
+            home = None
         candidate_append = False
-        street = address['Thoroughfare']['ThoroughfareName'].replace(u'улица', '').strip()
-        if kind == 'street':
+        if kind == STREET:
             if street not in streets:
                 streets.append(street)
                 candidate_append = True
@@ -48,9 +56,10 @@ def _parse_collection(collection, kind='house', city_request=None):
             candidates.append({
                 'address': {
                     'country': country['CountryName'],
+                    'area': address.get('DependentLocalityName'),
                     'city': city,
                     'street': street,
-                    'home': address['Thoroughfare']['Premise']['PremiseNumber'] if kind == 'house' else None
+                    'home': home
                 },
                 'coordinates': {
                     'lon': item['Point']['pos'].split(' ')[0],
@@ -95,11 +104,24 @@ def get_houses_by_coordinates(lat, lon):
     collection = _get_collection({
         'geocode': '%s,%s' % (lon, lat),
         'format': 'json',
-        'kind': 'house',
+        'kind': HOUSE,
         'results': MAX_RESULT
     })
     if collection:
         return _parse_collection(collection, kind='house')
+    else:
+        return []
+
+
+def get_areas_by_coordinates(lat, lon):
+    collection = _get_collection({
+        'geocode': '%s,%s' % (lon, lat),
+        'format': 'json',
+        'kind': DISTRICT,
+        'results': MAX_RESULT
+    })
+    if collection:
+        return _parse_collection(collection, kind='district')
     else:
         return []
 

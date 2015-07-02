@@ -11,6 +11,8 @@
             <tr>
                 <th>Статус</th>
                 <th>Адрес</th>
+                <th>Район</th>
+                <th>Тип поиска</th>
                 <th>Минимальная сумма</th>
                 <th>Стоимость доставки</th>
                 <th>Комментарий</th>
@@ -26,6 +28,8 @@
                             {{ zone.address_str }}
                         </a>
                     </td>
+                    <td>{{ zone.address.area }}</td>
+                    <td>{{ ZONE_MAP[zone.search_type] }}</td>
                     <td>{{ zone.min_sum }}</td>
                     <td>{{ zone.price }}</td>
                     <td>{% if zone.comment %} {{ zone.comment }} {% endif %}</td>
