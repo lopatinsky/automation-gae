@@ -25,7 +25,8 @@ from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseS
     DeliverySlotEditHandler
 from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, AddPushesHandler, ChangeParseApiKeys, \
     CancelPushHandler, CancelNewsHandler
-from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler
+from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \
+    AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

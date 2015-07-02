@@ -90,27 +90,34 @@ def get_venue_and_zone_by_address(address):
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                     for zone in delivery.delivery_zones:
                         zone = zone.get()
+                        zone.found = True  # it is used for mark precise address receipt
                         if not zone.geo_ribs:
                             if address['address']['city'] == zone.address.city:
                                 return venue, zone
                         else:
-                            pass
-    # case 2: get first venue with default flag
-    venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
-    for venue in venues:
-        for delivery in venue.delivery_types:
-            if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                for zone in delivery.delivery_zones:
-                    zone = zone.get()
-                    return venue, zone
-    # case 3: get first venue
-    venues = Venue.query(Venue.active == True).fetch()
-    for venue in venues:
-        for delivery in venue.delivery_types:
-            if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                for zone in delivery.delivery_zones:
-                    zone = zone.get()
-                    return venue, zone
+                            if zone.is_included(address):
+                                return venue, zone
+    if not address.get('coordinates') or not address['coordinates'].get('lat') or not address['coordinates'].get('lon'):
+        # case 2: get first venue with default flag
+        venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in delivery.delivery_zones:
+                        zone = zone.get()
+                        zone.found = False  # it is used for mark precise address receipt
+                        if zone.status == STATUS_AVAILABLE:
+                            return venue, zone
+        # case 3: get first venue
+        venues = Venue.query(Venue.active == True).fetch()
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in delivery.delivery_zones:
+                        zone = zone.get()
+                        zone.found = False  # it is used for mark precise address receipt
+                        if zone.status == STATUS_AVAILABLE:
+                            return venue, zone
     return None, None
 
 
