@@ -18,7 +18,9 @@ def _order_data(order):
         "created_time": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
         "delivery_time": (order.delivery_time + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
         "payment_type": PAYMENT_TYPE_MAP[order.payment_type_id],
-        "total_sum": order.total_sum if order.payment_type_id != 666 else 0,
+        "total_sum_without_promos": sum(d.price / 100.0 for d in order.item_details),
+        "total_sum_with_promos_without_wallet": order.total_sum - order.wallet_payment,
+        "total_sum": order.total_sum,
         "venue_revenue": sum(d.revenue for d in order.item_details),
         "venue": venue.title,
         "items": []
