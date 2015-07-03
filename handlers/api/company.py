@@ -34,6 +34,7 @@ class CompanyInfoHandler(ApiHandler):
             'phone': config.SUPPORT_PHONE,
             'site': config.SUPPORT_SITE,
             'emails': config.SUPPORT_EMAILS,
+            'place_type': config.PLACE_TYPE,
             'push_channels': get_channels(namespace_manager.get_namespace())
         })
 

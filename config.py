@@ -3,12 +3,13 @@ import threading
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 
+OTHER = -1
 VENUE = 0
 BAR = 1
 
-PLACE_TYPES = [
-    VENUE, BAR
-]
+PLACE_TYPES = (
+    OTHER, VENUE, BAR
+)
 
 
 class Config(ndb.Model):
@@ -26,7 +27,7 @@ class Config(ndb.Model):
 
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)
 
-    PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES)
+    PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES, default=OTHER)
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
