@@ -1,14 +1,16 @@
 import json
 import logging
+from urlparse import urlparse
 from google.appengine.api.namespace_manager import namespace_manager
-import webapp2
+from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from models.proxy.unified_app import AutomationCompany
-from config import Config
+from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
+from webapp2_extras import auth
 
 
-class ApiHandler(webapp2.RequestHandler):
-    @webapp2.cached_property
+class ApiHandler(RequestHandler):
+    @cached_property
     def jinja2(self):
         return jinja2.get_jinja2(app=self.app)
 
@@ -17,22 +19,33 @@ class ApiHandler(webapp2.RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
-        config = Config.get()
-        if not config:
-            self.abort(423)
-        logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
-        namespace = self.request.headers.get('Namespace')
-        self.request.init_namespace = None
-        if namespace:
-            proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
-            if proxy_company:
-                self.request.init_namespace = namespace_manager.get_namespace()
-                namespace_manager.set_namespace(namespace)
+        if urlparse(self.request.url).hostname == PRODUCTION_HOSTNAME:
+            config = Config.get()
+            if not config:
+                self.abort(423)
+            logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
+            namespace = self.request.headers.get('Namespace')
+            self.request.init_namespace = None
+            if namespace:
+                proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
+                if proxy_company:
+                    self.request.init_namespace = namespace_manager.get_namespace()
+                    namespace_manager.set_namespace(namespace)
+        elif urlparse(self.request.url).hostname == DEMO_HOSTNAME:
+            namespace = self.request.headers.get('Namespace')
+            namespace_manager.set_namespace(namespace)
+            config = Config.get()
+            if not config:
+                self.abort(403)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)
         return return_value
+
+    @cached_property
+    def auth(self):
+        return auth.get_auth(request=self.request)
 
     def abort(self, code, *args, **kwargs):
         if code == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:

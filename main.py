@@ -64,6 +64,10 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/api', [
+        PathPrefixRoute('/demo', [
+            Route('/login', api.DemoLoginHandler),
+        ]),
+
         PathPrefixRoute('/courier', [
             Route('/login', courier.LoginHandler),
             Route('/logout', courier.LogoutHandler),

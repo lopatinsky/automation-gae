@@ -20,3 +20,4 @@ from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler, 
 from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler, ValidateAddressHandler
 from statuses import StatusHandler, ClientSettingSuccessHandler
+from demo import DemoLoginHandler

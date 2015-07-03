@@ -13,6 +13,9 @@ MEAL_LOGIC = 1
 OTHER = 2
 SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
+DEMO_HOSTNAME = u'automation-demo.appspot.com'
+PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
+
 
 class Config(ndb.Model):
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
