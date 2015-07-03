@@ -19,7 +19,7 @@ class ApiHandler(RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
-        if urlparse(self.request.url).hostname == PRODUCTION_HOSTNAME:
+        if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
             config = Config.get()
             if not config:
                 self.abort(423)
