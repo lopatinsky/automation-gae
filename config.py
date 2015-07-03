@@ -6,10 +6,12 @@ from google.appengine.ext import ndb
 OTHER = -1
 VENUE = 0
 BAR = 1
+PLACE_TYPES = (OTHER, VENUE, BAR)
 
-PLACE_TYPES = (
-    OTHER, VENUE, BAR
-)
+COFFEE_LOGIC = 0
+MEAL_LOGIC = 1
+OTHER = 2
+SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
 
 class Config(ndb.Model):
@@ -28,6 +30,7 @@ class Config(ndb.Model):
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES, default=OTHER)
+    SCREEN_LOGIC = ndb.IntegerProperty(choices=SCREEN_LOGICS, default=OTHER)
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
