@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from base import CompanyBaseHandler
 from methods.auth import company_user_required
 from config import config, Config
+from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'
 
@@ -27,6 +28,62 @@ def _get_values():
         'ogrn': config.OGRN if config.OGRN else '',
         'ogrnip': config.OGRNIP if config.OGRNIP else ''
     }
+
+
+class LegalListHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        self.render('/docs/legal_list.html', legals=LegalInfo.query().fetch())
+
+
+class AddLegalListHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        self.render('/docs/add_legal.html')
+
+    def post(self):
+        legal = LegalInfo()
+        legal.name = self.request.get('company_name')
+        legal.address = self.request.get('company_address')
+        legal.site = self.request.get('site')
+        legal.person_ooo = self.request.get('legal_person')
+        legal.person_ip = self.request.get('legal_person_ip')
+        legal.contacts = self.request.get('legal_contacts')
+        legal.email = self.request.get('legal_email')
+        legal.inn = self.request.get('inn')
+        legal.kpp = self.request.get('kpp')
+        legal.ogrn = self.request.get('ogrn')
+        legal.ogrnip = self.request.get('ogrnip')
+        legal.put()
+        self.redirect('/company/docs/about')
+
+
+class EditLegalHandler(CompanyBaseHandler):
+    def get(self):
+        legal_id = self.request.get_range('legal_id')
+        legal = LegalInfo.get_by_id(legal_id)
+        if not legal:
+            self.abort(400)
+        self.render('/docs/add_legal.html', legal=legal)
+
+    def post(self):
+        legal_id = self.request.get_range('legal_id')
+        legal = LegalInfo.get_by_id(legal_id)
+        if not legal:
+            self.abort(400)
+        legal.name = self.request.get('company_name')
+        legal.address = self.request.get('company_address')
+        legal.site = self.request.get('site')
+        legal.person_ooo = self.request.get('legal_person')
+        legal.person_ip = self.request.get('legal_person_ip')
+        legal.contacts = self.request.get('legal_contacts')
+        legal.email = self.request.get('legal_email')
+        legal.inn = self.request.get('inn')
+        legal.kpp = self.request.get('kpp')
+        legal.ogrn = self.request.get('ogrn')
+        legal.ogrnip = self.request.get('ogrnip')
+        legal.put()
+        self.redirect('/company/docs/about')
 
 
 class AboutCompanyHandler(CompanyBaseHandler):
