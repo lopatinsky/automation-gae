@@ -20,7 +20,7 @@ class DoneOrderHandler(RequestHandler):
         order = Order.query(Order.email_key_done == email_key).get()
         if not order:
             return self.response.write(u'Невозможно выдать заказ. Возможно, он отменен.')
-        done_order(order, namespace_manager.get_namespace)
+        done_order(order, namespace_manager.get_namespace())
         self.response.write(u'Заказ успешно выдан!')
 
 

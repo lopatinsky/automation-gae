@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 from google.appengine.api import urlfetch
+from methods.email_mandrill import send_email
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
@@ -27,10 +28,18 @@ def _send_push(channels, data, device_type):
         'X-Parse-Application-Id': config.PARSE_APP_API_KEY,
         'X-Parse-REST-API-Key': config.PARSE_REST_API_KEY
     }
-    result = urlfetch.fetch('https://api.parse.com/1/push', payload=json.dumps(payload), method='POST',
-                            headers=headers, validate_certificate=False, deadline=10).content
-    logging.info(result)
-    return json.loads(result)
+    try:
+        result = json.loads(urlfetch.fetch('https://api.parse.com/1/push', payload=json.dumps(payload), method='POST',
+                            headers=headers, validate_certificate=False, deadline=10).content)
+        logging.info(result)
+        if result and (result.get('code') or result.get('error')):
+            text = u'Code = %s, Error = %s' % (result.get('code'), result.get('error'))
+            send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка Parse', text)
+    except Exception as e:
+        text = str(e)
+        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Parse упал', text)
+        result = None
+    return result
 
 
 def _make_push_data(text, header, device_type):
