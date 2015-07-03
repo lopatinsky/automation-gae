@@ -16,6 +16,7 @@ class Client(ndb.Model):
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES)
     tied_card = ndb.BooleanProperty(default=False)
     device_phone = ndb.StringProperty()
+    android_id = ndb.StringProperty()
     name = ndb.StringProperty()
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
