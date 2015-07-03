@@ -172,7 +172,7 @@ class ChooseDeliveryZonesHandler(CompanyBaseHandler):
         for delivery in venue.delivery_types:
             if delivery.delivery_type == DELIVERY:
                 venue_zone_keys = delivery.delivery_zones
-        zones = DeliveryZone.query().fetch()
+        zones = DeliveryZone.query().order(DeliveryZone.sequence_number).fetch()
         for zone in zones:
             zone.address_str = zone.address.str()
             if zone.key in venue_zone_keys:
