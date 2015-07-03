@@ -19,13 +19,13 @@ class ApiHandler(RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
+        self.request.init_namespace = None
         if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
             config = Config.get()
             if not config:
                 self.abort(423)
             logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
             namespace = self.request.headers.get('Namespace')
-            self.request.init_namespace = None
             if namespace:
                 proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
                 if proxy_company:

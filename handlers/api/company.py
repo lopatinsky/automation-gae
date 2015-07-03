@@ -19,12 +19,12 @@ class CompanyInfoHandler(ApiHandler):
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type not in deliveries:
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type == DELIVERY:
-                    for zone in sorted([zone_key.get() for zone_key in venue_delivery.delivery_zones],
-                                       key=lambda zone: zone.sequence_number):
-                        if zone.key not in zones:
+                    for zone in venue_delivery.delivery_zones:
+                        zone = zone.get()
+                        if zone.status == STATUS_AVAILABLE and zone.key not in zones:
                             zones[zone.key] = zone
         cities = []
-        for zone in zones.values():
+        for zone in sorted(zones.values(), key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
         self.render_json({

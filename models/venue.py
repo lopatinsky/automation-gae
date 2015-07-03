@@ -102,11 +102,13 @@ class DeliveryZone(ndb.Model):
     CITY = 0
     DISTRICT = 1
     ZONE = 2
-    SEARCH_TYPES = (CITY, DISTRICT, ZONE)
+    DEFAULT = 3
+    SEARCH_TYPES = (CITY, DISTRICT, ZONE, DEFAULT)
     SEARCH_MAP = {
         CITY: u'По городу',
         DISTRICT: u'По району',
-        ZONE: u'Собственная зона'
+        ZONE: u'Собственная зона',
+        DEFAULT: u'По умолчанию'
     }
     search_type = ndb.IntegerProperty(choices=SEARCH_TYPES, default=CITY)
     sequence_number = ndb.IntegerProperty()
@@ -115,7 +117,6 @@ class DeliveryZone(ndb.Model):
     price = ndb.IntegerProperty(default=0)
     min_sum = ndb.IntegerProperty(default=0)
     comment = ndb.StringProperty()
-    default = ndb.BooleanProperty(default=False)
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
 
     @staticmethod

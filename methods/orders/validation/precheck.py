@@ -3,7 +3,7 @@ import logging
 import re
 from methods.map import get_houses_by_address, get_areas_by_coordinates
 from methods.rendering import STR_TIME_FORMAT
-from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone
+from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
@@ -95,6 +95,8 @@ def get_venue_and_zone_by_address(address):
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
                     for zone in sorted([zone_key.get() for zone_key in delivery.delivery_zones],
                                        key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
                         zone.found = True  # it is used for mark precise address receipt
                         if zone.search_type == DeliveryZone.CITY:
                             if address['address']['city'] == zone.address.city:
@@ -113,6 +115,8 @@ def get_venue_and_zone_by_address(address):
                         elif zone.search_type == DeliveryZone.ZONE:
                             if has_coords and zone.is_included(address):
                                 return venue, zone
+                        elif zone.search_type == DeliveryZone.DEFAULT:
+                            return venue, zone
     if not address or\
             not address.get('coordinates') or\
             not address['coordinates'].get('lat') or\
@@ -123,8 +127,10 @@ def get_venue_and_zone_by_address(address):
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                    for zone in delivery.delivery_zones:
-                        zone = zone.get()
+                    for zone in sorted([zone_key.get() for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
                         zone.found = False  # it is used for mark precise address receipt
                         if zone.status == STATUS_AVAILABLE:
                             return venue, zone
@@ -133,8 +139,10 @@ def get_venue_and_zone_by_address(address):
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                    for zone in delivery.delivery_zones:
-                        zone = zone.get()
+                    for zone in sorted([zone_key.get() for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
                         zone.found = False  # it is used for mark precise address receipt
                         if zone.status == STATUS_AVAILABLE:
                             return venue, zone
