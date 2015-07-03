@@ -25,6 +25,9 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 address = venue.address
                 address.lat = venue.coordinates.lat
                 address.lon = venue.coordinates.lon
+                candidates = get_areas_by_coordinates(address.lat, address.lon)
+                if candidates:
+                    address.area = candidates[0]['address']['area']
                 zone = DeliveryZone(address=address)
                 zone.put()
                 for delivery in venue.delivery_types:
