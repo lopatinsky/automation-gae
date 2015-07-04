@@ -60,18 +60,17 @@
             <th>Время заказа</th>
             <th>Время самовывоза</th>
             <th>Статус заказа</th>
-            <th>Комментарий клиента</th>
-            <th>Комментарий отмены</th>
             <th>Тип оплаты</th>
             <th>Полная сумма</th>
             <th>Сумма с учетом скидок</th>
             <th>Сумма с учетом скидок и личного счета</th>
             <th>id клиента</th>
             <th>Имя</th>
-            <th>Фамилия</th>
             <th>Номер телефона</th>
             <th>Позиция в заказе</th>
             <th>Количество</th>
+            <th>Комментарий клиента</th>
+            <th>Комментарий отмены</th>
         </tr>
         {% for order in orders %}
             {% set icount = order["items"]|length %}
@@ -82,15 +81,12 @@
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.created_time }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.delivery_time }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.status }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.comment }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.return_comment }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.payment_type }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum_without_promos }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum_with_promos_without_wallet }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.id }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.name }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.surname }}</td>
+                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.phone }}</td>
 
                 {% for item in order["items"] %}
@@ -98,13 +94,17 @@
                         </tr>
                         <tr>
                         {% if btn_type == 'xls' %}
-                            {% for i in range(12) %}
+                            {% for i in range(13) %}
                                 <td></td>
                             {% endfor %}
                         {% endif %}
                     {% endif %}
                     <td>{{ item.title }}</td>
                     <td>{{ item.quantity }}</td>
+                    {% if loop.index0 == 0 %}
+                        <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.comment }}</td>
+                        <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.return_comment }}</td>
+                    {% endif %}
                 {% endfor %}
             </tr>
         {% endfor %}
