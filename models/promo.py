@@ -83,7 +83,7 @@ class Promo(ndb.Model):
             outcome = self.outcomes[0]
             if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT]:
                 icon = self._get_url(hostname, self.BONUS_ICON)
-            elif outcome.method in [PromoOutcome.CASH_BACK]:
+            elif outcome.method in [PromoOutcome.CASH_BACK, PromoOutcome.CASH_BACK_WITHOUT_WALLET_PAYMENT]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
             elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
                                     PromoOutcome.FIX_DISCOUNT]:
