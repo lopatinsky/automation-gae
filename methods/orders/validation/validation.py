@@ -291,7 +291,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
         wallet_balance = empatika_wallet.get_balance(client.key.id())
-        max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum_without_promos), wallet_balance / 100.0)
+        max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum), wallet_balance / 100.0)
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
 
     logging.info('item_dicts = %s' % item_dicts)
