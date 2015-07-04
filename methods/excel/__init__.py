@@ -16,6 +16,8 @@ def send_excel_file(request_handler, name, template_name, **values):
         for j, td in enumerate(tr.getchildren()):
             if td.text:
                 td = u''.join(td.text)
+                if u'😊'in td:
+                    continue
                 try:
                     td = float(td)
                 except ValueError:

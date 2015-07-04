@@ -89,6 +89,13 @@
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
                 <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.phone }}</td>
 
+                {% if not order["items"] %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
+
                 {% for item in order["items"] %}
                     {% if loop.index0 > 0 %}
                         </tr>
