@@ -29,9 +29,8 @@ class PromoOutcome(ndb.Model):
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
     FIX_DISCOUNT = 7
-    CASH_BACK_WITHOUT_WALLET_PAYMENT = 8
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, CASH_BACK_WITHOUT_WALLET_PAYMENT)
+               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -83,7 +82,7 @@ class Promo(ndb.Model):
             outcome = self.outcomes[0]
             if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT]:
                 icon = self._get_url(hostname, self.BONUS_ICON)
-            elif outcome.method in [PromoOutcome.CASH_BACK, PromoOutcome.CASH_BACK_WITHOUT_WALLET_PAYMENT]:
+            elif outcome.method in [PromoOutcome.CASH_BACK]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
             elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
                                     PromoOutcome.FIX_DISCOUNT]:
@@ -122,5 +121,4 @@ OUTCOME_MAP = {
     PromoOutcome.ORDER_GIFT: u'Подарок',
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
-    PromoOutcome.CASH_BACK_WITHOUT_WALLET_PAYMENT: u'Кэшбек без учета оплаты кошельком'
 }

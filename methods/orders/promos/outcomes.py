@@ -22,10 +22,12 @@ def _apply_discounts(item_dict, promo, discount):
         return False
 
 
-def _apply_cash_back(item_dict, promo, cash_back, order=None):
+def _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order=None):
     if promo not in item_dict['promos']:
         if order:
-            order.cash_backs.append(CashBack(amount=int(cash_back * item_dict['price'] * 100)))
+            cash_back_amount = cash_back * item_dict['price']
+            cash_back_without_wallet = cash_back_amount * (1 - wallet_payment_sum / init_total_sum)
+            order.cash_backs.append(CashBack(amount=int(cash_back_without_wallet * 100)))
         item_dict['promos'].append(promo)
         return True
     return False
@@ -53,18 +55,17 @@ def set_discounts(response, outcome, item_dicts, promo):
     return response
 
 
-def set_cash_back(response, outcome, item_dicts, promo, order):
+def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_payment_sum, order):
     cash_back = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
     if item_keys.get(outcome.item):
         for item_dict in item_keys[outcome.item]:
-            if _apply_cash_back(item_dict, promo, cash_back, order):
+            if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
                 promo_applied = True
     if not outcome.item_required:
-        for item_dict in item_dicts:
-            if _apply_cash_back(item_dict, promo, cash_back, order):
-                promo_applied = True
+        _apply_total_cash_back(init_total_sum - wallet_payment_sum, cash_back, order)
+        promo_applied = True
     if order:
         order.put()
     response.success = promo_applied
@@ -184,12 +185,4 @@ def set_fix_discount(response, outcome, init_total_sum):
         discount = init_total_sum
     response.success = True
     response.discount = discount
-    return response
-
-
-def set_cash_back_without_wallet(response, outcome, init_total_sum, wallet_payment, order):
-    sum_without_wallet = init_total_sum - wallet_payment
-    cash_back = float(outcome.value) / 100.0
-    _apply_total_cash_back(sum_without_wallet, cash_back, order)
-    response.success = True
     return response

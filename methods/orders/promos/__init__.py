@@ -2,7 +2,7 @@ from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
-    add_order_gift, set_order_gift_points, set_fix_discount, set_cash_back_without_wallet
+    add_order_gift, set_order_gift_points, set_fix_discount
 
 
 class OutcomeResult:
@@ -55,7 +55,7 @@ def _set_outcome(errors, outcome, items, promo, client, wallet_payment_sum, new_
     if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(response, outcome, items, promo)
     if outcome.method == PromoOutcome.CASH_BACK:
-        return set_cash_back(response, outcome, items, promo, order)
+        return set_cash_back(response, outcome, items, promo, _get_initial_total_sum(items), wallet_payment_sum, order)
     if outcome.method == PromoOutcome.DISCOUNT_CHEAPEST:
         return set_discount_cheapest(response, outcome, items, promo)
     if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
@@ -68,8 +68,6 @@ def _set_outcome(errors, outcome, items, promo, client, wallet_payment_sum, new_
         return set_order_gift_points(response, outcome, order)
     if outcome.method == PromoOutcome.FIX_DISCOUNT:
         return set_fix_discount(response, outcome, _get_initial_total_sum(items))
-    if outcome.method == PromoOutcome.CASH_BACK_WITHOUT_WALLET_PAYMENT:
-        return set_cash_back_without_wallet(response, outcome, _get_initial_total_sum(items), wallet_payment_sum, order)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type, order_gift_dicts,
