@@ -2,7 +2,7 @@
 __author__ = 'dvpermyakov'
 
 import lxml.html
-import pyExcelerator
+import xlwt
 from datetime import datetime
 
 
@@ -10,7 +10,7 @@ def send_excel_file(request_handler, name, template_name, **values):
     values['btn_type'] = 'xls'
     html_body = request_handler.jinja2.render_template('mt/reports/' + template_name, **values)
     page = lxml.html.fromstring(html_body)
-    book = pyExcelerator.Workbook()
+    book = xlwt.Workbook()
     sheet = book.add_sheet(name)
     for i, tr in enumerate(page.xpath("body/table")[0].findall("tr")):
         for j, td in enumerate(tr.getchildren()):
