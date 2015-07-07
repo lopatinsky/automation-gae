@@ -5,11 +5,12 @@ import lxml.html
 import xlwt
 from datetime import datetime
 from collections import defaultdict
+from webapp2_extras import jinja2
 
 
-def send_excel_file(request_handler, name, template_name, **values):
+def send_excel_file(request_handler, name, template_name,  **values):
     values['btn_type'] = 'xls'
-    html_body = request_handler.jinja2.render_template('mt/reports/' + template_name, **values)
+    html_body = jinja2.get_jinja2().render_template('mt/reports/' + template_name, **values)
     page = lxml.html.fromstring(html_body)
     book = xlwt.Workbook()
     sheet = book.add_sheet(name)
@@ -42,7 +43,9 @@ def send_excel_file(request_handler, name, template_name, **values):
                 for col in range(j, j + colspan):
                     cells_used[row].add(col)
 
-    request_handler.response.headers['Content-Type'] = 'application/ms-excel'
-    request_handler.response.headers['Content-Transfer-Encoding'] = 'Binary'
-    request_handler.response.headers['Content-disposition'] = 'attachment; filename="%s-%s.xls"' % (datetime.now().date(), name)
-    book.save(request_handler.response.out)
+    if request_handler:
+        request_handler.response.headers['Content-Type'] = 'application/ms-excel'
+        request_handler.response.headers['Content-Transfer-Encoding'] = 'Binary'
+        request_handler.response.headers['Content-disposition'] = 'attachment; filename="%s-%s.xls"' % (datetime.now().date(), name)
+        book.save(request_handler.response.out)
+    return book
