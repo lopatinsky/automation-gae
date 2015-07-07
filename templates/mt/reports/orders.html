@@ -110,6 +110,22 @@
                 {% endfor %}
             </tr>
         {% endfor %}
+        {% for total in totals %}
+            <tr>
+                <td colspan="6">Итого заказов ({{ total.status }} / {{ total.payment_type }})</td>
+                <td>{{ total.orders_number }}</td>
+                <td>{{ total.total_sum_without_promos }}</td>
+                <td>{{ total.total_sum }}</td>
+                <td>{{ total.total_sum_with_promos_without_wallet }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endfor %}
     </table>
     {% if padmin %}
         <a href="/company/report/main">Назад</a>

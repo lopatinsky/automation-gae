@@ -1,8 +1,9 @@
 # coding=utf-8
 from collections import Counter
 from datetime import datetime, timedelta
-from models.order import STATUS_MAP
-from models.payment_types import PAYMENT_TYPE_MAP
+from config import config
+from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
+from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, Venue
 
@@ -42,6 +43,29 @@ def _order_data(order):
     return dct
 
 
+def _total(orders, status, payment_type):
+    count = 0
+    total_sum = 0.0
+    total_sum_without_promos = 0.0
+    total_payment = 0.0
+
+    for order in orders:
+        if (status is not None and order.status != status) or \
+                (payment_type is not None and order.payment_type_id != payment_type):
+            continue
+        count += 1
+        total_sum += total_sum
+        total_sum_without_promos += sum(d.price / 100.0 for d in order.item_details)
+        total_payment += order.total_sum - order.wallet_payment
+    return {
+        "orders_number": count,
+        "status": STATUS_MAP[status] if status is not None else u'Все статусы',
+        "payment_type": PAYMENT_TYPE_MAP[payment_type] if payment_type is not None else u'Все способы оплаты',
+        "total_sum_without_promos": total_sum_without_promos,
+        "total_sum_with_promos_without_wallet": total_payment,
+        "total_sum": total_sum
+    }
+
 def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     if not venue_id:
         venue_id = 0
@@ -79,6 +103,15 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     orders = query.fetch()
     order_dicts = [_order_data(order) for order in orders]
 
+    totals = [
+        _total(orders, READY_ORDER, CASH_PAYMENT_TYPE),
+        _total(orders, READY_ORDER, CARD_PAYMENT_TYPE),
+        _total(orders, READY_ORDER, PAYPAL_PAYMENT_TYPE) if config.PAYPAL_CLIENT_ID else None,
+        _total(orders, CANCELED_BY_CLIENT_ORDER, None),
+        _total(orders, CANCELED_BY_BARISTA_ORDER, None)
+    ]
+    totals = filter(None, totals)
+
     values = {
         'venues': Venue.query().fetch(),
         'orders': order_dicts,
@@ -87,6 +120,7 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
         'chosen_venue': venue_id,
         'chosen_year': chosen_year,
         'chosen_month': chosen_month,
-        'chosen_day': chosen_day
+        'chosen_day': chosen_day,
+        'totals': totals,
     }
     return values
