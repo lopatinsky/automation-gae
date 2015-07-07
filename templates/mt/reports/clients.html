@@ -58,11 +58,9 @@
              <th>Платформа</th>
              <th>Всего заказов</th>
              <th>Выданных заказов</th>
-             <th>Сумма с учетом акций Даблби</th>
-             {% if not padmin %}
-                <th>Полная сумма по меню</th>
-             {% endif %}
-             <th>Оплачено клиентом</th>
+             <!--th>Полная сумма по меню</th-->
+             <th>Сумма с учетом скидок</th>
+             <th>Сумма с учетом скидок и личного счета</th>
              <th>Отмененных заказов</th>
              <th>Сумма отмененных заказов</th>
              <th>Средний чек</th>
@@ -75,10 +73,8 @@
                  <td>{{ "Android" if client.device_type else "iOS" }}</td>
                  <td>{{ client.amount_orders }}</td>
                  <td>{{ client.amount_orders - client.cancel_number }}</td>
+                 <!--td>{{ client.menu_sum }}</td-->
                  <td>{{ client.venue_sum }}</td>
-                 {% if not padmin %}
-                    <td>{{ client.menu_sum }}</td>
-                 {% endif %}
                  <td>{{ client.payment }}</td>
                  <td>{{ client.cancel_number }}</td>
                  <td>{{ client.cancel_sum }}</td>
@@ -92,14 +88,12 @@
              <td><b>Total</b></td>
              <td>{{ venue_number }}</td>
              <td>{{ venue_number - venue_cancel_number }}</td>
+             <!--td>{{ venue_expenditure }}</td-->
              <td>{{ venue_revenue }}</td>
-             {% if not padmin %}
-                <td>{{ venue_expenditure }}</td>
-             {% endif %}
              <td>{{ venue_payment }}</td>
              <td>{{ venue_cancel_number }}</td>
              <td>{{ venue_cancel_sum }}</td>
-             <td>{{ venue_expenditure / venue_number if venue_number else "-" }}</td>
+             <td>{{ (venue_revenue + venue_cancel_sum) / venue_number if venue_number else "-" }}</td>
          </tr>
      </table>
 

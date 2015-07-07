@@ -13,21 +13,16 @@ class ReportedClient:
         self.client_id = client_id
         self.name = name
         self.tel = tel
-        self.amount_orders = 1
-        self.average_order_cost = order_sum
+        self.amount_orders = 0
         self.device_type = device_type
-        if not is_cancel:
-            self.venue_sum = venue_sum
-            self.menu_sum = order_sum
-            self.payment = payment
-            self.cancel_number = 0
-            self.cancel_sum = 0
-        else:
-            self.venue_sum = 0
-            self.menu_sum = 0
-            self.payment = 0
-            self.cancel_number = 1
-            self.cancel_sum = order_sum
+        self.cancel_number = 0
+        self.venue_sum = 0
+        self.cancel_sum = 0
+        self.menu_sum = 0
+        self.payment = 0
+        self.average_order_cost = 0
+
+        self.add_order(venue_sum, order_sum, payment, is_cancel)
 
     def add_order(self, venue_sum, order_sum, payment, is_cancel):
         self.amount_orders += 1
@@ -37,8 +32,8 @@ class ReportedClient:
             self.payment += payment
         else:
             self.cancel_number += 1
-            self.cancel_sum += order_sum
-        self.average_order_cost = (self.menu_sum + self.cancel_sum) / self.amount_orders
+            self.cancel_sum += venue_sum
+        self.average_order_cost = (self.venue_sum+ self.cancel_sum) / self.amount_orders
 
 
 def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chosen_days=None):
@@ -60,7 +55,7 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chose
     for order in query.fetch():
         client_id = order.client_id
         total_sum = sum(item.get().price for item in order.items)
-        payment = order.total_sum if order.payment_type_id != 666 else 0
+        payment = order.total_sum - order.wallet_payment
         venue_sum = sum(d_item.revenue for d_item in order.item_details)
         if client_id in clients:
             clients[client_id].add_order(venue_sum, total_sum, payment,
