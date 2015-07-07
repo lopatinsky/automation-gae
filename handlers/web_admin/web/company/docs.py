@@ -55,7 +55,7 @@ class AddLegalListHandler(CompanyBaseHandler):
         legal.ogrn = self.request.get('ogrn')
         legal.ogrnip = self.request.get('ogrnip')
         legal.put()
-        self.redirect('/company/docs/about')
+        self.redirect('/company/docs/legal/list')
 
 
 class EditLegalHandler(CompanyBaseHandler):

@@ -20,7 +20,7 @@ from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, 
     VenueListHandler, ChooseDeliveryZonesHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
-from docs import AboutCompanyHandler, SetAboutCompanyHandler
+from docs import AboutCompanyHandler, SetAboutCompanyHandler, LegalListHandler, AddLegalListHandler, EditLegalHandler
 from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseSlotsHandler, DeliverySlotListHandler, \
     DeliverySlotEditHandler
 from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, AddPushesHandler, ChangeParseApiKeys, \

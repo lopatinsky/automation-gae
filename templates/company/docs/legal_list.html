@@ -4,6 +4,8 @@
     <title>Список юридических лиц</title>
 </head>
 <body>
+    {% include '/company/header.html' %}
+    <a href="/company/docs/legal/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Название</th>
@@ -19,18 +21,23 @@
             <th>ОРГИП</th>
         </tr>
         {% for legal in legals %}
-            <td>{{ legal.name }}</td>
-            <td>{{ legal.address }}</td>
-            <td>{{ legal.site }}</td>
-            <td>{{ legal.person_ooo }}</td>
-            <td>{{ legal.person_ip }}</td>
-            <td>{{ legal.contacts }}</td>
-            <td>{{ legal.email }}</td>
-            <td>{{ legal.inn }}</td>
-            <td>{{ legal.kpp }}</td>
-            <td>{{ legal.ogrn }}</td>
-            <td>{{ legal.ogrnip }}</td>
+            <tr>
+                <td>
+                    <a href="{{ '/company/docs/legal/edit?legal_id=%s' % legal.key.id() }}">{{ legal.name }}</a>
+                </td>
+                <td>{{ legal.address }}</td>
+                <td>{{ legal.site }}</td>
+                <td>{{ legal.person_ooo }}</td>
+                <td>{{ legal.person_ip }}</td>
+                <td>{{ legal.contacts }}</td>
+                <td>{{ legal.email }}</td>
+                <td>{{ legal.inn }}</td>
+                <td>{{ legal.kpp }}</td>
+                <td>{{ legal.ogrn }}</td>
+                <td>{{ legal.ogrnip }}</td>
+            </tr>
         {% endfor %}
     </table>
+    <a href="/company/main">Назад</a>
 </body>
 </html>

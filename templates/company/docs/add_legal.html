@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить юр. лицо</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Название
+            <input type="text" name="company_name" {% if legal %} value="{{ legal.name }}" {% endif %}>
+        </label><br>
+        <label>
+            Адрес
+            <input type="text" name="company_address" {% if legal %}  value="{{ legal.address }}" {% endif %}>
+        </label><br>
+        <label>
+            Сайт
+            <input type="text" name="site" {% if legal %}  value="{{ legal.site }}" {% endif %}>
+        </label><br>
+        <label>
+            ООО
+            <input type="text" name="legal_person" {% if legal %}  value="{{ legal.person_ooo }}" {% endif %}>
+        </label><br>
+        <label>
+            ИП
+            <input type="text" name="legal_person_ip" {% if legal %}  value="{{ legal.person_ip }}" {% endif %}>
+        </label><br>
+        <label>
+            Контакты
+            <input type="text" name="legal_contacts" {% if legal %}  value="{{ legal.contacts }}" {% endif %}>
+        </label><br>
+        <label>
+            Email
+            <input type="text" name="legal_email" {% if legal %}  value="{{ legal.email }}" {% endif %}>
+        </label><br>
+        <label>
+            ИНН
+            <input type="text" name="inn" {% if legal %}  value="{{ legal.inn }}" {% endif %}>
+        </label><br>
+        <label>
+            КПП
+            <input type="text" name="kpp" {% if legal %}  value="{{ legal.kpp }}" {% endif %}>
+        </label><br>
+        <label>
+            ОГРН
+            <input type="text" name="ogrn" {% if legal %}  value="{{ legal.ogrn }}" {% endif %}>
+        </label><br>
+        <label>
+            ОГРНИП
+            <input type="text" name="ogrnip" {% if legal %}  value="{{ legal.ogrnip }}" {% endif %}>
+        </label><br>
+        <input type="submit">
+        <a href="/company/docs/legal/list">Назад</a>
+    </form>
+</body>
+</html>
