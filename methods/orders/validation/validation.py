@@ -288,6 +288,12 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          order_gift_dicts, cancelled_order_gift_dicts, order)
 
+    wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
+    if config.WALLET_ENABLED:
+        valid, error = check_wallet_payment(total_sum, wallet_payment_sum)
+        if not valid:
+            return send_error(error)
+
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
         wallet_balance = empatika_wallet.get_balance(client.key.id())
