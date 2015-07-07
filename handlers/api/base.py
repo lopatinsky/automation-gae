@@ -32,11 +32,12 @@ class ApiHandler(RequestHandler):
                     self.request.init_namespace = namespace_manager.get_namespace()
                     namespace_manager.set_namespace(namespace)
         elif urlparse(self.request.url).hostname == DEMO_HOSTNAME:
-            namespace = self.request.headers.get('Namespace')
-            namespace_manager.set_namespace(namespace)
-            config = Config.get()
-            if not config:
-                self.abort(403)
+            if not namespace_manager.get_namespace():
+                namespace = self.request.headers.get('Namespace')
+                namespace_manager.set_namespace(namespace)
+                config = Config.get()
+                if not config:
+                    self.abort(403)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
