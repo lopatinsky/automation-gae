@@ -4,6 +4,7 @@ __author__ = 'dvpermyakov'
 import lxml.html
 import xlwt
 from datetime import datetime
+from collections import defaultdict
 
 
 def send_excel_file(request_handler, name, template_name, **values):
@@ -12,17 +13,32 @@ def send_excel_file(request_handler, name, template_name, **values):
     page = lxml.html.fromstring(html_body)
     book = xlwt.Workbook()
     sheet = book.add_sheet(name)
+    cells_used = defaultdict(set)
+
+    style = xlwt.XFStyle()
+    style.borders.left = style.borders.right = style.borders.top = style.borders.bottom = xlwt.Borders.THIN
+
     for i, tr in enumerate(page.xpath("body/table")[0].findall("tr")):
         for j, td in enumerate(tr.getchildren()):
-            if td.text:
-                td = u''.join(td.text)
-                if u'😊'in td:
-                    continue
-                try:
-                    td = float(td)
-                except ValueError:
-                    pass
-                sheet.write(i, j, td)
+            while j in cells_used[i]:
+                j += 1
+
+            if i == 0 and "data-no-excel" in td.attrib:
+                sheet.col(j).width = 0
+
+            value = u''.join(td.text) if td.text else u''
+            try:
+                value = float(value)
+            except ValueError:
+                pass
+
+            rowspan = int(td.attrib.get("rowspan", "1"))
+            if rowspan > 1:
+                sheet.write_merge(i, i + rowspan - 1, j, j, value, style)
+            else:
+                sheet.write(i, j, value, style)
+            for row in xrange(i, i + rowspan):
+                cells_used[row].add(j)
 
     request_handler.response.headers['Content-Type'] = 'application/ms-excel'
     request_handler.response.headers['Content-Transfer-Encoding'] = 'Binary'

@@ -55,18 +55,18 @@
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Номер заказа</th>
-            <th>Кофейня</th>
+            <th>Точка</th>
             <th>Дата создания</th>
             <th>Время заказа</th>
-            <th>Время самовывоза</th>
+            <th data-no-excel>Время самовывоза</th>
             <th>Статус заказа</th>
             <th>Тип оплаты</th>
             <th>Полная сумма</th>
             <th>Сумма с учетом скидок</th>
             <th>Сумма с учетом скидок и личного счета</th>
-            <th>id клиента</th>
+            <th data-no-excel>id клиента</th>
             <th>Имя</th>
-            <th>Номер телефона</th>
+            <th data-no-excel>Номер телефона</th>
             <th>Позиция в заказе</th>
             <th>Количество</th>
             <th>Комментарий клиента</th>
@@ -75,19 +75,19 @@
         {% for order in orders %}
             {% set icount = order["items"]|length %}
             <tr>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.order_id }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.venue }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.date }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.created_time }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.delivery_time }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.status }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.payment_type }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum_without_promos }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.total_sum_with_promos_without_wallet }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.id }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
-                <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.client.phone }}</td>
+                <td rowspan="{{ icount }}">{{ order.order_id }}</td>
+                <td rowspan="{{ icount }}">{{ order.venue }}</td>
+                <td rowspan="{{ icount }}">{{ order.date }}</td>
+                <td rowspan="{{ icount }}">{{ order.created_time }}</td>
+                <td rowspan="{{ icount }}">{{ order.delivery_time }}</td>
+                <td rowspan="{{ icount }}">{{ order.status }}</td>
+                <td rowspan="{{ icount }}">{{ order.payment_type }}</td>
+                <td rowspan="{{ icount }}">{{ order.total_sum_without_promos }}</td>
+                <td rowspan="{{ icount }}">{{ order.total_sum }}</td>
+                <td rowspan="{{ icount }}">{{ order.total_sum_with_promos_without_wallet }}</td>
+                <td rowspan="{{ icount }}">{{ order.client.id }}</td>
+                <td rowspan="{{ icount }}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
+                <td rowspan="{{ icount }}">{{ order.client.phone }}</td>
 
                 {% if not order["items"] %}
                     <td></td>
@@ -100,17 +100,12 @@
                     {% if loop.index0 > 0 %}
                         </tr>
                         <tr>
-                        {% if btn_type == 'xls' %}
-                            {% for i in range(13) %}
-                                <td></td>
-                            {% endfor %}
-                        {% endif %}
                     {% endif %}
                     <td>{{ item.title }}</td>
                     <td>{{ item.quantity }}</td>
                     {% if loop.index0 == 0 %}
-                        <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.comment }}</td>
-                        <td rowspan="{% if btn_type == 'xls' %}1{% else %}{{ icount }}{% endif %}">{{ order.return_comment }}</td>
+                        <td rowspan="{{ icount }}">{{ order.comment }}</td>
+                        <td rowspan="{{ icount }}">{{ order.return_comment }}</td>
                     {% endif %}
                 {% endfor %}
             </tr>
