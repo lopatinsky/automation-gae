@@ -18,7 +18,7 @@ def _send(namespace, emails):
     config = Config.get()
 
     yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-    report_data = orders.get(None, yesterday.year, yesterday.month, yesterday.day)
+    report_data = orders.get('0', yesterday.year, yesterday.month, yesterday.day)
 
     excel_file = excel.send_excel_file(None, 'orders', 'orders.html', **report_data)
     io = StringIO()
