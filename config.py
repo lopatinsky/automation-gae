@@ -92,6 +92,8 @@ class Config(ndb.Model):
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
+    REPORT_EMAILS = ndb.StringProperty(indexed=False)
+
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'

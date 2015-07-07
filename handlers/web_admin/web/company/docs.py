@@ -25,7 +25,8 @@ def _get_values():
         'inn': config.INN if config.INN else '',
         'kpp': config.KPP if config.KPP else '',
         'ogrn': config.OGRN if config.OGRN else '',
-        'ogrnip': config.OGRNIP if config.OGRNIP else ''
+        'ogrnip': config.OGRNIP if config.OGRNIP else '',
+        'report_emails': config.REPORT_EMAILS or '',
     }
 
 
@@ -68,5 +69,6 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.KPP = self.request.get('kpp')
         config.OGRN = self.request.get('ogrn')
         config.OGRNIP = self.request.get('ogrnip')
+        config.REPORT_EMAILS = self.request.get('report_emails')
         config.put()
         self.redirect('/company/docs/about')
