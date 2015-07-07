@@ -130,15 +130,19 @@ class AddPushesHandler(CompanyBaseHandler):
         full_text = self.request.get('full_text')
         if not full_text:
             return error(u'Введите полный текст')
-        start = self.request.get('start')
-        if start:
-            try:
-                start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
-            except:
-                return error(u'Неверное время отправки')
+        send_now = bool(self.request.get('send_now'))
+        if send_now:
+            start = datetime.utcnow()
         else:
-            return error(u'Введите время отправки')
-        if start < datetime.utcnow() + timedelta(seconds=MAX_SECONDS_LOSS):
+            start = self.request.get('start')
+            if start:
+                try:
+                    start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
+                except:
+                    return error(u'Неверное время отправки')
+            else:
+                return error(u'Введите время отправки')
+        if not send_now and start < datetime.utcnow() + timedelta(seconds=MAX_SECONDS_LOSS):
             return error(u'Введите время больше текущего в utc')
         channels = []
         if self.request.get('company'):
