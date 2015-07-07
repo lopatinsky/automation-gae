@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 from google.appengine.api import urlfetch
+from google.appengine.api.namespace_manager import namespace_manager
 from methods.email_mandrill import send_email
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
@@ -33,7 +34,7 @@ def _send_push(channels, data, device_type):
                             headers=headers, validate_certificate=False, deadline=10).content)
         logging.info(result)
         if result and (result.get('code') or result.get('error')):
-            text = u'Code = %s, Error = %s' % (result.get('code'), result.get('error'))
+            text = u'Namespace = %s\nCode = %s, Error = %s' % (namespace_manager.get_namespace(), result.get('code'), result.get('error'))
             send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка Parse', text)
     except Exception as e:
         text = str(e)
