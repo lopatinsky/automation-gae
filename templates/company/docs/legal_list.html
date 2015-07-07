@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список юридических лиц</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <a href="/company/docs/legal/add">Добавить</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Название</th>
+            <th>Адрес</th>
+            <th>Сайт</th>
+            <th>ООО</th>
+            <th>IP</th>
+            <th>Контакты</th>
+            <th>Email</th>
+            <th>ИНН</th>
+            <th>КПП</th>
+            <th>ОГРН</th>
+            <th>ОРГИП</th>
+        </tr>
+        {% for legal in legals %}
+            <tr>
+                <td>
+                    <a href="{{ '/company/docs/legal/edit?legal_id=%s' % legal.key.id() }}">{{ legal.name }}</a>
+                </td>
+                <td>{{ legal.address }}</td>
+                <td>{{ legal.site }}</td>
+                <td>{{ legal.person_ooo }}</td>
+                <td>{{ legal.person_ip }}</td>
+                <td>{{ legal.contacts }}</td>
+                <td>{{ legal.email }}</td>
+                <td>{{ legal.inn }}</td>
+                <td>{{ legal.kpp }}</td>
+                <td>{{ legal.ogrn }}</td>
+                <td>{{ legal.ogrnip }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="{{ licence_url }}">Лицензионное соглашение</a><br>
+    <a href="{{ payment_rules_url }}">Правила оплаты</a><br>
+    <a href="{{ paypal_privacy_policy_url }}">Paypal политика конфиденциальности</a><br>
+    <a href="{{ paypal_user_agreement_url }}">Paypal соглашение пользователя</a><br>
+    <br>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

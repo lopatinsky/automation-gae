@@ -1,24 +1,26 @@
 # coding=utf-8
 from base import ApiHandler
 from config import config
+from models import STATUS_AVAILABLE
+from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'
 
 
-def _get_values():
+def _get_values(legal):
     return {
-        'company_name': config.COMPANY_NAME,
+        'company_name': legal.name,
         'app_name': config.APP_NAME,
-        'legal_person': config.LEGAL_PERSON if config.LEGAL_PERSON else config.LEGAL_PERSON_IP,
-        'legal_person_ip': config.LEGAL_PERSON_IP,
-        'site': config.SUPPORT_SITE,
-        'legal_address': config.COMPANY_ADDRESS,
-        'legal_inn': config.INN,
-        'legal_kpp': config.KPP,
-        'legal_ogrn': config.OGRN,
-        'legal_ogrnip': config.OGRNIP,
-        'legal_contacts': config.LEGAL_CONTACTS,
-        'legal_support_email': config.LEGAL_EMAIL
+        'legal_person': legal.person_ooo if legal.person_ooo else legal.person_ip,
+        'legal_person_ip': legal.person_ip,
+        'site': legal.site,
+        'legal_address': legal.address,
+        'legal_inn': legal.inn,
+        'legal_kpp': legal.kpp,
+        'legal_ogrn': legal.ogrn,
+        'legal_ogrnip': legal.ogrnip,
+        'legal_contacts': legal.contacts,
+        'legal_support_email': legal.email
     }
 
 
@@ -31,7 +33,8 @@ class AboutHandler(ApiHandler):
 
 class LicenceHandler(ApiHandler):
     def get(self):
-        self.render_doc('auto_licence_agreement.html', **_get_values())
+        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+            self.render_doc('auto_licence_agreement.html', **_get_values(legal))
 
 
 class NdaHandler(ApiHandler):
@@ -41,14 +44,17 @@ class NdaHandler(ApiHandler):
 
 class PaymentRulesHandler(ApiHandler):
     def get(self):
-        self.render_doc('auto_payment_rules.html', **_get_values())
+        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+            self.render_doc('auto_payment_rules.html', **_get_values(legal))
 
 
 class PaypalPrivacyPolicyHandler(ApiHandler):
     def get(self):
-        self.render_doc('auto_paypal_privacy_policy.html', **_get_values())
+        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+            self.render_doc('auto_paypal_privacy_policy.html', **_get_values(legal))
 
 
 class PaypalUserAgreementHandler(ApiHandler):
     def get(self):
-        self.render_doc('auto_paypal_user_agreement.html', **_get_values())
+        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+            self.render_doc('auto_paypal_user_agreement.html', **_get_values(legal))
