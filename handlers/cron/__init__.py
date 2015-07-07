@@ -3,6 +3,7 @@ from close_orders import CloseOpenedOrdersHandler
 from check_pings import CheckPingsHandler
 from handlers.cron.alfa_errors import CheckAlfaErrorsHandler
 from handlers.cron.build_square_table import BuildSquareTableHandler
+from handlers.cron.reporting import ReportSendHandler
 from inactive_clients import SeveralDaysInactiveClientsHandler, SuccessBindingCardHandler, BindingCardHandler
 from clear_pings import ClearPingsHandler
 from creating_orders import CheckCreatingOrdersHandler
@@ -24,4 +25,5 @@ app = webapp2.WSGIApplication([
     ('/cron/creating_orders', CheckCreatingOrdersHandler),
     ('/cron/resize_image', ResizeImageHandler),
     ('/cron/cancel_gifts', CancelGiftsHandler),
+    ('/cron/send_reports', ReportSendHandler),
 ], debug=True)

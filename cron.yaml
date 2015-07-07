@@ -49,3 +49,7 @@ cron:
   url: /cron/cancel_gifts
   schedule: every day 12:00
   timezone: Europe/Moscow
+
+- description: send daily reports
+  url: /cron/send_reports
+  schedule: every day 07:30
