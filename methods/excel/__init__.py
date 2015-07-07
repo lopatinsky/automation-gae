@@ -33,12 +33,14 @@ def send_excel_file(request_handler, name, template_name, **values):
                 pass
 
             rowspan = int(td.attrib.get("rowspan", "1"))
-            if rowspan > 1:
-                sheet.write_merge(i, i + rowspan - 1, j, j, value, style)
+            colspan = int(td.attrib.get("colspan", "1"))
+            if rowspan > 1 or colspan > 1:
+                sheet.write_merge(i, i + rowspan - 1, j, j + colspan - 1, value, style)
             else:
                 sheet.write(i, j, value, style)
             for row in xrange(i, i + rowspan):
-                cells_used[row].add(j)
+                for col in range(j, j + colspan):
+                    cells_used[row].add(col)
 
     request_handler.response.headers['Content-Type'] = 'application/ms-excel'
     request_handler.response.headers['Content-Transfer-Encoding'] = 'Binary'
