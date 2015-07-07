@@ -70,24 +70,24 @@ class Config(ndb.Model):
     IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
 
     APP_NAME = ndb.StringProperty(indexed=False)
-    COMPANY_NAME = ndb.StringProperty(indexed=False)
+    #COMPANY_NAME = ndb.StringProperty(indexed=False)  # delete
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
-    COMPANY_ADDRESS = ndb.StringProperty(indexed=False)                                          # todo: delete
-    SUPPORT_PHONE = ndb.StringProperty(indexed=False)                                            # todo: delete
-    SUPPORT_SITE = ndb.StringProperty(indexed=False)                                             # todo: delete
-    SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)                            # todo: delete
+    #COMPANY_ADDRESS = ndb.StringProperty(indexed=False)  # delete
+    SUPPORT_PHONE = ndb.StringProperty(indexed=False)
+    SUPPORT_SITE = ndb.StringProperty(indexed=False)
+    SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     DELIVERY_PHONES = ndb.StringProperty(indexed=False, repeated=True)
     DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
 
-    LEGAL_PERSON = ndb.StringProperty(indexed=False)     # OOO                                    # todo: delete
-    LEGAL_PERSON_IP = ndb.StringProperty(indexed=False)  # IP                                     # todo: delete
-    LEGAL_CONTACTS = ndb.StringProperty(indexed=False)                                            # todo: delete
-    LEGAL_EMAIL = ndb.StringProperty(indexed=False)                                               # todo: delete
-    INN = ndb.StringProperty(indexed=False)                                                       # todo: delete
-    KPP = ndb.StringProperty(indexed=False)                                                       # todo: delete
-    OGRN = ndb.StringProperty(indexed=False)                                                      # todo: delete
-    OGRNIP = ndb.StringProperty(indexed=False)                                                    # todo: delete
+    #LEGAL_PERSON = ndb.StringProperty(indexed=False)     # OOO
+    #LEGAL_PERSON_IP = ndb.StringProperty(indexed=False)  # IP
+    #LEGAL_CONTACTS = ndb.StringProperty(indexed=False)
+    #LEGAL_EMAIL = ndb.StringProperty(indexed=False)
+    #INN = ndb.StringProperty(indexed=False)
+    #KPP = ndb.StringProperty(indexed=False)
+    #OGRN = ndb.StringProperty(indexed=False)
+    #OGRNIP = ndb.StringProperty(indexed=False)
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
