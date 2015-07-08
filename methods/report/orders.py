@@ -47,7 +47,7 @@ def _total(orders, status, payment_type):
                 (payment_type is not None and order.payment_type_id != payment_type):
             continue
         count += 1
-        total_sum += total_sum
+        total_sum += order.total_sum
         total_sum_without_promos += sum(d.price / 100.0 for d in order.item_details)
         total_payment += order.total_sum - order.wallet_payment
     return {
