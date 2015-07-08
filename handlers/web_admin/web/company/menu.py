@@ -490,11 +490,9 @@ class DownSingleModifierHandler(CompanyBaseHandler):
         modifier_id = self.request.get_range('modifier_id')
         modifier = SingleModifier.get_by_id(modifier_id)
         if not modifier:
-            logging.info('123')
             self.abort(400)
         next_ = modifier.get_next_modifier()
         if not next_:
-            logging.info('5678')
             self.abort(400)
         number = next_.sequence_number
         next_.sequence_number = modifier.sequence_number
