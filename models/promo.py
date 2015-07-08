@@ -1,5 +1,7 @@
 # coding=utf-8
+import random
 from google.appengine.ext import ndb
+from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.menu import MenuItem
 
@@ -73,9 +75,34 @@ class Promo(ndb.Model):
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
-    priority = ndb.IntegerProperty(default=0)                 # Not Implemented
+    priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+
+    @staticmethod
+    def generate_priority():
+        fastcounter.incr("promo", delta=100, update_interval=1)
+        return fastcounter.get_count("promo") + random.randint(1, 100)
+
+    @classmethod
+    def get_promos_in_order(cls):
+        return sorted([promo for promo in cls.query().fetch()], key=lambda promo: -promo.priority)
+
+    def get_previous(self):
+        promos = self.get_promos_in_order()
+        index = promos.index(self)
+        if index == 0:
+            return None
+        else:
+            return promos[index - 1]
+
+    def get_next(self):
+        promos = self.get_promos_in_order()
+        index = promos.index(self)
+        if index == len(promos) - 1:
+            return None
+        else:
+            return promos[index + 1]
 
     def dict(self, hostname):
         icon = None

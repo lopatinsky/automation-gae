@@ -309,6 +309,8 @@ app = WSGIApplication([
 
         PathPrefixRoute('/promos', [
             Route('/list', company_admin.PromoListHandler),
+            Route('/up', company_admin.UpPromoHandler),
+            Route('/down', company_admin.DownPromoHandler),
             Route('/api_keys', company_admin.ChangeApiKeysHandler),
             Route('/add', company_admin.AddPromoHandler),
             Route('/edit', company_admin.EditPromoHandler),

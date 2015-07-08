@@ -2,6 +2,43 @@
 <html>
 <head>
     <title>Акции</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('.up_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/promos/up' }}",
+                    data: {
+                        promo_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.promo_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/promos/down' }}",
+                    data: {
+                        promo_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.next_id).after($('#tr_' + json.promo_id));
+                        }
+                    }
+                });
+            });
+         });
+    </script>
 </head>
 <body>
     {% include '/company/header.html' %}
@@ -18,6 +55,7 @@
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th rowspan="2">Статус</th>
+                <th rowspan="2">Приоритет</th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Описание</th>
                 <th colspan="3">Условия</th>
@@ -38,6 +76,15 @@
                 <tr>
                     <td rowspan="{{ height + 1 }}">
                         <input type="checkbox" name={{ promo.key.id() }} {% if promo.status %} checked {% endif %}>
+                    </td>
+                    <td rowspan="{{ height + 1 }}">
+                        <button class="up_button" id="{{ promo.key.id() }}">
+                            Вверх
+                        </button>
+                        <br>
+                        <button class="down_button" id="{{ promo.key.id() }}">
+                            Вниз
+                        </button>
                     </td>
                     <td rowspan="{{ height + 1 }}">
                         <a href="{{ '/company/promos/edit?promo_id=%s' % promo.key.id() }}">

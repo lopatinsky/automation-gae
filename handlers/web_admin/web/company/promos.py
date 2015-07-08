@@ -1,4 +1,5 @@
 # coding:utf-8
+import json
 from config import config, Config
 from methods.auth import company_user_required
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem
@@ -16,7 +17,7 @@ FEATURES_TYPES = [CONDITION, OUTCOME]
 class PromoListHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        promos = Promo.query().fetch()
+        promos = Promo.query().order(-Promo.priority).fetch()
         for promo in promos:
             for condition in promo.conditions:
                 condition.value_string = str(condition.value) if condition.value else ""
@@ -75,6 +76,7 @@ class AddPromoHandler(CompanyBaseHandler):
         promo = Promo()
         promo.title = self.request.get('name')
         promo.description = self.request.get('description')
+        promo.priority = Promo.generate_priority()
         promo.put()
         self.redirect('/company/promos/list')
 
@@ -281,3 +283,49 @@ class AddGiftHandler(CompanyBaseHandler):
                 gift.points = self.request.get_range('points')
                 gift.put()
         self.redirect('/company/promos/gifts/list')
+
+
+class UpPromoHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        previous = promo.get_previous()
+        if not previous:
+            self.abort(400)
+        number = previous.priority
+        previous.priority = promo.priority
+        promo.priority = number
+        promo.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'promo_id': promo.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownPromoHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        next_ = promo.get_next()
+        if not next_:
+            self.abort(400)
+        number = next_.priority
+        next_.priority = promo.priority
+        promo.priority = number
+        promo.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'promo_id': promo.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))
