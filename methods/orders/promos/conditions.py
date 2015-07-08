@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import logging
-from google.appengine.api.namespace_manager import namespace_manager
 from methods import working_hours
 from models import Order
 from models.order import NOT_CANCELED_STATUSES
