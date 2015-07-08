@@ -14,7 +14,7 @@ def check_condition_max_by_value(condition, value):
 
 
 def check_condition_min_by_value(condition, value):
-    return condition.value <= value
+    return condition.value <= int(value)
 
 
 def check_first_order(client):

@@ -33,7 +33,7 @@ def _get_promos(venue):
     return promos
 
 
-def _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
+def _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum):
     if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
         return check_condition_by_value(condition, delivery_type)
     if condition.method == PromoCondition.CHECK_FIRST_ORDER:
@@ -48,6 +48,8 @@ def _check_condition(errors, condition, venue, client, item_dicts, payment_info,
         return check_condition_min_by_value(condition, _get_initial_total_sum(item_dicts))
     if condition.method == PromoCondition.CHECK_HAPPY_HOURS:
         return check_happy_hours(condition, venue, delivery_time)
+    if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS:
+        return check_condition_min_by_value(condition, _get_final_total_sum(total_sum, item_dicts))
 
 
 def _set_outcome(errors, outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
@@ -82,7 +84,8 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
     for promo in _get_promos(venue):
         apply_promo = True
         for condition in promo.conditions:
-            if not _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type):
+            if not _check_condition(errors, condition, venue, client, item_dicts, payment_info, delivery_time,
+                                    delivery_type, total_sum):
                 apply_promo = False
                 break
         if apply_promo:

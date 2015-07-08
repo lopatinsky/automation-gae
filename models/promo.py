@@ -49,8 +49,9 @@ class PromoCondition(ndb.Model):
     CHECK_REPEATED_ORDERS = 4
     CHECK_MIN_ORDER_SUM = 5
     CHECK_HAPPY_HOURS = 6
+    CHECK_MIN_ORDER_SUM_WITH_PROMOS = 7
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
-               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS)
+               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -137,7 +138,8 @@ CONDITION_MAP = {
     PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
     PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ',
     PromoCondition.CHECK_MIN_ORDER_SUM: u'Минимальная сумма заказа',
-    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы'
+    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы',
+    PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS: u'Минимальная сумма с учетом акций'
 }
 
 OUTCOME_MAP = {
