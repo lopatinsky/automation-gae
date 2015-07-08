@@ -29,8 +29,9 @@ class PromoOutcome(ndb.Model):
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
     FIX_DISCOUNT = 7
+    DELIVERY_SUM_DISCOUNT = 8
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT)
+               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -121,4 +122,5 @@ OUTCOME_MAP = {
     PromoOutcome.ORDER_GIFT: u'Подарок',
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
+    PromoOutcome.DELIVERY_SUM_DISCOUNT: u'Скидка на цену доставки',
 }

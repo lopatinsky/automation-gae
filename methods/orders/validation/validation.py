@@ -278,15 +278,15 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             return send_error(error)
 
     if not order:
-        promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
+        promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
-                         order_gift_dicts, cancelled_order_gift_dicts)
+                         delivery_zone, order_gift_dicts, cancelled_order_gift_dicts)
         if promo_errors:
             return send_error(promo_errors[0])
     else:
-        errors, new_order_gift_dicts, item_dicts, promos_info, total_sum = \
+        errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
-                         order_gift_dicts, cancelled_order_gift_dicts, order)
+                         delivery_zone, order_gift_dicts, cancelled_order_gift_dicts, order)
 
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
