@@ -24,7 +24,7 @@ def _order_data(order):
         "total_sum": order.total_sum,
         "venue_revenue": sum(d.revenue for d in order.item_details),
         "venue": venue.title,
-        "items": []
+        "items": order.grouped_item_dict(order.item_details)
     }
     client = Client.get_by_id(order.client_id)
     dct["client"] = {
@@ -33,13 +33,6 @@ def _order_data(order):
         "surname": client.surname,
         "phone": client.tel
     }
-    for item_key, count in Counter(order.items).items():
-        item = item_key.get()
-        dct["items"].append({
-            "title": item.title,
-            "price": item.price,
-            "quantity": count
-        })
     return dct
 
 
