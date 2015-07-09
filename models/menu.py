@@ -90,6 +90,7 @@ class GroupModifierChoice(ndb.Model):
 class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
+    sequence_number = ndb.IntegerProperty()
 
     def get_choice_by_id(self, choice_id):
         for choice in self.choices:
@@ -105,12 +106,39 @@ class GroupModifier(ndb.Model):
                     return modifier
         return None
 
+    @staticmethod
+    def generate_sequence_number():
+        fastcounter.incr("group_modifier", delta=100, update_interval=1)
+        return fastcounter.get_count("group_modifier") + random.randint(1, 100)
+
+    @classmethod
+    def get_modifiers_in_order(cls):
+        return sorted([modifier for modifier in cls.query().fetch()],
+                      key=lambda modifier: modifier.sequence_number)
+
+    def get_previous_modifier(self):
+        modifiers = self.get_modifiers_in_order()
+        index = modifiers.index(self)
+        if index == 0:
+            return None
+        else:
+            return modifiers[index - 1]
+
+    def get_next_modifier(self):
+        modifiers = self.get_modifiers_in_order()
+        index = modifiers.index(self)
+        if index == len(modifiers) - 1:
+            return None
+        else:
+            return modifiers[index + 1]
+
     def dict(self, product=None):
         choices = [choice for choice in self.choices
                    if product is None or choice.choice_id not in product.group_choice_restrictions]
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
+            'order': self.sequence_number,
             'choices': [
                 {
                     'default': choice.default,

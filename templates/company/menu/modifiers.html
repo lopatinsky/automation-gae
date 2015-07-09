@@ -5,7 +5,7 @@
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
          $(document).ready(function() {
-             $('.up_button').click(function(e){
+             $('.up_button_single').click(function(e){
                 e.preventDefault();
                  $.ajax({
                     type: "POST",
@@ -13,15 +13,14 @@
                     data: {
                         modifier_id: this.id
                     },
-                    //dataType: "json",
                     success: function(json) {
                         if (json.success) {
                             $('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
                         }
                     }
                 });
-            });
-            $('.down_button').click(function(e){
+             });
+             $('.down_button_single').click(function(e){
                 e.preventDefault();
                  $.ajax({
                     type: "POST",
@@ -29,10 +28,41 @@
                     data: {
                         modifier_id: this.id
                     },
-                    //dataType: "json",
                     success: function(json) {
                         if (json.success) {
                             $('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
+                        }
+                    }
+                });
+             });
+             $('.up_button_group').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/up/group_modifier' }}",
+                    data: {
+                        modifier_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button_group').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/down/group_modifier' }}",
+                    data: {
+                        modifier_id: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
                         }
                     }
                 });
@@ -59,15 +89,23 @@
         </button>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
+            <th>Изменить порядок</th>
             <th>Имя</th>
             <th>Продукты с модификатором</th>
             <th>Цена</th>
             <th>Минимальное кол-во</th>
             <th>Максимальное кол-во</th>
-            <th>Изменить порядок</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr id="{{ 'tr_%s' % modifier.key.id() }}" {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
+            <tr id="{{ 'tr_%s' % modifier.key.id() }}" {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" {% endif %}>
+                <td>
+                    <button class="up_button_single" id="{{ modifier.key.id() }}">
+                        Вверх
+                    </button>
+                    <button class="down_button_single" id="{{ modifier.key.id() }}">
+                        Вниз
+                    </button>
+                </td>
                 <td>
                     <a href="{{ '/company/menu/modifiers/edit/single_modifier?single_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -87,14 +125,6 @@
                         {{ modifier.max_amount }}
                     {% endif %}
                 </td>
-                <td>
-                    <button class="up_button" id="{{ modifier.key.id() }}">
-                        Вверх
-                    </button>
-                    <button class="down_button" id="{{ modifier.key.id() }}">
-                        Вниз
-                    </button>
-                </td>
             </tr>
         {% endfor %}
     </table>
@@ -111,6 +141,7 @@
     </button>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
+            <th>Изменить порядок</th>
             <th>Имя модификатора</th>
             <th>Продукты с модификатором</th>
             <th>Выбор по умолчанию</th>
@@ -119,7 +150,15 @@
             <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" {% endif %}>
+                <td rowspan="{{ modifier.choices|length + 1 }}">
+                    <button class="up_button_group" id="{{ modifier.key.id() }}">
+                        Вверх
+                    </button>
+                    <button class="down_button_group" id="{{ modifier.key.id() }}">
+                        Вниз
+                    </button>
+                </td>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <a href="{{ '/company/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
                         {{ modifier.title }}
@@ -149,7 +188,7 @@
                     </form>
                 </td>
                 {% for choice in modifier.choices %}
-                    </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
+                    </tr><tr {% if not modifier.enable %} class="group" {% endif %}>
                     <td>
                         <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
                     </td>

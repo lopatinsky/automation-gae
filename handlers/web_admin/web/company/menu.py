@@ -391,7 +391,7 @@ class ModifierList(CompanyBaseHandler):
                 single_modifier.enable = True
             else:
                 single_modifier.enable = False
-        group_modifiers = GroupModifier.query().order(GroupModifier.title).fetch()
+        group_modifiers = GroupModifier.query().order(GroupModifier.sequence_number).fetch()
         for group_modifier in group_modifiers:
             group_modifier.products = []
             for product in products:
@@ -650,5 +650,49 @@ class DownProductHandler(CompanyBaseHandler):
         self.response.write(json.dumps({
             'success': True,
             'product_id': product.key.id(),
+            'next_id': next_.key.id()
+        }, separators=(',', ':')))
+
+
+class UpGroupModifierHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = GroupModifier.get_by_id(modifier_id)
+        previous = modifier.get_previous_modifier()
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = modifier.sequence_number
+        modifier.sequence_number = number
+        modifier.put()
+        previous.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'modifier_id': modifier.key.id(),
+            'previous_id': previous.key.id()
+        }, separators=(',', ':')))
+
+
+class DownGroupModifierHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        modifier_id = self.request.get_range('modifier_id')
+        modifier = GroupModifier.get_by_id(modifier_id)
+        if not modifier:
+            self.abort(400)
+        next_ = modifier.get_next_modifier()
+        if not next_:
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = modifier.sequence_number
+        modifier.sequence_number = number
+        modifier.put()
+        next_.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True,
+            'modifier_id': modifier.key.id(),
             'next_id': next_.key.id()
         }, separators=(',', ':')))
