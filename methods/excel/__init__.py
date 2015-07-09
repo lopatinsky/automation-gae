@@ -19,7 +19,16 @@ def send_excel_file(request_handler, name, template_name,  **values):
     style = xlwt.XFStyle()
     style.borders.left = style.borders.right = style.borders.top = style.borders.bottom = xlwt.Borders.THIN
 
-    for i, tr in enumerate(page.xpath("body/table")[0].findall("tr")):
+    if page.xpath("body/table"):
+        array = page.xpath("body/table")[0].findall("tr")
+    elif page.xpath("body/form/table"):
+        array = page.xpath("body/form/table")[0].findall("tr")
+    else:
+        array = None
+    if not array:
+        return None
+
+    for i, tr in enumerate(array):
         for j, td in enumerate(tr.getchildren()):
             while j in cells_used[i]:
                 j += 1
