@@ -393,6 +393,7 @@ class ModifierList(CompanyBaseHandler):
                 single_modifier.enable = False
         group_modifiers = GroupModifier.query().order(GroupModifier.sequence_number).fetch()
         for group_modifier in group_modifiers:
+            group_modifier.choices = sorted(group_modifier.choices, key=lambda choice: choice.sequence_number)
             group_modifier.products = []
             for product in products:
                 if group_modifier.key in product.group_modifiers:
@@ -695,4 +696,54 @@ class DownGroupModifierHandler(CompanyBaseHandler):
             'success': True,
             'modifier_id': modifier.key.id(),
             'next_id': next_.key.id()
+        }, separators=(',', ':')))
+
+
+class UpGroupModifierChoiceHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        key = self.request.get('key')
+        choice_id = int(key.split('_')[0])
+        modifier_id = int(key.split('_')[1])
+        modifier = GroupModifier.get_by_id(modifier_id)
+        if not modifier:
+            self.abort(400)
+        choice = modifier.get_choice_by_id(choice_id)
+        if not choice:
+            self.abort(400)
+        previous = modifier.get_previous_choice(choice)
+        if not previous:
+            self.abort(400)
+        number = previous.sequence_number
+        previous.sequence_number = choice.sequence_number
+        choice.sequence_number = number
+        modifier.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True
+        }, separators=(',', ':')))
+
+
+class DownGroupModifierChoiceHandler(CompanyBaseHandler):
+    @company_user_required
+    def post(self):
+        key = self.request.get('key')
+        choice_id = int(key.split('_')[0])
+        modifier_id = int(key.split('_')[1])
+        modifier = GroupModifier.get_by_id(modifier_id)
+        if not modifier:
+            self.abort(400)
+        choice = modifier.get_choice_by_id(choice_id)
+        if not choice:
+            self.abort(400)
+        next_ = modifier.get_next_choice(choice)
+        if not next_:
+            self.abort(400)
+        number = next_.sequence_number
+        next_.sequence_number = choice.sequence_number
+        choice.sequence_number = number
+        modifier.put()
+        self.response.headers["Content-Type"] = "application/json"
+        self.response.write(json.dumps({
+            'success': True
         }, separators=(',', ':')))

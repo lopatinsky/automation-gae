@@ -67,6 +67,38 @@
                     }
                 });
             });
+             $('.up_button_group_choice').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/up/group_modifier_choice' }}",
+                    data: {
+                        key: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
+                        }
+                    }
+                });
+            });
+            $('.down_button_group_choice').click(function(e){
+                e.preventDefault();
+                 $.ajax({
+                    type: "POST",
+                    url: "{{ '/company/menu/modifiers/down/group_modifier_choice' }}",
+                    data: {
+                        key: this.id
+                    },
+                    success: function(json) {
+                        if (json.success) {
+                            location.reload();
+                            //$('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
+                        }
+                    }
+                });
+            });
             $('.show_products').click(function(e){
                 $('#tr_' + this.id).toggle();
             });
@@ -145,6 +177,7 @@
             <th>Имя модификатора</th>
             <th>Продукты с модификатором</th>
             <th>Выбор по умолчанию</th>
+            <th>Изменить порядок </th>
             <th>Имя выбора</th>
             <th>Цена выбора</th>
             <th>Выбрать продукты для выбора</th>
@@ -189,6 +222,14 @@
                 </td>
                 {% for choice in modifier.choices %}
                     </tr><tr {% if not modifier.enable %} class="group" {% endif %}>
+                    <td>
+                        <button class="up_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+                            Вверх
+                        </button>
+                        <button class="down_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+                            Вниз
+                        </button>
+                    </td>
                     <td>
                         <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
                     </td>

@@ -63,10 +63,12 @@ class GroupModifierChoice(ndb.Model):
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(default=0)  # в копейках
     default = ndb.BooleanProperty(default=False)
+    sequence_number = ndb.IntegerProperty()
 
     @property
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
+
 
     @staticmethod
     def generate_id():
@@ -97,6 +99,29 @@ class GroupModifier(ndb.Model):
             if choice_id == choice.choice_id:
                 return choice
         return None
+
+    def generate_choice_sequence_number(self):
+        fastcounter.incr("group_modifier_choice_%s" % self.key.id(), delta=100, update_interval=1)
+        return fastcounter.get_count("group_modifier_choice_%s" % self.key.id()) + random.randint(1, 100)
+
+    def get_choices_in_order(self):
+        return sorted([choice for choice in self.choices], key=lambda choice: choice.sequence_number)
+
+    def get_previous_choice(self, choice):
+        choices = self.get_choices_in_order()
+        index = choices.index(choice)
+        if index == 0:
+            return None
+        else:
+            return choices[index - 1]
+
+    def get_next_choice(self, choice):
+        choices = self.get_choices_in_order()
+        index = choices.index(choice)
+        if index == len(choices) - 1:
+            return None
+        else:
+            return choices[index + 1]
 
     @classmethod
     def get_modifier_by_choice(cls, choice_id):
@@ -144,7 +169,8 @@ class GroupModifier(ndb.Model):
                     'default': choice.default,
                     'title': choice.title,
                     'price': float(choice.price) / 100.0,  # в рублях
-                    'id': str(choice.choice_id)
+                    'id': str(choice.choice_id),
+                    'order': choice.sequence_number
                 } for choice in choices
             ]
         }
