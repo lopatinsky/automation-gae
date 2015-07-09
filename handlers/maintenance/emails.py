@@ -12,6 +12,8 @@ class EmailsErrorsHandler(BaseHandler):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             config = Config.get()
+            if not config:
+                continue
             if config.SEND_ERRORS_500:
                 response += '%s, ' % namespace
         self.response.write(response)
