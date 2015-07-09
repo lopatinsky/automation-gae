@@ -1,7 +1,6 @@
 import json
 import logging
 from urlparse import urlparse
-import decimal
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
@@ -10,16 +9,18 @@ from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 from webapp2_extras import auth
 
 
-class SuperJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            return str(o)
-        super(SuperJSONEncoder, self).default(o)
+class FakeFloat(float):
+    def __init__(self, value):
+        self._value = value
 
+    def __repr__(self):
+        return self._value
+
+
+class SuperJSONEncoder(json.JSONEncoder):
     def _replace(self, o):
         if isinstance(o, float):
-            s = "%.8f" % o
-            return decimal.Decimal(s)
+            return FakeFloat("%.8f" % o)
         elif isinstance(o, dict):
             return {k: self._replace(v) for k, v in o.iteritems()}
         elif isinstance(o, (list, tuple)):
