@@ -149,11 +149,11 @@ class OrderHandler(ApiHandler):
 
             total_sum = validation_result['total_sum']
             delivery_sum = validation_result['delivery_sum']
-            if request_total_sum and int(total_sum * 100) != int(request_total_sum * 100):
+            if request_total_sum and round(total_sum * 100) != round(request_total_sum * 100):
                 return self.render_error(u"Сумма заказа была пересчитана", u"")
-            if request_delivery_sum and int(delivery_sum * 100) != int(request_delivery_sum * 100):
+            if request_delivery_sum and round(delivery_sum * 100) != round(request_delivery_sum * 100):
                 return self.render_error(u"Сумма доставки была пересчитана", u"")
-            if wallet_payment and int(wallet_payment * 100) != int(validation_result['max_wallet_payment'] * 100):
+            if wallet_payment and round(wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):
                 return self.render_error(u"Сумма оплаты баллами была пересчитана", u"")
             total_sum += delivery_sum
 
