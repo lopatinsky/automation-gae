@@ -1,10 +1,12 @@
 # coding:utf-8
+from google.appengine.ext.ndb import metadata
+
 __author__ = 'dvpermyakov'
 
 from base import BaseHandler
 from methods import excel
 from methods.report import clients, menu_items, notifications, orders, repeated_orders, square_table, venues,\
-    card_binding
+    card_binding, companies
 
 
 def get_standart_params(request, values=None, delete_params=None):
@@ -119,3 +121,19 @@ class CardBindingReportHandler(BaseHandler):
             excel.send_excel_file(self, 'card_binding', 'card_binding.html', **html_values)
         else:
             self.render('/reports/card_binding.html', **html_values)
+
+
+class CompaniesReportHandler(BaseHandler):
+    def get(self):
+        chosen_namespaces = []
+        for namespace in metadata.get_namespaces():
+            if self.request.get(namespace):
+                chosen_namespaces.append(namespace)
+        html_values = companies.get(**get_standart_params(self.request, {
+            'chosen_object_type': self.request.get("selected_object_type"),
+            'chosen_namespaces': chosen_namespaces
+        }, delete_params=['venue_id']))
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, 'companies', 'companies.html', **html_values)
+        else:
+            self.render('/reports/companies.html', **html_values)

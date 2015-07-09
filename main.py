@@ -48,6 +48,7 @@ app = WSGIApplication([
         Route('/500_errors_email', maintenance.EmailsErrorsHandler),
         Route('/report', maintenance.ReportHandler),
         PathPrefixRoute('/report', [
+            Route('/companies', maintenance.CompaniesReportHandler),
             Route('/clients', maintenance.ClientsReportHandler),
             Route('/menu_items', maintenance.MenuItemsReportHandler),
             Route('/tablet_requests_graph', maintenance.TabletRequestGraphHandler),

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Компании</title>
+</head>
+<body>
+    {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
+
+    <form method="get">
+        <select name="selected_year">
+            <option value="0" {% if not chosen_year %}selected{% endif %}>Все года</option>
+            {% for year in range(start_year, end_year + 1) %}
+                <option value="{{ year }}" {% if chosen_year == year %} selected {% endif %}>
+                    {{ year }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="selected_month">
+            {% for month in range(0, 12 + 1) %}
+                <option value="{{ month }}" {% if chosen_month == month %} selected {% endif %}>
+                    {{ NAME_MONTHS[month] }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="selected_day">
+            <option value="0" {% if not chosen_day %} selected {% endif %}>
+                Все дни
+            </option>
+            {% for day in range(1, 31 + 1) %}
+                <option value="{{ day }}" {% if chosen_day == day %} selected {% endif %}>
+                    {{ day }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="selected_object_type">
+            <option value="0" {% if chosen_object_type == '0' %} selected {% endif %}>Заказы</option>
+            <option value="1" {% if chosen_object_type == '1' %} selected {% endif %}>Клиенты</option>
+            <option value="2" {% if chosen_object_type == '2' %} selected {% endif %}>Товары</option>
+        </select>
+        <input type="submit" value="Выбрать"/>
+        <button formmethod="get" name="button" value="xls">Скачать xls</button>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th rowspan="2">Выбрать</th>
+                <th rowspan="2">Название</th>
+                <th rowspan="2">Тип оплаты</th>
+                {% for status in statuses %}
+                    <th colspan="3">{{ status_map[status] }}</th>
+                {% endfor %}
+                </tr><tr>
+                {% for status in statuses %}
+                    <th>Кол-во</th>
+                    <th>Cумма</th>
+                    <th>Средний чек</th>
+                {% endfor %}
+            </tr>
+            {% for company in companies %}
+                <tr>
+                    {% set span = company.payments|length %}
+                    <td rowspan="{{ span }}">
+                        <input type="checkbox" name="{{ company.namespace }}"
+                                {% if company.namespace in chosen_namespaces %} checked {% endif %}>
+                    </td>
+                    <td rowspan="{{ span }}">{{ company.name }}</td>
+                    {% for payment in company.payments %}
+                        {% if loop.index0 > 0 %}
+                            </tr><tr>
+                        {% endif %}
+                        <td>{{ payment['name'] }}</td>
+                        {% for status in statuses %}
+                            <td>
+                                {% if chosen_object_type == '0' %}
+                                    {{ company.info[payment['type']][status]["orders_number"] }}
+                                {% elif chosen_object_type == '1' %}
+                                   {{ company.info[payment['type']][status]["client_number"] }}
+                                {% elif chosen_object_type == '2' %}
+                                    {{ company.info[payment['type']][status]["goods_number"] }}
+                                {% endif %}
+                            </td>
+                            <td>{{ company.info[payment['type']][status]["orders_sum"] }}</td>
+                            <td>{{ company.info[payment['type']][status]["average_orders_sum"] }}</td>
+                    {% endfor %}
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </form>
+</body>
+</html>

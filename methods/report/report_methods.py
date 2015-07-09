@@ -3,7 +3,7 @@ __author__ = 'dvpermyakov'
 from datetime import datetime, date, time
 import calendar
 
-PROJECT_STARTING_YEAR = 2014
+PROJECT_STARTING_YEAR = 2015
 
 
 def suitable_date(day, month, year, beginning):
