@@ -1,12 +1,34 @@
 import json
 import logging
 from urlparse import urlparse
+import decimal
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from models.proxy.unified_app import AutomationCompany
 from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 from webapp2_extras import auth
+
+
+class SuperJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return str(o)
+        super(SuperJSONEncoder, self).default(o)
+
+    def _replace(self, o):
+        if isinstance(o, float):
+            s = "%.8f" % o
+            return decimal.Decimal(s)
+        elif isinstance(o, dict):
+            return {k: self._replace(v) for k, v in o.iteritems()}
+        elif isinstance(o, (list, tuple)):
+            return map(self._replace, o)
+        else:
+            return o
+
+    def encode(self, o):
+        return super(SuperJSONEncoder, self).encode(self._replace(o))
 
 
 class ApiHandler(RequestHandler):
@@ -55,7 +77,7 @@ class ApiHandler(RequestHandler):
 
     def render_json(self, obj):
         self.response.headers["Content-Type"] = "application/json"
-        self.response.write(json.dumps(obj, separators=(',', ':')))
+        self.response.write(json.dumps(obj, separators=(',', ':'), cls=SuperJSONEncoder))
 
     def render_doc(self, template_name, **values):
         rendered = self.jinja2.render_template('/docs/' + template_name, **values)
