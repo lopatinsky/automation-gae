@@ -517,7 +517,9 @@ class AddGroupModifierHandler(CompanyBaseHandler):
     def post(self):
         for name in unique(self.request.params.getall('name')):
             if name:
-                GroupModifier(title=name).put()
+                modifier = GroupModifier(title=name)
+                modifier.sequence_number = GroupModifier.generate_sequence_number()
+                modifier.put()
         self.redirect_to('modifiers_list')
 
 
@@ -562,6 +564,7 @@ class AddGroupModifierItemHandler(CompanyBaseHandler):
             price = float(price)
             price = int(price * 100)
             choice = GroupModifierChoice.create(title=name, price=price)
+            choice.sequence_number = group_modifier.generate_choice_sequence_number()
             group_modifier.choices.append(choice)
         group_modifier.put()
         self.redirect_to('modifiers_list')
