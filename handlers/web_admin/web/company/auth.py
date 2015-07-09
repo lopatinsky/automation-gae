@@ -9,7 +9,7 @@ from methods.auth import set_current_user
 __author__ = 'dvpermyakov'
 
 from base import CompanyBaseHandler
-from models import CompanyUser
+from models import CompanyUser, DeliverySlot
 from methods.rendering import latinize
 
 
@@ -59,6 +59,13 @@ class CompanySignupHandler(CompanyBaseHandler):
         else:
             namespace_manager.set_namespace(namespace)
             Config(id=1).put()
+            DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put()
+            DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put()
+            DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put()
+            DeliverySlot(name=u'Через 15 минут', slot_type=0, value=15).put()
+            DeliverySlot(name=u'Через 20 минут', slot_type=0, value=20).put()
+            DeliverySlot(name=u'Через 25 минут', slot_type=0, value=25).put()
+            DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()
             self.success()
 
 

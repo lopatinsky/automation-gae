@@ -61,15 +61,6 @@ class DeliverySlotListHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
         slots = DeliverySlot.query().order(DeliverySlot.value).fetch()
-        if not slots:
-            DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put()
-            DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put()
-            DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put()
-            DeliverySlot(name=u'Через 15 минут', slot_type=0, value=15).put()
-            DeliverySlot(name=u'Через 20 минут', slot_type=0, value=20).put()
-            DeliverySlot(name=u'Через 25 минут', slot_type=0, value=25).put()
-            DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()
-            slots = DeliverySlot.query().order(DeliverySlot.value).fetch()
         for slot in slots:
             slot.slot_type_str = DeliverySlot.CHOICES_MAP[slot.slot_type]
         self.render('/delivery_settings/delivery_slot_list.html', slots=slots)
