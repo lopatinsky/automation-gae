@@ -1,6 +1,7 @@
 # coding=utf-8
 from models import MenuItem
 from models.order import CashBack, GiftPointsDetails
+from models.venue import DELIVERY
 
 
 def _get_item_keys(item_dicts):
@@ -185,4 +186,13 @@ def set_fix_discount(response, outcome, init_total_sum):
         discount = init_total_sum
     response.success = True
     response.discount = discount
+    return response
+
+
+def set_delivery_sum_discount(response, outcome, delivery_type, delivery_zone):
+    discount = float(outcome.value) / 100.0
+    if delivery_type != DELIVERY or not delivery_zone or not delivery_zone.price:
+        return response
+    response.success = True
+    response.delivery_sum_discount = int(delivery_zone.price * discount)
     return response

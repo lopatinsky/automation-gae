@@ -31,7 +31,7 @@ class PromoInfoHandler(ApiHandler):
                 'enable': config.WALLET_ENABLED,
                 'text': self.WALLET_TEXT
             },
-            'promos': [promo.dict(hostname) for promo in Promo.query(Promo.status == STATUS_AVAILABLE).fetch()],
+            'promos': [promo.dict(hostname) for promo in Promo.query(Promo.status == STATUS_AVAILABLE).order(-Promo.priority).fetch()],
             'bonuses': {
                 'items': gift_items,
                 'text': self.BONUS_TEXT

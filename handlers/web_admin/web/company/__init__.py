@@ -14,7 +14,8 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     DownCategoryHandler, NoneHandler, SelectDefaultChoiceHandler, UpSingleModifierHandler, DownSingleModifierHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, ChooseMenuItemHandler, \
-    AddPromoConditionHandler, AddPromoOutcomeHandler, ListGiftsHandler, AddGiftHandler, EditPromoHandler
+    AddPromoConditionHandler, AddPromoOutcomeHandler, ListGiftsHandler, AddGiftHandler, EditPromoHandler, \
+    UpPromoHandler, DownPromoHandler
 from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
     VenueListHandler, ChooseDeliveryZonesHandler

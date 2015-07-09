@@ -1,5 +1,7 @@
 # coding=utf-8
+import random
 from google.appengine.ext import ndb
+from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.menu import MenuItem
 
@@ -29,8 +31,9 @@ class PromoOutcome(ndb.Model):
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
     FIX_DISCOUNT = 7
+    DELIVERY_SUM_DISCOUNT = 8
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT)
+               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -46,8 +49,9 @@ class PromoCondition(ndb.Model):
     CHECK_REPEATED_ORDERS = 4
     CHECK_MIN_ORDER_SUM = 5
     CHECK_HAPPY_HOURS = 6
+    CHECK_MIN_ORDER_SUM_WITH_PROMOS = 7
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
-               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS)
+               CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS)
 
     item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_required = ndb.BooleanProperty(default=False)
@@ -72,9 +76,34 @@ class Promo(ndb.Model):
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
-    priority = ndb.IntegerProperty(default=0)                 # Not Implemented
+    priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+
+    @staticmethod
+    def generate_priority():
+        fastcounter.incr("promo", delta=100, update_interval=1)
+        return fastcounter.get_count("promo") + random.randint(1, 100)
+
+    @classmethod
+    def get_promos_in_order(cls):
+        return sorted([promo for promo in cls.query().fetch()], key=lambda promo: -promo.priority)
+
+    def get_previous(self):
+        promos = self.get_promos_in_order()
+        index = promos.index(self)
+        if index == 0:
+            return None
+        else:
+            return promos[index - 1]
+
+    def get_next(self):
+        promos = self.get_promos_in_order()
+        index = promos.index(self)
+        if index == len(promos) - 1:
+            return None
+        else:
+            return promos[index + 1]
 
     def dict(self, hostname):
         icon = None
@@ -109,7 +138,8 @@ CONDITION_MAP = {
     PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
     PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ',
     PromoCondition.CHECK_MIN_ORDER_SUM: u'Минимальная сумма заказа',
-    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы'
+    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы',
+    PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS: u'Минимальная сумма с учетом акций'
 }
 
 OUTCOME_MAP = {
@@ -121,4 +151,5 @@ OUTCOME_MAP = {
     PromoOutcome.ORDER_GIFT: u'Подарок',
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
+    PromoOutcome.DELIVERY_SUM_DISCOUNT: u'Скидка на цену доставки',
 }
