@@ -147,7 +147,7 @@ OUTCOME_MAP = {
     PromoOutcome.DISCOUNT: u"Скидка",
     PromoOutcome.DISCOUNT_RICHEST: u'Скидка на самый дорогой продукт в заказе',
     PromoOutcome.DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе',
-    PromoOutcome.ACCUMULATE_GIFT_POINT: u'Баллы',
+    PromoOutcome.ACCUMULATE_GIFT_POINT: u'Баллы за продукты',
     PromoOutcome.ORDER_GIFT: u'Подарок',
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
