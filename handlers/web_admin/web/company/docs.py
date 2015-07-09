@@ -17,7 +17,8 @@ def _get_values():
         'emails': u','.join(config.SUPPORT_EMAILS),
         'delivery_phones': u','.join(config.DELIVERY_PHONES),
         'delivery_emails':  u','.join(config.DELIVERY_EMAILS),
-        'report_emails': config.REPORT_EMAILS or ''
+        'report_emails': config.REPORT_EMAILS or '',
+        'color': config.ACTION_COLOR,
     }
 
 
@@ -106,5 +107,6 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.DELIVERY_PHONES = self.request.get('delivery_phones').split(',') if self.request.get('delivery_phones') else []
         config.DELIVERY_EMAILS = self.request.get('delivery_emails').split(',') if self.request.get('delivery_emails') else []
         config.REPORT_EMAILS = self.request.get('report_emails')
+        config.ACTION_COLOR = "FF%s" % self.request.get('color')[1:]
         config.put()
         self.redirect('/company/docs/about')

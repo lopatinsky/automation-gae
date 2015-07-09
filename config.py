@@ -94,6 +94,8 @@ class Config(ndb.Model):
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
 
+    ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
+
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
             return u'Кофейня'

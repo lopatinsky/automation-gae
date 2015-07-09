@@ -38,6 +38,10 @@
             Email для ежедневных отчетов (разделяя запятыми):
             <input type="text" name="report_emails" value="{{ report_emails }}"/>
         </label><br>
+        <label>
+            Цвет:
+            <input type="color" name="color" value="#{{ color[2:] }}"/>
+        </label><br>
         <input type="submit">
     </form>
     <a href="/company/docs/about">Назад</a>
