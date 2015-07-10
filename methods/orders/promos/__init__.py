@@ -53,6 +53,8 @@ def _check_condition(errors, condition, venue, client, item_dicts, payment_info,
         return check_condition_min_by_value(condition, _get_final_total_sum(total_sum, item_dicts))
     if condition.method == PromoCondition.CHECK_GROUP_MODIFIER_CHOICE:
         return check_group_modifier_choice(condition, item_dicts)
+    if condition.method == PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE:
+        return not check_group_modifier_choice(condition, item_dicts)
 
 
 def _set_outcome(errors, outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
