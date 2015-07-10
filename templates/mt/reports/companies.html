@@ -2,6 +2,18 @@
 <html>
 <head>
     <title>Компании</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+         $(document).ready(function() {
+            $('#toggle_btn').click(function(e){
+                if ($('.cb').prop('checked')) {
+                    $('.cb').prop('checked', false);
+                } else {
+                    $('.cb').prop('checked', true);
+                }
+            });
+         });
+    </script>
 </head>
 <body>
     {% set NAME_MONTHS = 'Все месяцы', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' %}
@@ -41,7 +53,12 @@
         <button formmethod="get" name="button" value="xls">Скачать xls</button>
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
-                <th rowspan="2">Выбрать</th>
+                <th rowspan="2">
+                    Выбрать
+                    <button id="toggle_btn">
+                        Выбрать всех
+                    </button>
+                </th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Тип оплаты</th>
                 {% for status in statuses %}
@@ -59,7 +76,7 @@
                     {% set span = company.payments|length %}
                     <td rowspan="{{ span }}">
                         <input type="checkbox" name="{{ company.namespace }}"
-                                {% if company.namespace in chosen_namespaces %} checked {% endif %}>
+                                {% if company.namespace in chosen_namespaces %} checked {% endif %} class="cb">
                     </td>
                     <td rowspan="{{ span }}">{{ company.name }}</td>
                     {% for payment in company.payments %}
