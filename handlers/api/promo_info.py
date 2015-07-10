@@ -26,12 +26,19 @@ class PromoInfoHandler(ApiHandler):
         gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         hostname = urlparse(self.request.url).hostname
+        promo_texts = []
+        promo_dicts = []
+        for promo in Promo.query(Promo.status == STATUS_AVAILABLE).order(-Promo.priority).fetch():
+            text = u'%s_%s' % (promo.title.strip(), promo.description.strip())
+            if text not in promo_texts:
+                promo_texts.append(text)
+                promo_dicts.append(promo.dict(hostname))
         self.render_json({
             'wallet': {
                 'enable': config.WALLET_ENABLED,
                 'text': self.WALLET_TEXT
             },
-            'promos': [promo.dict(hostname) for promo in Promo.query(Promo.status == STATUS_AVAILABLE).order(-Promo.priority).fetch()],
+            'promos': promo_dicts,
             'bonuses': {
                 'items': gift_items,
                 'text': self.BONUS_TEXT
