@@ -4,3 +4,5 @@
 #PyCharm
 .idea
 *.pyc
+node_modules/
+static/demo/dist/
