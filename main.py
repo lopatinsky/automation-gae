@@ -3,6 +3,7 @@ from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
 from handlers.api.user import admin
+from handlers.web_admin.web import demo
 from methods import fastcounter
 from handlers import api, web_admin, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -239,6 +240,8 @@ app = WSGIApplication([
                 Route('/choose', company_admin.ChooseSlotsHandler),
             ]),
         ]),
+
+        Route('/demo', demo.DemoWizardHandler),
 
         PathPrefixRoute('/docs', [
             PathPrefixRoute('/legal', [
