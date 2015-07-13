@@ -24,12 +24,12 @@ def _send(namespace, emails):
     io = StringIO()
     excel_file.save(io)
 
-    subject = u"Отчет по продажам через мобильное приложение %s за %s" % \
-              (config.APP_NAME, yesterday.strftime("%d.%m.%Y"))
+    subject = u"Приложение %s - отчет" % config.APP_NAME
+    body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
     filename = u"report-%s-%s.xls" % (namespace, yesterday.strftime("%d-%m-%Y"))
     filename = filename.encode('utf-8')
 
-    mail.send_mail(_EMAIL_SENDER, emails, subject, '', attachments=[mail.Attachment(filename, io.getvalue())])
+    mail.send_mail(_EMAIL_SENDER, emails, subject, body, attachments=[mail.Attachment(filename, io.getvalue())])
 
 
 class ReportSendHandler(RequestHandler):
