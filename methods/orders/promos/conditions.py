@@ -43,7 +43,7 @@ def check_item_in_order(condition, item_dicts):
 
 def check_happy_hours(condition, venue, delivery_time):
     now = delivery_time + timedelta(hours=venue.timezone_offset)
-    return working_hours.check(condition.hh_days, condition.hh_hours, now)
+    return working_hours.check(condition.schedule, now)
 
 
 def check_group_modifier_choice(condition, item_dicts):

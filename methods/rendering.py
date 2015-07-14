@@ -1,8 +1,10 @@
 # coding=utf-8
 import time
 
-STR_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+STR_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 STR_DATE_FORMAT = "%Y-%m-%d"
+STR_TIME_FORMAT = "%H:%M"
 
 HTML_STR_TIME_FORMAT = "%Y-%m-%dT%H:%M"
 

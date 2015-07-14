@@ -211,6 +211,7 @@ app = WSGIApplication([
             Route('/map', company_admin.MapVenuesHandler),
             Route('/create', company_admin.CreateVenueHandler),
             Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
+            Route('/schedule', company_admin.EditVenueScheduleHandler),
         ]),
 
         PathPrefixRoute('/delivery', [
@@ -322,6 +323,7 @@ app = WSGIApplication([
             Route('/choose', company_admin.ChooseMenuItemHandler),
             PathPrefixRoute('/conditions', [
                 Route('/add', company_admin.AddPromoConditionHandler),
+                Route('/happy_hours', company_admin.AddHappyHoursHandler),
             ]),
             PathPrefixRoute('/outcomes', [
                 Route('/add', company_admin.AddPromoOutcomeHandler),

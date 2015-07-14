@@ -1,11 +1,14 @@
 # coding:utf-8
+from datetime import datetime
 import logging
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
 from config import Config, config
 from methods.auth import company_user_required
+from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address, DeliveryZone
 from methods import map
+from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY
 
 
@@ -20,21 +23,20 @@ class CreateVenueHandler(CompanyBaseHandler):
             if address[0].get('address'):
                 address = address[0].get('address')
                 address_str = u'г. %s, ул. %s, д. %s' % (address.get('city'), address.get('street'), address.get('home'))
-        logging.info(address)
-        logging.info(address_str)
+        if not address_str:
+            self.abort(400)  # todo: return to map!!!
         self.render('/venues/edit_venue.html', **{
-            'coordinates': '%s, %s' % (lat, lon) if lat else '',
+            'lat': lat,
+            'lon': lon,
             'address': address_str
         })
 
     @company_user_required
     def post(self):
         venue = Venue()
-        raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule', 'problem')
-        for param in raw_params:
-            setattr(venue, param, self.request.get(param))
-        venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
-        venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
+        venue.title = self.request.get('title')
+        venue.description = self.request.get('description')
+        venue.coordinates = ndb.GeoPt(float(self.request.get('lat')), float(self.request.get('lon')))
         candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
         if candidates:
             address = candidates[0]
@@ -51,6 +53,8 @@ class EnableVenuesHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
         venues = Venue.query().fetch()
+        for venue in venues:
+            venue.days = [day for day in venue.schedule.days] if venue.schedule else []
         self.render('/venues/enable_venues.html', venues=venues)
 
     @company_user_required
@@ -78,21 +82,8 @@ class EditVenueHandler(CompanyBaseHandler):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
             self.abort(404)
-
-        raw_params = ('title', 'description', 'working_days', 'working_hours', 'holiday_schedule', 'problem')
-        for param in raw_params:
-            setattr(venue, param, self.request.get(param))
-
-        venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
-        venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
-        candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
-        if candidates:
-            address = candidates[0]
-            venue.address = Address(**address['address'])
-            config = Config.get()
-            if venue.address.country not in config.COUNTRIES:
-                config.COUNTRIES.append(venue.address.country)
-                config.put()
+        venue.title = self.request.get('title')
+        venue.description = self.request.get('description')
         venue.put()
         self.render('/venues/edit_venue.html', venue=venue, success=True)
 
@@ -202,5 +193,52 @@ class ChooseDeliveryZonesHandler(CompanyBaseHandler):
             else:
                 if zone.key in found_delivery.delivery_zones:
                     found_delivery.delivery_zones.remove(zone.key)
+        venue.put()
+        self.redirect('/company/venues')
+
+
+class EditVenueScheduleHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        days = []
+        venue_days = {}
+        if venue.schedule:
+            for day in venue.schedule.days:
+                venue_days[day.weekday] = {
+                    'start': day.start_str(),
+                    'end': day.end_str()
+                }
+        for day in DaySchedule.DAYS:
+            days.append({
+                'name': DaySchedule.DAY_MAP[day],
+                'value': day,
+                'exist': True if venue_days.get(day) else False,
+                'start': venue_days[day]['start'] if venue_days.get(day) else '00:00',
+                'end': venue_days[day]['end'] if venue_days.get(day) else '00:00'
+            })
+        self.render('/schedule.html', **{
+            'venue': venue,
+            'days': days
+        })
+
+    @company_user_required
+    def post(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            confirmed = bool(self.request.get(str(day)))
+            if confirmed:
+                start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
+                end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
+                days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
+        schedule = Schedule(days=days)
+        venue.schedule = schedule
         venue.put()
         self.redirect('/company/venues')

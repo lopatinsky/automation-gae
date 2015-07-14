@@ -4,6 +4,7 @@ from google.appengine.ext import ndb
 from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.menu import MenuItem
+from models.schedule import Schedule
 
 __author__ = 'dvpermyakov'
 
@@ -60,8 +61,9 @@ class PromoCondition(ndb.Model):
     item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
-    hh_days = ndb.StringProperty()   # it is used only for happy hours
-    hh_hours = ndb.StringProperty()  # it is used only for happy hours
+    schedule = ndb.LocalStructuredProperty(Schedule)
+    #hh_days = ndb.StringProperty()   # todo: remove
+    #hh_hours = ndb.StringProperty()  # todo: remove
 
 
 class Promo(ndb.Model):

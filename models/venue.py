@@ -1,13 +1,13 @@
 # coding=utf-8
-import datetime
+from datetime import datetime, timedelta
 import logging
 import random
 from google.appengine.ext import ndb
-from google.appengine.ext.ndb import GeoPt
 from methods import location, working_hours, fastcounter
 from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
+from models.schedule import Schedule
 
 SELF = 0
 IN_CAFE = 1
@@ -210,12 +210,13 @@ class Venue(ndb.Model):
     description = ndb.StringProperty(indexed=False)
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
-    working_days = ndb.StringProperty(indexed=False)
-    working_hours = ndb.StringProperty(indexed=False)
+    #working_days = ndb.StringProperty(indexed=False)   # todo: must remove
+    #working_hours = ndb.StringProperty(indexed=False)  # todo: must remove
+    schedule = ndb.LocalStructuredProperty(Schedule)
     takeout_only = ndb.BooleanProperty(indexed=False, default=False)  # todo: need to remove it
     delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phone_numbers = ndb.StringProperty(repeated=True, indexed=False)
-    holiday_schedule = ndb.StringProperty(indexed=False)
+    #holiday_schedule = ndb.StringProperty(indexed=False)
     problem = ndb.StringProperty(indexed=False)
     active = ndb.BooleanProperty(required=True, default=False)
     type_deliveries = ndb.IntegerProperty(repeated=True)
@@ -262,13 +263,8 @@ class Venue(ndb.Model):
             'is_open': self.is_open(),
             'takeout_only': self.takeout_only,
             'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
-            'schedule': []
+            'schedule': self.schedule.dict() if self.schedule else []
         }
-        working_days = self.working_days.split(',')
-        working_hours = self.working_hours.split(',')
-        for i in xrange(len(working_days)):
-            dct['schedule'].append({'days': [int(day) for day in working_days[i]],
-                                    'hours': working_hours[i]})
         return dct
 
     def admin_dict(self):
@@ -278,10 +274,6 @@ class Venue(ndb.Model):
             'address': self.description
         }
 
-    def is_open_by_delivery_time(self, delivery_time):
-        now = delivery_time + datetime.timedelta(hours=self.timezone_offset)
-        return working_hours.check(self.working_days, self.working_hours, now, self.holiday_schedule)
-
     def is_open(self, minutes_offset=0):
-        now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
-        return self.is_open_by_delivery_time(now)
+        now = datetime.utcnow() + timedelta(minutes=minutes_offset) + timedelta(hours=self.timezone_offset)
+        return working_hours.check(self.schedule, now)

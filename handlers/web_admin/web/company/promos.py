@@ -1,10 +1,13 @@
 # coding:utf-8
+from datetime import datetime
 import json
 from config import config, Config
 from methods.auth import company_user_required
+from methods.rendering import STR_TIME_FORMAT
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem
 from base import CompanyBaseHandler
 from models.promo import CONDITION_MAP, OUTCOME_MAP
+from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY_MAP
 
 __author__ = 'dvpermyakov'
@@ -19,12 +22,20 @@ class PromoListHandler(CompanyBaseHandler):
     def get(self):
         promos = Promo.query().order(-Promo.priority).fetch()
         for promo in promos:
-            for condition in promo.conditions:
+            conditions = []
+            for condition in promo.conditions[:]:
                 condition.value_string = str(condition.value) if condition.value else ""
                 if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
                     condition.value_string = DELIVERY_MAP[condition.value]
+                    conditions.append(condition)
                 elif condition.method == PromoCondition.CHECK_HAPPY_HOURS:
-                    condition.additional_info = '(%s;%s)' % (condition.hh_days, condition.hh_hours)
+                    for day in (condition.schedule.days if condition.schedule else []):
+                        new_condition = PromoCondition(method=PromoCondition.CHECK_HAPPY_HOURS)
+                        new_condition.value_string = day.str()
+                        conditions.append(new_condition)
+                else:
+                    conditions.append(condition)
+            promo.conditions = conditions
         self.render('/promos/list.html', **{
             'promo_api_key': config.PROMOS_API_KEY if config.PROMOS_API_KEY else '',
             'wallet_api_key': config.WALLET_API_KEY if config.WALLET_API_KEY else '',
@@ -188,11 +199,13 @@ class AddPromoConditionHandler(CompanyBaseHandler):
             self.abort(400)
         methods = []
         for condition in PromoCondition.CHOICES:
+            if condition == PromoCondition.CHECK_HAPPY_HOURS:
+                continue
             methods.append({
                 'name': CONDITION_MAP[condition],
                 'value': condition
             })
-        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods, feature_condition=True)
+        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
     @company_user_required
     def post(self):
@@ -203,12 +216,48 @@ class AddPromoConditionHandler(CompanyBaseHandler):
         condition = PromoCondition()
         condition.method = self.request.get_range('method')
         condition.value = self.request.get_range('value')
-        hh_days = self.request.get('hh_days')
-        hh_hours = self.request.get('hh_hours')
-        # todo: need validate days and hours
-        if condition.method == PromoCondition.CHECK_HAPPY_HOURS and hh_days and hh_hours:
-            condition.hh_days = hh_days
-            condition.hh_hours = hh_hours
+        promo.conditions.append(condition)
+        promo.put()
+        self.redirect('/company/promos/list')
+
+
+class AddHappyHoursHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            days.append({
+                'name': DaySchedule.DAY_MAP[day],
+                'value': day,
+                'exist': False,
+                'start': '00:00',
+                'end': '00:00'
+            })
+        self.render('/schedule.html', **{
+            'promo': promo,
+            'days': days
+        })
+
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            confirmed = bool(self.request.get(str(day)))
+            if confirmed:
+                start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
+                end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
+                days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
+        schedule = Schedule(days=days)
+        condition = PromoCondition(method=PromoCondition.CHECK_HAPPY_HOURS)
+        condition.schedule = schedule
         promo.conditions.append(condition)
         promo.put()
         self.redirect('/company/promos/list')
