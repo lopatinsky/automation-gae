@@ -36,12 +36,14 @@
                             Без
                         </option>
                         {% for choice in modifier.choices %}
-                            <option value="{{ choice.choice_id }}"
-                                {% if product.has and choice.choice_id in feature.item_details.group_choice_ids %}
-                                    selected
-                                {% endif %}>
-                                {{ choice.title }}
-                            </option>
+                            {% if choice.choice_id not in product.group_choice_restrictions %}
+                                <option value="{{ choice.choice_id }}"
+                                    {% if product.has and choice.choice_id in feature.item_details.group_choice_ids %}
+                                        selected
+                                    {% endif %}>
+                                    {{ choice.title }}
+                                </option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 {% endfor %}
