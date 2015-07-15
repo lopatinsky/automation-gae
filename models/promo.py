@@ -160,5 +160,5 @@ OUTCOME_MAP = {
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
     PromoOutcome.DELIVERY_SUM_DISCOUNT: u'Скидка на цену доставки',
-    PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT: u'Фиксированная кидка на цену доставки',
+    PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT: u'Фиксированная cкидка на цену доставки',
 }
