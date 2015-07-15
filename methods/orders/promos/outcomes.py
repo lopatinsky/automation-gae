@@ -227,3 +227,15 @@ def set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zon
     response.success = True
     response.delivery_sum_discount = outcome.value
     return response
+
+
+def set_percent_gift_points(response, outcome, item_dicts, order):
+    point_discount = float(outcome.value) / 100.0
+    points = 0
+    for item_dict in item_dicts:
+        points += int(point_discount * item_dict['price'])
+    if order:
+        order.points_details.append(GiftPointsDetails(points=points))
+        order.put()
+    response.success = True
+    return response
