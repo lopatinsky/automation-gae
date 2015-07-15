@@ -35,7 +35,13 @@ class Address(ndb.Model):
     comment = ndb.StringProperty()
 
     def str(self):
-        address_str = u'г. %s, ул. %s, д. %s' % (self.city, self.street, self.home)
+        address_str = u''
+        if self.city:
+            address_str += u'г. %s,' % self.city
+        if self.street:
+            address_str += u'ул. %s,' % self.street
+        if self.home:
+            address_str += u'д. %s' % self.home
         if self.flat:
             address_str += u', кв. %s' % self.flat
         if self.comment:

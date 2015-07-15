@@ -10,7 +10,7 @@
         function getBallonWithAddress(coords) {
             ymaps.geocode(coords).then(function (res) {
                 var firstGeoObject = res.geoObjects.get(0);
-
+                var href = "/company/delivery/zone/add?lat=" + coords[0] + '&lon=' + coords[1];
                 myPlacemark = new ymaps.Placemark(coords, {
                     balloonContentBody: [
                         '<strong>',
@@ -19,10 +19,8 @@
                         '<br/>',
                         firstGeoObject.properties.get('text'),
                         '<br/>',
-                        '<a href="/company/delivery/zone/add?lat=',
-                        coords[0],
-                        '&lon=',
-                        coords[1],
+                        '<a href="',
+                        href,
                         '">Добавить зону с этим адресом</a>'
                     ].join(''),
                     hintContent: "Щелкни, чтобы добавить"
