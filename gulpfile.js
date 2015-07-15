@@ -9,11 +9,21 @@ var gulp = require('gulp'),
     buffer = require('vinyl-buffer'),
     sourcemaps = require('gulp-sourcemaps');
 
+var path = {
+    STYLES: ['node_modules/bootswatch/simplex/bootstrap.min.css', 'static/demo/src/styles/*.*'],
+    STYLES_OUT: 'static/demo/dist/styles',
+    FONTS: 'node_modules/bootstrap/fonts/*.*',
+    FONTS_OUT: 'static/demo/dist/fonts',
+    SCRIPT_MAIN: 'static/demo/src/scripts/main',
+    SCRIPTS_OUT: 'static/demo/dist/scripts'
+};
+
 gulp.task('styles', function() {
-    gulp.src(['node_modules/bootswatch/simplex/bootstrap.min.css'])
-        .pipe(gulp.dest('static/demo/dist/styles'));
-    gulp.src(['node_modules/bootstrap/fonts/*.*'])
-        .pipe(gulp.dest('static/demo/dist/fonts'));
+    gulp.src(path.STYLES)
+        .pipe(concat('bundle.css'))
+        .pipe(gulp.dest(path.STYLES_OUT));
+    gulp.src(path.FONTS)
+        .pipe(gulp.dest(path.FONTS_OUT));
 });
 
 function _build(x) {
@@ -25,12 +35,12 @@ function _build(x) {
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify('bundle.js'))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('static/demo/dist/scripts'));
+        .pipe(gulp.dest(path.SCRIPTS_OUT));
 }
 
 gulp.task('scripts', function() {
     _build(browserify({
-        entries: ['static/demo/src/scripts/main'],
+        entries: path.SCRIPT_MAIN,
         transform: [babelify, reactify],
         extensions: ['.jsx'],
         debug: true
@@ -39,9 +49,12 @@ gulp.task('scripts', function() {
 
 gulp.task('default', ['scripts', 'styles']);
 
-gulp.task('watch', function () {
+gulp.task('watch', ['styles'], function () {
+    gulp.watch(path.STYLES, ['styles']);
+    gulp.watch(path.FONTS, ['styles']);
+
     var watcher = watchify(browserify({
-        entries: ['static/demo/src/scripts/main'],
+        entries: path.SCRIPT_MAIN,
         transform: [babelify, reactify],
         extensions: ['.jsx'],
         debug: true,
