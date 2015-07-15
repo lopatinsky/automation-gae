@@ -215,6 +215,7 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
+        logging.warning('Sending error: %s' % error)
         return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error)
 
     items = set_modifiers(items)
