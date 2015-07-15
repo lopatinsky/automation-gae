@@ -207,3 +207,11 @@ def set_delivery_sum_discount(response, outcome, delivery_type, delivery_zone):
     response.success = True
     response.delivery_sum_discount = int(delivery_zone.price * discount)
     return response
+
+
+def set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zone):
+    if delivery_type != DELIVERY or not delivery_zone or not delivery_zone.price:
+        return response
+    response.success = True
+    response.delivery_sum_discount = outcome.value
+    return response

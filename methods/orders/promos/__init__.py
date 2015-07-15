@@ -3,7 +3,7 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours, \
     check_group_modifier_choice
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
-    add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount
+    add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount
 
 
 class OutcomeResult:
@@ -80,6 +80,8 @@ def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_typ
         return set_fix_discount(response, outcome, _get_initial_total_sum(items))
     if outcome.method == PromoOutcome.DELIVERY_SUM_DISCOUNT:
         return set_delivery_sum_discount(response, outcome, delivery_type, delivery_zone)
+    if outcome.method == PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT:
+        return set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zone)
 
 
 def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
