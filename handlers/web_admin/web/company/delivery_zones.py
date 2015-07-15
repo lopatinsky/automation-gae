@@ -29,6 +29,7 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 if candidates:
                     address.area = candidates[0]['address']['area']
                 zone = DeliveryZone(address=address)
+                zone.sequence_number = DeliveryZone.generate_sequence_number()
                 zone.put()
                 for delivery in venue.delivery_types:
                     if delivery.delivery_type == DELIVERY:
