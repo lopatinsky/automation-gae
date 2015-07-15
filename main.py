@@ -31,6 +31,7 @@ app = WSGIApplication([
             Route('/close', email_api.DoneOrderHandler),
             Route('/cancel', email_api.CancelOrderHandler),
             Route('/postpone', email_api.PostponeOrderHandler),
+            Route('/confirm', email_api.ConfirmOrderHandler),
         ]),
     ]),
 

@@ -40,6 +40,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
         order.email_key_done = None
         order.email_key_cancel = None
         order.email_key_postpone = None
+        order.email_key_confirm = None
         order.put()
 
         if with_push:

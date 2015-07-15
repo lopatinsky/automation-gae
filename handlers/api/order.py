@@ -254,12 +254,17 @@ class OrderHandler(ApiHandler):
                     self.order.email_key_done = security.generate_random_string(entropy=256)
                     self.order.email_key_cancel = security.generate_random_string(entropy=256)
                     self.order.email_key_postpone = security.generate_random_string(entropy=256)
+                    if self.order.delivery_type == DELIVERY:
+                        self.order.email_key_confirm = security.generate_random_string(entropy=256)
                     self.order.put()
+
                     base_url = urlparse(self.request.url).hostname
                     item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
                     item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
                     item_values['postpone_url'] = 'http://%s/email/order/postpone?key=%s' % (base_url, self.order.email_key_postpone)
                     item_values['minutes'] = POSTPONE_MINUTES
+                    if self.order.delivery_type == DELIVERY:
+                        item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, self.order.email_key_confirm)
                 for email in config.DELIVERY_EMAILS:
                     send_email(EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 

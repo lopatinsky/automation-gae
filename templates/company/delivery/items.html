@@ -68,6 +68,9 @@
         <a href="{{ done_url }}">Выдать</a>
         <a href="{{ cancel_url }}">Отменить</a>
         <a href="{{ postpone_url }}">Перенести на {{ minutes }} минут</a>
+        {% if confirm_url %}
+            <a href="{{ confirm_url }}">Подтвердить</a>
+        {% endif %}
     {% endif %}
 </body>
 </html>

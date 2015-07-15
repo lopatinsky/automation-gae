@@ -129,6 +129,7 @@ class Order(ndb.Model):
     email_key_done = ndb.StringProperty()
     email_key_cancel = ndb.StringProperty()
     email_key_postpone = ndb.StringProperty()
+    email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
