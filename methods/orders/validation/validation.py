@@ -199,6 +199,7 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
         'new_order_gifts': [],
+        'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
         'promos': [],
@@ -279,13 +280,13 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             return send_error(error)
 
     if not order:
-        promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        promo_error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts)
-        if promo_errors:
-            return send_error(promo_errors[0])
+        if promo_error:
+            return send_error(promo_error)
     else:
-        errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts, order)
 
@@ -311,12 +312,14 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
+        grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
         grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
         grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
     else:
         grouped_item_dicts = []
         grouped_gift_dicts = []
         grouped_new_order_gift_dicts = []
+        grouped_unavail_order_gift_dicts = []
         grouped_order_gift_dicts = []
         grouped_cancelled_order_gift_dicts = []
 
@@ -351,6 +354,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'items': grouped_item_dicts,
         'gifts': grouped_gift_dicts,
         'new_order_gifts': grouped_new_order_gift_dicts,
+        'unavail_order_gifts': grouped_unavail_order_gift_dicts,
         'order_gifts': grouped_order_gift_dicts,
         'cancelled_order_gifts': grouped_cancelled_order_gift_dicts,
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
@@ -394,7 +398,20 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             )
             details.append(details_item)
         result['gift_details'] = details
-
+        details = []
+        for item_dict in order_gift_dicts:
+            details_item = OrderPositionDetails(
+                item=item_dict['item'].key,
+                price=0,
+                revenue=0,
+                promos=[promo.key for promo in item_dict['promos']],
+                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                            group_modifier=modifier.key)
+                                 for modifier in item_dict['group_modifiers']]
+            )
+            details.append(details_item)
+        result['order_gift_details'] = details
     return result
 
 

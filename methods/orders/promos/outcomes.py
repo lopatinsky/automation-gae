@@ -151,11 +151,12 @@ def set_order_gift_points(response, outcome, order):
     return response
 
 
-def add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
+def add_order_gift(response, outcome, promo, new_order_gift_dicts, unavail_order_gift_dicts, order_gift_dicts,
+                   cancelled_order_gift_dicts):
     from methods.orders.validation.validation import set_item_dicts
     gift = MenuItem.get_by_id(int(outcome.value))
     if not gift:
-        errors.append(u'Акция подарок по заказу не привязана к продукту')
+        response.error = u'Акция подарок по заказу не привязана к продукту'
         response.success = False
         return response
     found = False
@@ -163,12 +164,14 @@ def add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order
         if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
             found = True
             order_gift_dict['promos'].append(promo)
+            order_gift_dict['found'] = True
             break
     if not found:
         for order_gift_dict in cancelled_order_gift_dicts:
             if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
                 found = True
                 order_gift_dict['promos'].append(promo)
+                order_gift_dict['found'] = True
                 break
     if not found:
         gift.chosen_single_modifiers = []  # todo: is it flexible?
@@ -176,6 +179,14 @@ def add_order_gift(response, errors, outcome, promo, new_order_gift_dicts, order
         item_dict = set_item_dicts([gift], True)[0]
         item_dict['promos'].append(promo)
         new_order_gift_dicts.append(item_dict)
+    for order_gift_dict in order_gift_dicts[:]:
+        if not order_gift_dict.get('found'):
+            order_gift_dicts.remove(order_gift_dict)
+            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
+    for order_gift_dict in cancelled_order_gift_dicts[:]:
+        if not order_gift_dict.get('found'):
+            cancelled_order_gift_dicts.remove(order_gift_dict)
+            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
     response.success = True
     return response
 

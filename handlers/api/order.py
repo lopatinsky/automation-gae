@@ -158,6 +158,7 @@ class OrderHandler(ApiHandler):
             total_sum += delivery_sum
 
             item_details = validation_result["details"]
+            order_gift_details = validation_result["order_gift_details"]
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
 
             if address:
@@ -177,8 +178,8 @@ class OrderHandler(ApiHandler):
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
-                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
-                delivery_zone=delivery_zone.key if delivery_zone else None,
+                order_gift_details=order_gift_details, delivery_type=delivery_type, delivery_slot_id=delivery_slot_id,
+                address=address_obj, delivery_zone=delivery_zone.key if delivery_zone else None,
                 user_agent=self.request.headers["User-Agent"], delivery_sum=delivery_sum)
             self.order.put()
 
