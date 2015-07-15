@@ -104,8 +104,8 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=0&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    {% if promo.conditions[index].item %}
-                                        {{ promo.conditions[index].item.get().title }}
+                                    {% if promo.conditions[index].item_details.item %}
+                                        {{ promo.conditions[index].item_details.title }}
                                     {% else %}
                                         Выбрать
                                     {% endif %}
@@ -123,8 +123,8 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=1&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    {% if promo.outcomes[index].item %}
-                                        {{ promo.outcomes[index].item.get().title }}
+                                    {% if promo.outcomes[index].item_details.item %}
+                                        {{ promo.outcomes[index].item_details.title }}
                                     {% else %}
                                         Выбрать
                                     {% endif %}

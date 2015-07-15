@@ -14,6 +14,16 @@ def _get_item_keys(item_dicts):
     return result
 
 
+def _check_item(outcome, item_dict):
+    if item_dict['item'].key != outcome.item_details.item:
+        return False
+    item_choice_ids = [modifier_key[1] for modifier_key in item_dict['group_modifier_keys']]
+    for choice_id in outcome.item_details.group_choice_ids:
+        if choice_id not in item_choice_ids:
+            return False
+    return True
+
+
 def _apply_discounts(item_dict, promo, discount):
         if promo not in item_dict['promos']:
             if item_dict['revenue'] >= item_dict['price'] * discount:
@@ -44,11 +54,12 @@ def set_discounts(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item):
-        for item_dict in item_keys[outcome.item]:
-            if _apply_discounts(item_dict, promo, discount):
-                promo_applied = True
-    if not outcome.item_required:
+    if item_keys.get(outcome.item_details.item):
+        for item_dict in item_keys[outcome.item_details.item]:
+            if _check_item(outcome, item_dict):
+                if _apply_discounts(item_dict, promo, discount):
+                    promo_applied = True
+    if not outcome.item_details.item_required:
         for item_dict in item_dicts:
             if _apply_discounts(item_dict, promo, discount):
                 promo_applied = True
@@ -60,11 +71,12 @@ def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_p
     cash_back = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item):
-        for item_dict in item_keys[outcome.item]:
-            if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
-                promo_applied = True
-    if not outcome.item_required:
+    if item_keys.get(outcome.item_details.item):
+        for item_dict in item_keys[outcome.item_details.item]:
+            if _check_item(outcome, item_dict):
+                if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
+                    promo_applied = True
+    if not outcome.item_details.item_required:
         _apply_total_cash_back(init_total_sum - wallet_payment_sum, cash_back, order)
         promo_applied = True
     if order:
@@ -86,9 +98,9 @@ def set_discount_cheapest(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item):  # Not implemented, unfortunately
+    if item_keys.get(outcome.item_details.item):  # Not implemented, unfortunately
         pass
-    if not outcome.item_required:
+    if not outcome.item_details.item_required:
         item_dict = get_cheapest(item_dicts)
         if item_dict:
             if _apply_discounts(item_dict, promo, discount):
@@ -110,9 +122,9 @@ def set_discount_richest(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item):  # Not implemented, unfortunately
+    if item_keys.get(outcome.item_details.item):  # Not implemented, unfortunately
         pass
-    if not outcome.item_required:
+    if not outcome.item_details.item_required:
         item_dict = get_richest(item_dicts)
         if item_dict:
             if _apply_discounts(item_dict, promo, discount):
@@ -124,15 +136,15 @@ def set_discount_richest(response, outcome, item_dicts, promo):
 def set_gift_points(response, outcome, item_dicts, promo, order):
     item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item):
+    if item_keys.get(outcome.item_details.item):
         for item_dict in item_dicts:
-            if item_dict['item'].key == outcome.item:
+            if _check_item(outcome, item_dict):
                 if order:
-                    order.points_details.append(GiftPointsDetails(item=outcome.item, points=outcome.value))
+                    order.points_details.append(GiftPointsDetails(item=outcome.item_details.item, points=outcome.value))
                     order.put()
                 item_dict['promos'].append(promo)
                 promo_applied = True
-    if not outcome.item_required:
+    if not outcome.item_details.item_required:
         if order:
             order.points_details.append(GiftPointsDetails(points=outcome.value * len(item_dicts)))
             order.put()

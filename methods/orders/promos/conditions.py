@@ -5,6 +5,16 @@ from models import Order
 from models.order import NOT_CANCELED_STATUSES
 
 
+def _check_item(condition, item_dict):
+    if item_dict['item'].key != condition.item_details.item:
+        return False
+    item_choice_ids = [modifier_key[1] for modifier_key in item_dict['group_modifier_keys']]
+    for choice_id in condition.item_details.group_choice_ids:
+        if choice_id not in item_choice_ids:
+            return False
+    return True
+
+
 def check_condition_by_value(condition, value):
     return condition.value == value
 
@@ -36,7 +46,7 @@ def check_repeated_order(condition, client):
 def check_item_in_order(condition, item_dicts):
     amount = 0
     for item_dict in item_dicts:
-        if item_dict['item'].key == condition.item:
+        if _check_item(condition, item_dict):
             amount += 1
     return amount >= condition.value
 

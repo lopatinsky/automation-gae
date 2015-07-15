@@ -23,6 +23,12 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
         return dict
 
 
+class PromoMenuItem(ndb.Model):
+    item_required = ndb.BooleanProperty(default=False)  # item_required is False => apply for all items
+    item = ndb.KeyProperty(kind=MenuItem)
+    group_choice_ids = ndb.IntegerProperty(repeated=True)  # it can be None => not restrict in group modifiers
+
+
 class PromoOutcome(ndb.Model):
     DISCOUNT = 0               # calculated by prices
     CASH_BACK = 1              # calculated by prices
@@ -37,8 +43,9 @@ class PromoOutcome(ndb.Model):
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT)
 
-    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    #item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
+    #item_required = ndb.BooleanProperty(default=False)
+    item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
 
@@ -58,8 +65,9 @@ class PromoCondition(ndb.Model):
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE)
 
-    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    #item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
+    item_details = ndb.LocalStructuredProperty(PromoMenuItem)
+    #item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
     schedule = ndb.LocalStructuredProperty(Schedule)
