@@ -14,12 +14,19 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
     promo_id = ndb.IntegerProperty(required=True)  # it relates to empatika-promos
     points = ndb.IntegerProperty(required=True)  # how many spent
+    additional_group_choice_restrictions = ndb.IntegerProperty(repeated=True)
 
     def dict(self):
         dict = self.item.get().dict()
+        dict['id'] = str(self.key.id())
         dict.update({
             'points': self.points
         })
+        for modifier in dict['group_modifiers']:
+            choice_dicts = modifier['choices']
+            for choice_dict in choice_dicts[:]:
+                if int(choice_dict['id']) in self.additional_group_choice_restrictions:
+                    choice_dicts.remove(choice_dict)
         return dict
 
 

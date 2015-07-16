@@ -130,10 +130,14 @@ def group_item_dicts(item_dicts):
     return result
 
 
-def set_modifiers(items):
+def set_modifiers(items, with_gift_obj):
     mod_items = []
     for item in items:
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
+        if with_gift_obj:
+            menu_item.gift_obj = item['gift_obj']
+        else:
+            menu_item.gift_obj = None
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
             single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
@@ -167,6 +171,7 @@ def set_item_dicts(items, is_gift):
     for item in items:
         item_dicts.append({
             'item': item,
+            'gift_obj': item.gift_obj,  # can be None
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
@@ -216,9 +221,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
         logging.warning('Sending error: %s' % error)
-        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error)
+        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
+                                  cancelled_order_gifts, error)
 
-    items = set_modifiers(items)
+    items = set_modifiers(items, False)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items, False)
 
@@ -228,17 +234,21 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('total sum without promos = %s' % total_sum_without_promos)
 
-    gifts = set_modifiers(gifts)
+    for gift in gifts:
+        gift_obj = GiftMenuItem.get_by_id(int(gift['item_id']))
+        gift['item_id'] = gift_obj.item.id()
+        gift['gift_obj'] = gift_obj
+    gifts = set_modifiers(gifts, True)
     gift_dicts = set_item_dicts(gifts, True)
 
     logging.info('gift_dicts = %s' % gift_dicts)
 
-    order_gifts = set_modifiers(order_gifts)
+    order_gifts = set_modifiers(order_gifts, False)
     order_gift_dicts = set_item_dicts(order_gifts, True)
 
     logging.info('order_gift_dicts = %s' % order_gift_dicts)
 
-    cancelled_order_gifts = set_modifiers(cancelled_order_gifts)
+    cancelled_order_gifts = set_modifiers(cancelled_order_gifts, False)
     cancelled_order_gift_dicts = set_item_dicts(cancelled_order_gifts, True)
 
     logging.info('cancelled_order_gift_dicts = %s' % cancelled_order_gift_dicts)
@@ -254,7 +264,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_delivery_time(delivery_time)
     if not valid:
         return send_error(error)
-    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum_without_promos)
+    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
+                                       total_sum_without_promos)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
@@ -391,7 +402,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         details = []
         for item_dict in gift_dicts:
             details_item = GiftPositionDetails(
-                gift=GiftMenuItem.get_by_id(item_dict['item'].key.id()).key,
+                gift=item_dict['gift_obj'].key,
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
                 group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
                                                             group_modifier=modifier.key)

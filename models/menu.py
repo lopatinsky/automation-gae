@@ -69,7 +69,6 @@ class GroupModifierChoice(ndb.Model):
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
 
-
     @staticmethod
     def generate_id():
         fastcounter.incr("group_choice_id", delta=100, update_interval=1)

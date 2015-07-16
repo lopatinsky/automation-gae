@@ -247,10 +247,7 @@ def check_wallet_payment(total_sum, wallet_payment_sum):
 def check_gifts(gifts, client):
     spent_points = 0
     for gift in gifts:
-        gift_item = GiftMenuItem.get_by_id(gift.key.id())
-        if not gift_item:
-            description = u'%s нет в списке подарков' % gift.title
-            return False, description, 0, None
+        gift_item = gift.gift_obj
         spent_points += gift_item.points
     if config.PROMOS_API_KEY:
         accum_points = empatika_promos.get_user_points(client.key.id())

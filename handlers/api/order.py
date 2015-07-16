@@ -1,4 +1,5 @@
 # coding:utf-8
+import copy
 import logging
 from urlparse import urlparse
 import json
@@ -135,6 +136,9 @@ class OrderHandler(ApiHandler):
                 if previous_order and sorted(previous_order.items) == sorted(item_keys):
                     return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
+            # it is need, because item_id and gift_id are swapping
+            gifts_copy = copy.deepcopy(response_json.get('gifts', []))
+
             validation_result = validate_order(client,
                                                response_json['items'],
                                                response_json.get('gifts', []),
@@ -226,11 +230,12 @@ class OrderHandler(ApiHandler):
             client.put()
             self.order.status = NEW_ORDER
 
+            # use only gifts_copy, not response_json.get('gifts', [])
             # it is used for creating db for promos
-            validate_order(client, response_json['items'], response_json.get('gifts', []),
-                           response_json.get('order_gifts', []), response_json.get('cancelled_order_gifts', []),
-                           response_json['payment'], venue, address, delivery_time, delivery_slot, delivery_type,
-                           delivery_zone, False, self.order)
+            validate_order(client, response_json['items'], gifts_copy, response_json.get('order_gifts', []),
+                           response_json.get('cancelled_order_gifts', []), response_json['payment'],
+                           venue, address, delivery_time, delivery_slot, delivery_type, delivery_zone, False,
+                           self.order)
             self.order.put()
 
             # use delivery phone and delivery emails for all delivery types

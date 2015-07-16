@@ -315,7 +315,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
         outcome = PromoOutcome()
         outcome.method = self.request.get_range('method')
         outcome.value = self.request.get_range('value')
-        outcome.item_details= PromoMenuItem()
+        outcome.item_details = PromoMenuItem()
         promo.outcomes.append(outcome)
         promo.put()
         self.redirect('/company/promos/list')
@@ -327,6 +327,12 @@ class ListGiftsHandler(CompanyBaseHandler):
         gifts = GiftMenuItem.query().fetch()
         for gift in gifts:
             gift.title = gift.item.get().title
+            choice_titles = []
+            for choice_id in gift.additional_group_choice_restrictions:
+                choice = GroupModifier.get_modifier_by_choice(choice_id).get_choice_by_id(choice_id)
+                choice_titles.append(choice.title)
+            if choice_titles:
+                gift.title += u'(%s)' % u', '.join(choice_titles)
         self.render('/promos/gift_list.html', gifts=gifts)
 
     @company_user_required
@@ -356,9 +362,18 @@ class AddGiftHandler(CompanyBaseHandler):
         for item in MenuItem.query().fetch():
             confirmed = bool(self.request.get(str(item.key.id())))
             if confirmed:
-                gift = GiftMenuItem(id=item.key.id(), item=item.key)
+                choice_ids = []
+                for modifier in item.group_modifiers:
+                    modifier = modifier.get()
+                    choice_id = self.request.get_range('modifier_%s_%s' % (item.key.id(), modifier.key.id()))
+                    if choice_id:
+                        choice = modifier.get_choice_by_id(choice_id)
+                        if choice:
+                            choice_ids.append(choice_id)
+                gift = GiftMenuItem(item=item.key)
                 gift.promo_id = self.request.get_range('promo_id')
                 gift.points = self.request.get_range('points')
+                gift.additional_group_choice_restrictions = choice_ids
                 gift.put()
         self.redirect('/company/promos/gifts/list')
 
