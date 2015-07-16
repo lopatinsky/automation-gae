@@ -241,8 +241,6 @@ app = WSGIApplication([
             ]),
         ]),
 
-        Route('/demo', demo.DemoWizardHandler),
-
         PathPrefixRoute('/docs', [
             PathPrefixRoute('/legal', [
                 Route('/list', company_admin.LegalListHandler),
@@ -379,6 +377,8 @@ app = WSGIApplication([
         Route('/return_barista', web_admin.OrderCancelHandler),
         Route('/status_up', web_admin.OrderStatusUpdateHandler)
     ]),
+
+    Route('/wizard', demo.DemoWizardHandler),
 
     PathPrefixRoute('/task', [
         Route('/counter_persist_incr', fastcounter.CounterPersistIncr),
