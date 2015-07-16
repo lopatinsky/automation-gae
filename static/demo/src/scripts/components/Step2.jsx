@@ -1,7 +1,9 @@
 import React from 'react';
+import { Button, Glyphicon } from 'react-bootstrap';
 import { ButtonLink } from 'react-router-bootstrap';
 import MenuCategory from './MenuCategory';
 import MenuStore from '../stores/MenuStore';
+import Actions from '../Actions';
 
 const Step2 = React.createClass({
     getInitialState() {
@@ -28,11 +30,23 @@ const Step2 = React.createClass({
                 key={category.id}
                 category={category}
                 edit={this.state.edit}/>
-        }) ;
+        });
+        let addCard = this.state.categories[this.state.categories.length - 1]._new ? null :
+            <div className="card">
+                <div>
+                    <Button onClick={this._add} disabled={this.state.edit !== null}>
+                        <Glyphicon glyph='plus'/> Добавить категорию
+                    </Button>
+                </div>
+            </div>;
         return <div>
-            <h1>Настройка меню</h1>
+            <h2>Настройка меню</h2>
             {categories}
+            {addCard}
         </div>;
+    },
+    _add() {
+        Actions.addCategory();
     }
 });
 export default Step2;

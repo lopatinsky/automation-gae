@@ -2,8 +2,16 @@
     margin-bottom: 0;
 }
 
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
 body {
     background: #eeeeee;
+}
+
+body * {
+    font-family: "Open Sans", "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
 }
 
 .card {
@@ -11,6 +19,7 @@ body {
        -moz-box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
             box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
     background-color: white;
+    margin-bottom: 20px;
 }
 
 .card > * {
@@ -22,11 +31,12 @@ body {
     border-top: none;
 }
 
-.menu-category h2 {
-    margin: 0;
+.menu-category h3 {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
-.menu-item h3 {
+.menu-item h4 {
     margin-top: 0;
 }
 

@@ -44,7 +44,7 @@ const Step1 = React.createClass({
     },
     render() {
         return <div>
-            <h4>Введите информацию о Вашей компании</h4>
+            <h2>Введите информацию о Вашей компании</h2>
             <form className='form-horizontal'>
                 <Input ref='name'
                        type='text'

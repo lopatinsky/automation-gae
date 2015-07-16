@@ -31,17 +31,18 @@ const MenuStore = assign({}, EventEmitter.prototype, {
     },
 
     editing: null,
-    startEdit(itemId) {
-        this.editing = itemId;
+    startEditItem(itemId) {
+        this.editing = {item: itemId};
         this.emit('change');
     },
-    finishEdit(editedItem) {
+    finishEditItem(editedItem) {
         let found = false;
         for (let cat of this.menu) {
             for (let item of cat.items) {
                 if (item.id == editedItem.id) {
                     found = true;
                     assign(item, editedItem);
+                    delete item._new;
                     break;
                 }
             }
@@ -51,8 +52,11 @@ const MenuStore = assign({}, EventEmitter.prototype, {
         this.emit('change');
     },
     cancelEdit() {
+        if (this.menu[this.menu.length - 1]._new) {
+            this.menu.pop();
+        }
         for (let cat of this.menu) {
-            if (cat.items[cat.items.length - 1]._new) {
+            if (cat.items.length && cat.items[cat.items.length - 1]._new) {
                 cat.items.pop();
                 break;
             }
@@ -71,7 +75,29 @@ const MenuStore = assign({}, EventEmitter.prototype, {
         let item = MenuStore._createItem();
         item._new = true;
         category.items.push(item);
-        this.editing = item.id;
+        this.editing = {item: item.id};
+        this.emit('change');
+    },
+    startEditCategory(categoryId) {
+        this.editing = {category: categoryId};
+        this.emit('change');
+    },
+    finishEditCategory(editedCategory) {
+        for (let cat of this.menu) {
+            if (cat.id == editedCategory.id) {
+                assign(cat, editedCategory);
+                delete cat._new;
+                break;
+            }
+        }
+        this.editing = null;
+        this.emit('change');
+    },
+    addCategory() {
+        let category = this._createCategory();
+        category._new = true;
+        this.menu.push(category);
+        this.editing = {category: category.id};
         this.emit('change');
     }
 });
@@ -83,17 +109,26 @@ MenuStore.menu = [
 ];
 MenuStore.dispatchToken = AppDispatcher.register(action => {
     switch (action.actionType) {
-        case Actions.EDIT_STARTED:
-            MenuStore.startEdit(action.data);
+        case Actions.ITEM_EDIT_STARTED:
+            MenuStore.startEditItem(action.data);
             break;
-        case Actions.EDIT_FINISHED:
-            MenuStore.finishEdit(action.data);
+        case Actions.ITEM_EDIT_FINISHED:
+            MenuStore.finishEditItem(action.data);
             break;
         case Actions.EDIT_CANCELED:
             MenuStore.cancelEdit();
             break;
         case Actions.ITEM_ADDED:
             MenuStore.addItem(action.data);
+            break;
+        case Actions.CATEGORY_EDIT_STARTED:
+            MenuStore.startEditCategory(action.data);
+            break;
+        case Actions.CATEGORY_EDIT_FINISHED:
+            MenuStore.finishEditCategory(action.data);
+            break;
+        case Actions.CATEGORY_ADDED:
+            MenuStore.addCategory();
             break;
     }
 });

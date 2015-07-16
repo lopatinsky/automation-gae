@@ -11,12 +11,12 @@ const MenuItem = React.createClass({
     imageValidators: [pattern(/^https?:\/\/[a-z0-9-.]+\//i, "Введите корректную ссылку")],
     defaultImageUrl: 'http://placehold.it/100x50/eeeeee/777777?text=Нет',
     componentWillMount() {
-        if (this.props.edit == this.props.item.id) {
+        if (this.props.edit && this.props.edit.item == this.props.item.id) {
             this.setState(this.props.item);
         }
     },
     render() {
-        if (this.props.edit == this.props.item.id) {
+        if (this.props.edit && this.props.edit.item == this.props.item.id) {
             return <div className='form-horizontal menu-item'>
                 <InputGroup ref='title'
                             type='text'
@@ -63,10 +63,10 @@ const MenuItem = React.createClass({
                             <Glyphicon glyph='pencil'/>
                         </Button>
                     </div>
-                    <h3>
+                    <h4>
                         {this.props.item.title}&nbsp;
                         <Label bsStyle='primary'>{this.props.item.price} руб.</Label>
-                    </h3>
+                    </h4>
                     <p>{this.props.item.description}</p>
                 </div>
             </div>;
@@ -75,7 +75,7 @@ const MenuItem = React.createClass({
 
     _edit() {
         this.setState(this.props.item);
-        Actions.startEdit(this.props.item.id);
+        Actions.startEditItem(this.props.item.id);
     },
     _finishEdit() {
         let valid = this.refs.title.validate(true) &
@@ -83,7 +83,7 @@ const MenuItem = React.createClass({
                 this.refs.price.validate(true) &
                 this.refs.imageUrl.validate(true);
         if (valid) {
-            Actions.finishEdit(this.state);
+            Actions.finishEditItem(this.state);
         }
     },
     _cancelEdit() {

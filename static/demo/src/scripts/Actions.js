@@ -9,17 +9,17 @@ const Actions = {
         });
     },
 
-    EDIT_STARTED: "EDIT_STARTED",
-    startEdit(itemId) {
+    ITEM_EDIT_STARTED: "ITEM_EDIT_STARTED",
+    startEditItem(itemId) {
         AppDispatcher.dispatch({
-            actionType: Actions.EDIT_STARTED,
+            actionType: Actions.ITEM_EDIT_STARTED,
             data: itemId
         })
     },
-    EDIT_FINISHED: "EDIT_FINISHED",
-    finishEdit(item) {
+    ITEM_EDIT_FINISHED: "ITEM_EDIT_FINISHED",
+    finishEditItem(item) {
         AppDispatcher.dispatch({
-            actionType: Actions.EDIT_FINISHED,
+            actionType: Actions.ITEM_EDIT_FINISHED,
             data: item
         })
     },
@@ -35,6 +35,29 @@ const Actions = {
         AppDispatcher.dispatch({
             actionType: Actions.ITEM_ADDED,
             data: categoryId
+        })
+    },
+
+    CATEGORY_EDIT_STARTED: "CATEGORY_EDIT_STARTED",
+    startEditCategory(categoryId) {
+        AppDispatcher.dispatch({
+            actionType: Actions.CATEGORY_EDIT_STARTED,
+            data: categoryId
+        })
+    },
+    CATEGORY_EDIT_FINISHED: "CATEGORY_EDIT_FINISHED",
+    finishEditCategory(category) {
+        AppDispatcher.dispatch({
+            actionType: Actions.CATEGORY_EDIT_FINISHED,
+            data: category
+        });
+    },
+
+    CATEGORY_ADDED: "CATEGORY_ADDED",
+    addCategory() {
+        AppDispatcher.dispatch({
+            actionType: Actions.CATEGORY_ADDED,
+            data: null
         })
     }
 };
