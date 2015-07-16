@@ -10,7 +10,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps');
 
 var path = {
-    STYLES: ['node_modules/bootswatch/simplex/bootstrap.min.css', 'static/demo/src/styles/*.*'],
+    STYLES: ['node_modules/bootswatch/cosmo/bootstrap.min.css', 'static/demo/src/styles/*.*'],
     STYLES_OUT: 'static/demo/dist/styles',
     FONTS: 'node_modules/bootstrap/fonts/*.*',
     FONTS_OUT: 'static/demo/dist/fonts',

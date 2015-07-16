@@ -6,9 +6,9 @@ const App = React.createClass({
     render() {
         return (
             <div>
-                <Navbar fluid staticTop brand="Ru-Beacon"/>
+                <Navbar staticTop brand="Ru-Beacon"/>
 
-                <Grid fluid>
+                <Grid>
                     <RouteHandler/>
                 </Grid>
             </div>

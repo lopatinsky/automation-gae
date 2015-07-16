@@ -10,7 +10,6 @@ const InputGroup = React.createClass({
         };
     },
     render() {
-        console.log(this.state);
         return <Input ref='input'
             labelClassName='col-sm-4 col-md-3'
             wrapperClassName={'col-sm-6 col-md-6' + (this.props.label ? '' : 'col-sm-offset-4 col-md-offset-3')}
@@ -19,16 +18,13 @@ const InputGroup = React.createClass({
             onChange={this._onChange}
             onBlur={this._onBlur}
             bsStyle={this._getBsStyle()}
-            help={this.state.error}/>;
+            help={this.state.showValidation ? this.state.error : ''}/>;
     },
     _getBsStyle() {
         if (!this.state.showValidation) {
             return null;
         }
         return this.state.valid ? 'success' : 'error';
-    },
-    _getHelp() {
-        return this.state.showValidation ? this.state.error : '';
     },
     validate(forceEnable=false) {
         if (forceEnable) {
