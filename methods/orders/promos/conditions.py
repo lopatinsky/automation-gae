@@ -63,3 +63,7 @@ def check_group_modifier_choice(condition, item_dicts):
                 if modifier[1] == condition.value:
                     return True
     return False
+
+
+def check_payment_type(condition, payment_info):
+    return check_condition_by_value(condition, payment_info.get('type_id'))

@@ -70,9 +70,10 @@ class PromoCondition(ndb.Model):
     CHECK_MIN_ORDER_SUM_WITH_PROMOS = 7
     CHECK_GROUP_MODIFIER_CHOICE = 8
     CHECK_NOT_GROUP_MODIFIER_CHOICE = 9
+    CHECK_PAYMENT_TYPE = 10
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
-               CHECK_NOT_GROUP_MODIFIER_CHOICE)
+               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE)
 
     #item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
@@ -164,7 +165,8 @@ CONDITION_MAP = {
     PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы',
     PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS: u'Минимальная сумма с учетом акций',
     PromoCondition.CHECK_GROUP_MODIFIER_CHOICE: u'Выбор группового модификатора в заказе',
-    PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе'
+    PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе',
+    PromoCondition.CHECK_PAYMENT_TYPE: u'Тип оплаты'
 }
 
 OUTCOME_MAP = {

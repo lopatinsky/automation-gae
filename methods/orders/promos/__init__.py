@@ -1,7 +1,7 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours, \
-    check_group_modifier_choice
+    check_group_modifier_choice, check_payment_type
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points
@@ -57,6 +57,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_group_modifier_choice(condition, item_dicts)
     if condition.method == PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE:
         return not check_group_modifier_choice(condition, item_dicts)
+    if condition.method == PromoCondition.CHECK_PAYMENT_TYPE:
+        return check_payment_type(condition, payment_info)
 
 
 def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
