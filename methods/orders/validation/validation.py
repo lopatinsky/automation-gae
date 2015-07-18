@@ -171,7 +171,7 @@ def set_item_dicts(items, is_gift):
     for item in items:
         item_dicts.append({
             'item': item,
-            'gift_obj': item.gift_obj,  # can be None
+            'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
