@@ -17,7 +17,7 @@ const MenuItem = React.createClass({
     },
     render() {
         if (this.props.edit && this.props.edit.item == this.props.item.id) {
-            return <div className='form-horizontal menu-item'>
+            return <div className='menu-item'>
                 <InputGroup ref='title'
                             type='text'
                             value={this.state.title}
@@ -63,10 +63,10 @@ const MenuItem = React.createClass({
                             <Glyphicon glyph='pencil'/>
                         </Button>
                     </div>
-                    <h4>
+                    <h5>
                         {this.props.item.title}&nbsp;
                         <Label bsStyle='primary'>{this.props.item.price} руб.</Label>
-                    </h4>
+                    </h5>
                     <p>{this.props.item.description}</p>
                 </div>
             </div>;

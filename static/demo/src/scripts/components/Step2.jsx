@@ -40,7 +40,7 @@ const Step2 = React.createClass({
                 </div>
             </div>;
         return <div>
-            <h2>Настройка меню</h2>
+            <h3>Настройка меню</h3>
             <div className="cards-container">
                 {categories}
                 {addCard}

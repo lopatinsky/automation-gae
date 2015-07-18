@@ -4,7 +4,7 @@ import { ButtonLink } from 'react-router-bootstrap';
 const InitState = React.createClass({
     render() {
         return <div>
-            <h2>Finished!</h2>
+            <h3>Finished!</h3>
         </div>;
     }
 });

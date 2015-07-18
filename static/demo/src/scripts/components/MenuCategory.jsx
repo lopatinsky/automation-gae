@@ -16,7 +16,7 @@ const MenuCategory = React.createClass({
         let headingPart;
         if (this.props.edit && this.props.edit.category == this.props.category.id) {
             headingPart = <div>
-                <div className="form-horizontal">
+                <div>
                     <InputGroup ref='title'
                                 type='text'
                                 value={this.state.title}
@@ -36,12 +36,12 @@ const MenuCategory = React.createClass({
             </div>;
         } else {
             headingPart =
-                <h3>
+                <h4>
                     {this.props.category.title}&nbsp;
                     <Button bsSize='small' onClick={this._edit} disabled={this.props.edit !== null}>
                         <Glyphicon glyph='pencil'/>
                     </Button>
-                </h3>;
+                </h4>;
         }
 
         let items = this.props.category.items.map(item => {

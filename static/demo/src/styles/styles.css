@@ -7,8 +7,13 @@
     margin-bottom: 0;
 }
 
+.has-feedback label~.form-control-feedback {
+    top: 23px;
+}
+
 .help-block {
     font-size: smaller;
+    margin-top: 2px;
 }
 
 .form-group:last-child {
@@ -54,12 +59,12 @@ body * {
     border-top: none;
 }
 
-.menu-category h3 {
+.menu-category h4 {
     margin-top: 0;
     margin-bottom: 0;
 }
 
-.menu-item h4 {
+.menu-item h5 {
     margin-top: 0;
 }
 

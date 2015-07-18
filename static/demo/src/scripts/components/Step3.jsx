@@ -33,7 +33,7 @@ const Step3 = React.createClass({
             <Button onClick={this._selectAddress}>Выбрать</Button>;
         let mapPart = this.state.choosingAddress ? <AddressPicker onPicked={this._onAddressPicked}/>: null;
         return <div>
-            <h2>Введите информацию о заведении</h2>
+            <h3>Введите информацию о заведении</h3>
             <div className="cards-container">
                 <div className="card">
                     <div>

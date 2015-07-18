@@ -44,7 +44,7 @@ const Step1 = React.createClass({
     },
     render() {
         return <div>
-            <h2>Введите информацию о Вашей компании</h2>
+            <h3>Введите информацию о Вашей компании</h3>
             <div className="cards-container">
                 <div className="card">
                     <div>
