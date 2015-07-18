@@ -59,7 +59,7 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
                     company.info[order.payment_type_id][order.status]["client_ids"].append(order.client_id)
                 company.info[order.payment_type_id][order.status]["orders_number"] += 1
                 company.info[order.payment_type_id][order.status]["goods_number"] += len(order.item_details)
-                company.info[order.payment_type_id][order.status]["orders_sum"] += order.total_sum
+                company.info[order.payment_type_id][order.status]["orders_sum"] += order.total_sum - order.wallet_payment
         for payment in company.payments:
             for status in statuses:
                 company.info[payment['type']][status]["client_number"] = len(company.info[payment['type']][status]["client_ids"])
