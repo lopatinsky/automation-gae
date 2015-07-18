@@ -161,6 +161,8 @@ class OrderHandler(ApiHandler):
                 return self.render_error(u"Сумма доставки была пересчитана", u"")
             if wallet_payment and round(wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):
                 return self.render_error(u"Сумма оплаты баллами была пересчитана", u"")
+            if validation_result['unavail_order_gifts'] or validation_result['new_order_gifts']:
+                return self.render_error(u"Подарки были пересчитаны", u"")
             total_sum += delivery_sum
 
             item_details = validation_result["details"]
