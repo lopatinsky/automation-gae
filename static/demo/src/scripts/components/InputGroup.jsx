@@ -18,13 +18,25 @@ const InputGroup = React.createClass({
             onChange={this._onChange}
             onBlur={this._onBlur}
             bsStyle={this._getBsStyle()}
-            help={this.state.showValidation ? this.state.error : ''}/>;
+            help={this._getHelp()}/>;
+    },
+    _getHelp() {
+        if (this.props.noValidation) {
+            return this.props.help;
+        }
+        return this.state.showValidation ? this.state.error : '';
     },
     _getBsStyle() {
+        if (this.props.noValidation) {
+            return this.props.bsStyle;
+        }
         if (!this.state.showValidation) {
             return null;
         }
         return this.state.valid ? 'success' : 'error';
+    },
+    componentWillReceiveProps() {
+        this.validate();
     },
     validate(forceEnable=false) {
         if (forceEnable) {

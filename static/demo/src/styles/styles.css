@@ -1,9 +1,18 @@
+/* Common fixes */
 .form-horizontal .form-group .help-block:last-child {
     margin-bottom: 0;
 }
 
 .form-group:last-child {
     margin-bottom: 0;
+}
+
+.input-group-addon {
+    font-size: 16px;
+}
+
+.input-group-btn + .form-control {
+    padding-left: 10px;
 }
 
 body {

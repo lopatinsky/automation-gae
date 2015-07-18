@@ -52,12 +52,27 @@ const Actions = {
             data: category
         });
     },
-
     CATEGORY_ADDED: "CATEGORY_ADDED",
     addCategory() {
         AppDispatcher.dispatch({
             actionType: Actions.CATEGORY_ADDED,
             data: null
+        })
+    },
+
+    VENUE_TITLE_UPDATED: "VENUE_TITLE_UPDATED",
+    updateVenueTitle(title) {
+        AppDispatcher.dispatch({
+            actionType: Actions.VENUE_TITLE_UPDATED,
+            data: title
+        })
+    },
+
+    VENUE_LOCATION_UPDATED: "VENUE_LOCATION_UPDATED",
+    updateVenueLocation(location) {
+        AppDispatcher.dispatch({
+            actionType: Actions.VENUE_LOCATION_UPDATED,
+            data: location
         })
     }
 };

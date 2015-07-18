@@ -43,6 +43,7 @@ const Step2 = React.createClass({
             <h2>Настройка меню</h2>
             {categories}
             {addCard}
+            <ButtonLink to='step3'>Далее</ButtonLink>
         </div>;
     },
     _add() {
