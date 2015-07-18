@@ -6,6 +6,7 @@ from base import CompanyBaseHandler
 from config import Config, config
 from methods.auth import company_user_required
 from methods.rendering import STR_TIME_FORMAT
+from methods.timezone import get_time_zone
 from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address, DeliveryZone
 from methods import geocoder
 from models.schedule import DaySchedule, Schedule
@@ -24,12 +25,13 @@ class CreateVenueHandler(CompanyBaseHandler):
                 address = address[0].get('address')
                 address_str = u'г. %s, ул. %s, д. %s' % (address.get('city'), address.get('street'), address.get('home'))
         if not address_str:
-            self.abort(400)  # todo: return to map!!!
-        self.render('/venues/edit_venue.html', **{
-            'lat': lat,
-            'lon': lon,
-            'address': address_str
-        })
+            self.redirect('/company/venues/map')
+        else:
+            self.render('/venues/edit_venue.html', **{
+                'lat': lat,
+                'lon': lon,
+                'address': address_str
+            })
 
     @company_user_required
     def post(self):
@@ -45,6 +47,10 @@ class CreateVenueHandler(CompanyBaseHandler):
             if venue.address.country not in config.COUNTRIES:
                 config.COUNTRIES.append(venue.address.country)
                 config.put()
+        zone = get_time_zone(venue.coordinates.lat, venue.coordinates.lon)
+        if zone:
+            venue.timezone_offset = zone['offset']
+            venue.timezone_name = zone['name']
         venue.put()
         self.redirect('/company/venues')
 

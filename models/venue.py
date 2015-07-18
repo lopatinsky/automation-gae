@@ -227,6 +227,7 @@ class Venue(ndb.Model):
     active = ndb.BooleanProperty(required=True, default=False)
     type_deliveries = ndb.IntegerProperty(repeated=True)
     timezone_offset = ndb.IntegerProperty(default=3)  # hours offset
+    timezone_name = ndb.StringProperty()
     stop_lists = ndb.KeyProperty(kind=MenuItem, repeated=True)
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
