@@ -11,8 +11,6 @@ const InputGroup = React.createClass({
     },
     render() {
         return <Input ref='input'
-            labelClassName='col-sm-4 col-md-3'
-            wrapperClassName={'col-sm-6 col-md-6' + (this.props.label ? '' : 'col-sm-offset-4 col-md-offset-3')}
             hasFeedback
             {...this.props}
             onChange={this._onChange}

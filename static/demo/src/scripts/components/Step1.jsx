@@ -45,33 +45,37 @@ const Step1 = React.createClass({
     render() {
         return <div>
             <h2>Введите информацию о Вашей компании</h2>
-            <form className='form-horizontal'>
-                <Input ref='name'
-                       type='text'
-                       value={this.state.name}
-                       placeholder='Кафе "У Ивана"'
-                       label='Название компании'
-                       onChange={this._onInputChange}
-                       validators={this.nameValidators}/>
-                <Input ref='phone'
-                       type='text'
-                       value={this.state.phone}
-                       placeholder='999 000-00-00'
-                       label='Ваш телефон'
-                       addonBefore={<span>+7</span>}
-                       onChange={this._onInputChange}
-                       validators={this.phoneValidators}/>
-                <Input ref='email'
-                       type='email'
-                       value={this.state.email}
-                       placeholder='name@example.com'
-                       label='Ваш e-mail'
-                       onChange={this._onInputChange}
-                       validators={this.emailValidators}/>
-                <Input>
-                    <Button onClick={this._onNextClick}>Далее</Button>
-                </Input>
-            </form>
+            <div className="cards-container">
+                <div className="card">
+                    <div>
+                        <Input ref='name'
+                               type='text'
+                               value={this.state.name}
+                               placeholder='Кафе "У Ивана"'
+                               label='Название компании'
+                               onChange={this._onInputChange}
+                               validators={this.nameValidators}/>
+                        <Input ref='phone'
+                               type='text'
+                               value={this.state.phone}
+                               placeholder='999 000-00-00'
+                               label='Ваш телефон'
+                               addonBefore={<span>+7</span>}
+                               onChange={this._onInputChange}
+                               validators={this.phoneValidators}/>
+                        <Input ref='email'
+                               type='email'
+                               value={this.state.email}
+                               placeholder='name@example.com'
+                               label='Ваш e-mail'
+                               onChange={this._onInputChange}
+                               validators={this.emailValidators}/>
+                    </div>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                    <Button onClick={this._onNextClick} bsStyle="primary">Далее</Button>
+                </div>
+            </div>
         </div>;
     }
 });

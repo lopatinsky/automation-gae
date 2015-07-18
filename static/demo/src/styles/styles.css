@@ -3,8 +3,16 @@
     margin-bottom: 0;
 }
 
-.form-group:last-child {
+.form-group .control-label {
     margin-bottom: 0;
+}
+
+.help-block {
+    font-size: smaller;
+}
+
+.form-group:last-child {
+    margin-bottom: 5px;
 }
 
 .input-group-addon {
@@ -15,12 +23,18 @@
     padding-left: 10px;
 }
 
+/* App styles */
 body {
     background: #eeeeee;
 }
 
 body * {
     font-family: "Open Sans", "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+}
+
+.cards-container {
+    max-width: 720px;
+    margin: 0 auto;
 }
 
 .card {

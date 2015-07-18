@@ -41,9 +41,13 @@ const Step2 = React.createClass({
             </div>;
         return <div>
             <h2>Настройка меню</h2>
-            {categories}
-            {addCard}
-            <ButtonLink to='step3'>Далее</ButtonLink>
+            <div className="cards-container">
+                {categories}
+                {addCard}
+                <div style={{textAlign: 'right'}}>
+                    <ButtonLink to='step3' bsStyle='primary'>Далее</ButtonLink>
+                </div>
+            </div>
         </div>;
     },
     _add() {

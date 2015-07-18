@@ -34,28 +34,32 @@ const Step3 = React.createClass({
         let mapPart = this.state.choosingAddress ? <AddressPicker onPicked={this._onAddressPicked}/>: null;
         return <div>
             <h2>Введите информацию о заведении</h2>
-            <div className="form-horizontal">
-                <InputGroup ref='title'
-                            type='text'
-                            value={this.state.title}
-                            placeholder='Кафе на Тверской'
-                            label='Название заведения'
-                            onChange={this._onInputChange}
-                            validators={this.titleValidators}/>
-                <InputGroup ref='address'
-                            type='text'
-                            value={this.state.address}
-                            placeholder='Москва, Тверская ул., 1'
-                            label='Адрес'
-                            readOnly
-                            buttonBefore={addressButton}
-                            noValidation
-                            bsStyle={this.state.addressBsStyle}
-                            help={this.state.addressHelp}/>
-                {mapPart}
-                <InputGroup>
-                    <Button onClick={this._onNextClick}>Далее</Button>
-                </InputGroup>
+            <div className="cards-container">
+                <div className="card">
+                    <div>
+                        <InputGroup ref='title'
+                                    type='text'
+                                    value={this.state.title}
+                                    placeholder='Кафе на Тверской'
+                                    label='Название заведения'
+                                    onChange={this._onInputChange}
+                                    validators={this.titleValidators}/>
+                        <InputGroup ref='address'
+                                    type='text'
+                                    value={this.state.address}
+                                    placeholder='Москва, Тверская ул., 1'
+                                    label='Адрес'
+                                    readOnly
+                                    buttonBefore={addressButton}
+                                    noValidation
+                                    bsStyle={this.state.addressBsStyle}
+                                    help={this.state.addressHelp}/>
+                        {mapPart}
+                    </div>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                    <Button onClick={this._onNextClick} bsStyle="primary">Далее</Button>
+                </div>
             </div>
         </div>;
     },
