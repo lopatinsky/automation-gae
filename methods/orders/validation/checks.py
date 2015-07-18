@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_promos
-from methods.map import get_houses_by_address, get_streets_by_address
+from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.working_hours import check_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
 from models.order import OrderPositionDetails

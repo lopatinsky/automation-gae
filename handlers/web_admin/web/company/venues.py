@@ -7,7 +7,7 @@ from config import Config, config
 from methods.auth import company_user_required
 from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address, DeliveryZone
-from methods import map
+from methods import geocoder
 from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY
 
@@ -17,7 +17,7 @@ class CreateVenueHandler(CompanyBaseHandler):
     def get(self):
         lat = self.request.get('lat')
         lon = self.request.get('lon')
-        address = map.get_houses_by_coordinates(lat, lon)
+        address = geocoder.get_houses_by_coordinates(lat, lon)
         address_str = ''
         if len(address):
             if address[0].get('address'):
@@ -37,7 +37,7 @@ class CreateVenueHandler(CompanyBaseHandler):
         venue.title = self.request.get('title')
         venue.description = self.request.get('description')
         venue.coordinates = ndb.GeoPt(float(self.request.get('lat')), float(self.request.get('lon')))
-        candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
+        candidates = geocoder.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
         if candidates:
             address = candidates[0]
             venue.address = Address(**address['address'])

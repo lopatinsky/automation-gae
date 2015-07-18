@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 import re
-from methods.map import get_houses_by_address, get_areas_by_coordinates
+from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.venue import DELIVERY

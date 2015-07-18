@@ -3,7 +3,7 @@ import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
-from methods.map import get_cities_by_coordinates, get_areas_by_coordinates
+from methods.geocoder import get_cities_by_coordinates, get_areas_by_coordinates
 from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
 
