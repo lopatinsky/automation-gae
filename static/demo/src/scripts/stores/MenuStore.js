@@ -2,8 +2,9 @@ import { EventEmitter } from 'events';
 import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
+import PersistenceMixin from '../utils/PersistenceMixin';
 
-const MenuStore = assign({}, EventEmitter.prototype, {
+const MenuStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     _itemCounter: 0,
     _categoryCounter: 0,
     _createItem(title, description, price, imageUrl) {
@@ -107,6 +108,7 @@ MenuStore.menu = [
         MenuStore._createItem("Продукт 2", "Продукт 2 -- не лучший в мире :(", 50, "https://www.google.ru/images/srpr/logo11w.png")
     )
 ];
+MenuStore.initPersistence(['menu', '_itemCounter', '_categoryCounter'], 'menu');
 MenuStore.dispatchToken = AppDispatcher.register(action => {
     switch (action.actionType) {
         case Actions.ITEM_EDIT_STARTED:

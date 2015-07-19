@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Glyphicon } from 'react-bootstrap';
-import { ButtonLink } from 'react-router-bootstrap';
 import MenuCategory from './MenuCategory';
 import MenuStore from '../stores/MenuStore';
 import Actions from '../Actions';
@@ -44,11 +43,18 @@ const Step2 = React.createClass({
             <div className="cards-container">
                 {categories}
                 {addCard}
-                <div style={{textAlign: 'right'}}>
-                    <ButtonLink to='step3' bsStyle='primary'>Далее</ButtonLink>
+                <div>
+                    <Button onClick={this._onPrevClick}>Назад</Button>
+                    <Button bsStyle='primary' onClick={this._onNextClick} className="pull-right">Далее</Button>
                 </div>
             </div>
         </div>;
+    },
+    _onNextClick() {
+        Actions.nextStep();
+    },
+    _onPrevClick() {
+        Actions.prevStep();
     },
     _add() {
         Actions.addCategory();

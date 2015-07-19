@@ -2,8 +2,9 @@ import { EventEmitter } from 'events';
 import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
+import PersistenceMixin from '../utils/PersistenceMixin';
 
-const InfoStore = assign({}, EventEmitter.prototype, {
+const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     name: '',
     phone: '',
     email: '',
@@ -22,6 +23,7 @@ const InfoStore = assign({}, EventEmitter.prototype, {
         return {name, phone, email};
     }
 });
+InfoStore.initPersistence(['name', 'phone', 'email'], 'info');
 InfoStore.dispatchToken = AppDispatcher.register(function(action) {
     if (action.actionType == Actions.INFO_UPDATED) {
         InfoStore.updateMainInfo(action.data);

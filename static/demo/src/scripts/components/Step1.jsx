@@ -1,13 +1,11 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { Navigation } from 'react-router';
 import Input from './InputGroup'
 import InfoStore from '../stores/InfoStore';
 import Actions from '../Actions';
 import { required, pattern, email } from '../validators';
 
 const Step1 = React.createClass({
-    mixins: [Navigation],
     nameValidators: [required("Введите название компании")],
     phoneValidators: [
         required("Введите Ваш номер телефона"),
@@ -39,7 +37,7 @@ const Step1 = React.createClass({
             this.refs.phone.validate(true) &
             this.refs.email.validate(true);
         if (valid) {
-            this.transitionTo('step2');
+            Actions.nextStep();
         }
     },
     render() {

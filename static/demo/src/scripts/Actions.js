@@ -67,12 +67,26 @@ const Actions = {
             data: title
         })
     },
-
     VENUE_LOCATION_UPDATED: "VENUE_LOCATION_UPDATED",
     updateVenueLocation(location) {
         AppDispatcher.dispatch({
             actionType: Actions.VENUE_LOCATION_UPDATED,
             data: location
+        })
+    },
+
+    NEXT_STEP: "NEXT_STEP",
+    nextStep() {
+        AppDispatcher.dispatch({
+            actionType: Actions.NEXT_STEP,
+            data: null
+        })
+    },
+    PREV_STEP: "PREV_STEP",
+    prevStep() {
+        AppDispatcher.dispatch({
+            actionType: Actions.PREV_STEP,
+            data: null
         })
     }
 };

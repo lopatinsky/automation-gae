@@ -2,8 +2,9 @@ import { EventEmitter } from 'events';
 import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
+import PersistenceMixin from '../utils/PersistenceMixin';
 
-const VenueStore = assign({}, EventEmitter.prototype, {
+const VenueStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     title: '',
     address: '',
     lat: null,
@@ -27,6 +28,7 @@ const VenueStore = assign({}, EventEmitter.prototype, {
         return {title, address, lat, lng};
     }
 });
+VenueStore.initPersistence(['title', 'address', 'lat', 'lng'], 'venue');
 VenueStore.dispatchToken = AppDispatcher.register(action => {
     if (action.actionType == Actions.VENUE_TITLE_UPDATED) {
         VenueStore.updateTitle(action.data);

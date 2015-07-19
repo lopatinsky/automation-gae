@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { Navigation } from 'react-router';
 import assign from 'object-assign';
 import InputGroup from './InputGroup';
 import VenueStore from '../stores/VenueStore';
@@ -9,7 +8,6 @@ import AddressPicker from './AddressPicker';
 import Actions from '../Actions';
 
 const Step3 = React.createClass({
-    mixins: [Navigation],
     titleValidators: [required('Введите название заведения')],
     getInitialState() {
         return assign({
@@ -57,8 +55,9 @@ const Step3 = React.createClass({
                         {mapPart}
                     </div>
                 </div>
-                <div style={{textAlign: 'right'}}>
-                    <Button onClick={this._onNextClick} bsStyle="primary">Далее</Button>
+                <div>
+                    <Button onClick={this._onPrevClick}>Назад</Button>
+                    <Button bsStyle='primary' onClick={this._onNextClick} className="pull-right">Далее</Button>
                 </div>
             </div>
         </div>;
@@ -84,10 +83,13 @@ const Step3 = React.createClass({
             this.setState({addressBsStyle: 'error', addressHelp: 'Выберите адрес заведения'});
         }
     },
+    _onPrevClick() {
+        Actions.prevStep();
+    },
     _onNextClick() {
         let valid = this.refs.title.validate(true) & !!this.state.address;
         if (valid) {
-            this.transitionTo('finish');
+            Actions.nextStep();
         }
         if (!this.state.address) {
             this._setAddressValid(false);
