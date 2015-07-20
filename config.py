@@ -15,6 +15,7 @@ SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
 DEMO_HOSTNAME = u'automation-demo.appspot.com'
 PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
+TEST_VERSIONS = ('.test.', '.p-test.', '.courier.')
 
 
 class Config(ndb.Model):

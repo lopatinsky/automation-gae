@@ -4,7 +4,7 @@ from google.appengine.api.taskqueue import taskqueue
 from config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
-from methods.rendering import HTML_STR_TIME_FORMAT, STR_TIME_FORMAT
+from methods.rendering import HTML_STR_TIME_FORMAT, STR_DATETIME_FORMAT
 from models import News, Notification, Venue
 from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL, NOTIFICATION_STATUS_MAP, STATUS_CREATED, \
     STATUS_ACTIVE, get_channels
@@ -19,8 +19,8 @@ class ListNewsHandler(CompanyBaseHandler):
     def get(self):
         news = News.query().order(-News.start).fetch()
         for new in news:
-            new.created_str = datetime.strftime(new.created, STR_TIME_FORMAT)
-        utc_time = datetime.strftime(datetime.utcnow(), STR_TIME_FORMAT)
+            new.created_str = datetime.strftime(new.created, STR_DATETIME_FORMAT)
+        utc_time = datetime.strftime(datetime.utcnow(), STR_DATETIME_FORMAT)
         self.render('/notifications/news_list.html', news=news, utc_time=utc_time,
                     NOTIFICATION_STATUS_MAP=NOTIFICATION_STATUS_MAP,
                     STATUS_ACTIVE=STATUS_ACTIVE, STATUS_CREATED=STATUS_CREATED)
@@ -98,8 +98,8 @@ class PushesListHandler(CompanyBaseHandler):
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
         for push in pushes:
-            push.created_str = datetime.strftime(push.created, STR_TIME_FORMAT)
-        utc_time = datetime.strftime(datetime.utcnow(), STR_TIME_FORMAT)
+            push.created_str = datetime.strftime(push.created, STR_DATETIME_FORMAT)
+        utc_time = datetime.strftime(datetime.utcnow(), STR_DATETIME_FORMAT)
         self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get(), utc_time=utc_time,
                     PUSH_STATUS_MAP=NOTIFICATION_STATUS_MAP, STATUS_CREATED=STATUS_CREATED)
 

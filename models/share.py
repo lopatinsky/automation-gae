@@ -7,6 +7,7 @@ from methods.rendering import timestamp
 from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
+from models.promo_code import PromoCode
 
 __author__ = 'dvpermyakov'
 
@@ -96,6 +97,7 @@ class SharedGift(ndb.Model):
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
+    promo_code = ndb.KeyProperty(kind=PromoCode)
     share_id = ndb.IntegerProperty(required=True)
     share_item = ndb.KeyProperty(required=True, kind=SharedGiftMenuItem)
     client_id = ndb.IntegerProperty(required=True)         # Who pays for cup
@@ -112,6 +114,8 @@ class SharedGift(ndb.Model):
         from methods.push import send_share_gift_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
+        promo_code = self.promo_code.get()
+        promo_code.deactivate()
         self.status = self.DONE
         self.recipient_id = client.key.id()
         self.put()

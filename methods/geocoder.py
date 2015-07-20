@@ -11,13 +11,16 @@ from config import config
 
 BASE_URL = 'http://geocode-maps.yandex.ru/1.x/'
 MAX_RESULT = 15
+
+CITY = 'locality'
 DISTRICT = 'district'
 STREET = 'street'
 HOUSE = 'house'
+CHOICES = (CITY, DISTRICT, STREET, HOUSE)
 
 
 def _parse_collection(collection, kind=HOUSE, city_request=None):
-    if kind not in [HOUSE, STREET, DISTRICT]:
+    if kind not in CHOICES:
         return
     candidates = []
     streets = []
@@ -95,7 +98,7 @@ def get_houses_by_address(city, street, home):
         'results': MAX_RESULT
     })
     if collection:
-        return _parse_collection(collection, kind='house', city_request=city)
+        return _parse_collection(collection, kind=HOUSE, city_request=city)
     else:
         return []
 
@@ -108,7 +111,20 @@ def get_houses_by_coordinates(lat, lon):
         'results': MAX_RESULT
     })
     if collection:
-        return _parse_collection(collection, kind='house')
+        return _parse_collection(collection, kind=HOUSE)
+    else:
+        return []
+
+
+def get_cities_by_coordinates(lat, lon):
+    collection = _get_collection({
+        'geocode': '%s,%s' % (lon, lat),
+        'format': 'json',
+        'kind': CITY,
+        'results': MAX_RESULT
+    })
+    if collection:
+        return _parse_collection(collection, kind=CITY)
     else:
         return []
 
@@ -121,7 +137,7 @@ def get_areas_by_coordinates(lat, lon):
         'results': MAX_RESULT
     })
     if collection:
-        return _parse_collection(collection, kind='district')
+        return _parse_collection(collection, kind=DISTRICT)
     else:
         return []
 
@@ -133,7 +149,7 @@ def get_streets_by_address(city, street):
         'results': MAX_RESULT
     })
     if collection:
-        return _parse_collection(collection, kind='street')
+        return _parse_collection(collection, kind=STREET)
     else:
         return []
 
@@ -145,9 +161,9 @@ def get_streets_or_houses_by_address(city, street):
         'results': MAX_RESULT
     })
     if collection:
-        candidates = _parse_collection(collection, kind='house', city_request=city)
+        candidates = _parse_collection(collection, kind=HOUSE, city_request=city)
         if not candidates:
-            candidates = _parse_collection(collection, kind='street', city_request=city)
+            candidates = _parse_collection(collection, kind=STREET, city_request=city)
         return candidates
     else:
         return []

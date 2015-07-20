@@ -12,10 +12,7 @@
         </div>
     {% endif %}
     <div>
-        <a href="/company/venues/create">Создать кофейню (Лучше через карту, она ниже)</a>
-    </div>
-    <div>
-        <a href="/company/venues/map">Карта</a>
+        <a href="/company/venues/map">Добавить</a>
     </div>
     <form method="post">
         <table style="border-collapse:collapse; width:100%" border="1">
@@ -23,26 +20,44 @@
                 <th>Статус</th>
                 <th>Название</th>
                 <th>Адрес</th>
-                <th>Дни</th>
-                <th>Часы</th>
                 <th>Выбрать зоны</th>
+                <th>Расписание</th>
             </tr>
             {% for venue in venues %}
+                {% set height = venue.days|length if venue.days else 1 %}
                 <tr>
-                    <td>
+                    <td rowspan="{{ height }}">
                         <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
                     </td>
-                    <td>
+                    <td rowspan="{{ height }}">
                         <a href="/company/venues/{{ venue.key.id() }}">
                             {{ venue.title }}
                         </a>
                     </td>
-                    <td>{{ venue.description }}</td>
-                    <td>{{ venue.working_days }}</td>
-                    <td>{{ venue.working_hours }}</td>
-                    <td>
+                    <td rowspan="{{ height }}">
+                        {{ venue.description }}
+                    </td>
+                    <td rowspan="{{ height }}">
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
                     </td>
+                    {% if venue.days %}
+                        {% for day in venue.days %}
+                            {% if loop.index0 == 0 %}
+                                <td>
+                                    <a href="{{ '/company/venues/schedule?venue_id=%s' % venue.key.id() }}">
+                                        {{ day.str() }}
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td>{{ day.str() }}</td>
+                            {% endif %}
+                            </tr><tr>
+                        {% endfor %}
+                    {% else %}
+                        <td>
+                            <a href="{{ '/company/venues/schedule?venue_id=%s' % venue.key.id() }}">Добавить</a>
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>

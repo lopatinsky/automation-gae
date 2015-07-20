@@ -3,7 +3,7 @@ import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
-from methods.map import get_houses_by_coordinates, get_areas_by_coordinates
+from methods.geocoder import get_cities_by_coordinates, get_areas_by_coordinates
 from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
 
@@ -29,6 +29,7 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 if candidates:
                     address.area = candidates[0]['address']['area']
                 zone = DeliveryZone(address=address)
+                zone.sequence_number = DeliveryZone.generate_sequence_number()
                 zone.put()
                 for delivery in venue.delivery_types:
                     if delivery.delivery_type == DELIVERY:
@@ -63,7 +64,7 @@ class AddDeliveryZoneHandler(CompanyBaseHandler):
     def get(self):
         lat = float(self.request.get('lat'))
         lon = float(self.request.get('lon'))
-        candidates = get_houses_by_coordinates(lat, lon)
+        candidates = get_cities_by_coordinates(lat, lon)
         if candidates:
             address = candidates[0]['address']
             address_obj = Address(**address)
@@ -77,7 +78,7 @@ class AddDeliveryZoneHandler(CompanyBaseHandler):
             zone.put()
             self.redirect('/company/delivery/zone/list')
         else:
-            self.redirect('/company/delivery/zone/add')
+            self.redirect('/company/delivery/zone/add_by_map')
 
 
 class EditDeliveryZoneHandler(CompanyBaseHandler):

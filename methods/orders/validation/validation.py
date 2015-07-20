@@ -5,7 +5,7 @@ import logging
 from config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
-from methods.rendering import STR_TIME_FORMAT
+from methods.rendering import STR_DATETIME_FORMAT
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
@@ -130,10 +130,14 @@ def group_item_dicts(item_dicts):
     return result
 
 
-def set_modifiers(items):
+def set_modifiers(items, with_gift_obj):
     mod_items = []
     for item in items:
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
+        if with_gift_obj:
+            menu_item.gift_obj = item['gift_obj']
+        else:
+            menu_item.gift_obj = None
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
             single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
@@ -167,6 +171,7 @@ def set_item_dicts(items, is_gift):
     for item in items:
         item_dicts.append({
             'item': item,
+            'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
@@ -199,6 +204,7 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
         'new_order_gifts': [],
+        'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
         'promos': [],
@@ -214,9 +220,11 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
-        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error)
+        logging.warning('Sending error: %s' % error)
+        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
+                                  cancelled_order_gifts, error)
 
-    items = set_modifiers(items)
+    items = set_modifiers(items, False)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items, False)
 
@@ -226,17 +234,21 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('total sum without promos = %s' % total_sum_without_promos)
 
-    gifts = set_modifiers(gifts)
+    for gift in gifts:
+        gift_obj = GiftMenuItem.get_by_id(int(gift['item_id']))
+        gift['item_id'] = gift_obj.item.id()
+        gift['gift_obj'] = gift_obj
+    gifts = set_modifiers(gifts, True)
     gift_dicts = set_item_dicts(gifts, True)
 
     logging.info('gift_dicts = %s' % gift_dicts)
 
-    order_gifts = set_modifiers(order_gifts)
+    order_gifts = set_modifiers(order_gifts, False)
     order_gift_dicts = set_item_dicts(order_gifts, True)
 
     logging.info('order_gift_dicts = %s' % order_gift_dicts)
 
-    cancelled_order_gifts = set_modifiers(cancelled_order_gifts)
+    cancelled_order_gifts = set_modifiers(cancelled_order_gifts, False)
     cancelled_order_gift_dicts = set_item_dicts(cancelled_order_gifts, True)
 
     logging.info('cancelled_order_gift_dicts = %s' % cancelled_order_gift_dicts)
@@ -252,7 +264,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_delivery_time(delivery_time)
     if not valid:
         return send_error(error)
-    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum_without_promos)
+    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
+                                       total_sum_without_promos)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
@@ -279,13 +292,13 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             return send_error(error)
 
     if not order:
-        promo_errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        promo_error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts)
-        if promo_errors:
-            return send_error(promo_errors[0])
+        if promo_error:
+            return send_error(promo_error)
     else:
-        errors, new_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts, order)
 
@@ -311,12 +324,14 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
+        grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
         grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
         grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
     else:
         grouped_item_dicts = []
         grouped_gift_dicts = []
         grouped_new_order_gift_dicts = []
+        grouped_unavail_order_gift_dicts = []
         grouped_order_gift_dicts = []
         grouped_cancelled_order_gift_dicts = []
 
@@ -351,6 +366,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'items': grouped_item_dicts,
         'gifts': grouped_gift_dicts,
         'new_order_gifts': grouped_new_order_gift_dicts,
+        'unavail_order_gifts': grouped_unavail_order_gift_dicts,
         'order_gifts': grouped_order_gift_dicts,
         'cancelled_order_gifts': grouped_cancelled_order_gift_dicts,
         'promos': [promo.validation_dict() for promo in _unique_promos(promos_info)],
@@ -358,9 +374,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_sum': delivery_sum,
         'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
-        'delivery_time': datetime.strftime(delivery_time, STR_TIME_FORMAT)
+        'delivery_time': datetime.strftime(delivery_time, STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_TIME_FORMAT),
+        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATETIME_FORMAT),
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }
@@ -386,7 +402,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         details = []
         for item_dict in gift_dicts:
             details_item = GiftPositionDetails(
-                gift=GiftMenuItem.get_by_id(item_dict['item'].key.id()).key,
+                gift=item_dict['gift_obj'].key,
                 single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
                 group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
                                                             group_modifier=modifier.key)
@@ -394,7 +410,20 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             )
             details.append(details_item)
         result['gift_details'] = details
-
+        details = []
+        for item_dict in order_gift_dicts:
+            details_item = OrderPositionDetails(
+                item=item_dict['item'].key,
+                price=0,
+                revenue=0,
+                promos=[promo.key for promo in item_dict['promos']],
+                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                            group_modifier=modifier.key)
+                                 for modifier in item_dict['group_modifiers']]
+            )
+            details.append(details_item)
+        result['order_gift_details'] = details
     return result
 
 

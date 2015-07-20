@@ -23,7 +23,8 @@ class PromoInfoHandler(ApiHandler):
             share_gifts = [gift.dict() for gift in SharedGift.query(SharedGift.recipient_id == client_id).fetch()]
         else:
             share_gifts = []
-        gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
+        gift_items = [gift.dict() for gift in sorted(GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch(),
+                                                     key=lambda item: item.points)]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         hostname = urlparse(self.request.url).hostname
         promo_texts = []
@@ -53,7 +54,8 @@ class PromoInfoHandler(ApiHandler):
 
 class GiftListHandler(ApiHandler):
     def get(self):
-        items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch()]
+        items = [gift.dict() for gift in sorted(GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch(),
+                                                key=lambda item: item.points)]
         self.render_json({
             'items': items
         })

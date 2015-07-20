@@ -8,6 +8,7 @@ __author__ = 'dvpermyakov'
 
 def confirm_order(order, namespace):
     order.status = CONFIRM_ORDER
+    order.email_key_confirm = None
     order.put()
 
     client = Client.get_by_id(order.client_id)

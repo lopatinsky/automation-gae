@@ -25,10 +25,29 @@
             <br>
             <b>{{ category.title }}</b><br>
             {% for product in category.items %}
-                 <label>
-                     <input type="radio" {% if product.has %} checked {% endif %} name="product_id" value="{{ product.key.id() }}">
-                     {{ product.title }}
-                 </label><br>
+                <label>
+                    <input type="radio" {% if product.has %} checked {% endif %} name="product_id" value="{{ product.key.id() }}">
+                    {{ product.title }}
+                </label>
+                {% for modifier in product.group_modifiers %}
+                    {% set modifier = modifier.get() %}
+                    <select name="{{ 'modifier_%s_%s' % (product.key.id(), modifier.key.id()) }}">
+                        <option value="0">
+                            Без
+                        </option>
+                        {% for choice in modifier.choices %}
+                            {% if choice.choice_id not in product.group_choice_restrictions %}
+                                <option value="{{ choice.choice_id }}"
+                                    {% if product.has and choice.choice_id in feature.item_details.group_choice_ids %}
+                                        selected
+                                    {% endif %}>
+                                    {{ choice.title }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                {% endfor %}
+                <br>
             {% endfor %}
         {% endfor %}
         <br>

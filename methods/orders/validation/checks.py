@@ -3,8 +3,8 @@ from datetime import timedelta, datetime
 import logging
 from config import config, VENUE, BAR
 from methods import empatika_promos
-from methods.map import get_houses_by_address, get_streets_by_address
-from methods.working_hours import is_valid_weekday, get_valid_time_str
+from methods.geocoder import get_houses_by_address, get_streets_by_address
+from methods.working_hours import check_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
 from models.order import OrderPositionDetails
 from models.venue import DELIVERY, DELIVERY_MAP
@@ -144,12 +144,9 @@ def check_venue(venue, delivery_time, delivery_type):
                 error = u'Заведение сейчас недоступно'
             return False, error
         if delivery_time:
-            if not venue.is_open_by_delivery_time(delivery_time):
-                valid, error = is_valid_weekday(venue.working_days, venue.working_hours, delivery_time)
-                if valid:
-                    return False, get_valid_time_str(venue.working_days, venue.working_hours, delivery_time)
-                else:
-                    return False, u'В этот день недели заказы не принимаются'
+            valid, error = check_with_errors(venue.schedule, delivery_time + timedelta(hours=venue.timezone_offset))
+            if not valid:
+                return False, error
         if venue.problem:
             place_name = config.get_place_str()
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
@@ -250,10 +247,7 @@ def check_wallet_payment(total_sum, wallet_payment_sum):
 def check_gifts(gifts, client):
     spent_points = 0
     for gift in gifts:
-        gift_item = GiftMenuItem.get_by_id(gift.key.id())
-        if not gift_item:
-            description = u'%s нет в списке подарков' % gift.title
-            return False, description, 0, None
+        gift_item = gift.gift_obj
         spent_points += gift_item.points
     if config.PROMOS_API_KEY:
         accum_points = empatika_promos.get_user_points(client.key.id())

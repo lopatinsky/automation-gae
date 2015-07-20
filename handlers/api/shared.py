@@ -1,5 +1,6 @@
 # coding: utf-8
 from config import Config
+from models.promo_code import PromoCode, KIND_SHARE_GIFT
 
 __author__ = 'dvpermyakov'
 
@@ -185,9 +186,11 @@ class GetGiftUrlHandler(ApiHandler):
                 if not success:
                     self.send_error(error)
                 else:
+                    promo_code = PromoCode.create(kind=KIND_SHARE_GIFT)
                     gift = SharedGift(client_id=client_id, total_sum=item.float_price, order_id=order_id,
                                       payment_type_id=payment_type_id, payment_id=result, share_item=share_item.key,
-                                      recipient_name=recipient_name, recipient_phone=recipient_phone)
+                                      recipient_name=recipient_name, recipient_phone=recipient_phone,
+                                      promo_code=promo_code.key)
                     self.success(client, gift=gift, name=recipient_name, phone=recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')

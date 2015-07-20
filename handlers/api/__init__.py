@@ -21,3 +21,4 @@ from company import CompanyInfoHandler, CompanyBaseUrlsHandler
 from address import AddressByAddressHandler, ValidateAddressHandler
 from statuses import StatusHandler, ClientSettingSuccessHandler
 from demo import DemoLoginHandler
+from promo_code import EnterPromoCode

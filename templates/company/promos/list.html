@@ -16,7 +16,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.promo_id).after($('#tr_' + json.previous_id));
                         }
                     }
                 });
@@ -32,7 +31,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.next_id).after($('#tr_' + json.promo_id));
                         }
                     }
                 });
@@ -94,6 +92,7 @@
                     <td rowspan="{{ height + 1 }}">{{ promo.description }}</td>
                     <td colspan="3">
                         <a href="{{ '/company/promos/conditions/add?promo_id=%s' % promo.key.id() }}">Добавить условие</a>
+                        <a href="{{ '/company/promos/conditions/happy_hours?promo_id=%s' % promo.key.id() }}">Добавить счастливые часы</a>
                     </td>
                     <td colspan="3">
                         <a href="{{ '/company/promos/outcomes/add?promo_id=%s' % promo.key.id() }}">Добавить последствие</a>
@@ -105,18 +104,14 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=0&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    {% if promo.conditions[index].item %}
-                                        {{ promo.conditions[index].item.get().title }}
+                                    {% if promo.conditions[index].item_details.item %}
+                                        {{ promo.conditions[index].item_details.title }}
                                     {% else %}
                                         Выбрать
                                     {% endif %}
                                 </a>
                             </td>
-                            <td>{{ condition_map[promo.conditions[index].method] }}
-                                {% if promo.conditions[index].additional_info %}
-                                    {{ promo.conditions[index].additional_info }}
-                                {% endif %}
-                            </td>
+                            <td>{{ condition_map[promo.conditions[index].method] }}</td>
                             <td>{{ promo.conditions[index].value_string }}</td>
                         {% else %}
                             <td>---</td>
@@ -128,8 +123,8 @@
                                 <a href="
                                 {{ '/company/promos/choose?promo_id=%s&feature_type=1&number=%s' % (promo.key.id(), loop.index0) }}
                                 ">
-                                    {% if promo.outcomes[index].item %}
-                                        {{ promo.outcomes[index].item.get().title }}
+                                    {% if promo.outcomes[index].item_details.item %}
+                                        {{ promo.outcomes[index].item_details.title }}
                                     {% else %}
                                         Выбрать
                                     {% endif %}

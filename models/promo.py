@@ -2,8 +2,9 @@
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier
 from models.menu import MenuItem
+from models.schedule import Schedule
 
 __author__ = 'dvpermyakov'
 
@@ -13,13 +14,29 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
     promo_id = ndb.IntegerProperty(required=True)  # it relates to empatika-promos
     points = ndb.IntegerProperty(required=True)  # how many spent
+    additional_group_choice_restrictions = ndb.IntegerProperty(repeated=True)
 
     def dict(self):
-        dict = self.item.get().dict()
+        item = self.item.get()
+        dict = item.dict()
+        dict['id'] = str(self.key.id())
         dict.update({
             'points': self.points
         })
+        for modifier in dict['group_modifiers']:
+            choice_dicts = modifier['choices']
+            for choice_dict in choice_dicts[:]:
+                if int(choice_dict['id']) not in self.additional_group_choice_restrictions:
+                    choice_dicts.remove(choice_dict)
+        if self.additional_group_choice_restrictions:
+            dict['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
         return dict
+
+
+class PromoMenuItem(ndb.Model):
+    item_required = ndb.BooleanProperty(default=False)  # item_required is False => apply for all items
+    item = ndb.KeyProperty(kind=MenuItem)
+    group_choice_ids = ndb.IntegerProperty(repeated=True)  # it can be None => not restrict in group modifiers
 
 
 class PromoOutcome(ndb.Model):
@@ -32,11 +49,13 @@ class PromoOutcome(ndb.Model):
     ORDER_ACCUMULATE_GIFT_POINT = 6
     FIX_DISCOUNT = 7
     DELIVERY_SUM_DISCOUNT = 8
+    DELIVERY_FIX_SUM_DISCOUNT = 9
+    PERCENT_GIFT_POINT = 10
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
-               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT)
+               ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
+               PERCENT_GIFT_POINT)
 
-    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
 
@@ -52,16 +71,16 @@ class PromoCondition(ndb.Model):
     CHECK_MIN_ORDER_SUM_WITH_PROMOS = 7
     CHECK_GROUP_MODIFIER_CHOICE = 8
     CHECK_NOT_GROUP_MODIFIER_CHOICE = 9
+    CHECK_PAYMENT_TYPE = 10
+    CHECK_HAPPY_HOURS_CREATED_TIME = 11
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
-               CHECK_NOT_GROUP_MODIFIER_CHOICE)
+               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME)
 
-    item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    item_required = ndb.BooleanProperty(default=False)
+    item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
-    hh_days = ndb.StringProperty()   # it is used only for happy hours
-    hh_hours = ndb.StringProperty()  # it is used only for happy hours
+    schedule = ndb.LocalStructuredProperty(Schedule)
 
 
 class Promo(ndb.Model):
@@ -141,10 +160,12 @@ CONDITION_MAP = {
     PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
     PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ',
     PromoCondition.CHECK_MIN_ORDER_SUM: u'Минимальная сумма заказа',
-    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы',
+    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы время заказа',
     PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS: u'Минимальная сумма с учетом акций',
     PromoCondition.CHECK_GROUP_MODIFIER_CHOICE: u'Выбор группового модификатора в заказе',
-    PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе'
+    PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе',
+    PromoCondition.CHECK_PAYMENT_TYPE: u'Тип оплаты',
+    PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME: u'Счастливые часы время создания заказа'
 }
 
 OUTCOME_MAP = {
@@ -157,4 +178,6 @@ OUTCOME_MAP = {
     PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT: u'Баллы за заказ',
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
     PromoOutcome.DELIVERY_SUM_DISCOUNT: u'Скидка на цену доставки',
+    PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT: u'Фиксированная скидка на цену доставки',
+    PromoOutcome.PERCENT_GIFT_POINT: u'Баллы, равные проценту от суммы'
 }

@@ -75,8 +75,13 @@ def resize_image(item, url, size=None, icon=False):
             item.put()
 
 
-def save_item_image(item, image_data):
-    image = Image.open(StringIO.StringIO(image_data))
+def save_item_image(item, image_data=None, url=None):
+    if url:
+        image_data = urlfetch.fetch(url, deadline=30).content
+    if image_data:
+        image = Image.open(StringIO.StringIO(image_data))
+    else:
+        return
     image = _resize(image, MAX_SIZE)
 
     filename = _get_filename('MenuItem', item.key.id(), 'init')

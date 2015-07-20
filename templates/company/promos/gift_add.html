@@ -17,10 +17,26 @@
         {% for category in categories %}
             <h3>{{ category.title }}</h3>
             {% for item in category.items %}
-                <label>
+                <label class="{{ 'item_%s' % item.key.id() }}">
                     {{ item.title }}
                     <input type="checkbox" name={{ item.key.id() }}>
-                </label><br>
+                </label>
+                {% for modifier in item.group_modifiers %}
+                    {% set modifier = modifier.get() %}
+                    <select name="{{ 'modifier_%s_%s' % (item.key.id(), modifier.key.id()) }}">
+                        <option value="0">
+                            Без
+                        </option>
+                        {% for choice in modifier.choices %}
+                            {% if choice.choice_id not in item.group_choice_restrictions %}
+                                <option value="{{ choice.choice_id }}">
+                                    {{ choice.title }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                {% endfor %}
+                <br>
             {% endfor %}
         {% endfor %}
         <input type="submit">

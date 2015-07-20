@@ -32,6 +32,7 @@ app = WSGIApplication([
             Route('/close', email_api.DoneOrderHandler),
             Route('/cancel', email_api.CancelOrderHandler),
             Route('/postpone', email_api.PostponeOrderHandler),
+            Route('/confirm', email_api.ConfirmOrderHandler),
         ]),
     ]),
 
@@ -172,6 +173,10 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/promo_code', [
+            Route('/enter', api.EnterPromoCode),
+        ]),
+
         PathPrefixRoute('/wallet', [
             Route('/balance', api.WalletBalanceHandler),
             Route('/deposit', api.DepositToWalletHandler),
@@ -212,6 +217,7 @@ app = WSGIApplication([
             Route('/map', company_admin.MapVenuesHandler),
             Route('/create', company_admin.CreateVenueHandler),
             Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
+            Route('/schedule', company_admin.EditVenueScheduleHandler),
         ]),
 
         PathPrefixRoute('/delivery', [
@@ -323,6 +329,7 @@ app = WSGIApplication([
             Route('/choose', company_admin.ChooseMenuItemHandler),
             PathPrefixRoute('/conditions', [
                 Route('/add', company_admin.AddPromoConditionHandler),
+                Route('/happy_hours', company_admin.AddHappyHoursHandler),
             ]),
             PathPrefixRoute('/outcomes', [
                 Route('/add', company_admin.AddPromoOutcomeHandler),

@@ -1,4 +1,4 @@
 __author__ = 'dvpermyakov'
 
 
-from order import CancelOrderHandler, DoneOrderHandler, PostponeOrderHandler
+from order import CancelOrderHandler, DoneOrderHandler, PostponeOrderHandler, ConfirmOrderHandler

@@ -1,4 +1,5 @@
 # coding:utf-8
+import copy
 import logging
 from urlparse import urlparse
 import json
@@ -6,6 +7,7 @@ from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
+from google.appengine.ext import deferred
 from webapp2_extras import security
 from google.appengine.ext.ndb import GeoPt, Key
 from google.appengine.api import taskqueue
@@ -13,7 +15,7 @@ from google.appengine.api import taskqueue
 from config import config
 from handlers.api.base import ApiHandler
 from handlers.web_admin.web.company.delivery.orders import order_items_values
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
+from methods import alfa_bank, empatika_promos, empatika_wallet, paypal
 from methods.orders.validation.validation import validate_order, get_first_error
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
@@ -87,6 +89,8 @@ class OrderHandler(ApiHandler):
             coordinates = None
 
         comment = response_json['comment']
+        if self.test:
+            comment = u'Тестовый заказ. %s' % comment
         device_type = response_json.get('device_type', IOS_DEVICE)
 
         delivery_slot_id = response_json.get('delivery_slot_id')
@@ -135,6 +139,9 @@ class OrderHandler(ApiHandler):
                 if previous_order and sorted(previous_order.items) == sorted(item_keys):
                     return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
+            # it is need, because item_id and gift_id are swapping
+            gifts_copy = copy.deepcopy(response_json.get('gifts', []))
+
             validation_result = validate_order(client,
                                                response_json['items'],
                                                response_json.get('gifts', []),
@@ -155,9 +162,12 @@ class OrderHandler(ApiHandler):
                 return self.render_error(u"Сумма доставки была пересчитана", u"")
             if wallet_payment and round(wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):
                 return self.render_error(u"Сумма оплаты баллами была пересчитана", u"")
+            if validation_result['unavail_order_gifts'] or validation_result['new_order_gifts']:
+                return self.render_error(u"Подарки были пересчитаны", u"")
             total_sum += delivery_sum
 
             item_details = validation_result["details"]
+            order_gift_details = validation_result["order_gift_details"]
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
 
             if address:
@@ -177,8 +187,8 @@ class OrderHandler(ApiHandler):
                 comment=comment, status=CREATING_ORDER, device_type=device_type, delivery_time=delivery_time,
                 delivery_time_str=validation_result['delivery_time'], payment_type_id=payment_type_id,
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
-                delivery_type=delivery_type, delivery_slot_id=delivery_slot_id, address=address_obj,
-                delivery_zone=delivery_zone.key if delivery_zone else None,
+                order_gift_details=order_gift_details, delivery_type=delivery_type, delivery_slot_id=delivery_slot_id,
+                address=address_obj, delivery_zone=delivery_zone.key if delivery_zone else None,
                 user_agent=self.request.headers["User-Agent"], delivery_sum=delivery_sum)
             self.order.put()
 
@@ -225,11 +235,12 @@ class OrderHandler(ApiHandler):
             client.put()
             self.order.status = NEW_ORDER
 
+            # use only gifts_copy, not response_json.get('gifts', [])
             # it is used for creating db for promos
-            validate_order(client, response_json['items'], response_json.get('gifts', []),
-                           response_json.get('order_gifts', []), response_json.get('cancelled_order_gifts', []),
-                           response_json['payment'], venue, address, delivery_time, delivery_slot, delivery_type,
-                           delivery_zone, False, self.order)
+            validate_order(client, response_json['items'], gifts_copy, response_json.get('order_gifts', []),
+                           response_json.get('cancelled_order_gifts', []), response_json['payment'],
+                           venue, address, delivery_time, delivery_slot, delivery_type, delivery_zone, False,
+                           self.order)
             self.order.put()
 
             # use delivery phone and delivery emails for all delivery types
@@ -254,14 +265,19 @@ class OrderHandler(ApiHandler):
                     self.order.email_key_done = security.generate_random_string(entropy=256)
                     self.order.email_key_cancel = security.generate_random_string(entropy=256)
                     self.order.email_key_postpone = security.generate_random_string(entropy=256)
+                    if self.order.delivery_type == DELIVERY:
+                        self.order.email_key_confirm = security.generate_random_string(entropy=256)
                     self.order.put()
+
                     base_url = urlparse(self.request.url).hostname
                     item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
                     item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
                     item_values['postpone_url'] = 'http://%s/email/order/postpone?key=%s' % (base_url, self.order.email_key_postpone)
                     item_values['minutes'] = POSTPONE_MINUTES
+                    if self.order.delivery_type == DELIVERY:
+                        item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, self.order.email_key_confirm)
                 for email in config.DELIVERY_EMAILS:
-                    send_email(EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
+                    deferred.defer(send_email, EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)

@@ -1,17 +1,20 @@
 # coding:utf-8
+from datetime import datetime
 import json
 from config import config, Config
 from methods.auth import company_user_required
-from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem
+from methods.rendering import STR_TIME_FORMAT
+from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem, GroupModifier
 from base import CompanyBaseHandler
-from models.promo import CONDITION_MAP, OUTCOME_MAP
+from models.promo import CONDITION_MAP, OUTCOME_MAP, PromoMenuItem
+from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY_MAP
 
 __author__ = 'dvpermyakov'
 
 CONDITION = 0
 OUTCOME = 1
-FEATURES_TYPES = [CONDITION, OUTCOME]
+FEATURES_TYPES = (CONDITION, OUTCOME)
 
 
 class PromoListHandler(CompanyBaseHandler):
@@ -19,12 +22,37 @@ class PromoListHandler(CompanyBaseHandler):
     def get(self):
         promos = Promo.query().order(-Promo.priority).fetch()
         for promo in promos:
-            for condition in promo.conditions:
+            conditions = []
+            for condition in promo.conditions[:]:
+                if condition.item_details and condition.item_details.item:
+                    choice_titles = []
+                    for choice_id in condition.item_details.group_choice_ids:
+                        choice = GroupModifier.get_modifier_by_choice(choice_id).get_choice_by_id(choice_id)
+                        choice_titles.append(choice.title)
+                    condition.item_details.title = condition.item_details.item.get().title
+                    if choice_titles:
+                        condition.item_details.title += u'(%s)' % u', '.join(choice_titles)
                 condition.value_string = str(condition.value) if condition.value else ""
                 if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
                     condition.value_string = DELIVERY_MAP[condition.value]
-                elif condition.method == PromoCondition.CHECK_HAPPY_HOURS:
-                    condition.additional_info = '(%s;%s)' % (condition.hh_days, condition.hh_hours)
+                    conditions.append(condition)
+                elif condition.method in [PromoCondition.CHECK_HAPPY_HOURS, PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME]:
+                    for day in (condition.schedule.days if condition.schedule else []):
+                        new_condition = PromoCondition(method=condition.method)
+                        new_condition.value_string = day.str()
+                        conditions.append(new_condition)
+                else:
+                    conditions.append(condition)
+            for outcome in promo.outcomes[:]:
+                if outcome.item_details and outcome.item_details.item:
+                    choice_titles = []
+                    for choice_id in outcome.item_details.group_choice_ids:
+                        choice = GroupModifier.get_modifier_by_choice(choice_id).get_choice_by_id(choice_id)
+                        choice_titles.append(choice.title)
+                    outcome.item_details.title = outcome.item_details.item.get().title
+                    if choice_titles:
+                        outcome.item_details.title += u'(%s)' % u', '.join(choice_titles)
+            promo.conditions = conditions
         self.render('/promos/list.html', **{
             'promo_api_key': config.PROMOS_API_KEY if config.PROMOS_API_KEY else '',
             'wallet_api_key': config.WALLET_API_KEY if config.WALLET_API_KEY else '',
@@ -133,14 +161,15 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
                 item = item.get()
                 item.has = False
                 if item.status == STATUS_AVAILABLE:
-                    if feature.item_required:
-                        if item.key == feature.item:
+                    if feature.item_details.item_required:
+                        if item.key == feature.item_details.item:
                             item.has = True
                     items.append(item)
             category.items = items
         self.render('/promos/choose_product.html', **{
             'categories': categories,
             'promo': promo,
+            'feature': feature,
             'feature_name': feature_name,
             'feature_number': number,
         })
@@ -148,8 +177,16 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
     @company_user_required
     def post(self):
         item_id = self.request.get('product_id')
+        choice_ids = []
         if item_id:
             item = MenuItem.get_by_id(int(item_id))
+            for modifier in item.group_modifiers:
+                modifier = modifier.get()
+                choice_id = self.request.get_range('modifier_%s_%s' % (item.key.id(), modifier.key.id()))
+                if choice_id:
+                    choice = modifier.get_choice_by_id(choice_id)
+                    if choice:
+                        choice_ids.append(choice_id)
         else:
             item = None
         promo_id = self.request.get_range('promo_id')
@@ -170,11 +207,12 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
                 self.abort(400)
             feature = promo.conditions[number]
         if item:
-            feature.item = item.key
-            feature.item_required = True
+            feature.item_details.item = item.key
+            feature.item_details.group_choice_ids = choice_ids
+            feature.item_details.item_required = True
         else:
-            feature.item = None
-            feature.item_required = False
+            feature.item_details.item = None
+            feature.item_details.item_required = False
         promo.put()
         self.redirect('/company/promos/list')
 
@@ -188,11 +226,13 @@ class AddPromoConditionHandler(CompanyBaseHandler):
             self.abort(400)
         methods = []
         for condition in PromoCondition.CHOICES:
+            if condition == PromoCondition.CHECK_HAPPY_HOURS:
+                continue
             methods.append({
                 'name': CONDITION_MAP[condition],
                 'value': condition
             })
-        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods, feature_condition=True)
+        self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
     @company_user_required
     def post(self):
@@ -203,12 +243,58 @@ class AddPromoConditionHandler(CompanyBaseHandler):
         condition = PromoCondition()
         condition.method = self.request.get_range('method')
         condition.value = self.request.get_range('value')
-        hh_days = self.request.get('hh_days')
-        hh_hours = self.request.get('hh_hours')
-        # todo: need validate days and hours
-        if condition.method == PromoCondition.CHECK_HAPPY_HOURS and hh_days and hh_hours:
-            condition.hh_days = hh_days
-            condition.hh_hours = hh_hours
+        condition.item_details = PromoMenuItem()
+        promo.conditions.append(condition)
+        promo.put()
+        self.redirect('/company/promos/list')
+
+
+class AddHappyHoursHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            days.append({
+                'name': DaySchedule.DAY_MAP[day],
+                'value': day,
+                'exist': False,
+                'start': '00:00',
+                'end': '00:00'
+            })
+        methods = []
+        for condition in PromoCondition.CHOICES:
+            if condition in [PromoCondition.CHECK_HAPPY_HOURS, PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME]:
+                methods.append({
+                    'name': CONDITION_MAP[condition],
+                    'value': condition
+                })
+        self.render('/schedule.html', **{
+            'promo': promo,
+            'days': days,
+            'methods': methods
+        })
+
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            confirmed = bool(self.request.get(str(day)))
+            if confirmed:
+                start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
+                end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
+                days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
+        schedule = Schedule(days=days)
+        condition = PromoCondition()
+        condition.method = self.request.get_range('method')
+        condition.schedule = schedule
         promo.conditions.append(condition)
         promo.put()
         self.redirect('/company/promos/list')
@@ -238,6 +324,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
         outcome = PromoOutcome()
         outcome.method = self.request.get_range('method')
         outcome.value = self.request.get_range('value')
+        outcome.item_details = PromoMenuItem()
         promo.outcomes.append(outcome)
         promo.put()
         self.redirect('/company/promos/list')
@@ -249,6 +336,12 @@ class ListGiftsHandler(CompanyBaseHandler):
         gifts = GiftMenuItem.query().fetch()
         for gift in gifts:
             gift.title = gift.item.get().title
+            choice_titles = []
+            for choice_id in gift.additional_group_choice_restrictions:
+                choice = GroupModifier.get_modifier_by_choice(choice_id).get_choice_by_id(choice_id)
+                choice_titles.append(choice.title)
+            if choice_titles:
+                gift.title += u'(%s)' % u', '.join(choice_titles)
         self.render('/promos/gift_list.html', gifts=gifts)
 
     @company_user_required
@@ -278,9 +371,18 @@ class AddGiftHandler(CompanyBaseHandler):
         for item in MenuItem.query().fetch():
             confirmed = bool(self.request.get(str(item.key.id())))
             if confirmed:
-                gift = GiftMenuItem(id=item.key.id(), item=item.key)
+                choice_ids = []
+                for modifier in item.group_modifiers:
+                    modifier = modifier.get()
+                    choice_id = self.request.get_range('modifier_%s_%s' % (item.key.id(), modifier.key.id()))
+                    if choice_id:
+                        choice = modifier.get_choice_by_id(choice_id)
+                        if choice:
+                            choice_ids.append(choice_id)
+                gift = GiftMenuItem(item=item.key)
                 gift.promo_id = self.request.get_range('promo_id')
                 gift.points = self.request.get_range('points')
+                gift.additional_group_choice_restrictions = choice_ids
                 gift.put()
         self.redirect('/company/promos/gifts/list')
 

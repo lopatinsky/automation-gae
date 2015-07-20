@@ -46,7 +46,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
                         }
                     }
                 });
@@ -62,7 +61,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
                         }
                     }
                 });
@@ -78,7 +76,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.modifier_id).after($('#tr_' + json.previous_id));
                         }
                     }
                 });
@@ -94,7 +91,6 @@
                     success: function(json) {
                         if (json.success) {
                             location.reload();
-                            //$('#tr_' + json.next_id).after($('#tr_' + json.modifier_id));
                         }
                     }
                 });
@@ -129,7 +125,7 @@
             <th>Максимальное кол-во</th>
         </tr>
         {% for modifier in single_modifiers %}
-            <tr id="{{ 'tr_%s' % modifier.key.id() }}" {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" {% endif %}>
+            <tr id="{{ 'tr_%s' % modifier.key.id() }}" {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="single" hidden {% endif %}>
                 <td>
                     <button class="up_button_single" id="{{ modifier.key.id() }}">
                         Вверх
@@ -183,7 +179,7 @@
             <th>Выбрать продукты для выбора</th>
         </tr>
         {% for modifier in group_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" {% endif %}>
+            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
                 <td rowspan="{{ modifier.choices|length + 1 }}">
                     <button class="up_button_group" id="{{ modifier.key.id() }}">
                         Вверх
@@ -221,7 +217,7 @@
                     </form>
                 </td>
                 {% for choice in modifier.choices %}
-                    </tr><tr {% if not modifier.enable %} class="group" {% endif %}>
+                    </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
                     <td>
                         <button class="up_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
                             Вверх

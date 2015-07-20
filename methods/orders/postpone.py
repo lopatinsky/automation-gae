@@ -1,7 +1,7 @@
 # coding=utf-8
 from datetime import timedelta
 from methods import push
-from methods.rendering import STR_TIME_FORMAT, STR_DATE_FORMAT
+from methods.rendering import STR_DATETIME_FORMAT, STR_DATE_FORMAT
 from models import Venue, Client, DeliverySlot
 
 __author__ = 'dvpermyakov'
@@ -19,7 +19,7 @@ def postpone_order(order, minutes, namespace):
     if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
         delivery_time_str = local_delivery_time.strftime(STR_DATE_FORMAT)
     else:
-        delivery_time_str = local_delivery_time.strftime(STR_TIME_FORMAT)
+        delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
     order.delivery_time_str = delivery_time_str
     order.email_key_postpone = None
     order.put()
