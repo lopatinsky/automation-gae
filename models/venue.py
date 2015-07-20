@@ -285,3 +285,16 @@ class Venue(ndb.Model):
     def is_open(self, minutes_offset=0):
         now = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes_offset)
         return self.is_open_by_delivery_time(now)
+
+    def update_address(self):
+        from config import Config
+        from methods import map
+
+        candidates = map.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)
+        if candidates:
+            address = candidates[0]
+            self.address = Address(**address['address'])
+            config = Config.get()
+            if self.address.country not in config.COUNTRIES:
+                config.COUNTRIES.append(self.address.country)
+                config.put()

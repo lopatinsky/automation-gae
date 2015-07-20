@@ -35,14 +35,7 @@ class CreateVenueHandler(CompanyBaseHandler):
             setattr(venue, param, self.request.get(param))
         venue.coordinates = ndb.GeoPt(self.request.get('coordinates'))
         venue.phone_numbers = [n.strip() for n in self.request.get('phone_numbers').split(',')]
-        candidates = map.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
-        if candidates:
-            address = candidates[0]
-            venue.address = Address(**address['address'])
-            config = Config.get()
-            if venue.address.country not in config.COUNTRIES:
-                config.COUNTRIES.append(venue.address.country)
-                config.put()
+        venue.update_address()
         venue.put()
         self.redirect('/company/venues')
 
