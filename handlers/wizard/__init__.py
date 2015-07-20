@@ -1,12 +1,16 @@
 # coding=utf-8
 import json
 import random
+import datetime
 from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import jinja2
 from config import Config
-from models import DeliverySlot, MenuCategory, MenuItem, CompanyUser, Venue
+from models import DeliverySlot, MenuCategory, MenuItem, CompanyUser, Venue, DAY_SECONDS, HOUR_SECONDS, STATUS_AVAILABLE
+from models.payment_types import PaymentType, CASH_PAYMENT_TYPE
+from models.schedule import Schedule, DaySchedule
+from models.venue import DELIVERY_TYPES, DeliveryType, SELF, IN_CAFE
 
 
 class BaseHandler(RequestHandler):
@@ -74,13 +78,14 @@ class WizardCreateCompanyHandler(BaseHandler):
         cfg.ACTION_COLOR = "FF25B8CD"
         cfg.put()
 
-        DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put()
-        DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put()
-        DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put()
-        DeliverySlot(name=u'Через 15 минут', slot_type=0, value=15).put()
-        DeliverySlot(name=u'Через 20 минут', slot_type=0, value=20).put()
-        DeliverySlot(name=u'Через 25 минут', slot_type=0, value=25).put()
-        DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()
+        delivery_slot_keys = [
+            DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put(),
+            DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put(),
+            DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put(),
+            DeliverySlot(name=u'Через 15 минут', slot_type=0, value=15).put(),
+            DeliverySlot(name=u'Через 20 минут', slot_type=0, value=20).put(),
+            DeliverySlot(name=u'Через 25 минут', slot_type=0, value=25).put(),
+            DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()]
 
         menu = data['menu']
         for i, category_dict in enumerate(menu):
@@ -91,7 +96,7 @@ class WizardCreateCompanyHandler(BaseHandler):
                     title=item["title"],
                     description=item["description"],
                     picture=item["imageUrl"],
-                    price=item["price"],
+                    price=int(round(item["price"] * 100)),
                     sequence_number=j)
                 item_key = item.put()
                 category.menu_items.append(item_key)
@@ -103,9 +108,23 @@ class WizardCreateCompanyHandler(BaseHandler):
         venue = Venue(
             title=venue_dict['title'],
             description=venue_dict['address'],
-            coordinates=ndb.GeoPt(venue_dict['lat'], venue_dict['lng']))
+            coordinates=ndb.GeoPt(venue_dict['lat'], venue_dict['lng']),
+            active=True)
         venue.update_address()
+        venue.schedule = Schedule(
+            days=[DaySchedule(weekday=i, start=datetime.time(0, 0), end=datetime.time(0, 0)) for i in xrange(1, 8)])
+
+        for delivery_type in (SELF, IN_CAFE):
+            delivery = DeliveryType.create(delivery_type)
+            delivery.put()
+            delivery.status = STATUS_AVAILABLE
+            delivery.max_time = DAY_SECONDS + HOUR_SECONDS  # need hour to order on tomorrow
+            delivery.delivery_slots = delivery_slot_keys
+            venue.delivery_types.append(delivery)
+
         venue.put()
+
+        PaymentType(id=str(CASH_PAYMENT_TYPE), title="cash", status=STATUS_AVAILABLE).put()
 
         self.render_json({
             'login': namespace,

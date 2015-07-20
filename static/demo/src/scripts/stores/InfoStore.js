@@ -8,6 +8,8 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     name: '',
     phone: '',
     email: '',
+    login: null,
+    password: null,
     addChangeListener(fn) {
         this.on('change', fn);
     },
@@ -24,7 +26,6 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     },
     setLoginPassword({login, password}) {
         assign(this, {login, password});
-        this.emit('change');
     },
     getLoginPassword() {
         let {login, password} = this;
