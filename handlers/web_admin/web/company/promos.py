@@ -36,7 +36,7 @@ class PromoListHandler(CompanyBaseHandler):
                 if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
                     condition.value_string = DELIVERY_MAP[condition.value]
                     conditions.append(condition)
-                elif condition.method == PromoCondition.CHECK_HAPPY_HOURS:
+                elif condition.method in [PromoCondition.CHECK_HAPPY_HOURS, PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME]:
                     for day in (condition.schedule.days if condition.schedule else []):
                         new_condition = PromoCondition(method=PromoCondition.CHECK_HAPPY_HOURS)
                         new_condition.value_string = day.str()
