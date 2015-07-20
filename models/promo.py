@@ -26,7 +26,7 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
         for modifier in dict['group_modifiers']:
             choice_dicts = modifier['choices']
             for choice_dict in choice_dicts[:]:
-                if int(choice_dict['id']) in self.additional_group_choice_restrictions:
+                if int(choice_dict['id']) not in self.additional_group_choice_restrictions:
                     choice_dicts.remove(choice_dict)
         if self.additional_group_choice_restrictions:
             dict['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
