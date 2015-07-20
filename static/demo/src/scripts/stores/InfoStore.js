@@ -25,8 +25,13 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
 });
 InfoStore.initPersistence(['name', 'phone', 'email'], 'info');
 InfoStore.dispatchToken = AppDispatcher.register(function(action) {
-    if (action.actionType == Actions.INFO_UPDATED) {
-        InfoStore.updateMainInfo(action.data);
+    switch (action.actionType) {
+        case Actions.INFO_UPDATED:
+            InfoStore.updateMainInfo(action.data);
+            break;
+        case Actions.RESTART:
+            InfoStore.clearPersistence();
+            break;
     }
 });
 

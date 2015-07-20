@@ -30,10 +30,16 @@ const VenueStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
 });
 VenueStore.initPersistence(['title', 'address', 'lat', 'lng'], 'venue');
 VenueStore.dispatchToken = AppDispatcher.register(action => {
-    if (action.actionType == Actions.VENUE_TITLE_UPDATED) {
-        VenueStore.updateTitle(action.data);
-    } else if (action.actionType == Actions.VENUE_LOCATION_UPDATED) {
-        VenueStore.updateAddress(action.data);
+    switch (action.actionType) {
+        case Actions.VENUE_TITLE_UPDATED:
+            VenueStore.updateTitle(action.data);
+            break;
+        case Actions.VENUE_LOCATION_UPDATED:
+            VenueStore.updateAddress(action.data);
+            break;
+        case Actions.RESTART:
+            VenueStore.clearPersistence();
+            break;
     }
 });
 

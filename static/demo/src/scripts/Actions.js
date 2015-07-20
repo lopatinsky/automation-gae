@@ -88,6 +88,14 @@ const Actions = {
             actionType: Actions.PREV_STEP,
             data: null
         })
+    },
+
+    RESTART: "RESTART",
+    restart() {
+        AppDispatcher.dispatch({
+            actionType: Actions.RESTART,
+            data: null
+        })
     }
 };
 

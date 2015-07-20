@@ -132,6 +132,9 @@ MenuStore.dispatchToken = AppDispatcher.register(action => {
         case Actions.CATEGORY_ADDED:
             MenuStore.addCategory();
             break;
+        case Actions.RESTART:
+            MenuStore.clearPersistence();
+            break;
     }
 });
 

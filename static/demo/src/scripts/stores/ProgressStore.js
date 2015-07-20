@@ -3,6 +3,9 @@ import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
 import PersistenceMixin from '../utils/PersistenceMixin';
+import InfoStore from './InfoStore';
+import MenuStore from './MenuStore';
+import VenueStore from './VenueStore';
 
 const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     step: 0,
@@ -32,10 +35,18 @@ const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
 });
 ProgressStore.initPersistence(['step'], 'progress');
 ProgressStore.dispatchToken = AppDispatcher.register(function(action) {
-    if (action.actionType == Actions.NEXT_STEP) {
-        ProgressStore.next();
-    } else if (action.actionType == Actions.PREV_STEP) {
-        ProgressStore.prev();
+    switch (action.actionType) {
+        case Actions.NEXT_STEP:
+            ProgressStore.next();
+            break;
+        case Actions.PREV_STEP:
+            ProgressStore.prev();
+            break;
+        case Actions.RESTART:
+            ProgressStore.clearPersistence();
+            AppDispatcher.waitFor([MenuStore.dispatchToken, VenueStore.dispatchToken, InfoStore.dispatchToken]);
+            window.location.reload();
+            break;
     }
 });
 

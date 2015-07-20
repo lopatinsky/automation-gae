@@ -17,6 +17,9 @@ const PersistenceMixin = {
 
         this.on('change', this[saveSymbol]);
     },
+    clearPersistence() {
+        localStorage.removeItem(this[keySymbol]);
+    },
     [loadSymbol]() {
         const rawData = localStorage.getItem(this[keySymbol]);
         let data = null;
