@@ -1,0 +1,50 @@
+.form-horizontal .form-group .help-block:last-child {
+    margin-bottom: 0;
+}
+
+body {
+    background: #eeeeee;
+}
+
+body * {
+    font-family: "Open Sans", "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+}
+
+.card {
+    -webkit-box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+       -moz-box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+            box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+    background-color: white;
+    margin-bottom: 20px;
+}
+
+.card > * {
+    padding: 10px 16px;
+    border-top: 1px solid #bbbbbb;
+}
+
+.card > :first-child {
+    border-top: none;
+}
+
+.menu-category h4 {
+    margin: 0;
+}
+
+.menu-item h5 {
+    margin-top: 0;
+}
+
+.menu-item p {
+    margin-bottom: 0;
+}
+
+.menu-item-image {
+    display: block;
+    float: left;
+    width: 100px;
+}
+
+.menu-item-info {
+    padding-left: 120px;
+}
