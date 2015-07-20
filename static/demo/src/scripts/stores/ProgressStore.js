@@ -43,6 +43,13 @@ ProgressStore.dispatchToken = AppDispatcher.register(function(action) {
             AppDispatcher.waitFor([MenuStore.dispatchToken, VenueStore.dispatchToken, InfoStore.dispatchToken]);
             window.location.reload();
             break;
+        case Actions.POSTING_TO_SERVER:
+            ProgressStore.go(ProgressStore.steps.LOADING);
+            break;
+        case Actions.POST_TO_SERVER_SUCCESS:
+            AppDispatcher.waitFor([InfoStore.dispatchToken]);
+            ProgressStore.go(ProgressStore.steps.FINISH);
+            break;
     }
 });
 

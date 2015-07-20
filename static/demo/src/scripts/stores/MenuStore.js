@@ -135,6 +135,8 @@ MenuStore.dispatchToken = AppDispatcher.register(action => {
         case Actions.RESTART:
             MenuStore.clearPersistence();
             break;
+        case Actions.POST_TO_SERVER_SUCCESS:
+
     }
 });
 

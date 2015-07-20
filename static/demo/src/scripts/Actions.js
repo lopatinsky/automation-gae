@@ -1,4 +1,9 @@
+import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
+import ProgressStore from "./stores/ProgressStore";
+import InfoStore from './stores/InfoStore';
+import MenuStore from './stores/MenuStore';
+import VenueStore from './stores/VenueStore';
 
 const Actions = {
     INFO_UPDATED: "INFO_UPDATED",
@@ -89,6 +94,36 @@ const Actions = {
             actionType: Actions.RESTART,
             data: null
         })
+    },
+
+    POSTING_TO_SERVER: "POSTING_TO_SERVER",
+    POST_TO_SERVER_SUCCESS: "POST_TO_SERVER_SUCCESS",
+    postToServer() {
+        request
+            .post('/wizard/api/create')
+            .send({
+                info: InfoStore.getMainInfo(),
+                menu: MenuStore.getCategories(),
+                venue: VenueStore.getVenueInfo()
+            })
+            .end((err, res) => {
+                console.log(res);
+                if (!err) {
+                    AppDispatcher.dispatch({
+                        actionType: Actions.POST_TO_SERVER_SUCCESS,
+                        data: res.body
+                    });
+                } else {
+                    AppDispatcher.dispatch({
+                        actionType: Actions.GO_TO_STEP,
+                        data: ProgressStore.steps.VENUE
+                    })
+                }
+            });
+        AppDispatcher.dispatch({
+            actionType: Actions.POSTING_TO_SERVER,
+            data: null
+        });
     }
 };
 

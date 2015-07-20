@@ -9,7 +9,8 @@
     "bootswatch": "^3.3.5",
     "flux": "^2.0.3",
     "object-assign": "^3.0.0",
-    "react-spinner": "^0.2.2"
+    "react-spinner": "^0.2.2",
+    "superagent": "^1.2.0"
   },
   "devDependencies": {
     "gulp-concat": "^2.6.0",

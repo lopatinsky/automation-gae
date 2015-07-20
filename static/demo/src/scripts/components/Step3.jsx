@@ -90,7 +90,7 @@ const Step3 = React.createClass({
     _onNextClick() {
         let valid = this.refs.title.validate(true) & !!this.state.address;
         if (valid) {
-            Actions.goToStep(ProgressStore.steps.LOADING);
+            Actions.postToServer();
         }
         if (!this.state.address) {
             this._setAddressValid(false);

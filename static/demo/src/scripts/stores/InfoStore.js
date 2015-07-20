@@ -21,9 +21,17 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     getMainInfo() {
         let {name, phone, email} = this;
         return {name, phone, email};
+    },
+    setLoginPassword({login, password}) {
+        assign(this, {login, password});
+        this.emit('change');
+    },
+    getLoginPassword() {
+        let {login, password} = this;
+        return {login, password};
     }
 });
-InfoStore.initPersistence(['name', 'phone', 'email'], 'info');
+InfoStore.initPersistence(['name', 'phone', 'email', 'login', 'password'], 'info');
 InfoStore.dispatchToken = AppDispatcher.register(function(action) {
     switch (action.actionType) {
         case Actions.INFO_UPDATED:
@@ -31,6 +39,9 @@ InfoStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
         case Actions.RESTART:
             InfoStore.clearPersistence();
+            break;
+        case Actions.POST_TO_SERVER_SUCCESS:
+            InfoStore.setLoginPassword(action.data);
             break;
     }
 });

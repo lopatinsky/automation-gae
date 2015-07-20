@@ -57,7 +57,7 @@ class WizardCreateCompanyHandler(BaseHandler):
         return namespace
 
     def post(self):
-        data = json.loads(self.request.get('data'))
+        data = json.loads(self.request.body)
         name, phone, email = map(data['info'].get, ('name', 'phone', 'email'))
         phone = '7' + ''.join(c for c in phone if '0' <= c <= '9')
 
@@ -65,6 +65,7 @@ class WizardCreateCompanyHandler(BaseHandler):
         password = "%04d" % random.randint(0, 10000)
         CompanyUser.create_user(namespace, namespace=namespace, password_raw=password, login=namespace)
 
+        namespace_manager.set_namespace(namespace)
         cfg = Config(id=1)
         cfg.APP_NAME = name
         cfg.DELIVERY_PHONES = [phone]
@@ -85,23 +86,24 @@ class WizardCreateCompanyHandler(BaseHandler):
         for i, category_dict in enumerate(menu):
             MenuCategory.generate_category_sequence_number()  # only to increase counter
             category = MenuCategory(title=category_dict["title"], sequence_number=i)
-            for j, item in enumerate(category_dict["item"]):
-                category.generate_sequence_number()  # only to increase counter
+            for j, item in enumerate(category_dict["items"]):
                 item = MenuItem(
                     title=item["title"],
                     description=item["description"],
-                    picture=item["image"],
+                    picture=item["imageUrl"],
                     price=item["price"],
                     sequence_number=j)
                 item_key = item.put()
                 category.menu_items.append(item_key)
             category.put()
+            for _ in category.menu_items:
+                category.generate_sequence_number()  # only to increase counter
 
         venue_dict = data['venue']
         venue = Venue(
             title=venue_dict['title'],
             description=venue_dict['address'],
-            coordinates=ndb.GeoPt(venue_dict['lat'], venue_dict['lon']))
+            coordinates=ndb.GeoPt(venue_dict['lat'], venue_dict['lng']))
         venue.update_address()
         venue.put()
 
