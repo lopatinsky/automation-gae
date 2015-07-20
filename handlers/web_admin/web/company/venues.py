@@ -39,18 +39,7 @@ class CreateVenueHandler(CompanyBaseHandler):
         venue.title = self.request.get('title')
         venue.description = self.request.get('description')
         venue.coordinates = ndb.GeoPt(float(self.request.get('lat')), float(self.request.get('lon')))
-        candidates = geocoder.get_houses_by_coordinates(venue.coordinates.lat, venue.coordinates.lon)
-        if candidates:
-            address = candidates[0]
-            venue.address = Address(**address['address'])
-            config = Config.get()
-            if venue.address.country not in config.COUNTRIES:
-                config.COUNTRIES.append(venue.address.country)
-                config.put()
-        zone = get_time_zone(venue.coordinates.lat, venue.coordinates.lon)
-        if zone:
-            venue.timezone_offset = zone['offset']
-            venue.timezone_name = zone['name']
+        venue.update_address()
         venue.put()
         self.redirect('/company/venues')
 

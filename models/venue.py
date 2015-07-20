@@ -284,3 +284,20 @@ class Venue(ndb.Model):
     def is_open(self, minutes_offset=0):
         now = datetime.utcnow() + timedelta(minutes=minutes_offset) + timedelta(hours=self.timezone_offset)
         return working_hours.check(self.schedule, now)
+
+    def update_address(self):
+        from config import Config
+        from methods import geocoder, timezone
+
+        candidates = geocoder.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)
+        if candidates:
+            address = candidates[0]
+            self.address = Address(**address['address'])
+            config = Config.get()
+            if self.address.country not in config.COUNTRIES:
+                config.COUNTRIES.append(self.address.country)
+                config.put()
+        zone = timezone.get_time_zone(self.coordinates.lat, self.coordinates.lon)
+        if zone:
+            self.timezone_offset = zone['offset']
+            self.timezone_name = zone['name']

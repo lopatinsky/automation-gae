@@ -1,0 +1,87 @@
+/* Common fixes */
+.form-horizontal .form-group .help-block:last-child {
+    margin-bottom: 0;
+}
+
+.form-group .control-label {
+    margin-bottom: 0;
+}
+
+.has-feedback label~.form-control-feedback {
+    top: 23px;
+}
+
+.help-block {
+    font-size: smaller;
+    margin-top: 2px;
+}
+
+.form-group:last-child {
+    margin-bottom: 5px;
+}
+
+.input-group-addon {
+    font-size: 16px;
+}
+
+.input-group-btn + .form-control {
+    padding-left: 10px;
+}
+
+/* App styles */
+body {
+    background: #eeeeee;
+}
+
+body * {
+    font-family: "Open Sans", "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+}
+
+.cards-container {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.card {
+    -webkit-box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+       -moz-box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+            box-shadow: 0 2px 5px 0 rgba(110,110,110,1);
+    background-color: white;
+    margin-bottom: 20px;
+}
+
+.card > * {
+    padding: 10px 16px;
+    border-top: 1px solid #bbbbbb;
+}
+
+.card > :first-child {
+    border-top: none;
+}
+
+.menu-category h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.menu-item h5 {
+    margin-top: 0;
+}
+
+.menu-item p {
+    margin-bottom: 0;
+}
+
+.menu-item-image {
+    display: block;
+    float: left;
+    width: 100px;
+}
+
+.menu-item-info {
+    padding-left: 120px;
+}
+
+.react-spinner_bar {
+    background-color: #777777;
+}
