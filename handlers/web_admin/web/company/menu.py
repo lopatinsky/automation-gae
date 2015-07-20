@@ -160,9 +160,11 @@ class AddMenuItemHandler(CompanyBaseHandler):
             item.weight = float(self.request.get('weight'))
         item.sequence_number = category.generate_sequence_number()
         item.put()  # it is need to get id in saving image
-        item.picture = self.request.get('picture') if self.request.get('picture') else None
-        if self.request.get('image_file'):
-            save_item_image(item, str(self.request.get('image_file')))
+        if self.request.get('image_file') or self.request.get('picture'):
+            if self.request.get('image_file'):
+                save_item_image(item, image_data=str(self.request.get('image_file')))
+            elif self.request.get('picture'):
+                save_item_image(item, url=self.request.get('picture'))
         if item.picture:
             resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
@@ -213,9 +215,11 @@ class EditMenuItemHandler(CompanyBaseHandler):
         item.picture = None
         item.cut_picture = None
         item.icon = None
-        item.picture = self.request.get('picture') if self.request.get('picture') else None
-        if self.request.get('image_file'):
-            save_item_image(item, str(self.request.get('image_file')))
+        if self.request.get('image_file') or self.request.get('picture'):
+            if self.request.get('image_file'):
+                save_item_image(item, image_data=str(self.request.get('image_file')))
+            elif self.request.get('picture'):
+                save_item_image(item, url=self.request.get('picture'))
         if item.picture:
             resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()
