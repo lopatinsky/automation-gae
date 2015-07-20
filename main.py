@@ -174,6 +174,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/promo_code', [
             Route('/enter', api.EnterPromoCode),
+            Route('/history', api.PromoCodeHistoryHandler),
         ]),
 
         PathPrefixRoute('/wallet', [

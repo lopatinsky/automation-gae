@@ -1,6 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 from webapp2_extras import security
+from models import Client
 
 __author__ = 'dvpermyakov'
 
@@ -9,7 +10,8 @@ STATUS_ACTIVE = 1
 STATUS_PERFORMING = 2
 STATUS_DONE = 3
 STATUS_CANCELLED = 4
-PROMO_CODE_STATUS_CHOICES = (STATUS_CREATED, STATUS_ACTIVE, STATUS_DONE, STATUS_CANCELLED)
+PROMO_CODE_STATUS_CHOICES = (STATUS_CREATED, STATUS_ACTIVE, STATUS_PERFORMING, STATUS_DONE, STATUS_CANCELLED)
+PROMO_CODE_HISTORY_STATUS_CHOICES = (STATUS_PERFORMING, STATUS_DONE)
 PROMO_CODE_STATUS_MAP = {
     STATUS_CREATED: u'Создано',
     STATUS_ACTIVE: u'Активно',
@@ -29,6 +31,11 @@ PROMO_CODE_KIND_MAP = {
     KIND_POINTS: u'Накопительные баллы',
     KIND_ORDER_PROMO: u'Личные акции'
 }
+
+
+class PromoCodePerformed(ndb.Model):
+    promo_code = ndb.KeyProperty(required=True)
+    client = ndb.KeyProperty(kind=Client, required=True)
 
 
 class PromoCode(ndb.Model):
@@ -54,9 +61,12 @@ class PromoCode(ndb.Model):
         self.status = STATUS_ACTIVE
         self.put()
 
-    def perform(self):
+    def perform(self, client):
         self.status = STATUS_PERFORMING
         self.put()
+        PromoCodePerformed(promo_kode=self.key, client=client.key).put()
+        if self.kind == KIND_SHARE_GIFT:
+            self.deactivate()
 
     def deactivate(self):
         self.status = STATUS_DONE
@@ -66,9 +76,12 @@ class PromoCode(ndb.Model):
         self.status = STATUS_CANCELLED
         self.put()
 
-
-class PromoCodeActivation(ndb.Model):
-    promo_code = ndb.KeyProperty(required=True)
+    def dict(self):
+        return {
+            'title': PROMO_CODE_KIND_MAP[self.kind],
+            'key': self.id,
+            'status': PROMO_CODE_STATUS_MAP[self.status]
+        }
 
 
 class PromoCodeGroup(ndb.Model):

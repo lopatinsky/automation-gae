@@ -1,7 +1,7 @@
 # coding=utf-8
 from google.appengine.api.namespace_manager import namespace_manager
 from models import Client, SharedGift
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, STATUS_ACTIVE
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, STATUS_ACTIVE, PROMO_CODE_HISTORY_STATUS_CHOICES
 
 __author__ = 'dvpermyakov'
 
@@ -40,3 +40,14 @@ class EnterPromoCode(ApiHandler):
                     return self.send_error(u'Подарок уже активирован')
         else:
             return self.send_error(u'Ничего не найдено')
+
+
+class PromoCodeHistoryHandler(ApiHandler):
+    def get(self):
+        client_id = self.request.get_range('client_id')
+        client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
+        self.render_json({
+            'activation': [promo_code.dict() for promo_code in PromoCode.query(PromoCode.status.IN(PROMO_CODE_HISTORY_STATUS_CHOICES)).fetch()]
+        })
