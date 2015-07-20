@@ -81,3 +81,7 @@ body * {
 .menu-item-info {
     padding-left: 120px;
 }
+
+.react-spinner_bar {
+    background-color: #777777;
+}

@@ -75,18 +75,11 @@ const Actions = {
         })
     },
 
-    NEXT_STEP: "NEXT_STEP",
-    nextStep() {
+    GO_TO_STEP: "GO_TO_STEP",
+    goToStep(step) {
         AppDispatcher.dispatch({
-            actionType: Actions.NEXT_STEP,
-            data: null
-        })
-    },
-    PREV_STEP: "PREV_STEP",
-    prevStep() {
-        AppDispatcher.dispatch({
-            actionType: Actions.PREV_STEP,
-            data: null
+            actionType: Actions.GO_TO_STEP,
+            data: step
         })
     },
 

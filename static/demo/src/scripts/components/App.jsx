@@ -3,15 +3,17 @@ import { Navbar, Grid, Row, Col } from 'react-bootstrap';
 import Step1 from './Step1';
 import Step2 from './Step2';
 import Step3 from './Step3';
+import StepLoading from './StepLoading';
 import StepFinish from './StepFinish';
 import ProgressStore from '../stores/ProgressStore';
 
 const App = React.createClass({
     contentTypes: {
-        0: Step1,
-        1: Step2,
-        2: Step3,
-        3: StepFinish
+        [ProgressStore.steps.INFO]: Step1,
+        [ProgressStore.steps.MENU]: Step2,
+        [ProgressStore.steps.VENUE]: Step3,
+        [ProgressStore.steps.LOADING]: StepLoading,
+        [ProgressStore.steps.FINISH]: StepFinish
     },
     getInitialState() {
         return {step: ProgressStore.getStep()};

@@ -3,6 +3,7 @@ import { Button } from 'react-bootstrap';
 import assign from 'object-assign';
 import InputGroup from './InputGroup';
 import VenueStore from '../stores/VenueStore';
+import ProgressStore from '../stores/ProgressStore';
 import { required } from '../validators';
 import AddressPicker from './AddressPicker';
 import Actions from '../Actions';
@@ -84,12 +85,12 @@ const Step3 = React.createClass({
         }
     },
     _onPrevClick() {
-        Actions.prevStep();
+        Actions.goToStep(ProgressStore.steps.MENU);
     },
     _onNextClick() {
         let valid = this.refs.title.validate(true) & !!this.state.address;
         if (valid) {
-            Actions.nextStep();
+            Actions.goToStep(ProgressStore.steps.LOADING);
         }
         if (!this.state.address) {
             this._setAddressValid(false);

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Glyphicon } from 'react-bootstrap';
 import MenuCategory from './MenuCategory';
 import MenuStore from '../stores/MenuStore';
+import ProgressStore from '../stores/ProgressStore';
 import Actions from '../Actions';
 
 const Step2 = React.createClass({
@@ -51,10 +52,10 @@ const Step2 = React.createClass({
         </div>;
     },
     _onNextClick() {
-        Actions.nextStep();
+        Actions.goToStep(ProgressStore.steps.VENUE);
     },
     _onPrevClick() {
-        Actions.prevStep();
+        Actions.goToStep(ProgressStore.steps.INFO);
     },
     _add() {
         Actions.addCategory();

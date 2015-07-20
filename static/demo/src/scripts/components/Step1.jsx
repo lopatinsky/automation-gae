@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from 'react-bootstrap';
 import Input from './InputGroup'
 import InfoStore from '../stores/InfoStore';
+import ProgressStore from '../stores/ProgressStore';
 import Actions from '../Actions';
 import { required, pattern, email } from '../validators';
 
@@ -37,7 +38,7 @@ const Step1 = React.createClass({
             this.refs.phone.validate(true) &
             this.refs.email.validate(true);
         if (valid) {
-            Actions.nextStep();
+            Actions.goToStep(ProgressStore.steps.MENU);
         }
     },
     render() {

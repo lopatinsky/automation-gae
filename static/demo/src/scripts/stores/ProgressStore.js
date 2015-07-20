@@ -8,9 +8,14 @@ import MenuStore from './MenuStore';
 import VenueStore from './VenueStore';
 
 const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
-    step: 0,
-    minStep: 0,
-    maxStep: 3,
+    steps: {
+        INFO: "INFO",
+        MENU: "MENU",
+        VENUE: "VENUE",
+        LOADING: "LOADING",
+        FINISH: "FINISH"
+    },
+    step: "INFO",
     addChangeListener(fn) {
         this.on('change', fn);
     },
@@ -20,15 +25,9 @@ const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     getStep() {
         return this.step;
     },
-    next() {
-        if (this.step < this.maxStep) {
-            this.step += 1;
-            this.emit('change');
-        }
-    },
-    prev() {
-        if (this.step > this.minStep) {
-            this.step -= 1;
+    go(step) {
+        if (step in this.steps) {
+            this.step = step;
             this.emit('change');
         }
     }
@@ -36,11 +35,8 @@ const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
 ProgressStore.initPersistence(['step'], 'progress');
 ProgressStore.dispatchToken = AppDispatcher.register(function(action) {
     switch (action.actionType) {
-        case Actions.NEXT_STEP:
-            ProgressStore.next();
-            break;
-        case Actions.PREV_STEP:
-            ProgressStore.prev();
+        case Actions.GO_TO_STEP:
+            ProgressStore.go(action.data);
             break;
         case Actions.RESTART:
             ProgressStore.clearPersistence();
