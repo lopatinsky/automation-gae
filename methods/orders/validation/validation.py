@@ -9,7 +9,7 @@ from methods.rendering import STR_DATETIME_FORMAT
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
-from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, check_order_gifts, \
+from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
 from models.venue import DELIVERY
 
@@ -275,9 +275,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     if not valid:
         return send_error(error)
     valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
-    if not valid:
-        return send_error(error)
-    valid, error = check_order_gifts(order_gift_dicts, cancelled_order_gift_dicts)
     if not valid:
         return send_error(error)
     success, error, rest_points, full_points = check_gifts(gifts, client)

@@ -260,43 +260,6 @@ def check_gifts(gifts, client):
         return True, None, accum_points - spent_points, accum_points
 
 
-def check_order_gifts(gifts, cancelled_gifts, order=None):
-    def get_error():
-        description = u'Невозможно добавить %s, как подарок' % gift['item'].title
-        return description
-
-    description = None
-    for gift in gifts:
-        if not gift['promos']:
-            description = get_error()
-        for promo in gift['promos']:
-            if PromoOutcome.ORDER_GIFT not in [outcome.method for outcome in promo.outcomes]:
-                description = get_error()
-    for gift in cancelled_gifts:
-        if not gift['promos']:
-            description = get_error()
-        for promo in gift['promos']:
-            if PromoOutcome.ORDER_GIFT not in [outcome.method for outcome in promo.outcomes]:
-                description = get_error()
-    if description:
-        return False, description
-    else:
-        if order:
-            gift_details = []
-            for gift in gifts:
-                gift_details.append(OrderPositionDetails(
-                    item=gift['item'].key,
-                    price=0,
-                    revenue=0,
-                    promos=[promo.key for promo in gift['promos']],
-                    single_modifiers=[],  # todo: is it flexible?
-                    group_modifiers=[]    # todo: is it flexible?
-                ))
-            order.order_gift_details = gift_details
-            order.put()
-        return True, None
-
-
 def check_address(delivery_type, address):
     if delivery_type == DELIVERY:
         address = address.get('address') if address else None
