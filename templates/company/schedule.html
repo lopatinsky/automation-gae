@@ -10,6 +10,16 @@
             <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
         {% elif promo %}
             <input type="text" name="promo_id" value="{{ promo.key.id() }}" hidden>
+            <label>
+                Метод:
+                <select name="method">
+                    {% for method in methods %}
+                      <option value="{{ method['value'] }}" {% if feature and feature.method == method['value'] %} selected {% endif %}>
+                          {{ method['name'] }}
+                      </option>
+                    {% endfor %}
+                </select>
+            </label><br>
         {% endif %}
         {% for day in days %}
             <label>

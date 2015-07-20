@@ -52,8 +52,6 @@ class PromoOutcome(ndb.Model):
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
                PERCENT_GIFT_POINT)
 
-    #item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
-    #item_required = ndb.BooleanProperty(default=False)
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
@@ -71,18 +69,15 @@ class PromoCondition(ndb.Model):
     CHECK_GROUP_MODIFIER_CHOICE = 8
     CHECK_NOT_GROUP_MODIFIER_CHOICE = 9
     CHECK_PAYMENT_TYPE = 10
+    CHECK_HAPPY_HOURS_CREATED_TIME = 11
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
-               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE)
+               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME)
 
-    #item = ndb.KeyProperty(kind=MenuItem)  # item_required is False => apply for all items
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
-    #item_required = ndb.BooleanProperty(default=False)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty()
     schedule = ndb.LocalStructuredProperty(Schedule)
-    #hh_days = ndb.StringProperty()   # todo: remove
-    #hh_hours = ndb.StringProperty()  # todo: remove
 
 
 class Promo(ndb.Model):
@@ -162,11 +157,12 @@ CONDITION_MAP = {
     PromoCondition.CHECK_ITEM_IN_ORDER: u'Продукт в заказе',
     PromoCondition.CHECK_REPEATED_ORDERS: u'Повторный заказ',
     PromoCondition.CHECK_MIN_ORDER_SUM: u'Минимальная сумма заказа',
-    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы',
+    PromoCondition.CHECK_HAPPY_HOURS: u'Счастливые часы время заказа',
     PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS: u'Минимальная сумма с учетом акций',
     PromoCondition.CHECK_GROUP_MODIFIER_CHOICE: u'Выбор группового модификатора в заказе',
     PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе',
-    PromoCondition.CHECK_PAYMENT_TYPE: u'Тип оплаты'
+    PromoCondition.CHECK_PAYMENT_TYPE: u'Тип оплаты',
+    PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME: u'Счастливые часы время создания заказа'
 }
 
 OUTCOME_MAP = {

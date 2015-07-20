@@ -265,9 +265,17 @@ class AddHappyHoursHandler(CompanyBaseHandler):
                 'start': '00:00',
                 'end': '00:00'
             })
+        methods = []
+        for condition in PromoCondition.CHOICES:
+            if condition in [PromoCondition.CHECK_HAPPY_HOURS, PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME]:
+                methods.append({
+                    'name': CONDITION_MAP[condition],
+                    'value': condition
+                })
         self.render('/schedule.html', **{
             'promo': promo,
-            'days': days
+            'days': days,
+            'methods': methods
         })
 
     @company_user_required
@@ -284,7 +292,8 @@ class AddHappyHoursHandler(CompanyBaseHandler):
                 end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
                 days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
         schedule = Schedule(days=days)
-        condition = PromoCondition(method=PromoCondition.CHECK_HAPPY_HOURS)
+        condition = PromoCondition()
+        condition.method = self.request.get_range('method')
         condition.schedule = schedule
         promo.conditions.append(condition)
         promo.put()

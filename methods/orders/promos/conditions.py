@@ -51,8 +51,14 @@ def check_item_in_order(condition, item_dicts):
     return amount >= condition.value
 
 
-def check_happy_hours(condition, venue, delivery_time):
+def check_happy_hours_delivery_time(condition, venue, delivery_time):
     now = delivery_time + timedelta(hours=venue.timezone_offset)
+    return working_hours.check(condition.schedule, now)
+
+
+def check_happy_hours_created_time(condition, venue):
+    MAX_SECONDS_LOSS = 10
+    now = datetime.utcnow() + timedelta(hours=venue.timezone_offset) - timedelta(seconds=MAX_SECONDS_LOSS)
     return working_hours.check(condition.schedule, now)
 
 

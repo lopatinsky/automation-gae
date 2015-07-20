@@ -1,7 +1,7 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
-    check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours, \
-    check_group_modifier_choice, check_payment_type
+    check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
+    check_group_modifier_choice, check_payment_type, check_happy_hours_created_time
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points
@@ -50,7 +50,7 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
     if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM:
         return check_condition_min_by_value(condition, _get_initial_total_sum(item_dicts))
     if condition.method == PromoCondition.CHECK_HAPPY_HOURS:
-        return check_happy_hours(condition, venue, delivery_time)
+        return check_happy_hours_delivery_time(condition, venue, delivery_time)
     if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS:
         return check_condition_min_by_value(condition, _get_final_total_sum(total_sum, item_dicts))
     if condition.method == PromoCondition.CHECK_GROUP_MODIFIER_CHOICE:
@@ -59,6 +59,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return not check_group_modifier_choice(condition, item_dicts)
     if condition.method == PromoCondition.CHECK_PAYMENT_TYPE:
         return check_payment_type(condition, payment_info)
+    if condition.method == PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME:
+        return check_happy_hours_created_time(condition, venue)
 
 
 def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
