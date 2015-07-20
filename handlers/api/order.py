@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
+from google.appengine.ext import deferred
 from webapp2_extras import security
 from google.appengine.ext.ndb import GeoPt, Key
 from google.appengine.api import taskqueue
@@ -14,7 +15,7 @@ from google.appengine.api import taskqueue
 from config import config
 from handlers.api.base import ApiHandler
 from handlers.web_admin.web.company.delivery.orders import order_items_values
-from methods import alfa_bank, empatika_promos, orders, empatika_wallet, paypal
+from methods import alfa_bank, empatika_promos, empatika_wallet, paypal
 from methods.orders.validation.validation import validate_order, get_first_error
 from methods.orders.cancel import cancel_order
 from methods.twilio import send_sms
@@ -276,7 +277,7 @@ class OrderHandler(ApiHandler):
                     if self.order.delivery_type == DELIVERY:
                         item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, self.order.email_key_confirm)
                 for email in config.DELIVERY_EMAILS:
-                    send_email(EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
+                    deferred.defer(send_email, EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
