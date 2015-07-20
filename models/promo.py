@@ -2,7 +2,7 @@
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier
 from models.menu import MenuItem
 from models.schedule import Schedule
 
@@ -17,7 +17,8 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
     additional_group_choice_restrictions = ndb.IntegerProperty(repeated=True)
 
     def dict(self):
-        dict = self.item.get().dict()
+        item = self.item.get()
+        dict = item.dict()
         dict['id'] = str(self.key.id())
         dict.update({
             'points': self.points
@@ -27,6 +28,8 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
             for choice_dict in choice_dicts[:]:
                 if int(choice_dict['id']) in self.additional_group_choice_restrictions:
                     choice_dicts.remove(choice_dict)
+        if self.additional_group_choice_restrictions:
+            dict['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
         return dict
 
 
