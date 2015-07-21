@@ -36,12 +36,13 @@ PROMO_CODE_KIND_MAP = {
 
 class PromoCode(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
+    updated = ndb.DateTimeProperty(auto_now=True)
     start = ndb.DateTimeProperty(required=True)
     end = ndb.DateTimeProperty(required=True)
+    title = ndb.StringProperty()
     status = ndb.IntegerProperty(choices=PROMO_CODE_STATUS_CHOICES, default=STATUS_CREATED)
     kind = ndb.IntegerProperty(choices=PROMO_CODE_KIND_CHOICES)
     message = ndb.StringProperty()
-    client = ndb.KeyProperty(kind=Client)  # who activates promo code
 
     @classmethod
     def create(cls, start, end, kind, message=None):
@@ -65,7 +66,7 @@ class PromoCode(ndb.Model):
         self.put()
 
     def perform(self, client):
-        self.client = client.key
+        PromoCodePerforming(promo_code=self.key, client=client.key).put()
         self.status = STATUS_PERFORMING
         self.put()
         if self.kind in [KIND_SHARE_GIFT, KIND_WALLET]:
@@ -81,10 +82,17 @@ class PromoCode(ndb.Model):
 
     def dict(self):
         return {
-            'title': PROMO_CODE_KIND_MAP[self.kind],
             'key': self.key.id(),
+            'title': self.title,
+            'kind': PROMO_CODE_KIND_MAP[self.kind],
             'status': PROMO_CODE_STATUS_MAP[self.status]
         }
+
+
+class PromoCodePerforming(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    promo_code = ndb.KeyProperty(kind=PromoCode)
+    client = ndb.KeyProperty(kind=Client)
 
 
 class PromoCodeDeposit(ndb.Model):
