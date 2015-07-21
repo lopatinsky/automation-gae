@@ -1,4 +1,5 @@
 # coding=utf-8
+from google.appengine.api.taskqueue import taskqueue
 from google.appengine.ext import ndb
 from webapp2_extras import security
 from models import Client
@@ -43,14 +44,20 @@ class PromoCode(ndb.Model):
     client = ndb.KeyProperty(kind=Client)  # who activates promo code
 
     @classmethod
-    def create(cls, kind, message=None):
+    def create(cls, start, end, kind, message=None):
         while True:
             key = security.generate_random_string(entropy=256)
             if not cls.get_by_id(key):
                 if kind == KIND_SHARE_GIFT:
                     message = u'Вы активировали подарок другу!'
-                promo_code = cls(id=key, kind=kind, message=message)
+                promo_code = cls(id=key, start=start, end=end, kind=kind, message=message)
                 promo_code.put()
+                taskqueue.add(url='/task/promo_code/start', method='POST', eta=start, params={
+                    'code_id': promo_code.key.id()
+                })
+                taskqueue.add(url='/task/promo_code/close', method='POST', eta=end, params={
+                    'code_id': promo_code.key.id()
+                })
                 return promo_code
 
     def activate(self):
@@ -61,7 +68,7 @@ class PromoCode(ndb.Model):
         self.client = client.key
         self.status = STATUS_PERFORMING
         self.put()
-        if self.kind == KIND_SHARE_GIFT:
+        if self.kind in [KIND_SHARE_GIFT, KIND_WALLET]:
             self.deactivate()
 
     def deactivate(self):
@@ -94,3 +101,5 @@ class PromoCodeDeposit(ndb.Model):
         deposit(client.key.id(), self.amount * 100, 'promo code %s' % self.promo_code.id())
         self.status = self.DONE
         self.put()
+        promo_code = self.promo_code.get()
+        promo_code.perform(client)

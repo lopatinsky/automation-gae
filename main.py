@@ -399,6 +399,10 @@ app = WSGIApplication([
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
         ]),
+        PathPrefixRoute('/promo_code', [
+            Route('/start', tasks.StartPromoCodeHandler),
+            Route('/close', tasks.ClosePromoCodeHandler),
+        ]),
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),

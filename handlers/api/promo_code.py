@@ -40,9 +40,12 @@ class EnterPromoCode(ApiHandler):
                         return self.send_success(promo_code)
                 elif promo_code.kind == KIND_WALLET:
                     try:
-                        promo_code_deposit = PromoCodeDeposit.query(PromoCodeDeposit.promo_code == promo_code.key).get()
+                        deposit = PromoCodeDeposit.query(PromoCodeDeposit.promo_code == promo_code.key).get()
+                        if deposit:
+                            deposit.deposit(client)
+                            return self.send_success(promo_code)
                     except DeadlineExceededError:
-                        return self.send_error(u'Пожалуйста, повторите попытку')
+                        return self.send_error(u'Пожалуйста, повторите попытку...')
             else:
                 return self.send_error(u'Промо код не активен')
         else:

@@ -131,6 +131,8 @@ class SharedGift(ndb.Model):
             reverse(self.payment_id)
             share = Share.get_by_id(self.share_id)
             share.deactivate()
+            promo_code = self.promo_code.get()
+            promo_code.cancel()
             self.status = self.CANCELED
             self.put()
             recipient = Client.get_by_id(self.recipient_id)
