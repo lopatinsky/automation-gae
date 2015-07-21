@@ -373,19 +373,6 @@ app = WSGIApplication([
         ]),
     ]),
 
-    PathPrefixRoute('/admin', [  # now work with modifiers
-        Route('/login', web_admin.LoginHandler),
-        Route('/logout', web_admin.LogoutHandler),
-        Route('/orders', web_admin.OrdersHandler),
-        Route('/backs', web_admin.ReturnsHandler),
-        Route('/history', web_admin.HistoryHandler),
-        Route('/check_time', web_admin.CheckTimeHandler),
-        Route('/check_update', web_admin.CheckUpdateHandler),
-        Route('/done', web_admin.OrderDoneHandler),
-        Route('/return_barista', web_admin.OrderCancelHandler),
-        Route('/status_up', web_admin.OrderStatusUpdateHandler)
-    ]),
-
     Route('/wizard', wizard.WizardWebHandler),
     Route('/wizard/api/create', wizard.WizardCreateCompanyHandler),
 
