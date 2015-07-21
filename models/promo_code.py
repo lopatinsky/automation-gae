@@ -33,11 +33,6 @@ PROMO_CODE_KIND_MAP = {
 }
 
 
-class PromoCodePerformed(ndb.Model):
-    promo_code = ndb.KeyProperty(required=True)
-    client = ndb.KeyProperty(kind=Client, required=True)
-
-
 class PromoCode(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     start = ndb.DateTimeProperty(required=True)
@@ -45,6 +40,7 @@ class PromoCode(ndb.Model):
     status = ndb.IntegerProperty(choices=PROMO_CODE_STATUS_CHOICES, default=STATUS_CREATED)
     kind = ndb.IntegerProperty(choices=PROMO_CODE_KIND_CHOICES)
     message = ndb.StringProperty()
+    client = ndb.KeyProperty(kind=Client)  # who activates promo code
 
     @classmethod
     def create(cls, kind, message=None):
@@ -62,9 +58,9 @@ class PromoCode(ndb.Model):
         self.put()
 
     def perform(self, client):
+        self.client = client.key
         self.status = STATUS_PERFORMING
         self.put()
-        PromoCodePerformed(promo_kode=self.key, client=client.key).put()
         if self.kind == KIND_SHARE_GIFT:
             self.deactivate()
 
@@ -84,5 +80,17 @@ class PromoCode(ndb.Model):
         }
 
 
-class PromoCodeGroup(ndb.Model):
-    codes = ndb.KeyProperty(kind=PromoCode, repeated=True)
+class PromoCodeDeposit(ndb.Model):
+    READY = 0
+    DONE = 1
+    CHOICES = (READY, DONE)
+
+    promo_code = ndb.KeyProperty(kind=PromoCode, required=True)
+    status = ndb.IntegerProperty(choices=CHOICES, default=READY)
+    amount = ndb.IntegerProperty(required=True)  # в рублях
+
+    def deposit(self, client):
+        from methods.empatika_wallet import deposit
+        deposit(client.key.id(), self.amount * 100, 'promo code %s' % self.promo_code.id())
+        self.status = self.DONE
+        self.put()
