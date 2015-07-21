@@ -33,7 +33,7 @@ class WalletDepositHandler(AdminApiHandler):
                 "description": e.message
             })
         else:
-            self.user.deposit_history.append(Deposit(source=wallet_source))
+            self.user.deposit_history.append(Deposit(source=wallet_source, amount=amount))
             self.user.put()
             self.render_json({
                 "balance": wallet_result["balance"] / 100.0

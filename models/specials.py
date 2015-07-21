@@ -98,6 +98,7 @@ class News(ndb.Model):
 
 class Deposit(ndb.Model):
     source = ndb.StringProperty(required=True)
+    amount = ndb.IntegerProperty(required=True)  # в рублях
 
 
 class JsonStorage(ndb.Model):
