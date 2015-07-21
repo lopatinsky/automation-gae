@@ -46,7 +46,7 @@ class PromoCode(ndb.Model):
     @classmethod
     def create(cls, start, end, kind, message=None):
         while True:
-            key = security.generate_random_string(entropy=256)
+            key = security.generate_random_string(entropy=256, length=7)
             if not cls.get_by_id(key):
                 if kind == KIND_SHARE_GIFT:
                     message = u'Вы активировали подарок другу!'
@@ -82,7 +82,7 @@ class PromoCode(ndb.Model):
     def dict(self):
         return {
             'title': PROMO_CODE_KIND_MAP[self.kind],
-            'key': self.id,
+            'key': self.key.id(),
             'status': PROMO_CODE_STATUS_MAP[self.status]
         }
 
