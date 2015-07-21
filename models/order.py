@@ -147,11 +147,14 @@ class Order(ndb.Model):
 
     def activate_gift_points(self):
         from methods import empatika_promos
+        point_sum = 0
         for index, point_detail in enumerate(self.points_details):
             if point_detail.status == GiftPointsDetails.READY:
                 empatika_promos.register_order(self.client_id, point_detail.points, '%s_%s' % (self.key.id(), index))
                 point_detail.status = GiftPointsDetails.DONE
+                point_sum += point_detail.points
         self.put()
+        return point_sum
 
     def grouped_item_dict(self, details, gift=False):
         item_dicts = []

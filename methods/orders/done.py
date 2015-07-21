@@ -13,10 +13,11 @@ __author__ = 'dvpermyakov'
 
 def done_order(order, namespace, with_push=True):
     total_cash_back = 0
+    point_sum = 0
     if config.WALLET_ENABLED:
         total_cash_back = order.activate_cash_back()
     if config.GIFT_ENABLED:
-        order.activate_gift_points()
+        point_sum = order.activate_gift_points()
 
     order.status = READY_ORDER
     order.email_key_done = None
@@ -38,6 +39,8 @@ def done_order(order, namespace, with_push=True):
 
     if with_push:
         text = u"Заказ №%s выдан." % order.key.id()
+        if point_sum:
+            text += u" Начислены баллы на в размере %s." % point_sum
         if total_cash_back:
-            text += u" Начислены бонусы на Ваш счет в размере %s" % (total_cash_back / 100.0)
+            text += u" Начислены бонусы на Ваш счет в размере %s." % (total_cash_back / 100.0)
         push.send_order_push(order, text, namespace, silent=True)
