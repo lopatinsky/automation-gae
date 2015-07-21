@@ -26,6 +26,7 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     },
     setLoginPassword({login, password}) {
         assign(this, {login, password});
+        this.emit('change');
     },
     getLoginPassword() {
         let {login, password} = this;

@@ -2,15 +2,33 @@
 import json
 import random
 import datetime
-from google.appengine.api import namespace_manager
-from google.appengine.ext import ndb
+from google.appengine.api import namespace_manager, mail
+from google.appengine.ext import ndb, deferred
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import jinja2
 from config import Config
+from methods import sms_pilot, email_mandrill
 from models import DeliverySlot, MenuCategory, MenuItem, CompanyUser, Venue, DAY_SECONDS, HOUR_SECONDS, STATUS_AVAILABLE
 from models.payment_types import PaymentType, CASH_PAYMENT_TYPE
 from models.schedule import Schedule, DaySchedule
-from models.venue import DELIVERY_TYPES, DeliveryType, SELF, IN_CAFE
+from models.venue import DeliveryType, SELF, IN_CAFE
+
+
+def _notify_sms(phone, login, password):
+    sms_pilot.send_sms(
+        [phone],
+        u"Логин для входа в демо-приложение: %s, пароль %s. Скачать: http://rbcn.mobi/get/dem?m=sms" % (login, password))
+
+
+def _notify_email(email, phone, name, login, password):
+    email_mandrill.send_email("noreply@ru-beacon.ru", email, "Ваши данные для входа в демо-приложение Ru-beacon",
+                              u"""Ваш логин: <b>%s</b><br/>
+Ваш пароль: <b>%s</b><br/>
+<a href="http://rbcn.mobi/get/dem?m=email">Скачать демо-приложение</a>""" % (login, password))
+    mail.send_mail_to_admins(
+        "wizard@automation-demo.appspotmail.com",
+        u"Создана компания через wizard",
+        u"Название: %s\nТелефон: %s\nEmail: %s\nЛогин: %s\nПароль: %s" % (name, phone, email, login, password))
 
 
 class BaseHandler(RequestHandler):
@@ -73,7 +91,7 @@ class WizardCreateCompanyHandler(BaseHandler):
         cfg = Config(id=1)
         cfg.APP_NAME = name
         cfg.DELIVERY_PHONES = [phone]
-        cfg.DELIVERY_EMAILS = [email]
+        cfg.DELIVERY_EMAILS = ['beacon-team@googlegroups.com', email]
         cfg.SUPPORT_EMAILS = [email]
         cfg.ACTION_COLOR = "FF25B8CD"
         cfg.put()
@@ -125,6 +143,9 @@ class WizardCreateCompanyHandler(BaseHandler):
         venue.put()
 
         PaymentType(id=str(CASH_PAYMENT_TYPE), title="cash", status=STATUS_AVAILABLE).put()
+
+        deferred.defer(_notify_sms, phone, namespace, password)
+        deferred.defer(_notify_email, email, phone, name, namespace, password)
 
         self.render_json({
             'login': namespace,

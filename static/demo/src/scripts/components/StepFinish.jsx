@@ -11,8 +11,12 @@ const StepFinish = React.createClass({
         return <div className="card-container">
             <h4 style={{textAlign: 'center'}}>Готово!</h4>
             <p className="lead" style={{textAlign: 'center'}}>
-                Вы можете загрузить демо-приложение и делать с ним все, что угодно :)
+                <a href="http://rbcn.mobi/get/dem?m=finish" target="_blank">Скачайте демо-приложение</a> или
+                отсканируйте QR-код ниже:
             </p>
+            <div style={{textAlign: 'center'}}>
+                <img src="http://chart.apis.google.com/chart?cht=qr&chs=540x540&chl=http%3A//rbcn.mobi/get/dem%3Fm%3Dqr&chld=L|0" alt="QR" width={270}/>
+            </div>
             <p style={{textAlign: 'center'}}>
                 Данные для входа в приложение:<br/>
                 логин: <b>{this.state.login}</b><br/>
