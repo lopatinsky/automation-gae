@@ -2,7 +2,8 @@
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.urlfetch_errors import DeadlineExceededError
 from models import Client, SharedGift
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, STATUS_ACTIVE, PROMO_CODE_HISTORY_STATUS_CHOICES, KIND_WALLET, PromoCodeDeposit
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, STATUS_ACTIVE, KIND_WALLET, PromoCodeDeposit, \
+    PromoCodePerforming
 
 __author__ = 'dvpermyakov'
 
@@ -59,5 +60,5 @@ class PromoCodeHistoryHandler(ApiHandler):
         if not client:
             self.abort(400)
         self.render_json({
-            'activation': [promo_code.dict() for promo_code in PromoCode.query(PromoCode.status.IN(PROMO_CODE_HISTORY_STATUS_CHOICES)).fetch()]
+            'activation': [performing.promo_code.get().dict() for performing in PromoCodePerforming.query(PromoCodePerforming.client == client.key).fetch()]
         })
