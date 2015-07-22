@@ -166,6 +166,7 @@ class Order(ndb.Model):
                 item = gift.item.get()
             item_dicts.append({
                 'item': item,
+                'points': gift.points if gift else None,
                 'price': item_detail.price if not gift else 0,
                 'image': item.picture,
                 'single_modifier_keys':  item_detail.single_modifiers,
@@ -173,17 +174,20 @@ class Order(ndb.Model):
             })
         from methods.orders.validation.validation import group_item_dicts
         response = []
-        for item_dict in group_item_dicts(item_dicts):
-            response.append({
-                "id": item_dict['id'],
-                "title": item_dict['title'],
-                "price": item_dict['price_without_promos'] / 100.0,  # в рублях
-                "image": item_dict.get('image'),
-                "pic": item_dict.get('image'),
-                "quantity": item_dict['quantity'],
-                "single_modifiers": item_dict['single_modifiers'],
-                "group_modifiers": item_dict['group_modifiers']
-            })
+        for index, group_dict in enumerate(group_item_dicts(item_dicts)):
+            response_dict = {
+                "id": group_dict['id'],
+                "title": group_dict['title'],
+                "price": group_dict['price_without_promos'] / 100.0,  # в рублях
+                "image": group_dict.get('image'),
+                "pic": group_dict.get('image'),
+                "quantity": group_dict['quantity'],
+                "single_modifiers": group_dict['single_modifiers'],
+                "group_modifiers": group_dict['group_modifiers']
+            }
+            if item_dicts[index]['points']:
+                response_dict['points'] = item_dicts[index]['points']
+            response.append(response_dict)
         return response
 
     def status_dict(self):
@@ -199,6 +203,8 @@ class Order(ndb.Model):
             delivery_slot = DeliverySlot.get_by_id(self.delivery_slot_id)
         else:
             delivery_slot = None
+        gifts = self.grouped_item_dict(self.gift_details, gift=True)
+        gifts.extend(self.grouped_item_dict(self.order_gift_details))
         dct.update({
             "delivery_type": self.delivery_type,
             "address": self.address.dict() if self.address else None,
@@ -212,8 +218,7 @@ class Order(ndb.Model):
             "delivery_sum": self.delivery_sum,
             "venue_id": str(self.venue_id),
             "items": self.grouped_item_dict(self.item_details),
-            "gifts": self.grouped_item_dict(self.gift_details, gift=True),
-            "order_gifts": self.grouped_item_dict(self.order_gift_details)
+            "gifts": gifts
         })
         return dct
 
