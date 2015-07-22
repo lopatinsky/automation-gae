@@ -29,6 +29,7 @@ from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, Ad
     CancelPushHandler, CancelNewsHandler
 from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \
     AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler
+from promo_code import ListPromoCodeHandler, AddPromoCodeHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

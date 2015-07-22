@@ -38,6 +38,8 @@ class PromoCode(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     start = ndb.DateTimeProperty(required=True)
     end = ndb.DateTimeProperty(required=True)
+    amount = ndb.IntegerProperty(required=True)
+    one_for_client = ndb.BooleanProperty(required=True)
     title = ndb.StringProperty()
     status = ndb.IntegerProperty(choices=PROMO_CODE_STATUS_CHOICES, default=STATUS_CREATED)
     kind = ndb.IntegerProperty(choices=PROMO_CODE_KIND_CHOICES)
@@ -64,11 +66,20 @@ class PromoCode(ndb.Model):
         self.status = STATUS_ACTIVE
         self.put()
 
-    def perform(self, client):
+    def check(self, client):  # use priority for conditions
+        if self.status != STATUS_ACTIVE:
+            return False, u'Промо код не активен'
+        if self.one_for_client and PromoCodePerforming.query(PromoCodePerforming.client == client.key, PromoCodePerforming.promo_code == self.key).get():
+            return False, u'Вы уже активировали этот промо-код'
+        return True, None
+
+    @ndb.transactional(xg=True)
+    def perform(self, client):  # use only after check()
         PromoCodePerforming(promo_code=self.key, client=client.key).put()
         self.status = STATUS_PERFORMING
+        self.amount -= 1
         self.put()
-        if self.kind in [KIND_SHARE_GIFT, KIND_WALLET]:
+        if not self.amount:
             self.deactivate()
 
     def deactivate(self):
