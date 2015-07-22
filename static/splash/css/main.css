@@ -1,58 +1,73 @@
 body {
 	color: #000;
 	background-color: #fff;
-	margin: 16px 0px 16px 0px;
+	margin: 32px 0px 32px 0px;
 	text-align: center;
 }
 
-h1 {
+h4 {
 	font-family: 'Ubuntu', Arial, sans-serif;
 	font-weight: 300;
-	font-size: 24px;
-	line-height: 24px;
+	font-size: 56px;
+	line-height: 56px;
 }
 
 p {
 	font-family: 'Ubuntu', Arial, sans-serif;
 	font-weight: 300;
-	font-size: 16px;
-	line-height: 16px;
+	font-size: 32px;
+	line-height: 32px;
 }
 
 a {
 	font-family: 'Ubuntu', Arial, sans-serif;
 	font-weight: 300;
-	font-size: 26px;
+	font-size: 36px;
 	line-height: 36px;
-	color: #53CFCD;
+	color: #930671;
 }
 
 #title {
-	margin: 16px auto 16px auto;
+	margin: -16px auto -32px auto;
+}
+
+#title table {
+	width: 90%;
+	margin: auto;
 }
 
 #title img {
-	width: 70px;
+	width: 100%;
 }
 
 #info {
-	margin: 16px auto 0px;
+	margin: 32px auto 0px;
 	text-align: center;
+	background-image: url(images/div.png);
+	background-repeat: no-repeat;
+	background-position: left;
 }
 
 #info img{
-	width: 360px;
+	width: 60%;
 	margin-bottom: 0px;
 }
 
 #stores img{
-	width: 200px;
+	width: 30%;
 }
 
 #divider {
 	background: rgba(0,0,0,0.20);
-	margin: -4px auto 16px auto;
 	height: 2px;
-	width: 440px;
-	box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+	margin-bottom: 15px;
+}
+
+#footer img{
+	height: 160px;
+	margin: 32px 0px 32px 0px;
+}
+
+#footer a {
+	margin: 32px 0px 32px 0px;
 }
