@@ -25,6 +25,7 @@ KIND_WALLET = 1
 KIND_POINTS = 2
 KIND_ORDER_PROMO = 3
 PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO)
+PROMO_CODE_KIND_ADMIN = (KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO)
 PROMO_CODE_KIND_MAP = {
     KIND_SHARE_GIFT: u'Подари другу',
     KIND_WALLET: u'Баллы на кошелек',
@@ -46,13 +47,14 @@ class PromoCode(ndb.Model):
     message = ndb.StringProperty()
 
     @classmethod
-    def create(cls, start, end, kind, message=None):
+    def create(cls, start, end, kind, amount, one_for_client, title=None, message=None):
         while True:
             key = security.generate_random_string(length=7)
             if not cls.get_by_id(key):
                 if kind == KIND_SHARE_GIFT:
                     message = u'Вы активировали подарок другу!'
-                promo_code = cls(id=key, start=start, end=end, kind=kind, message=message)
+                promo_code = cls(id=key, start=start, end=end, kind=kind, title=title, amount=amount, message=message,
+                                 one_for_client=one_for_client)
                 promo_code.put()
                 taskqueue.add(url='/task/promo_code/start', method='POST', eta=start, params={
                     'code_id': promo_code.key.id()
@@ -75,7 +77,8 @@ class PromoCode(ndb.Model):
 
     @ndb.transactional(xg=True)
     def perform(self, client):  # use only after check()
-        PromoCodePerforming(promo_code=self.key, client=client.key).put()
+        PromoCodePerforming(promo_code=self.key, client=client.key,
+                            group_id=PromoCodeGroup.query(PromoCodeGroup.promo_codes.IN([self.key])).get().key.id()).put()
         self.status = STATUS_PERFORMING
         self.amount -= 1
         self.put()
@@ -99,10 +102,15 @@ class PromoCode(ndb.Model):
         }
 
 
+class PromoCodeGroup(ndb.Model):
+    promo_codes = ndb.KeyProperty(kind=PromoCode, repeated=True)
+
+
 class PromoCodePerforming(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
-    promo_code = ndb.KeyProperty(kind=PromoCode)
-    client = ndb.KeyProperty(kind=Client)
+    promo_code = ndb.KeyProperty(kind=PromoCode, required=True)
+    group_id = ndb.IntegerProperty(required=True)
+    client = ndb.KeyProperty(kind=Client, required=True)
 
 
 class PromoCodeDeposit(ndb.Model):

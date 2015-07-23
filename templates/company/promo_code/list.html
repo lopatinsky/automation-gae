@@ -5,7 +5,7 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <a>Добавить</a>
+    <a href="/company/promo_code/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Ключ</th>
@@ -18,20 +18,21 @@
             <th>Оставшееся кол-во</th>
             <th>Активации</th>
         </tr>
-        <tr>
             {% for code in promo_codes %}
-                <td>{{ code.key.id() }}</td>
-                <td>{{ code.title }}</td>
-                <td>{{ PROMO_CODE_KIND_MAP[code.status] }}</td>
-                <td>{{ code.start_str }}</td>
-                <td>{{ code.end_str }}</td>
-                <td>{{ code.one_for_client }}</td>
-                <td>{{ code.amount }}</td>
-                <td>
-                    <a>Активации</a>
-                </td>
+                <tr>
+                    <td>{{ code.key.id() }}</td>
+                    <td>{{ code.title }}</td>
+                    <td>{{ PROMO_CODE_KIND_MAP[code.kind] }}</td>
+                    <td>{{ PROMO_CODE_STATUS_MAP[code.status] }}</td>
+                    <td>{{ code.start_str }}</td>
+                    <td>{{ code.end_str }}</td>
+                    <td>{{ code.one_for_client }}</td>
+                    <td>{{ code.amount }}</td>
+                    <td>
+                        <a>Активации</a>
+                    </td>
+                </tr>
             {% endfor %}
-        </tr>
     </table>
     <a href="/company/main">Назад</a>
 </body>
