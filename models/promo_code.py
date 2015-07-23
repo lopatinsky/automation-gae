@@ -10,6 +10,7 @@ STATUS_ACTIVE = 1
 STATUS_PERFORMING = 2
 STATUS_DONE = 3
 PROMO_CODE_STATUS_CHOICES = (STATUS_ACTIVE, STATUS_PERFORMING, STATUS_DONE)
+PROMO_CODE_ACTIVE_STATUS_CHOICES = (STATUS_ACTIVE, STATUS_PERFORMING)
 PROMO_CODE_STATUS_MAP = {
     STATUS_ACTIVE: u'Активно',
     STATUS_PERFORMING: u'Исполнятеся',
@@ -63,7 +64,7 @@ class PromoCode(ndb.Model):
                 return promo_code
 
     def check(self, client):  # use priority for conditions
-        if self.status not in [STATUS_ACTIVE, STATUS_PERFORMING]:
+        if self.status not in PROMO_CODE_ACTIVE_STATUS_CHOICES:
             return False, u'Промо код не активен'
         if PromoCodePerforming.query(PromoCodePerforming.client == client.key, PromoCodePerforming.promo_code == self.key).get():
             return False, u'Вы уже активировали этот промо-код'

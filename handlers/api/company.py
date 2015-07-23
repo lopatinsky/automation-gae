@@ -6,6 +6,7 @@ from config import config, Config
 from models import STATUS_AVAILABLE, Venue
 from models.venue import DELIVERY
 from models.specials import get_channels
+from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
 
 __author__ = 'dvpermyakov'
 
@@ -29,6 +30,7 @@ class CompanyInfoHandler(ApiHandler):
                 cities.append(zone.address.city)
         self.render_json({
             'app_name': config.APP_NAME,
+            'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
             'description': config.COMPANY_DESCRIPTION,
             'delivery_types': deliveries.values(),
             'cities': cities,
