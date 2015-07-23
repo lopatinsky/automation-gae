@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Промо коды</title>
 </head>
 <body>
     {% include '/company/header.html' %}
@@ -10,11 +10,11 @@
         <tr>
             <th>Ключ</th>
             <th>Название</th>
+            <th>Сообщение</th>
             <th>Тип</th>
+            <th>Значение</th>
             <th>Статус</th>
-            <th>Начало</th>
-            <th>Конец</th>
-            <th>Один на пользователя</th>
+            <th>Первоначальное кол-во</th>
             <th>Оставшееся кол-во</th>
             <th>Активации</th>
         </tr>
@@ -22,14 +22,14 @@
                 <tr>
                     <td>{{ code.key.id() }}</td>
                     <td>{{ code.title }}</td>
+                    <td>{{ code.message }}</td>
                     <td>{{ PROMO_CODE_KIND_MAP[code.kind] }}</td>
+                    <td>{{ code.value }}</td>
                     <td>{{ PROMO_CODE_STATUS_MAP[code.status] }}</td>
-                    <td>{{ code.start_str }}</td>
-                    <td>{{ code.end_str }}</td>
-                    <td>{{ code.one_for_client }}</td>
+                    <td>{{ code.init_amount }}</td>
                     <td>{{ code.amount }}</td>
                     <td>
-                        <a>Активации</a>
+                        <a href="{{ '/company/promo_code/activations?key=%s' % code.key.id() }}">Активации</a>
                     </td>
                 </tr>
             {% endfor %}

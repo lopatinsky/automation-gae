@@ -2,7 +2,7 @@
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.urlfetch_errors import DeadlineExceededError
 from models import Client, SharedGift
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, KIND_WALLET, PromoCodeDeposit, PromoCodePerforming
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, KIND_WALLET, PromoCodePerforming
 
 __author__ = 'dvpermyakov'
 
@@ -34,21 +34,8 @@ class EnterPromoCode(ApiHandler):
         if promo_code:
             success, description = promo_code.check(client)
             if success:
-                if promo_code.kind == KIND_SHARE_GIFT:
-                    gift = SharedGift.query(SharedGift.promo_code == promo_code.key).get()
-                    if gift.status == SharedGift.READY:
-                        gift.deactivate(client, namespace_manager.get_namespace())
-                        return self.send_success(promo_code)
-                elif promo_code.kind == KIND_WALLET:
-                    try:
-                        deposit = PromoCodeDeposit.query(PromoCodeDeposit.promo_code == promo_code.key).get()
-                        if deposit:
-                            deposit.deposit(client)
-                            return self.send_success(promo_code)
-                    except DeadlineExceededError:
-                        return self.send_error(u'Пожалуйста, повторите попытку...')
-                else:
-                    return self.send_error(u'Тип промо кода не найден')
+                promo_code.perform(client)
+                return self.send_success(promo_code)
             else:
                 return self.send_error(description)
         else:
