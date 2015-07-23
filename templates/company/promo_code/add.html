@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавление промо кода</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Тип:
+            <select name="kind">
+                {% for kind in kinds %}
+                  <option value="{{ kind['value'] }}">
+                      {{ kind['name'] }}
+                  </option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>
+            Значение (если необходимо)
+            <input type="number" name="value">
+        </label><br>
+        <label>
+            Кол-во промо кодов
+            <input type="number" name="amount" value="1">
+        </label><br>
+        <label>
+            Максимальное кол-во активаций
+            <input type="number" name="max_activations" value="1">
+        </label><br>
+        <label>
+            Название
+            <input type="text" name="title">
+        </label><br>
+        <label>
+            Сообщение
+            <input type="text" name="message">
+        </label><br>
+        <input type="submit">
+        <a href="/company/promo_code/list">Назад</a>
+    </form>
+</body>
+</html>

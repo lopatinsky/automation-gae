@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Активации</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Ключ</th>
+            <th>Время</th>
+            <th>Клиент ID</th>
+            <th>Клиент имя</th>
+            <th>Клиент телефон</th>
+            <th>Клиент user-agent</th>
+        </tr>
+            {% for activation in activations %}
+                <tr>
+                    <td>{{ activation.promo_code.id() }}</td>
+                    <td>{{ activation.created }}</td>
+                    <td>{{ activation.client.id() }}</td>
+                    <td>{{ '%s %s' % (activation.client_obj.name, activation.client_obj.surname) }}</td>
+                    <td>{{ activation.client_obj.tel }}</td>
+                    <td>{{ activation.client_obj.user_agent }}</td>
+                </tr>
+            {% endfor %}
+    </table>
+    <a href="/company/promo_code/list">Назад</a>
+</body>
+</html>

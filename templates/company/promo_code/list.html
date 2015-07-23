@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Промо коды</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <a href="/company/promo_code/add">Добавить</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Ключ</th>
+            <th>Название</th>
+            <th>Сообщение</th>
+            <th>Тип</th>
+            <th>Значение</th>
+            <th>Статус</th>
+            <th>Первоначальное кол-во</th>
+            <th>Оставшееся кол-во</th>
+            <th>Активации</th>
+        </tr>
+            {% for code in promo_codes %}
+                <tr>
+                    <td>{{ code.key.id() }}</td>
+                    <td>{{ code.title }}</td>
+                    <td>{{ code.message }}</td>
+                    <td>{{ PROMO_CODE_KIND_MAP[code.kind] }}</td>
+                    <td>{{ code.value }}</td>
+                    <td>{{ PROMO_CODE_STATUS_MAP[code.status] }}</td>
+                    <td>{{ code.init_amount }}</td>
+                    <td>{{ code.amount }}</td>
+                    <td>
+                        <a href="{{ '/company/promo_code/activations?key=%s' % code.key.id() }}">Активации</a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

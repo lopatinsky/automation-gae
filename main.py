@@ -341,6 +341,12 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/promo_code', [
+            Route('/list', company_admin.ListPromoCodeHandler),
+            Route('/activations', company_admin.ActivationsPromoCodeHandler),
+            Route('/add', company_admin.AddPromoCodeHandler),
+        ]),
+
         PathPrefixRoute('/notifications', [
             PathPrefixRoute('/news', [
                 Route('/list', company_admin.ListNewsHandler),
@@ -385,10 +391,6 @@ app = WSGIApplication([
         ]),
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
-        ]),
-        PathPrefixRoute('/promo_code', [
-            Route('/start', tasks.StartPromoCodeHandler),
-            Route('/close', tasks.ClosePromoCodeHandler),
         ]),
     ]),
 

@@ -114,8 +114,6 @@ class SharedGift(ndb.Model):
         from methods.push import send_share_gift_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
-        promo_code = self.promo_code.get()
-        promo_code.perform(client)
         self.status = self.DONE
         self.recipient_id = client.key.id()
         self.put()
