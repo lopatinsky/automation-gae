@@ -8,6 +8,7 @@ from methods.working_hours import check_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
 from models.order import OrderPositionDetails
 from models.venue import DELIVERY, DELIVERY_MAP
+from models.promo_code import PromoCodePerforming
 
 __author__ = 'dvpermyakov'
 
@@ -132,7 +133,9 @@ def check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts):
     return True, None
 
 
-def check_venue(venue, delivery_time, delivery_type):
+def check_venue(venue, delivery_time, delivery_type, client):
+    for promo_code in PromoCodePerforming.query().fetch():
+        pass
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())

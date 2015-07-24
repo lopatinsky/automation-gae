@@ -21,13 +21,15 @@ KIND_SHARE_GIFT = 0
 KIND_WALLET = 1
 KIND_POINTS = 2
 KIND_ORDER_PROMO = 3
-PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO)
+KIND_ALL_TIME_HACK = 4
+PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK)
 PROMO_CODE_KIND_ADMIN = (KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO)
 PROMO_CODE_KIND_MAP = {
     KIND_SHARE_GIFT: u'Подари другу',
     KIND_WALLET: u'Баллы на кошелек',
     KIND_POINTS: u'Накопительные баллы',
-    KIND_ORDER_PROMO: u'Личные акции'
+    KIND_ORDER_PROMO: u'Личные акции',
+    KIND_ALL_TIME_HACK: u'Заказ в любое время'
 }
 
 
@@ -35,7 +37,8 @@ DEFAULT_MESSAGE_MAP = {
     KIND_SHARE_GIFT: u'Вы активировали подарок другу!',
     KIND_WALLET: u'Вам будут начислены бонусы на личный счет',
     KIND_POINTS: u'Вам будут начисленыы баллы',
-    KIND_ORDER_PROMO: u'Вам будет доступна новая акция'
+    KIND_ORDER_PROMO: u'Вам будет доступна новая акция',
+    KIND_ALL_TIME_HACK: u'Если Вы не разработчик приложения, обратитесь в службу поддержки'
 }
 
 

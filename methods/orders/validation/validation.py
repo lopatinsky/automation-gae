@@ -256,7 +256,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_address(delivery_type, address)
     if not valid:
         return send_error(error)
-    valid, error = check_venue(venue, delivery_time, delivery_type)
+    valid, error = check_venue(venue, delivery_time, delivery_type, client)
     if not valid:
         return send_error(error)
     valid, error = check_payment(payment_info)
