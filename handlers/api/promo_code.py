@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.urlfetch_errors import DeadlineExceededError
 from models import Client, SharedGift
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, KIND_WALLET, PromoCodePerforming
+import logging
 
 __author__ = 'dvpermyakov'
 
@@ -11,12 +12,14 @@ from base import ApiHandler
 
 class EnterPromoCode(ApiHandler):
     def send_error(self, description):
+        logging.info('error = %s' % description)
         return self.render_json({
             'success': False,
             'description': description
         })
 
     def send_success(self, promo_code):
+        logging.info('message = %s' % promo_code.message)
         return self.render_json({
             'success': True,
             'message': promo_code.message,
@@ -49,5 +52,5 @@ class PromoCodeHistoryHandler(ApiHandler):
         if not client:
             self.abort(400)
         self.render_json({
-            'activation': [performing.promo_code.get().dict() for performing in PromoCodePerforming.query(PromoCodePerforming.client == client.key).fetch()]
+            'history': [performing.promo_code.get().dict() for performing in PromoCodePerforming.query(PromoCodePerforming.client == client.key).fetch()]
         })
