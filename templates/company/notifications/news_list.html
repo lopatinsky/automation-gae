@@ -37,7 +37,6 @@
             <th>Картинка</th>
             <th>Время создания</th>
             <th>Начало</th>
-            <th>Конец</th>
             <th>Статус</th>
             <th>Отменить</th>
         </tr>
@@ -49,7 +48,6 @@
                 </td>
                 <td>{{ new.created_str }}</td>
                 <td>{{ new.start }}</td>
-                <td>{{ new.end }}</td>
                 <td class="{{ 'status_%s' % new.key.id() }}">{{ NOTIFICATION_STATUS_MAP[new.status] }}</td>
                 <td rowspan="{{ height }}">
                     <button class="cancel_btn" id="{{ new.key.id() }}"

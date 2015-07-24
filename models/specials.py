@@ -70,17 +70,12 @@ class ClientSmsSending(ndb.Model):
 class News(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     start = ndb.DateTimeProperty(required=True)
-    end = ndb.DateTimeProperty(required=True)
     text = ndb.StringProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(choices=NOTIFICATION_STATUS_CHOICES, default=STATUS_CREATED)
-    image_url = ndb.StringProperty(required=True, indexed=False)
+    image_url = ndb.StringProperty(indexed=False)
 
     def activate(self):
         self.status = STATUS_ACTIVE
-        self.put()
-
-    def deactivate(self):
-        self.status = STATUS_DONE
         self.put()
 
     def cancel(self):

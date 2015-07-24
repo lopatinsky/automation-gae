@@ -387,7 +387,6 @@ app = WSGIApplication([
         Route('/check_order_success', tasks.CheckOrderSuccessHandler),
         PathPrefixRoute('/news', [
             Route('/start', tasks.StartNewsHandler),
-            Route('/close', tasks.CloseNewsHandler),
         ]),
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
