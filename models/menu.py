@@ -174,59 +174,9 @@ class GroupModifier(ndb.Model):
         }
 
 
-class MenuItem(ndb.Model):
-    category = ndb.KeyProperty()
-    title = ndb.StringProperty(required=True)
-    description = ndb.StringProperty(indexed=False)
-    picture = ndb.StringProperty(indexed=False)  # source
-    cut_picture = ndb.StringProperty(indexed=False)
-    icon = ndb.StringProperty(indexed=False)
-    kal = ndb.IntegerProperty(indexed=False)
-    weight = ndb.FloatProperty(indexed=False, default=0)
-    volume = ndb.FloatProperty(indexed=False, default=0)
-    price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
-
-    status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
-                                 default=STATUS_AVAILABLE)
-    sequence_number = ndb.IntegerProperty(default=0)
-    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
-    group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
-
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
-    group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
-    stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
-
-    @property
-    def float_price(self):  # в рублях
-        return float(self.price) / 100.0
-
-    def dict(self, without_restrictions=False):
-        dct = {
-            'id': str(self.key.id()),
-            'order': self.sequence_number,
-            'title': self.title,
-            'description': self.description,
-            'price':  float(self.price) / 100.0,  # в рублях
-            'kal': self.kal,
-            'pic': self.picture if not self.cut_picture else self.cut_picture,
-            'icon': self.icon,
-            'weight': self.weight,
-            'volume': self.volume,
-            'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
-            'group_modifiers': [modifier.get().dict(self) for modifier in self.group_modifiers],
-            'restrictions': {
-                'venues': [str(restrict.id()) for restrict in self.restrictions]
-            }
-        }
-        if without_restrictions:
-            del dct['restrictions']
-        return dct
-
-
 class MenuCategory(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
-    #menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty()
 
@@ -314,4 +264,53 @@ class MenuCategory(ndb.Model):
         }
         if venue:
             del dct['info']['restrictions']
+        return dct
+
+
+class MenuItem(ndb.Model):
+    category = ndb.KeyProperty(kind=MenuCategory)
+    title = ndb.StringProperty(required=True)
+    description = ndb.StringProperty(indexed=False)
+    picture = ndb.StringProperty(indexed=False)  # source
+    cut_picture = ndb.StringProperty(indexed=False)
+    icon = ndb.StringProperty(indexed=False)
+    kal = ndb.IntegerProperty(indexed=False)
+    weight = ndb.FloatProperty(indexed=False, default=0)
+    volume = ndb.FloatProperty(indexed=False, default=0)
+    price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
+
+    status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
+                                 default=STATUS_AVAILABLE)
+    sequence_number = ndb.IntegerProperty(default=0)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+    group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
+
+    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+    group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
+    stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
+
+    def dict(self, without_restrictions=False):
+        dct = {
+            'id': str(self.key.id()),
+            'order': self.sequence_number,
+            'title': self.title,
+            'description': self.description,
+            'price':  float(self.price) / 100.0,  # в рублях
+            'kal': self.kal,
+            'pic': self.picture if not self.cut_picture else self.cut_picture,
+            'icon': self.icon,
+            'weight': self.weight,
+            'volume': self.volume,
+            'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
+            'group_modifiers': [modifier.get().dict(self) for modifier in self.group_modifiers],
+            'restrictions': {
+                'venues': [str(restrict.id()) for restrict in self.restrictions]
+            }
+        }
+        if without_restrictions:
+            del dct['restrictions']
         return dct
