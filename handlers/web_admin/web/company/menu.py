@@ -89,6 +89,26 @@ class CreateCategoryHandler(CompanyBaseHandler):
         self.redirect_to('mt_category_list')
 
 
+class EditCategoryHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        self.render('/menu/add_category.html', category=category)
+
+    @company_user_required
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        category.title = self.request.get('title')
+        category.put()
+        self.redirect_to('mt_category_list')
+
+
 class ListMenuItemsHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):

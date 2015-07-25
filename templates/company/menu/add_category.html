@@ -6,8 +6,14 @@
 <body>
     {% include '/company/header.html' %}
     <form method="post">
-        <label>Title: <input type="text" name="title"></label><br>
-        <input type="submit" value="Выбрать"/>
+        {% if category %}
+            <input type="text" name="category_id" value="{{ category.key.id() }}" hidden>
+        {% endif %}
+        <label>
+            Название:
+            <input type="text" name="title" {% if category %} value="{{ category.title }}" {% endif %}>
+        </label><br>
+        <input type="submit">
         <a href="/company/menu/category/list">Назад</a>
     </form>
 </body>

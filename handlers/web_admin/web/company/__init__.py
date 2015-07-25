@@ -12,7 +12,8 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
     ListMenuItemsHandler, MainMenuHandler, MenuItemInfoHandler, \
     SelectProductForChoiceHandler, SelectProductForModifierHandler, UpProductHandler, UpCategoryHandler, \
     DownCategoryHandler, NoneHandler, SelectDefaultChoiceHandler, UpSingleModifierHandler, DownSingleModifierHandler, \
-    DownGroupModifierHandler, UpGroupModifierHandler, UpGroupModifierChoiceHandler, DownGroupModifierChoiceHandler
+    DownGroupModifierHandler, UpGroupModifierHandler, UpGroupModifierChoiceHandler, DownGroupModifierChoiceHandler, \
+    EditCategoryHandler
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, ChooseMenuItemHandler, \
     AddPromoConditionHandler, AddPromoOutcomeHandler, ListGiftsHandler, AddGiftHandler, EditPromoHandler, \

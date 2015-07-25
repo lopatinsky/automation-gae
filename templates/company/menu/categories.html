@@ -47,6 +47,7 @@
         <tr>
             <th>Изменить порядок</th>
             <th>Название</th>
+            <th>Изменить</th>
         </tr>
         {% for category in categories %}
             <tr id="{{ 'tr_%s' % category.key.id() }}">
@@ -61,6 +62,9 @@
                 </td>
                 <td>
                     <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
+                </td>
+                <td>
+                    <a href="{{ '/company/menu/category/edit?category_id=%s' % category.key.id() }}">Изменить</a>
                 </td>
             </tr>
         {% endfor %}
