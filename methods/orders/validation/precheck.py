@@ -158,6 +158,7 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
     if delivery_slot:
         if delivery_slot.slot_type == DeliverySlot.MINUTES:
             delivery_time_minutes = delivery_slot.value
+            delivery_time_picker = datetime.utcnow()
         elif delivery_slot.slot_type == DeliverySlot.STRINGS:
             if delivery_time_picker:
                 delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)
