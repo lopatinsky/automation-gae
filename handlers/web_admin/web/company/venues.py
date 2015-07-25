@@ -38,6 +38,8 @@ class CreateVenueHandler(CompanyBaseHandler):
         venue = Venue()
         venue.title = self.request.get('title')
         venue.description = self.request.get('description')
+        venue.phones = self.request.get('phones').split(',')
+        venue.emails = self.request.get('emails').split(',')
         venue.coordinates = ndb.GeoPt(float(self.request.get('lat')), float(self.request.get('lon')))
         venue.update_address()
         venue.put()
@@ -79,6 +81,8 @@ class EditVenueHandler(CompanyBaseHandler):
             self.abort(404)
         venue.title = self.request.get('title')
         venue.description = self.request.get('description')
+        venue.phones = self.request.get('phones').split(',')
+        venue.emails = self.request.get('emails').split(',')
         venue.put()
         self.render('/venues/edit_venue.html', venue=venue, success=True)
 

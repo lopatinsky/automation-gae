@@ -245,8 +245,8 @@ class OrderHandler(ApiHandler):
 
             # use delivery phone and delivery emails for all delivery types
             text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
-            if config.DELIVERY_PHONES:
-                for phone in config.DELIVERY_PHONES:
+            if venue.phones:
+                for phone in venue.phones:
                     try:
                         send_sms([phone], text)
                     except Exception as e:
@@ -256,7 +256,7 @@ class OrderHandler(ApiHandler):
                         send_email('dvpermyakov1@gmail.com', 'elenamarchenkolm@gmail.com', u'Ошибка оповещения через смс', error_text)
                         logging.warning(u'Неверный номер телефона для оповещения')
 
-            if config.DELIVERY_EMAILS:
+            if venue.emails:
                 item_values = order_items_values(self.order)
                 item_values['venue'] = venue
                 item_values['delivery_type_str'] = DELIVERY_MAP[self.order.device_type]
@@ -276,7 +276,7 @@ class OrderHandler(ApiHandler):
                     item_values['minutes'] = POSTPONE_MINUTES
                     if self.order.delivery_type == DELIVERY:
                         item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, self.order.email_key_confirm)
-                for email in config.DELIVERY_EMAILS:
+                for email in venue.emails:
                     deferred.defer(send_email, EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},

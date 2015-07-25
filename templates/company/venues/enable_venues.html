@@ -20,6 +20,8 @@
                 <th>Статус</th>
                 <th>Название</th>
                 <th>Адрес</th>
+                <th>Телефоны</th>
+                <th>Почты</th>
                 <th>Выбрать зоны</th>
                 <th>Расписание</th>
             </tr>
@@ -36,6 +38,12 @@
                     </td>
                     <td rowspan="{{ height }}">
                         {{ venue.description }}
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ ','.join(venue.phones) }}
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ ','.join(venue.emails) }}
                     </td>
                     <td rowspan="{{ height }}">
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>

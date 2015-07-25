@@ -75,8 +75,8 @@ class Config(ndb.Model):
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
-    DELIVERY_PHONES = ndb.StringProperty(indexed=False, repeated=True)
-    DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
+    #DELIVERY_PHONES = ndb.StringProperty(indexed=False, repeated=True)
+    #DELIVERY_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)

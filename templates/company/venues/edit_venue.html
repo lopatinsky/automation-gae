@@ -25,6 +25,16 @@
                     {% else %} value="{{ address }}"
                     {% endif %}>
         </label><br>
+        <label>
+            Телефоны:
+            <input type="text" name="phones"
+                    {% if venue %} value="{{ ','.join(venue.phones) }}" {% endif %}>
+        </label><br>
+        <label>
+            Почты:
+            <input type="text" name="emails"
+                    {% if venue %} value="{{ ','.join(venue.emails) }}" {% endif %}>
+        </label><br>
         <input type="submit"/>
         <a href="/company/venues">Назад к списку</a>
     </form>
