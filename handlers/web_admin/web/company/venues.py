@@ -102,14 +102,12 @@ class AddRestrictionHandler(CompanyBaseHandler):
         categories = []
         for category in MenuCategory.query().fetch():
             products = []
-            for product in category.menu_items:
-                product = product.get()
-                if product.status == STATUS_AVAILABLE:
-                    if venue_key in product.restrictions:
-                        product.avail = False
-                    else:
-                        product.avail = True
-                    products.append(product)
+            for product in category.get_items(only_available=True):
+                if venue_key in product.restrictions:
+                    product.avail = False
+                else:
+                    product.avail = True
+                products.append(product)
             category.products = products
             categories.append(category)
         self.render('/menu/select_products_restriction.html', **{

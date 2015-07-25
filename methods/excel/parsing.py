@@ -81,5 +81,5 @@ def menu_parse(file_excel):
                     current_item.group_modifiers.append(current_modifier.key)
             current_item.put()
             if item_add:
-                current_category.menu_items.append(current_item.key)
+                current_item.category = current_category.key
             current_category.put()

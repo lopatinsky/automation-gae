@@ -170,7 +170,6 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
             if delivery.delivery_type == delivery_type:
                 delivery_items = delivery.item_restrictions
                 delivery_categories = delivery.category_restrictions
-        items = []
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
@@ -181,13 +180,8 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
                     item_dict['substitutes'].append(substitute)
             if item.key in delivery_items:
                 description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
-            if item not in items:
-                items.append(item)
-        if delivery_categories:
-            for item in items:
-                for category in MenuCategory.query().fetch():
-                    if item.key in category.menu_items and category.key in delivery_categories:
-                        description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (category.title, DELIVERY_MAP[delivery_type])
+            if item.category in delivery_categories:
+                description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (item.category.get().title, DELIVERY_MAP[delivery_type])
         return description
 
     items_description = check(item_dicts)

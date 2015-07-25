@@ -45,8 +45,7 @@ class ModifiersHandler(ApiHandler):
         single_modifiers = {}
         group_modifiers = {}
         for category in MenuCategory.query().fetch():
-            for item in category.menu_items:
-                item = item.get()
+            for item in category.get_items():
                 if venue and venue.key in item.restrictions:
                     continue
                 for single_modifier in item.single_modifiers:

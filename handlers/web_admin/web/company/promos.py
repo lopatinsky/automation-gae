@@ -157,14 +157,12 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
         categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
         for category in categories:
             items = []
-            for item in category.menu_items:
-                item = item.get()
-                item.has = False
-                if item.status == STATUS_AVAILABLE:
-                    if feature.item_details.item_required:
-                        if item.key == feature.item_details.item:
-                            item.has = True
-                    items.append(item)
+            for item in category.get_items(only_available=True):
+                if feature.item_details.item_required and item.key == feature.item_details.item:
+                    item.has = True
+                else:
+                    item.has = False
+                items.append(item)
             category.items = items
         self.render('/promos/choose_product.html', **{
             'categories': categories,
@@ -362,8 +360,8 @@ class AddGiftHandler(CompanyBaseHandler):
         categories = MenuCategory.query().fetch()
         for category in categories:
             category.items = []
-            for item in category.menu_items:
-                category.items.append(item.get())
+            for item in category.get_items():
+                category.items.append(item)
         self.render('/promos/gift_add.html', categories=categories)
 
     @company_user_required

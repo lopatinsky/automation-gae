@@ -106,7 +106,7 @@ class ListMenuItemsHandler(CompanyBaseHandler):
         category = MenuCategory.get_by_id(category_id)
         if not category:
             self.abort(400)
-        for item in category.menu_items:
+        for item in category.get_items():
             item = item.get()
             item.status = bool(self.request.get(str(item.key.id())))
             item.put()
@@ -167,9 +167,8 @@ class AddMenuItemHandler(CompanyBaseHandler):
                 save_item_image(item, url=self.request.get('picture'))
         if item.picture:
             resize_image(item, item.picture, ICON_SIZE, icon=True)
+        item.category = category.key
         item.put()
-        category.menu_items.append(item.key)
-        category.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
 
@@ -240,10 +239,7 @@ class SelectProductForModifierHandler(CompanyBaseHandler):
         categories = MenuCategory.query().fetch()
         for category in categories:
             category.products = []
-            for product in category.menu_items:
-                product = product.get()
-                if product.status != STATUS_AVAILABLE:
-                    continue
+            for product in category.get_items(only_available=True):
                 category.products.append(product)
                 if modifier_type == SINGLE_MODIFIER:
                     if modifier.key in product.single_modifiers:

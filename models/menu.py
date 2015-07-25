@@ -28,8 +28,7 @@ class SingleModifier(ndb.Model):
 
     @staticmethod
     def get_modifiers_in_order():
-        return sorted([modifier for modifier in SingleModifier.query().fetch()],
-                      key=lambda modifier: modifier.sequence_number)
+        return sorted(SingleModifier.query().fetch(), key=lambda modifier: modifier.sequence_number)
 
     def get_previous_modifier(self):
         modifiers = self.get_modifiers_in_order()
@@ -176,6 +175,7 @@ class GroupModifier(ndb.Model):
 
 
 class MenuItem(ndb.Model):
+    category = ndb.KeyProperty()
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty(indexed=False)
     picture = ndb.StringProperty(indexed=False)  # source
@@ -226,11 +226,19 @@ class MenuItem(ndb.Model):
 class MenuCategory(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
-    menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
+    #menu_items = ndb.KeyProperty(kind=MenuItem, repeated=True, indexed=False)
     status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty()
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
+
+    def get_items(self, only_available=False):
+        items = MenuItem.query(MenuItem.category == self.key).fetch()
+        if only_available:
+            for item in items[:]:
+                if item.status != STATUS_AVAILABLE:
+                    items.remove(item)
+        return items
 
     @staticmethod
     def generate_category_sequence_number():
@@ -239,8 +247,7 @@ class MenuCategory(ndb.Model):
 
     @staticmethod
     def get_categories_in_order():
-        return sorted([category for category in MenuCategory.query().fetch()],
-                      key=lambda category: category.sequence_number)
+        return sorted(MenuCategory.query().fetch(), key=lambda category: category.sequence_number)
 
     def get_previous_category(self):
         categories = self.get_categories_in_order()
@@ -263,7 +270,7 @@ class MenuCategory(ndb.Model):
         return fastcounter.get_count("category_%s" % self.key.id()) + random.randint(1, 100)
 
     def get_items_in_order(self):
-        return sorted([item.get() for item in self.menu_items], key=lambda item: item.sequence_number)
+        return sorted(self.get_items(), key=lambda item: item.sequence_number)
 
     def get_previous(self, item):
         items = self.get_items_in_order()
@@ -287,10 +294,7 @@ class MenuCategory(ndb.Model):
 
     def dict(self, venue=None):
         items = []
-        for item in self.menu_items:
-            item = item.get()
-            if item.status != STATUS_AVAILABLE:
-                continue
+        for item in self.get_items(only_available=True):
             if not venue:
                 items.append(item.dict())
             else:

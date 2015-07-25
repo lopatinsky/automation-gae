@@ -110,16 +110,15 @@ class WizardCreateCompanyHandler(BaseHandler):
             MenuCategory.generate_category_sequence_number()  # only to increase counter
             category = MenuCategory(title=category_dict["title"], sequence_number=i)
             for j, item in enumerate(category_dict["items"]):
-                item = MenuItem(
+                MenuItem(
+                    category=category.key,
                     title=item["title"],
                     description=item["description"],
                     picture=item["imageUrl"],
                     price=int(round(item["price"] * 100)),
-                    sequence_number=j)
-                item_key = item.put()
-                category.menu_items.append(item_key)
+                    sequence_number=j).put()
             category.put()
-            for _ in category.menu_items:
+            for _ in category.get_items():
                 category.generate_sequence_number()  # only to increase counter
 
         venue_dict = data['venue']
