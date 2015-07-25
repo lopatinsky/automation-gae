@@ -90,3 +90,16 @@ def save_item_image(item, image_data=None, url=None):
         serving_url = _get_serving_url(image, filename)
         item.picture = serving_url
         item.put()
+
+
+def save_news_image(news, url):
+    image_data = urlfetch.fetch(url, deadline=30).content
+    image = Image.open(StringIO.StringIO(image_data))
+    image = _resize(image, MAX_SIZE)
+
+    filename = _get_filename('News', news.key.id(), 'init')
+    success = _save(image, filename)
+    if success:
+        serving_url = _get_serving_url(image, filename)
+        news.image_url = serving_url
+        news.put()

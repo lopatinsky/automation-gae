@@ -8,6 +8,7 @@ from methods.rendering import HTML_STR_TIME_FORMAT, STR_DATETIME_FORMAT
 from models import News, Notification, Venue
 from models.specials import Channel, COMPANY_CHANNEL, VENUE_CHANNEL, NOTIFICATION_STATUS_MAP, STATUS_CREATED, \
     STATUS_ACTIVE, get_channels
+from methods.images import save_news_image
 
 __author__ = 'dvpermyakov'
 
@@ -50,6 +51,7 @@ class AddNewsHandler(CompanyBaseHandler):
             return error(u'Введите время больше текущего в utc')
         news = News(text=text, image_url=image_url, start=start)
         news.put()
+        save_news_image(news, image_url)
         taskqueue.add(url='/task/news/start', method='POST', eta=start, params={
             'news_id': news.key.id()
         })
