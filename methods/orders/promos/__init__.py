@@ -39,28 +39,30 @@ def _get_promos(venue):
 def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum):
     if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
         return check_condition_by_value(condition, delivery_type)
-    if condition.method == PromoCondition.CHECK_FIRST_ORDER:
+    elif condition.method == PromoCondition.CHECK_FIRST_ORDER:
         return check_first_order(client)
-    if condition.method == PromoCondition.CHECK_MAX_ORDER_SUM:
+    elif condition.method == PromoCondition.CHECK_MAX_ORDER_SUM:
         return check_condition_max_by_value(condition, _get_initial_total_sum(item_dicts))
-    if condition.method == PromoCondition.CHECK_ITEM_IN_ORDER:
+    elif condition.method == PromoCondition.CHECK_ITEM_IN_ORDER:
         return check_item_in_order(condition, item_dicts)
-    if condition.method == PromoCondition.CHECK_REPEATED_ORDERS:
+    elif condition.method == PromoCondition.CHECK_REPEATED_ORDERS:
         return check_repeated_order(condition, client)
-    if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM:
+    elif condition.method == PromoCondition.CHECK_MIN_ORDER_SUM:
         return check_condition_min_by_value(condition, _get_initial_total_sum(item_dicts))
-    if condition.method == PromoCondition.CHECK_HAPPY_HOURS:
+    elif condition.method == PromoCondition.CHECK_HAPPY_HOURS:
         return check_happy_hours_delivery_time(condition, venue, delivery_time)
-    if condition.method == PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS:
+    elif condition.method == PromoCondition.CHECK_MIN_ORDER_SUM_WITH_PROMOS:
         return check_condition_min_by_value(condition, _get_final_total_sum(total_sum, item_dicts))
-    if condition.method == PromoCondition.CHECK_GROUP_MODIFIER_CHOICE:
+    elif condition.method == PromoCondition.CHECK_GROUP_MODIFIER_CHOICE:
         return check_group_modifier_choice(condition, item_dicts)
-    if condition.method == PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE:
+    elif condition.method == PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE:
         return not check_group_modifier_choice(condition, item_dicts)
-    if condition.method == PromoCondition.CHECK_PAYMENT_TYPE:
+    elif condition.method == PromoCondition.CHECK_PAYMENT_TYPE:
         return check_payment_type(condition, payment_info)
-    if condition.method == PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME:
+    elif condition.method == PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME:
         return check_happy_hours_created_time(condition, venue)
+    else:
+        return True
 
 
 def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
@@ -68,27 +70,30 @@ def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_typ
     response = OutcomeResult()
     if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(response, outcome, items, promo)
-    if outcome.method == PromoOutcome.CASH_BACK:
+    elif outcome.method == PromoOutcome.CASH_BACK:
         return set_cash_back(response, outcome, items, promo, _get_initial_total_sum(items), wallet_payment_sum, order)
-    if outcome.method == PromoOutcome.DISCOUNT_CHEAPEST:
+    elif outcome.method == PromoOutcome.DISCOUNT_CHEAPEST:
         return set_discount_cheapest(response, outcome, items, promo)
-    if outcome.method == PromoOutcome.DISCOUNT_RICHEST:
+    elif outcome.method == PromoOutcome.DISCOUNT_RICHEST:
         return set_discount_richest(response, outcome, items, promo)
-    if outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
+    elif outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
         return set_gift_points(response, outcome, items, promo, order)
-    if outcome.method == PromoOutcome.ORDER_GIFT:
+    elif outcome.method == PromoOutcome.ORDER_GIFT:
         return add_order_gift(response, outcome, promo, new_order_gift_dicts, unavail_order_gift_dicts, order_gift_dicts,
                               cancelled_order_gift_dicts)
-    if outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
+    elif outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
         return set_order_gift_points(response, outcome, order)
-    if outcome.method == PromoOutcome.FIX_DISCOUNT:
+    elif outcome.method == PromoOutcome.FIX_DISCOUNT:
         return set_fix_discount(response, outcome, _get_initial_total_sum(items))
-    if outcome.method == PromoOutcome.DELIVERY_SUM_DISCOUNT:
+    elif outcome.method == PromoOutcome.DELIVERY_SUM_DISCOUNT:
         return set_delivery_sum_discount(response, outcome, delivery_type, delivery_zone)
-    if outcome.method == PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT:
+    elif outcome.method == PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT:
         return set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zone)
-    if outcome.method == PromoOutcome.PERCENT_GIFT_POINT:
+    elif outcome.method == PromoOutcome.PERCENT_GIFT_POINT:
         return set_percent_gift_points(response, outcome, items, order)
+    else:
+        response.success = True
+        return response
 
 
 def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
