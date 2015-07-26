@@ -1,6 +1,6 @@
 import json
 from methods.auth import company_user_required
-from methods.images import save_item_image, resize_image, MAX_SIZE, ICON_SIZE
+from methods.images import get_new_image_url, resize_image, MAX_SIZE, ICON_SIZE
 from methods.unique import unique
 from base import CompanyBaseHandler
 from models.menu import SINGLE_MODIFIER, GROUP_MODIFIER
@@ -182,9 +182,13 @@ class AddMenuItemHandler(CompanyBaseHandler):
         item.put()  # it is need to get id in saving image
         if self.request.get('image_file') or self.request.get('picture'):
             if self.request.get('image_file'):
-                save_item_image(item, image_data=str(self.request.get('image_file')))
+                new_url = get_new_image_url('MenuItem', item.key.id(), image_data=str(self.request.get('image_file')))
+                if new_url:
+                    item.picture = new_url
             elif self.request.get('picture'):
-                save_item_image(item, url=self.request.get('picture'))
+                new_url = get_new_image_url('MenuItem', item.key.id(), url=self.request.get('picture'))
+                if new_url:
+                    item.picture = new_url
         if item.picture:
             resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.category = category.key
@@ -236,9 +240,13 @@ class EditMenuItemHandler(CompanyBaseHandler):
         item.icon = None
         if self.request.get('image_file') or self.request.get('picture'):
             if self.request.get('image_file'):
-                save_item_image(item, image_data=str(self.request.get('image_file')))
+                new_url = get_new_image_url('MenuItem', item.key.id(), image_data=str(self.request.get('image_file')))
+                if new_url:
+                    item.picture = new_url
             elif self.request.get('picture'):
-                save_item_image(item, url=self.request.get('picture'))
+                new_url = get_new_image_url('MenuItem', item.key.id(), url=self.request.get('picture'))
+                if new_url:
+                    item.picture = new_url
         if item.picture:
             resize_image(item, item.picture, ICON_SIZE, icon=True)
         item.put()

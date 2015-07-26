@@ -75,7 +75,7 @@ def resize_image(item, url, size=None, icon=False):
             item.put()
 
 
-def save_item_image(item, image_data=None, url=None):
+def get_new_image_url(model_name, id, image_data=None, url=None):
     if url:
         image_data = urlfetch.fetch(url, deadline=30).content
     if image_data:
@@ -84,22 +84,9 @@ def save_item_image(item, image_data=None, url=None):
         return
     image = _resize(image, MAX_SIZE)
 
-    filename = _get_filename('MenuItem', item.key.id(), 'init')
+    filename = _get_filename(model_name, id, 'init')
     success = _save(image, filename)
     if success:
-        serving_url = _get_serving_url(image, filename)
-        item.picture = serving_url
-        item.put()
-
-
-def save_news_image(news, url):
-    image_data = urlfetch.fetch(url, deadline=30).content
-    image = Image.open(StringIO.StringIO(image_data))
-    image = _resize(image, MAX_SIZE)
-
-    filename = _get_filename('News', news.key.id(), 'init')
-    success = _save(image, filename)
-    if success:
-        serving_url = _get_serving_url(image, filename)
-        news.image_url = serving_url
-        news.put()
+        return _get_serving_url(image, filename)
+    else:
+        return None
