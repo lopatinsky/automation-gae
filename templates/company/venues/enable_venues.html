@@ -20,6 +20,7 @@
                 <th>Статус</th>
                 <th>Название</th>
                 <th>Адрес</th>
+                <th>Часовой пояс</th>
                 <th>Телефоны</th>
                 <th>Почты</th>
                 <th>Выбрать зоны</th>
@@ -38,6 +39,9 @@
                     </td>
                     <td rowspan="{{ height }}">
                         {{ venue.description }}
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ '+%s (%s)' % (venue.timezone_offset, venue.timezone_name) }}
                     </td>
                     <td rowspan="{{ height }}">
                         {{ ','.join(venue.phones) }}
