@@ -46,6 +46,7 @@
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Изменить порядок</th>
+            <th>ID</th>
             <th>Название</th>
             <th>Изменить</th>
         </tr>
@@ -60,6 +61,7 @@
                         Вниз
                     </button>
                 </td>
+                <td>{{ category.key.id() }}</td>
                 <td>
                     <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
                 </td>

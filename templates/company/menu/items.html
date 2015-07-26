@@ -57,6 +57,7 @@
             <tr>
                 <th>Статус</th>
                 <th>Изменить порядок</th>
+                <th>ID</th>
                 <th>Название</th>
                 <th>Описание</th>
                 <th>Цена</th>
@@ -78,6 +79,7 @@
                             Вниз
                         </button>
                     </td>
+                    <td>{{ item.key.id() }}</td>
                     <td>
                         <a href="{{ '/company/menu/item/edit?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}">{{ item.title }}</a>
                     </td>
