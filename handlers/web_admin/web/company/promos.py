@@ -230,6 +230,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
                 'name': CONDITION_MAP[condition],
                 'value': condition
             })
+        methods = sorted(methods, key=lambda method: method['name'])
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
     @company_user_required
@@ -311,6 +312,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
                 'name': OUTCOME_MAP[condition],
                 'value': condition
             })
+        methods = sorted(methods, key=lambda method: method['name'])
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
     @company_user_required
