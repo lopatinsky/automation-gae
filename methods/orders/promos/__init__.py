@@ -2,7 +2,8 @@ from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
     check_group_modifier_choice, check_payment_type, check_happy_hours_created_time, mark_item_with_category, \
-    mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity
+    mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
+    check_promo_code
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift
@@ -47,7 +48,7 @@ def _get_promos(venue):
     return promos
 
 
-def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum):
+def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum, order):
     if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
         return check_condition_by_value(condition, delivery_type)
     elif condition.method == PromoCondition.CHECK_FIRST_ORDER:
@@ -84,6 +85,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return mark_not_item(condition, item_dicts)
     elif condition.method == PromoCondition.MARK_ITEM_WITH_QUANTITY:
         return mark_item_with_quantity(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_PROMO_CODE:
+        return check_promo_code(condition, client, order)
     else:
         return True
 
@@ -139,7 +142,7 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
         apply_promo = True
         for condition in promo.conditions:
             if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type,
-                                    total_sum):
+                                    total_sum, order):
                 apply_promo = False
                 break
         if apply_promo:

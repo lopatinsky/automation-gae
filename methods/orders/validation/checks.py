@@ -8,7 +8,7 @@ from methods.working_hours import check_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
 from models.order import OrderPositionDetails
 from models.venue import DELIVERY, DELIVERY_MAP
-from models.promo_code import PromoCodePerforming
+from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
 
 __author__ = 'dvpermyakov'
 
@@ -134,8 +134,10 @@ def check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts):
 
 
 def check_venue(venue, delivery_time, delivery_type, client):
-    for promo_code in PromoCodePerforming.query().fetch():
-        pass
+    for performing in PromoCodePerforming.query(PromoCodePerforming.client == client.key,
+                                                PromoCodePerforming.status == PromoCodePerforming.PROCESSING_ACTION).fetch():
+        if performing.promo_code.get().kind == KIND_ALL_TIME_HACK:
+            return True, None
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())

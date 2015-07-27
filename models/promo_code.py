@@ -23,7 +23,7 @@ KIND_POINTS = 2
 KIND_ORDER_PROMO = 3
 KIND_ALL_TIME_HACK = 4
 PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK)
-PROMO_CODE_KIND_ADMIN = (KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO)
+PROMO_CODE_KIND_ADMIN = (KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK)
 PROMO_CODE_KIND_MAP = {
     KIND_SHARE_GIFT: u'Подари другу',
     KIND_WALLET: u'Баллы на кошелек',
@@ -104,7 +104,8 @@ class PromoCodeGroup(ndb.Model):
 class PromoCodePerforming(ndb.Model):
     READY_ACTION = 0
     DONE_ACTION = 1
-    ACTION_CHOICES = (READY_ACTION, DONE_ACTION)
+    PROCESSING_ACTION = 2
+    ACTION_CHOICES = (READY_ACTION, DONE_ACTION, PROCESSING_ACTION)
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     promo_code = ndb.KeyProperty(kind=PromoCode, required=True)
@@ -121,9 +122,21 @@ class PromoCodePerforming(ndb.Model):
         if promo_code.kind == KIND_SHARE_GIFT:
             gift = SharedGift.query(SharedGift.promo_code == promo_code.key).get()
             gift.deactivate(client, namespace_manager.get_namespace())
+            self.status = self.PROCESSING_ACTION
         elif promo_code.kind == KIND_WALLET:
             deposit(client.key.id(), promo_code.value * 100, 'promo code %s' % self.promo_code.id())
+            self.status = self.DONE_ACTION
         elif promo_code.kind == KIND_POINTS:
             register_order(client.key.id(), promo_code.value, 'promo code %s' % self.promo_code.id())
+            self.status = self.DONE_ACTION
+        elif promo_code.kind == KIND_ORDER_PROMO:
+            self.status = self.PROCESSING_ACTION
+        elif promo_code.kind == KIND_ALL_TIME_HACK:
+            self.status = self.PROCESSING_ACTION
+        else:
+            self.status = self.DONE_ACTION
+        self.put()
+
+    def close(self):
         self.status = self.DONE_ACTION
         self.put()

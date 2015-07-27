@@ -8,6 +8,7 @@
     <a href="/company/promo_code/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
+            <th>Групповой id</th>
             <th>Ключ</th>
             <th>Название</th>
             <th>Сообщение</th>
@@ -20,6 +21,7 @@
         </tr>
             {% for code in promo_codes %}
                 <tr>
+                    <td>{{ code.group_id }}</td>
                     <td>{{ code.key.id() }}</td>
                     <td>{{ code.title }}</td>
                     <td>{{ code.message }}</td>

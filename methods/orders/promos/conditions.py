@@ -3,6 +3,7 @@ import logging
 from methods import working_hours
 from models import Order
 from models.order import NOT_CANCELED_STATUSES
+from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 
 
 def _check_item(condition, item_dict):
@@ -124,3 +125,14 @@ def check_marked_min_sum(condition, item_dicts):
         if item_dict['persistent_mark']:
             marked_sum += item_dict['price']
     return marked_sum >= condition.value
+
+
+def check_promo_code(condition, client, order):
+    for performing in PromoCodePerforming.query(PromoCodePerforming.client == client.key,
+                                                PromoCodePerforming.status == PromoCodePerforming.PROCESSING_ACTION).fetch():
+        promo_code = performing.promo_code.get()
+        if promo_code.kind == KIND_ORDER_PROMO and promo_code.group_id == condition.value:
+            if order:
+                performing.close()
+            return True
+    return False

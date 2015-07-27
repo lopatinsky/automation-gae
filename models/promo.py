@@ -87,11 +87,12 @@ class PromoCondition(ndb.Model):
     MARK_ITEM = 15
     MARK_NOT_ITEM = 16
     MARK_ITEM_WITH_QUANTITY = 17
+    CHECK_PROMO_CODE = 18
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
                MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
-               MARK_ITEM_WITH_QUANTITY)
+               MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -188,7 +189,8 @@ CONDITION_MAP = {
     PromoCondition.CHECK_MARKED_MIN_SUM: u'Минимальная сумма помеченных продуктов',
     PromoCondition.MARK_ITEM: u'Продукт (метка)',
     PromoCondition.MARK_NOT_ITEM: u'Не продукт (метка)',
-    PromoCondition.MARK_ITEM_WITH_QUANTITY: u'Минимальное кол-во помеченных продуктов каждого типа (метка)'
+    PromoCondition.MARK_ITEM_WITH_QUANTITY: u'Минимальное кол-во помеченных продуктов каждого типа (метка)',
+    PromoCondition.CHECK_PROMO_CODE: u'Клиент активировал промо-код из группы'
 }
 
 OUTCOME_MAP = {
