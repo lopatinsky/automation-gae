@@ -53,6 +53,7 @@
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th rowspan="2">Статус</th>
+                <th rowspan="2">Видимость</th>
                 <th rowspan="2">Приоритет</th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Описание</th>
@@ -73,7 +74,10 @@
                                                       else promo.conditions|length %}
                 <tr>
                     <td rowspan="{{ height + 1 }}">
-                        <input type="checkbox" name={{ promo.key.id() }} {% if promo.status %} checked {% endif %}>
+                        <input type="checkbox" name={{ 'status_%s' % promo.key.id() }} {% if promo.status %} checked {% endif %}>
+                    </td>
+                    <td rowspan="{{ height + 1 }}">
+                        <input type="checkbox" name={{ 'visible_%s' % promo.key.id() }} {% if promo.visible %} checked {% endif %}>
                     </td>
                     <td rowspan="{{ height + 1 }}">
                         <button class="up_button" id="{{ promo.key.id() }}">

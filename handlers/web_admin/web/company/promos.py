@@ -64,11 +64,18 @@ class PromoListHandler(CompanyBaseHandler):
     @company_user_required
     def post(self):
         for promo in Promo.query().fetch():
-            confirmed = bool(self.request.get(str(promo.key.id())))
-            if confirmed:
+            confirmed_status = bool(self.request.get('status_%s' % promo.key.id()))
+            confirmed_visible = bool(self.request.get('visible_%s' % promo.key.id()))
+            if not confirmed_status:
+                confirmed_visible = False
+            if confirmed_status:
                 promo.status = STATUS_AVAILABLE
             else:
                 promo.status = STATUS_UNAVAILABLE
+            if confirmed_visible:
+                promo.visible = STATUS_AVAILABLE
+            else:
+                promo.visible = STATUS_UNAVAILABLE
             promo.put()
         self.redirect('/company/main')
 

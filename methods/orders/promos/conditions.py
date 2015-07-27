@@ -73,3 +73,54 @@ def check_group_modifier_choice(condition, item_dicts):
 
 def check_payment_type(condition, payment_info):
     return check_condition_by_value(condition, payment_info.get('type_id'))
+
+
+def mark_item_with_category(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].category.id() != condition.value:
+            item_dict['temporary_mark'] = False
+    return True
+
+
+def mark_item_without_category(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].category.id() == condition.value:
+            item_dict['temporary_mark'] = False
+    return True
+
+
+def mark_item(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].key.id() != condition.value:
+            item_dict['temporary_mark'] = False
+    return True
+
+
+def mark_not_item(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].key.id() == condition.value:
+            item_dict['temporary_mark'] = False
+    return True
+
+
+def mark_item_with_quantity(condition, item_dicts):
+    from methods.orders.validation.validation import is_equal
+    for index1, item_dict1 in enumerate(item_dicts):
+        amount = 1
+        for index2, item_dict2 in enumerate(item_dicts):
+            if index1 != index2 and is_equal(item_dict1, item_dict2):
+                amount += 1
+            if index1 > index2 and amount == 2:
+                amount = 1
+                break
+        if amount < condition.value:
+            item_dict1['temporary_mark'] = False
+    return True
+
+
+def check_marked_min_sum(condition, item_dicts):
+    marked_sum = 0
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark']:
+            marked_sum += item_dict['price']
+    return marked_sum >= condition.value

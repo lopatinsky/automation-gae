@@ -35,7 +35,7 @@ def _unique_promos(promos):
         return []
     result = []
     for promo in promos:
-        if promo not in result:
+        if promo.visible and promo not in result:
             result.append(promo)
     return result
 
@@ -44,7 +44,7 @@ def _group_promos(promos):
     return [promo.validation_dict() for promo in _unique_promos(promos)]
 
 
-def _is_equal(item_dict1, item_dict2):
+def is_equal(item_dict1, item_dict2):
     if not item_dict1 or not item_dict2:
         return False
     if item_dict1['item'].key != item_dict2['item'].key:
@@ -114,7 +114,7 @@ def group_item_dicts(item_dicts):
     result = []
     for item_dict in item_dicts:
         possible_group = result[-1] if result else {'id': None}
-        if _is_equal(item_dict, possible_group.get('item_dict')):
+        if is_equal(item_dict, possible_group.get('item_dict')):
             possible_group['quantity'] += 1
             if item_dict.get('promos'):
                 possible_group['promos'].extend(item_dict.get('promos'))

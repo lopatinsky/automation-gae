@@ -2,7 +2,7 @@
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier, STATUS_CHOICES
 from models.menu import MenuItem
 from models.schedule import Schedule
 
@@ -56,9 +56,12 @@ class PromoOutcome(ndb.Model):
     DELIVERY_SUM_DISCOUNT = 8
     DELIVERY_FIX_SUM_DISCOUNT = 9
     PERCENT_GIFT_POINT = 10
+    SET_PERSISTENT_MARK = 11
+    REMOVE_PERSISTENT_MARK = 12
+    MARKED_ORDER_GIFT = 13
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
-               PERCENT_GIFT_POINT)
+               PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -78,9 +81,17 @@ class PromoCondition(ndb.Model):
     CHECK_NOT_GROUP_MODIFIER_CHOICE = 9
     CHECK_PAYMENT_TYPE = 10
     CHECK_HAPPY_HOURS_CREATED_TIME = 11
+    MARK_ITEM_WITH_CATEGORY = 12
+    MARK_ITEM_WITHOUT_CATEGORY = 13
+    CHECK_MARKED_MIN_SUM = 14
+    MARK_ITEM = 15
+    MARK_NOT_ITEM = 16
+    MARK_ITEM_WITH_QUANTITY = 17
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
-               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME)
+               CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
+               MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
+               MARK_ITEM_WITH_QUANTITY)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -105,7 +116,8 @@ class Promo(ndb.Model):
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
     priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
-    status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+    visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
     @staticmethod
     def generate_priority():
@@ -170,7 +182,13 @@ CONDITION_MAP = {
     PromoCondition.CHECK_GROUP_MODIFIER_CHOICE: u'Выбор группового модификатора в заказе',
     PromoCondition.CHECK_NOT_GROUP_MODIFIER_CHOICE: u'Выбора группового модификатора нет в заказе',
     PromoCondition.CHECK_PAYMENT_TYPE: u'Тип оплаты',
-    PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME: u'Счастливые часы время создания заказа'
+    PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME: u'Счастливые часы время создания заказа',
+    PromoCondition.MARK_ITEM_WITH_CATEGORY: u'Продукты из категории (метка)',
+    PromoCondition.MARK_ITEM_WITHOUT_CATEGORY: u'Продукты не из категории (метка)',
+    PromoCondition.CHECK_MARKED_MIN_SUM: u'Минимальная сумма помеченных продуктов',
+    PromoCondition.MARK_ITEM: u'Продукт (метка)',
+    PromoCondition.MARK_NOT_ITEM: u'Не продукт (метка)',
+    PromoCondition.MARK_ITEM_WITH_QUANTITY: u'Минимальное кол-во помеченных продуктов каждого типа (метка)'
 }
 
 OUTCOME_MAP = {
@@ -184,5 +202,8 @@ OUTCOME_MAP = {
     PromoOutcome.FIX_DISCOUNT: u'Фиксированная скидка',
     PromoOutcome.DELIVERY_SUM_DISCOUNT: u'Скидка на цену доставки',
     PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT: u'Фиксированная скидка на цену доставки',
-    PromoOutcome.PERCENT_GIFT_POINT: u'Баллы, равные проценту от суммы'
+    PromoOutcome.PERCENT_GIFT_POINT: u'Баллы, равные проценту от суммы',
+    PromoOutcome.SET_PERSISTENT_MARK: u'Установить метку (метка)',
+    PromoOutcome.REMOVE_PERSISTENT_MARK: u'Удалить метку (метка)',
+    PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)'
 }

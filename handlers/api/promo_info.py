@@ -30,6 +30,8 @@ class PromoInfoHandler(ApiHandler):
         promo_texts = []
         promo_dicts = []
         for promo in Promo.query(Promo.status == STATUS_AVAILABLE).order(-Promo.priority).fetch():
+            if not promo.visible:
+                continue
             text = u'%s_%s' % (promo.title.strip() if promo.title else u'',
                                promo.description.strip() if promo.description else u'')
             if text not in promo_texts:

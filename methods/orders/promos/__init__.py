@@ -1,10 +1,11 @@
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
-    check_group_modifier_choice, check_payment_type, check_happy_hours_created_time
+    check_group_modifier_choice, check_payment_type, check_happy_hours_created_time, mark_item_with_category, \
+    mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
-    set_percent_gift_points
+    set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift
 
 
 class OutcomeResult:
@@ -13,6 +14,16 @@ class OutcomeResult:
         self.discount = 0.0
         self.delivery_sum_discount = 0.0
         self.error = None
+
+
+def _set_item_dict(item_dicts):
+    for item_dict in item_dicts:
+        item_dict['persistent_mark'] = False
+
+
+def _update_item_dict(item_dicts):
+    for item_dict in item_dicts:
+        item_dict['temporary_mark'] = True
 
 
 def _get_initial_total_sum(item_dicts):
@@ -61,12 +72,24 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_payment_type(condition, payment_info)
     elif condition.method == PromoCondition.CHECK_HAPPY_HOURS_CREATED_TIME:
         return check_happy_hours_created_time(condition, venue)
+    elif condition.method == PromoCondition.MARK_ITEM_WITH_CATEGORY:
+        return mark_item_with_category(condition, item_dicts)
+    elif condition.method == PromoCondition.MARK_ITEM_WITHOUT_CATEGORY:
+        return mark_item_without_category(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_MARKED_MIN_SUM:
+        return check_marked_min_sum(condition, item_dicts)
+    elif condition.method == PromoCondition.MARK_ITEM:
+        return mark_item(condition, item_dicts)
+    elif condition.method == PromoCondition.MARK_NOT_ITEM:
+        return mark_not_item(condition, item_dicts)
+    elif condition.method == PromoCondition.MARK_ITEM_WITH_QUANTITY:
+        return mark_item_with_quantity(condition, item_dicts)
     else:
         return True
 
 
-def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_type, delivery_zone,
-                 new_order_gift_dicts, unavail_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts, order):
+def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, delivery_zone, new_order_gift_dicts,
+                 order_gift_dicts, cancelled_order_gift_dicts, order):
     response = OutcomeResult()
     if outcome.method == PromoOutcome.DISCOUNT:
         return set_discounts(response, outcome, items, promo)
@@ -79,7 +102,7 @@ def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_typ
     elif outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
         return set_gift_points(response, outcome, items, promo, order)
     elif outcome.method == PromoOutcome.ORDER_GIFT:
-        return add_order_gift(response, outcome, promo, new_order_gift_dicts, unavail_order_gift_dicts, order_gift_dicts,
+        return add_order_gift(response, outcome, promo, new_order_gift_dicts, order_gift_dicts,
                               cancelled_order_gift_dicts)
     elif outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
         return set_order_gift_points(response, outcome, order)
@@ -91,6 +114,13 @@ def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_typ
         return set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zone)
     elif outcome.method == PromoOutcome.PERCENT_GIFT_POINT:
         return set_percent_gift_points(response, outcome, items, order)
+    elif outcome.method == PromoOutcome.SET_PERSISTENT_MARK:
+        return set_promo_mark_for_marked_items(response, items, promo)
+    elif outcome.method == PromoOutcome.REMOVE_PERSISTENT_MARK:
+        return remove_persistent_mark(response, items, promo)
+    elif outcome.method == PromoOutcome.MARKED_ORDER_GIFT:
+        return add_marked_order_gift(response, items, promo, new_order_gift_dicts, order_gift_dicts,
+                                     cancelled_order_gift_dicts)
     else:
         response.success = True
         return response
@@ -99,11 +129,13 @@ def _set_outcome(outcome, items, promo, client, wallet_payment_sum, delivery_typ
 def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                  delivery_zone, order_gift_dicts, cancelled_order_gift_dicts, order=None):
     total_sum = float(_get_initial_total_sum(item_dicts))
+    _set_item_dict(item_dicts)
     error = None
     promos = []
     new_order_gift_dicts = []
     unavail_order_gift_dicts = []
     for promo in _get_promos(venue):
+        _update_item_dict(item_dicts)
         apply_promo = True
         for condition in promo.conditions:
             if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type,
@@ -112,9 +144,9 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
                 break
         if apply_promo:
             for outcome in promo.outcomes:
-                outcome_response = _set_outcome(outcome, item_dicts, promo, client, wallet_payment_sum, delivery_type,
-                                                delivery_zone, new_order_gift_dicts, unavail_order_gift_dicts,
-                                                order_gift_dicts, cancelled_order_gift_dicts, order)
+                outcome_response = _set_outcome(outcome, item_dicts, promo, wallet_payment_sum, delivery_type,
+                                                delivery_zone, new_order_gift_dicts, order_gift_dicts,
+                                                cancelled_order_gift_dicts, order)
                 if outcome_response.success:
                     if promo not in promos:
                         promos.append(promo)
@@ -124,6 +156,14 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
                         delivery_zone.price = max(int(delivery_zone.price - outcome_response.delivery_sum_discount), 0)
                     if outcome_response.error:
                         error = outcome_response.error
+    for order_gift_dict in order_gift_dicts[:]:
+        if not order_gift_dict.get('found'):
+            order_gift_dicts.remove(order_gift_dict)
+            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
+    for order_gift_dict in cancelled_order_gift_dicts[:]:
+        if not order_gift_dict.get('found'):
+            cancelled_order_gift_dicts.remove(order_gift_dict)
+            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
     total_sum = _get_final_total_sum(total_sum, item_dicts)
     total_sum = max(0, total_sum)
     return error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos, total_sum, delivery_zone

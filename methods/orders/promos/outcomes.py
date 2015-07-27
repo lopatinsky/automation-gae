@@ -50,6 +50,30 @@ def _apply_total_cash_back(sum_without_wallet, cash_back, order=None):
     return True
 
 
+def _add_order_gift(gift, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
+    from methods.orders.validation.validation import set_item_dicts
+    found = False
+    for order_gift_dict in order_gift_dicts:
+        if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+            found = True
+            order_gift_dict['promos'].append(promo)
+            order_gift_dict['found'] = True
+            break
+    if not found:
+        for order_gift_dict in cancelled_order_gift_dicts:
+            if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+                found = True
+                order_gift_dict['promos'].append(promo)
+                order_gift_dict['found'] = True
+                break
+    if not found:
+        gift.chosen_single_modifiers = []  # todo: is it flexible?
+        gift.chosen_group_modifiers = []   # todo: is it flexible?
+        item_dict = set_item_dicts([gift], True)[0]
+        item_dict['promos'].append(promo)
+        new_order_gift_dicts.append(item_dict)
+
+
 def set_discounts(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
     item_keys = _get_item_keys(item_dicts)
@@ -163,42 +187,13 @@ def set_order_gift_points(response, outcome, order):
     return response
 
 
-def add_order_gift(response, outcome, promo, new_order_gift_dicts, unavail_order_gift_dicts, order_gift_dicts,
-                   cancelled_order_gift_dicts):
-    from methods.orders.validation.validation import set_item_dicts
+def add_order_gift(response, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
     gift = MenuItem.get_by_id(int(outcome.value))
     if not gift:
         response.error = u'Акция подарок по заказу не привязана к продукту'
         response.success = False
         return response
-    found = False
-    for order_gift_dict in order_gift_dicts:
-        if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
-            found = True
-            order_gift_dict['promos'].append(promo)
-            order_gift_dict['found'] = True
-            break
-    if not found:
-        for order_gift_dict in cancelled_order_gift_dicts:
-            if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
-                found = True
-                order_gift_dict['promos'].append(promo)
-                order_gift_dict['found'] = True
-                break
-    if not found:
-        gift.chosen_single_modifiers = []  # todo: is it flexible?
-        gift.chosen_group_modifiers = []   # todo: is it flexible?
-        item_dict = set_item_dicts([gift], True)[0]
-        item_dict['promos'].append(promo)
-        new_order_gift_dicts.append(item_dict)
-    for order_gift_dict in order_gift_dicts[:]:
-        if not order_gift_dict.get('found'):
-            order_gift_dicts.remove(order_gift_dict)
-            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
-    for order_gift_dict in cancelled_order_gift_dicts[:]:
-        if not order_gift_dict.get('found'):
-            cancelled_order_gift_dicts.remove(order_gift_dict)
-            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
+    _add_order_gift(gift, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
     response.success = True
     return response
 
@@ -237,5 +232,40 @@ def set_percent_gift_points(response, outcome, item_dicts, order):
     if order:
         order.points_details.append(GiftPointsDetails(points=points))
         order.put()
-    response.success = True
+    if points:
+        response.success = True
+    return response
+
+
+def set_promo_mark_for_marked_items(response, item_dicts, promo):
+    promo_applied = False
+    for item_dict in item_dicts:
+        if item_dict['temporary_mark']:
+            item_dict['persistent_mark'] = True
+            item_dict['promos'].append(promo)
+            promo_applied = True
+    response.success = promo_applied
+    return response
+
+
+def remove_persistent_mark(response, item_dicts, promo):
+    promo_applied = False
+    for item_dict in item_dicts:
+        if item_dict['temporary_mark']:
+            item_dict['persistent_mark'] = False
+            item_dict['promos'].append(promo)
+            promo_applied = True
+    response.success = promo_applied
+    return response
+
+
+def add_marked_order_gift(response, item_dicts, promo, new_order_gift_dicts, order_gift_dicts,
+                          cancelled_order_gift_dicts):
+    promo_applied = False
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark'] and item_dict['temporary_mark']:
+            _add_order_gift(item_dict['item'], promo, new_order_gift_dicts, order_gift_dicts,
+                            cancelled_order_gift_dicts)
+            promo_applied = True
+    response.success = promo_applied
     return response
