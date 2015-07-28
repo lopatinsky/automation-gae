@@ -37,10 +37,16 @@ def authorize(order_id, amount, refresh_token, correlation_id):
                 },
                 "description": "Order %s" % order_id
             }
-        ]
+        ],
+        "redirect_urls": {
+            "return_url": 'http://doubleb-automation-production.appspot.com',  # todo: replace this!
+            "cancel_url": 'http://doubleb-automation-production.appspot.com'   # todo: replace this!
+        }
     }, api=config.PAYPAL_API)
     if payment.create(refresh_token, correlation_id):
+        logging.info(payment)
         return True, payment['transactions'][0]['related_resources'][0]['authorization']['id']
+    logging.info(payment.error)
     return False, payment.error
 
 

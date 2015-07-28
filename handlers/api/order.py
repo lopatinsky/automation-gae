@@ -212,17 +212,21 @@ class OrderHandler(ApiHandler):
                 if not success:
                     if wallet_payment > 0:
                         empatika_wallet.reverse(client_id, order_id)
-                    return self.render_error(u"Не удалось произвести оплату. " + (error or ''))
+                    description = u"Не удалось произвести оплату. "
+                    if error:
+                        description += error
+                    return self.render_error(description)
             elif payment_type_id == PAYPAL_PAYMENT_TYPE and payment_amount > 0:
                 correlation_id = response_json['payment']['correlation_id']
                 success, info = paypal.authorize(order_id, payment_amount / 100.0, client.paypal_refresh_token,
                                                  correlation_id)
-
+                logging.info(info)
                 if success:
                     self.order.payment_id = info
                     self.order.put()
                 else:
-                    return self.render_error(u"Не удалось произвести оплату. " + (info or ''))
+                    description = u"Не удалось произвести оплату."
+                    return self.render_error(description)
 
             gift_details = []
             for gift_detail in validation_result['gift_details']:
