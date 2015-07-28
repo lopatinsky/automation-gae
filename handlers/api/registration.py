@@ -8,15 +8,13 @@ from models.share import SharedPromo
 from models.client import IOS_DEVICE, ANDROID_DEVICE
 
 
-def _refresh_client_info(request, device_phone, android_id, client_id=None):
+def _refresh_client_info(request, android_id, client_id=None):
     def refresh(client):
         client.user_agent = request.headers["User-Agent"]
         if 'iOS' in client.user_agent:
             client.device_type = IOS_DEVICE
         elif 'Android' in client.user_agent:
             client.device_type = ANDROID_DEVICE
-        if device_phone:
-            client.device_phone = device_phone
         if android_id:
             client.android_id = android_id
         client.put()
@@ -46,24 +44,21 @@ def _perform_registration(request):
     response = {}
 
     client_id = request.get_range('client_id')
-    device_phone = "".join(c for c in request.get('device_phone') if '0' <= c <= '9')
     android_id = request.get('android_id')
 
     client = None
     if client_id:
         client = Client.get_by_id(client_id)
     else:
-        if device_phone:
-            client = Client.query(Client.device_phone == device_phone).get()
-        if not client and android_id:
+        if android_id:
             client = Client.query(Client.android_id == android_id).get()
         if client:
             client_id = client.key.id()  # it is need to share gift
 
     if not client:
-        client = _refresh_client_info(request, device_phone, android_id)
+        client = _refresh_client_info(request, android_id)
     else:
-        client = _refresh_client_info(request, device_phone, android_id, client_id)
+        client = _refresh_client_info(request, android_id, client_id)
 
     response['client_id'] = client.key.id()
     client_name = client.name or ''
