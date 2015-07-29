@@ -1,7 +1,6 @@
 # coding: utf-8
 import json
-from config import Config
-from models.promo_code import PromoCode, KIND_SHARE_GIFT
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
 
 __author__ = 'dvpermyakov'
 
@@ -12,42 +11,6 @@ from methods import branch_io, alfa_bank
 from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift
 from models.share import SharedGiftMenuItem
 import logging
-
-
-def _get_gift_dict():
-    config = Config.get()
-    return {
-        'head': config.SHARED_GIFT_HEAD,
-        'text': config.SHARED_GIFT_TEXT,
-        'image': config.SHARED_GIFT_IMAGE_URL
-    }
-
-
-def _get_invitation_dict():
-    config = Config.get()
-    return {
-        'head': config.SHARED_INVITATION_HEAD,
-        'text': config.SHARED_INVITATION_TEXT,
-        'image': config.SHARED_INVITATION_IMAGE_URL
-    }
-
-
-def _get_about_invitation_dict():
-    config = Config.get()
-    return {
-        'head': config.SHARED_ABOUT_INVITATION_HEAD,
-        'text': config.SHARED_ABOUT_INVITATION_TEXT,
-        'image': config.SHARED_ABOUT_INVITATION_IMAGE_URL
-    }
-
-
-def _get_share_dict():
-    config = Config.get()
-    return {
-        'head': config.SHARED_SHARE_HEAD,
-        'text': config.SHARED_SHARE_TEXT,
-        'image': config.SHARED_SHARE_IMAGE_URL
-    }
 
 
 class GetShareUrlHandler(ApiHandler):
@@ -75,7 +38,7 @@ class GetShareUrlHandler(ApiHandler):
             share.urls = [url['url'] for url in urls]
             share.put()
 
-        self.render_json(_get_share_dict())
+        self.render_json({})  # todo: need to update
 
 
 class GetInvitationUrlHandler(ApiHandler):
@@ -103,9 +66,8 @@ class GetInvitationUrlHandler(ApiHandler):
             share.urls = [url['url'] for url in urls]
             share.put()
 
+        # todo: need to update
         self.render_json({
-            'info': _get_invitation_dict(),
-            'about': _get_about_invitation_dict(),
             'urls': share.urls
         })
 
@@ -119,7 +81,7 @@ class GetGiftUrlHandler(ApiHandler):
             'description': error
         })
 
-    def success(self, sender, gift, name=None, phone=None):
+    def success(self, sender, gift, promo_code, name=None, phone=None):
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -137,9 +99,10 @@ class GetGiftUrlHandler(ApiHandler):
         share.put()
         gift.share_id = share.key.id()
         gift.put()
-        values = _get_gift_dict()
-        values['text'] = values['text'] % url
-        self.render_json(values)
+        self.render_json({
+            'success': True,
+            'sms_text': u'ссылка = %s, код = %s' % (url, promo_code.key.id())
+        })
 
     def post(self):
         client_id = self.request.get_range('client_id')
@@ -174,12 +137,17 @@ class GetGiftUrlHandler(ApiHandler):
                 if not success:
                     self.send_error(error)
                 else:
-                    #promo_code = PromoCode.create(kind=KIND_SHARE_GIFT)
+                    group_promo_codes = PromoCodeGroup()
+                    group_promo_codes.put()
+                    promo_code = PromoCode.create(group_promo_codes, KIND_SHARE_GIFT, 1)
+                    promo_code.put()
+                    group_promo_codes.promo_codes = [promo_code.key]
+                    group_promo_codes.put()
                     gift = SharedGift(client_id=client_id, total_sum=item.float_price, order_id=order_id,
                                       payment_type_id=payment_type_id, payment_id=result, share_item=share_item.key,
                                       recipient_name=recipient_name, recipient_phone=recipient_phone,
-                                      promo_code=None)
-                    self.success(client, gift=gift, name=recipient_name, phone=recipient_phone)
+                                      promo_code=promo_code.key)
+                    self.success(client, gift=gift, promo_code=promo_code, name=recipient_name, phone=recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')
         else:

@@ -41,29 +41,12 @@ class Config(ndb.Model):
 
     SEND_ERRORS_500 = ndb.BooleanProperty(indexed=False, default=False)
 
-    SHARED_SHARE_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_SHARE_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_SHARE_TEXT = ndb.StringProperty(indexed=False)
-
-    SHARED_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_GIFT_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_GIFT_TEXT = ndb.StringProperty(indexed=False)
-
-    SHARED_ABOUT_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_INVITATION_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_INVITATION_TEXT = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
     SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_RECIPIENT_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
-    BRANCH_DESKTOP_URL = ndb.StringProperty(indexed=False)
-    BRANCH_ANDROID_URL = ndb.StringProperty(indexed=False)
-    BRANCH_IOS_URL = ndb.StringProperty(indexed=False)
 
     IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
 
