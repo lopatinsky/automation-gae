@@ -1,8 +1,5 @@
 # coding=utf-8
 from google.appengine.ext import ndb
-from config import Config
-from methods.empatika_promos import register_order
-from methods.empatika_wallet import deposit
 from methods.rendering import timestamp
 from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
 from models.client import Client
@@ -53,6 +50,9 @@ class SharedPromo(ndb.Model):
 
     def deactivate(self, namespace):
         from methods.push import send_client_push
+        from methods.empatika_promos import register_order
+        from methods.empatika_wallet import deposit
+        from config import Config
         config = Config.get()
         if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS or config.SHARED_INVITATION_SENDER_WALLET_POINTS:
             sender_order_id = "sender_referral_%s" % self.recipient.id()

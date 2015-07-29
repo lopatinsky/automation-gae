@@ -9,7 +9,7 @@ __author__ = 'ilyazorin'
 
 class VenuesHandler(ApiHandler):
     def get(self):
-        venues = Venue.query(Venue.active == True).fetch()
+        venues = Venue.fetch_venues(self.app_kind, Venue.active == True)
         location = self.request.get("ll")
         try:
             location = ndb.GeoPt(location)
@@ -19,7 +19,8 @@ class VenuesHandler(ApiHandler):
         venue_dicts = []
         for venue in venues:
             for delivery in venue.delivery_types:
-                if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE]:
+                #if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE]:
+                if delivery.status == STATUS_AVAILABLE:
                     venue_dicts.append(venue.dict(location))
                     break
         if location:

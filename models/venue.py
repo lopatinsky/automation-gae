@@ -232,6 +232,20 @@ class Venue(ndb.Model):
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
     default = ndb.BooleanProperty(default=False)
 
+    @classmethod
+    def fetch_venues(cls, app_kind, *args, **kwargs):
+        from config import AUTO_APP, IIKO_APP
+        from methods.proxy.iiko.venues import get_venues
+        if app_kind == AUTO_APP:
+            return cls.query(*args, **kwargs).fetch()
+        elif app_kind == IIKO_APP:
+            venues = get_venues()
+            for venue in venues[:]:
+                for name, value in kwargs.items():
+                    if getattr(venue, name) != value:
+                        venues.remove(venue)
+            return venues
+
     def dynamic_info(self):
         items = []
         for item in self.stop_lists:
@@ -257,7 +271,7 @@ class Venue(ndb.Model):
         if user_location:
             distance = location.distance(user_location, self.coordinates)
         dct = {
-            'id': str(self.key.id()),
+            'id': str(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
             'distance': distance,
             'title': self.title,
             'address': self.description,

@@ -5,7 +5,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from models.proxy.unified_app import AutomationCompany
-from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME, TEST_VERSIONS
+from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME, TEST_VERSIONS, IIKO_APP
 from webapp2_extras import auth
 
 
@@ -43,10 +43,10 @@ class ApiHandler(RequestHandler):
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
         self.request.init_namespace = None
+        config = Config.get()
+        if not config:
+            self.abort(423)
         if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
-            config = Config.get()
-            if not config:
-                self.abort(423)
             logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
             namespace = self.request.headers.get('Namespace')
             if namespace:
@@ -58,14 +58,12 @@ class ApiHandler(RequestHandler):
             if not namespace_manager.get_namespace():
                 namespace = self.request.headers.get('Namespace')
                 namespace_manager.set_namespace(namespace)
-                config = Config.get()
-                if not config:
-                    self.abort(403)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         self.test = False
         for version in TEST_VERSIONS:
             if version in self.request.url:
                 self.test = True
+        self.app_kind = config.APP_KIND
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)
