@@ -1,4 +1,5 @@
 # coding: utf-8
+import json
 from config import Config
 from models.promo_code import PromoCode, KIND_SHARE_GIFT
 
@@ -159,7 +160,8 @@ class GetGiftUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
-        item_id = self.request.get_range('item_id')
+        items_json = json.loads(self.request.get('items'))
+        item_id = int(items_json[0]['item_id'])
         share_item = SharedGiftMenuItem.get_by_id(item_id)
         if not share_item:
             self.abort(400)
@@ -178,7 +180,7 @@ class GetGiftUrlHandler(ApiHandler):
                 return_url = self.request.get('return_url')
 
                 order_id = "gift_%s_%s" % (client_id, int(time.time()))
-                success, result = alfa_bank.create_simple(item.float_price, order_id, return_url, alpha_client_id)
+                success, result = alfa_bank.create_simple(int(item.float_price * 100), order_id, return_url, alpha_client_id)
                 if success:
                     success, error = alfa_bank.hold_and_check(result, binding_id)
                 else:
@@ -186,11 +188,11 @@ class GetGiftUrlHandler(ApiHandler):
                 if not success:
                     self.send_error(error)
                 else:
-                    promo_code = PromoCode.create(kind=KIND_SHARE_GIFT)
+                    #promo_code = PromoCode.create(kind=KIND_SHARE_GIFT)
                     gift = SharedGift(client_id=client_id, total_sum=item.float_price, order_id=order_id,
                                       payment_type_id=payment_type_id, payment_id=result, share_item=share_item.key,
                                       recipient_name=recipient_name, recipient_phone=recipient_phone,
-                                      promo_code=promo_code.key)
+                                      promo_code=None)
                     self.success(client, gift=gift, name=recipient_name, phone=recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')

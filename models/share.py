@@ -104,7 +104,7 @@ class SharedGift(ndb.Model):
     recipient_name = ndb.StringProperty(required=True)
     recipient_phone = ndb.StringProperty(required=True)
     recipient_id = ndb.IntegerProperty()                   # it is known after deactivate
-    total_sum = ndb.IntegerProperty(required=True)
+    total_sum = ndb.FloatProperty(required=True)
     order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
     payment_id = ndb.StringProperty(required=True)
