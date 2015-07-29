@@ -45,9 +45,6 @@ class Config(ndb.Model):
     SHARED_SHARE_HEAD = ndb.StringProperty(indexed=False)
     SHARED_SHARE_TEXT = ndb.StringProperty(indexed=False)
 
-    SHARED_ABOUT_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_GIFT_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_GIFT_TEXT = ndb.StringProperty(indexed=False)
     SHARED_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
     SHARED_GIFT_HEAD = ndb.StringProperty(indexed=False)
     SHARED_GIFT_TEXT = ndb.StringProperty(indexed=False)

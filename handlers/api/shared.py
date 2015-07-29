@@ -23,15 +23,6 @@ def _get_gift_dict():
     }
 
 
-def _get_about_gift_dict():
-    config = Config.get()
-    return {
-        'head': config.SHARED_ABOUT_GIFT_HEAD,
-        'text': config.SHARED_ABOUT_GIFT_TEXT,
-        'image': config.SHARED_ABOUT_GIFT_IMAGE_URL
-    }
-
-
 def _get_invitation_dict():
     config = Config.get()
     return {
@@ -57,11 +48,6 @@ def _get_share_dict():
         'text': config.SHARED_SHARE_TEXT,
         'image': config.SHARED_SHARE_IMAGE_URL
     }
-
-
-class GiftInfoHandler(ApiHandler):
-    def get(self):
-        self.render_json(_get_about_gift_dict())
 
 
 class GetShareUrlHandler(ApiHandler):
