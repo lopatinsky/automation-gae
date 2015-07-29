@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
@@ -182,8 +183,30 @@ class MenuCategory(ndb.Model):
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
 
-    def get_items(self, only_available=False):
-        items = MenuItem.query(MenuItem.category == self.key).fetch()
+    @classmethod
+    def fetch_categories(cls, app_kind, *args, **kwargs):
+        from config import AUTO_APP, IIKO_APP
+        from methods.proxy.iiko.menu import get_categories
+        if app_kind == AUTO_APP:
+            return cls.query(*args, **kwargs).fetch()
+        elif app_kind == IIKO_APP:
+            categories = get_categories()
+            logging.info(categories)
+            for category in categories[:]:
+                for name, value in kwargs.items():
+                    if getattr(category, name) != value:
+                        categories.remove(category)
+            return categories
+
+    def get_items(self, app_kind=0, only_available=False):  # AUTO_APP = 0
+        from methods.proxy.iiko.menu import get_products
+        from config import AUTO_APP, IIKO_APP
+        if app_kind == AUTO_APP:
+            items = MenuItem.query(MenuItem.category == self.key).fetch()
+        elif app_kind == IIKO_APP:
+            items = get_products(self)
+        else:
+            items = []
         if only_available:
             for item in items[:]:
                 if item.status != STATUS_AVAILABLE:
@@ -242,9 +265,9 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, venue=None):
+    def dict(self, app_kind, venue=None):
         items = []
-        for item in self.get_items(only_available=True):
+        for item in self.get_items(app_kind, only_available=True):
             if not venue:
                 items.append(item.dict())
             else:
@@ -252,7 +275,7 @@ class MenuCategory(ndb.Model):
                     items.append(item.dict(without_restrictions=True))
         dct = {
             'info': {
-                'category_id': str(self.key.id()),
+                'category_id': str(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
                 'title': self.title,
                 'pic': self.picture,
                 'restrictions': {
@@ -295,7 +318,7 @@ class MenuItem(ndb.Model):
 
     def dict(self, without_restrictions=False):
         dct = {
-            'id': str(self.key.id()),
+            'id': str(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,

@@ -1,8 +1,7 @@
 from google.appengine.ext.ndb import GeoPt
 from config import Config
-from models import Venue, STATUS_AVAILABLE
+from models import Venue
 from models.schedule import Schedule
-from models.venue import DeliveryType, DELIVERY
 from requests import get_iiko_venues
 from delivery_types import get_delivery_types
 

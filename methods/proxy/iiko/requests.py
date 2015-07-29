@@ -54,3 +54,16 @@ def get_iiko_delivery_types(iiko_company):
         'organization_id': iiko_company.resto_company_id
     }
     return _get_request(path, params)
+
+
+def get_iiko_company_info(iiko_company):
+    path = '/api/company/get_company'
+    params = {
+        'company_id': iiko_company.resto_company_id
+    }
+    return _get_request(path, params)
+
+
+def get_iiko_menu(iiko_company):
+    path = '/api/venue/%s/menu' % iiko_company.key.id()
+    return _get_request(path)
