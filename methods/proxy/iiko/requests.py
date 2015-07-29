@@ -46,3 +46,11 @@ def get_iiko_venues(iiko_company):
 def get_iiko_payment_types(iiko_company):
     path = '/api/payment_types/%s' % iiko_company.key.id()
     return _get_request(path)
+
+
+def get_iiko_delivery_types(iiko_company):
+    path = '/api/delivery_types'
+    params = {
+        'organization_id': iiko_company.resto_company_id
+    }
+    return _get_request(path, params)

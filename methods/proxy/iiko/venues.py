@@ -4,6 +4,7 @@ from models import Venue, STATUS_AVAILABLE
 from models.schedule import Schedule
 from models.venue import DeliveryType, DELIVERY
 from requests import get_iiko_venues
+from delivery_types import get_delivery_types
 
 __author__ = 'dvpermyakov'
 
@@ -11,6 +12,7 @@ __author__ = 'dvpermyakov'
 def get_venues():
     config = Config.get()
     iiko_company = config.IIKO_COMPANY.get()
+    delivery_types = get_delivery_types()
     iiko_venues = get_iiko_venues(iiko_company)
     venues = []
     for iiko_venue in iiko_venues['venues']:
@@ -21,6 +23,6 @@ def get_venues():
         venue.title = iiko_venue['name']
         venue.description = iiko_venue['address']
         venue.schedule = Schedule(days=[])
-        venue.delivery_types = [DeliveryType(delivery_type=DELIVERY, status=STATUS_AVAILABLE)]
+        venue.delivery_types = delivery_types
         venues.append(venue)
     return venues
