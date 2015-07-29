@@ -19,9 +19,23 @@ class PaymentType(ndb.Model):
     status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
                                  default=STATUS_AVAILABLE)
 
+    @classmethod
+    def fetch_types(cls, app_kind, *args, **kwargs):
+        from config import AUTO_APP, IIKO_APP
+        from methods.proxy.iiko.payment_types import get_payment_types
+        if app_kind == AUTO_APP:
+            return cls.query(*args, **kwargs).fetch()
+        elif app_kind == IIKO_APP:
+            types = get_payment_types()
+            for type in types[:]:
+                for name, value in kwargs.items():
+                    if getattr(type, name) != value:
+                        types.remove(type)
+            return types
+
     def dict(self):
         dct = {
-            'id': int(self.key.id()),
+            'id': int(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
             'title': self.title
         }
         return dct

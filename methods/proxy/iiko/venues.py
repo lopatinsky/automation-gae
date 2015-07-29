@@ -11,9 +11,9 @@ __author__ = 'dvpermyakov'
 def get_venues():
     config = Config.get()
     iiko_company = config.IIKO_COMPANY.get()
-    response = get_iiko_venues(iiko_company)
+    iiko_venues = get_iiko_venues(iiko_company)
     venues = []
-    for iiko_venue in response['venues']:
+    for iiko_venue in iiko_venues['venues']:
         venue = Venue()
         venue.faked_id = iiko_venue['venueId']
         venue.active = True
