@@ -88,9 +88,11 @@ class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
     CANCELED = 2
-    CHOICES = (READY, DONE, CANCELED)
+    PERFORMING = 3
+    CHOICES = (READY, PERFORMING, DONE, CANCELED)
     CHOICES_MAP = {
         READY: u'Оплачено',
+        PERFORMING: u'В исполнении',
         DONE: u'Получено',
         CANCELED: u'Отменено'
     }
@@ -110,16 +112,21 @@ class SharedGift(ndb.Model):
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
-    def deactivate(self, client, namespace):
+    def perform(self, client, namespace):
         from methods.push import send_share_gift_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
-        self.status = self.DONE
+        self.status = self.PERFORMING
         self.recipient_id = client.key.id()
         self.put()
         sender = Client.get_by_id(self.client_id)
         text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
         send_share_gift_push(client, text, namespace)
+
+    def deactivate(self):
+        if self.status == self.PERFORMING:
+            self.status = self.DONE
+            self.put()
 
     def cancel(self, namespace):
         from methods.alfa_bank import reverse
