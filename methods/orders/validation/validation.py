@@ -15,14 +15,6 @@ from checks import check_delivery_time, check_delivery_type, check_gifts, check_
 from models.venue import DELIVERY
 
 
-def _nice_join(strs):
-    if not strs:
-        return ""
-    if len(strs) == 1:
-        return strs[0]
-    return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
-
-
 def _unique(seq):
     if not seq:
         return []
@@ -45,21 +37,22 @@ def _group_promos(promos):
     return [promo.validation_dict() for promo in _unique_promos(promos)]
 
 
-def is_equal(item_dict1, item_dict2):
+def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
     if not item_dict1 or not item_dict2:
         return False
     if item_dict1['item'].key != item_dict2['item'].key:
         return False
-    if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
-        return False
-    for i in xrange(len(item_dict1['single_modifier_keys'])):
-        if item_dict1['single_modifier_keys'][i] != item_dict2['single_modifier_keys'][i]:
-            return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
-        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:
+        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:  # consider group modifier
             return False
-        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:
+        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
             return False
+    if consider_single_modifiers:
+        if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
+            return False
+        for i in xrange(len(item_dict1['single_modifier_keys'])):
+            if item_dict1['single_modifier_keys'][i] != item_dict2['single_modifier_keys'][i]:
+                return False
     return True
 
 

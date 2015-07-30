@@ -1,11 +1,21 @@
 # coding=utf-8
-from models import MenuItem
+from models import MenuItem, GroupModifier
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY
 
 
-def _get_item_keys(item_dicts):
-    result = {}
+def _get_promo_item_dicts(item_details, item_dicts):
+    chosen_group_modifiers = []
+    for choice_id in item_details.group_choice_ids:
+        modifier = GroupModifier.get_modifier_by_choice(choice_id)
+
+    promo_item_dict = {
+        'item': item_details.item.get(),
+        'single_modifier_keys': [],
+        'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
+                                for modifier in item.chosen_group_modifiers],
+    }
+    result = []
     for item_dict in item_dicts:
         if result.get(item_dict['item'].key):
             result[item_dict['item'].key].append(item_dict)
@@ -28,8 +38,10 @@ def _apply_discounts(item_dict, promo, discount):
         if promo not in item_dict['promos']:
             if item_dict['revenue'] >= item_dict['price'] * discount:
                 item_dict['revenue'] -= item_dict['price'] * discount
-                item_dict['promos'].append(promo)
-                return True
+            else:
+                item_dict['revenue'] = 0
+            item_dict['promos'].append(promo)
+            return True
         return False
 
 

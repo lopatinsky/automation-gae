@@ -39,7 +39,7 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
 
 
 class PromoMenuItem(ndb.Model):
-    item_required = ndb.BooleanProperty(default=False)  # item_required is False => apply for all items
+    item_required = ndb.BooleanProperty(default=False)  # todo: should be deleted
     item = ndb.KeyProperty(kind=MenuItem)
     group_choice_ids = ndb.IntegerProperty(repeated=True)  # it can be None => not restrict in group modifiers
 
