@@ -168,6 +168,7 @@ class OrderHandler(ApiHandler):
 
             item_details = validation_result["details"]
             order_gift_details = validation_result["order_gift_details"]
+            shared_gift_details = validation_result['share_gift_details']
             promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
 
             if address:
@@ -189,7 +190,8 @@ class OrderHandler(ApiHandler):
                 promos=promo_list, items=item_keys, wallet_payment=wallet_payment, item_details=item_details,
                 order_gift_details=order_gift_details, delivery_type=delivery_type, delivery_slot_id=delivery_slot_id,
                 address=address_obj, delivery_zone=delivery_zone.key if delivery_zone else None,
-                user_agent=self.request.headers["User-Agent"], delivery_sum=delivery_sum)
+                user_agent=self.request.headers["User-Agent"], delivery_sum=delivery_sum,
+                shared_gift_details=shared_gift_details)
             self.order.put()
 
             if wallet_payment > 0:
@@ -235,6 +237,10 @@ class OrderHandler(ApiHandler):
                 gift_detail.activation_id = activation_dict['activation']['id']
                 gift_details.append(gift_detail)
             self.order.gift_details = gift_details
+
+            for shared_gift_detail in shared_gift_details:
+                gift = shared_gift_detail.gift.get()
+                gift.put_in_order()
 
             client.put()
             self.order.status = NEW_ORDER

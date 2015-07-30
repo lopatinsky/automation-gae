@@ -1,10 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
-from config import Config
-from methods.empatika_promos import register_order
-from methods.empatika_wallet import deposit
-from methods.rendering import timestamp
-from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
+from models import STATUS_CHOICES, STATUS_AVAILABLE
+from models.menu import MenuItem
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
 from models.promo_code import PromoCode
@@ -31,6 +28,7 @@ class Share(ndb.Model):
         self.put()
 
     def dict(self):
+        from methods.rendering import timestamp
         return {
             'sender': self.sender.get().dict(),
             'created': timestamp(self.created),
@@ -53,6 +51,9 @@ class SharedPromo(ndb.Model):
 
     def deactivate(self, namespace):
         from methods.push import send_client_push
+        from methods.empatika_promos import register_order
+        from methods.empatika_wallet import deposit
+        from config import Config
         config = Config.get()
         if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS or config.SHARED_INVITATION_SENDER_WALLET_POINTS:
             sender_order_id = "sender_referral_%s" % self.recipient.id()
@@ -89,11 +90,13 @@ class SharedGift(ndb.Model):
     DONE = 1
     CANCELED = 2
     PERFORMING = 3
-    CHOICES = (READY, PERFORMING, DONE, CANCELED)
+    IN_ORDER = 4
+    CHOICES = (READY, PERFORMING, IN_ORDER, DONE, CANCELED)
     CHOICES_MAP = {
         READY: u'Оплачено',
-        PERFORMING: u'В исполнении',
-        DONE: u'Получено',
+        PERFORMING: u'Получено',
+        IN_ORDER: u'Заказан',
+        DONE: u'Выдан',
         CANCELED: u'Отменено'
     }
 
@@ -105,7 +108,7 @@ class SharedGift(ndb.Model):
     client_id = ndb.IntegerProperty(required=True)         # Who pays for cup
     recipient_name = ndb.StringProperty(required=True)
     recipient_phone = ndb.StringProperty(required=True)
-    recipient_id = ndb.IntegerProperty()                   # it is known after deactivate
+    recipient_id = ndb.IntegerProperty()                   # it is known after perform
     total_sum = ndb.FloatProperty(required=True)
     order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
@@ -113,7 +116,7 @@ class SharedGift(ndb.Model):
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
     def perform(self, client, namespace):
-        from methods.push import send_share_gift_push
+        from methods.push import send_client_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
         self.status = self.PERFORMING
@@ -121,17 +124,27 @@ class SharedGift(ndb.Model):
         self.put()
         sender = Client.get_by_id(self.client_id)
         text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
-        send_share_gift_push(client, text, namespace)
+        header = u'Подарок'
+        send_client_push(client, text, header, namespace)
+
+    def put_in_order(self):
+        if self.status == self.PERFORMING:
+            self.status = self.IN_ORDER
+            self.put()
 
     def deactivate(self):
-        if self.status == self.PERFORMING:
+        if self.status == self.IN_ORDER:
             self.status = self.DONE
+            self.put()
+
+    def recover(self):
+        if self.status == self.IN_ORDER:
+            self.status = self.PERFORMING
             self.put()
 
     def cancel(self, namespace):
         from methods.alfa_bank import reverse
         from methods.push import send_client_push
-
         if self.status == self.READY:
             reverse(self.payment_id)
             share = Share.get_by_id(self.share_id)
@@ -147,6 +160,7 @@ class SharedGift(ndb.Model):
 
     def dict(self):
         from models import Client
+        from methods.rendering import timestamp
         item_dict = self.share_item.get().dict()
         item_dict.update({
             'gift_status': self.CHOICES_MAP[self.status]

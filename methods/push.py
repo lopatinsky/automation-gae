@@ -111,9 +111,3 @@ def send_client_push(client, text, header, namespace):
 def send_multichannel_push(text, header, channels, device_type):
     data = _make_push_data(text, header, device_type)
     return _send_push(channels, data, device_type)
-
-
-def send_share_gift_push(client, text, namespace):
-    data = _make_share_gift_push_data(client, text)
-    client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
-    return _send_push([client_channel], data, client.device_type)

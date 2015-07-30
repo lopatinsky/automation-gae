@@ -54,22 +54,22 @@ def _add_order_gift(gift, promo, new_order_gift_dicts, order_gift_dicts, cancell
     from methods.orders.validation.validation import set_item_dicts
     found = False
     for order_gift_dict in order_gift_dicts:
-        if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+        if order_gift_dict['item'].key == gift.key and not order_gift_dict.get('found'):
             found = True
-            order_gift_dict['promos'].append(promo)
             order_gift_dict['found'] = True
+            order_gift_dict['promos'].append(promo)
             break
     if not found:
         for order_gift_dict in cancelled_order_gift_dicts:
-            if order_gift_dict['item'].key == gift.key and promo not in order_gift_dict['promos']:
+            if order_gift_dict['item'].key == gift.key and not order_gift_dict.get('found'):
                 found = True
-                order_gift_dict['promos'].append(promo)
                 order_gift_dict['found'] = True
+                order_gift_dict['promos'].append(promo)
                 break
     if not found:
         gift.chosen_single_modifiers = []  # todo: is it flexible?
         gift.chosen_group_modifiers = []   # todo: is it flexible?
-        item_dict = set_item_dicts([gift], True)[0]
+        item_dict = set_item_dicts([gift], is_gift=True)[0]
         item_dict['promos'].append(promo)
         new_order_gift_dicts.append(item_dict)
 

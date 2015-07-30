@@ -7,8 +7,9 @@ from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
 from models import MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DeliverySlot
-from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
+    GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
+from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
+    SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
 from models.venue import DELIVERY
@@ -130,7 +131,7 @@ def group_item_dicts(item_dicts):
     return result
 
 
-def set_modifiers(items, with_gift_obj):
+def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
@@ -138,6 +139,10 @@ def set_modifiers(items, with_gift_obj):
             menu_item.gift_obj = item['gift_obj']
         else:
             menu_item.gift_obj = None
+        if with_share_gift_obj:
+            menu_item.share_gift_obj = item['share_gift_obj']
+        else:
+            menu_item.share_gift_obj = None
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
             single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
@@ -166,13 +171,14 @@ def set_price_with_modifiers(items):
     return items
 
 
-def set_item_dicts(items, is_gift):
+def set_item_dicts(items, is_gift=False):
     item_dicts = []
     for item in items:
         item_dicts.append({
             'item': item,
             'image': item.picture,
             'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
+            'share_gift_obj': item.share_gift_obj if hasattr(item, 'share_gift_obj') else None,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
@@ -195,7 +201,26 @@ def get_avail_gifts(points):
     return gifts
 
 
-def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error=None):
+def get_shared_gifts(client):
+    shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
+    shared_gift_json = []
+    for shared_gift in shared_gifts:
+        item = shared_gift.share_item.get().item.get()
+        shared_gift_json.append({
+            'item_id': item.key.id(),
+            'quantity': 1,
+            'single_modifiers': [],
+            'group_modifiers': [],
+            'share_gift_obj': shared_gift
+        })
+    shared_gifts = set_modifiers(shared_gift_json, with_share_gift_obj=True)
+    shared_gift_dicts = set_item_dicts(shared_gifts, True)
+
+    return shared_gift_dicts
+
+
+def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, shared_gift_dicts,
+                       error=None):
     return {
         'valid': valid,
         'more_gift': False,
@@ -204,7 +229,7 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
         'errors': [error] if error else [],
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
-        'new_order_gifts': [],
+        'new_order_gifts': [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict['found']],
         'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
@@ -223,11 +248,11 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     def send_error(error):
         logging.warning('Sending error: %s' % error)
         return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
-                                  cancelled_order_gifts, error)
+                                  cancelled_order_gifts, shared_gift_dicts, error)
 
-    items = set_modifiers(items, False)
+    items = set_modifiers(items)
     items = set_price_with_modifiers(items)
-    item_dicts = set_item_dicts(items, False)
+    item_dicts = set_item_dicts(items)
 
     total_sum_without_promos = 0
     for item in items:
@@ -239,27 +264,37 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         gift_obj = GiftMenuItem.get_by_id(int(gift['item_id']))
         gift['item_id'] = gift_obj.item.id()
         gift['gift_obj'] = gift_obj
-    gifts = set_modifiers(gifts, True)
+    gifts = set_modifiers(gifts, with_gift_obj=True)
     gift_dicts = set_item_dicts(gifts, True)
 
     logging.info('gift_dicts = %s' % gift_dicts)
 
-    order_gifts = set_modifiers(order_gifts, False)
+    order_gifts = set_modifiers(order_gifts)
     order_gift_dicts = set_item_dicts(order_gifts, True)
 
     logging.info('order_gift_dicts = %s' % order_gift_dicts)
 
-    cancelled_order_gifts = set_modifiers(cancelled_order_gifts, False)
+    cancelled_order_gifts = set_modifiers(cancelled_order_gifts)
     cancelled_order_gift_dicts = set_item_dicts(cancelled_order_gifts, True)
 
     logging.info('cancelled_order_gift_dicts = %s' % cancelled_order_gift_dicts)
+
+    shared_gift_dicts = get_shared_gifts(client)
+    for shared_gift_dict in shared_gift_dicts:
+        for order_gift_dict in order_gift_dicts:
+            if not order_gift_dict['found'] and is_equal(shared_gift_dict, order_gift_dict):
+                order_gift_dict['found'] = True
+                shared_gift_dict['found'] = True
+
+    logging.info('shared_gift_dicts = %s' % shared_gift_dicts)
+
     valid, error = check_address(delivery_type, address)
     if not valid:
         return send_error(error)
     valid, error = check_venue(venue, delivery_time, delivery_type, client)
     if not valid:
         return send_error(error)
-    valid, error = check_payment(payment_info)
+    valid, error = check_payment(payment_info, item_dicts, gift_dicts, shared_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_delivery_time(delivery_time)
@@ -318,13 +353,16 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('item_dicts = %s' % item_dicts)
 
-    if len(item_dicts) or len(gift_dicts):
+    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts):
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
         grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
         grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
         grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
+        grouped_shared_gift_dicts = group_item_dicts(
+            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict['found']])
+        grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
     else:
         grouped_item_dicts = []
         grouped_gift_dicts = []
@@ -422,6 +460,11 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             )
             details.append(details_item)
         result['order_gift_details'] = details
+        details = []
+        for shared_gift_dict in shared_gift_dicts:
+            details_item = SharedGiftPositionDetails(gift=shared_gift_dict['share_gift_obj'].key)
+            details.append(details_item)
+        result['share_gift_details'] = details
     return result
 
 
