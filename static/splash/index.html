@@ -1,32 +1,35 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta name="author" content="Ru-beacon">
-    <meta name="apple-itunes-app" content="app-id=990194521">
-    <meta name="apple-itunes-app-tab" content="app-id=990194521">
-    <meta name="google-play-app" content="app-id=com.rubeacon.pastadeli">
-    <meta name="google-play-app-tab" content="app-id=com.rubeacon.pastadeli">
-    <meta name="msApplication-ID" content="App"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link
-            rel="stylesheet" href="https://test.doubleb-automation-production.appspot.com/static/smartbanner/css/smartbanner.css"
-            type="text/css"
-            media="screen">
+	<meta charset="UTF-8">
+	<title>Mobile</title>
+	<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,700&subset=cyrillic,latin' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="css/main.css" type="text/css">
 </head>
-    <body>
-        Этот текст необходимо заменить соответствующим контентом!
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-        <script src="https://test.doubleb-automation-production.appspot.com/static/smartbanner/js/smartbanner.js"></script>
-        <script type="text/javascript">
-            $(function () {
-                $.smartbanner({
-                    daysHidden: 0,
-                    daysReminder: 0,
-                    title: 'Pasta Deli',
-                    button: 'Download',
-                    icon: 'http://lh3.googleusercontent.com/Cmq8pkOUyPQht-yztGRBQK8ki6fAQR96hHazDeItSpBpgIoeHQUCvwxOO4KTYXz3J98c59T2YDXU3iaSeMytPgV_W6vumA7yfD5F3fLjUp2TsV0=s180'
-                })
-            })
-        </script>
-    </body>
+<body>
+<div id="phone">
+	<a href="tel:{{ phone }}">РџРѕР·РІРѕРЅРёС‚СЊ РЅР°Рј</a>
+</div>
+<div id="title">
+	<table>
+		<tr>
+			<td><img src="{{ logo_ur }}"></td>
+			<td><h4>Р—Р°РєР°Р·С‹РІР°Р№<br>Р»СЋР±РёРјС‹Рµ Р±Р»СЋРґР°<br>СЃ РјРѕР±РёР»СЊРЅРѕРіРѕ</h4></td>
+		</tr>
+	</table>
+</div>
+<div id="info">
+	<img src="{{ app_url }}">
+</div>
+<div id="divider"></div>
+<div id="stores">
+	<img src="images/appstore.png">
+	<img src="images/googleplay.png">
+</div>
+
+<div id="footer">
+	<a href="{{ rbcn_url }}"><img src="images/button.png"></a><br>
+	<a href="{{ site }}">РџРѕР»РЅР°СЏ РІРµСЂСЃРёСЏ СЃР°Р№С‚Р°</a>
+</div>
+</body>
 </html>
