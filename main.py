@@ -46,6 +46,10 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/mt', [
+        PathPrefixRoute('/splash', [
+            Route('/main', maintenance.SplashMainHandler),
+            Route('/smart_banner', maintenance.SmartBannerHandler),
+        ]),
         Route('/companies', maintenance.CompaniesListHandler),
         Route('/500_errors_email', maintenance.EmailsErrorsHandler),
         Route('/report', maintenance.ReportHandler),

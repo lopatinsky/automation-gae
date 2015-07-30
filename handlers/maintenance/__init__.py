@@ -5,3 +5,4 @@ from tablet_requests_report import TabletRequestGraphHandler, TabletInfoHandler
 from name_confirmed import NameConfirmationHandler
 from automation import CompaniesListHandler
 from emails import EmailsErrorsHandler
+from splash import SplashMainHandler, SmartBannerHandler
