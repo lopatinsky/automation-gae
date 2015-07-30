@@ -1,39 +1,31 @@
 # coding:utf-8
 import copy
 import logging
-from urlparse import urlparse
 import json
 from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-from google.appengine.ext import deferred
-from webapp2_extras import security
 from google.appengine.ext.ndb import GeoPt, Key
 from google.appengine.api import taskqueue
 
 from config import config
 from handlers.api.base import ApiHandler
-from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods import alfa_bank, empatika_promos, empatika_wallet, paypal
+from methods.orders.create import send_venue_sms, send_venue_email
 from methods.orders.validation.validation import validate_order, get_first_error
 from methods.orders.cancel import cancel_order
-from methods.twilio import send_sms
-from methods.email_mandrill import send_email
 from methods.orders.validation.precheck import check_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address
 from models import DeliverySlot, STATUS_AVAILABLE, PaymentType, Order, Venue, Address, Client
 from models.client import IOS_DEVICE
 from models.order import READY_ORDER, NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
     CONFUSED_OTHER
-from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_MAP
-from models.venue import SELF, IN_CAFE, DELIVERY_MAP, DELIVERY, PICKUP
-from handlers.email_api.order import POSTPONE_MINUTES
+from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
+from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
 
 
 SECONDS_WAITING_BEFORE_SMS = 15
-
-EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 
 class OrderHandler(ApiHandler):
@@ -253,41 +245,8 @@ class OrderHandler(ApiHandler):
                            self.order)
             self.order.put()
 
-            # use delivery phone and delivery emails for all delivery types
-            text = u'Новый заказ №%s поступил в систему из мобильного приложения' % self.order.key.id()
-            if venue.phones:
-                for phone in venue.phones:
-                    try:
-                        send_sms([phone], text)
-                    except Exception as e:
-                        error_text = str(e)
-                        error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
-                        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка оповещения через смс', error_text)
-                        send_email('dvpermyakov1@gmail.com', 'elenamarchenkolm@gmail.com', u'Ошибка оповещения через смс', error_text)
-                        logging.warning(u'Неверный номер телефона для оповещения')
-
-            if venue.emails:
-                item_values = order_items_values(self.order)
-                item_values['venue'] = venue
-                item_values['delivery_type_str'] = DELIVERY_MAP[self.order.device_type]
-                self.order.payment_type_str = PAYMENT_TYPE_MAP[self.order.payment_type_id]
-                if config.EMAIL_REQUESTS:
-                    self.order.email_key_done = security.generate_random_string(entropy=256)
-                    self.order.email_key_cancel = security.generate_random_string(entropy=256)
-                    self.order.email_key_postpone = security.generate_random_string(entropy=256)
-                    if self.order.delivery_type == DELIVERY:
-                        self.order.email_key_confirm = security.generate_random_string(entropy=256)
-                    self.order.put()
-
-                    base_url = urlparse(self.request.url).hostname
-                    item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, self.order.email_key_done)
-                    item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, self.order.email_key_cancel)
-                    item_values['postpone_url'] = 'http://%s/email/order/postpone?key=%s' % (base_url, self.order.email_key_postpone)
-                    item_values['minutes'] = POSTPONE_MINUTES
-                    if self.order.delivery_type == DELIVERY:
-                        item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, self.order.email_key_confirm)
-                for email in venue.emails:
-                    deferred.defer(send_email, EMAIL_FROM, email, text, self.jinja2.render_template('/company/delivery/items.html', **item_values))
+            send_venue_sms(venue, self.order)
+            send_venue_email(venue, self.order, self.request.url, self.jinja2)
 
             taskqueue.add(url='/task/check_order_success', params={'order_id': order_id},
                           countdown=SECONDS_WAITING_BEFORE_SMS)
