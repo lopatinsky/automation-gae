@@ -141,7 +141,8 @@ class Order(ndb.Model):
     courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
-        from methods.empatika_wallet import deposit
+        from methods.empatika_wallet import deposit, get_balance
+        from google.appengine.ext.deferred import deferred
         total_cash_back = 0
         for cash_back in self.cash_backs:
             if cash_back.status == cash_back.READY:
@@ -150,6 +151,7 @@ class Order(ndb.Model):
         if total_cash_back > 0:
             logging.info('cash back with sum=%s' % total_cash_back)
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
+            deferred.defer(get_balance, self.client_id, raise_error=True)  # just to update memcache
         self.put()
         return total_cash_back
 
