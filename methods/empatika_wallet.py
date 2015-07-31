@@ -90,7 +90,7 @@ def get_balance(client_id, from_memcache=False, set_zero_if_fail=False, raise_er
             memcache.set(cache_key, balance, time=60)
         except DeadlineExceededError:
             if set_zero_if_fail:
-                balance = memcache.get(cache_key)
+                balance = 0
             if raise_error:
                 raise Exception('Raising error in get wallet balance')
     return balance
