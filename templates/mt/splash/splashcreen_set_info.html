@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <label>
             Телефон:
             <input type="text" name="phone">
@@ -25,6 +25,10 @@
         <label>
             Сайт:
             <input type="text" name="site">
+        </label><br>
+        <label>
+            Загрузить "скачать" картинку:
+            <input type="file" name="download_image">
         </label><br>
         <input type="submit">
     </form>

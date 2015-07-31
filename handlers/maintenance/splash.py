@@ -39,11 +39,14 @@ class SplashScreenHandler(BaseHandler):
         app_url = get_new_image_url('Splash', app_url, url=app_url)
         rbcn_url = self.request.get('rbcn_url')
         site = self.request.get('site')
+        download_image = self.request.get('download_image')
+        download_image_url = get_new_image_url('Splash', 'download_image', image_data=download_image)
         values = {
             'phone': phone,
             'logo_url': logo_url,
             'app_url': app_url,
             'rbcn_url': rbcn_url,
-            'site': site
+            'site': site,
+            'download_button_url': download_image_url
         }
         self.render('/splash/splash_screen.html', **values)

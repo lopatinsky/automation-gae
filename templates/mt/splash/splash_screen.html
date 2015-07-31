@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>Mobile</title>
 	<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,700&subset=cyrillic,latin' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="http://test.doubleb-automation-production.appspot.com/static/splash/css/main.css" type="text/css">
+    <link rel="stylesheet" href="http://doubleb-automation-production.appspot.com/static/splash/css/main.css" type="text/css">
 </head>
 <body>
     <div id="phone">
@@ -23,12 +23,14 @@
     </div>
     <div id="divider"></div>
     <div id="stores">
-        <img src="http://test.doubleb-automation-production.appspot.com/static/splash/images/appstore.png">
-        <img src="http://test.doubleb-automation-production.appspot.com/static/splash/images/googleplay.png">
+        <img src="http://doubleb-automation-production.appspot.com/static/splash/images/appstore.png">
+        <img src="http://doubleb-automation-production.appspot.com/static/splash/images/googleplay.png">
     </div>
 
     <div id="footer">
-        <a href="{{ rbcn_url }}"><img src="http://test.doubleb-automation-production.appspot.com/static/splash/images/button.png"></a><br>
+        <a href="{{ rbcn_url }}">
+            <img src="{{ download_button_url }}">
+        </a><br>
         <a href="{{ site }}">Полная версия сайта</a>
     </div>
 </body>
