@@ -90,6 +90,7 @@ class GroupModifierChoice(ndb.Model):
 class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
+    required = ndb.BooleanProperty(default=False)
     sequence_number = ndb.IntegerProperty()
 
     def get_choice_by_id(self, choice_id):
@@ -161,6 +162,7 @@ class GroupModifier(ndb.Model):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
+            'required': self.required,
             'order': self.sequence_number,
             'choices': [
                 {

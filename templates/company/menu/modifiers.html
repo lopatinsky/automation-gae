@@ -167,90 +167,98 @@
     <button id="show_inactive_group">
         Показать/Скрыть неактивные
     </button>
-    <table style="border-collapse:collapse; width:100%" border="1">
-        <tr>
-            <th>Изменить порядок</th>
-            <th>Имя модификатора</th>
-            <th>Продукты с модификатором</th>
-            <th>Выбор по умолчанию</th>
-            <th>Изменить порядок </th>
-            <th>Имя выбора</th>
-            <th>Цена выбора</th>
-            <th>Выбрать продукты для выбора</th>
-        </tr>
-        {% for modifier in group_modifiers %}
-            <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
-                <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <button class="up_button_group" id="{{ modifier.key.id() }}">
-                        Вверх
-                    </button>
-                    <button class="down_button_group" id="{{ modifier.key.id() }}">
-                        Вниз
-                    </button>
-                </td>
-                <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/company/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
-                        {{ modifier.title }}
-                    </a>
-                    <br>
-                    {% if modifier.enable %}
-                        <button class="show_products" id="{{ modifier.key.id() }}">
-                            Показать/Скрыть
-                        </button>
-                    {% endif %}
-                </td>
-                <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/company/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
-                        Выбрать
-                    </a>
-                </td>
-                <td rowspan="{{ modifier.choices|length + 1 }}">
-                    <a href="{{ '/company/menu/modifiers/choices/default?modifier_id=%s' % modifier.key.id() }}">
-                        Выбрать
-                    </a>
-                </td>
-                <td colspan="4">
-                    <form method="get">
-                        <button formaction="{{ '/company/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
-                            Добавить выбор
-                        </button>
-                    </form>
-                </td>
-                {% for choice in modifier.choices %}
-                    </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
-                    <td>
-                        <button class="up_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+    <form method="post">
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Обязательный модификатор</th>
+                <th>Изменить порядок</th>
+                <th>Имя модификатора</th>
+                <th>Продукты с модификатором</th>
+                <th>Выбор по умолчанию</th>
+                <th>Изменить порядок </th>
+                <th>Имя выбора</th>
+                <th>Цена выбора</th>
+                <th>Выбрать продукты для выбора</th>
+            </tr>
+            {% for modifier in group_modifiers %}
+                <tr {% if modifier.enable %} bgcolor="#99FF99" {% else %} class="group" hidden {% endif %}>
+                    <td rowspan="{{ modifier.choices|length + 1 }}">
+                        <input type="checkbox" name="{{ 'required_%s' % modifier.key.id() }}"
+                                {% if modifier.required %} checked {% endif %}>
+                    </td>
+                    <td rowspan="{{ modifier.choices|length + 1 }}">
+                        <button class="up_button_group" id="{{ modifier.key.id() }}">
                             Вверх
                         </button>
-                        <button class="down_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+                        <button class="down_button_group" id="{{ modifier.key.id() }}">
                             Вниз
                         </button>
                     </td>
-                    <td>
-                        <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
+                    <td rowspan="{{ modifier.choices|length + 1 }}">
+                        <a href="{{ '/company/menu/modifiers/edit/group_modifier?group_modifier_id=%s' % modifier.key.id() }}">
+                            {{ modifier.title }}
+                        </a>
+                        <br>
+                        {% if modifier.enable %}
+                            <button class="show_products" id="{{ modifier.key.id() }}">
+                                Показать/Скрыть
+                            </button>
+                        {% endif %}
                     </td>
-                    <td>{{ choice.float_price }}</td>
-                    <td>
-                        <a href="{{ '/company/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
+                    <td rowspan="{{ modifier.choices|length + 1 }}">
+                        <a href="{{ '/company/menu/product/modifiers/select?modifier_id=%s&modifier_type=%s' % (modifier.key.id(), 1) }}">
+                            Выбрать
+                        </a>
                     </td>
-                {% endfor %}
-            </tr>
-            <tr id="tr_{{ modifier.key.id() }}" hidden bgcolor="#99FF99">
-                <td colspan="5">
-                    {% for product in modifier.products %}
-                        {{ '%s, ' % product.title }}
+                    <td rowspan="{{ modifier.choices|length + 1 }}">
+                        <a href="{{ '/company/menu/modifiers/choices/default?modifier_id=%s' % modifier.key.id() }}">
+                            Выбрать
+                        </a>
+                    </td>
+                    <td colspan="4">
+                        <form method="get">
+                            <button formaction="{{ '/company/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
+                                Добавить выбор
+                            </button>
+                        </form>
+                    </td>
+                    {% for choice in modifier.choices %}
+                        </tr><tr {% if not modifier.enable %} class="group" hidden {% endif %}>
+                        <td>
+                            <button class="up_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+                                Вверх
+                            </button>
+                            <button class="down_button_group_choice" id="{{ '%s_%s' % (choice.choice_id, modifier.key.id()) }}">
+                                Вниз
+                            </button>
+                        </td>
+                        <td>
+                            <a href="{{ '/company/menu/modifiers/edit/choice?choice_id=%s' % choice.choice_id }}">{{ choice.title }}</a>
+                        </td>
+                        <td>{{ choice.float_price }}</td>
+                        <td>
+                            <a href="{{ '/company/menu/modifiers/choices/select?choice_id=%s' % choice.choice_id }}">Выбрать</a>
+                        </td>
                     {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-    <div>
-        <form method="get">
-            <button formaction="{{ '/company/menu/modifiers/add/group_modifier' }}">
-                Добавить
-            </button>
-        </form>
-    </div>
-    <a href="{{ '/company/menu/main' }}">Назад</a>
+                </tr>
+                <tr id="tr_{{ modifier.key.id() }}" hidden bgcolor="#99FF99">
+                    <td colspan="5">
+                        {% for product in modifier.products %}
+                            {{ '%s, ' % product.title }}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <div>
+            <form method="get">
+                <button formaction="{{ '/company/menu/modifiers/add/group_modifier' }}">
+                    Добавить
+                </button>
+            </form>
+        </div><br>
+        <input type="submit">
+        <a href="{{ '/company/menu/main' }}">Назад</a>
+    </form>
 </body>
 </html>

@@ -436,6 +436,14 @@ class ModifierList(CompanyBaseHandler):
             'inf': SingleModifier.INFINITY
         })
 
+    @company_user_required
+    def post(self):
+        for group_modifier in GroupModifier.query().fetch():
+            confirmed = bool(self.request.get('required_%s' % group_modifier.key.id()))
+            group_modifier.required = confirmed
+            group_modifier.put()
+        self.redirect('/company/menu/main')
+
 
 class AddSingleModifierHandler(CompanyBaseHandler):
     @company_user_required
