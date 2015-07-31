@@ -3,6 +3,7 @@ import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
 from methods.rendering import opt, timestamp
+from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
 from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
@@ -125,6 +126,7 @@ class Order(ndb.Model):
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
     shared_gift_details = ndb.LocalStructuredProperty(SharedGiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
+    promo_code_performings = ndb.KeyProperty(kind=PromoCodePerforming, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
@@ -162,7 +164,8 @@ class Order(ndb.Model):
         self.put()
         return point_sum
 
-    def grouped_item_dict(self, details, gift=False):
+    @staticmethod
+    def grouped_item_dict(details, gift=False):
         item_dicts = []
         for item_detail in details:
             if not gift:

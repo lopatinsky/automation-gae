@@ -6,7 +6,8 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     check_promo_code
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
-    set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift
+    set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
+    return_success
 
 
 class OutcomeResult:
@@ -105,8 +106,7 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.ACCUMULATE_GIFT_POINT:
         return set_gift_points(response, outcome, items, promo, order)
     elif outcome.method == PromoOutcome.ORDER_GIFT:
-        return add_order_gift(response, outcome, promo, new_order_gift_dicts, order_gift_dicts,
-                              cancelled_order_gift_dicts)
+        return add_order_gift(response, outcome, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
     elif outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
         return set_order_gift_points(response, outcome, order)
     elif outcome.method == PromoOutcome.FIX_DISCOUNT:
@@ -122,8 +122,9 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.REMOVE_PERSISTENT_MARK:
         return remove_persistent_mark(response, items, promo)
     elif outcome.method == PromoOutcome.MARKED_ORDER_GIFT:
-        return add_marked_order_gift(response, items, promo, new_order_gift_dicts, order_gift_dicts,
-                                     cancelled_order_gift_dicts)
+        return add_marked_order_gift(response, items, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
+    elif outcome.method == PromoOutcome.EMPTY:
+        return return_success(response)
     else:
         response.success = True
         return response

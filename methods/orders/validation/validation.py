@@ -42,6 +42,8 @@ def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
         return False
     if item_dict1['item'].key != item_dict2['item'].key:
         return False
+    if len(item_dict1['group_modifier_keys']) != len(item_dict2['group_modifier_keys']):
+        return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
         if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:  # consider group modifier
             return False
@@ -95,11 +97,11 @@ def group_item_dicts(item_dicts):
             'id': str(item_dict['item'].key.id()),
             'title': item_dict['item'].title,
             'promos': item_dict.get('promos', []),
-            'errors': item_dict.get('errors'),
-            'substitutes': item_dict.get('substitutes'),
-            'image': item_dict.get('image'),
+            'errors': item_dict.get('errors', []),
+            'substitutes': item_dict.get('substitutes', []),
+            'image': item_dict.get('image', ''),
             'quantity': 1,
-            'price_without_promos': item_dict['price'],
+            'price_without_promos': item_dict.get('price', 0),
             'single_modifiers': _group_single_modifiers(item_dict['single_modifier_keys']),
             'group_modifiers': _group_group_modifiers(item_dict['group_modifier_keys']),
             'item_dict': item_dict
@@ -198,14 +200,20 @@ def get_shared_gifts(client):
     shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
     shared_gift_json = []
     for shared_gift in shared_gifts:
-        item = shared_gift.share_item.get().item.get()
-        shared_gift_json.append({
-            'item_id': item.key.id(),
-            'quantity': 1,
-            'single_modifiers': [],
-            'group_modifiers': [],
-            'share_gift_obj': shared_gift
-        })
+        for shared_item in shared_gift.share_items:
+            chosen_group_modifiers = []
+            for choice_id in shared_item.group_choice_ids:
+                modifier = GroupModifier.get_modifier_by_choice(choice_id)
+                modifier.choice = modifier.get_choice_by_id(choice_id)
+                chosen_group_modifiers.append(modifier)
+            shared_gift_json.append({
+                'item_id': shared_item.shared_item.get(),
+                'quantity': 1,
+                'single_modifiers': shared_item.share_single_modifiers,
+                'group_modifiers': [(modifier.key, modifier.choice.choice_id)
+                                    for modifier in chosen_group_modifiers],
+                'share_gift_obj': shared_gift
+            })
     shared_gifts = set_modifiers(shared_gift_json, with_share_gift_obj=True)
     shared_gift_dicts = set_item_dicts(shared_gifts, True)
 

@@ -1,19 +1,17 @@
 from datetime import datetime, timedelta
 import logging
 from methods import working_hours
-from models import Order
+from models.order import Order
+from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 
 
-def _check_item(condition, item_dict):
-    if item_dict['item'].key != condition.item_details.item:
+def _check_item(item_details, item_dict):
+    from methods.orders.validation.validation import is_equal
+    if not item_details.item:
         return False
-    item_choice_ids = [modifier_key[1] for modifier_key in item_dict['group_modifier_keys']]
-    for choice_id in condition.item_details.group_choice_ids:
-        if choice_id not in item_choice_ids:
-            return False
-    return True
+    return is_equal(get_item_dict(item_details), item_dict)
 
 
 def check_condition_by_value(condition, value):
@@ -30,26 +28,27 @@ def check_condition_min_by_value(condition, value):
 
 def check_first_order(client):
     order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
+    logging.info('check first order = %s' % order)
     return order is None
 
 
 def check_repeated_order(condition, client):
-    if condition.value is not None:
+    if condition.value > 0:
         min_time = datetime.utcnow() - timedelta(days=condition.value)
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES),
                             Order.date_created > min_time).get()
     else:
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
-    logging.info(order)
+    logging.info('check repeated order = %s' % order)
     return order is not None
 
 
 def check_item_in_order(condition, item_dicts):
     amount = 0
     for item_dict in item_dicts:
-        if _check_item(condition, item_dict):
+        if _check_item(condition.item_details, item_dict):
             amount += 1
-    return amount >= condition.value
+    return amount > condition.value
 
 
 def check_happy_hours_delivery_time(condition, venue, delivery_time):
@@ -133,6 +132,7 @@ def check_promo_code(condition, client, order):
         promo_code = performing.promo_code.get()
         if promo_code.kind == KIND_ORDER_PROMO and promo_code.group_id == condition.value:
             if order:
-                performing.close()
+                performing.put_in_order()
+                order.promo_code_performings.append(performing.key)
             return True
     return False

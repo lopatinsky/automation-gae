@@ -105,7 +105,8 @@ class PromoCodePerforming(ndb.Model):
     READY_ACTION = 0
     DONE_ACTION = 1
     PROCESSING_ACTION = 2
-    ACTION_CHOICES = (READY_ACTION, DONE_ACTION, PROCESSING_ACTION)
+    IN_ORDER = 3
+    ACTION_CHOICES = (READY_ACTION, PROCESSING_ACTION, IN_ORDER, DONE_ACTION)
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     promo_code = ndb.KeyProperty(kind=PromoCode, required=True)
@@ -136,6 +137,16 @@ class PromoCodePerforming(ndb.Model):
         else:
             self.status = self.DONE_ACTION
         self.put()
+
+    def put_in_order(self):
+        if self.status == self.PROCESSING_ACTION:
+            self.status = self.IN_ORDER
+            self.put()
+
+    def recover(self):
+        if self.status == self.IN_ORDER:
+            self.status = self.PROCESSING_ACTION
+            self.put()
 
     def close(self):
         self.status = self.DONE_ACTION

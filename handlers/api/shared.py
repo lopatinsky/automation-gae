@@ -1,5 +1,6 @@
 # coding: utf-8
 import json
+from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers, set_item_dicts
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
 
 __author__ = 'dvpermyakov'
@@ -8,8 +9,8 @@ import time
 from models.payment_types import CARD_PAYMENT_TYPE
 from base import ApiHandler
 from methods import branch_io, alfa_bank
-from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift
-from models.share import SharedGiftMenuItem
+from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift, STATUS_UNAVAILABLE
+from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem
 import logging
 
 
@@ -110,13 +111,22 @@ class GetGiftUrlHandler(ApiHandler):
         if not client:
             self.abort(400)
         items_json = json.loads(self.request.get('items'))
-        item_id = int(items_json[0]['item_id'])
-        share_item = SharedGiftMenuItem.get_by_id(item_id)
-        if not share_item:
-            self.abort(400)
-        item = share_item.item.get()
-        total_sum = self.request.get('total_sum')
-        if float(total_sum) != item.float_price:
+        items = set_modifiers(items_json)
+        items = set_price_with_modifiers(items)
+        share_items = []
+        for item in items:
+            share_item = SharedGiftMenuItem.get_by_id(item.key.id())
+            if share_item.status == STATUS_UNAVAILABLE:
+                return self.send_error(u'Продукт %s недоступен' % item.title)
+            chosen_shared_item = ChosenSharedGiftMenuItem(shared_item=share_item)
+            chosen_shared_item.group_choice_ids = [modifier.choice.choice_id for modifier in item.chosen_group_modifiers]
+            chosen_shared_item.single_modifiers = [modifier.key for modifier in item.chosen_single_modifiers]
+            share_items.append(chosen_shared_item)
+        total_sum = 0
+        for item in items:
+            total_sum += item.total_price
+        request_total_sum = self.request.get('total_sum')
+        if round(total_sum) != round(request_total_sum):
             return self.send_error(u'Сумма была пересчитана')
         recipient_phone = "".join(c for c in self.request.get('recipient_phone') if '0' <= c <= '9')
         recipient_name = self.request.get('recipient_name')
@@ -129,7 +139,7 @@ class GetGiftUrlHandler(ApiHandler):
                 return_url = self.request.get('return_url')
 
                 order_id = "gift_%s_%s" % (client_id, int(time.time()))
-                success, result = alfa_bank.create_simple(int(item.float_price * 100), order_id, return_url, alpha_client_id)
+                success, result = alfa_bank.create_simple(int(total_sum * 100), order_id, return_url, alpha_client_id)
                 if success:
                     success, error = alfa_bank.hold_and_check(result, binding_id)
                 else:
@@ -143,8 +153,8 @@ class GetGiftUrlHandler(ApiHandler):
                     promo_code.put()
                     group_promo_codes.promo_codes = [promo_code.key]
                     group_promo_codes.put()
-                    gift = SharedGift(client_id=client_id, total_sum=item.float_price, order_id=order_id,
-                                      payment_type_id=payment_type_id, payment_id=result, share_item=share_item.key,
+                    gift = SharedGift(client_id=client_id, total_sum=total_sum, order_id=order_id,
+                                      payment_type_id=payment_type_id, payment_id=result, share_items=share_items,
                                       recipient_name=recipient_name, recipient_phone=recipient_phone,
                                       promo_code=promo_code.key)
                     self.success(client, gift=gift, promo_code=promo_code, name=recipient_name, phone=recipient_phone)

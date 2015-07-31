@@ -1,37 +1,34 @@
 # coding=utf-8
-from models import MenuItem, GroupModifier
+from models.menu import GroupModifier
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY
 
 
-def _get_promo_item_dicts(item_details, item_dicts):
+def get_item_dict(item_details):
     chosen_group_modifiers = []
     for choice_id in item_details.group_choice_ids:
         modifier = GroupModifier.get_modifier_by_choice(choice_id)
-
-    promo_item_dict = {
-        'item': item_details.item.get(),
-        'single_modifier_keys': [],
-        'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
-                                for modifier in item.chosen_group_modifiers],
+        modifier.choice = modifier.get_choice_by_id(choice_id)
+        chosen_group_modifiers.append(modifier)
+    item = item_details.item.get()
+    return {
+        'item': item,
+        'image': item.picture,
+        'single_modifier_keys': item_details.single_modifiers,
+        'group_modifier_keys': [(modifier.key, modifier.choice.choice_id) for modifier in chosen_group_modifiers],
     }
-    result = []
+
+
+def _get_promo_item_dicts(item_details, item_dicts):
+    from methods.orders.validation.validation import is_equal
+    if not item_details.item:
+        return []
+    promo_item_dict = get_item_dict(item_details)
+    result_item_dicts = []
     for item_dict in item_dicts:
-        if result.get(item_dict['item'].key):
-            result[item_dict['item'].key].append(item_dict)
-        else:
-            result[item_dict['item'].key] = [item_dict]
-    return result
-
-
-def _check_item(outcome, item_dict):
-    if item_dict['item'].key != outcome.item_details.item:
-        return False
-    item_choice_ids = [modifier_key[1] for modifier_key in item_dict['group_modifier_keys']]
-    for choice_id in outcome.item_details.group_choice_ids:
-        if choice_id not in item_choice_ids:
-            return False
-    return True
+        if is_equal(promo_item_dict, item_dict, consider_single_modifiers=False):
+            result_item_dicts.append(item_dict)
+    return result_item_dicts
 
 
 def _apply_discounts(item_dict, promo, discount):
@@ -62,57 +59,44 @@ def _apply_total_cash_back(sum_without_wallet, cash_back, order=None):
     return True
 
 
-def _add_order_gift(gift, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
-    from methods.orders.validation.validation import set_item_dicts
+def _add_order_gift(item_dict, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
+    from methods.orders.validation.validation import is_equal
     found = False
     for order_gift_dict in order_gift_dicts:
-        if order_gift_dict['item'].key == gift.key and not order_gift_dict.get('found'):
+        if not order_gift_dict.get('found') and is_equal(item_dict, order_gift_dict):
             found = True
             order_gift_dict['found'] = True
-            order_gift_dict['promos'].append(promo)
             break
     if not found:
         for order_gift_dict in cancelled_order_gift_dicts:
-            if order_gift_dict['item'].key == gift.key and not order_gift_dict.get('found'):
+            if not order_gift_dict.get('found') and is_equal(item_dict, order_gift_dict):
                 found = True
                 order_gift_dict['found'] = True
-                order_gift_dict['promos'].append(promo)
                 break
     if not found:
-        gift.chosen_single_modifiers = []  # todo: is it flexible?
-        gift.chosen_group_modifiers = []   # todo: is it flexible?
-        item_dict = set_item_dicts([gift], is_gift=True)[0]
-        item_dict['promos'].append(promo)
         new_order_gift_dicts.append(item_dict)
 
 
 def set_discounts(response, outcome, item_dicts, promo):
     discount = float(outcome.value) / 100.0
-    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item_details.item):
-        for item_dict in item_keys[outcome.item_details.item]:
-            if _check_item(outcome, item_dict):
-                if _apply_discounts(item_dict, promo, discount):
-                    promo_applied = True
-    if not outcome.item_details.item_required:
-        for item_dict in item_dicts:
-            if _apply_discounts(item_dict, promo, discount):
-                promo_applied = True
+    if outcome.item_details.item:
+        item_dicts = _get_promo_item_dicts(outcome.item_details, item_dicts)
+    for item_dict in item_dicts:
+        if _apply_discounts(item_dict, promo, discount):
+            promo_applied = True
     response.success = promo_applied
     return response
 
 
 def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_payment_sum, order):
     cash_back = float(outcome.value) / 100.0
-    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item_details.item):
-        for item_dict in item_keys[outcome.item_details.item]:
-            if _check_item(outcome, item_dict):
-                if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
-                    promo_applied = True
-    if not outcome.item_details.item_required:
+    if outcome.item_details.item:
+        for item_dict in _get_promo_item_dicts(outcome.item_details, item_dicts):
+            if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
+                promo_applied = True
+    else:
         _apply_total_cash_back(init_total_sum - wallet_payment_sum, cash_back, order)
         promo_applied = True
     if order:
@@ -132,15 +116,11 @@ def set_discount_cheapest(response, outcome, item_dicts, promo):
         return cheapest_item_dict
 
     discount = float(outcome.value) / 100.0
-    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item_details.item):  # Not implemented, unfortunately
-        pass
-    if not outcome.item_details.item_required:
-        item_dict = get_cheapest(item_dicts)
-        if item_dict:
-            if _apply_discounts(item_dict, promo, discount):
-                promo_applied = True
+    item_dict = get_cheapest(item_dicts)
+    if item_dict:
+        if _apply_discounts(item_dict, promo, discount):
+            promo_applied = True
     response.success = promo_applied
     return response
 
@@ -156,31 +136,25 @@ def set_discount_richest(response, outcome, item_dicts, promo):
         return richest_item_dict
 
     discount = float(outcome.value) / 100.0
-    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item_details.item):  # Not implemented, unfortunately
-        pass
-    if not outcome.item_details.item_required:
-        item_dict = get_richest(item_dicts)
-        if item_dict:
-            if _apply_discounts(item_dict, promo, discount):
-                promo_applied = True
+    item_dict = get_richest(item_dicts)
+    if item_dict:
+        if _apply_discounts(item_dict, promo, discount):
+            promo_applied = True
     response.success = promo_applied
     return response
 
 
 def set_gift_points(response, outcome, item_dicts, promo, order):
-    item_keys = _get_item_keys(item_dicts)
     promo_applied = False
-    if item_keys.get(outcome.item_details.item):
-        for item_dict in item_dicts:
-            if _check_item(outcome, item_dict):
-                if order:
-                    order.points_details.append(GiftPointsDetails(item=outcome.item_details.item, points=outcome.value))
-                    order.put()
-                item_dict['promos'].append(promo)
-                promo_applied = True
-    if not outcome.item_details.item_required:
+    if outcome.item_details.item:
+        for item_dict in _get_promo_item_dicts(outcome.item_details, item_dicts):
+            if order:
+                order.points_details.append(GiftPointsDetails(item=outcome.item_details.item, points=outcome.value))
+                order.put()
+            item_dict['promos'].append(promo)
+            promo_applied = True
+    else:
         if order:
             order.points_details.append(GiftPointsDetails(points=outcome.value * len(item_dicts)))
             order.put()
@@ -199,13 +173,8 @@ def set_order_gift_points(response, outcome, order):
     return response
 
 
-def add_order_gift(response, outcome, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
-    gift = MenuItem.get_by_id(int(outcome.value))
-    if not gift:
-        response.error = u'Акция подарок по заказу не привязана к продукту'
-        response.success = False
-        return response
-    _add_order_gift(gift, promo, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
+def add_order_gift(response, outcome, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
+    _add_order_gift(get_item_dict(outcome.item_details), new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
     response.success = True
     return response
 
@@ -238,6 +207,8 @@ def set_delivery_fix_sum_discount(response, outcome, delivery_type, delivery_zon
 
 def set_percent_gift_points(response, outcome, item_dicts, order):
     point_discount = float(outcome.value) / 100.0
+    if outcome.item_details.item:
+        item_dicts = _get_promo_item_dicts(outcome.item_details, item_dicts)
     points = 0
     for item_dict in item_dicts:
         points += int(point_discount * item_dict['price'])
@@ -271,13 +242,17 @@ def remove_persistent_mark(response, item_dicts, promo):
     return response
 
 
-def add_marked_order_gift(response, item_dicts, promo, new_order_gift_dicts, order_gift_dicts,
+def add_marked_order_gift(response, item_dicts, new_order_gift_dicts, order_gift_dicts,
                           cancelled_order_gift_dicts):
     promo_applied = False
     for item_dict in item_dicts:
         if item_dict['persistent_mark'] and item_dict['temporary_mark']:
-            _add_order_gift(item_dict['item'], promo, new_order_gift_dicts, order_gift_dicts,
-                            cancelled_order_gift_dicts)
+            _add_order_gift(item_dict, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
             promo_applied = True
     response.success = promo_applied
+    return response
+
+
+def return_success(response):
+    response.success = True
     return response

@@ -1,7 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 from models import STATUS_CHOICES, STATUS_AVAILABLE
-from models.menu import MenuItem
+from models.menu import MenuItem, SingleModifier
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
 from models.promo_code import PromoCode
@@ -85,6 +85,12 @@ class SharedGiftMenuItem(ndb.Model):  # self.id() == item.key.id()
         return self.item.get().dict()
 
 
+class ChosenSharedGiftMenuItem(ndb.Model):
+    shared_item = ndb.KeyProperty(kind=SharedGiftMenuItem, required=True)
+    group_choice_ids = ndb.IntegerProperty(repeated=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+
+
 class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
@@ -104,7 +110,7 @@ class SharedGift(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     promo_code = ndb.KeyProperty(kind=PromoCode)
     share_id = ndb.IntegerProperty(required=True)
-    share_item = ndb.KeyProperty(required=True, kind=SharedGiftMenuItem)
+    share_items = ndb.KeyProperty(kind=ChosenSharedGiftMenuItem, repeated=True)
     client_id = ndb.IntegerProperty(required=True)         # Who pays for cup
     recipient_name = ndb.StringProperty(required=True)
     recipient_phone = ndb.StringProperty(required=True)
