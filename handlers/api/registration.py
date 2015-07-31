@@ -82,7 +82,7 @@ def _perform_registration(request):
                 if share.status == Share.ACTIVE:
                     gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()
                     if gift.status == SharedGift.READY:
-                        gift.deactivate(client, namespace_manager.get_namespace())
+                        gift.perform(client, namespace_manager.get_namespace())
                     response['branch_name'] = share_data.get('name')
                     response['branch_phone'] = share_data.get('phone')
     return response

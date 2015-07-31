@@ -33,6 +33,12 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
                 logging.exception(e)
                 email.send_error("payment", "Wallet reversal failed", str(e))
                 # main payment reversed -- do not abort
+        for share_gift in order.shared_gift_details:
+            gift = share_gift.gift.get()
+            gift.recover()
+        for performing in order.promo_code_performings:
+            performing = performing.get()
+            performing.recover()
 
         order.status = status
         order.return_datetime = datetime.utcnow()

@@ -202,7 +202,6 @@ app = WSGIApplication([
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),
             PathPrefixRoute('/gift', [
-                Route('/info', api.GiftInfoHandler),
                 Route('/items', api.SharedGiftListHandler),
                 Route('/history', api.SharedGiftHistoryHandler),
                 Route('/get_url', api.GetGiftUrlHandler),

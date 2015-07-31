@@ -3,7 +3,7 @@ import random
 from google.appengine.ext import ndb
 from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier, STATUS_CHOICES
-from models.menu import MenuItem
+from models.menu import MenuItem, SingleModifier
 from models.schedule import Schedule
 
 __author__ = 'dvpermyakov'
@@ -39,16 +39,16 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
 
 
 class PromoMenuItem(ndb.Model):
-    item_required = ndb.BooleanProperty(default=False)  # item_required is False => apply for all items
     item = ndb.KeyProperty(kind=MenuItem)
-    group_choice_ids = ndb.IntegerProperty(repeated=True)  # it can be None => not restrict in group modifiers
+    group_choice_ids = ndb.IntegerProperty(repeated=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
 
 
 class PromoOutcome(ndb.Model):
-    DISCOUNT = 0               # calculated by prices
-    CASH_BACK = 1              # calculated by prices
-    DISCOUNT_CHEAPEST = 2      # calculated by prices ## use priority to imply in the end
-    DISCOUNT_RICHEST = 3       # calculated by prices ## use priority to imply in the end
+    DISCOUNT = 0
+    CASH_BACK = 1
+    DISCOUNT_CHEAPEST = 2
+    DISCOUNT_RICHEST = 3
     ACCUMULATE_GIFT_POINT = 4
     ORDER_GIFT = 5
     ORDER_ACCUMULATE_GIFT_POINT = 6
@@ -59,9 +59,10 @@ class PromoOutcome(ndb.Model):
     SET_PERSISTENT_MARK = 11
     REMOVE_PERSISTENT_MARK = 12
     MARKED_ORDER_GIFT = 13
+    EMPTY = 14
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
-               PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT)
+               PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -207,5 +208,6 @@ OUTCOME_MAP = {
     PromoOutcome.PERCENT_GIFT_POINT: u'Баллы, равные проценту от суммы',
     PromoOutcome.SET_PERSISTENT_MARK: u'Установить метку (метка)',
     PromoOutcome.REMOVE_PERSISTENT_MARK: u'Удалить метку (метка)',
-    PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)'
+    PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)',
+    PromoOutcome.EMPTY: u'Выводить сообщение'
 }

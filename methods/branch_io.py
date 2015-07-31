@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from google.appengine.api import urlfetch
 import json
 from config import Config
@@ -50,15 +51,10 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
             'phone': recipient.get('phone') if recipient else None,
             'name': recipient.get('name') if recipient else None,
             'share_id': share_id,
-            '$desktop_url': config.BRANCH_DESKTOP_URL,
-            '$android_url': config.BRANCH_ANDROID_URL,
-            '$ios_url': config.BRANCH_IOS_URL,
-            '$deeplink_path': '',
-            '$always_deeplink': False
         },
         'alias': alias if alias else None,
         'identity': share_id,
-        'tags': [config.BRANCH_IO_TAG, user_agent],
+        'tags': [user_agent],
         'feature': FEATURE_MAP[feature],
         'channel': CHANNEL_MAP[channel]
     }
@@ -66,6 +62,8 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
         for item in custom_tags.items():
             params['tags'].append("%s__%s" % item)
     url = '%s%s' % (BASE_URL, '/v1/url')
+    logging.info(url)
     response = urlfetch.fetch(url=url, payload=json.dumps(params), method=urlfetch.POST,
                               headers={'Content-Type': 'application/json'}).content
+    logging.info(response)
     return json.loads(response)['url']
