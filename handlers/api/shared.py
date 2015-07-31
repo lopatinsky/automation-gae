@@ -82,7 +82,7 @@ class GetGiftUrlHandler(ApiHandler):
             'description': error
         })
 
-    def success(self, sender, gift, promo_code, name=None, phone=None):
+    def success(self, sender, gift, promo_code, sender_phone, sender_email, name=None, phone=None):
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -100,9 +100,11 @@ class GetGiftUrlHandler(ApiHandler):
         share.put()
         gift.share_id = share.key.id()
         gift.put()
+        text = u'ссылка = %s, код = %s' % (url, promo_code.key.id())
+        # todo: send email and sms
         self.render_json({
             'success': True,
-            'sms_text': u'ссылка = %s, код = %s' % (url, promo_code.key.id())
+            'sms_text': text
         })
 
     def post(self):
@@ -110,6 +112,8 @@ class GetGiftUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
+        sender_phone = self.request.get('sender_phone')
+        sender_email = self.request.get('sender_email')
         items_json = json.loads(self.request.get('items'))
         items = set_modifiers(items_json)
         items = set_price_with_modifiers(items)
@@ -118,14 +122,15 @@ class GetGiftUrlHandler(ApiHandler):
             share_item = SharedGiftMenuItem.get_by_id(item.key.id())
             if share_item.status == STATUS_UNAVAILABLE:
                 return self.send_error(u'Продукт %s недоступен' % item.title)
-            chosen_shared_item = ChosenSharedGiftMenuItem(shared_item=share_item)
+            chosen_shared_item = ChosenSharedGiftMenuItem(shared_item=share_item.key)
             chosen_shared_item.group_choice_ids = [modifier.choice.choice_id for modifier in item.chosen_group_modifiers]
             chosen_shared_item.single_modifiers = [modifier.key for modifier in item.chosen_single_modifiers]
+            chosen_shared_item.put()
             share_items.append(chosen_shared_item)
-        total_sum = 0
+        total_sum = 0.0
         for item in items:
             total_sum += item.total_price
-        request_total_sum = self.request.get('total_sum')
+        request_total_sum = float(self.request.get('total_sum'))
         if round(total_sum) != round(request_total_sum):
             return self.send_error(u'Сумма была пересчитана')
         recipient_phone = "".join(c for c in self.request.get('recipient_phone') if '0' <= c <= '9')
@@ -153,11 +158,12 @@ class GetGiftUrlHandler(ApiHandler):
                     promo_code.put()
                     group_promo_codes.promo_codes = [promo_code.key]
                     group_promo_codes.put()
+                    share_item_keys = [item.key for item in share_items]
                     gift = SharedGift(client_id=client_id, total_sum=total_sum, order_id=order_id,
-                                      payment_type_id=payment_type_id, payment_id=result, share_items=share_items,
+                                      payment_type_id=payment_type_id, payment_id=result, share_items=share_item_keys,
                                       recipient_name=recipient_name, recipient_phone=recipient_phone,
                                       promo_code=promo_code.key)
-                    self.success(client, gift=gift, promo_code=promo_code, name=recipient_name, phone=recipient_phone)
+                    self.success(client, gift, promo_code, sender_phone, sender_email, name=recipient_name, phone=recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')
         else:

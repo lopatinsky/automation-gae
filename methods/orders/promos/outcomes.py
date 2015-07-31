@@ -14,8 +14,9 @@ def get_item_dict(item_details):
     return {
         'item': item,
         'image': item.picture,
-        'single_modifier_keys': item_details.single_modifiers,
-        'group_modifier_keys': [(modifier.key, modifier.choice.choice_id) for modifier in chosen_group_modifiers],
+        'single_modifier_keys': sorted(item_details.single_modifiers, key=lambda modifier_key: modifier_key.id()),
+        'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
+                                for modifier in sorted(chosen_group_modifiers, key=lambda modifier: modifier.key.id())],
     }
 
 

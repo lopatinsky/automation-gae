@@ -163,11 +163,11 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
     for order_gift_dict in order_gift_dicts[:]:
         if not order_gift_dict.get('found'):
             order_gift_dicts.remove(order_gift_dict)
-            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
+            unavail_order_gift_dicts.append(order_gift_dict)
     for order_gift_dict in cancelled_order_gift_dicts[:]:
         if not order_gift_dict.get('found'):
             cancelled_order_gift_dicts.remove(order_gift_dict)
-            unavail_order_gift_dicts.append(unavail_order_gift_dicts)
+            unavail_order_gift_dicts.append(order_gift_dict)
     total_sum = _get_final_total_sum(total_sum, item_dicts)
     total_sum = max(0, total_sum)
     return error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos, total_sum, delivery_zone

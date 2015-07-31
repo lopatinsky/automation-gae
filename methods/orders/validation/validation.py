@@ -176,9 +176,11 @@ def set_item_dicts(items, is_gift=False):
             'share_gift_obj': item.share_gift_obj if hasattr(item, 'share_gift_obj') else None,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
-            'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
+            'single_modifier_keys': [modifier.key for modifier in
+                                     sorted(item.chosen_single_modifiers, key=lambda modifier: modifier.key.id())],
             'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
-                                    for modifier in item.chosen_group_modifiers],
+                                    for modifier in sorted(item.chosen_group_modifiers,
+                                                           key=lambda modifier: modifier.key.id())],
             'price': item.total_price if not is_gift else 0,
             'revenue': item.total_price if not is_gift else 0,
             'errors': [],
@@ -198,26 +200,26 @@ def get_avail_gifts(points):
 
 def get_shared_gifts(client):
     shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
-    shared_gift_json = []
+    shared_gift_dict = []
     for shared_gift in shared_gifts:
         for shared_item in shared_gift.share_items:
+            shared_item = shared_item.get()
             chosen_group_modifiers = []
             for choice_id in shared_item.group_choice_ids:
                 modifier = GroupModifier.get_modifier_by_choice(choice_id)
                 modifier.choice = modifier.get_choice_by_id(choice_id)
                 chosen_group_modifiers.append(modifier)
-            shared_gift_json.append({
-                'item_id': shared_item.shared_item.get(),
-                'quantity': 1,
-                'single_modifiers': shared_item.share_single_modifiers,
-                'group_modifiers': [(modifier.key, modifier.choice.choice_id)
-                                    for modifier in chosen_group_modifiers],
+            shared_menu_item = shared_item.shared_item.get()
+            item = shared_menu_item.item.get()
+            shared_gift_dict.append({
+                'item': item,
+                'image': item.picture,
+                'single_modifier_keys': sorted(shared_item.single_modifiers, key=lambda modifier_key: modifier_key.id()),
+                'group_modifier_keys': [(modifier.key, modifier.choice.choice_id) for modifier in
+                                        sorted(chosen_group_modifiers, key=lambda modifier: modifier.key.id())],
                 'share_gift_obj': shared_gift
             })
-    shared_gifts = set_modifiers(shared_gift_json, with_share_gift_obj=True)
-    shared_gift_dicts = set_item_dicts(shared_gifts, True)
-
-    return shared_gift_dicts
+    return shared_gift_dict
 
 
 def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, shared_gift_dicts,
@@ -230,7 +232,8 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
         'errors': [error] if error else [],
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
-        'new_order_gifts': [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict['found']],
+        'new_order_gifts': group_item_dicts([shared_gift_dict for shared_gift_dict in shared_gift_dicts
+                                             if not shared_gift_dict.get('found')]),
         'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
@@ -283,7 +286,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     shared_gift_dicts = get_shared_gifts(client)
     for shared_gift_dict in shared_gift_dicts:
         for order_gift_dict in order_gift_dicts:
-            if not order_gift_dict['found'] and is_equal(shared_gift_dict, order_gift_dict):
+            if not order_gift_dict.get('found') and is_equal(shared_gift_dict, order_gift_dict):
                 order_gift_dict['found'] = True
                 shared_gift_dict['found'] = True
 
@@ -362,7 +365,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
         grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
         grouped_shared_gift_dicts = group_item_dicts(
-            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict['found']])
+            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
         grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
     else:
         grouped_item_dicts = []

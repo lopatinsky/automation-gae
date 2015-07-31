@@ -1,5 +1,6 @@
 # coding=utf-8
 from google.appengine.ext import ndb
+from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
 from models import Client
 from google.appengine.api.namespace_manager import namespace_manager
@@ -73,11 +74,10 @@ class PromoCode(ndb.Model):
             return False, u'Вы уже активировали этот промо-код'
         return True, None
 
-    @ndb.transactional(xg=True)
     def perform(self, client):  # use only after check()
         performing = PromoCodePerforming(promo_code=self.key, client=client.key, group_id=self.group_id)
         performing.put()
-        performing.perform(client)
+        deferred.defer(performing.perform, client)
         self.status = STATUS_PERFORMING
         self.amount -= 1
         self.put()
@@ -122,7 +122,7 @@ class PromoCodePerforming(ndb.Model):
         promo_code = self.promo_code.get()
         if promo_code.kind == KIND_SHARE_GIFT:
             gift = SharedGift.query(SharedGift.promo_code == promo_code.key).get()
-            gift.deactivate(client, namespace_manager.get_namespace())
+            gift.perform(client, namespace_manager.get_namespace())
             self.status = self.PROCESSING_ACTION
         elif promo_code.kind == KIND_WALLET:
             deposit(client.key.id(), promo_code.value * 100, 'promo code %s' % self.promo_code.id())

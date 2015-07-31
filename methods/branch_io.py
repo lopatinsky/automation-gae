@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from google.appengine.api import urlfetch
 import json
 from config import Config
@@ -61,6 +62,8 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
         for item in custom_tags.items():
             params['tags'].append("%s__%s" % item)
     url = '%s%s' % (BASE_URL, '/v1/url')
+    logging.info(url)
     response = urlfetch.fetch(url=url, payload=json.dumps(params), method=urlfetch.POST,
                               headers={'Content-Type': 'application/json'}).content
+    logging.info(response)
     return json.loads(response)['url']
