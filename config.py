@@ -17,6 +17,7 @@ DEMO_HOSTNAME = u'automation-demo.appspot.com'
 PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
 TEST_VERSIONS = ('.test.', '.p-test.', '.courier.')
 
+EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 class Config(ndb.Model):
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation

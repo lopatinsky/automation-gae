@@ -1,6 +1,12 @@
 # coding: utf-8
 import json
-from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers, set_item_dicts
+from google.appengine.api.namespace_manager import namespace_manager
+from google.appengine.ext.deferred import deferred
+from config import Config, EMAIL_FROM
+from methods.email import send_error
+from methods.email_mandrill import send_email
+from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
+from methods.twilio import send_sms
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
 
 __author__ = 'dvpermyakov'
@@ -82,7 +88,7 @@ class GetGiftUrlHandler(ApiHandler):
             'description': error
         })
 
-    def success(self, sender, gift, promo_code, sender_phone, sender_email, name=None, phone=None):
+    def success(self, sender, gift, promo_code, sender_phone, sender_email, reciptient_name, recipient_phone):
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -92,8 +98,8 @@ class GetGiftUrlHandler(ApiHandler):
         else:
             user_agent = 'unknown'
         recipient = {
-            'name': name,
-            'phone': phone
+            'name': reciptient_name,
+            'phone': recipient_phone
         }
         url = branch_io.create_url(share.key.id(), branch_io.INVITATION, branch_io.SMS, user_agent, recipient=recipient)
         share.urls = [url]
@@ -101,7 +107,15 @@ class GetGiftUrlHandler(ApiHandler):
         gift.share_id = share.key.id()
         gift.put()
         text = u'ссылка = %s, код = %s' % (url, promo_code.key.id())
-        # todo: send email and sms
+        try:
+            send_sms([sender_phone], text)
+        except Exception as e:
+            config = Config.get()
+            error_text = str(e)
+            error_text += u' В компании "%s" (%s) при отправке смс о подаренном подарке.' \
+                          % (config.APP_NAME, namespace_manager.get_namespace())
+            send_error('sms_error', 'Send sms', error_text)
+        deferred.defer(send_email, EMAIL_FROM, sender_email, u'Подарок другу', text)
         self.render_json({
             'success': True,
             'sms_text': text
@@ -163,7 +177,7 @@ class GetGiftUrlHandler(ApiHandler):
                                       payment_type_id=payment_type_id, payment_id=result, share_items=share_item_keys,
                                       recipient_name=recipient_name, recipient_phone=recipient_phone,
                                       promo_code=promo_code.key)
-                    self.success(client, gift, promo_code, sender_phone, sender_email, name=recipient_name, phone=recipient_phone)
+                    self.success(client, gift, promo_code, sender_phone, sender_email, recipient_name, recipient_phone)
             else:
                 self.send_error(u'Возможна оплата только картой')
         else:

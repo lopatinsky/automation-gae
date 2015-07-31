@@ -3,7 +3,7 @@ from urlparse import urlparse
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
-from config import config
+from config import config, EMAIL_FROM
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods.email import send_error
@@ -13,8 +13,6 @@ from models.payment_types import PAYMENT_TYPE_MAP
 from models.venue import DELIVERY_MAP, DELIVERY
 
 __author__ = 'dvpermyakov'
-
-EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 
 def send_venue_sms(venue, order):
