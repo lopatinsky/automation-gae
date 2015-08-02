@@ -81,8 +81,6 @@ class OrderHandler(ApiHandler):
             coordinates = None
 
         comment = response_json['comment']
-        if self.test:
-            comment = u'Тестовый заказ. %s' % comment
         device_type = response_json.get('device_type', IOS_DEVICE)
 
         delivery_slot_id = response_json.get('delivery_slot_id')
