@@ -107,7 +107,7 @@ class OrderHandler(ApiHandler):
         request_total_sum = response_json.get("total_sum")
         request_delivery_sum = int(response_json.get('delivery_sum')) if response_json.get('delivery_sum') else 0
 
-        client_id, client = set_client_info(response_json.get('client'))
+        client_id, client = set_client_info(response_json.get('client'), comment)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
 

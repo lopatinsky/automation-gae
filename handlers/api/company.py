@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from base import ApiHandler
 from config import config, Config
+from methods.rendering import latinize
 from models import STATUS_AVAILABLE, Venue
 from models.venue import DELIVERY
 from models.specials import get_channels
@@ -29,6 +30,15 @@ class CompanyInfoHandler(ApiHandler):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
         self.render_json({
+            'extra_client_fields': [{
+                'fields': [{
+                    'title': field,
+                    'field': latinize(field),
+                    'type': 'string'
+                } for field in config.EXTRA_CLIENT_INFO_FIELDS],
+                'module': None,
+                'group': 0
+            }],
             'app_name': config.APP_NAME,
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
             'description': config.COMPANY_DESCRIPTION,

@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 import logging
 import re
+from config import Config
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
-from methods.rendering import STR_DATETIME_FORMAT
+from methods.rendering import STR_DATETIME_FORMAT, latinize
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.venue import DELIVERY
 
@@ -27,7 +28,7 @@ def check_items_and_gifts(items, gifts):
         return True
 
 
-def set_client_info(client_json):
+def set_client_info(client_json, comment=None):
     client_id = int(client_json.get('id'))
     if not client_id:
         return None, None
@@ -35,17 +36,19 @@ def set_client_info(client_json):
     if not client:
         return None, None
     name = client_json.get('name').split(None, 1)
-    client_name = name[0]
-    client_surname = name[1] if len(name) > 1 else ""
-    client_tel = re.sub("[^0-9]", "", client_json.get('phone'))
-    client_email = client_json.get('email')
-    if client.name != client_name or client.surname != client_surname or client.tel != client_tel \
-            or client.email != client_email:
-        client.name = client_name
-        client.surname = client_surname
-        client.tel = client_tel
-        client.email = client_email
-        client.put()
+    client.name = name[0]
+    client.surname = name[1] if len(name) > 1 else ""
+    client.tel = re.sub("[^0-9]", "", client_json.get('phone'))
+    client.email = client_json.get('email')
+    config = Config.get()
+    extra_json = {}
+    for field in config.EXTRA_CLIENT_INFO_FIELDS:
+        value = client_json.get(latinize(field))
+        if comment:
+            comment += ' %s: %s,' % (field, value)
+        extra_json[field] = value
+    client.extra_data = extra_json
+    client.put()
     return client_id, client
 
 

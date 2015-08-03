@@ -15,9 +15,10 @@ SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
 DEMO_HOSTNAME = u'automation-demo.appspot.com'
 PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
-TEST_VERSIONS = ('.test.', '.p-test.', '.courier.')
+TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
 
 EMAIL_FROM = 'noreply-order@ru-beacon.ru'
+
 
 class Config(ndb.Model):
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
@@ -62,6 +63,8 @@ class Config(ndb.Model):
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
+
+    EXTRA_CLIENT_INFO_FIELDS = ndb.StringProperty(indexed=False, repeated=True)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
 
