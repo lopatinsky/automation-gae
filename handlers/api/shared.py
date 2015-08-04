@@ -17,6 +17,7 @@ from base import ApiHandler
 from methods import branch_io, alfa_bank
 from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift, STATUS_UNAVAILABLE
 from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem
+from methods.rendering import get_phone
 import logging
 
 
@@ -110,11 +111,7 @@ class GetGiftUrlHandler(ApiHandler):
         try:
             send_sms([sender_phone], text)
         except Exception as e:
-            config = Config.get()
-            error_text = str(e)
-            error_text += u' В компании "%s" (%s) при отправке смс о подаренном подарке.' \
-                          % (config.APP_NAME, namespace_manager.get_namespace())
-            send_error('sms_error', 'Send sms', error_text)
+            logging.warning(str(e))
         deferred.defer(send_email, EMAIL_FROM, sender_email, u'Подарок другу', text)
         self.render_json({
             'success': True,
@@ -126,7 +123,7 @@ class GetGiftUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
-        sender_phone = self.request.get('sender_phone')
+        sender_phone = get_phone(self.request.get('sender_phone'))
         sender_email = self.request.get('sender_email')
         items_json = json.loads(self.request.get('items'))
         items = set_modifiers(items_json)
