@@ -50,8 +50,6 @@ class Config(ndb.Model):
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
 
-    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
-
     APP_NAME = ndb.StringProperty(indexed=False)
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)

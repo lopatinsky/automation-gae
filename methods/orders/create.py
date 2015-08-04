@@ -1,18 +1,56 @@
 # coding=utf-8
 from urlparse import urlparse
+from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
 from config import config, EMAIL_FROM
+from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
+from methods import alfa_bank
 from methods.email import send_error
 from methods.email_mandrill import send_email
 from methods.twilio import send_sms
 from models.payment_types import PAYMENT_TYPE_MAP
-from models.venue import DELIVERY_MAP, DELIVERY
+from models.venue import DELIVERY_MAP, DELIVERY, Address
 
 __author__ = 'dvpermyakov'
+
+
+def card_payment_performing(payment_json, amount, order):
+    binding_id = payment_json['binding_id']
+    client_id = payment_json['client_id']
+    return_url = payment_json['return_url']
+
+    success, result = alfa_bank.create_simple(amount, order.key.id(), return_url, client_id)
+    if not success:
+        return success, result
+
+    order.payment_id = result
+    order.put()
+    success, error = alfa_bank.hold_and_check(order.payment_id, binding_id)
+    if not success:
+        error = u"Не удалось произвести оплату. %s" % error
+    return success, error
+
+
+def paypal_payment_performing(payment_json, amount, order, client):
+    correlation_id = payment_json['correlation_id']
+    success, info = paypal.authorize(order.key.id(), amount / 100.0, client.paypal_refresh_token, correlation_id)
+    if success:
+        order.payment_id = info
+        order.put()
+    error = None
+    if not success:
+        error = u'Не удалось произвести оплату'
+    return success, error
+
+
+def send_client_sms(order):
+    SECONDS_WAITING_BEFORE_SMS = 15
+    taskqueue.add(url='/task/check_order_success', params={'order_id': order.key.id()},
+                  countdown=SECONDS_WAITING_BEFORE_SMS)
 
 
 def send_venue_sms(venue, order):
@@ -52,3 +90,14 @@ def send_venue_email(venue, order, url, jinja2):
         for email in venue.emails:
             deferred.defer(send_email, EMAIL_FROM, email, text,
                            jinja2.render_template('/company/delivery/items.html', **item_values))
+
+
+def set_address_obj(address_json, order):
+    address_args = {
+        'lat': float(address_json['coordinates']['lat']) if address_json['coordinates']['lat'] else None,
+        'lon': float(address_json['coordinates']['lon']) if address_json['coordinates']['lon'] else None
+    }
+    address_args.update(address_json['address'])
+    address_obj = Address(**address_args)
+    address_obj.comment = address_json['comment'] if address_json.get('comment') else None
+    order.address = address_obj

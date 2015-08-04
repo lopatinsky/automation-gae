@@ -2,7 +2,7 @@
 import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
-from methods.rendering import opt, timestamp
+from methods.rendering import timestamp
 from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
 from models.client import Client
@@ -115,12 +115,12 @@ class Order(ndb.Model):
     venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
-    comment = ndb.StringProperty(indexed=False)  # todo: it is need for barista. why?
+    comment = ndb.StringProperty(indexed=False)
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
     address = ndb.LocalStructuredProperty(Address)
-    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
+    #items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     order_gift_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
@@ -239,7 +239,7 @@ class Order(ndb.Model):
             "total_sum": self.total_sum,
             "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
-            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
+            "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": Client.get_by_id(self.client_id).dict(),
             "pan": self.pan,
             "comment": self.comment,

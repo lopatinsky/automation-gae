@@ -1,34 +1,39 @@
+# coding=utf-8
 from datetime import datetime, timedelta
 import logging
 import re
+from google.appengine.ext.ndb import Key
 from config import Config
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
+from methods.orders.validation.validation import get_first_error
 from methods.rendering import STR_DATETIME_FORMAT, latinize
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
+from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
 
 
-def check_order_id(order_id):
+def get_order_id(order_json):
+    order_id = order_json.get('order_id')
     if order_id:
-        order = Order.get_by_id(order_id)
+        order = Order.get_by_id(int(order_id))
         if order:
-            return False, None
+            return None
         else:
-            return True, order_id
+            return order_id
     else:
-        return True, Order.generate_id()
+        return Order.generate_id()
 
 
-def check_items_and_gifts(items, gifts):
-    if len(items) == 0 and len(gifts) == 0:
+def check_items_and_gifts(order_json):
+    if not order_json['items'] and not order_json.get('gifts') and not order_json.get('order_gifts'):
         return False
     else:
         return True
 
 
-def set_client_info(client_json, comment=None):
+def set_client_info(client_json, order=None):
     client_id = int(client_json.get('id'))
     if not client_id:
         return None, None
@@ -44,12 +49,12 @@ def set_client_info(client_json, comment=None):
     extra_json = {}
     for field in config.EXTRA_CLIENT_INFO_FIELDS:
         value = client_json.get(latinize(field))
-        if comment:
-            comment += ' %s: %s,' % (field, value)
+        if order:
+            order.comment += ' %s: %s,' % (field, value)
         extra_json[field] = value
     client.extra_data = extra_json
     client.put()
-    return client_id, client
+    return client
 
 
 def validate_address(address):
@@ -174,3 +179,31 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
             delivery_time = datetime.utcnow()
         delivery_time += timedelta(minutes=delivery_time_minutes)
     return delivery_time
+
+
+def check_after_error(order_json, client):
+    MINUTES = 3
+    min_ago = datetime.utcnow() - timedelta(minutes=MINUTES)
+    previous_order = Order.query(Order.client_id == client.key.id(),
+                                 Order.status.IN(NOT_CANCELED_STATUSES),
+                                 Order.date_created >= min_ago).get()
+    item_keys = [Key('MenuItem', int(item['item_id'])) for item in order_json['items']]
+    return previous_order and sorted(previous_order.items) == sorted(item_keys)
+
+
+def after_validation_check(validation_result, order):
+    if not validation_result['valid']:
+        logging.warning('Fail in validation')
+        return False, get_first_error(validation_result)
+
+    total_sum = validation_result['total_sum']
+    delivery_sum = validation_result['delivery_sum']
+    if order.total_sum and round(total_sum * 100) != round(order.total_sum * 100):
+        return False, u"Сумма заказа была пересчитана"
+    if order.delivery_sum and round(delivery_sum * 100) != round(order.delivery_sum * 100):
+        return False, u"Сумма доставки была пересчитана"
+    if order.wallet_payment and round(order.wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):
+        return False, u"Сумма оплаты баллами была пересчитана"
+    if validation_result['unavail_order_gifts'] or validation_result['new_order_gifts']:
+        return False, u"Подарки были пересчитаны"
+    return True, None
