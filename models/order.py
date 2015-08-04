@@ -120,7 +120,6 @@ class Order(ndb.Model):
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
     address = ndb.LocalStructuredProperty(Address)
-    #items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     order_gift_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)

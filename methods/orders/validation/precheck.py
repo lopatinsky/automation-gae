@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta
 import logging
 import re
-from google.appengine.ext.ndb import Key
 from config import Config
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
@@ -187,8 +186,16 @@ def check_after_error(order_json, client):
     previous_order = Order.query(Order.client_id == client.key.id(),
                                  Order.status.IN(NOT_CANCELED_STATUSES),
                                  Order.date_created >= min_ago).get()
-    item_keys = [Key('MenuItem', int(item['item_id'])) for item in order_json['items']]
-    return previous_order and sorted(previous_order.items) == sorted(item_keys)
+    if not previous_order:
+        return False
+    group_details = Order.grouped_item_dict(previous_order.item_details)
+    if len(order_json['items']) != len(group_details):
+        return False
+    for index, item_detail in enumerate(group_details):
+        item_dict = order_json['items'][index]
+        if item_dict['item_id'] != item_detail['id'] or item_dict['quantity'] != item_detail['quantity']:
+            return False
+    return True
 
 
 def after_validation_check(validation_result, order):

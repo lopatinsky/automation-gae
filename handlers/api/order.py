@@ -76,12 +76,12 @@ class OrderHandler(ApiHandler):
         self.order.comment = order_json['comment']
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
 
-        self.order.delivery_slot_id = order_json.get('delivery_slot_id', None)
-        if self.order.delivery_slot_id == '-1':
+        self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
+            if order_json.get('delivery_slot_id') else None
+        if self.order.delivery_slot_id == -1:
             return self.render_error(u'Неверно выбран слот времени')
         if self.order.delivery_slot_id:
-            delivery_slot_id = int(self.order.delivery_slot_id)
-            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
+            delivery_slot = DeliverySlot.get_by_id(self.order.delivery_slot_id)
             if not delivery_slot:
                 return self.render_error(u'Неправильный формат времени')
         else:
@@ -96,20 +96,21 @@ class OrderHandler(ApiHandler):
         if not self.order.delivery_time:
             return self.render_error(u'Неправильный формат времени')
 
-        self.order.total_sum = int(order_json.get("total_sum"))
-        self.order.delivery_sum = int(order_json.get('delivery_sum')) if order_json.get('delivery_sum') else 0
+        self.order.total_sum = float(order_json.get("total_sum"))
+        self.order.delivery_sum = int(order_json.get('delivery_sum', 0))
 
         client = set_client_info(order_json.get('client'), self.order)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
         self.order.client_id = client.key.id()
+        self.order.user_agent = self.request.headers["User-Agent"]
 
         self.order.payment_type_id = order_json['payment']['type_id']
         payment_type = PaymentType.get_by_id(str(self.order.payment_type_id))
         if payment_type.status == STATUS_UNAVAILABLE:
             return self.render_error(u"Выбранный способ оплаты недоступен.")
 
-        self.order.wallet_payment = order_json['payment'].get('wallet_payment', 0.0)
+        self.order.wallet_payment = order_json['payment'].get('wallet_payment', 0)
 
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
