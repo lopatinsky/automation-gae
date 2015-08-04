@@ -1,11 +1,10 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
-import re
 from config import Config
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
-from methods.rendering import STR_DATETIME_FORMAT, latinize
+from methods.rendering import STR_DATETIME_FORMAT, latinize, get_phone, get_separated_name_surname
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
@@ -35,14 +34,14 @@ def check_items_and_gifts(order_json):
 def set_client_info(client_json, order=None):
     client_id = int(client_json.get('id'))
     if not client_id:
-        return None, None
+        return None
     client = Client.get_by_id(client_id)
     if not client:
-        return None, None
-    name = client_json.get('name').split(None, 1)
-    client.name = name[0]
-    client.surname = name[1] if len(name) > 1 else ""
-    client.tel = re.sub("[^0-9]", "", client_json.get('phone'))
+        return None
+    name, surname = get_separated_name_surname(client_json.get('name'))
+    client.name = name
+    client.surname = surname
+    client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
     config = Config.get()
     extra_json = {}

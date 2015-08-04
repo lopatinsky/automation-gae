@@ -1,6 +1,6 @@
 # coding=utf-8
 import time
-
+import re
 
 STR_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 STR_DATE_FORMAT = "%Y-%m-%d"
@@ -25,3 +25,17 @@ def latinize(name):
             if letter in english:
                 new_name += letter
     return new_name
+
+
+def get_phone(phone_str):
+    return re.sub("[^0-9]", "", phone_str)
+
+
+def get_separated_name_surname(name_and_surname):
+    values = name_and_surname.split(None, 1)
+    if not values:
+        return '', ''
+    elif len(values) == 1:
+        return values[0], ''
+    else:
+        return values[0], values[1]
