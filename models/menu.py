@@ -2,7 +2,7 @@
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, STATUS_CHOICES
 
 SINGLE_MODIFIER = 0
 GROUP_MODIFIER = 1
@@ -177,12 +177,14 @@ class GroupModifier(ndb.Model):
 
 
 class MenuCategory(ndb.Model):
+    init = ndb.BooleanProperty(default=False)  # it is true if it is the first category in inserted menu
+    category = ndb.KeyProperty()  # kind=self
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
-    status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty()
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
+    def get_categories(self):
+        return MenuCategory.query(MenuCategory.category == self.key).fetch()
 
     def get_items(self, only_available=False):
         items = MenuItem.query(MenuItem.category == self.key).fetch()
@@ -262,11 +264,24 @@ class MenuCategory(ndb.Model):
                 },
                 'order': self.sequence_number if self.sequence_number else 0
             },
-            'items': items
+            'items': items,
+            'categories': [category.dict() for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
         return dct
+
+    @staticmethod
+    def get_menu_dict(venue=None):
+        init_category = MenuCategory.query(MenuCategory.init == True).get()
+        if not init_category:
+            return []
+        category_dicts = []
+        for category in init_category.get_categories():
+            category_dict = category.dict(venue)
+            if category_dict['items'] or category_dict['categories']:
+                category_dicts.append(category_dict)
+        return category_dicts
 
 
 class MenuItem(ndb.Model):
@@ -281,8 +296,7 @@ class MenuItem(ndb.Model):
     volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
 
-    status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
-                                 default=STATUS_AVAILABLE)
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
