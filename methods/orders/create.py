@@ -57,12 +57,13 @@ def send_venue_sms(venue, order):
     if venue.phones:
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         for phone in venue.phones:
-            try:
-                send_sms([phone], text)
-            except Exception as e:
-                error_text = str(e)
-                error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
-                send_error('sms_error', 'Send sms', error_text)
+            if phone:
+                try:
+                    send_sms([phone], text)
+                except Exception as e:
+                    error_text = str(e)
+                    error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
+                    send_error('sms_error', 'Send sms', error_text)
 
 
 def send_venue_email(venue, order, url, jinja2):
@@ -88,8 +89,9 @@ def send_venue_email(venue, order, url, jinja2):
             if order.delivery_type == DELIVERY:
                 item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, order.email_key_confirm)
         for email in venue.emails:
-            deferred.defer(send_email, EMAIL_FROM, email, text,
-                           jinja2.render_template('/company/delivery/items.html', **item_values))
+            if email:
+                deferred.defer(send_email, EMAIL_FROM, email, text,
+                               jinja2.render_template('/company/delivery/items.html', **item_values))
 
 
 def set_address_obj(address_json, order):
