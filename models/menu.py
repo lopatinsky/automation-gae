@@ -260,7 +260,7 @@ class MenuCategory(ndb.Model):
                 'title': self.title,
                 'pic': self.picture,
                 'restrictions': {
-                    'venues': [str(restrict.id()) for restrict in self.restrictions]
+                    'venues': []  # todo: update restrictions logic for categories
                 },
                 'order': self.sequence_number if self.sequence_number else 0
             },
