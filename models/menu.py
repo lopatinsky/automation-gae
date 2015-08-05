@@ -177,11 +177,19 @@ class GroupModifier(ndb.Model):
 
 
 class MenuCategory(ndb.Model):
-    init = ndb.BooleanProperty(default=False)  # it is true if it is the first category in inserted menu
-    category = ndb.KeyProperty()  # kind=self
+    category = ndb.KeyProperty()  # kind=self, if it is None, that is initial category
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
+    icon = ndb.StringProperty(indexed=False)
     sequence_number = ndb.IntegerProperty()
+
+    @classmethod
+    def get_initial_category(cls):
+        category = cls.query(MenuCategory.category == None).get()
+        if not category:
+            category = cls(title=u'Начальная категория')
+            category.put()
+        return category
 
     def get_categories(self):
         return MenuCategory.query(MenuCategory.category == self.key).fetch()
@@ -271,11 +279,9 @@ class MenuCategory(ndb.Model):
             del dct['info']['restrictions']
         return dct
 
-    @staticmethod
-    def get_menu_dict(venue=None):
-        init_category = MenuCategory.query(MenuCategory.init == True).get()
-        if not init_category:
-            return []
+    @classmethod
+    def get_menu_dict(cls, venue=None):
+        init_category = cls.get_initial_category()
         category_dicts = []
         for category in init_category.get_categories():
             category_dict = category.dict(venue)

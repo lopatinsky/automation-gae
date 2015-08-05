@@ -90,19 +90,11 @@
                     <td>
                         <img src="{% if item.icon %} {{ item.icon }} {% else %} {{ item.picture }} {% endif %}" height="75">
                     </td>
-                    <!--
-                    <form method="post">
-                        <button formaction="{{ '/company/menu/item/delete?item_id=%s&category_id=%s' % (item.key.id(), category.key.id()) }}"
-                                name="button" value="delete">
-                            Удалить
-                        </button>
-                    </form>
-                    -->
                 </tr>
             {% endfor %}
         </table>
         <input type="submit">
-        <a href="/company/menu/category/list">Назад</a>
+        <a href="{{ '/company/menu/category/list?category_id=%s' % category.category.id() }}">Назад</a>
     </form>
 </body>
 </html>

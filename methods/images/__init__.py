@@ -51,38 +51,14 @@ def _get_filename(model_name, id, uniq):
     return '/%s/%s/%s/%s/%s/%s' % (_BUCKET, namespace_manager.get_namespace(), model_name, id, uniq, tmstmp)
 
 
-def resize_image(item, url, size=None, icon=False):
-    logging.info('----------------------------------')
-    logging.info('initial url = %s' % url)
-    response = urlfetch.fetch(url, deadline=30)
-    logging.info("image fetched, status is %s", response.status_code)
-    if response.status_code == 200:  # new or updated image
-        logging.info("image is new or modified")
-        image_data = response.content
-
-        image = Image.open(StringIO.StringIO(image_data))
-        image = _resize(image, size)
-
-        filename = _get_filename('MenuItem', item.key.id(), size)
-        success = _save(image, filename)
-        if success:
-            serving_url = _get_serving_url(image, filename)
-
-            if not icon:
-                item.cut_picture = serving_url
-            else:
-                item.icon = serving_url
-            item.put()
-
-
-def get_new_image_url(model_name, id, image_data=None, url=None):
+def get_new_image_url(model_name, id, image_data=None, url=None, size=MAX_SIZE):
     if url:
         image_data = urlfetch.fetch(url, deadline=30).content
     if image_data:
         image = Image.open(StringIO.StringIO(image_data))
     else:
         return
-    image = _resize(image, MAX_SIZE)
+    image = _resize(image, size)
 
     filename = _get_filename(model_name, id, 'init')
     success = _save(image, filename)

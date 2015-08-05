@@ -5,16 +5,30 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% if category %}
             <input type="text" name="category_id" value="{{ category.key.id() }}" hidden>
+        {% endif %}
+        {% if main_category %}
+            <input type="text" name="main_category_id" value="{{ main_category.key.id() }}" hidden>
         {% endif %}
         <label>
             Название:
             <input type="text" name="title" {% if category %} value="{{ category.title }}" {% endif %}>
         </label><br>
+        <label>
+            Картинка url: <input type="text" name="picture"
+                {% if category and category.picture %} value="{{ category.picture }}" {% endif %}>
+        </label><br>
+        <br>
+        <label>
+            Картинка файл: <input type="file" name="image_file">
+        </label><br>
         <input type="submit">
-        <a href="/company/menu/category/list">Назад</a>
+        <a href="{{ '/company/menu/category/list?category_id=%s' %
+                (category.key.id() if category else main_category.key.id()) }}">
+            Назад
+        </a>
     </form>
 </body>
 </html>
