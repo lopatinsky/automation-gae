@@ -48,7 +48,6 @@ def get_resto_payment_types(resto_company):
     return _get_request(path)
 
 
-
 def get_resto_menu(resto_company):
     path = '/api/company/%s/menu' % resto_company.key.id()
     return _get_request(path)
@@ -60,3 +59,10 @@ def get_resto_company_info(resto_company):
         'company_id': resto_company.key.id()
     }
     return _get_request(path, params)
+
+
+def post_resto_check_order(venue, resto_client):
+    path = '/api/get_order_promo'
+    params = {
+        'venue_id': venue.key.id()
+    }
