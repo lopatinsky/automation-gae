@@ -166,7 +166,6 @@ class ListMenuItemsHandler(CompanyBaseHandler):
         if not category:
             self.abort(400)
         for item in category.get_items():
-            item = item.get()
             item.status = bool(self.request.get(str(item.key.id())))
             item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
