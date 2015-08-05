@@ -1,10 +1,13 @@
 # coding=utf-8
 __author__ = 'dvpermyakov'
 
-from webapp2 import RequestHandler
-from models import Order, Client
-from methods import email, sms_pilot
 import logging
+
+from webapp2 import RequestHandler
+
+from models import Order, Client
+from methods.sms import sms_pilot
+from methods.emails import admins
 
 
 class CheckOrderSuccessHandler(RequestHandler):
@@ -18,7 +21,7 @@ class CheckOrderSuccessHandler(RequestHandler):
                    u"Client name: %s %s\n" \
                    u"Client phone: %s" % (order_id, client.name, client.surname, client.tel)
             logging.warning(body)
-            email.send_error('network', 'Order timeout', body)
+            admins.send_error('network', 'Order timeout', body)
 
             sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов." % (client.name, order_id)
             phone = client.tel

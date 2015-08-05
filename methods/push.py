@@ -2,9 +2,11 @@
 import datetime
 import json
 import logging
+
 from google.appengine.api import urlfetch
 from google.appengine.api.namespace_manager import namespace_manager
-from methods.email_mandrill import send_email
+
+from methods.emails.mandrill import send_email
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL

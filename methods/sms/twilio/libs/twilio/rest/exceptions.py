@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from methods.twilio.libs.twilio.six import u
+from methods.sms.twilio.libs import u
 
 # Backwards compatibility.
-from ..version import __version__, __version_info__
 
 from ..exceptions import TwilioException
 

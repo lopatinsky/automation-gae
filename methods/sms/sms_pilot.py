@@ -1,7 +1,9 @@
 import json
 import logging
+
 from google.appengine.api import urlfetch
-from . import email
+
+from methods.emails import admins
 from config import Config
 
 SMSPILOT_API_KEY = 'YMO7263H170NDGPX2N3863D17EX88HX9P96MFK5O4DKKBQ8D9J897J9O6TQH8741'
@@ -30,5 +32,5 @@ def send_sms(to, text):
         if message["status"] != "0":
             success = False
     if not success:
-        email.send_error("sms", "SMS failure", response)
+        admins.send_error("sms", "SMS failure", response)
     return json.loads(response)

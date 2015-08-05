@@ -1,9 +1,9 @@
 import logging
+
 from webapp2 import RequestHandler
-from methods import email
+
 from methods.pings import PingReport, LEVEL_OK, LEVEL_WARNING
 from models import AdminStatus, Admin
-
 
 _TEMPLATE = "Token: %s\n" \
     "Login: %s\n" \

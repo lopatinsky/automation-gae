@@ -1,12 +1,12 @@
 # coding: utf-8
 import json
-from google.appengine.api.namespace_manager import namespace_manager
+
 from google.appengine.ext.deferred import deferred
-from config import Config, EMAIL_FROM
-from methods.email import send_error
-from methods.email_mandrill import send_email
+
+from config import EMAIL_FROM
+from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
-from methods.twilio import send_sms
+from methods.sms.twilio import send_sms
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
 
 __author__ = 'dvpermyakov'

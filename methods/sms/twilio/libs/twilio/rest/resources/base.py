@@ -2,7 +2,7 @@ import logging
 import os
 import platform
 
-from methods.twilio.libs.twilio.six import (
+from methods.sms.twilio.libs import (
     integer_types,
     string_types,
     binary_type,
@@ -10,7 +10,6 @@ from methods.twilio.libs.twilio.six import (
 )
 from ...compat import urlparse
 from ...compat import urlencode
-
 from ... import __version__
 from ...exceptions import TwilioException
 from ..exceptions import TwilioRestException

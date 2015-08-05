@@ -1,10 +1,10 @@
 from .notifications import Notifications
 from .recordings import Recordings
-from methods.twilio.libs.twilio.rest.resources.call_feedback import (
+from methods.sms.twilio.libs import (
     CallFeedbackFactory,
     CallFeedbackSummary,
 )
-from .util import normalize_dates, parse_date, transform_params
+from .util import normalize_dates, parse_date
 from . import InstanceResource, ListResource
 
 

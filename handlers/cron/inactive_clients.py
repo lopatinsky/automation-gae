@@ -5,9 +5,8 @@ __author__ = 'dvpermyakov'
 
 from webapp2 import RequestHandler
 from models import Client, Order, Notification, CardBindingPayment
-from methods import email
+from methods.emails import admins
 from datetime import datetime, timedelta
-from methods import sms_pilot
 from webapp2_extras import jinja2
 
 
@@ -76,7 +75,7 @@ class BindingCardHandler(RequestHandler):
             html_file = jinja2.get_jinja2(app=self.app).render_template('inactive_clients.html',
                                                                         clients=clients_with_phone)
 
-            email.send_error('analytics', 'Привязка карт', body="",  html=html_file)
+            admins.send_error('analytics', 'Привязка карт', body="",  html=html_file)
 
             for client in passive_clients:
                 sms_text = (u'Доброе утро, %s!\n'
@@ -126,7 +125,7 @@ class SeveralDaysInactiveClientsHandler(RequestHandler):
         html_file = jinja2.get_jinja2(app=self.app).render_template(
             'inactive_clients_period.html', clients=clients)
 
-        email.send_error('analytics', u'Люди без заказов в течении 3-х недель', body="",  html=html_file)
+        admins.send_error('analytics', u'Люди без заказов в течении 3-х недель', body="",  html=html_file)
 
         #for client_id in clients_id:
             #client = Client.get_by_id(client_id)

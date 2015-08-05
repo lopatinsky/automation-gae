@@ -1,10 +1,10 @@
 from .imports import (
-    httplib2,
-    socks,
     PROXY_TYPE_HTTP,
     PROXY_TYPE_SOCKS4,
     PROXY_TYPE_SOCKS5
 )
+from methods.sms.twilio.libs.httplib2 import socks
+from methods.sms.twilio.libs import httplib2
 
 
 class Connection(object):

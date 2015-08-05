@@ -1,6 +1,5 @@
 
 # Those are not supported by the six library and needs to be done manually
-from methods.twilio.libs.twilio.six import binary_type
 
 try:
     # python 3
