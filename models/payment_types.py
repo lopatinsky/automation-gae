@@ -11,21 +11,20 @@ PAYMENT_TYPE_MAP = {
 }
 
 from google.appengine.ext import ndb
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_AVAILABLE, STATUS_CHOICES
 
 
-class PaymentType(ndb.Model):
-    title = ndb.StringProperty(indexed=False)
-    status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
-                                 default=STATUS_AVAILABLE)
+class PaymentType(ndb.Model):  # self.key.id() == type
+    title = ndb.StringProperty(indexed=False)  # todo: why?
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
     @classmethod
     def fetch_types(cls, app_kind, *args, **kwargs):
-        from config import AUTO_APP, IIKO_APP
-        from methods.proxy.iiko.payment_types import get_payment_types
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.payment_types import get_payment_types
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
-        elif app_kind == IIKO_APP:
+        elif app_kind == RESTO_APP:
             types = get_payment_types()
             for type in types[:]:
                 for name, value in kwargs.items():
@@ -35,7 +34,7 @@ class PaymentType(ndb.Model):
 
     def dict(self):
         dct = {
-            'id': int(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
+            'id': int(self.key.id()),
             'title': self.title
         }
         return dct

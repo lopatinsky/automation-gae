@@ -18,6 +18,15 @@ class SingleModifier(ndb.Model):
     max_amount = ndb.IntegerProperty(default=0)
     sequence_number = ndb.IntegerProperty(default=0)
 
+    @classmethod
+    def get(cls, modifier_key, app_kind=0):  # AUTO_APP = 0
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_single_modifier
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(modifier_key.id())
+        elif app_kind == RESTO_APP:
+            return get_single_modifier(modifier_key)
+
     @property
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
@@ -59,7 +68,8 @@ class SingleModifier(ndb.Model):
 
 
 class GroupModifierChoice(ndb.Model):
-    choice_id = ndb.IntegerProperty(required=True)
+    choice_id = ndb.IntegerProperty()
+    choice_id_str = ndb.StringProperty()  # todo: set choice_id to str
     title = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(default=0)  # в копейках
     default = ndb.BooleanProperty(default=False)
@@ -93,6 +103,15 @@ class GroupModifier(ndb.Model):
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
     required = ndb.BooleanProperty(default=False)
     sequence_number = ndb.IntegerProperty()
+
+    @classmethod
+    def get(cls, modifier_key, app_kind=0):  # AUTO_APP = 0
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_group_modifier
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(modifier_key.id())
+        elif app_kind == RESTO_APP:
+            return get_group_modifier(modifier_key)
 
     def get_choice_by_id(self, choice_id):
         for choice in self.choices:
@@ -170,7 +189,7 @@ class GroupModifier(ndb.Model):
                     'default': choice.default,
                     'title': choice.title,
                     'price': float(choice.price) / 100.0,  # в рублях
-                    'id': str(choice.choice_id),
+                    'id': str(choice.choice_id) if choice.choice_id else choice.choice_id_str,
                     'order': choice.sequence_number
                 } for choice in choices
             ]
@@ -192,30 +211,20 @@ class MenuCategory(ndb.Model):
             category.put()
         return category
 
-    def get_categories(self):
-        return MenuCategory.query(MenuCategory.category == self.key).fetch()
-
-    @classmethod
-    def fetch_categories(cls, app_kind, *args, **kwargs):
-        from config import AUTO_APP, IIKO_APP
-        from methods.proxy.iiko.menu import get_categories
+    def get_categories(self, app_kind=0):  # AUTO_APP = 0
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_categories
         if app_kind == AUTO_APP:
-            return cls.query(*args, **kwargs).fetch()
-        elif app_kind == IIKO_APP:
-            categories = get_categories()
-            logging.info(categories)
-            for category in categories[:]:
-                for name, value in kwargs.items():
-                    if getattr(category, name) != value:
-                        categories.remove(category)
-            return categories
+            return MenuCategory.query(MenuCategory.category == self.key).fetch()
+        elif app_kind == RESTO_APP:
+            return get_categories(self)
 
     def get_items(self, app_kind=0, only_available=False):  # AUTO_APP = 0
-        from methods.proxy.iiko.menu import get_products
-        from config import AUTO_APP, IIKO_APP
+        from methods.proxy.resto.menu import get_products
+        from config import AUTO_APP, RESTO_APP
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
-        elif app_kind == IIKO_APP:
+        elif app_kind == RESTO_APP:
             items = get_products(self)
         else:
             items = []
@@ -277,17 +286,17 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, app_kind, venue=None):
+    def dict(self, venue=None, app_kind=0):  # AUTO_APP = 0
         items = []
         for item in self.get_items(app_kind, only_available=True):
             if not venue:
-                items.append(item.dict())
+                items.append(item.dict(app_kind=app_kind))
             else:
                 if venue.key not in item.restrictions:
                     items.append(item.dict(without_restrictions=True))
         dct = {
             'info': {
-                'category_id': str(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
+                'category_id': str(self.key.id()),
                 'title': self.title,
                 'pic': self.picture,
                 'restrictions': {
@@ -296,18 +305,18 @@ class MenuCategory(ndb.Model):
                 'order': self.sequence_number if self.sequence_number else 0
             },
             'items': items,
-            'categories': [category.dict() for category in self.get_categories()]
+            'categories': [category.dict(venue, app_kind) for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None):
+    def get_menu_dict(cls, venue=None, app_kind=0):  # AUTO_APP = 0
         init_category = cls.get_initial_category()
         category_dicts = []
-        for category in init_category.get_categories():
-            category_dict = category.dict(venue)
+        for category in init_category.get_categories(app_kind=app_kind):
+            category_dict = category.dict(venue, app_kind)
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
         return category_dicts
@@ -338,9 +347,9 @@ class MenuItem(ndb.Model):
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
 
-    def dict(self, without_restrictions=False):
+    def dict(self, without_restrictions=False, app_kind=0):  # AUTO_APP = 0
         dct = {
-            'id': str(self.key.id()) if hasattr(self.key, 'id') else self.faked_id,
+            'id': str(self.key.id()),
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
@@ -350,8 +359,8 @@ class MenuItem(ndb.Model):
             'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
-            'single_modifiers': [modifier.get().dict() for modifier in self.single_modifiers],
-            'group_modifiers': [modifier.get().dict(self) for modifier in self.group_modifiers],
+            'single_modifiers': [SingleModifier.get(modifier, app_kind).dict() for modifier in self.single_modifiers],
+            'group_modifiers': [GroupModifier.get(modifier, app_kind).dict(self) for modifier in self.group_modifiers],
             'restrictions': {
                 'venues': [str(restrict.id()) for restrict in self.restrictions]
             }

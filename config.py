@@ -2,7 +2,7 @@
 import threading
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
-from models.proxy.iiko import IikoCompany
+from models.proxy.resto import RestoCompany
 
 OTHER = -1
 VENUE = 0
@@ -21,13 +21,13 @@ TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
 EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 AUTO_APP = 0
-IIKO_APP = 1
-APP_CHOICES = (AUTO_APP, IIKO_APP)
+RESTO_APP = 1
+APP_CHOICES = (AUTO_APP, RESTO_APP)
 
 
 class Config(ndb.Model):
     APP_KIND = ndb.IntegerProperty(choices=APP_CHOICES, default=AUTO_APP)
-    IIKO_COMPANY = ndb.KeyProperty(kind=IikoCompany)
+    RESTO_COMPANY = ndb.KeyProperty(kind=RestoCompany)
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time

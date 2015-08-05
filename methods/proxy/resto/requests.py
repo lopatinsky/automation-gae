@@ -38,32 +38,32 @@ def _post_request(path, params=None, payload=None, log_response=True):
     return response
 
 
-def get_iiko_venues(iiko_company):
-    path = '/api/venues/%s' % iiko_company.resto_company_id
+def get_resto_venues(resto_company):
+    path = '/api/venues/%s' % resto_company.key.id()
     return _get_request(path)
 
 
-def get_iiko_payment_types(iiko_company):
-    path = '/api/payment_types/%s' % iiko_company.key.id()
+def get_resto_payment_types(resto_company):
+    path = '/api/company/%s/payment_types' % resto_company.key.id()
     return _get_request(path)
 
 
-def get_iiko_delivery_types(iiko_company):
+def get_resto_delivery_types(resto_company):
     path = '/api/delivery_types'
     params = {
-        'organization_id': iiko_company.resto_company_id
+        'organization_id': resto_company.key.id()
     }
     return _get_request(path, params)
 
 
-def get_iiko_company_info(iiko_company):
+def get_resto_menu(resto_company):
+    path = '/api/company/%s/menu' % resto_company.key.id()
+    return _get_request(path)
+
+
+def get_resto_company_info(resto_company):
     path = '/api/company/get_company'
     params = {
-        'company_id': iiko_company.resto_company_id
+        'company_id': resto_company.key.id()
     }
     return _get_request(path, params)
-
-
-def get_iiko_menu(iiko_company):
-    path = '/api/venue/%s/menu' % iiko_company.key.id()
-    return _get_request(path)

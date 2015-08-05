@@ -5,7 +5,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from models.proxy.unified_app import AutomationCompany
-from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME, TEST_VERSIONS, IIKO_APP
+from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME, TEST_VERSIONS
 from webapp2_extras import auth
 
 
