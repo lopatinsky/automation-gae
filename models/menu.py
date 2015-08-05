@@ -305,7 +305,7 @@ class MenuCategory(ndb.Model):
                 'order': self.sequence_number if self.sequence_number else 0
             },
             'items': items,
-            'categories': [category.dict(venue, app_kind) for category in self.get_categories()]
+            'categories': [category.dict(venue, app_kind) for category in self.get_categories(app_kind)]
         }
         if venue:
             del dct['info']['restrictions']
