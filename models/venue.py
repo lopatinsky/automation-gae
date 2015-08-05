@@ -125,6 +125,15 @@ class DeliveryZone(ndb.Model):
     comment = ndb.StringProperty()
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
 
+    @classmethod
+    def get(cls, zone_key, app_kind=0):  # AUTO_APP = 0
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.company import get_delivery_zone
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(zone_key.id())
+        elif app_kind == RESTO_APP:
+            return get_delivery_zone(zone_key)
+
     @staticmethod
     def generate_sequence_number():
         fastcounter.incr("delivery_zones", delta=100, update_interval=1)

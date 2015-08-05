@@ -48,12 +48,12 @@ def __get_products(category, resto_products):
         product.price = int(resto_product['price'] * 100)
         product.sequence_number = resto_product['order']
         products.append(product)
-        group_modifiers = __get_group_modifiers(resto_product['modifiers'])
-        product.group_modifiers = group_modifiers.keys()
-        group_modifiers.update(group_modifiers)
-        single_modifiers = __get_single_modifiers(resto_product['single_modifiers'])
-        product.single_modifiers = single_modifiers.keys()
-        single_modifiers.update(single_modifiers)
+        product_group_modifiers = __get_group_modifiers(resto_product['modifiers'])
+        product.group_modifiers = product_group_modifiers.keys()
+        group_modifiers.update(product_group_modifiers)
+        product_single_modifiers = __get_single_modifiers(resto_product['single_modifiers'])
+        product.single_modifiers = product_single_modifiers.keys()
+        single_modifiers.update(product_single_modifiers)
     return products, group_modifiers, single_modifiers
 
 
@@ -88,8 +88,7 @@ def __get_categories(parent_category, resto_categories):
 def _get_menu():
     config = Config.get()
     resto_company = config.RESTO_COMPANY.get()
-    #menu = memcache.get('menu_%s' % resto_company.key.id())
-    menu = None
+    menu = memcache.get('menu_%s' % resto_company.key.id())
     if not menu:
         resto_menu = get_resto_menu(resto_company)
         init_category = MenuCategory.get_initial_category()

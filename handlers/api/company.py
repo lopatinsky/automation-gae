@@ -5,7 +5,7 @@ from base import ApiHandler
 from config import config, Config
 from methods.rendering import latinize
 from models import STATUS_AVAILABLE, Venue
-from models.venue import DELIVERY
+from models.venue import DELIVERY, DeliveryZone
 from models.specials import get_channels
 from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
 
@@ -16,20 +16,20 @@ class CompanyInfoHandler(ApiHandler):
     def get(self):
         zones = {}
         deliveries = {}
-        for venue in Venue.query(Venue.active == True).fetch():
+        for venue in Venue.fetch_venues(self.app_kind, Venue.active == True):
             for venue_delivery in venue.delivery_types:
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type not in deliveries:
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
                 if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type == DELIVERY:
                     for zone in venue_delivery.delivery_zones:
-                        zone = zone.get()
+                        zone = DeliveryZone.get(zone, self.app_kind)
                         if zone.status == STATUS_AVAILABLE and zone.key not in zones:
                             zones[zone.key] = zone
         cities = []
         for zone in sorted(zones.values(), key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
-        self.render_json({
+        response = {
             'extra_client_fields': [{
                 'fields': [{
                     'title': field,
@@ -39,20 +39,17 @@ class CompanyInfoHandler(ApiHandler):
                 'module': None,
                 'group': 0
             }],
-            'app_name': config.APP_NAME,
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
-            'description': config.COMPANY_DESCRIPTION,
             'delivery_types': deliveries.values(),
             'cities': cities,
-            'phone': config.SUPPORT_PHONE,
-            'site': config.SUPPORT_SITE,
-            'emails': config.SUPPORT_EMAILS,
             'screen_logic_type': config.SCREEN_LOGIC,
             'push_channels': get_channels(namespace_manager.get_namespace()),
             'colors': {
                 'action': config.ACTION_COLOR,
             },
-        })
+        }
+        response.update(config.get_company_dict())
+        self.render_json(response)
 
 
 class CompanyBaseUrlsHandler(ApiHandler):
