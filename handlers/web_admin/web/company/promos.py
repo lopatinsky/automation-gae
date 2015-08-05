@@ -161,7 +161,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
         else:
             feature_name = u'Не найдено'
             feature = None
-        categories = MenuCategory.query(MenuCategory.status == STATUS_AVAILABLE).fetch()
+        categories = MenuCategory.query().fetch()
         for category in categories:
             items = []
             for item in category.get_items(only_available=True):
