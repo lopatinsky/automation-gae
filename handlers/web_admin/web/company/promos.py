@@ -164,7 +164,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
         categories = MenuCategory.query().fetch()
         for category in categories:
             items = []
-            for item in category.get_items(only_available=True):
+            for item in category.get_items():
                 if item.key == feature.item_details.item:
                     item.has = True
                 else:
