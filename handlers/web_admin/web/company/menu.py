@@ -33,7 +33,7 @@ class ListCategoriesHandler(CompanyBaseHandler):
             category = MenuCategory.get_by_id(category_id)
         else:
             category = MenuCategory.get_initial_category()
-        categories = category.get_categories()
+        categories = sorted(category.get_categories(), key=lambda category: category.sequence_number)
         self.render('/menu/categories.html', categories=categories, main_category=category)
 
 
