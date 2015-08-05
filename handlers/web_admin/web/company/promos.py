@@ -165,7 +165,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
         for category in categories:
             items = []
             for item in category.get_items(only_available=True):
-                if feature.item_details.item_required and item.key == feature.item_details.item:
+                if item.key == feature.item_details.item:
                     item.has = True
                 else:
                     item.has = False
@@ -214,10 +214,8 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
         if item:
             feature.item_details.item = item.key
             feature.item_details.group_choice_ids = choice_ids
-            feature.item_details.item_required = True
         else:
             feature.item_details.item = None
-            feature.item_details.item_required = False
         promo.put()
         self.redirect('/company/promos/list')
 

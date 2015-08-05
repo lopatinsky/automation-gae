@@ -1,10 +1,5 @@
 from handlers.api.base import ApiHandler
-from models import MenuCategory, STATUS_AVAILABLE, Venue
-
-
-def _get_menu(app_kind, venue=None):
-    categories = [category.dict(app_kind, venue=venue) for category in MenuCategory.fetch_categories(app_kind, MenuCategory.status == STATUS_AVAILABLE)]
-    return [category for category in categories if category.get('items')]
+from models import MenuCategory, Venue
 
 
 class MenuHandler(ApiHandler):
@@ -17,7 +12,7 @@ class MenuHandler(ApiHandler):
             if not venue:
                 self.abort(400)
         self.render_json({
-            "menu": _get_menu(self.app_kind, venue=venue) if venue else _get_menu(self.app_kind),
+            "menu": MenuCategory.get_menu_dict(venue),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         })
 

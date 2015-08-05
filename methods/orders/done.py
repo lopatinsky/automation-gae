@@ -19,6 +19,13 @@ def done_order(order, namespace, with_push=True):
     if config.GIFT_ENABLED:
         point_sum = order.activate_gift_points()
 
+    for share_gift in order.shared_gift_details:
+        share_gift.gift.get().deactivate()
+
+    for performing in order.promo_code_performings:
+        performing = performing.get()
+        performing.close()
+
     order.status = READY_ORDER
     order.email_key_done = None
     order.email_key_cancel = None

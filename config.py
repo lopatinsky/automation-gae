@@ -16,7 +16,9 @@ SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
 DEMO_HOSTNAME = u'automation-demo.appspot.com'
 PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
-TEST_VERSIONS = ('.test.', '.p-test.', '.courier.')
+TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
+
+EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 AUTO_APP = 0
 IIKO_APP = 1
@@ -49,34 +51,12 @@ class Config(ndb.Model):
 
     SEND_ERRORS_500 = ndb.BooleanProperty(indexed=False, default=False)
 
-    SHARED_SHARE_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_SHARE_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_SHARE_TEXT = ndb.StringProperty(indexed=False)
-
-    SHARED_ABOUT_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_GIFT_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_GIFT_TEXT = ndb.StringProperty(indexed=False)
-    SHARED_GIFT_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_GIFT_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_GIFT_TEXT = ndb.StringProperty(indexed=False)
-
-    SHARED_ABOUT_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_INVITATION_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_ABOUT_INVITATION_TEXT = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_IMAGE_URL = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_HEAD = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
     SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_RECIPIENT_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
-    BRANCH_DESKTOP_URL = ndb.StringProperty(indexed=False)
-    BRANCH_ANDROID_URL = ndb.StringProperty(indexed=False)
-    BRANCH_IOS_URL = ndb.StringProperty(indexed=False)
-
-    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=True)
 
     APP_NAME = ndb.StringProperty(indexed=False)
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
@@ -89,6 +69,8 @@ class Config(ndb.Model):
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
+
+    EXTRA_CLIENT_INFO_FIELDS = ndb.StringProperty(indexed=False, repeated=True)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
 

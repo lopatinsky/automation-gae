@@ -2,7 +2,9 @@
 import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
-from methods.rendering import opt, timestamp
+from methods.rendering import timestamp
+from models.promo_code import PromoCodePerforming
+from models.share import SharedGift
 from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
@@ -79,6 +81,10 @@ class GiftPositionDetails(ndb.Model):
     activation_id = ndb.IntegerProperty(required=True)
 
 
+class SharedGiftPositionDetails(ndb.Model):
+    gift = ndb.KeyProperty(kind=SharedGift)
+
+
 class GiftPointsDetails(ndb.Model):
     READY = 0
     DONE = 1
@@ -109,16 +115,17 @@ class Order(ndb.Model):
     venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
-    comment = ndb.StringProperty(indexed=False)  # todo: it is need for barista. why?
+    comment = ndb.StringProperty(indexed=False)
     return_datetime = ndb.DateTimeProperty()
     payment_id = ndb.StringProperty()
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES, required=True)
     address = ndb.LocalStructuredProperty(Address)
-    items = ndb.KeyProperty(indexed=False, repeated=True, kind=MenuItem)  # not used, preferable use item_details
     item_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     order_gift_details = ndb.LocalStructuredProperty(OrderPositionDetails, repeated=True)
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
+    shared_gift_details = ndb.LocalStructuredProperty(SharedGiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
+    promo_code_performings = ndb.KeyProperty(kind=PromoCodePerforming, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
     response_success = ndb.BooleanProperty(default=False, indexed=False)
@@ -133,7 +140,8 @@ class Order(ndb.Model):
     courier = ndb.KeyProperty(kind=Courier)
 
     def activate_cash_back(self):
-        from methods.empatika_wallet import deposit
+        from methods.empatika_wallet import deposit, get_balance
+        from google.appengine.ext.deferred import deferred
         total_cash_back = 0
         for cash_back in self.cash_backs:
             if cash_back.status == cash_back.READY:
@@ -142,6 +150,7 @@ class Order(ndb.Model):
         if total_cash_back > 0:
             logging.info('cash back with sum=%s' % total_cash_back)
             deposit(self.client_id, total_cash_back, "order_id_%s" % self.key.id())
+            deferred.defer(get_balance, self.client_id, raise_error=True)  # just to update memcache
         self.put()
         return total_cash_back
 
@@ -156,7 +165,8 @@ class Order(ndb.Model):
         self.put()
         return point_sum
 
-    def grouped_item_dict(self, details, gift=False):
+    @staticmethod
+    def grouped_item_dict(details, gift=False):
         item_dicts = []
         for item_detail in details:
             if not gift:
@@ -228,7 +238,7 @@ class Order(ndb.Model):
             "total_sum": self.total_sum,
             "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
-            "actual_delivery_time": opt(timestamp, self.actual_delivery_time),
+            "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": Client.get_by_id(self.client_id).dict(),
             "pan": self.pan,
             "comment": self.comment,

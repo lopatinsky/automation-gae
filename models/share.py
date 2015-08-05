@@ -1,7 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
-from methods.rendering import timestamp
-from models import MenuItem, STATUS_CHOICES, STATUS_AVAILABLE
+from models import STATUS_CHOICES, STATUS_AVAILABLE
+from models.menu import MenuItem, SingleModifier
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
 from models.promo_code import PromoCode
@@ -28,6 +28,7 @@ class Share(ndb.Model):
         self.put()
 
     def dict(self):
+        from methods.rendering import timestamp
         return {
             'sender': self.sender.get().dict(),
             'created': timestamp(self.created),
@@ -84,14 +85,24 @@ class SharedGiftMenuItem(ndb.Model):  # self.id() == item.key.id()
         return self.item.get().dict()
 
 
+class ChosenSharedGiftMenuItem(ndb.Model):
+    shared_item = ndb.KeyProperty(kind=SharedGiftMenuItem, required=True)
+    group_choice_ids = ndb.IntegerProperty(repeated=True)
+    single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
+
+
 class SharedGift(ndb.Model):
     READY = 0
     DONE = 1
     CANCELED = 2
-    CHOICES = (READY, DONE, CANCELED)
+    PERFORMING = 3
+    IN_ORDER = 4
+    CHOICES = (READY, PERFORMING, IN_ORDER, DONE, CANCELED)
     CHOICES_MAP = {
         READY: u'Оплачено',
-        DONE: u'Получено',
+        PERFORMING: u'Получено',
+        IN_ORDER: u'Заказан',
+        DONE: u'Выдан',
         CANCELED: u'Отменено'
     }
 
@@ -99,32 +110,47 @@ class SharedGift(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     promo_code = ndb.KeyProperty(kind=PromoCode)
     share_id = ndb.IntegerProperty(required=True)
-    share_item = ndb.KeyProperty(required=True, kind=SharedGiftMenuItem)
+    share_items = ndb.KeyProperty(kind=ChosenSharedGiftMenuItem, repeated=True)
     client_id = ndb.IntegerProperty(required=True)         # Who pays for cup
     recipient_name = ndb.StringProperty(required=True)
     recipient_phone = ndb.StringProperty(required=True)
-    recipient_id = ndb.IntegerProperty()                   # it is known after deactivate
-    total_sum = ndb.IntegerProperty(required=True)
+    recipient_id = ndb.IntegerProperty()                   # it is known after perform
+    total_sum = ndb.FloatProperty(required=True)
     order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
     payment_id = ndb.StringProperty(required=True)
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
-    def deactivate(self, client, namespace):
-        from methods.push import send_share_gift_push
+    def perform(self, client, namespace):
+        from methods.push import send_client_push
         share = Share.get_by_id(self.share_id)
         share.deactivate()
-        self.status = self.DONE
+        self.status = self.PERFORMING
         self.recipient_id = client.key.id()
         self.put()
         sender = Client.get_by_id(self.client_id)
         text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
-        send_share_gift_push(client, text, namespace)
+        header = u'Подарок'
+        send_client_push(client, text, header, namespace)
+
+    def put_in_order(self):
+        if self.status == self.PERFORMING:
+            self.status = self.IN_ORDER
+            self.put()
+
+    def deactivate(self):
+        if self.status == self.IN_ORDER:
+            self.status = self.DONE
+            self.put()
+
+    def recover(self):
+        if self.status == self.IN_ORDER:
+            self.status = self.PERFORMING
+            self.put()
 
     def cancel(self, namespace):
         from methods.alfa_bank import reverse
         from methods.push import send_client_push
-
         if self.status == self.READY:
             reverse(self.payment_id)
             share = Share.get_by_id(self.share_id)
@@ -140,6 +166,7 @@ class SharedGift(ndb.Model):
 
     def dict(self):
         from models import Client
+        from methods.rendering import timestamp
         item_dict = self.share_item.get().dict()
         item_dict.update({
             'gift_status': self.CHOICES_MAP[self.status]

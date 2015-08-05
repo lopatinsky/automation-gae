@@ -3,7 +3,7 @@ import logging
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, STATUS_CHOICES
 
 SINGLE_MODIFIER = 0
 GROUP_MODIFIER = 1
@@ -91,6 +91,7 @@ class GroupModifierChoice(ndb.Model):
 class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
+    required = ndb.BooleanProperty(default=False)
     sequence_number = ndb.IntegerProperty()
 
     def get_choice_by_id(self, choice_id):
@@ -162,6 +163,7 @@ class GroupModifier(ndb.Model):
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
+            'required': self.required,
             'order': self.sequence_number,
             'choices': [
                 {
@@ -176,12 +178,22 @@ class GroupModifier(ndb.Model):
 
 
 class MenuCategory(ndb.Model):
+    category = ndb.KeyProperty()  # kind=self, if it is None, that is initial category
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
-    status = ndb.IntegerProperty(choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE), default=STATUS_AVAILABLE)
+    icon = ndb.StringProperty(indexed=False)
     sequence_number = ndb.IntegerProperty()
 
-    restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue not implemented
+    @classmethod
+    def get_initial_category(cls):
+        category = cls.query(MenuCategory.category == None).get()
+        if not category:
+            category = cls(title=u'Начальная категория')
+            category.put()
+        return category
+
+    def get_categories(self):
+        return MenuCategory.query(MenuCategory.category == self.key).fetch()
 
     @classmethod
     def fetch_categories(cls, app_kind, *args, **kwargs):
@@ -279,15 +291,26 @@ class MenuCategory(ndb.Model):
                 'title': self.title,
                 'pic': self.picture,
                 'restrictions': {
-                    'venues': [str(restrict.id()) for restrict in self.restrictions]
+                    'venues': []  # todo: update restrictions logic for categories
                 },
                 'order': self.sequence_number if self.sequence_number else 0
             },
-            'items': items
+            'items': items,
+            'categories': [category.dict() for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
         return dct
+
+    @classmethod
+    def get_menu_dict(cls, venue=None):
+        init_category = cls.get_initial_category()
+        category_dicts = []
+        for category in init_category.get_categories():
+            category_dict = category.dict(venue)
+            if category_dict['items'] or category_dict['categories']:
+                category_dicts.append(category_dict)
+        return category_dicts
 
 
 class MenuItem(ndb.Model):
@@ -302,8 +325,7 @@ class MenuItem(ndb.Model):
     volume = ndb.FloatProperty(indexed=False, default=0)
     price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
 
-    status = ndb.IntegerProperty(required=True, choices=(STATUS_AVAILABLE, STATUS_UNAVAILABLE),
-                                 default=STATUS_AVAILABLE)
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)

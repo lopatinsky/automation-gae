@@ -1,6 +1,7 @@
+# coding=utf-8
 import json
 from methods.auth import company_user_required
-from methods.images import get_new_image_url, resize_image, MAX_SIZE, ICON_SIZE
+from methods.images import get_new_image_url, ICON_SIZE
 from methods.unique import unique
 from base import CompanyBaseHandler
 from models.menu import SINGLE_MODIFIER, GROUP_MODIFIER
@@ -27,8 +28,13 @@ class MainMenuHandler(CompanyBaseHandler):
 class ListCategoriesHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        categories = MenuCategory.get_categories_in_order()
-        self.render('/menu/categories.html', categories=categories)
+        category_id = self.request.get_range('category_id')
+        if category_id:
+            category = MenuCategory.get_by_id(category_id)
+        else:
+            category = MenuCategory.get_initial_category()
+        categories = category.get_categories()
+        self.render('/menu/categories.html', categories=categories, main_category=category)
 
 
 class UpCategoryHandler(CompanyBaseHandler):
@@ -80,12 +86,34 @@ class DownCategoryHandler(CompanyBaseHandler):
 class CreateCategoryHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        self.render('/menu/add_category.html')
+        main_category_id = self.request.get_range('main_category_id')
+        main_category = MenuCategory.get_by_id(main_category_id)
+        if not main_category:
+            self.abort(400)
+        self.render('/menu/add_category.html', main_category=main_category)
 
     @company_user_required
     def post(self):
-        title = self.request.get('title')
-        MenuCategory(title=title, sequence_number=MenuCategory.generate_category_sequence_number()).put()
+        main_category_id = self.request.get_range('main_category_id')
+        main_category = MenuCategory.get_by_id(main_category_id)
+        if not main_category:
+            self.abort(400)
+        category = MenuCategory(sequence_number=MenuCategory.generate_category_sequence_number(),
+                                category=main_category.key)
+        category.title = self.request.get('title')
+        category.put()
+        if self.request.get('image_file') or self.request.get('picture'):
+            if self.request.get('image_file'):
+                new_url = get_new_image_url('MenuCategory', category.key.id(), image_data=str(self.request.get('image_file')))
+            elif self.request.get('picture'):
+                new_url = get_new_image_url('MenuCategory', category.key.id(), url=self.request.get('picture'))
+            else:
+                new_url = None
+            if new_url:
+                category.picture = new_url
+        if category.picture:
+            category.icon = get_new_image_url('MenuCategoryIcon', category.key.id(), url=category.picture, size=ICON_SIZE)
+        category.put()
         self.redirect_to('mt_category_list')
 
 
@@ -105,6 +133,17 @@ class EditCategoryHandler(CompanyBaseHandler):
         if not category:
             self.abort(400)
         category.title = self.request.get('title')
+        if self.request.get('image_file') or self.request.get('picture'):
+            if self.request.get('image_file'):
+                new_url = get_new_image_url('MenuCategory', category.key.id(), image_data=str(self.request.get('image_file')))
+            elif self.request.get('picture'):
+                new_url = get_new_image_url('MenuCategory', category.key.id(), url=self.request.get('picture'))
+            else:
+                new_url = None
+            if new_url:
+                category.picture = new_url
+        if category.picture:
+            category.icon = get_new_image_url('MenuCategoryIcon', category.key.id(), url=category.picture, size=ICON_SIZE)
         category.put()
         self.redirect_to('mt_category_list')
 
@@ -190,7 +229,7 @@ class AddMenuItemHandler(CompanyBaseHandler):
                 if new_url:
                     item.picture = new_url
         if item.picture:
-            resize_image(item, item.picture, ICON_SIZE, icon=True)
+            item.icon = get_new_image_url('MenuItemIcon', item.key.id(), url=item.picture, size=ICON_SIZE)
         item.category = category.key
         item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
@@ -248,7 +287,7 @@ class EditMenuItemHandler(CompanyBaseHandler):
                 if new_url:
                     item.picture = new_url
         if item.picture:
-            resize_image(item, item.picture, ICON_SIZE, icon=True)
+            item.icon = get_new_image_url('MenuItemIcon', item.key.id(), url=item.picture, size=ICON_SIZE)
         item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 
@@ -435,6 +474,14 @@ class ModifierList(CompanyBaseHandler):
             'group_modifiers': group_modifiers,
             'inf': SingleModifier.INFINITY
         })
+
+    @company_user_required
+    def post(self):
+        for group_modifier in GroupModifier.query().fetch():
+            confirmed = bool(self.request.get('required_%s' % group_modifier.key.id()))
+            group_modifier.required = confirmed
+            group_modifier.put()
+        self.redirect('/company/menu/main')
 
 
 class AddSingleModifierHandler(CompanyBaseHandler):

@@ -21,6 +21,8 @@ class Client(ndb.Model):
     tel = ndb.StringProperty()
     email = ndb.StringProperty()
 
+    extra_data = ndb.JsonProperty()
+
     name_confirmed = ndb.BooleanProperty(default=False)
     name_for_sms = ndb.StringProperty(default='')
 

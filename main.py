@@ -46,6 +46,11 @@ app = WSGIApplication([
     ]),
 
     PathPrefixRoute('/mt', [
+        PathPrefixRoute('/splash', [
+            Route('/main', maintenance.SplashMainHandler),
+            Route('/smart_banner', maintenance.SmartBannerHandler),
+            Route('/splash_screen', maintenance.SplashScreenHandler),
+        ]),
         Route('/companies', maintenance.CompaniesListHandler),
         Route('/500_errors_email', maintenance.EmailsErrorsHandler),
         Route('/report', maintenance.ReportHandler),
@@ -197,7 +202,6 @@ app = WSGIApplication([
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),
             PathPrefixRoute('/gift', [
-                Route('/info', api.GiftInfoHandler),
                 Route('/items', api.SharedGiftListHandler),
                 Route('/history', api.SharedGiftHistoryHandler),
                 Route('/get_url', api.GetGiftUrlHandler),

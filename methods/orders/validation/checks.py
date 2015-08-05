@@ -92,11 +92,11 @@ def check_delivery_time(delivery_time):
         return True, None
 
 
-def check_payment(payment_info):
+def check_payment(payment_info, item_dicts, gift_dicts, shared_gifts):
     if not payment_info:
-        return False, u'Не выбран тип оплаты'
-    else:
-        return True, None
+        if item_dicts or not (gift_dicts and shared_gifts):
+            return False, u'Не выбран тип оплаты'
+    return True, None
 
 
 def check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts):

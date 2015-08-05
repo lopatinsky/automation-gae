@@ -7,19 +7,12 @@ from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
 from models import MenuItem, SingleModifier, GroupModifier, \
-    GiftMenuItem, STATUS_AVAILABLE, DeliverySlot
-from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails
+    GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
+from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
+    SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
 from models.venue import DELIVERY
-
-
-def _nice_join(strs):
-    if not strs:
-        return ""
-    if len(strs) == 1:
-        return strs[0]
-    return u"%s и %s" % (", ".join(strs[:-1]), strs[-1])
 
 
 def _unique(seq):
@@ -44,21 +37,24 @@ def _group_promos(promos):
     return [promo.validation_dict() for promo in _unique_promos(promos)]
 
 
-def is_equal(item_dict1, item_dict2):
+def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
     if not item_dict1 or not item_dict2:
         return False
     if item_dict1['item'].key != item_dict2['item'].key:
         return False
-    if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
+    if len(item_dict1['group_modifier_keys']) != len(item_dict2['group_modifier_keys']):
         return False
-    for i in xrange(len(item_dict1['single_modifier_keys'])):
-        if item_dict1['single_modifier_keys'][i] != item_dict2['single_modifier_keys'][i]:
-            return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
-        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:
+        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:  # consider group modifier
             return False
-        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:
+        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
             return False
+    if consider_single_modifiers:
+        if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
+            return False
+        for i in xrange(len(item_dict1['single_modifier_keys'])):
+            if item_dict1['single_modifier_keys'][i] != item_dict2['single_modifier_keys'][i]:
+                return False
     return True
 
 
@@ -101,11 +97,11 @@ def group_item_dicts(item_dicts):
             'id': str(item_dict['item'].key.id()),
             'title': item_dict['item'].title,
             'promos': item_dict.get('promos', []),
-            'errors': item_dict.get('errors'),
-            'substitutes': item_dict.get('substitutes'),
-            'image': item_dict.get('image'),
+            'errors': item_dict.get('errors', []),
+            'substitutes': item_dict.get('substitutes', []),
+            'image': item_dict.get('image', ''),
             'quantity': 1,
-            'price_without_promos': item_dict['price'],
+            'price_without_promos': item_dict.get('price', 0),
             'single_modifiers': _group_single_modifiers(item_dict['single_modifier_keys']),
             'group_modifiers': _group_group_modifiers(item_dict['group_modifier_keys']),
             'item_dict': item_dict
@@ -130,7 +126,7 @@ def group_item_dicts(item_dicts):
     return result
 
 
-def set_modifiers(items, with_gift_obj):
+def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
         menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
@@ -138,6 +134,10 @@ def set_modifiers(items, with_gift_obj):
             menu_item.gift_obj = item['gift_obj']
         else:
             menu_item.gift_obj = None
+        if with_share_gift_obj:
+            menu_item.share_gift_obj = item['share_gift_obj']
+        else:
+            menu_item.share_gift_obj = None
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
             single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
@@ -166,18 +166,21 @@ def set_price_with_modifiers(items):
     return items
 
 
-def set_item_dicts(items, is_gift):
+def set_item_dicts(items, is_gift=False):
     item_dicts = []
     for item in items:
         item_dicts.append({
             'item': item,
             'image': item.picture,
             'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
+            'share_gift_obj': item.share_gift_obj if hasattr(item, 'share_gift_obj') else None,
             'single_modifiers': item.chosen_single_modifiers,
             'group_modifiers': item.chosen_group_modifiers,
-            'single_modifier_keys': [modifier.key for modifier in item.chosen_single_modifiers],
+            'single_modifier_keys': [modifier.key for modifier in
+                                     sorted(item.chosen_single_modifiers, key=lambda modifier: modifier.key.id())],
             'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
-                                    for modifier in item.chosen_group_modifiers],
+                                    for modifier in sorted(item.chosen_group_modifiers,
+                                                           key=lambda modifier: modifier.key.id())],
             'price': item.total_price if not is_gift else 0,
             'revenue': item.total_price if not is_gift else 0,
             'errors': [],
@@ -195,7 +198,32 @@ def get_avail_gifts(points):
     return gifts
 
 
-def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, error=None):
+def get_shared_gifts(client):
+    shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
+    shared_gift_dict = []
+    for shared_gift in shared_gifts:
+        for shared_item in shared_gift.share_items:
+            shared_item = shared_item.get()
+            chosen_group_modifiers = []
+            for choice_id in shared_item.group_choice_ids:
+                modifier = GroupModifier.get_modifier_by_choice(choice_id)
+                modifier.choice = modifier.get_choice_by_id(choice_id)
+                chosen_group_modifiers.append(modifier)
+            shared_menu_item = shared_item.shared_item.get()
+            item = shared_menu_item.item.get()
+            shared_gift_dict.append({
+                'item': item,
+                'image': item.picture,
+                'single_modifier_keys': sorted(shared_item.single_modifiers, key=lambda modifier_key: modifier_key.id()),
+                'group_modifier_keys': [(modifier.key, modifier.choice.choice_id) for modifier in
+                                        sorted(chosen_group_modifiers, key=lambda modifier: modifier.key.id())],
+                'share_gift_obj': shared_gift
+            })
+    return shared_gift_dict
+
+
+def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, shared_gift_dicts,
+                       error=None):
     return {
         'valid': valid,
         'more_gift': False,
@@ -204,7 +232,8 @@ def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, ca
         'errors': [error] if error else [],
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
-        'new_order_gifts': [],
+        'new_order_gifts': group_item_dicts([shared_gift_dict for shared_gift_dict in shared_gift_dicts
+                                             if not shared_gift_dict.get('found')]),
         'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
@@ -223,11 +252,11 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     def send_error(error):
         logging.warning('Sending error: %s' % error)
         return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
-                                  cancelled_order_gifts, error)
+                                  cancelled_order_gifts, shared_gift_dicts, error)
 
-    items = set_modifiers(items, False)
+    items = set_modifiers(items)
     items = set_price_with_modifiers(items)
-    item_dicts = set_item_dicts(items, False)
+    item_dicts = set_item_dicts(items)
 
     total_sum_without_promos = 0
     for item in items:
@@ -239,27 +268,37 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         gift_obj = GiftMenuItem.get_by_id(int(gift['item_id']))
         gift['item_id'] = gift_obj.item.id()
         gift['gift_obj'] = gift_obj
-    gifts = set_modifiers(gifts, True)
+    gifts = set_modifiers(gifts, with_gift_obj=True)
     gift_dicts = set_item_dicts(gifts, True)
 
     logging.info('gift_dicts = %s' % gift_dicts)
 
-    order_gifts = set_modifiers(order_gifts, False)
+    order_gifts = set_modifiers(order_gifts)
     order_gift_dicts = set_item_dicts(order_gifts, True)
 
     logging.info('order_gift_dicts = %s' % order_gift_dicts)
 
-    cancelled_order_gifts = set_modifiers(cancelled_order_gifts, False)
+    cancelled_order_gifts = set_modifiers(cancelled_order_gifts)
     cancelled_order_gift_dicts = set_item_dicts(cancelled_order_gifts, True)
 
     logging.info('cancelled_order_gift_dicts = %s' % cancelled_order_gift_dicts)
+
+    shared_gift_dicts = get_shared_gifts(client)
+    for shared_gift_dict in shared_gift_dicts:
+        for order_gift_dict in order_gift_dicts:
+            if not order_gift_dict.get('found') and is_equal(shared_gift_dict, order_gift_dict):
+                order_gift_dict['found'] = True
+                shared_gift_dict['found'] = True
+
+    logging.info('shared_gift_dicts = %s' % shared_gift_dicts)
+
     valid, error = check_address(delivery_type, address)
     if not valid:
         return send_error(error)
     valid, error = check_venue(venue, delivery_time, delivery_type, client)
     if not valid:
         return send_error(error)
-    valid, error = check_payment(payment_info)
+    valid, error = check_payment(payment_info, item_dicts, gift_dicts, shared_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_delivery_time(delivery_time)
@@ -309,7 +348,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
-        wallet_balance = empatika_wallet.get_balance(client.key.id())
+        wallet_balance = empatika_wallet.get_balance(client.key.id(),
+                                                     from_memcache=order is None,
+                                                     set_zero_if_fail=True)
         max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum + (delivery_zone.price if delivery_zone else 0)),
                                  wallet_balance / 100.0)
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
@@ -318,13 +359,16 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('item_dicts = %s' % item_dicts)
 
-    if len(item_dicts) or len(gift_dicts):
+    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts):
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
         grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
         grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
         grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
+        grouped_shared_gift_dicts = group_item_dicts(
+            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
+        grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
     else:
         grouped_item_dicts = []
         grouped_gift_dicts = []
@@ -422,6 +466,11 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             )
             details.append(details_item)
         result['order_gift_details'] = details
+        details = []
+        for shared_gift_dict in shared_gift_dicts:
+            details_item = SharedGiftPositionDetails(gift=shared_gift_dict['share_gift_obj'].key)
+            details.append(details_item)
+        result['share_gift_details'] = details
     return result
 
 

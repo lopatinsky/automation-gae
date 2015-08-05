@@ -40,15 +40,20 @@
 </head>
 <body>
     {% include '/company/header.html' %}
+    <h3>Текущая категория: {{ main_category.title }}</h3>
     <div>
-        <a href="{{ '/company/menu/category/add' }}">Добавить категорию</a>
+        <a href="{{ '/company/menu/category/add?main_category_id=%s' % main_category.key.id() }}">
+            Добавить категорию
+        </a>
     </div>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Изменить порядок</th>
             <th>ID</th>
             <th>Название</th>
-            <th>Изменить</th>
+            <th>Картинка</th>
+            <th>Категории</th>
+            <th>Продукты</th>
         </tr>
         {% for category in categories %}
             <tr id="{{ 'tr_%s' % category.key.id() }}">
@@ -63,17 +68,27 @@
                 </td>
                 <td>{{ category.key.id() }}</td>
                 <td>
-                    <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
+                    <a href="{{ '/company/menu/category/edit?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
                 </td>
                 <td>
-                    <a href="{{ '/company/menu/category/edit?category_id=%s' % category.key.id() }}">Изменить</a>
+                    <img src="{{ category.icon }}" height="75">
+                </td>
+                <td>
+                    <a href="{{ '/company/menu/category/list?category_id=%s' % category.key.id() }}">Вложенные категории</a>
+                </td>
+                <td>
+                    <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">Продукты</a>
                 </td>
             </tr>
         {% endfor %}
     </table>
     <br>
     <div>
-        <a href="{{ '/company/menu/main' }}">Назад</a>
+        {% if not main_category.category %}
+            <a href="{{ '/company/menu/main' }}">Назад</a>
+        {% else %}
+            <a href="{{ '/company/menu/category/list?category_id=%s' % main_category.category.id() }}">Назад</a>
+        {% endif %}
     </div>
 </body>
 </html>

@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 import time
 
 from .base import ApiHandler
@@ -55,6 +56,9 @@ class WalletBalanceHandler(ApiHandler):
         client_id = int(client_id)
         if config.WALLET_API_KEY:
             wallet_balance = empatika_wallet.get_balance(client_id)
+            if wallet_balance is None:
+                logging.info(u'Не удалось получить баланс пользователя')
+                self.abort(503)  # todo: think about new logic
         else:
             wallet_balance = 0
         self.render_json({

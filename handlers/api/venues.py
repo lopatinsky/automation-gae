@@ -2,7 +2,7 @@ from google.appengine.api.datastore_errors import BadValueError
 from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
 from models import Venue, STATUS_AVAILABLE
-from models.venue import SELF, IN_CAFE
+from models.venue import SELF, IN_CAFE, PICKUP
 
 __author__ = 'ilyazorin'
 
@@ -19,8 +19,7 @@ class VenuesHandler(ApiHandler):
         venue_dicts = []
         for venue in venues:
             for delivery in venue.delivery_types:
-                #if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE]:
-                if delivery.status == STATUS_AVAILABLE:
+                if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE, PICKUP]:
                     venue_dicts.append(venue.dict(location))
                     break
         if location:

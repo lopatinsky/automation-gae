@@ -1,8 +1,10 @@
 # coding=utf-8
+from google.appengine.ext.deferred import deferred
 from methods import email, empatika_wallet, push, paypal
 import logging
 from methods import alfa_bank, empatika_promos
 from datetime import datetime
+from methods.empatika_wallet import get_balance
 from models import Client
 
 __author__ = 'dvpermyakov'
@@ -28,11 +30,18 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
         if order.wallet_payment > 0:
             try:
                 empatika_wallet.reverse(order.client_id, order.key.id())
+                deferred.defer(get_balance, order.client_id, raise_error=True)  # just to update memcache
                 success_wallet_payment_reverse = True
             except empatika_wallet.EmpatikaWalletError as e:
                 logging.exception(e)
                 email.send_error("payment", "Wallet reversal failed", str(e))
                 # main payment reversed -- do not abort
+        for share_gift in order.shared_gift_details:
+            gift = share_gift.gift.get()
+            gift.recover()
+        for performing in order.promo_code_performings:
+            performing = performing.get()
+            performing.recover()
 
         order.status = status
         order.return_datetime = datetime.utcnow()
