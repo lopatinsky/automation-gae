@@ -222,8 +222,8 @@ def get_shared_gifts(client):
     return shared_gift_dict
 
 
-def _get_response_dict(valid, total_sum, item_dicts, gift_dicts, order_gifts, cancelled_order_gifts, shared_gift_dicts,
-                       error=None):
+def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
+                      shared_gift_dicts=(), error=None):
     return {
         'valid': valid,
         'more_gift': False,
@@ -251,8 +251,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
         logging.warning('Sending error: %s' % error)
-        return _get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
-                                  cancelled_order_gifts, shared_gift_dicts, error)
+        return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
+                                 cancelled_order_gifts, shared_gift_dicts, error)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)

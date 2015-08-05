@@ -8,7 +8,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
 
-from config import config
+from config import config, AUTO_APP, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms, card_payment_performing, \
@@ -17,6 +17,7 @@ from methods.orders.validation.validation import validate_order
 from methods.orders.cancel import cancel_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
+from methods.proxy.resto.check_order import resto_validate_order
 from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
 from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
@@ -272,11 +273,11 @@ class CheckOrderHandler(ApiHandler):
         address = self.request.get('address')
 
         if delivery_type in [SELF, IN_CAFE, PICKUP]:
-            venue_id = self.request.get_range('venue_id')
-            if not venue_id or venue_id == -1:
+            venue_id = self.request.get('venue_id')
+            if not venue_id or venue_id == '-1':
                 venue = None
             else:
-                venue = Venue.get_by_id(venue_id)
+                venue = Venue.get(venue_id, self.app_kind)
         elif delivery_type in [DELIVERY]:
             if address:
                 address = json.loads(address)
@@ -322,6 +323,11 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
-        result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                address, delivery_time, delivery_slot, delivery_type, delivery_zone)
+        if self.app_kind == AUTO_APP:
+            result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
+                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone)
+        elif self.app_kind == RESTO_APP:
+            result = resto_validate_order(client, items, venue, delivery_time)
+        else:
+            result = {}
         self.render_json(result)

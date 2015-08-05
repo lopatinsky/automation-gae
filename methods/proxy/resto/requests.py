@@ -2,6 +2,7 @@ import json
 import logging
 import urllib
 from google.appengine.api import urlfetch
+from methods.rendering import timestamp
 
 __author__ = 'dvpermyakov'
 
@@ -28,7 +29,7 @@ def _post_request(path, params=None, payload=None, log_response=True):
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
     if payload:
-        payload = json.dumps(payload)
+        payload = urllib.urlencode(payload)
     logging.info('payload = %s' % payload)
     response = urlfetch.fetch(url, method='POST', payload=payload)
     logging.info(response.status_code)
@@ -50,7 +51,7 @@ def get_resto_payment_types(resto_company):
 
 def get_resto_menu(resto_company):
     path = '/api/company/%s/menu' % resto_company.key.id()
-    return _get_request(path)
+    return _get_request(path, log_response=False)
 
 
 def get_resto_company_info(resto_company):
@@ -61,8 +62,14 @@ def get_resto_company_info(resto_company):
     return _get_request(path, params)
 
 
-def post_resto_check_order(venue, resto_client):
+def post_resto_check_order(venue, resto_item_dicts, resto_client, total_sum, delivery_time):
     path = '/api/get_order_promo'
-    params = {
-        'venue_id': venue.key.id()
+    payload = {
+        'venue_id': venue.key.id(),
+        'phone': resto_client.phone if resto_client else None,
+        'customer_id': resto_client.key.id() if resto_client else None,
+        'sum': total_sum,
+        'date': timestamp(delivery_time),
+        'items': resto_item_dicts
     }
+    return _post_request(path, payload=payload)

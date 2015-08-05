@@ -9,4 +9,5 @@ class RestoCompany(ndb.Model):
 
 
 class RestoClient(ndb.Model):
-    client = ndb.KeyProperty(kind=Client)
+    client = ndb.KeyProperty(kind=Client, required=True)
+    resto_phone = ndb.StringProperty()

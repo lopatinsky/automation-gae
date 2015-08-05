@@ -34,7 +34,7 @@ def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_
         delivery_type.status = resto_deliery_type['available']
         if delivery_type.delivery_type == DELIVERY:
             for id, city in enumerate(resto_delivery_cities):
-                zone = DeliveryZone(id=id, address=Address(city=city), min_sum=resto_min_sum)
+                zone = DeliveryZone(id=id+1, address=Address(city=city), min_sum=resto_min_sum)
                 delivery_type.delivery_zones.append(zone.key)
                 delivery_zones[zone.key] = zone
         delivery_types.append(delivery_type)

@@ -242,6 +242,16 @@ class Venue(ndb.Model):
     default = ndb.BooleanProperty(default=False)
 
     @classmethod
+    def get(cls, venue_id, app_kind):
+        from config import AUTO_APP, RESTO_APP
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(int(venue_id))
+        elif app_kind == RESTO_APP:
+            for venue in cls.fetch_venues(app_kind):
+                if venue.key.id() == venue_id:
+                    return venue
+
+    @classmethod
     def fetch_venues(cls, app_kind, *args, **kwargs):
         from config import AUTO_APP, RESTO_APP
         from methods.proxy.resto.venues import get_venues
