@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
+from models.venue import DELIVERY_MAP
 from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, Venue
 
@@ -24,7 +25,8 @@ def _order_data(order):
         "total_sum": order.total_sum,
         "venue_revenue": sum(d.revenue for d in order.item_details),
         "venue": venue.title,
-        "items": order.grouped_item_dict(order.item_details)
+        "items": order.grouped_item_dict(order.item_details),
+        "delivery_type": order.delivery_type
     }
     client = Client.get_by_id(order.client_id)
     dct["client"] = {
@@ -115,5 +117,6 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
         'chosen_month': chosen_month,
         'chosen_day': chosen_day,
         'totals': totals,
+        'DELIVERY_TYPE_MAP': DELIVERY_MAP
     }
     return values

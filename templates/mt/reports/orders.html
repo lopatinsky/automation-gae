@@ -56,6 +56,7 @@
         <tr>
             <th>Номер заказа</th>
             <th>Точка</th>
+            <th>Тип доставки</th>
             <th>Дата создания</th>
             <th>Время заказа</th>
             <th data-no-excel>Время самовывоза</th>
@@ -77,6 +78,7 @@
             <tr>
                 <td rowspan="{{ icount }}">{{ order.order_id }}</td>
                 <td rowspan="{{ icount }}">{{ order.venue }}</td>
+                <td rowspan="{{ icount }}">{{ DELIVERY_TYPE_MAP[order.delivery_type] }}</td>
                 <td rowspan="{{ icount }}">{{ order.date }}</td>
                 <td rowspan="{{ icount }}">{{ order.created_time }}</td>
                 <td rowspan="{{ icount }}">{{ order.delivery_time }}</td>
