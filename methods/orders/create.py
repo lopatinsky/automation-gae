@@ -74,7 +74,7 @@ def send_venue_email(venue, order, url, jinja2):
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         item_values = order_items_values(order)
         item_values['venue'] = venue
-        item_values['delivery_type_str'] = DELIVERY_MAP[order.device_type]
+        item_values['delivery_type_str'] = DELIVERY_MAP[order.delivery_type]
         order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
         if config.EMAIL_REQUESTS:
             order.email_key_done = security.generate_random_string(entropy=256)
