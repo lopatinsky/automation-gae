@@ -49,6 +49,7 @@ class Config(ndb.Model):
     SHARED_INVITATION_RECIPIENT_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
+    RBCN_MOBI = ndb.StringProperty(indexed=False)
 
     APP_NAME = ndb.StringProperty(indexed=False)
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
