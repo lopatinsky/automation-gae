@@ -5,6 +5,8 @@ import json
 from config import Config
 
 BASE_URL = 'https://api.branch.io'
+BRANCH_API_KEY = '155014419024204427'
+
 
 VK = 0
 FACEBOOK = 1
@@ -46,7 +48,7 @@ FEATURE_MAP = {
 def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
     config = Config.get()
     params = {
-        'app_id': config.BRANCH_API_KEY,
+        'app_id': BRANCH_API_KEY,
         'data': {
             'phone': recipient.get('phone') if recipient else None,
             'name': recipient.get('name') if recipient else None,
