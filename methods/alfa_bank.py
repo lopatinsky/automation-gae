@@ -2,7 +2,7 @@ import json
 import logging
 import urllib
 from google.appengine.api import urlfetch
-from config import config
+from config import Config
 from models import PaymentErrorsStatistics
 
 ALPHA_CARD_LIMIT_CODES = [-20010, 902, 116, 123]
@@ -27,6 +27,7 @@ def _success(resp):
 
 
 def __post_request_alfa(api_path, params, deadline=30):
+    config = Config.get()
     url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)
@@ -50,6 +51,7 @@ def __post_request_alfa(api_path, params, deadline=30):
 
 
 def create(amount, order_number, return_url, client_id, page_view):
+    config = Config.get()
     p = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -64,6 +66,7 @@ def create(amount, order_number, return_url, client_id, page_view):
 
 
 def check_status(order_id):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -74,6 +77,7 @@ def check_status(order_id):
 
 
 def check_extended_status(order_id):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -92,6 +96,7 @@ def check_extended_status(order_id):
 
 
 def reverse(order_id):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -102,6 +107,7 @@ def reverse(order_id):
 
 
 def authorize(binding_id, order_id):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -113,6 +119,7 @@ def authorize(binding_id, order_id):
 
 
 def deposit(order_id, amount):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,
@@ -124,6 +131,7 @@ def deposit(order_id, amount):
 
 
 def unbind_card(binding_id):
+    config = Config.get()
     params = {
         'userName': config.ALFA_LOGIN,
         'password': config.ALFA_PASSWORD,

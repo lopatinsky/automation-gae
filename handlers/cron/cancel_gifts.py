@@ -14,13 +14,16 @@ MAX_DAYS_BEFORE_CANCEL = 7
 class CancelGiftsHandler(RequestHandler):
     def get(self):
         time = datetime.datetime.now() - datetime.timedelta(days=MAX_DAYS_BEFORE_CANCEL)
+        namespace_cancels = {}
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             config = Config.get()
             unused_gifts = SharedGift.query(SharedGift.status == SharedGift.READY)
-            old_gifts = [g for g in unused_gifts if g.created < time]
+            old_gifts = [gift for gift in unused_gifts if gift.created < time]
             if old_gifts:
-                admins.send_error("order",
-                                 "Unused gifts found", "Gifts not used within 7 days: %s. In company %s" % (len(old_gifts), config.APP_NAME))
                 for gift in old_gifts:
-                    gift.cancel()
+                    gift.cancel(namespace)
+                namespace_cancels[namespace] = 'Gifts not used within %s days: %s. In company %s\n' % \
+                                               (MAX_DAYS_BEFORE_CANCEL, len(old_gifts), config.APP_NAME)
+        if namespace_cancels:
+            admins.send_error('order', 'Unused gifts found', ''.join(namespace_cancels.values()))

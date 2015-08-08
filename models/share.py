@@ -156,13 +156,13 @@ class SharedGift(ndb.Model):
             share = Share.get_by_id(self.share_id)
             share.deactivate()
             promo_code = self.promo_code.get()
-            promo_code.cancel()
+            promo_code.deactivate()
             self.status = self.CANCELED
             self.put()
-            recipient = Client.get_by_id(self.recipient_id)
+            sender = Client.get_by_id(self.client_id)
             text = u'Ваш подарок не был получен. Ссылка более не будет активна, а деньги вернутся в ближайшее время.'
             header = u'Отмена подарка'
-            send_client_push(recipient, text, header, namespace)
+            send_client_push(sender, text, header, namespace)
 
     def dict(self):
         from models import Client
