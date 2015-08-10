@@ -50,10 +50,12 @@ def paypal_payment_performing(payment_json, amount, order, client):
     return success, error
 
 
-def send_client_sms(order):
+def send_client_sms_task(order, namespace):
     SECONDS_WAITING_BEFORE_SMS = 15
-    taskqueue.add(url='/task/check_order_success', params={'order_id': order.key.id()},
-                  countdown=SECONDS_WAITING_BEFORE_SMS)
+    taskqueue.add(url='/task/check_order_success', params={
+        'order_id': order.key.id(),
+        'namespace': namespace
+    }, countdown=SECONDS_WAITING_BEFORE_SMS)
 
 
 def send_venue_sms(venue, order):

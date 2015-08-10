@@ -31,6 +31,12 @@ def get_phone(phone_str):
     return re.sub("[^0-9]", "", phone_str)
 
 
+def sms_phone(phone):
+    if len(phone) == 11 and phone[0] == "8":
+        phone = "7" + phone[1:]
+    return phone
+
+
 def get_separated_name_surname(name_and_surname):
     values = name_and_surname.split(None, 1)
     if not values:

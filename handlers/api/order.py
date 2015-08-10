@@ -11,7 +11,7 @@ from google.appengine.ext.ndb import GeoPt
 from config import config
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
-from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms, card_payment_performing, \
+from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj
 from methods.orders.validation.validation import validate_order
 from methods.orders.cancel import cancel_order
@@ -185,7 +185,7 @@ class OrderHandler(ApiHandler):
 
         send_venue_sms(venue, self.order)
         send_venue_email(venue, self.order, self.request.url, self.jinja2)
-        send_client_sms(self.order)
+        send_client_sms_task(self.order, namespace_manager.get_namespace())
 
         self.response.status_int = 201
         self.render_json({
