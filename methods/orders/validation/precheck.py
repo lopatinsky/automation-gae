@@ -15,7 +15,8 @@ __author__ = 'dvpermyakov'
 def get_order_id(order_json):
     order_id = order_json.get('order_id')
     if order_id:
-        order = Order.get_by_id(int(order_id))
+        order_id = int(order_id)
+        order = Order.get_by_id(order_id)
         if order:
             return None
         else:
