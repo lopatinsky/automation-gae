@@ -121,6 +121,20 @@ class Promo(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
+    @classmethod
+    def query_promos(cls, app_kind=0, *args, **kwargs):  # AUTO_APP = 0
+        from config import AUTO_APP, RESTO_APP
+        from methods.proxy.resto.promo import get_promos
+        if app_kind == AUTO_APP:
+            return cls.query(*args, **kwargs).fetch()
+        elif app_kind == RESTO_APP:
+            promos = get_promos()
+            for promo in promos[:]:
+                for name, value in kwargs.items():
+                    if getattr(promo, name) != value:
+                        promos.remove(promo)
+            return promos
+
     @staticmethod
     def generate_priority():
         fastcounter.incr("promo", delta=100, update_interval=1)

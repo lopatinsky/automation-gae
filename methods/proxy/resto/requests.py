@@ -49,6 +49,14 @@ def get_resto_payment_types(resto_company):
     return _get_request(path)
 
 
+def get_resto_delivery_types(resto_company):
+    path = '/api/delivery_types'
+    params = {
+        'organization_id': resto_company.key.id()
+    }
+    return _get_request(path, params)
+
+
 def get_resto_menu(resto_company):
     path = '/api/company/%s/menu' % resto_company.key.id()
     return _get_request(path, log_response=False)
@@ -60,6 +68,11 @@ def get_resto_company_info(resto_company):
         'company_id': resto_company.key.id()
     }
     return _get_request(path, params)
+
+
+def get_resto_promos(resto_company):
+    path = '/api/company/%s/promos' % resto_company.key.id()
+    return _get_request(path)
 
 
 def post_resto_check_order(venue, resto_item_dicts, resto_client, total_sum, delivery_time):

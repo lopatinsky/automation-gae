@@ -2,7 +2,7 @@ from datetime import time
 from config import Config
 from models.schedule import Schedule, DaySchedule
 from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address
-from requests import get_resto_company_info
+from requests import get_resto_company_info, get_resto_delivery_types
 
 __author__ = 'dvpermyakov'
 
@@ -55,8 +55,9 @@ def _get_company_info():
     config = Config.get()
     resto_company = config.RESTO_COMPANY.get()
     resto_company_info = get_resto_company_info(resto_company)
+    resto_delivery_types = get_resto_delivery_types(resto_company)
     schedule = __get_company_schedule(resto_company_info['schedule'])
-    delivery_types, delivery_zones = __get_delivery_types(resto_company_info['delivery_types'],
+    delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
                                                           resto_company_info['cities'],
                                                           resto_company_info['min_order_sum'])
     company_info_dict = __get_company_info_dict(resto_company_info)
