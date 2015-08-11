@@ -80,7 +80,7 @@ def _group_group_modifiers(modifiers):
         if key in result:
             result[key]['quantity'] += 1
         else:
-            modifier_obj = modifier[0].get()
+            modifier_obj = GroupModifier.get(modifier[0].id())
             choice = modifier_obj.get_choice_by_id(modifier[1])
             result[key] = {
                 'id': str(modifier[0].id()),
@@ -129,7 +129,7 @@ def group_item_dicts(item_dicts):
 def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
-        menu_item = copy.copy(MenuItem.get_by_id(int(item['item_id'])))
+        menu_item = copy.copy(MenuItem.get(item['item_id']))
         if with_gift_obj:
             menu_item.gift_obj = item['gift_obj']
         else:
@@ -140,13 +140,13 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
             menu_item.share_gift_obj = None
         menu_item.chosen_single_modifiers = []
         for single_modifier in item['single_modifiers']:
-            single_modifier_obj = copy.copy(SingleModifier.get_by_id(int(single_modifier['single_modifier_id'])))
+            single_modifier_obj = copy.copy(SingleModifier.get(single_modifier['single_modifier_id']))
             for i in xrange(single_modifier['quantity']):
                 menu_item.chosen_single_modifiers.append(single_modifier_obj)
         menu_item.chosen_group_modifiers = []
         for group_modifier in item['group_modifiers']:
-            group_modifier_obj = copy.copy(GroupModifier.get_by_id(int(group_modifier['group_modifier_id'])))
-            group_modifier_obj.choice = group_modifier_obj.get_choice_by_id(int(group_modifier['choice']))
+            group_modifier_obj = copy.copy(GroupModifier.get(group_modifier['group_modifier_id']))
+            group_modifier_obj.choice = group_modifier_obj.get_choice_by_id(group_modifier['choice'])
             if group_modifier_obj.choice:
                 for i in xrange(group_modifier['quantity']):
                     menu_item.chosen_group_modifiers.append(group_modifier_obj)

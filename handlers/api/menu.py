@@ -12,7 +12,7 @@ class MenuHandler(ApiHandler):
             if not venue:
                 self.abort(400)
         self.render_json({
-            "menu": MenuCategory.get_menu_dict(venue, self.app_kind),
+            "menu": MenuCategory.get_menu_dict(venue),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         })
 

@@ -9,7 +9,7 @@ __author__ = 'ilyazorin'
 
 class VenuesHandler(ApiHandler):
     def get(self):
-        venues = Venue.fetch_venues(self.app_kind, Venue.active == True)
+        venues = Venue.fetch_venues(Venue.active == True)
         location = self.request.get("ll")
         try:
             location = ndb.GeoPt(location)

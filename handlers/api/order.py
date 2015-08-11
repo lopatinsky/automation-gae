@@ -277,7 +277,7 @@ class CheckOrderHandler(ApiHandler):
             if not venue_id or venue_id == '-1':
                 venue = None
             else:
-                venue = Venue.get(venue_id, self.app_kind)
+                venue = Venue.get(venue_id)
         elif delivery_type in [DELIVERY]:
             if address:
                 address = json.loads(address)
@@ -323,10 +323,10 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
-        if self.app_kind == AUTO_APP:
+        if config.APP_KIND == AUTO_APP:
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
                                     address, delivery_time, delivery_slot, delivery_type, delivery_zone)
-        elif self.app_kind == RESTO_APP:
+        elif config.APP_KIND == RESTO_APP:
             result = resto_validate_order(client, items, venue, delivery_time)
         else:
             result = {}

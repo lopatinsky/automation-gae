@@ -33,7 +33,7 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time):
     total_sum = _get_init_total_sum(items)
     resto_client = RestoClient.query(RestoClient.client == client.key).get()
     resto_item_dicts = _get_resto_item_dicts(init_item_dicts)
-    resto_validation = post_resto_check_order(venue, resto_item_dicts, resto_client, total_sum, delivery_time)
+    resto_validation = post_resto_check_order(venue, resto_item_dicts, client, resto_client, total_sum, delivery_time)
     required_value = {
         'valid': not resto_validation['error'],
         'error': resto_validation['description'] if resto_validation['error'] else None,

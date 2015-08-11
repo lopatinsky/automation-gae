@@ -19,9 +19,10 @@ class PaymentType(ndb.Model):  # self.key.id() == type
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
     @classmethod
-    def fetch_types(cls, app_kind, *args, **kwargs):
-        from config import AUTO_APP, RESTO_APP
+    def fetch_types(cls, *args, **kwargs):
+        from config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.payment_types import get_payment_types
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
         elif app_kind == RESTO_APP:

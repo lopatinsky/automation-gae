@@ -126,9 +126,10 @@ class DeliveryZone(ndb.Model):
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
 
     @classmethod
-    def get(cls, zone_key, app_kind=0):  # AUTO_APP = 0
-        from config import AUTO_APP, RESTO_APP
+    def get(cls, zone_key):
+        from config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.company import get_delivery_zone
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(zone_key.id())
         elif app_kind == RESTO_APP:
@@ -242,8 +243,9 @@ class Venue(ndb.Model):
     default = ndb.BooleanProperty(default=False)
 
     @classmethod
-    def get(cls, venue_id, app_kind):
-        from config import AUTO_APP, RESTO_APP
+    def get(cls, venue_id):
+        from config import Config, AUTO_APP, RESTO_APP
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
         elif app_kind == RESTO_APP:
@@ -252,9 +254,10 @@ class Venue(ndb.Model):
                     return venue
 
     @classmethod
-    def fetch_venues(cls, app_kind, *args, **kwargs):
-        from config import AUTO_APP, RESTO_APP
+    def fetch_venues(cls, *args, **kwargs):
+        from config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.venues import get_venues
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
         elif app_kind == RESTO_APP:

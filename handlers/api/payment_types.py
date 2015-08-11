@@ -6,7 +6,7 @@ __author__ = 'ilyazorin'
 
 class PaymentTypesHandler(ApiHandler):
     def get(self):
-        payment_types = PaymentType.fetch_types(self.app_kind, PaymentType.status == STATUS_AVAILABLE)
+        payment_types = PaymentType.fetch_types(PaymentType.status == STATUS_AVAILABLE)
         self.render_json({
             'payment_types': [payment_type.dict() for payment_type in payment_types]
         })

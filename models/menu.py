@@ -19,13 +19,14 @@ class SingleModifier(ndb.Model):
     sequence_number = ndb.IntegerProperty(default=0)
 
     @classmethod
-    def get(cls, modifier_key, app_kind=0):  # AUTO_APP = 0
-        from config import AUTO_APP, RESTO_APP
-        from methods.proxy.resto.menu import get_single_modifier
+    def get(cls, modifier_id):
+        from config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_single_modifier_by_id
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
-            return cls.get_by_id(modifier_key.id())
+            return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
-            return get_single_modifier(modifier_key)
+            return get_single_modifier_by_id(modifier_id)
 
     @property
     def float_price(self):  # в рублях
@@ -105,17 +106,25 @@ class GroupModifier(ndb.Model):
     sequence_number = ndb.IntegerProperty()
 
     @classmethod
-    def get(cls, modifier_key, app_kind=0):  # AUTO_APP = 0
-        from config import AUTO_APP, RESTO_APP
-        from methods.proxy.resto.menu import get_group_modifier
+    def get(cls, modifier_id):
+        from config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_group_modifier_by_id
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
-            return cls.get_by_id(modifier_key.id())
+            return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
-            return get_group_modifier(modifier_key)
+            return get_group_modifier_by_id(modifier_id)
 
     def get_choice_by_id(self, choice_id):
-        for choice in self.choices:
-            if choice_id == choice.choice_id:
+        from config import Config, AUTO_APP, RESTO_APP
+        app_kind = Config.get().APP_KIND
+        if app_kind == AUTO_APP:
+            choice_id = int(choice_id)
+            choices = self.choices
+        elif app_kind == RESTO_APP:
+            choices = self.get(self.key.id()).choices
+        for choice in choices:
+            if choice_id == choice.choice_id or choice_id == choice.choice_id_str:
                 return choice
         return None
 
@@ -211,17 +220,19 @@ class MenuCategory(ndb.Model):
             category.put()
         return category
 
-    def get_categories(self, app_kind=0):  # AUTO_APP = 0
-        from config import AUTO_APP, RESTO_APP
+    def get_categories(self):
+        from config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_categories
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return MenuCategory.query(MenuCategory.category == self.key).fetch()
         elif app_kind == RESTO_APP:
             return get_categories(self)
 
-    def get_items(self, app_kind=0, only_available=False):  # AUTO_APP = 0
+    def get_items(self, only_available=False):
         from methods.proxy.resto.menu import get_products
-        from config import AUTO_APP, RESTO_APP
+        from config import Config, AUTO_APP, RESTO_APP
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
         elif app_kind == RESTO_APP:
@@ -286,11 +297,11 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, venue=None, app_kind=0):  # AUTO_APP = 0
+    def dict(self, venue=None):
         items = []
-        for item in self.get_items(app_kind, only_available=True):
+        for item in self.get_items(only_available=True):
             if not venue:
-                items.append(item.dict(app_kind=app_kind))
+                items.append(item.dict())
             else:
                 if venue.key not in item.restrictions:
                     items.append(item.dict(without_restrictions=True))
@@ -305,18 +316,18 @@ class MenuCategory(ndb.Model):
                 'order': self.sequence_number if self.sequence_number else 0
             },
             'items': items,
-            'categories': [category.dict(venue, app_kind) for category in self.get_categories(app_kind)]
+            'categories': [category.dict(venue) for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None, app_kind=0):  # AUTO_APP = 0
+    def get_menu_dict(cls, venue=None):
         init_category = cls.get_initial_category()
         category_dicts = []
-        for category in init_category.get_categories(app_kind=app_kind):
-            category_dict = category.dict(venue, app_kind)
+        for category in init_category.get_categories():
+            category_dict = category.dict(venue)
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
         return category_dicts
@@ -343,11 +354,21 @@ class MenuItem(ndb.Model):
     group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
     stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
 
+    @classmethod
+    def get(cls, product_id):
+        from config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_product_by_id
+        app_kind = Config.get().APP_KIND
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(int(product_id))
+        elif app_kind == RESTO_APP:
+            return get_product_by_id(product_id)
+
     @property
     def float_price(self):  # в рублях
         return float(self.price) / 100.0
 
-    def dict(self, without_restrictions=False, app_kind=0):  # AUTO_APP = 0
+    def dict(self, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
             'order': self.sequence_number,
@@ -359,8 +380,8 @@ class MenuItem(ndb.Model):
             'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
-            'single_modifiers': [SingleModifier.get(modifier, app_kind).dict() for modifier in self.single_modifiers],
-            'group_modifiers': [GroupModifier.get(modifier, app_kind).dict(self) for modifier in self.group_modifiers],
+            'single_modifiers': [SingleModifier.get(modifier.id()).dict() for modifier in self.single_modifiers],
+            'group_modifiers': [GroupModifier.get(modifier.id()).dict(self) for modifier in self.group_modifiers],
             'restrictions': {
                 'venues': [str(restrict.id()) for restrict in self.restrictions]
             }

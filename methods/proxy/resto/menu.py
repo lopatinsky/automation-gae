@@ -1,4 +1,5 @@
 from google.appengine.api import memcache
+from google.appengine.ext import ndb
 from config import Config
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
 from requests import get_resto_menu
@@ -109,9 +110,18 @@ def get_products(category):
     return _get_menu()[1].get(category.key, [])
 
 
-def get_group_modifier(modifier_key):
+def get_product_by_id(product_id):
+    for products in _get_menu()[1].values():
+        for product in products:
+            if product.key.id() == product_id:
+                return product
+
+
+def get_group_modifier_by_id(modifier_id):
+    modifier_key = ndb.Key(GroupModifier, modifier_id)
     return _get_menu()[2][modifier_key]
 
 
-def get_single_modifier(modifier_key):
+def get_single_modifier_by_id(modifier_id):
+    modifier_key = ndb.Key(SingleModifier, modifier_id)
     return _get_menu()[3][modifier_key]

@@ -29,7 +29,7 @@ class PromoInfoHandler(ApiHandler):
         hostname = urlparse(self.request.url).hostname
         promo_texts = []
         promo_dicts = []
-        for promo in sorted(Promo.query_promos(self.app_kind, Promo.status == STATUS_AVAILABLE),
+        for promo in sorted(Promo.query_promos(Promo.status == STATUS_AVAILABLE),
                             key=lambda query_promo: -query_promo.priority):
             if not promo.visible:
                 continue

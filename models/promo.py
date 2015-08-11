@@ -122,9 +122,10 @@ class Promo(ndb.Model):
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
     @classmethod
-    def query_promos(cls, app_kind=0, *args, **kwargs):  # AUTO_APP = 0
-        from config import AUTO_APP, RESTO_APP
+    def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
+        from config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.promo import get_promos
+        app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
         elif app_kind == RESTO_APP:

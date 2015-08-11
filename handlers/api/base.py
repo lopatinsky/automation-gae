@@ -63,7 +63,6 @@ class ApiHandler(RequestHandler):
         for version in TEST_VERSIONS:
             if version in self.request.url:
                 self.test = True
-        self.app_kind = config.APP_KIND
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)

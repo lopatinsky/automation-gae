@@ -75,14 +75,14 @@ def get_resto_promos(resto_company):
     return _get_request(path)
 
 
-def post_resto_check_order(venue, resto_item_dicts, resto_client, total_sum, delivery_time):
+def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time):
     path = '/api/get_order_promo'
     payload = {
         'venue_id': venue.key.id(),
-        'phone': resto_client.phone if resto_client else None,
+        'phone': auto_client.tel,
         'customer_id': resto_client.key.id() if resto_client else None,
         'sum': total_sum,
         'date': timestamp(delivery_time),
-        'items': resto_item_dicts
+        'items': json.dumps(resto_item_dicts)
     }
     return _post_request(path, payload=payload)
