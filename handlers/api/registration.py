@@ -1,6 +1,8 @@
 import json
 from google.appengine.api.namespace_manager import namespace_manager
 from .base import ApiHandler
+from config import config, RESTO_APP
+from methods.proxy.resto.registration import resto_registration
 from models import Client, Share, SharedGift, STATUS_AVAILABLE
 from methods.branch_io import INVITATION, GIFT
 from models.proxy.unified_app import AutomationCompany
@@ -91,4 +93,7 @@ def _perform_registration(request):
 class RegistrationHandler(ApiHandler):
     def post(self):
         response = _perform_registration(self.request)
+        client = Client.get_by_id(response['client_id'])
+        if config.APP_KIND == RESTO_APP:
+            resto_registration(client)
         self.render_json(response)

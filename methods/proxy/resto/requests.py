@@ -75,6 +75,16 @@ def get_resto_promos(resto_company):
     return _get_request(path)
 
 
+def post_resto_register(resto_company, resto_customer):
+    path = '/api/customer/register'
+    params = {
+        'company_id': resto_company.key.id(),
+        'customer_id': resto_customer.resto_customer_id,
+        'share_data': None
+    }
+    return _post_request(path, params=params)
+
+
 def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time):
     path = '/api/get_order_promo'
     payload = {

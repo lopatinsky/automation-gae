@@ -16,3 +16,7 @@ class RestoCompany(ndb.Model):
 class RestoClient(ndb.Model):
     client = ndb.KeyProperty(kind=Client, required=True)
     resto_customer_id = ndb.StringProperty(required=True)
+
+    @classmethod
+    def get(cls, auto_client):
+        return cls.query(cls.client == auto_client.key).get()
