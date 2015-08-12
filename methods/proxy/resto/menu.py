@@ -27,7 +27,7 @@ def __get_single_modifiers(resto_modifiers):
     for resto_modifier in resto_modifiers:
         modifier = SingleModifier(id=resto_modifier['id'])
         modifier.title = resto_modifier['name']
-        modifier.price = resto_modifier['price']
+        modifier.price = int(resto_modifier['price'] * 100)
         modifier.min_amount = resto_modifier['minAmount']
         modifier.max_amount = resto_modifier['maxAmount']
         single_modifiers[modifier.key] = modifier

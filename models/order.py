@@ -112,7 +112,7 @@ class Order(ndb.Model):
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
     wallet_payment = ndb.FloatProperty(required=True, default=0.0)
     coordinates = ndb.GeoPtProperty(indexed=False)
-    venue_id = ndb.IntegerProperty()  # it is not required cos order may be delivery
+    venue_id = ndb.StringProperty()                                                      # it is changed!!!!!!!!!!!!
     pan = ndb.StringProperty(indexed=False)
     return_comment = ndb.StringProperty(indexed=False)
     comment = ndb.StringProperty(indexed=False)

@@ -6,6 +6,19 @@ from requests import post_resto_check_order
 __author__ = 'dvpermyakov'
 
 
+def get_resto_address_dict(address_json):
+    address = address_json['address']
+    return {
+        'city': address['city'],
+        'street': address['street'],
+        'home': address['home'],
+        'apartment': address['flat'],
+        'entrance': '-',
+        'housing': '-',
+        'floor': '-'
+    }
+
+
 def _get_init_total_sum(items):
     total_sum = 0
     for item in items:
@@ -20,7 +33,7 @@ def _get_item_and_item_dicts(items):
     return items, item_dicts
 
 
-def _get_resto_item_dicts(init_item_dicts):
+def get_resto_item_dicts(init_item_dicts):
     return [{
         'id': item_dict['item_id'],
         'name': '',
@@ -31,8 +44,8 @@ def _get_resto_item_dicts(init_item_dicts):
 def resto_validate_order(client, init_item_dicts, venue, delivery_time):
     items, item_dicts = _get_item_and_item_dicts(init_item_dicts)
     total_sum = _get_init_total_sum(items)
-    resto_client = RestoClient.query(RestoClient.client == client.key).get()
-    resto_item_dicts = _get_resto_item_dicts(init_item_dicts)
+    resto_client = RestoClient.get(client)
+    resto_item_dicts = get_resto_item_dicts(init_item_dicts)
     resto_validation = post_resto_check_order(venue, resto_item_dicts, client, resto_client, total_sum, delivery_time)
     required_value = {
         'valid': not resto_validation['error'],

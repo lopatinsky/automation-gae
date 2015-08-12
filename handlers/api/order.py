@@ -108,7 +108,7 @@ class OrderHandler(ApiHandler):
         self.order.user_agent = self.request.headers["User-Agent"]
 
         self.order.payment_type_id = order_json['payment']['type_id']
-        payment_type = PaymentType.get_by_id(str(self.order.payment_type_id))
+        payment_type = PaymentType.get(self.order.payment_type_id)
         if payment_type.status == STATUS_UNAVAILABLE:
             return self.render_error(u"Выбранный способ оплаты недоступен.")
 
@@ -118,7 +118,8 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
         if config.APP_KIND == RESTO_APP:
-            success, response = resto_place_order(client, venue, self.order, order_json['payment'])
+            success, response = resto_place_order(
+                client, venue, self.order, order_json['payment'], order_json['items'], address_json)
             if success:
                 return self.render_json(response)
             else:

@@ -12,12 +12,17 @@ DELIVERY_TYPE_MAP = {
     'delivery': DELIVERY
 }
 
+REVERSE_DELIVERY_TYPE_MAP = {
+    SELF: 'self',
+    DELIVERY: 'delivery'
+}
+
 
 def __get_company_schedule(resto_schedule):
     schedule = Schedule()
     for resto_schedule in resto_schedule:
-        resto_start_hour = int(resto_schedule['hours'].split('-')[0])
-        resto_end_hour = int(resto_schedule['hours'].split('-')[1])
+        resto_start_hour = int(resto_schedule['hours'].split('-')[0]) % 24
+        resto_end_hour = int(resto_schedule['hours'].split('-')[1]) % 24
         for day in resto_schedule['days']:
             schedule.days.append(DaySchedule(weekday=int(day),
                                              start=time(hour=resto_start_hour),

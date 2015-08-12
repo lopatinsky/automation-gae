@@ -7,7 +7,7 @@ from methods.rendering import timestamp
 __author__ = 'dvpermyakov'
 
 
-BASE_URL = 'http://empatika-resto.appspot.com'
+BASE_URL = 'http://empatika-resto-test.appspot.com'
 
 
 def _get_request(path, params=None, log_response=True):
@@ -29,9 +29,10 @@ def _post_request(path, params=None, payload=None, log_response=True):
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
     if payload:
+        payload = {k: unicode(v).encode('utf-8') for k, v in payload.iteritems()}
         payload = urllib.urlencode(payload)
     logging.info('payload = %s' % payload)
-    response = urlfetch.fetch(url, method='POST', payload=payload)
+    response = urlfetch.fetch(url, method='POST', payload=payload, deadline=60)
     logging.info(response.status_code)
     response = json.loads(response.content)
     if log_response:
@@ -77,12 +78,11 @@ def get_resto_promos(resto_company):
 
 def post_resto_register(resto_company, resto_customer):
     path = '/api/customer/register'
-    params = {
+    payload = {
         'company_id': resto_company.key.id(),
-        'customer_id': resto_customer.resto_customer_id,
-        'share_data': None
+        'customer_id': resto_customer.resto_customer_id if resto_customer else None
     }
-    return _post_request(path, params=params)
+    return _post_request(path, payload=payload)
 
 
 def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time):
@@ -98,24 +98,26 @@ def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, t
     return _post_request(path, payload=payload)
 
 
-def post_resto_place_order(resto_venue, resto_customer, auto_client, order, payment_json):
+def post_resto_place_order(resto_venue, resto_customer, auto_client, order, items, payment_dict, address):
+    from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
+    from methods.proxy.resto.payment_types import REVERSE_PAYMENT_TYPE_MAP
     path = '/api/venue/%s/order/new' % resto_venue.key.id()
     payload = {
         'custom_data': '',
         'bonus_sum': 0,
         'discount_sum': 0,
         'customer_id': resto_customer.resto_customer_id,
-        'address': order.address,
+        'address': json.dumps(address),
         'comment': order.comment,
-        'binding_id': payment_json['binding_id'],
-        'alpha_client_id': payment_json['client_id'],
+        'binding_id': payment_dict.get('binding_id'),
+        'alpha_client_id': payment_dict.get('client_id'),
         'name': auto_client.name,
         'phone': auto_client.tel,
-        'date': order.delivery_time,
-        'paymentType': order.payment_type_id,
-        'items': order.items,
+        'date': timestamp(order.delivery_time),
+        'paymentType': REVERSE_PAYMENT_TYPE_MAP[order.payment_type_id],
+        'items': json.dumps(items),
         'sum': order.total_sum,
-        'deliveryType': order.delivery_type
+        'deliveryType': REVERSE_DELIVERY_TYPE_MAP[order.delivery_type]
     }
     return _post_request(path, payload=payload)
 

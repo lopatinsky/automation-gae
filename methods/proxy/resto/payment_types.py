@@ -1,4 +1,3 @@
-from config import Config
 from models import PaymentType
 from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany
@@ -9,6 +8,11 @@ __author__ = 'dvpermyakov'
 PAYMENT_TYPE_MAP = {
     1: str(CASH_PAYMENT_TYPE),
     2: str(CARD_PAYMENT_TYPE)
+}
+
+REVERSE_PAYMENT_TYPE_MAP = {
+    CASH_PAYMENT_TYPE: 1,
+    CARD_PAYMENT_TYPE: 2
 }
 
 
@@ -22,3 +26,9 @@ def get_payment_types():
         payment_type.status = int(resto_payment_type['available'])
         payment_types.append(payment_type)
     return payment_types
+
+
+def get_payment_type(payment_id):
+    for payment_type in get_payment_types():
+        if payment_type.key.id() == payment_id:
+            return payment_type
