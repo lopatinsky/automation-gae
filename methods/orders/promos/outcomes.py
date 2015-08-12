@@ -1,16 +1,21 @@
 # coding=utf-8
-from models.menu import GroupModifier
+from models.menu import GroupModifier, GroupModifierChoice
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY
 
 
 def get_item_dict(item_details):
+    item = item_details.item.get()
     chosen_group_modifiers = []
     for choice_id in item_details.group_choice_ids:
         modifier = GroupModifier.get_modifier_by_choice(choice_id)
         modifier.choice = modifier.get_choice_by_id(choice_id)
         chosen_group_modifiers.append(modifier)
-    item = item_details.item.get()
+    for modifier_key in item.group_modifiers:
+        if modifier_key not in [modifier.key for modifier in chosen_group_modifiers]:
+            modifier = modifier_key.get()
+            modifier.choice = GroupModifierChoice(choice_id=None)
+            chosen_group_modifiers.append(modifier)
     return {
         'item': item,
         'image': item.picture,

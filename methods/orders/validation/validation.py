@@ -45,10 +45,11 @@ def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
     if len(item_dict1['group_modifier_keys']) != len(item_dict2['group_modifier_keys']):
         return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
-        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:  # consider group modifier
+        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:      # consider group modifier
             return False
-        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
-            return False
+        if item_dict1['group_modifier_keys'][i][1] and item_dict2['group_modifier_keys'][i][1]:     # group modifier choice can be None if not chosen
+            if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
+                return False
     if consider_single_modifiers:
         if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
             return False
