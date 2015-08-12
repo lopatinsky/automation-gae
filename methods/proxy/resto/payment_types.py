@@ -1,6 +1,7 @@
 from config import Config
 from models import PaymentType
 from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE
+from models.proxy.resto import RestoCompany
 from requests import get_resto_payment_types
 
 __author__ = 'dvpermyakov'
@@ -12,8 +13,7 @@ PAYMENT_TYPE_MAP = {
 
 
 def get_payment_types():
-    config = Config.get()
-    resto_company = config.RESTO_COMPANY.get()
+    resto_company = RestoCompany.get()
     resto_payment_types = get_resto_payment_types(resto_company)
     payment_types = []
     for resto_payment_type in resto_payment_types['types']:

@@ -2,7 +2,7 @@
 import threading
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
-from models.proxy.resto import RestoCompany
+from models import STATUS_AVAILABLE
 
 OTHER = -1
 VENUE = 0
@@ -26,8 +26,13 @@ APP_CHOICES = (AUTO_APP, RESTO_APP)
 
 
 class Config(ndb.Model):
-    APP_KIND = ndb.IntegerProperty(choices=APP_CHOICES, default=AUTO_APP)
-    RESTO_COMPANY = ndb.KeyProperty(kind=RestoCompany)
+    @property
+    def APP_KIND(self):
+        from models.proxy.resto import RestoCompany
+        if RestoCompany.get():
+            return RESTO_APP
+        else:
+            return AUTO_APP
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time

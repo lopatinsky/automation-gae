@@ -1,14 +1,13 @@
 from google.appengine.api import memcache
-from config import Config
 from models import Promo
+from models.proxy.resto import RestoCompany
 from requests import get_resto_promos
 
 __author__ = 'dvpermyakov'
 
 
 def get_promos():
-    config = Config.get()
-    resto_company = config.RESTO_COMPANY.get()
+    resto_company = RestoCompany.get()
     resto_promos = get_resto_promos(resto_company)
     promos = memcache.get('promos_%s' % resto_company.key.id())
     if not promos:

@@ -1,7 +1,7 @@
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
-from config import Config
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
+from models.proxy.resto import RestoCompany
 from requests import get_resto_menu
 
 __author__ = 'dvpermyakov'
@@ -87,8 +87,7 @@ def __get_categories(parent_category, resto_categories):
 
 
 def _get_menu():
-    config = Config.get()
-    resto_company = config.RESTO_COMPANY.get()
+    resto_company = RestoCompany.get()
     menu = memcache.get('menu_%s' % resto_company.key.id())
     if not menu:
         resto_menu = get_resto_menu(resto_company)

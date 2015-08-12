@@ -1,5 +1,5 @@
 from datetime import time
-from config import Config
+from models.proxy.resto import RestoCompany
 from models.schedule import Schedule, DaySchedule
 from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address
 from requests import get_resto_company_info, get_resto_delivery_types
@@ -52,8 +52,7 @@ def __get_company_info_dict(resto_company_info):
 
 
 def _get_company_info():
-    config = Config.get()
-    resto_company = config.RESTO_COMPANY.get()
+    resto_company = RestoCompany.get()
     resto_company_info = get_resto_company_info(resto_company)
     resto_delivery_types = get_resto_delivery_types(resto_company)
     schedule = __get_company_schedule(resto_company_info['schedule'])

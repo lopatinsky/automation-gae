@@ -18,6 +18,7 @@ from methods.orders.cancel import cancel_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
 from methods.proxy.resto.check_order import resto_validate_order
+from methods.proxy.resto.place_order import resto_place_order
 from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
 from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
@@ -115,6 +116,13 @@ class OrderHandler(ApiHandler):
 
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
+
+        if config.APP_KIND == RESTO_APP:
+            success, response = resto_place_order(client, venue, self.order, order_json['payment'])
+            if success:
+                return self.render_json(response)
+            else:
+                return self.render_error(response['description'])
 
         # it is need, because item_id and gift_id are swapping
         gifts_copy = copy.deepcopy(order_json.get('gifts', []))

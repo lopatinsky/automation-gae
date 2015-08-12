@@ -86,3 +86,26 @@ def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, t
         'items': json.dumps(resto_item_dicts)
     }
     return _post_request(path, payload=payload)
+
+
+def post_resto_place_order(resto_venue, resto_customer, auto_client, order, payment_json):
+    path = '/api/venue/%s/order/new' % resto_venue.key.id()
+    payload = {
+        'custom_data': '',
+        'bonus_sum': 0,
+        'discount_sum': 0,
+        'customer_id': resto_customer.resto_customer_id,
+        'address': order.address,
+        'comment': order.comment,
+        'binding_id': payment_json['binding_id'],
+        'alpha_client_id': payment_json['client_id'],
+        'name': auto_client.name,
+        'phone': auto_client.tel,
+        'date': order.delivery_time,
+        'paymentType': order.payment_type_id,
+        'items': order.items,
+        'sum': order.total_sum,
+        'deliveryType': order.delivery_type
+    }
+    return _post_request(path, payload=payload)
+

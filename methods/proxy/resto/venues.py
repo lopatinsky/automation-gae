@@ -1,7 +1,7 @@
 from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
-from config import Config
 from models import Venue
+from models.proxy.resto import RestoCompany
 from requests import get_resto_venues
 from company import get_company_schedule, get_delivery_types
 
@@ -9,8 +9,7 @@ __author__ = 'dvpermyakov'
 
 
 def get_venues():
-    config = Config.get()
-    resto_company = config.RESTO_COMPANY.get()
+    resto_company = RestoCompany.get()
     venues = memcache.get('venues_%s' % resto_company.key.id())
     if not venues:
         resto_venues = get_resto_venues(resto_company)
