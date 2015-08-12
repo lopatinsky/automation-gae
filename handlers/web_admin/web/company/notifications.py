@@ -12,6 +12,8 @@ from methods.images import get_new_image_url
 
 __author__ = 'dvpermyakov'
 
+MAX_SECONDS_LOSS = 30
+
 
 class ListNewsHandler(CompanyBaseHandler):
     @company_user_required
