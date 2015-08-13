@@ -47,6 +47,7 @@ class OrderHandler(ApiHandler):
         if not order_id:
             self.abort(409)
         self.order = Order(id=order_id)
+        self.order.number = order_id
 
         success = check_items_and_gifts(order_json)
         if not success:
@@ -70,6 +71,9 @@ class OrderHandler(ApiHandler):
                 address_json = validate_address(address_json)
                 venue, delivery_zone = get_venue_and_zone_by_address(address_json)
         self.order.venue_id = venue.key.id()
+
+        if address_json:
+            set_address_obj(address_json, self.order)
 
         coordinates = order_json.get('coordinates')
         if coordinates:
@@ -118,8 +122,7 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
         if config.APP_KIND == RESTO_APP:
-            success, response = resto_place_order(
-                client, venue, self.order, order_json['payment'], order_json['items'], address_json)
+            success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'])
             if success:
                 return self.render_json(response)
             else:
@@ -150,9 +153,6 @@ class OrderHandler(ApiHandler):
         self.order.shared_gift_details = validation_result['share_gift_details']
         self.order.promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
         self.order.delivery_time_str = validation_result['delivery_time']
-
-        if address_json:
-            set_address_obj(address_json, self.order)
 
         self.order.status = CREATING_ORDER
         self.order.put()

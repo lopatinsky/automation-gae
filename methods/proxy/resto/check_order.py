@@ -6,13 +6,12 @@ from requests import post_resto_check_order
 __author__ = 'dvpermyakov'
 
 
-def get_resto_address_dict(address_json):
-    address = address_json['address']
+def get_resto_address_dict(address):
     return {
-        'city': address['city'],
-        'street': address['street'],
-        'home': address['home'],
-        'apartment': address['flat'],
+        'city': address.city,
+        'street': address.street,
+        'home': address.home,
+        'apartment': address.flat,
         'entrance': '-',
         'housing': '-',
         'floor': '-'
@@ -26,7 +25,7 @@ def _get_init_total_sum(items):
     return total_sum
 
 
-def _get_item_and_item_dicts(items):
+def get_item_and_item_dicts(items):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items)
@@ -42,7 +41,7 @@ def get_resto_item_dicts(init_item_dicts):
 
 
 def resto_validate_order(client, init_item_dicts, venue, delivery_time):
-    items, item_dicts = _get_item_and_item_dicts(init_item_dicts)
+    items, item_dicts = get_item_and_item_dicts(init_item_dicts)
     total_sum = _get_init_total_sum(items)
     resto_client = RestoClient.get(client)
     resto_item_dicts = get_resto_item_dicts(init_item_dicts)

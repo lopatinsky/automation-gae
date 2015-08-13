@@ -96,6 +96,7 @@ class GiftPointsDetails(ndb.Model):
 
 class Order(ndb.Model):
     from models.client import DEVICE_CHOICES
+    number = ndb.IntegerProperty(required=True)
     client_id = ndb.IntegerProperty(required=True)
     user_agent = ndb.StringProperty()
     total_sum = ndb.FloatProperty(indexed=False)
@@ -203,6 +204,7 @@ class Order(ndb.Model):
     def status_dict(self):
         dct = {
             'order_id': str(self.key.id()),
+            'number': self.number,
             'status': self.status
         }
         return dct

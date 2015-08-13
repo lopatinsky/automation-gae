@@ -222,6 +222,24 @@ def get_shared_gifts(client):
     return shared_gift_dict
 
 
+def get_order_position_details(item_dicts):
+    details = []
+    for item_dict in item_dicts:
+        details_item = OrderPositionDetails(
+            item=item_dict['item'].key,
+            price=int(item_dict['price'] * 100),  # перевод в копейки
+            revenue=item_dict['revenue'],
+            promos=[promo.key for promo in item_dict['promos']],
+            single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
+            group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                        group_modifier=modifier.key)
+                             for modifier in item_dict['group_modifiers']]
+        )
+        details_item.errors = item_dict['errors']
+        details.append(details_item)
+    return details
+
+
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
                       shared_gift_dicts=(), error=None):
     return {
@@ -426,21 +444,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     logging.info('total sum = %s' % total_sum)
 
     if with_details:
-        details = []
-        for item_dict in item_dicts:
-            details_item = OrderPositionDetails(
-                item=item_dict['item'].key,
-                price=int(item_dict['price'] * 100),  # перевод в копейки
-                revenue=item_dict['revenue'],
-                promos=[promo.key for promo in item_dict['promos']],
-                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
-                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
-                                                            group_modifier=modifier.key)
-                                 for modifier in item_dict['group_modifiers']]
-            )
-            details_item.errors = item_dict['errors']
-            details.append(details_item)
-        result['details'] = details
+        result['details'] = get_order_position_details(item_dicts)
+        result['order_gift_details'] = get_order_position_details(order_gift_dicts)
+
         details = []
         for item_dict in gift_dicts:
             details_item = GiftPositionDetails(
@@ -452,25 +458,13 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             )
             details.append(details_item)
         result['gift_details'] = details
-        details = []
-        for item_dict in order_gift_dicts:
-            details_item = OrderPositionDetails(
-                item=item_dict['item'].key,
-                price=0,
-                revenue=0,
-                promos=[promo.key for promo in item_dict['promos']],
-                single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
-                group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
-                                                            group_modifier=modifier.key)
-                                 for modifier in item_dict['group_modifiers']]
-            )
-            details.append(details_item)
-        result['order_gift_details'] = details
+
         details = []
         for shared_gift_dict in shared_gift_dicts:
             details_item = SharedGiftPositionDetails(gift=shared_gift_dict['share_gift_obj'].key)
             details.append(details_item)
         result['share_gift_details'] = details
+
     return result
 
 

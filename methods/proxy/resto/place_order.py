@@ -1,6 +1,7 @@
 from datetime import datetime
 from google.appengine.ext import ndb
-from methods.proxy.resto.check_order import get_resto_address_dict, get_resto_item_dicts
+from methods.orders.validation.validation import get_order_position_details
+from methods.proxy.resto.check_order import get_resto_address_dict, get_resto_item_dicts, get_item_and_item_dicts
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order
 from models.order import NEW_ORDER
@@ -10,9 +11,10 @@ from requests import post_resto_place_order
 __author__ = 'dvpermyakov'
 
 
-def resto_place_order(client, venue, order, payment_json, items_json, address_json):
+def resto_place_order(client, venue, order, payment_json, items_json):
     resto_client = RestoClient.get(client)
-    resto_address_dict = get_resto_address_dict(address_json)
+    resto_address_dict = get_resto_address_dict(order.address)
+    items, item_dicts = get_item_and_item_dicts(items_json)
     resto_item_dicts = get_resto_item_dicts(items_json)
     resto_place_result = post_resto_place_order(venue, resto_client, client, order, resto_item_dicts, payment_json,
                                                 resto_address_dict)
@@ -24,8 +26,10 @@ def resto_place_order(client, venue, order, payment_json, items_json, address_js
     else:
         resto_client.resto_customer_id = resto_place_result['customer_id']
         resto_client.put()
-        order.key = ndb.Key(Order, resto_place_result['order']['number'])
+        order.key = ndb.Key(Order, resto_place_result['order']['resto_id'])
+        order.number = resto_place_result['order']['number']
         order.status = NEW_ORDER
+        order.item_details = get_order_position_details(item_dicts)
         order.put()
         success = True
         response = {
