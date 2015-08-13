@@ -39,8 +39,8 @@ def _get_promo_item_dicts(item_details, item_dicts):
 
 def _apply_discounts(item_dict, promo, discount):
         if promo not in item_dict['promos']:
-            if item_dict['revenue'] >= item_dict['price'] * discount:
-                item_dict['revenue'] -= item_dict['price'] * discount
+            if item_dict['revenue'] >= item_dict['item'].total_price * discount:
+                item_dict['revenue'] -= item_dict['item'].total_price * discount
             else:
                 item_dict['revenue'] = 0
             item_dict['promos'].append(promo)
