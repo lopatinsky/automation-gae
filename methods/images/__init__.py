@@ -28,11 +28,11 @@ def _resize(image, size):
 
 
 def _save(image, filename):
-    image_file = cloudstorage.open(filename, "w", 'image/jpeg')
+    image_file = cloudstorage.open(filename, "w", 'image/png')
     try:
-        image.save(image_file, 'JPEG')
+        image.save(image_file, 'PNG')
     except:
-        logging.warning('can not save JPG')
+        logging.warning('can not save PNG')
         image_file.close()
         return False
     image_file.close()
