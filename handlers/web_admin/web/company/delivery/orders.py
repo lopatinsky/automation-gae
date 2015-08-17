@@ -68,13 +68,12 @@ def _update_order_info(orders):
 
 
 def order_items_values(order):
-    item_dicts = order.grouped_item_dict(order.item_details) + order.grouped_item_dict(order.gift_details, True)
-    items = []
-    for item_dict in item_dicts:
+    def _process_item_dict(item_dict, gift=False):
         item_obj = MenuItem.get_by_id(int(item_dict['id']))
         item_obj.amount = item_dict['quantity']
         item_obj.total_float_price = item_obj.float_price * item_obj.amount
         item_obj.modifiers = []
+        item_obj.is_gift = gift
         for modifier_dict in item_dict['single_modifiers']:
             modifier = SingleModifier.get_by_id(int(modifier_dict['id']))
             modifier.amount = modifier_dict['quantity']
@@ -86,7 +85,18 @@ def order_items_values(order):
             choice.amount = modifier_dict['quantity']
             item_obj.total_float_price += choice.float_price * choice.amount * item_obj.amount
             item_obj.modifiers.append(choice)
-        items.append(item_obj)
+        if gift:
+            item_obj.total_float_price = 0.0
+        return item_obj
+
+    items = []
+    for item_dict in order.grouped_item_dict(order.item_details):
+        items.append(_process_item_dict(item_dict))
+
+    for gift_dict in order.grouped_item_dict(order.gift_details, True) + \
+                     order.grouped_item_dict(order.order_gift_details):
+        items.append(_process_item_dict(gift_dict, True))
+
     order = _update_order_info([order])[0]
     order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
     return {

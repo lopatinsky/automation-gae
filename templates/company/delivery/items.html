@@ -45,7 +45,12 @@
             {% set len = item.modifiers|length if item.modifiers|length > 0 else 1 %}
             <tr>
                 <td rowspan="{{ len }}">{{ loop.index }}</td>
-                <td rowspan="{{ len }}">{{ item.title }}</td>
+                <td rowspan="{{ len }}">
+                    {{ item.title }}
+                    {% if item.is_gift %}
+                        (<b>Подарок</b>)
+                    {% endif %}
+                </td>
                 <td rowspan="{{ len }}">{{ item.total_float_price }}</td>
                 <td rowspan="{{ len }}">{{ item.amount }}</td>
                 {% if item.modifiers %}
