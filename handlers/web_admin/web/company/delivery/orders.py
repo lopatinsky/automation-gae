@@ -68,8 +68,9 @@ def _update_order_info(orders):
 
 
 def order_items_values(order):
+    item_dicts = order.grouped_item_dict(order.item_details) + order.grouped_item_dict(order.gift_details, True)
     items = []
-    for item_dict in order.grouped_item_dict(order.item_details):
+    for item_dict in item_dicts:
         item_obj = MenuItem.get_by_id(int(item_dict['id']))
         item_obj.amount = item_dict['quantity']
         item_obj.total_float_price = item_obj.float_price * item_obj.amount
