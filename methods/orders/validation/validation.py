@@ -1,6 +1,6 @@
 # coding=utf-8
 import copy
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 from config import config
 from methods import empatika_wallet
@@ -417,9 +417,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_sum': delivery_sum,
         'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
-        'delivery_time': datetime.strftime(delivery_time, STR_DATETIME_FORMAT)
+        'delivery_time': delivery_time.strftime(STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATETIME_FORMAT),
+        else (delivery_time + timedelta(hours=venue.timezone_offset)).strftime(STR_DATETIME_FORMAT),
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }

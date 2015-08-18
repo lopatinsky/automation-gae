@@ -1,6 +1,5 @@
 # coding=utf-8
 from datetime import datetime, timedelta
-from google.appengine.api.namespace_manager import namespace_manager
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
 from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
@@ -45,14 +44,14 @@ def _update_order_info(orders):
     for order in orders:
         hours_offset = Venue.get_by_id(order.venue_id).timezone_offset
         if order.delivery_time:
-            delivery_time_str = datetime.strftime(order.delivery_time + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+            delivery_time_str = (order.delivery_time + timedelta(hours=hours_offset)).strftime("%Y-%m-%d %H:%M:%S")
         else:
             delivery_time_str = u''
         if order.delivery_slot_id:
             slot = DeliverySlot.get_by_id(order.delivery_slot_id)
             if slot.slot_type == DeliverySlot.STRINGS:
                 if order.delivery_time:
-                    delivery_time_date = datetime.strftime(order.delivery_time, "%Y-%m-%d")
+                    delivery_time_date = order.delivery_time.strftime("%Y-%m-%d")
                 else:
                     delivery_time_date = u''
                 delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
@@ -61,7 +60,7 @@ def _update_order_info(orders):
             order.address_str = order.address.str()
         else:
             order.address_str = u'Адрес не найден'
-        order.date_str = datetime.strftime(order.date_created + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        order.date_str = (order.date_created + timedelta(hours=hours_offset)).strftime("%Y-%m-%d %H:%M:%S")
         order.delivery_time_str = delivery_time_str
         order.status_description = STATUS_MAP[order.status]
     return orders

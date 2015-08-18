@@ -1,5 +1,4 @@
 # coding=utf-8
-from collections import Counter
 from datetime import datetime, timedelta
 from config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER

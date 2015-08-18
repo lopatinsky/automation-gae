@@ -4,6 +4,7 @@ from base import ApiHandler
 from methods.orders.validation.checks import check_address
 from methods.geocoder import get_houses_by_address, get_streets_or_houses_by_address
 from methods.orders.validation.precheck import validate_address
+from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
 
@@ -29,7 +30,7 @@ class ValidateAddressHandler(ApiHandler):
             self.abort(400)
         address = json.loads(address)
         address = validate_address(address)
-        success, description = check_address(address)
+        success, description = check_address(DELIVERY, address)
         self.render_json({
             'success': success,
             'description': description

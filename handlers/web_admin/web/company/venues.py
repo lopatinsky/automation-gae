@@ -1,13 +1,10 @@
 # coding:utf-8
 from datetime import datetime
-import logging
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
-from config import Config, config
 from methods.auth import company_user_required
 from methods.rendering import STR_TIME_FORMAT
-from methods.timezone import get_time_zone
-from models import Venue, MenuItem, MenuCategory, STATUS_AVAILABLE, Address, DeliveryZone
+from models import Venue, MenuItem, MenuCategory, DeliveryZone
 from methods import geocoder
 from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY

@@ -498,11 +498,11 @@ class AddSingleModifierHandler(CompanyBaseHandler):
             price = int(price * 100)
         else:
             price = 0
-        min = self.request.get_range('min')
-        max = self.request.get_range('max')
-        if max == 0:
-            max = SingleModifier.INFINITY
-        modifier = SingleModifier(title=name, price=price, min_amount=min, max_amount=max)
+        min_amount = self.request.get_range('min')
+        max_amount = self.request.get_range('max')
+        if max_amount == 0:
+            max_amount = SingleModifier.INFINITY
+        modifier = SingleModifier(title=name, price=price, min_amount=min_amount, max_amount=max_amount)
         modifier.sequence_number = SingleModifier.generate_sequence_number()
         modifier.put()
         self.redirect_to('modifiers_list')

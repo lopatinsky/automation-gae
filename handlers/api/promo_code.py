@@ -1,8 +1,6 @@
 # coding=utf-8
-from google.appengine.api.namespace_manager import namespace_manager
-from google.appengine.api.urlfetch_errors import DeadlineExceededError
-from models import Client, SharedGift
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, KIND_WALLET, PromoCodePerforming
+from models import Client
+from models.promo_code import PromoCode, PromoCodePerforming
 import logging
 
 __author__ = 'dvpermyakov'

@@ -10,7 +10,7 @@ import json
 import time
 
 
-class AdminRequestNumber():
+class AdminRequestNumber(object):
     def __init__(self, admin_id, token, number_parts):
         self.admin_id = admin_id
         self.login = Admin.get_by_id(admin_id).email

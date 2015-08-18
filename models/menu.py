@@ -2,7 +2,7 @@
 import random
 from google.appengine.ext import ndb
 from methods import fastcounter
-from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, STATUS_CHOICES
+from models import STATUS_AVAILABLE, STATUS_CHOICES
 
 SINGLE_MODIFIER = 0
 GROUP_MODIFIER = 1

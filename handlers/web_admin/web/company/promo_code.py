@@ -1,10 +1,8 @@
 # coding=utf-8
-from datetime import datetime
 from methods.auth import company_user_required
 from base import CompanyBaseHandler
-from methods.rendering import STR_DATETIME_FORMAT, HTML_STR_TIME_FORMAT
 from models.promo_code import PromoCode, PROMO_CODE_KIND_MAP, PROMO_CODE_KIND_ADMIN, PromoCodeGroup, \
-    PROMO_CODE_STATUS_MAP, KIND_WALLET, PromoCodePerforming
+    PROMO_CODE_STATUS_MAP, PromoCodePerforming
 
 __author__ = 'dvpermyakov'
 

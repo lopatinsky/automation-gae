@@ -20,8 +20,8 @@ class ListNewsHandler(CompanyBaseHandler):
     def get(self):
         news = News.query().order(-News.start).fetch()
         for new in news:
-            new.created_str = datetime.strftime(new.created, STR_DATETIME_FORMAT)
-        utc_time = datetime.strftime(datetime.utcnow(), STR_DATETIME_FORMAT)
+            new.created_str = new.created.strftime(STR_DATETIME_FORMAT)
+        utc_time = datetime.utcnow().strftime(STR_DATETIME_FORMAT)
         self.render('/notifications/news_list.html', news=news, utc_time=utc_time,
                     NOTIFICATION_STATUS_MAP=NOTIFICATION_STATUS_MAP,
                     STATUS_ACTIVE=STATUS_ACTIVE, STATUS_CREATED=STATUS_CREATED)
@@ -45,7 +45,7 @@ class AddNewsHandler(CompanyBaseHandler):
         if start:
             try:
                 start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
-            except:
+            except ValueError:
                 return error(u'Неверное время начала')
         else:
             return error(u'Введите время начала')
@@ -88,8 +88,8 @@ class PushesListHandler(CompanyBaseHandler):
     def get(self):
         pushes = Notification.query().order(-Notification.start).fetch()
         for push in pushes:
-            push.created_str = datetime.strftime(push.created, STR_DATETIME_FORMAT)
-        utc_time = datetime.strftime(datetime.utcnow(), STR_DATETIME_FORMAT)
+            push.created_str = push.created.strftime(STR_DATETIME_FORMAT)
+        utc_time = datetime.utcnow().strftime(STR_DATETIME_FORMAT)
         self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get(), utc_time=utc_time,
                     PUSH_STATUS_MAP=NOTIFICATION_STATUS_MAP, STATUS_CREATED=STATUS_CREATED)
 
@@ -128,7 +128,7 @@ class AddPushesHandler(CompanyBaseHandler):
             if start:
                 try:
                     start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
-                except:
+                except ValueError:
                     return error(u'Неверное время отправки')
             else:
                 return error(u'Введите время отправки')

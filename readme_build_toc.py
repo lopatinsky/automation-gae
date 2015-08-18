@@ -15,6 +15,7 @@ def make_link(level, text):
 def main():
     readme_dir = os.path.dirname(__file__)
     readme_file = os.path.join(readme_dir, "README.md")
+    # noinspection Restricted_Python_calls
     readme = open(readme_file, "r+")
     lines = readme.readlines()
 

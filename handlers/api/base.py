@@ -33,6 +33,8 @@ class SuperJSONEncoder(json.JSONEncoder):
 
 
 class ApiHandler(RequestHandler):
+    test = False
+
     @cached_property
     def jinja2(self):
         return jinja2.get_jinja2(app=self.app)

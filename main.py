@@ -5,7 +5,7 @@ from webapp2_extras.routes import PathPrefixRoute
 from handlers.api.user import admin
 from handlers import wizard
 from methods import fastcounter
-from handlers import api, web_admin, maintenance, handle_500
+from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
 from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
