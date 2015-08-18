@@ -140,7 +140,6 @@ app = WSGIApplication([
             Route('/register', api.PaymentRegisterHandler),
             Route('/status', api.PaymentStatusHandler),
             Route('/extended_status', api.PaymentExtendedStatusHandler),
-            Route('/payment_binding', api.PaymentBindingHandler),
             Route('/reverse', api.PaymentReverseHandler),
             Route('/payment_types', api.PaymentTypesHandler),
         ]),

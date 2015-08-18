@@ -1,6 +1,6 @@
 __author__ = 'ilyazorin'
 
-from alfa import PaymentBindingHandler, PaymentRegisterHandler, \
+from alfa import PaymentRegisterHandler, \
     PaymentReverseHandler, PaymentStatusHandler, UnbindCardHandler, \
     PaymentExtendedStatusHandler
 from venues import VenuesHandler
