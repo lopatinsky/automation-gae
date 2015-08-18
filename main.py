@@ -381,6 +381,8 @@ app = WSGIApplication([
                 Route('/change_password', company_admin.ChangePasswordAdmin),
             ]),
         ]),
+
+        Route('/alfa_settings', company_admin.AlfaSettingsHandler),
     ]),
 
     Route('/wizard', wizard.WizardWebHandler),

@@ -31,6 +31,7 @@ from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, Ad
 from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \
     AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler
 from promo_code import ListPromoCodeHandler, AddPromoCodeHandler, ActivationsPromoCodeHandler
+from alfa_settings import AlfaSettingsHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):
