@@ -35,6 +35,16 @@
             <input type="text" name="emails"
                     {% if venue %} value="{{ ','.join(venue.emails) }}" {% endif %}>
         </label><br>
+        <label>
+            Юрлицо:
+            <select name="legal" required>
+                {% for legal in legals %}
+                    <option value="{{ legal.key.id() }}" {% if venue and venue.legal == legal.key %}selected{% endif %}>
+                        {{ legal.person_ooo or legal.person_ip }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br>
         <input type="submit"/>
         <a href="/company/venues">Назад к списку</a>
     </form>
