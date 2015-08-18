@@ -5,6 +5,7 @@ import random
 from google.appengine.ext import ndb
 from methods import location, working_hours, fastcounter
 from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory
+from models.legal import LegalInfo
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
 from models.schedule import Schedule
@@ -231,6 +232,7 @@ class Venue(ndb.Model):
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
     default = ndb.BooleanProperty(default=False)
+    legal = ndb.KeyProperty(LegalInfo)
 
     def dynamic_info(self):
         items = []

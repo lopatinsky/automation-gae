@@ -17,3 +17,6 @@ class LegalInfo(ndb.Model):
     kpp = ndb.StringProperty()
     ogrn = ndb.StringProperty()
     ogrnip = ndb.StringProperty(indexed=False)
+
+    alfa_login = ndb.StringProperty(required=True, indexed=False, default='empatika_autopay-api')
+    alfa_password = ndb.StringProperty(required=True, indexed=False, default='empatika_autopay')

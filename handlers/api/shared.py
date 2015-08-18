@@ -7,6 +7,7 @@ from config import EMAIL_FROM
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.sms.sms_pilot import send_sms
+from models.legal import LegalInfo
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
 
 __author__ = 'dvpermyakov'
@@ -155,9 +156,11 @@ class GetGiftUrlHandler(ApiHandler):
                 return_url = self.request.get('return_url')
 
                 order_id = "gift_%s_%s" % (client_id, int(time.time()))
-                success, result = alfa_bank.create_simple(int(total_sum * 100), order_id, return_url, alpha_client_id)
+                legal = LegalInfo.query().get()  # TODO find solution for multiple legals
+                success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, int(total_sum * 100),
+                                                          order_id, return_url, alpha_client_id)
                 if success:
-                    success, error = alfa_bank.hold_and_check(result, binding_id)
+                    success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_password, result, binding_id)
                 else:
                     error = result
                 if not success:

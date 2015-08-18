@@ -7,6 +7,7 @@ from methods import alfa_bank, push, paypal
 from models import Client
 from models.share import SharedPromo
 from models.order import READY_ORDER
+from models.venue import Venue
 
 __author__ = 'dvpermyakov'
 
@@ -40,7 +41,8 @@ def done_order(order, namespace, with_push=True):
         shared_promo.deactivate(namespace_manager.get_namespace())
 
     if order.has_card_payment:
-        alfa_bank.deposit(order.payment_id, 0)  # TODO check success
+        legal = Venue.get_by_id(order.venue_id).legal.get()
+        alfa_bank.deposit(legal.alfa_login, legal.alfa_password, order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
 

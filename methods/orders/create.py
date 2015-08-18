@@ -16,7 +16,7 @@ from methods.emails.admins import send_error
 from methods.emails.postmark import send_email
 from methods.sms.sms_pilot import send_sms
 from models.payment_types import PAYMENT_TYPE_MAP
-from models.venue import DELIVERY_MAP, DELIVERY, Address
+from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 
 __author__ = 'dvpermyakov'
 
@@ -26,13 +26,16 @@ def card_payment_performing(payment_json, amount, order):
     client_id = payment_json['client_id']
     return_url = payment_json['return_url']
 
-    success, result = alfa_bank.create_simple(amount, order.key.id(), return_url, client_id)
+    legal = Venue.get_by_id(order.venue_id).legal.get()
+
+    success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_pasword, amount, order.key.id(), return_url,
+                                              client_id)
     if not success:
         return success, result
 
     order.payment_id = result
     order.put()
-    success, error = alfa_bank.hold_and_check(order.payment_id, binding_id)
+    success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_pasword, order.payment_id, binding_id)
     if not success:
         error = u"Не удалось произвести оплату. %s" % error
     return success, error

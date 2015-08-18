@@ -1,5 +1,6 @@
 import logging
 from .base import ApiHandler
+from config import config
 from methods import alfa_bank
 from models import CardBindingPayment, Client
 
@@ -8,16 +9,7 @@ class UnbindCardHandler(ApiHandler):
     def post(self):
         binding_id = self.request.get("bindingId")
 
-        alfa_response = alfa_bank.unbind_card(binding_id)
-        self.render_json(alfa_response)
-
-
-class PaymentBindingHandler(ApiHandler):
-    def post(self):
-        binding_id = self.request.get("bindingId")
-        order_id = self.request.get("mdOrder")
-
-        alfa_response = alfa_bank.authorize(binding_id, order_id)
+        alfa_response = alfa_bank.unbind_card(config.ALFA_LOGIN, config.ALFA_PASSWORD, binding_id)
         self.render_json(alfa_response)
 
 
@@ -28,7 +20,8 @@ class PaymentRegisterHandler(ApiHandler):
         amount = self.request.get("amount")
         return_url = self.request.get("returnUrl")
 
-        alfa_response = alfa_bank.create(amount, order_number, return_url, client_id, 'MOBILE')
+        alfa_response = alfa_bank.create(config.ALFA_LOGIN, config.ALFA_PASSWORD, amount, order_number, return_url,
+                                         client_id, 'MOBILE')
         if str(alfa_response.get('errorCode', '0')) == '0':
             CardBindingPayment(id=alfa_response['orderId'], client_id=int(client_id)).put()
         self.render_json(alfa_response)
@@ -38,7 +31,7 @@ class PaymentReverseHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId') or self.request.get('order_id')
 
-        alfa_response = alfa_bank.reverse(order_id)
+        alfa_response = alfa_bank.reverse(config.ALFA_LOGIN, config.ALFA_PASSWORD, order_id)
         self.render_json(alfa_response)
 
 
@@ -46,7 +39,7 @@ class PaymentStatusHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId')
 
-        result = alfa_bank.check_extended_status(order_id)['alfa_response']
+        result = alfa_bank.check_extended_status(config.ALFA_LOGIN, config.ALFA_PASSWORD, order_id)['alfa_response']
         alfa_response = {}
 
         if 'errorCode' in result:
@@ -96,7 +89,7 @@ class PaymentExtendedStatusHandler(ApiHandler):
     def post(self):
         order_id = self.request.get('orderId')
 
-        alfa_response = alfa_bank.check_extended_status(order_id)
+        alfa_response = alfa_bank.check_extended_status(config.ALFA_LOGIN, config.ALFA_PASSWORD, order_id)
         logging.info(alfa_response)
 
         self.render_json(alfa_response)

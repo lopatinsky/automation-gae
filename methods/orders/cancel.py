@@ -9,6 +9,7 @@ from methods.emails import admins
 from methods import alfa_bank, empatika_promos
 from methods.empatika_wallet import get_balance
 from models import Client
+from models.venue import Venue
 
 __author__ = 'dvpermyakov'
 
@@ -16,7 +17,8 @@ __author__ = 'dvpermyakov'
 def cancel_order(order, status, namespace, comment=None, with_push=True):
     success = True
     if order.has_card_payment:
-        return_result = alfa_bank.reverse(order.payment_id)
+        legal = Venue.get_by_id(order.venue_id).legal.get()
+        return_result = alfa_bank.reverse(legal.alfa_login, legal.alfa_password, order.payment_id)
         success = str(return_result['errorCode']) == '0'
     elif order.has_paypal_payment:
         success, error = paypal.void(order.payment_id)

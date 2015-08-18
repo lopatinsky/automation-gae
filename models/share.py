@@ -1,6 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 from models import STATUS_CHOICES, STATUS_AVAILABLE
+from models.legal import LegalInfo
 from models.menu import MenuItem, SingleModifier
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
@@ -152,7 +153,8 @@ class SharedGift(ndb.Model):
         from methods.alfa_bank import reverse
         from methods.push import send_client_push
         if self.status == self.READY:
-            reverse(self.payment_id)
+            legal = LegalInfo.query().get()  # TODO find solution for multiple legals
+            reverse(legal.alfa_login, legal.alfa_password, self.payment_id)
             share = Share.get_by_id(self.share_id)
             share.deactivate()
             promo_code = self.promo_code.get()

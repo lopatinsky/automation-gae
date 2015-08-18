@@ -8,6 +8,7 @@ from methods import alfa_bank, paypal
 from methods.emails import admins
 from models import Order
 from models.order import CREATING_ORDER
+from models.venue import Venue
 
 MINUTES_INTERVAL = 10
 
@@ -32,7 +33,9 @@ class CheckCreatingOrdersHandler(RequestHandler):
                     if order.has_card_payment:
                         try:
                             # check payment status
-                            status = alfa_bank.check_extended_status(order.payment_id)["alfa_response"]
+                            legal = Venue.get_by_id(order.venue_id).legal.get()
+                            status = alfa_bank.check_extended_status(legal.alfa_login, legal.alfa_password,
+                                                                     order.payment_id)["alfa_response"]
                             info.append(("status check result", status))
 
                             # if status check was successful:
@@ -42,7 +45,8 @@ class CheckCreatingOrdersHandler(RequestHandler):
                                     info.append(("ERROR", "deposited"))
                                 # money approved -- reverse
                                 elif status['orderStatus'] == 1:
-                                    reverse_result = alfa_bank.reverse(order.payment_id)
+                                    reverse_result = alfa_bank.reverse(legal.alfa_login, legal.alfa_password,
+                                                                       order.payment_id)
                                     info.append(("reverse result", reverse_result))
                                     if str(reverse_result.get('errorCode', '0')) == '0':
                                         to_delete = True

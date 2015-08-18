@@ -5,6 +5,7 @@ import time
 from .base import ApiHandler
 from config import config
 from methods import alfa_bank, empatika_wallet
+from models.legal import LegalInfo
 
 
 class DepositToWalletHandler(ApiHandler):
@@ -13,8 +14,11 @@ class DepositToWalletHandler(ApiHandler):
         binding_id = self.request.get("binding_id")
         amount = self.request.get_range("amount")
 
+        legal = LegalInfo.query().get()  # TODO find solution for multiple legals
+
         order_number = "dp_%s_%s" % (client_id, int(time.time()))
-        success, result = alfa_bank.create_simple(amount, order_number, "_", client_id)
+        success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order_number, "_",
+                                                  client_id)
         if not success:
             self.response.set_status(400)
             self.render_json({
@@ -23,7 +27,7 @@ class DepositToWalletHandler(ApiHandler):
             return
 
         alfa_order_id = result
-        success, error = alfa_bank.hold_and_check(alfa_order_id, binding_id)
+        success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_password, alfa_order_id, binding_id)
         if not success:
             self.response.set_status(400)
             self.render_json({
@@ -35,14 +39,14 @@ class DepositToWalletHandler(ApiHandler):
         try:
             wallet_result = empatika_wallet.deposit(client_id, amount * 100, wallet_source)
         except empatika_wallet.EmpatikaWalletError as e:
-            alfa_bank.reverse(alfa_order_id)
+            alfa_bank.reverse(legal.alfa_login, legal.alfa_password, alfa_order_id)
 
             self.response.set_status(400)
             self.render_json({
                 "description": e.message
             })
         else:
-            alfa_bank.deposit(alfa_order_id, 0)
+            alfa_bank.deposit(legal.alfa_login, legal.alfa_password, alfa_order_id, 0)
             self.render_json({
                 "balance": wallet_result["balance"] / 100.0
             })
