@@ -114,7 +114,7 @@
         {% endfor %}
         {% for total in totals %}
             <tr>
-                <td colspan="6">Итого заказов ({{ total.status }} / {{ total.payment_type }})</td>
+                <td colspan="7">Итого заказов ({{ total.status }} / {{ total.payment_type }})</td>
                 <td>{{ total.orders_number }}</td>
                 <td>{{ total.total_sum_without_promos }}</td>
                 <td>{{ total.total_sum }}</td>
