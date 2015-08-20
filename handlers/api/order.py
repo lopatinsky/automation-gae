@@ -216,8 +216,7 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace(),
-                                       with_push=False)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace())
                 if success:
                     reason_id = self.request.get('reason_id')
                     if reason_id:
