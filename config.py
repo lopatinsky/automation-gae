@@ -41,7 +41,7 @@ class Config(ndb.Model):
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
 
-    SEND_ERRORS_500 = ndb.BooleanProperty(indexed=False, default=False)
+    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=False)
 
     SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)

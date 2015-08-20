@@ -29,6 +29,9 @@
     <p>
         <b>Кнопки выдачи заказа в письмах: </b>{% if email_buttons %}Есть{% else %}Нет{% endif %}
     </p>
+    <p>
+        <b>Запущен: </b>{% if in_production %}Да{% else %}Нет{% endif %}
+    </p>
     <a href="/company/docs/set/about">Изменить</a>
     <a href="/company/main">Назад</a>
 </body>
