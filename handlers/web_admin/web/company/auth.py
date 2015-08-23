@@ -58,7 +58,9 @@ class CompanySignupHandler(CompanyBaseHandler):
             self.render('/signup.html', email=login, error=error)
         else:
             namespace_manager.set_namespace(namespace)
-            Config(id=1).put()
+            cfg = Config(id=1)
+            cfg.REPORT_EMAILS = ['elenamarchenko.lm@gmail.com']
+            cfg.put()
             DeliverySlot(name=u'Сейчас', slot_type=0, value=0).put()
             DeliverySlot(name=u'Через 5 минут', slot_type=0, value=5).put()
             DeliverySlot(name=u'Через 10 минут', slot_type=0, value=10).put()
