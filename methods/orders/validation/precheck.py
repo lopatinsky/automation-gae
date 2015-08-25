@@ -4,7 +4,8 @@ import logging
 from config import Config
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
-from methods.rendering import STR_DATETIME_FORMAT, latinize, get_phone, get_separated_name_surname
+from methods.rendering import latinize, get_phone, get_separated_name_surname, \
+    parse_time_picker_value
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
@@ -158,7 +159,7 @@ def get_venue_and_zone_by_address(address):
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
     if delivery_time_picker:
-        delivery_time_picker = datetime.strptime(delivery_time_picker, STR_DATETIME_FORMAT)
+        delivery_time_picker = parse_time_picker_value(delivery_time_picker)
         if venue and (not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS):
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
