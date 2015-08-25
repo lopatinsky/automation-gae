@@ -37,15 +37,16 @@ def _get_promo_item_dicts(item_details, item_dicts):
     return result_item_dicts
 
 
-def _apply_discounts(item_dict, promo, discount):
-        if promo not in item_dict['promos']:
-            if item_dict['revenue'] >= item_dict['item'].total_price * discount:
-                item_dict['revenue'] -= item_dict['item'].total_price * discount
-            else:
-                item_dict['revenue'] = 0
-            item_dict['promos'].append(promo)
-            return True
-        return False
+def _apply_discounts(item_dict, promo, discount, percent=True):
+    discount_sum = item_dict['item'].total_price * discount if percent else discount
+    if promo not in item_dict['promos']:
+        if item_dict['revenue'] >= discount_sum:
+            item_dict['revenue'] -= discount_sum
+        else:
+            item_dict['revenue'] = 0
+        item_dict['promos'].append(promo)
+        return True
+    return False
 
 
 def _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order=None):
@@ -185,12 +186,19 @@ def add_order_gift(response, outcome, new_order_gift_dicts, order_gift_dicts, ca
     return response
 
 
-def set_fix_discount(response, outcome, init_total_sum):
-    discount = outcome.value
-    if discount > init_total_sum:
-        discount = init_total_sum
-    response.success = True
-    response.discount = discount
+def set_fix_discount(response, outcome, promo, item_dicts, init_total_sum):
+    if outcome.item_details.item:
+        item_dicts = _get_promo_item_dicts(outcome.item_details, item_dicts)
+        if item_dicts:
+            response.success = True
+        for item_dict in item_dicts:
+            _apply_discounts(item_dict, promo, outcome.value, percent=False)
+    else:
+        discount = outcome.value
+        if discount > init_total_sum:
+            discount = init_total_sum
+        response.success = True
+        response.discount = discount
     return response
 
 
