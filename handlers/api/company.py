@@ -52,6 +52,12 @@ class CompanyInfoHandler(ApiHandler):
             'colors': {
                 'action': config.ACTION_COLOR,
             },
+            'share_gift': {
+                'enabled': config.SHARED_GIFT_ENABLED,
+            },
+            'share_invitation': {
+                'enabled': config.SHARED_INVITATION_ENABLED,
+            },
         })
 
 

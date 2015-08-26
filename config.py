@@ -43,6 +43,9 @@ class Config(ndb.Model):
 
     IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=False)
 
+    SHARED_INVITATION_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
+    SHARED_GIFT_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
+
     SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
