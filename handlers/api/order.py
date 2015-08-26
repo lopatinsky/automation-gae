@@ -99,7 +99,7 @@ class OrderHandler(ApiHandler):
         self.order.total_sum = float(order_json.get("total_sum"))
         self.order.delivery_sum = int(order_json.get('delivery_sum', 0))
 
-        client = set_client_info(order_json.get('client'), self.order)
+        client = set_client_info(order_json.get('client'), self.request.headers, self.order)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
         self.order.client_id = client.key.id()

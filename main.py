@@ -198,6 +198,7 @@ app = WSGIApplication([
                 Route('/get_url', api.GetShareUrlHandler),
             ]),
             PathPrefixRoute('/invitation', [
+                Route('/info', api.GetInvitationInfoHandler),
                 Route('/history', api.SharedInvitationHistoryHandler),
                 Route('/get_url', api.GetInvitationUrlHandler),
             ]),

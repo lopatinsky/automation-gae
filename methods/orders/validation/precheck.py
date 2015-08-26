@@ -33,8 +33,8 @@ def check_items_and_gifts(order_json):
         return True
 
 
-def set_client_info(client_json, order=None):
-    client_id = int(client_json.get('id'))
+def set_client_info(client_json, headers, order=None):
+    client_id = int(client_json.get('id', 0)) or headers.get('Client-Id')
     if not client_id:
         return None
     client = Client.get_by_id(client_id)
@@ -45,6 +45,8 @@ def set_client_info(client_json, order=None):
     client.surname = surname
     client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
+    client.user_agent = headers['User-Agent']
+    client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
     for field in config.EXTRA_CLIENT_INFO_FIELDS:

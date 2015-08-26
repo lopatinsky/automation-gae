@@ -12,7 +12,7 @@ from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler, SharedGif
 from client import ClientHandler
 from history import HistoryHandler, SharedGiftHistoryHandler, SharedInvitationHistoryHandler
 from wallet import DepositToWalletHandler, WalletBalanceHandler
-from shared import GetInvitationUrlHandler, GetGiftUrlHandler, GetShareUrlHandler
+from shared import GetInvitationUrlHandler, GetGiftUrlHandler, GetShareUrlHandler, GetInvitationInfoHandler
 from twilio import ReceiveSms
 from paypal import BindPaypalHandler, UnbindPaypalHandler
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler, PaypalPrivacyPolicyHandler, \

@@ -3,7 +3,7 @@ import json
 
 from google.appengine.ext.deferred import deferred
 
-from config import EMAIL_FROM
+from config import EMAIL_FROM, Config
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.sms.sms_pilot import send_sms
@@ -23,7 +23,7 @@ import logging
 
 class GetShareUrlHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.headers['Client-Id']
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -47,6 +47,15 @@ class GetShareUrlHandler(ApiHandler):
             share.put()
 
         self.render_json({})  # todo: need to update
+
+
+class GetInvitationInfoHandler(ApiHandler):
+    def get(self):
+        config = Config.get()
+        self.render_json({
+            'title': config.SHARED_INVITATION_ABOUT_TITLE,
+            'description': config.SHARED_INVITATION_ABOUT_DESCRIPTION
+        })
 
 
 class GetInvitationUrlHandler(ApiHandler):
@@ -74,9 +83,11 @@ class GetInvitationUrlHandler(ApiHandler):
             share.urls = [url['url'] for url in urls]
             share.put()
 
-        # todo: need to update
+        config = Config.get()
         self.render_json({
-            'urls': share.urls
+            'text': config.SHARED_INVITATION_TEXT,
+            'urls': share.urls,
+            'image': config.SHARED_INVITATION_IMAGE
         })
 
 

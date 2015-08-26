@@ -4,6 +4,7 @@ from google.appengine.ext.ndb import metadata
 from base import ApiHandler
 from config import config, Config
 from methods.rendering import latinize
+from methods.versions import is_available_version, get_version
 from models import STATUS_AVAILABLE, Venue
 from models.venue import DELIVERY
 from models.specials import get_channels
@@ -58,6 +59,10 @@ class CompanyInfoHandler(ApiHandler):
             'share_invitation': {
                 'enabled': config.SHARED_INVITATION_ENABLED,
             },
+            'new_version_popup': {
+                'show': not is_available_version(self.request.headers.get('Version', 0)),
+                'version': get_version(self.request.headers.get('Version', 0)).dict()
+            }
         })
 
 
