@@ -61,16 +61,17 @@ class PromoCode(ndb.Model):
     message = ndb.StringProperty()
 
     @classmethod
-    def create(cls, group, kind, amount, value=None, title=None, message=None):
+    def create(cls, group, kind, amount, value=None, title=None, message=None, promo_code_key=None, persist=False):
         while True:
-            key = security.generate_random_string(length=7).lower()
+            key = security.generate_random_string(length=7).lower() if not promo_code_key else promo_code_key
             if not cls.get_by_id(key):
                 if not message:
                     message = DEFAULT_MESSAGE_MAP[kind]
                 promo_code = cls(id=key, kind=kind, title=title, amount=amount, init_amount=amount, message=message,
-                                 value=value, group_id=group.key.id())
+                                 value=value, group_id=group.key.id(), persist=persist)
                 promo_code.put()
                 return promo_code
+            promo_code_key = None
 
     def check(self, client):  # use priority for conditions
         if self.status not in PROMO_CODE_ACTIVE_STATUS_CHOICES:
