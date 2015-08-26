@@ -259,7 +259,7 @@ class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
 
-        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id'))
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id', 0))
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
