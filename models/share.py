@@ -70,7 +70,7 @@ class SharedPromo(ndb.Model):
             sender_order_id = "sender_referral_%s" % self.recipient.id()
             register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
                            order_id=sender_order_id)
-            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS, source=sender_order_id)
+            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS * 100, source=sender_order_id)
             sender = self.sender.get()
             text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
             header = u'Бонусы!'
@@ -79,7 +79,8 @@ class SharedPromo(ndb.Model):
             recipient_order_id = "recipient_referral_%s" % self.recipient.id()
             register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
                            order_id=recipient_order_id)
-            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS, source=recipient_order_id)
+            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS * 100,
+                    source=recipient_order_id)
             recipient = self.recipient.get()
             text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'
             header = u'Бонусы!'

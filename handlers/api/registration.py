@@ -1,7 +1,7 @@
 import json
 from google.appengine.api.namespace_manager import namespace_manager
 from .base import ApiHandler
-from models import Client, Share, SharedGift, STATUS_AVAILABLE
+from models import Client, Share, SharedGift, STATUS_AVAILABLE, Order
 from methods.branch_io import INVITATION, GIFT
 from models.proxy.unified_app import AutomationCompany
 from models.share import SharedPromo
@@ -76,7 +76,7 @@ def _perform_registration(request):
             share = Share.get_by_id(share_id)
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
-                if not client_id:
+                if not client_id or not Order.query(Order.client_id == client_id).get():
                     SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
             elif share.share_type == GIFT:
                 if share.status == Share.ACTIVE:
