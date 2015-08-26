@@ -66,7 +66,7 @@ class ApiHandler(RequestHandler):
                     self.abort(403)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         self.test = is_test_version(self.request.url)
-        update_company_versions(self.request.headers.get('Version'))
+        update_company_versions(self.request.headers.get('Version', 0))
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)

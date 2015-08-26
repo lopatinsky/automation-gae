@@ -9,6 +9,17 @@ from models.promo_code import PromoCode
 __author__ = 'dvpermyakov'
 
 
+class ChannelUrl(ndb.Model):
+    url = ndb.StringProperty(required=True)
+    channel = ndb.IntegerProperty(required=True)
+
+    def dict(self):
+        return {
+            'url': self.url,
+            'channel': self.channel
+        }
+
+
 class Share(ndb.Model):
     from methods.branch_io import FEATURE_CHOICES
 
@@ -21,7 +32,7 @@ class Share(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=ACTIVE)
-    urls = ndb.StringProperty(repeated=True)
+    channel_urls = ndb.LocalStructuredProperty(ChannelUrl, repeated=True)
 
     def deactivate(self):
         self.status = self.INACTIVE

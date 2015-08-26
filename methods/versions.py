@@ -13,6 +13,7 @@ def is_test_version(url):
 
 
 def get_version(version):
+    version = int(version)
     config = Config.get()
     for version_obj in config.VERSIONS:
         if version_obj.number == version:
@@ -25,11 +26,13 @@ def get_version(version):
 
 
 def is_available_version(version):
+    version = int(version)
     version_obj = get_version(version)
     return version_obj.available
 
 
 def update_company_versions(version):
+    version = int(version)
     config = Config.get()
     version_obj = get_version(version)
     version_obj.updated = datetime.utcnow()

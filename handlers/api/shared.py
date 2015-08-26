@@ -16,37 +16,9 @@ from models.payment_types import CARD_PAYMENT_TYPE
 from base import ApiHandler
 from methods import branch_io, alfa_bank
 from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift, STATUS_UNAVAILABLE
-from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem
+from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem, ChannelUrl
 from methods.rendering import get_phone
 import logging
-
-
-class GetShareUrlHandler(ApiHandler):
-    def get(self):
-        client_id = self.request.headers['Client-Id']
-        client = Client.get_by_id(client_id)
-        if not client:
-            self.abort(400)
-        share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
-                            Share.share_type == branch_io.SHARE).get()
-        if not share:
-            share = Share(share_type=branch_io.SHARE, sender=client.key)
-            share.put()  # need share id
-
-            if 'iOS' in self.request.headers["User-Agent"]:
-                user_agent = 'ios'
-            elif 'Android' in self.request.headers["User-Agent"]:
-                user_agent = 'android'
-            else:
-                user_agent = 'unknown'
-            urls = [{
-                'url': branch_io.create_url(share.key.id(), branch_io.SHARE, channel, user_agent),
-                'channel': channel
-            } for channel in branch_io.CHANNELS]
-            share.urls = [url['url'] for url in urls]
-            share.put()
-
-        self.render_json({})  # todo: need to update
 
 
 class GetInvitationInfoHandler(ApiHandler):
@@ -60,7 +32,7 @@ class GetInvitationInfoHandler(ApiHandler):
 
 class GetInvitationUrlHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
+        client_id = int(self.request.headers.get('Client-Id'))
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -80,13 +52,13 @@ class GetInvitationUrlHandler(ApiHandler):
                 'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent),
                 'channel': channel
             } for channel in branch_io.CHANNELS]
-            share.urls = [url['url'] for url in urls]
+            share.channel_urls = [ChannelUrl(url=url['url'], channel=url['channel']) for url in urls]
             share.put()
 
         config = Config.get()
         self.render_json({
             'text': config.SHARED_INVITATION_TEXT,
-            'urls': share.urls,
+            'urls': [channel_url.dict() for channel_url in share.channel_urls],
             'image': config.SHARED_INVITATION_IMAGE
         })
 
@@ -130,7 +102,7 @@ class GetGiftUrlHandler(ApiHandler):
         })
 
     def post(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id'))
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
