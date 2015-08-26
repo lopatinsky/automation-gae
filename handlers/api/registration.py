@@ -43,7 +43,7 @@ def _refresh_client_info(request, android_id, client_id=None):
 def _perform_registration(request):
     response = {}
 
-    client_id = request.get_range('client_id')
+    client_id = request.get_range('client_id') or int(request.headers.get('Client-Id'))
     android_id = request.get('android_id')
 
     client = None

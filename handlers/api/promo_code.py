@@ -24,7 +24,7 @@ class EnterPromoCode(ApiHandler):
         })
 
     def post(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id'))
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -45,7 +45,7 @@ class EnterPromoCode(ApiHandler):
 
 class PromoCodeHistoryHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id'))
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)

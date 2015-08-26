@@ -9,7 +9,7 @@ from methods import alfa_bank, empatika_wallet
 
 class DepositToWalletHandler(ApiHandler):
     def post(self):
-        client_id = self.request.get("client_id")
+        client_id = self.request.get("client_id") or int(self.request.headers.get('Client-Id'))
         binding_id = self.request.get("binding_id")
         amount = self.request.get_range("amount")
 
@@ -50,7 +50,7 @@ class DepositToWalletHandler(ApiHandler):
 
 class WalletBalanceHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get("client_id")
+        client_id = self.request.get("client_id") or int(self.request.headers.get('Client-Id'))
         if not client_id:
             self.abort(400)
         client_id = int(client_id)
