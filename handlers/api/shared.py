@@ -7,7 +7,7 @@ from config import EMAIL_FROM, Config
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.sms.sms_pilot import send_sms
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup, KIND_SHARE_INVITATION
 
 __author__ = 'dvpermyakov'
 
@@ -53,13 +53,18 @@ class GetInvitationUrlHandler(ApiHandler):
                 'channel': channel
             } for channel in branch_io.CHANNELS]
             share.channel_urls = [ChannelUrl(url=url['url'], channel=url['channel']) for url in urls]
+            group_promo_codes = PromoCodeGroup()
+            group_promo_codes.put()
+            promo_code = PromoCode.create(group_promo_codes, KIND_SHARE_INVITATION, 1)
+            share.promo_code = promo_code.key
             share.put()
 
         config = Config.get()
         self.render_json({
             'text': config.SHARED_INVITATION_TEXT,
             'urls': [channel_url.dict() for channel_url in share.channel_urls],
-            'image': config.SHARED_INVITATION_IMAGE
+            'image': config.SHARED_INVITATION_IMAGE,
+            'promo_code': share.promo_code.id()
         })
 
 

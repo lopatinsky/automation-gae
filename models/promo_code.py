@@ -23,14 +23,17 @@ KIND_WALLET = 1
 KIND_POINTS = 2
 KIND_ORDER_PROMO = 3
 KIND_ALL_TIME_HACK = 4
-PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK)
+KIND_SHARE_INVITATION = 5
+PROMO_CODE_KIND_CHOICES = (KIND_SHARE_GIFT, KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK,
+                           KIND_SHARE_INVITATION)
 PROMO_CODE_KIND_ADMIN = (KIND_WALLET, KIND_POINTS, KIND_ORDER_PROMO, KIND_ALL_TIME_HACK)
 PROMO_CODE_KIND_MAP = {
     KIND_SHARE_GIFT: u'Подари другу',
     KIND_WALLET: u'Баллы на кошелек',
     KIND_POINTS: u'Накопительные баллы',
     KIND_ORDER_PROMO: u'Личные акции',
-    KIND_ALL_TIME_HACK: u'Заказ в любое время'
+    KIND_ALL_TIME_HACK: u'Заказ в любое время',
+    KIND_SHARE_INVITATION: u'Пригласи друга'
 }
 
 
@@ -39,13 +42,15 @@ DEFAULT_MESSAGE_MAP = {
     KIND_WALLET: u'Вам будут начислены бонусы на личный счет',
     KIND_POINTS: u'Вам будут начисленыы баллы',
     KIND_ORDER_PROMO: u'Вам будет доступна новая акция',
-    KIND_ALL_TIME_HACK: u'Если Вы не разработчик приложения, обратитесь в службу поддержки'
+    KIND_ALL_TIME_HACK: u'Если Вы не разработчик приложения, обратитесь в службу поддержки',
+    KIND_SHARE_INVITATION: u'Вы активировали приглашение друга. Сделайте заказ и получите бонусы!'
 }
 
 
 class PromoCode(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
+    persist = ndb.BooleanProperty(default=False)
     value = ndb.IntegerProperty()
     group_id = ndb.IntegerProperty()
     init_amount = ndb.IntegerProperty(required=True)
@@ -58,7 +63,7 @@ class PromoCode(ndb.Model):
     @classmethod
     def create(cls, group, kind, amount, value=None, title=None, message=None):
         while True:
-            key = security.generate_random_string(length=7)
+            key = security.generate_random_string(length=7).lower()
             if not cls.get_by_id(key):
                 if not message:
                     message = DEFAULT_MESSAGE_MAP[kind]
@@ -115,7 +120,7 @@ class PromoCodePerforming(ndb.Model):
     status = ndb.IntegerProperty(choices=ACTION_CHOICES, default=READY_ACTION)
 
     def perform(self, client):
-        from models.share import SharedGift
+        from models.share import SharedGift, Share, SharedPromo
         from methods.empatika_wallet import deposit
         from methods.empatika_promos import register_order
 
@@ -134,6 +139,10 @@ class PromoCodePerforming(ndb.Model):
             self.status = self.PROCESSING_ACTION
         elif promo_code.kind == KIND_ALL_TIME_HACK:
             self.status = self.PROCESSING_ACTION
+        elif promo_code.kind == KIND_SHARE_INVITATION:
+            share = Share.query(Share.promo_code == promo_code.key).get()
+            if client.key.id() != share.sender.id():
+                SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
         else:
             self.status = self.DONE_ACTION
         self.put()

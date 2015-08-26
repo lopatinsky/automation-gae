@@ -33,6 +33,7 @@ class Share(ndb.Model):
     updated = ndb.DateTimeProperty(auto_now=True)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=ACTIVE)
     channel_urls = ndb.LocalStructuredProperty(ChannelUrl, repeated=True)
+    promo_code = ndb.KeyProperty(kind=PromoCode)
 
     def deactivate(self):
         self.status = self.INACTIVE
