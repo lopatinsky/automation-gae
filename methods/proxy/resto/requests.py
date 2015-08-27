@@ -15,7 +15,7 @@ def _get_request(path, params=None, log_response=True):
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
-    response = urlfetch.fetch(url, method='GET')
+    response = urlfetch.fetch(url, method='GET', deadline=60)
     logging.info(response.status_code)
     response = json.loads(response.content)
     if log_response:
@@ -74,6 +74,15 @@ def get_resto_company_info(resto_company):
 def get_resto_promos(resto_company):
     path = '/api/company/%s/promos' % resto_company.key.id()
     return _get_request(path)
+
+
+def get_resto_history(resto_company, resto_customer):
+    path = '/api/history'
+    params = {
+        'organisation_id': resto_company.key.id(),
+        'client_id': resto_customer.resto_customer_id if resto_customer else None
+    }
+    return _get_request(path, params)
 
 
 def post_resto_register(resto_company, resto_customer):

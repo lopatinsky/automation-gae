@@ -52,9 +52,11 @@ class CashBack(ndb.Model):
 class ChosenGroupModifierDetails(ndb.Model):
     group_modifier = ndb.KeyProperty(kind=GroupModifier)
     group_choice_id = ndb.IntegerProperty()
+    group_choice_id_str = ndb.StringProperty()  # todo: set group_choice_id to str
 
     def group_modifier_obj(self):
-        return self.group_modifier, self.group_choice_id
+        choice_id = self.group_choice_id if self.group_choice_id else self.group_choice_id_str
+        return self.group_modifier, choice_id
 
     @property
     def title(self):
@@ -140,6 +142,16 @@ class Order(ndb.Model):
     email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
 
+    @classmethod
+    def get(cls, client):
+        from config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.history import get_orders
+        app_kind = Config.get().APP_KIND
+        if app_kind == AUTO_APP:
+            return cls.query(cls.client_id == client.key.id())
+        elif app_kind == RESTO_APP:
+            return get_orders(client)
+
     def activate_cash_back(self):
         from methods.empatika_wallet import deposit, get_balance
         from google.appengine.ext.deferred import deferred
@@ -168,13 +180,16 @@ class Order(ndb.Model):
 
     @staticmethod
     def grouped_item_dict(details, gift=False):
+        from models.menu import MenuItem
         item_dicts = []
         for item_detail in details:
             if not gift:
-                item = item_detail.item.get()
+                item = MenuItem.get(item_detail.item.id())
             else:
                 gift = item_detail.gift.get()
                 item = gift.item.get()
+            if not item:
+                continue
             item_dicts.append({
                 'item': item,
                 'points': gift.points if gift else None,

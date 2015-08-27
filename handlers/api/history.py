@@ -8,7 +8,10 @@ from models.share import SharedPromo
 class HistoryHandler(ApiHandler):
     def get(self):
         client_id = self.request.get_range('client_id')
-        history = Order.query(Order.client_id == client_id)
+        client = Client.get_by_id(client_id)
+        if not client:
+            self.abort(400)
+        history = Order.get(client)
         sorted_history = sorted(history, key=lambda order: order.delivery_time, reverse=True)
         order_dicts = [order.history_dict() for order in sorted_history if order.status != CREATING_ORDER]
         self.render_json({
