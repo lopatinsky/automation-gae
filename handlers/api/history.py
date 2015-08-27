@@ -7,7 +7,7 @@ from models.share import SharedPromo
 
 class HistoryHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id', 0))
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         history = Order.query(Order.client_id == client_id)
         sorted_history = sorted(history, key=lambda order: order.delivery_time, reverse=True)
         order_dicts = [order.history_dict() for order in sorted_history if order.status != CREATING_ORDER]
@@ -18,7 +18,7 @@ class HistoryHandler(ApiHandler):
 
 class SharedGiftHistoryHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id', 0))
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -30,7 +30,7 @@ class SharedGiftHistoryHandler(ApiHandler):
 
 class SharedInvitationHistoryHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id', 0))
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)

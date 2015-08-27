@@ -50,7 +50,7 @@ class DepositToWalletHandler(ApiHandler):
 
 class WalletBalanceHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get("client_id") or int(self.request.headers.get('Client-Id', 0))
+        client_id = self.request.get("client_id") or self.request.headers.get('Client-Id')
         if not client_id:
             self.abort(400)
         client_id = int(client_id)
