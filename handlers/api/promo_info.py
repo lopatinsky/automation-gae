@@ -14,7 +14,7 @@ class PromoInfoHandler(ApiHandler):
     BONUS_TEXT = 'Добавляй позиции в заказ, используя накопленные баллы.'
 
     def get(self):
-        client_id = self.request.get('client_id')
+        client_id = self.request.get('client_id') or int(self.request.headers.get('Client-Id') or 0)
         if client_id:
             client_id = int(client_id)
             client = Client.get_by_id(client_id)

@@ -110,7 +110,7 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT:
         return set_order_gift_points(response, outcome, order)
     elif outcome.method == PromoOutcome.FIX_DISCOUNT:
-        return set_fix_discount(response, outcome, _get_initial_total_sum(items))
+        return set_fix_discount(response, outcome, promo, items, _get_initial_total_sum(items))
     elif outcome.method == PromoOutcome.DELIVERY_SUM_DISCOUNT:
         return set_delivery_sum_discount(response, outcome, delivery_type, delivery_zone)
     elif outcome.method == PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT:

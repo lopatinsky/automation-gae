@@ -1,8 +1,6 @@
 # coding=utf-8
-from google.appengine.api.namespace_manager import namespace_manager
-from google.appengine.api.urlfetch_errors import DeadlineExceededError
-from models import Client, SharedGift
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, KIND_WALLET, PromoCodePerforming
+from models import Client
+from models.promo_code import PromoCode, PromoCodePerforming
 import logging
 
 __author__ = 'dvpermyakov'
@@ -26,7 +24,7 @@ class EnterPromoCode(ApiHandler):
         })
 
     def post(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -47,7 +45,7 @@ class EnterPromoCode(ApiHandler):
 
 class PromoCodeHistoryHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)

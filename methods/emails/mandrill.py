@@ -5,7 +5,7 @@ import json
 import logging
 
 MANDRILL_SEND_EMAIL_URL = 'https://mandrillapp.com/api/1.0/messages/send.json'
-API_KEY = 'vcJnxtopNKq4gKaliwhDPg'
+API_KEY = 'e02w7UmHBExqLjvFZNTVgA'
 
 
 def send_email(from_email, to_email, subject, body, recipients=None):

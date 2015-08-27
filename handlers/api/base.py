@@ -4,8 +4,9 @@ from urlparse import urlparse
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
+from methods.versions import is_test_version, update_company_versions
 from models.proxy.unified_app import AutomationCompany
-from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME, TEST_VERSIONS
+from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 from webapp2_extras import auth
 
 
@@ -33,6 +34,8 @@ class SuperJSONEncoder(json.JSONEncoder):
 
 
 class ApiHandler(RequestHandler):
+    test = False
+
     @cached_property
     def jinja2(self):
         return jinja2.get_jinja2(app=self.app)
@@ -42,11 +45,12 @@ class ApiHandler(RequestHandler):
             if key == "password":
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
+        logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
         self.request.init_namespace = None
         config = Config.get()
-        if not config:
-            self.abort(423)
         if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
+            if not config:
+                self.abort(423)
             logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
             namespace = self.request.headers.get('Namespace')
             if namespace:
@@ -59,10 +63,8 @@ class ApiHandler(RequestHandler):
                 namespace = self.request.headers.get('Namespace')
                 namespace_manager.set_namespace(namespace)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
-        self.test = False
-        for version in TEST_VERSIONS:
-            if version in self.request.url:
-                self.test = True
+        self.test = is_test_version(self.request.url)
+        update_company_versions(self.request.headers.get('Version', 0))
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)

@@ -1,5 +1,4 @@
 # coding:utf-8
-from methods.email_mandrill import send_email
 
 __author__ = 'dvpermyakov'
 
@@ -82,8 +81,7 @@ def _get_collection(params):
         response = urlfetch.fetch(url, deadline=3)
         response = json.loads(response.content)
     except Exception as e:
-        text = str(e)
-        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка геокодера', text)
+        logging.warning(str(e))
         response = None
     if response:
         return response['response']['GeoObjectCollection']['featureMember']

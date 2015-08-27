@@ -1,12 +1,13 @@
 from collections import defaultdict, Counter
 import datetime
 import logging
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
-from methods import email
-from models.error_statistics import PaymentErrorsStatistics
 
+from methods.emails import admins
+from models.error_statistics import PaymentErrorsStatistics
 
 MINUTES_INTERVAL = 10
 AVAIL_FAILURE_PERCENT = 20
@@ -41,4 +42,4 @@ class CheckAlfaErrorsHandler(RequestHandler):
             mail_body += namespace_errors[namespace]
         if namespace_errors:
             logging.warning(mail_body)
-            email.send_error("server", "Payment errors", mail_body)
+            admins.send_error("server", "Payment errors", mail_body)

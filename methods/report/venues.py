@@ -97,6 +97,3 @@ def get_with_dates(chosen_year, chosen_month):
         'chosen_month': chosen_month
     }
     return values
-
-    list = {}
-    list.popitem()

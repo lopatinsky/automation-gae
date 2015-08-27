@@ -1,9 +1,10 @@
 #coding:utf-8
 __author__ = 'dvpermyakov'
 
-from base import ApiHandler
-from methods import email
 import logging
+
+from base import ApiHandler
+from methods.emails import admins
 
 
 class ReceiveSms(ApiHandler):
@@ -15,4 +16,4 @@ class ReceiveSms(ApiHandler):
         body = self.request.get('Body')
         message = u'Страна: %s\nРегион: %s\nТелефон: %s\nСообщение: %s' % (country, region, phone, body)
         logging.info(message)
-        email.send_error('analytics', u'Смс ответ', body=message)
+        admins.send_error('analytics', u'Смс ответ', body=message)

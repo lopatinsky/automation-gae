@@ -11,11 +11,12 @@ __author__ = 'dvpermyakov'
 
 
 class Company:
-    def __init__(self, namespace, name):
+    def __init__(self, namespace, name, in_production):
         self.namespace = namespace
         self.name = name
         self.payments = []
         self.info = {}
+        self.in_production = in_production
 
 
 def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namespaces):
@@ -31,13 +32,21 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
         config = Config.get()
         if not config or not config.APP_NAME:
             continue
-        if not namespace in chosen_namespaces:
-            skip_companies.append(Company(namespace, config.APP_NAME))
+        if (chosen_namespaces and namespace in chosen_namespaces) or \
+                (not chosen_namespaces and config.IN_PRODUCTION):
+            companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
         else:
-            companies.append(Company(namespace, config.APP_NAME))
+            skip_companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
+    if not chosen_namespaces:
+        chosen_namespaces = [c.namespace for c in companies]
     start = suitable_date(chosen_day, chosen_month, chosen_year, True)
     end = suitable_date(chosen_day, chosen_month, chosen_year, False)
     statuses = (READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)  # it can be tunable
+    total = {
+        'orders_number': 0,
+        'orders_sum': 0,
+        'average_orders_sum': 0
+    }
     for company in companies:
         namespace_manager.set_namespace(company.namespace)
         orders = Order.query(Order.date_created >= start, Order.date_created <= end).fetch()
@@ -69,6 +78,13 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
                 company.info[payment['type']][status]["orders_sum"] = round(company.info[payment['type']][status]["orders_sum"], 2)
                 company.info[payment['type']][status]["average_orders_sum"] = round(company.info[payment['type']][status]["average_orders_sum"], 2)
         company.payments = sorted(company.payments, key=lambda payment: payment['type'])
+        total['orders_number'] += sum([company.info[payment['type']][READY_ORDER]['orders_number']
+                                       for payment in company.payments])
+        total['orders_sum'] += sum([company.info[payment['type']][READY_ORDER]['orders_sum']
+                                    for payment in company.payments])
+
+    total['average_orders_sum'] = round(total['orders_sum'] / total['orders_number'], 2) if total['orders_number'] else 0
+
     companies.extend(skip_companies)
     return {
         'companies': companies,
@@ -80,5 +96,6 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
         'chosen_year': chosen_year,
         'chosen_month': chosen_month,
         'chosen_day': chosen_day,
-        'chosen_object_type': chosen_object_type
+        'chosen_object_type': chosen_object_type,
+        'total': total
     }

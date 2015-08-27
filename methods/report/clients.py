@@ -54,7 +54,7 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chose
                                 Order.status == CANCELED_BY_CLIENT_ORDER))
     for order in query.fetch():
         client_id = order.client_id
-        total_sum = sum(item.get().price for item in order.items)
+        total_sum = sum(item.price for item in order.item_details)
         payment = order.total_sum - order.wallet_payment
         venue_sum = sum(d_item.revenue for d_item in order.item_details)
         if client_id in clients:

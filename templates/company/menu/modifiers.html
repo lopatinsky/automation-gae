@@ -200,7 +200,7 @@
                         </a>
                         <br>
                         {% if modifier.enable %}
-                            <button class="show_products" id="{{ modifier.key.id() }}">
+                            <button type="button" class="show_products" id="{{ modifier.key.id() }}">
                                 Показать/Скрыть
                             </button>
                         {% endif %}
@@ -217,7 +217,9 @@
                     </td>
                     <td colspan="4">
                         <form method="get">
-                            <button formaction="{{ '/company/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}">
+                            <button
+                                    formaction="{{ '/company/menu/modifiers/add/%s/group_modifier_item' % modifier.key.id() }}"
+                                    formmethod="get">
                                 Добавить выбор
                             </button>
                         </form>
@@ -252,7 +254,7 @@
         </table>
         <div>
             <form method="get">
-                <button formaction="{{ '/company/menu/modifiers/add/group_modifier' }}">
+                <button formaction="{{ '/company/menu/modifiers/add/group_modifier' }}" formmethod="get">
                     Добавить
                 </button>
             </form>

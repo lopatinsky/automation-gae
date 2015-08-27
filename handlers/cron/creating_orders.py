@@ -1,8 +1,11 @@
 import datetime
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
-from methods import email, alfa_bank, paypal
+
+from methods import alfa_bank, paypal
+from methods.emails import admins
 from models import Order
 from models.order import CREATING_ORDER
 
@@ -72,4 +75,4 @@ class CheckCreatingOrdersHandler(RequestHandler):
             mail_body += "List of orders:\n" + \
                          "\n\n".join("\n".join("%s: %s" % t for t in info) for info in namespace_infos[namespace])
         if namespace_infos:
-            email.send_error("order", "Orders crashed while creating", mail_body)
+            admins.send_error("order", "Orders crashed while creating", mail_body)

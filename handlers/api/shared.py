@@ -1,13 +1,13 @@
 # coding: utf-8
 import json
-from google.appengine.api.namespace_manager import namespace_manager
+
 from google.appengine.ext.deferred import deferred
-from config import Config, EMAIL_FROM
-from methods.email import send_error
-from methods.email_mandrill import send_email
+
+from config import EMAIL_FROM, Config
+from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
-from methods.twilio import send_sms
-from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup
+from methods.sms.sms_pilot import send_sms
+from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup, KIND_SHARE_INVITATION
 
 __author__ = 'dvpermyakov'
 
@@ -16,42 +16,23 @@ from models.payment_types import CARD_PAYMENT_TYPE
 from base import ApiHandler
 from methods import branch_io, alfa_bank
 from models import Share, Client, PaymentType, STATUS_AVAILABLE, SharedGift, STATUS_UNAVAILABLE
-from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem
+from models.share import SharedGiftMenuItem, ChosenSharedGiftMenuItem, ChannelUrl
 from methods.rendering import get_phone
 import logging
 
 
-class GetShareUrlHandler(ApiHandler):
+class GetInvitationInfoHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
-        client = Client.get_by_id(client_id)
-        if not client:
-            self.abort(400)
-        share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
-                            Share.share_type == branch_io.SHARE).get()
-        if not share:
-            share = Share(share_type=branch_io.SHARE, sender=client.key)
-            share.put()  # need share id
-
-            if 'iOS' in self.request.headers["User-Agent"]:
-                user_agent = 'ios'
-            elif 'Android' in self.request.headers["User-Agent"]:
-                user_agent = 'android'
-            else:
-                user_agent = 'unknown'
-            urls = [{
-                'url': branch_io.create_url(share.key.id(), branch_io.SHARE, channel, user_agent),
-                'channel': channel
-            } for channel in branch_io.CHANNELS]
-            share.urls = [url['url'] for url in urls]
-            share.put()
-
-        self.render_json({})  # todo: need to update
+        config = Config.get()
+        self.render_json({
+            'title': config.SHARED_INVITATION_ABOUT_TITLE,
+            'description': config.SHARED_INVITATION_ABOUT_DESCRIPTION
+        })
 
 
 class GetInvitationUrlHandler(ApiHandler):
     def get(self):
-        client_id = self.request.get_range('client_id')
+        client_id = int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
@@ -71,12 +52,19 @@ class GetInvitationUrlHandler(ApiHandler):
                 'url': branch_io.create_url(share.key.id(), branch_io.INVITATION, channel, user_agent),
                 'channel': channel
             } for channel in branch_io.CHANNELS]
-            share.urls = [url['url'] for url in urls]
+            share.channel_urls = [ChannelUrl(url=url['url'], channel=url['channel']) for url in urls]
+            group_promo_codes = PromoCodeGroup()
+            group_promo_codes.put()
+            promo_code = PromoCode.create(group_promo_codes, KIND_SHARE_INVITATION, 1)
+            share.promo_code = promo_code.key
             share.put()
 
-        # todo: need to update
+        config = Config.get()
         self.render_json({
-            'urls': share.urls
+            'text': config.SHARED_INVITATION_TEXT,
+            'urls': [channel_url.dict() for channel_url in share.channel_urls],
+            'image': config.SHARED_INVITATION_IMAGE,
+            'promo_code': share.promo_code.id()
         })
 
 
@@ -119,7 +107,7 @@ class GetGiftUrlHandler(ApiHandler):
         })
 
     def post(self):
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)

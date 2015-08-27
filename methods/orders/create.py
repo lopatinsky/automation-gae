@@ -1,17 +1,20 @@
 # coding=utf-8
 from urlparse import urlparse
+
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
+
 from webapp2_extras import security
+
 from config import config, EMAIL_FROM
 from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
 from methods import alfa_bank
-from methods.email import send_error
-from methods.email_mandrill import send_email
-from methods.twilio import send_sms
+from methods.emails.admins import send_error
+from methods.emails.postmark import send_email
+from methods.sms.sms_pilot import send_sms
 from models.payment_types import PAYMENT_TYPE_MAP
 from models.venue import DELIVERY_MAP, DELIVERY, Address
 
@@ -47,10 +50,12 @@ def paypal_payment_performing(payment_json, amount, order, client):
     return success, error
 
 
-def send_client_sms(order):
+def send_client_sms_task(order, namespace):
     SECONDS_WAITING_BEFORE_SMS = 15
-    taskqueue.add(url='/task/check_order_success', params={'order_id': order.key.id()},
-                  countdown=SECONDS_WAITING_BEFORE_SMS)
+    taskqueue.add(url='/task/check_order_success', params={
+        'order_id': order.key.id(),
+        'namespace': namespace
+    }, countdown=SECONDS_WAITING_BEFORE_SMS)
 
 
 def send_venue_sms(venue, order):
@@ -71,7 +76,7 @@ def send_venue_email(venue, order, url, jinja2):
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         item_values = order_items_values(order)
         item_values['venue'] = venue
-        item_values['delivery_type_str'] = DELIVERY_MAP[order.device_type]
+        item_values['delivery_type_str'] = DELIVERY_MAP[order.delivery_type]
         order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
         if config.EMAIL_REQUESTS:
             order.email_key_done = security.generate_random_string(entropy=256)

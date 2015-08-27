@@ -242,6 +242,8 @@ class Order(ndb.Model):
             else None,
             "payment_type_id": self.payment_type_id,
             "total": self.total_sum,
+            "menu_sum": sum([item_detail.price / 100.0 for item_detail in self.item_details]),
+            "wallet_payment": self.wallet_payment,
             "delivery_sum": self.delivery_sum,
             "venue_id": str(self.venue_id),
             "items": self.grouped_item_dict(self.item_details),
@@ -253,7 +255,6 @@ class Order(ndb.Model):
         dct = self.history_dict()
         dct.update({
             "total_sum": self.total_sum,
-            "wallet_payment": self.wallet_payment,
             "venue": Venue.get_by_id(self.venue_id).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": Client.get_by_id(self.client_id).dict(),

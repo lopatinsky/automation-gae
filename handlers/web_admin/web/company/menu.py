@@ -33,7 +33,7 @@ class ListCategoriesHandler(CompanyBaseHandler):
             category = MenuCategory.get_by_id(category_id)
         else:
             category = MenuCategory.get_initial_category()
-        categories = category.get_categories()
+        categories = sorted(category.get_categories(), key=lambda category: category.sequence_number)
         self.render('/menu/categories.html', categories=categories, main_category=category)
 
 
@@ -166,7 +166,6 @@ class ListMenuItemsHandler(CompanyBaseHandler):
         if not category:
             self.abort(400)
         for item in category.get_items():
-            item = item.get()
             item.status = bool(self.request.get(str(item.key.id())))
             item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
@@ -499,11 +498,11 @@ class AddSingleModifierHandler(CompanyBaseHandler):
             price = int(price * 100)
         else:
             price = 0
-        min = self.request.get_range('min')
-        max = self.request.get_range('max')
-        if max == 0:
-            max = SingleModifier.INFINITY
-        modifier = SingleModifier(title=name, price=price, min_amount=min, max_amount=max)
+        min_amount = self.request.get_range('min')
+        max_amount = self.request.get_range('max')
+        if max_amount == 0:
+            max_amount = SingleModifier.INFINITY
+        modifier = SingleModifier(title=name, price=price, min_amount=min_amount, max_amount=max_amount)
         modifier.sequence_number = SingleModifier.generate_sequence_number()
         modifier.put()
         self.redirect_to('modifiers_list')

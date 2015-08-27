@@ -1,6 +1,5 @@
 # coding=utf-8
 from datetime import datetime, timedelta
-from google.appengine.api.namespace_manager import namespace_manager
 from ..base import CompanyBaseHandler
 from methods.auth import company_user_required
 from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
@@ -45,14 +44,14 @@ def _update_order_info(orders):
     for order in orders:
         hours_offset = Venue.get_by_id(order.venue_id).timezone_offset
         if order.delivery_time:
-            delivery_time_str = datetime.strftime(order.delivery_time + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+            delivery_time_str = (order.delivery_time + timedelta(hours=hours_offset)).strftime("%Y-%m-%d %H:%M:%S")
         else:
             delivery_time_str = u''
         if order.delivery_slot_id:
             slot = DeliverySlot.get_by_id(order.delivery_slot_id)
             if slot.slot_type == DeliverySlot.STRINGS:
                 if order.delivery_time:
-                    delivery_time_date = datetime.strftime(order.delivery_time, "%Y-%m-%d")
+                    delivery_time_date = order.delivery_time.strftime("%Y-%m-%d")
                 else:
                     delivery_time_date = u''
                 delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
@@ -61,19 +60,19 @@ def _update_order_info(orders):
             order.address_str = order.address.str()
         else:
             order.address_str = u'Адрес не найден'
-        order.date_str = datetime.strftime(order.date_created + timedelta(hours=hours_offset), "%Y-%m-%d %H:%M:%S")
+        order.date_str = (order.date_created + timedelta(hours=hours_offset)).strftime("%Y-%m-%d %H:%M:%S")
         order.delivery_time_str = delivery_time_str
         order.status_description = STATUS_MAP[order.status]
     return orders
 
 
 def order_items_values(order):
-    items = []
-    for item_dict in order.grouped_item_dict(order.item_details):
+    def _process_item_dict(item_dict, gift=False):
         item_obj = MenuItem.get_by_id(int(item_dict['id']))
         item_obj.amount = item_dict['quantity']
         item_obj.total_float_price = item_obj.float_price * item_obj.amount
         item_obj.modifiers = []
+        item_obj.is_gift = gift
         for modifier_dict in item_dict['single_modifiers']:
             modifier = SingleModifier.get_by_id(int(modifier_dict['id']))
             modifier.amount = modifier_dict['quantity']
@@ -85,7 +84,18 @@ def order_items_values(order):
             choice.amount = modifier_dict['quantity']
             item_obj.total_float_price += choice.float_price * choice.amount * item_obj.amount
             item_obj.modifiers.append(choice)
-        items.append(item_obj)
+        if gift:
+            item_obj.total_float_price = 0.0
+        return item_obj
+
+    items = []
+    for item_dict in order.grouped_item_dict(order.item_details):
+        items.append(_process_item_dict(item_dict))
+
+    for gift_dict in order.grouped_item_dict(order.gift_details, True) + \
+                     order.grouped_item_dict(order.order_gift_details):
+        items.append(_process_item_dict(gift_dict, True))
+
     order = _update_order_info([order])[0]
     order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
     return {

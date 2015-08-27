@@ -1,16 +1,22 @@
 # coding=utf-8
-from google.appengine.ext.deferred import deferred
-from methods import email, empatika_wallet, push, paypal
 import logging
-from methods import alfa_bank, empatika_promos
 from datetime import datetime
+
+from google.appengine.ext import deferred
+from config import EMAIL_FROM
+
+from methods import empatika_wallet, push, paypal
+from methods.emails import admins, postmark
+from methods import alfa_bank, empatika_promos
 from methods.empatika_wallet import get_balance
-from models import Client
+from methods.sms import sms_pilot
+from models import Client, Venue
+from models.order import CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
 
 __author__ = 'dvpermyakov'
 
 
-def cancel_order(order, status, namespace, comment=None, with_push=True):
+def cancel_order(order, status, namespace, comment=None):
     success = True
     if order.has_card_payment:
         return_result = alfa_bank.reverse(order.payment_id)
@@ -23,7 +29,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
                 empatika_promos.cancel_activation(gift_detail.activation_id)
             except empatika_promos.EmpatikaPromosError as e:
                 logging.exception(e)
-                email.send_error("payment", "Cancel activation", str(e))
+                admins.send_error("payment", "Cancel activation", str(e))
                 success = False
     if success:
         success_wallet_payment_reverse = False
@@ -34,7 +40,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
                 success_wallet_payment_reverse = True
             except empatika_wallet.EmpatikaWalletError as e:
                 logging.exception(e)
-                email.send_error("payment", "Wallet reversal failed", str(e))
+                admins.send_error("payment", "Wallet reversal failed", str(e))
                 # main payment reversed -- do not abort
         for share_gift in order.shared_gift_details:
             gift = share_gift.gift.get()
@@ -52,7 +58,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
         order.email_key_confirm = None
         order.put()
 
-        if with_push:
+        if status == CANCELED_BY_BARISTA_ORDER:
             client = Client.get_by_id(order.client_id)
             push_text = u"%s, заказ №%s отменен." % (client.name, order.key.id())
             if order.has_card_payment:
@@ -62,4 +68,11 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
             if comment:
                 push_text += comment
             push.send_order_push(order, push_text, namespace)
+        elif status == CANCELED_BY_CLIENT_ORDER:
+            message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
+            venue = Venue.get_by_id(order.venue_id)
+            sms_pilot.send_sms(venue.phones, message)
+            for email in venue.emails:
+                if email:
+                    deferred.defer(postmark.send_email, EMAIL_FROM, email, message, "<html></html>")
     return success

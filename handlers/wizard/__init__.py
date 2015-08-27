@@ -2,12 +2,15 @@
 import json
 import random
 import datetime
+
 from google.appengine.api import namespace_manager, mail
 from google.appengine.ext import ndb, deferred
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import jinja2
+
 from config import Config
-from methods import sms_pilot, email_mandrill
+from methods.sms import sms_pilot
+from methods.emails import mandrill
 from models import DeliverySlot, MenuCategory, MenuItem, CompanyUser, Venue, DAY_SECONDS, HOUR_SECONDS, STATUS_AVAILABLE
 from models.payment_types import PaymentType, CASH_PAYMENT_TYPE
 from models.schedule import Schedule, DaySchedule
@@ -21,7 +24,7 @@ def _notify_sms(phone, login, password):
 
 
 def _notify_email(email, phone, name, login, password):
-    email_mandrill.send_email("noreply@ru-beacon.ru", email, "Ваши данные для входа в демо-приложение Ru-beacon",
+    mandrill.send_email("noreply@ru-beacon.ru", email, "Ваши данные для входа в демо-приложение Ru-beacon",
                               u"""Ваш логин: <b>%s</b><br/>
 Ваш пароль: <b>%s</b><br/>
 <a href="http://rbcn.mobi/get/dem?m=email">Скачать демо-приложение</a>""" % (login, password))

@@ -1,13 +1,15 @@
 # coding=utf-8
 import logging
+from datetime import datetime, timedelta
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
+
 from handlers.api.base import ApiHandler
-from methods import email
+from methods.emails import admins
 from models import Order, Venue
 from models.order import NOT_CANCELED_STATUSES, READY_ORDER
 from methods.orders.done import done_order
-from datetime import datetime, timedelta
 
 HOURS_BEFORE = 3
 
@@ -36,4 +38,4 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 venue_title = venue.title if venue else u'Не определено'
                 mail_body += u'%s (%s),\n' % (order.key.id(), venue_title)
         if namespace_orders:
-            email.send_error("order", "Orders not closed", mail_body)
+            admins.send_error("order", "Orders not closed", mail_body)

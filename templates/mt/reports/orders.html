@@ -56,14 +56,16 @@
         <tr>
             <th>Номер заказа</th>
             <th>Точка</th>
+            <th>Тип доставки</th>
             <th>Дата создания</th>
             <th>Время заказа</th>
             <th data-no-excel>Время самовывоза</th>
             <th>Статус заказа</th>
             <th>Тип оплаты</th>
-            <th>Полная сумма</th>
+            <th>Сумма по меню</th>
             <th>Сумма с учетом скидок</th>
-            <th>Сумма с учетом скидок и личного счета</th>
+            <th>Сумма с учетом скидок и стоимости доставки</th>
+            <th>Итоговая сумма после оплаты баллами</th>
             <th data-no-excel>id клиента</th>
             <th>Имя</th>
             <th data-no-excel>Номер телефона</th>
@@ -77,14 +79,16 @@
             <tr>
                 <td rowspan="{{ icount }}">{{ order.order_id }}</td>
                 <td rowspan="{{ icount }}">{{ order.venue }}</td>
+                <td rowspan="{{ icount }}">{{ DELIVERY_TYPE_MAP[order.delivery_type] }}</td>
                 <td rowspan="{{ icount }}">{{ order.date }}</td>
                 <td rowspan="{{ icount }}">{{ order.created_time }}</td>
                 <td rowspan="{{ icount }}">{{ order.delivery_time }}</td>
                 <td rowspan="{{ icount }}">{{ order.status }}</td>
                 <td rowspan="{{ icount }}">{{ order.payment_type }}</td>
-                <td rowspan="{{ icount }}">{{ order.total_sum_without_promos }}</td>
-                <td rowspan="{{ icount }}">{{ order.total_sum }}</td>
-                <td rowspan="{{ icount }}">{{ order.total_sum_with_promos_without_wallet }}</td>
+                <td rowspan="{{ icount }}">{{ order.menu_sum }}</td>
+                <td rowspan="{{ icount }}">{{ order.sum_after_promos }}</td>
+                <td rowspan="{{ icount }}">{{ order.sum_after_delivery }}</td>
+                <td rowspan="{{ icount }}">{{ order.sum_after_wallet }}</td>
                 <td rowspan="{{ icount }}">{{ order.client.id }}</td>
                 <td rowspan="{{ icount }}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
                 <td rowspan="{{ icount }}">{{ order.client.phone }}</td>
@@ -112,11 +116,12 @@
         {% endfor %}
         {% for total in totals %}
             <tr>
-                <td colspan="6">Итого заказов ({{ total.status }} / {{ total.payment_type }})</td>
+                <td colspan="7">Итого заказов ({{ total.status }} / {{ total.payment_type }})</td>
                 <td>{{ total.orders_number }}</td>
-                <td>{{ total.total_sum_without_promos }}</td>
-                <td>{{ total.total_sum }}</td>
-                <td>{{ total.total_sum_with_promos_without_wallet }}</td>
+                <td>{{ total.menu_sum }}</td>
+                <td>{{ total.sum_after_promos }}</td>
+                <td>{{ total.sum_after_delivery }}</td>
+                <td>{{ total.sum_after_wallet }}</td>
                 <td></td>
                 <td></td>
                 <td></td>

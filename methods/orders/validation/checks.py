@@ -5,8 +5,7 @@ from config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.working_hours import check_with_errors
-from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, PromoOutcome, GiftMenuItem, MenuItem, MenuCategory
-from models.order import OrderPositionDetails
+from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.venue import DELIVERY, DELIVERY_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
 

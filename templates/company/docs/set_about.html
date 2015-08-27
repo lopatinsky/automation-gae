@@ -34,6 +34,14 @@
             Цвет:
             <input type="color" name="color" value="#{{ color[2:] }}"/>
         </label><br>
+        <label>
+            Кнопки выдачи заказа в письмах:
+            <input type="checkbox" name="email_buttons" {% if email_buttons %}checked{% endif %}>
+        </label><br>
+        <label>
+            Запущен:
+            <input type="checkbox" name="in_production" {% if in_production %}checked{% endif %}>
+        </label><br>
         <input type="submit">
     </form>
     <a href="/company/docs/about">Назад</a>

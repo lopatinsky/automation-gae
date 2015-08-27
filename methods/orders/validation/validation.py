@@ -1,6 +1,6 @@
 # coding=utf-8
 import copy
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 from config import config
 from methods import empatika_wallet
@@ -45,10 +45,11 @@ def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
     if len(item_dict1['group_modifier_keys']) != len(item_dict2['group_modifier_keys']):
         return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
-        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:  # consider group modifier
+        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:      # consider group modifier
             return False
-        if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
-            return False
+        if item_dict1['group_modifier_keys'][i][1] and item_dict2['group_modifier_keys'][i][1]:     # group modifier choice can be None if not chosen
+            if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
+                return False
     if consider_single_modifiers:
         if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
             return False
@@ -434,9 +435,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_sum': delivery_sum,
         'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
-        'delivery_time': datetime.strftime(delivery_time, STR_DATETIME_FORMAT)
+        'delivery_time': delivery_time.strftime(STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
-        else datetime.strftime(delivery_time + timedelta(hours=venue.timezone_offset), STR_DATETIME_FORMAT),
+        else (delivery_time + timedelta(hours=venue.timezone_offset)).strftime(STR_DATETIME_FORMAT),
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }

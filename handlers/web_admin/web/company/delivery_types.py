@@ -70,10 +70,10 @@ class DeliverySlotAddHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
         types = []
-        for type in DeliverySlot.CHOICES:
+        for slot_type in DeliverySlot.CHOICES:
             types.append({
-                'name': DeliverySlot.CHOICES_MAP[type],
-                'value': type
+                'name': DeliverySlot.CHOICES_MAP[slot_type],
+                'value': slot_type
             })
         self.render('/delivery_settings/delivery_slot_add.html', types=types)
 
@@ -97,10 +97,10 @@ class DeliverySlotEditHandler(CompanyBaseHandler):
         if not slot:
             self.abort(400)
         types = []
-        for type in DeliverySlot.CHOICES:
+        for slot_type in DeliverySlot.CHOICES:
             types.append({
-                'name': DeliverySlot.CHOICES_MAP[type],
-                'value': type
+                'name': DeliverySlot.CHOICES_MAP[slot_type],
+                'value': slot_type
             })
         self.render('/delivery_settings/delivery_slot_add.html', types=types, slot=slot)
 

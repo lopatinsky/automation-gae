@@ -1,4 +1,5 @@
 # coding=utf-8
+from datetime import datetime
 import time
 import re
 
@@ -31,6 +32,12 @@ def get_phone(phone_str):
     return re.sub("[^0-9]", "", phone_str)
 
 
+def sms_phone(phone):
+    if len(phone) == 11 and phone[0] == "8":
+        phone = "7" + phone[1:]
+    return phone
+
+
 def get_separated_name_surname(name_and_surname):
     values = name_and_surname.split(None, 1)
     if not values:
@@ -39,3 +46,10 @@ def get_separated_name_surname(name_and_surname):
         return values[0], ''
     else:
         return values[0], values[1]
+
+
+def parse_time_picker_value(time_picker_value):
+    try:
+        return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT)
+    except ValueError:
+        return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT + ' %p')

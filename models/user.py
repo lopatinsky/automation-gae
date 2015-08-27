@@ -58,11 +58,11 @@ class Admin(User):
         self.unique_model.delete_multi(ids)
 
     def dict(self):
-        dict = super(Admin, self).dict()
-        dict.update({
+        result = super(Admin, self).dict()
+        result.update({
             'venue': self.venue.get().dict()
         })
-        return dict
+        return result
 
 
 class Courier(User):
@@ -73,12 +73,12 @@ class Courier(User):
     surname = ndb.StringProperty()
 
     def dict(self):
-        dict = super(Courier, self).dict()
-        dict.update({
+        result = super(Courier, self).dict()
+        result.update({
             'name': self.name,
             'surname': self.surname
         })
-        return dict
+        return result
 
     def query_orders(self, *args, **kwargs):
         from models.order import Order

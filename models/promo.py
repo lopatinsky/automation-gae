@@ -18,24 +18,24 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
 
     def dict(self):
         item = self.item.get()
-        dict = item.dict()
-        dict['id'] = str(self.key.id())
-        dict.update({
+        result = item.dict()
+        result['id'] = str(self.key.id())
+        result.update({
             'points': self.points
         })
-        for modifier in dict['group_modifiers']:
+        for modifier in result['group_modifiers']:
             choice_dicts = modifier['choices']
             for choice_dict in choice_dicts[:]:
                 if int(choice_dict['id']) in self.additional_group_choice_restrictions:
                     choice_dict['price'] = 0
                     modifier['choices'] = [choice_dict]
                     break
-        for modifier in dict['single_modifiers'][:]:
+        for modifier in result['single_modifiers'][:]:
             if modifier['price'] > 0:
-                dict['single_modifiers'].remove(modifier)
+                result['single_modifiers'].remove(modifier)
         if self.additional_group_choice_restrictions:
-            dict['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
-        return dict
+            result['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
+        return result
 
 
 class PromoMenuItem(ndb.Model):

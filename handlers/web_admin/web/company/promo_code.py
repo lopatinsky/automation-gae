@@ -1,10 +1,8 @@
 # coding=utf-8
-from datetime import datetime
 from methods.auth import company_user_required
 from base import CompanyBaseHandler
-from methods.rendering import STR_DATETIME_FORMAT, HTML_STR_TIME_FORMAT
 from models.promo_code import PromoCode, PROMO_CODE_KIND_MAP, PROMO_CODE_KIND_ADMIN, PromoCodeGroup, \
-    PROMO_CODE_STATUS_MAP, KIND_WALLET, PromoCodePerforming
+    PROMO_CODE_STATUS_MAP, PromoCodePerforming
 
 __author__ = 'dvpermyakov'
 
@@ -13,6 +11,8 @@ class ListPromoCodeHandler(CompanyBaseHandler):
     @company_user_required
     def get(self):
         codes = PromoCode.query().fetch()
+        for code in codes:
+            code.promo_code_key = code.key.id().decode('utf-8')
         self.render('/promo_code/list.html', promo_codes=codes, PROMO_CODE_KIND_MAP=PROMO_CODE_KIND_MAP,
                     PROMO_CODE_STATUS_MAP=PROMO_CODE_STATUS_MAP)
 
@@ -43,16 +43,19 @@ class AddPromoCodeHandler(CompanyBaseHandler):
 
     @company_user_required
     def post(self):
+        key = self.request.get('key')
         kind = self.request.get_range('kind')
         value = self.request.get_range('value')
         amount = self.request.get_range('amount')
         max_activations = self.request.get_range('max_activations')
         title = self.request.get('title')
         message = self.request.get('message')
+        persist = bool(self.request.get('persist'))
         group = PromoCodeGroup()
         group.put()
         for number in xrange(amount):
-            promo_code = PromoCode.create(group, kind, max_activations, message=message, title=title, value=value)
+            promo_code = PromoCode.create(group, kind, max_activations, message=message, title=title, value=value,
+                                          promo_code_key=key, persist=persist)
             group.promo_codes.append(promo_code.key)
         group.put()
         self.redirect('/company/promo_code/list')

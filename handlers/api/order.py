@@ -11,7 +11,7 @@ from google.appengine.ext.ndb import GeoPt
 from config import config, AUTO_APP, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
-from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms, card_payment_performing, \
+from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj
 from methods.orders.validation.validation import validate_order
 from methods.orders.cancel import cancel_order
@@ -105,7 +105,7 @@ class OrderHandler(ApiHandler):
         self.order.total_sum = float(order_json.get("total_sum"))
         self.order.delivery_sum = int(order_json.get('delivery_sum', 0))
 
-        client = set_client_info(order_json.get('client'), self.order)
+        client = set_client_info(order_json.get('client'), self.request.headers, self.order)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
         self.order.client_id = client.key.id()
@@ -195,7 +195,7 @@ class OrderHandler(ApiHandler):
 
         send_venue_sms(venue, self.order)
         send_venue_email(venue, self.order, self.request.url, self.jinja2)
-        send_client_sms(self.order)
+        send_client_sms_task(self.order, namespace_manager.get_namespace())
 
         self.response.status_int = 201
         self.render_json({
@@ -226,8 +226,7 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace(),
-                                       with_push=False)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace())
                 if success:
                     reason_id = self.request.get('reason_id')
                     if reason_id:
@@ -270,7 +269,7 @@ class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
 
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
