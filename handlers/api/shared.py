@@ -32,7 +32,7 @@ class GetInvitationInfoHandler(ApiHandler):
 
 class GetInvitationUrlHandler(ApiHandler):
     def get(self):
-        client_id = int(self.request.headers.get('Client-Id'))
+        client_id = int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
