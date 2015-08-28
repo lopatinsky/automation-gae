@@ -2,19 +2,21 @@
 import logging
 from datetime import datetime
 
-from google.appengine.ext.deferred import deferred
+from google.appengine.ext import deferred
+from config import EMAIL_FROM
 
 from methods import empatika_wallet, push, paypal
-from methods.emails import admins
+from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos
 from methods.empatika_wallet import get_balance
-from models import Client
-from models.venue import Venue
+from methods.sms import sms_pilot
+from models import Client, Venue
+from models.order import CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
 
 __author__ = 'dvpermyakov'
 
 
-def cancel_order(order, status, namespace, comment=None, with_push=True):
+def cancel_order(order, status, namespace, comment=None):
     success = True
     if order.has_card_payment:
         legal = Venue.get_by_id(order.venue_id).legal.get()
@@ -57,7 +59,7 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
         order.email_key_confirm = None
         order.put()
 
-        if with_push:
+        if status == CANCELED_BY_BARISTA_ORDER:
             client = Client.get_by_id(order.client_id)
             push_text = u"%s, заказ №%s отменен." % (client.name, order.key.id())
             if order.has_card_payment:
@@ -67,4 +69,11 @@ def cancel_order(order, status, namespace, comment=None, with_push=True):
             if comment:
                 push_text += comment
             push.send_order_push(order, push_text, namespace)
+        elif status == CANCELED_BY_CLIENT_ORDER:
+            message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
+            venue = Venue.get_by_id(order.venue_id)
+            sms_pilot.send_sms(venue.phones, message)
+            for email in venue.emails:
+                if email:
+                    deferred.defer(postmark.send_email, EMAIL_FROM, email, message, "<html></html>")
     return success

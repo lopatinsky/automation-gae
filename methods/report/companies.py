@@ -11,11 +11,12 @@ __author__ = 'dvpermyakov'
 
 
 class Company:
-    def __init__(self, namespace, name):
+    def __init__(self, namespace, name, in_production):
         self.namespace = namespace
         self.name = name
         self.payments = []
         self.info = {}
+        self.in_production = in_production
 
 
 def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namespaces):
@@ -31,10 +32,13 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
         config = Config.get()
         if not config or not config.APP_NAME:
             continue
-        if not namespace in chosen_namespaces:
-            skip_companies.append(Company(namespace, config.APP_NAME))
+        if (chosen_namespaces and namespace in chosen_namespaces) or \
+                (not chosen_namespaces and config.IN_PRODUCTION):
+            companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
         else:
-            companies.append(Company(namespace, config.APP_NAME))
+            skip_companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
+    if not chosen_namespaces:
+        chosen_namespaces = [c.namespace for c in companies]
     start = suitable_date(chosen_day, chosen_month, chosen_year, True)
     end = suitable_date(chosen_day, chosen_month, chosen_year, False)
     statuses = (READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)  # it can be tunable

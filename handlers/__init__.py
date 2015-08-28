@@ -10,7 +10,7 @@ _APP_ID = app_identity.get_application_id()
 
 def handle_500(request, response, exception):
     config = Config.get()
-    if config and config.SEND_ERRORS_500:
+    if config and config.IN_PRODUCTION:
         body = """URL: %s
 User-Agent: %s
 Exception: %s

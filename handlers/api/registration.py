@@ -1,7 +1,7 @@
 import json
 from google.appengine.api.namespace_manager import namespace_manager
 from .base import ApiHandler
-from models import Client, Share, SharedGift, STATUS_AVAILABLE
+from models import Client, Share, SharedGift, STATUS_AVAILABLE, Order
 from methods.branch_io import INVITATION, GIFT
 from models.proxy.unified_app import AutomationCompany
 from models.share import SharedPromo
@@ -43,7 +43,7 @@ def _refresh_client_info(request, android_id, client_id=None):
 def _perform_registration(request):
     response = {}
 
-    client_id = request.get_range('client_id')
+    client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
     android_id = request.get('android_id')
 
     client = None
@@ -76,7 +76,8 @@ def _perform_registration(request):
             share = Share.get_by_id(share_id)
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
-                if not client_id:
+                if not client_id or \
+                        (not Order.query(Order.client_id == client_id).get() and client_id != share.sender.id()):
                     SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
             elif share.share_type == GIFT:
                 if share.status == Share.ACTIVE:

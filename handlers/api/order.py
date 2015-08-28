@@ -99,7 +99,7 @@ class OrderHandler(ApiHandler):
         self.order.total_sum = float(order_json.get("total_sum"))
         self.order.delivery_sum = int(order_json.get('delivery_sum', 0))
 
-        client = set_client_info(order_json.get('client'), self.order)
+        client = set_client_info(order_json.get('client'), self.request.headers, self.order)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
         self.order.client_id = client.key.id()
@@ -216,8 +216,7 @@ class ReturnOrderHandler(ApiHandler):
             now = datetime.utcnow()
             if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
                     order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace(),
-                                       with_push=False)
+                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace())
                 if success:
                     reason_id = self.request.get('reason_id')
                     if reason_id:
@@ -260,7 +259,7 @@ class CheckOrderHandler(ApiHandler):
     def post(self):
         logging.info(self.request.POST)
 
-        client_id = self.request.get_range('client_id')
+        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)

@@ -1,4 +1,5 @@
 # coding=utf-8
+from datetime import datetime
 import time
 import re
 
@@ -45,3 +46,10 @@ def get_separated_name_surname(name_and_surname):
         return values[0], ''
     else:
         return values[0], values[1]
+
+
+def parse_time_picker_value(time_picker_value):
+    try:
+        return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT)
+    except ValueError:
+        return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT + ' %p')

@@ -22,7 +22,7 @@
             {% for code in promo_codes %}
                 <tr>
                     <td>{{ code.group_id }}</td>
-                    <td>{{ code.key.id() }}</td>
+                    <td>{{ code.promo_code_key }}</td>
                     <td>{{ code.title }}</td>
                     <td>{{ code.message }}</td>
                     <td>{{ PROMO_CODE_KIND_MAP[code.kind] }}</td>
@@ -31,7 +31,7 @@
                     <td>{{ code.init_amount }}</td>
                     <td>{{ code.amount }}</td>
                     <td>
-                        <a href="{{ '/company/promo_code/activations?key=%s' % code.key.id() }}">Активации</a>
+                        <a href="{{ '/company/promo_code/activations?key=%s' % code.promo_code_key }}">Активации</a>
                     </td>
                 </tr>
             {% endfor %}

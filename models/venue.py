@@ -110,12 +110,14 @@ class DeliveryZone(ndb.Model):
     DISTRICT = 1
     ZONE = 2
     DEFAULT = 3
-    SEARCH_TYPES = (CITY, DISTRICT, ZONE, DEFAULT)
+    NEAREST = 4
+    SEARCH_TYPES = (CITY, DISTRICT, ZONE, DEFAULT, NEAREST)
     SEARCH_MAP = {
         CITY: u'По городу',
         DISTRICT: u'По району',
         ZONE: u'Собственная зона',
-        DEFAULT: u'По умолчанию'
+        DEFAULT: u'По умолчанию',
+        NEAREST: u'Ближайшая',
     }
     search_type = ndb.IntegerProperty(choices=SEARCH_TYPES, default=CITY)
     sequence_number = ndb.IntegerProperty()

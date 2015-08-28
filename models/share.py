@@ -10,6 +10,17 @@ from models.promo_code import PromoCode
 __author__ = 'dvpermyakov'
 
 
+class ChannelUrl(ndb.Model):
+    url = ndb.StringProperty(required=True)
+    channel = ndb.IntegerProperty(required=True)
+
+    def dict(self):
+        return {
+            'url': self.url,
+            'channel': self.channel
+        }
+
+
 class Share(ndb.Model):
     from methods.branch_io import FEATURE_CHOICES
 
@@ -22,7 +33,8 @@ class Share(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=ACTIVE)
-    urls = ndb.StringProperty(repeated=True)
+    channel_urls = ndb.LocalStructuredProperty(ChannelUrl, repeated=True)
+    promo_code = ndb.KeyProperty(kind=PromoCode)
 
     def deactivate(self):
         self.status = self.INACTIVE
@@ -60,7 +72,7 @@ class SharedPromo(ndb.Model):
             sender_order_id = "sender_referral_%s" % self.recipient.id()
             register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
                            order_id=sender_order_id)
-            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS, source=sender_order_id)
+            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS * 100, source=sender_order_id)
             sender = self.sender.get()
             text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
             header = u'Бонусы!'
@@ -69,7 +81,8 @@ class SharedPromo(ndb.Model):
             recipient_order_id = "recipient_referral_%s" % self.recipient.id()
             register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
                            order_id=recipient_order_id)
-            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS, source=recipient_order_id)
+            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS * 100,
+                    source=recipient_order_id)
             recipient = self.recipient.get()
             text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'
             header = u'Бонусы!'

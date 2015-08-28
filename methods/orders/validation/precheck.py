@@ -1,10 +1,13 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
+from google.appengine.ext.ndb import GeoPt
 from config import Config
+from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
-from methods.rendering import STR_DATETIME_FORMAT, latinize, get_phone, get_separated_name_surname
+from methods.rendering import latinize, get_phone, get_separated_name_surname, \
+    parse_time_picker_value
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
@@ -32,8 +35,8 @@ def check_items_and_gifts(order_json):
         return True
 
 
-def set_client_info(client_json, order=None):
-    client_id = int(client_json.get('id'))
+def set_client_info(client_json, headers, order=None):
+    client_id = int(client_json.get('id', 0)) or int(headers.get('Client-Id') or 0)
     if not client_id:
         return None
     client = Client.get_by_id(client_id)
@@ -44,6 +47,8 @@ def set_client_info(client_json, order=None):
     client.surname = surname
     client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
+    client.user_agent = headers['User-Agent']
+    client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
     for field in config.EXTRA_CLIENT_INFO_FIELDS:
@@ -95,8 +100,9 @@ def get_venue_and_zone_by_address(address):
         if address.get('coordinates'):
             if address['coordinates'].get('lat') and address['coordinates'].get('lon'):
                 has_coords = True
-        # case 1: get venue by city or polygons
         venues = Venue.query(Venue.active == True).fetch()
+        nearest_venues = []  # it is used for getting nearest venue if not found by city or polygons
+        # case 1: get venue by city or polygons
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
@@ -124,12 +130,23 @@ def get_venue_and_zone_by_address(address):
                                 return venue, zone
                         elif zone.search_type == DeliveryZone.DEFAULT:
                             return venue, zone
+                        elif zone.search_type == DeliveryZone.NEAREST:
+                            if has_coords:
+                                venue.distance = location.distance(
+                                    GeoPt(address['coordinates']['lat'], address['coordinates']['lon']), venue.coordinates)
+                                venue.zone = zone
+                                nearest_venues.append(venue)
+        # case 2: get nearest venue
+        if nearest_venues:
+            venue = sorted(nearest_venues, key=lambda venue: venue.distance)[0]
+            return venue, venue.zone
+
     if not address or\
             not address.get('coordinates') or\
             not address['coordinates'].get('lat') or\
             not address['coordinates'].get('lon') or\
             not area:
-        # case 2: get first venue with default flag
+        # case 3: get first venue with default flag
         venues = Venue.query(Venue.active == True, Venue.default == True).fetch()
         for venue in venues:
             for delivery in venue.delivery_types:
@@ -141,7 +158,7 @@ def get_venue_and_zone_by_address(address):
                         zone.found = False  # it is used for mark precise address receipt
                         if zone.status == STATUS_AVAILABLE:
                             return venue, zone
-        # case 3: get first venue
+        # case 4: get first venue
         venues = Venue.query(Venue.active == True).fetch()
         for venue in venues:
             for delivery in venue.delivery_types:
@@ -158,7 +175,7 @@ def get_venue_and_zone_by_address(address):
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
     if delivery_time_picker:
-        delivery_time_picker = datetime.strptime(delivery_time_picker, STR_DATETIME_FORMAT)
+        delivery_time_picker = parse_time_picker_value(delivery_time_picker)
         if venue and (not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS):
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 

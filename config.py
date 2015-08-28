@@ -20,7 +20,23 @@ TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
 EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 
+class Version(ndb.Model):
+    created = ndb.DateTimeProperty(required=True)
+    updated = ndb.DateTimeProperty(required=True)
+    number = ndb.IntegerProperty()
+    available = ndb.BooleanProperty(default=True)
+    force = ndb.BooleanProperty(default=False)
+
+    def dict(self):
+        return {
+            'text': u'Обновите приложение!',
+            'force': self.force
+        }
+
+
 class Config(ndb.Model):
+    VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
+
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
     
@@ -41,7 +57,16 @@ class Config(ndb.Model):
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
 
-    SEND_ERRORS_500 = ndb.BooleanProperty(indexed=False, default=False)
+    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=False)
+
+    SHARED_INVITATION_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
+    SHARED_GIFT_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
+
+    SHARED_INVITATION_ABOUT_TITLE = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_ABOUT_DESCRIPTION = ndb.StringProperty(indexed=False)
+
+    SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
+    SHARED_INVITATION_IMAGE = ndb.StringProperty(indexed=False)
 
     SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
     SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)

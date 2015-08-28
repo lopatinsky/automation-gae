@@ -10,5 +10,5 @@ class ClientHandler(ApiHandler):
             'phone': self.request.get('client_phone'),
             'email': self.request.get('client_email')
         }
-        set_client_info(client_json)
+        set_client_info(client_json, self.request.headers)
         self.render_json({})

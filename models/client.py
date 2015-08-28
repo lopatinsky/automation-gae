@@ -12,6 +12,7 @@ DEVICE_TYPE_MAP = {
 
 class Client(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
+    updated = ndb.DateTimeProperty(auto_now=True)
     user_agent = ndb.StringProperty(indexed=False)
     device_type = ndb.IntegerProperty(choices=DEVICE_CHOICES)
     tied_card = ndb.BooleanProperty(default=False)
@@ -22,9 +23,6 @@ class Client(ndb.Model):
     email = ndb.StringProperty()
 
     extra_data = ndb.JsonProperty()
-
-    name_confirmed = ndb.BooleanProperty(default=False)
-    name_for_sms = ndb.StringProperty(default='')
 
     paypal_refresh_token = ndb.StringProperty(indexed=False)
 

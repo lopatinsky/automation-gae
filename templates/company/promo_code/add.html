@@ -7,6 +7,10 @@
     {% include '/company/header.html' %}
     <form method="post">
         <label>
+            Ключ (случайно, если пусто)
+            <input type="text" name="key">
+        </label><br>
+        <label>
             Тип:
             <select name="kind">
                 {% for kind in kinds %}
@@ -35,6 +39,10 @@
         <label>
             Сообщение
             <input type="text" name="message">
+        </label><br>
+        <label>
+            Действует всегда (только для акций)
+            <input type="checkbox" name="persist">
         </label><br>
         <input type="submit">
         <a href="/company/promo_code/list">Назад</a>
