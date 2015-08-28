@@ -27,7 +27,7 @@ def resto_place_order(client, venue, order, payment_json, items_json):
         resto_client.resto_customer_id = resto_place_result['customer_id']
         resto_client.put()
         order.key = ndb.Key(Order, resto_place_result['order']['resto_id'])
-        order.number = resto_place_result['order']['number']
+        order.number = int(resto_place_result['order']['number'])
         order.status = NEW_ORDER
         order.item_details = get_order_position_details(item_dicts)
         order.put()
