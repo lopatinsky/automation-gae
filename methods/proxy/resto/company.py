@@ -1,4 +1,5 @@
 from datetime import time
+from google.appengine.api import memcache
 from models.proxy.resto import RestoCompany
 from models.schedule import Schedule, DaySchedule
 from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address
@@ -60,11 +61,22 @@ def _get_company_info():
     resto_company = RestoCompany.get()
     resto_company_info = get_resto_company_info(resto_company)
     resto_delivery_types = get_resto_delivery_types(resto_company)
-    schedule = __get_company_schedule(resto_company_info['schedule'])
-    delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
-                                                          resto_company_info['cities'],
-                                                          resto_company_info['min_order_sum'])
-    company_info_dict = __get_company_info_dict(resto_company_info)
+    schedule = memcache.get('schedule_%s' % resto_company.key.id())
+    if not schedule:
+        schedule = __get_company_schedule(resto_company_info['schedule'])
+        memcache.set('schedule_%s' % resto_company.key.id(), schedule, time=3600)
+    delivery_types = memcache.get('delivery_types_%s' % resto_company.key.id())
+    delivery_zones = memcache.get('delivery_zones_%s' % resto_company.key.id())
+    if not delivery_types or not delivery_zones:
+        delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
+                                                              resto_company_info['cities'],
+                                                              resto_company_info['min_order_sum'])
+        memcache.set('delivery_types_%s' % resto_company.key.id(), delivery_types, time=3600)
+        memcache.set('delivery_zones_%s' % resto_company.key.id(), delivery_zones, time=3600)
+    company_info_dict = memcache.get('company_info_%s' % resto_company.key.id())
+    if not company_info_dict:
+        company_info_dict = __get_company_info_dict(resto_company_info)
+        memcache.set('company_info_%s' % resto_company.key.id(), company_info_dict, time=3600)
     return schedule, delivery_types, delivery_zones, company_info_dict
 
 
