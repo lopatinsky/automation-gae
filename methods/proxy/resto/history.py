@@ -1,8 +1,11 @@
 from datetime import datetime
 from google.appengine.ext import ndb
+from methods.rendering import STR_DATETIME_FORMAT
 from models import Order, Address, MenuItem, GroupModifier
 from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails
+from models.payment_types import CASH_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany, RestoClient
+from models.venue import SELF, DELIVERY
 from requests import get_resto_history
 
 __author__ = 'dvpermyakov'
@@ -47,6 +50,9 @@ def get_orders(client):
             order.venue_id = resto_order['venue_id']
             order.total_sum = resto_order['sum']
             order.delivery_time = datetime.fromtimestamp(resto_order['date'])
+            order.delivery_time_str = order.delivery_time.strftime(STR_DATETIME_FORMAT)
+            order.payment_type_id = CASH_PAYMENT_TYPE  # todo: this is hardcoded
+            order.delivery_type = SELF if resto_order['self'] else DELIVERY
             order.item_details = [_get_item_details(resto_item) for resto_item in resto_order['items']]
             orders.append(order)
     return orders
