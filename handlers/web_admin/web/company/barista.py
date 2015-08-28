@@ -74,7 +74,7 @@ class ListAdmins(CompanyBaseHandler):
 class AutoCreateAdmins(CompanyBaseHandler):
     @company_user_required
     def get(self):
-        venues = Venue.query().fetch()
+        venues = Venue.fetch_venues()
         for venue in venues:
             admin = Admin.query(Admin.venue == venue.key).get()
             if admin:
