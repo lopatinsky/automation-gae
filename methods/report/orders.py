@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+import logging
 from config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
@@ -9,7 +10,7 @@ from models import Order, Client, Venue
 
 
 def _order_data(order):
-    venue = Venue.get_by_id(order.venue_id)
+    venue = Venue.get_by_id(int(order.venue_id))
     dct = {
         "order_id": order.key.id(),
         "comment": order.comment if order.comment else '',
@@ -97,7 +98,7 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
 
     query = Order.query(Order.date_created >= start, Order.date_created <= end)
     if venue_id:
-        query = query.filter(Order.venue_id == venue_id)
+        query = query.filter(Order.venue_id == str(venue_id))
     orders = query.fetch()
     order_dicts = [_order_data(order) for order in orders]
 

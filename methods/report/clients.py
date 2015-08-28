@@ -48,7 +48,7 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chose
         query = Order.query(Order.date_created >= suitable_date(chosen_day, chosen_month, chosen_year, True))
         query = query.filter(Order.date_created <= suitable_date(chosen_day, chosen_month, chosen_year, False))
     if venue_id != 0:
-        query = query.filter(Order.venue_id == venue_id)
+        query = query.filter(Order.venue_id == str(venue_id))
     query = query.filter(ndb.OR(Order.status == READY_ORDER,
                                 Order.status == CANCELED_BY_BARISTA_ORDER,
                                 Order.status == CANCELED_BY_CLIENT_ORDER))
