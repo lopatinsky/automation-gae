@@ -42,7 +42,7 @@ def _order_delivery_dict(order, client):
 
 def _update_order_info(orders):
     for order in orders:
-        hours_offset = Venue.get_by_id(order.venue_id).timezone_offset
+        hours_offset = Venue.get_by_id(int(order.venue_id)).timezone_offset
         if order.delivery_time:
             delivery_time_str = (order.delivery_time + timedelta(hours=hours_offset)).strftime("%Y-%m-%d %H:%M:%S")
         else:
