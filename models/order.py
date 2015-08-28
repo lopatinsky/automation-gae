@@ -255,7 +255,7 @@ class Order(ndb.Model):
         dct = self.history_dict()
         dct.update({
             "total_sum": self.total_sum,
-            "venue": Venue.get_by_id(self.venue_id).admin_dict(),
+            "venue": Venue.get_by_id(int(self.venue_id)).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": Client.get_by_id(self.client_id).dict(),
             "pan": self.pan,

@@ -37,7 +37,7 @@ class Admin(User):
     def query_orders(self, *args, **kwargs):
         from models.order import Order
         if self.venue:
-            return Order.query(Order.venue_id == self.venue.id(), *args, **kwargs)
+            return Order.query(Order.venue_id == str(self.venue.id()), *args, **kwargs)
         return Order.query(*args, **kwargs)
 
     def order_by_id(self, order_id):
@@ -45,7 +45,7 @@ class Admin(User):
         order = Order.get_by_id(order_id)
         if not order:
             return None
-        if self.venue and order.venue_id != self.venue.id():
+        if self.venue and order.venue_id != str(self.venue.id()):
             return None
         return order
 

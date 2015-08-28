@@ -13,7 +13,7 @@ class RevenueReportTodayHandler(AdminApiHandler):
         start = end.replace(hour=0, minute=0)
         if venue_key:
             orders = Order.query(Order.date_created > start, Order.date_created < end,
-                                 Order.venue_id == venue_key.id()).fetch()
+                                 Order.venue_id == str(venue_key.id())).fetch()
         else:
             orders = Order.query(Order.date_created > start, Order.date_created < end).fetch()
         orders = [order for order in orders if order.status == READY_ORDER]
@@ -27,7 +27,7 @@ class RevenueReportMonthHandler(AdminApiHandler):
     def get_orders(self, start, end, venue_key):
         if venue_key:
             orders = Order.query(Order.date_created > start, Order.date_created < end,
-                                 Order.venue_id == venue_key.id()).fetch()
+                                 Order.venue_id == str(venue_key.id())).fetch()
         else:
             orders = Order.query(Order.date_created > start, Order.date_created < end).fetch()
         orders = [order for order in orders if order.status == READY_ORDER]
