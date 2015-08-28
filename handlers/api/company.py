@@ -6,6 +6,7 @@ from config import config, Config
 from methods.rendering import latinize
 from methods.versions import is_available_version, get_version
 from models import STATUS_AVAILABLE, Venue
+from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY, DeliveryZone
 from models.specials import get_channels
 from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
@@ -57,7 +58,8 @@ class CompanyInfoHandler(ApiHandler):
             'new_version_popup': {
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
                 'version': get_version(self.request.headers.get('Version', 0)).dict()
-            }
+            },
+            'cancel_order': RestoCompany.get() is not None
         }
         response.update(config.get_company_dict())
         self.render_json(response)
