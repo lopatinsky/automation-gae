@@ -20,6 +20,7 @@
                 <th>Статус</th>
                 <th>Название</th>
                 <th>Адрес</th>
+                <th>Юрлицо</th>
                 <th>Часовой пояс</th>
                 <th>Телефоны</th>
                 <th>Почты</th>
@@ -39,6 +40,10 @@
                     </td>
                     <td rowspan="{{ height }}">
                         {{ venue.description }}
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {% set legal = venue.legal.get() %}
+                        {{ legal.person_ooo or legal.person_ip }}
                     </td>
                     <td rowspan="{{ height }}">
                         {{ '+%s (%s)' % (venue.timezone_offset, venue.timezone_name) }}

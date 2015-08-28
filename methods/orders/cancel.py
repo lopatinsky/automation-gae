@@ -19,7 +19,8 @@ __author__ = 'dvpermyakov'
 def cancel_order(order, status, namespace, comment=None):
     success = True
     if order.has_card_payment:
-        return_result = alfa_bank.reverse(order.payment_id)
+        legal = Venue.get_by_id(order.venue_id).legal.get()
+        return_result = alfa_bank.reverse(legal.alfa_login, legal.alfa_password, order.payment_id)
         success = str(return_result['errorCode']) == '0'
     elif order.has_paypal_payment:
         success, error = paypal.void(order.payment_id)

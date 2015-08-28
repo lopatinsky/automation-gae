@@ -50,11 +50,10 @@ def __post_request_alfa(api_path, params, deadline=30):
     return result
 
 
-def create(amount, order_number, return_url, client_id, page_view):
-    config = Config.get()
+def create(login, password, amount, order_number, return_url, client_id, page_view):
     p = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'amount': amount,
         'orderNumber': order_number,
         'returnUrl': return_url,
@@ -65,22 +64,20 @@ def create(amount, order_number, return_url, client_id, page_view):
     return result
 
 
-def check_status(order_id):
-    config = Config.get()
+def check_status(login, password, order_id):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'orderId': order_id
     }
     result = __post_request_alfa('/rest/getOrderStatus.do', params)
     return result
 
 
-def check_extended_status(order_id):
-    config = Config.get()
+def check_extended_status(login, password, order_id):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'orderId': order_id,
     }
     result_json = __post_request_alfa('/rest/getOrderStatusExtended.do', params)
@@ -95,22 +92,20 @@ def check_extended_status(order_id):
             'alfa_response': result_json}
 
 
-def reverse(order_id):
-    config = Config.get()
+def reverse(login, password, order_id):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'orderId': order_id
     }
     result = __post_request_alfa('/rest/reverse.do', params)
     return result
 
 
-def authorize(binding_id, order_id):
-    config = Config.get()
+def authorize(login, password, binding_id, order_id):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'mdOrder': order_id,
         'bindingId': binding_id
     }
@@ -118,11 +113,10 @@ def authorize(binding_id, order_id):
     return result
 
 
-def deposit(order_id, amount):
-    config = Config.get()
+def deposit(login, password, order_id, amount):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'orderId': order_id,
         'amount': amount
     }
@@ -130,30 +124,29 @@ def deposit(order_id, amount):
     return result
 
 
-def unbind_card(binding_id):
-    config = Config.get()
+def unbind_card(login, password, binding_id):
     params = {
-        'userName': config.ALFA_LOGIN,
-        'password': config.ALFA_PASSWORD,
+        'userName': login,
+        'password': password,
         'bindingId': binding_id
     }
     result = __post_request_alfa('/rest/unBindCard.do', params)
     return result
 
 
-def create_simple(amount, order_number, return_url, client_id):
-    result = create(amount, order_number, return_url, client_id, 'MOBILE')
+def create_simple(login, password, amount, order_number, return_url, client_id):
+    result = create(login, password, amount, order_number, return_url, client_id, 'MOBILE')
     if not _success(result):
         return False, _error_message(result)
     return True, result['orderId']
 
 
-def hold_and_check(payment_id, binding_id):
-    create_result = authorize(binding_id, payment_id)
+def hold_and_check(login, password, payment_id, binding_id):
+    create_result = authorize(login, password, binding_id, payment_id)
     if not _success(create_result):
         return False, _error_message(create_result)
 
-    check_result = check_extended_status(payment_id)['alfa_response']
+    check_result = check_extended_status(login, password, payment_id)['alfa_response']
     if not _success(check_result):
         return False, _error_message(check_result)
 

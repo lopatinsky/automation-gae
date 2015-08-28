@@ -140,7 +140,6 @@ app = WSGIApplication([
             Route('/register', api.PaymentRegisterHandler),
             Route('/status', api.PaymentStatusHandler),
             Route('/extended_status', api.PaymentExtendedStatusHandler),
-            Route('/payment_binding', api.PaymentBindingHandler),
             Route('/reverse', api.PaymentReverseHandler),
             Route('/payment_types', api.PaymentTypesHandler),
         ]),
@@ -380,6 +379,8 @@ app = WSGIApplication([
                 Route('/change_password', company_admin.ChangePasswordAdmin),
             ]),
         ]),
+
+        Route('/alfa_settings', company_admin.AlfaSettingsHandler),
     ]),
 
     Route('/wizard', wizard.WizardWebHandler),

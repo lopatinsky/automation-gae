@@ -6,6 +6,7 @@ from methods.auth import company_user_required
 from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, DeliveryZone
 from methods import geocoder
+from models.legal import LegalInfo
 from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY
 
@@ -24,7 +25,9 @@ class CreateVenueHandler(CompanyBaseHandler):
         if not address_str:
             self.redirect('/company/venues/map')
         else:
+            legals = LegalInfo.query().fetch()
             self.render('/venues/edit_venue.html', **{
+                'legals': legals,
                 'lat': lat,
                 'lon': lon,
                 'address': address_str
@@ -38,6 +41,7 @@ class CreateVenueHandler(CompanyBaseHandler):
         venue.phones = self.request.get('phones').split(',')
         venue.emails = self.request.get('emails').split(',')
         venue.coordinates = ndb.GeoPt(float(self.request.get('lat')), float(self.request.get('lon')))
+        venue.legal = LegalInfo.get_by_id(self.request.get_range('legal')).key
         venue.update_address()
         venue.put()
         self.redirect('/company/venues')
@@ -69,7 +73,8 @@ class EditVenueHandler(CompanyBaseHandler):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
             self.abort(404)
-        self.render('/venues/edit_venue.html', venue=venue)
+        legals = LegalInfo.query().fetch()
+        self.render('/venues/edit_venue.html', venue=venue, legals=legals)
 
     @company_user_required
     def post(self, venue_id):
@@ -80,8 +85,10 @@ class EditVenueHandler(CompanyBaseHandler):
         venue.description = self.request.get('description')
         venue.phones = self.request.get('phones').split(',')
         venue.emails = self.request.get('emails').split(',')
+        venue.legal = LegalInfo.get_by_id(self.request.get('legal')).key
         venue.put()
-        self.render('/venues/edit_venue.html', venue=venue, success=True)
+        legals = LegalInfo.query().fetch()
+        self.render('/venues/edit_venue.html', venue=venue, success=True, legals=legals)
 
 
 class VenueListHandler(CompanyBaseHandler):
