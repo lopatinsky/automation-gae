@@ -10,12 +10,12 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps');
 
 var path = {
-    STYLES: ['node_modules/react-spinner/react-spinner.css', 'static/demo/src/styles/*.*'],
-    STYLES_OUT: 'static/demo/dist/styles',
-    FONTS: 'node_modules/bootstrap/fonts/*.*',
-    FONTS_OUT: 'static/demo/dist/fonts',
-    SCRIPT_MAIN: 'static/demo/src/scripts/main',
-    SCRIPTS_OUT: 'static/demo/dist/scripts'
+    STYLES: ['../../node_modules/react-spinner/react-spinner.css', 'styles/*.*'],
+    STYLES_OUT: '../../static/demo/styles',
+    FONTS: '../../node_modules/bootstrap/fonts/*.*',
+    FONTS_OUT: '../../static/demo/fonts',
+    SCRIPT_MAIN: 'scripts/main',
+    SCRIPTS_OUT: '../../static/demo/scripts'
 };
 
 gulp.task('styles', function() {
