@@ -28,14 +28,14 @@ def card_payment_performing(payment_json, amount, order):
 
     legal = Venue.get_by_id(int(order.venue_id)).legal.get()
 
-    success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_pasword, amount, order.key.id(), return_url,
+    success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order.key.id(), return_url,
                                               client_id)
     if not success:
         return success, result
 
     order.payment_id = result
     order.put()
-    success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_pasword, order.payment_id, binding_id)
+    success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_password, order.payment_id, binding_id)
     if not success:
         error = u"Не удалось произвести оплату. %s" % error
     return success, error
