@@ -85,7 +85,7 @@ class EditVenueHandler(CompanyBaseHandler):
         venue.description = self.request.get('description')
         venue.phones = self.request.get('phones').split(',')
         venue.emails = self.request.get('emails').split(',')
-        venue.legal = LegalInfo.get_by_id(self.request.get('legal')).key
+        venue.legal = LegalInfo.get_by_id(int(self.request.get('legal'))).key
         venue.put()
         legals = LegalInfo.query().fetch()
         self.render('/venues/edit_venue.html', venue=venue, success=True, legals=legals)
