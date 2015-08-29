@@ -10,7 +10,7 @@ __author__ = 'dvpermyakov'
 def postpone_order(order, minutes, namespace):
     order.delivery_time += timedelta(minutes=minutes)
 
-    venue = Venue.get_by_id(order.venue_id)
+    venue = Venue.get_by_id(int(order.venue_id))
     local_delivery_time = order.delivery_time + timedelta(hours=venue.timezone_offset)
 
     delivery_slot = None
