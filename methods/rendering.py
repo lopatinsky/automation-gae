@@ -9,6 +9,8 @@ STR_TIME_FORMAT = "%H:%M"
 
 HTML_STR_TIME_FORMAT = "%Y-%m-%dT%H:%M"
 
+AM_PM_STR_DATETIME_FORMAT = "%Y-%m-%d %I:%M:%S %p"
+
 
 def timestamp(datetime_object):
     return int(time.mktime(datetime_object.timetuple()))
@@ -52,4 +54,4 @@ def parse_time_picker_value(time_picker_value):
     try:
         return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT)
     except ValueError:
-        return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT + ' %p')
+        return datetime.strptime(time_picker_value, AM_PM_STR_DATETIME_FORMAT)
