@@ -50,7 +50,8 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time):
         'valid': not resto_validation['error'],
         'error': resto_validation['description'] if resto_validation['error'] else None,
         'total_sum': total_sum,
-        'item_dicts': item_dicts
+        'item_dicts': item_dicts,
+        'max_wallet_payment': resto_validation['max_bonus_payment']
     }
     updated_value = {}
     response = get_response_dict(**required_value)

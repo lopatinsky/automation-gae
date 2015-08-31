@@ -113,7 +113,7 @@ def post_resto_place_order(resto_venue, resto_customer, auto_client, order, item
     path = '/api/venue/%s/order/new' % resto_venue.key.id()
     payload = {
         'custom_data': '',
-        'bonus_sum': 0,
+        'bonus_sum': order.wallet_payment,
         'discount_sum': 0,
         'customer_id': resto_customer.resto_customer_id,
         'address': json.dumps(address),
