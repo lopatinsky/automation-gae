@@ -28,7 +28,7 @@ def get_payment_types():
             payment_type.title = resto_payment_type['name']
             payment_type.status = int(resto_payment_type['available'])
             payment_types.append(payment_type)
-        memcache.set('menu_%s' % resto_company.key.id(), payment_types, time=3600)
+        memcache.set('payment_types_%s' % resto_company.key.id(), payment_types, time=3600)
     return payment_types
 
 
