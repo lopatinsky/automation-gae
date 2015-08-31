@@ -122,7 +122,9 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
         if config.APP_KIND == RESTO_APP:
-            success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'])
+            success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'],
+                                                  order_json.get('order_gifts', []),
+                                                  order_json.get('cancelled_order_gifts', []))
             if success:
                 return self.render_json(response)
             else:
@@ -335,7 +337,7 @@ class CheckOrderHandler(ApiHandler):
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
                                     address, delivery_time, delivery_slot, delivery_type, delivery_zone)
         elif config.APP_KIND == RESTO_APP:
-            result = resto_validate_order(client, items, venue, delivery_time)
+            result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts)
         else:
             result = {}
         self.render_json(result)

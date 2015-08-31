@@ -12,14 +12,15 @@ from requests import post_resto_place_order
 __author__ = 'dvpermyakov'
 
 
-def resto_place_order(client, venue, order, payment_json, items_json):
+def resto_place_order(client, venue, order, payment_json, items_json, order_gifts, cancelled_order_gifts):
     resto_client = RestoClient.get(client)
     resto_address_dict = get_resto_address_dict(order.address)
     items, item_dicts = get_item_and_item_dicts(items_json)
     resto_item_dicts = get_resto_item_dicts(items_json)
+    resto_gift_dicts = get_resto_item_dicts(order_gifts)
     order.init_total_sum = get_init_total_sum(items)
-    resto_place_result = post_resto_place_order(venue, resto_client, client, order, resto_item_dicts, payment_json,
-                                                resto_address_dict)
+    resto_place_result = post_resto_place_order(venue, resto_client, client, order, resto_item_dicts, resto_gift_dicts,
+                                                payment_json, resto_address_dict)
     if resto_place_result.get('error') and resto_place_result['error'] == True:
         success = False
         response = {
