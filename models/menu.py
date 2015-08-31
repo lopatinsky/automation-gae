@@ -102,7 +102,7 @@ class GroupModifierChoice(ndb.Model):
 class GroupModifier(ndb.Model):
     title = ndb.StringProperty(required=True)
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
-    required = ndb.BooleanProperty(default=False)
+    required = ndb.BooleanProperty(default=True)
     sequence_number = ndb.IntegerProperty()
 
     @classmethod
