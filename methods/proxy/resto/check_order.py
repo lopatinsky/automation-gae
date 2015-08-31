@@ -18,7 +18,7 @@ def get_resto_address_dict(address):
     }
 
 
-def _get_init_total_sum(items):
+def get_init_total_sum(items):
     total_sum = 0
     for item in items:
         total_sum += item.total_price
@@ -42,14 +42,14 @@ def get_resto_item_dicts(init_item_dicts):
 
 def resto_validate_order(client, init_item_dicts, venue, delivery_time):
     items, item_dicts = get_item_and_item_dicts(init_item_dicts)
-    total_sum = _get_init_total_sum(items)
+    total_sum = get_init_total_sum(items)
     resto_client = RestoClient.get(client)
     resto_item_dicts = get_resto_item_dicts(init_item_dicts)
     resto_validation = post_resto_check_order(venue, resto_item_dicts, client, resto_client, total_sum, delivery_time)
     required_value = {
         'valid': not resto_validation['error'],
         'error': resto_validation['description'] if resto_validation['error'] else None,
-        'total_sum': total_sum,
+        'total_sum': total_sum - resto_validation['order_discounts'],
         'item_dicts': item_dicts,
         'max_wallet_payment': resto_validation['max_bonus_payment']
     }
