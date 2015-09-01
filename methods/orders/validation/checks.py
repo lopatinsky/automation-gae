@@ -1,7 +1,7 @@
 # coding=utf-8
 from datetime import timedelta, datetime
 import logging
-from config import config, VENUE, BAR
+from config import config, VENUE, BAR, Config
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.working_hours import check_with_errors
@@ -299,4 +299,11 @@ def check_address(delivery_type, address):
                 return False, error
         if not address['flat']:
             return False, u'Не выбрана квартира'
+    return True, None
+
+
+def check_client_info(client, delivery_type):
+    if config.COMPULSORY_DELIVERY_EMAIL_VALIDATES:
+        if delivery_type == DELIVERY and not client.email:
+            return False, u'Не введен email'
     return True, None

@@ -109,6 +109,7 @@ class Config(ndb.Model):
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
+    COMPULSORY_DELIVERY_EMAIL_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
 

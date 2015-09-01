@@ -11,7 +11,8 @@ from models import MenuItem, SingleModifier, GroupModifier, \
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
-    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
+    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
+    check_client_info
 from models.venue import DELIVERY
 
 
@@ -325,6 +326,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         return send_error(error)
     valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
                                        total_sum_without_promos)
+    if not valid:
+        return send_error(error)
+    valid, error = check_client_info(client, delivery_type)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
