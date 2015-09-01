@@ -83,7 +83,7 @@ def _get_collection(params):
     except Exception as e:
         logging.warning(str(e))
         response = None
-    if response:
+    if response and response.get('response'):
         return response['response']['GeoObjectCollection']['featureMember']
     else:
         return None
