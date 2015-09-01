@@ -49,6 +49,9 @@ class CompanyInfoHandler(ApiHandler):
             'colors': {
                 'action': config.ACTION_COLOR,
             },
+            'wallet': {
+                'enable': config.WALLET_ENABLED,
+            },
             'share_gift': {
                 'enabled': config.SHARED_GIFT_ENABLED,
             },
