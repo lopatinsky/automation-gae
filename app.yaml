@@ -62,3 +62,4 @@ skip_files:
 - ^(.*/)?.*/RCS/.*$
 - ^(.*/)?\..*$
 - ^node_modules/.*
+- ^frontend-src/.*
