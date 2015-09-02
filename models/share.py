@@ -182,10 +182,13 @@ class SharedGift(ndb.Model):
     def dict(self):
         from models import Client
         from methods.rendering import timestamp
-        item_dict = self.share_item.get().dict()
-        item_dict.update({
-            'gift_status': self.CHOICES_MAP[self.status]
-        })
+        item_dicts = []
+        for share_item in self.share_items:
+            item_dict = share_item.get().dict()
+            item_dict.update({
+                'gift_status': self.CHOICES_MAP[self.status]
+            })
+            item_dicts.append(item_dict)
         recipient_dict = Client.get_by_id(self.recipient_id).dict()
         recipient_dict.update({
             'initial_name': self.recipient_name,
@@ -193,7 +196,7 @@ class SharedGift(ndb.Model):
         })
         sender_dict = Client.get_by_id(self.client_id).dict()
         return {
-            'item': item_dict,
+            'items': item_dicts,
             'recipient': recipient_dict,
             'sender': sender_dict,
             'created': timestamp(self.created),
