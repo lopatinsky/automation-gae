@@ -70,19 +70,23 @@ class SharedPromo(ndb.Model):
         config = Config.get()
         if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS or config.SHARED_INVITATION_SENDER_WALLET_POINTS:
             sender_order_id = "sender_referral_%s" % self.recipient.id()
-            register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
-                           order_id=sender_order_id)
-            deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS * 100, source=sender_order_id)
+            if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS:
+                register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
+                               order_id=sender_order_id)
+            if config.SHARED_INVITATION_SENDER_WALLET_POINTS:
+                deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS * 100, source=sender_order_id)
             sender = self.sender.get()
             text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
             header = u'Бонусы!'
             send_client_push(sender, text, header, namespace)
         if config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS or config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS:
             recipient_order_id = "recipient_referral_%s" % self.recipient.id()
-            register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
-                           order_id=recipient_order_id)
-            deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS * 100,
-                    source=recipient_order_id)
+            if config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS:
+                register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
+                               order_id=recipient_order_id)
+            if config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS:
+                deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS * 100,
+                        source=recipient_order_id)
             recipient = self.recipient.get()
             text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'
             header = u'Бонусы!'
