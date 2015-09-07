@@ -25,6 +25,14 @@ var targets = {
         FONTS_OUT: 'static/barista/fonts',
         SCRIPT_MAIN: 'frontend-src/barista/scripts/main',
         SCRIPTS_OUT: 'static/barista/scripts'
+    },
+    app: {
+        STYLES: 'frontend-src/app/styles/*.*',
+        STYLES_OUT: 'static/app/styles',
+        FONTS: [],
+        FONTS_OUT: 'static/app/fonts',
+        SCRIPT_MAIN: 'frontend-src/app/scripts/main',
+        SCRIPTS_OUT: 'static/app/scripts'
     }
 };
 

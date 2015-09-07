@@ -4,6 +4,7 @@ from webapp2_extras.routes import PathPrefixRoute
 
 from handlers.api.user import admin
 from handlers import wizard, web_admin
+from handlers import web_app
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -383,6 +384,8 @@ app = WSGIApplication([
     ]),
 
     Route('/barista', web_admin.WebBaristaHandler),
+
+    Route('/app', web_app.WebAppHandler),
 
     Route('/wizard', wizard.WizardWebHandler),
     Route('/wizard/api/create', wizard.WizardCreateCompanyHandler),
