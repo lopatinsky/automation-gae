@@ -1,15 +1,22 @@
 import React from 'react';
-import { Tabs, Tab } from 'material-ui';
+import { Tabs } from 'material-ui';
+import { MenuCategory } from '../components'
 
 const MenuScreen = React.createClass({
     render() {
-        var category_names = ["Первая", "Вторая", "Третья"];
-        var categories = category_names.map(function(name) {
-            return (
-                <Tab label={ name }>
-                    Контент
-                </Tab>
-            );
+        var categories_objs = [
+            {
+                name: 'First'
+            },
+            {
+                name: 'Second'
+            },
+            {
+                name: 'Third'
+            }
+        ];
+        var categories = categories_objs.map(function(category) {
+            return <MenuCategory category={category} />
         });
         return (
             <Tabs>
