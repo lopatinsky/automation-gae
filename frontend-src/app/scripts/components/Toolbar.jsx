@@ -1,11 +1,11 @@
 import React from 'react';
-import { Nav } from '../components';
+import { AppBar } from 'material-ui';
 
 const Toolbar = React.createClass({
     render() {
         return (
             <AppBar
-                title="Title"
+                title={this.props.title}
                 iconClassNameRight="muidocs-icon-navigation-expand-more" />
         );
     }
