@@ -2,6 +2,7 @@
 import threading
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
+from webapp2 import cached_property
 
 OTHER = -1
 VENUE = 0
@@ -39,7 +40,7 @@ class Version(ndb.Model):
 
 
 class Config(ndb.Model):
-    @property
+    @cached_property
     def APP_KIND(self):
         from models.proxy.resto import RestoCompany
         if RestoCompany.get():
