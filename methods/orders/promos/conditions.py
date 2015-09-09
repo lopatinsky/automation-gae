@@ -139,7 +139,7 @@ def check_promo_code(condition, client, order):
 
 
 def check_order_number(condition, client):
-    orders = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES).fetch())
+    orders = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).fetch()
     if (len(orders) + 1) % condition.value == 0:
         return True
     else:

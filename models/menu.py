@@ -188,6 +188,16 @@ class GroupModifier(ndb.Model):
     def dict(self, product=None):
         choices = [choice for choice in self.choices
                    if product is None or choice.choice_id not in product.group_choice_restrictions]
+        if self.required and choices:
+            found = False
+            suit_choice = choices[0]
+            for choice in choices:
+                if choice.default:
+                    found = True
+                if suit_choice.price > choice.price:
+                    suit_choice = choice
+            if not found:
+                suit_choice.default = True
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
