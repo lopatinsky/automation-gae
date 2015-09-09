@@ -7,7 +7,7 @@ from conditions import check_condition_by_value, check_first_order, check_condit
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
-    return_success
+    return_success, set_cash_gift_point
 
 
 class OutcomeResult:
@@ -127,6 +127,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return add_marked_order_gift(response, items, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
     elif outcome.method == PromoOutcome.EMPTY:
         return return_success(response)
+    elif outcome.method == PromoOutcome.CASH_ACCUMULATE_GIFT_POINT:
+        return set_cash_gift_point(response, outcome, _get_initial_total_sum(items), order)
     else:
         response.success = True
         return response

@@ -60,9 +60,11 @@ class PromoOutcome(ndb.Model):
     REMOVE_PERSISTENT_MARK = 12
     MARKED_ORDER_GIFT = 13
     EMPTY = 14
+    CASH_ACCUMULATE_GIFT_POINT = 15
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
-               PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY)
+               PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY,
+               CASH_ACCUMULATE_GIFT_POINT)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -226,5 +228,6 @@ OUTCOME_MAP = {
     PromoOutcome.SET_PERSISTENT_MARK: u'Установить метку (метка)',
     PromoOutcome.REMOVE_PERSISTENT_MARK: u'Удалить метку (метка)',
     PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)',
-    PromoOutcome.EMPTY: u'Выводить сообщение'
+    PromoOutcome.EMPTY: u'Выводить сообщение',
+    PromoOutcome.CASH_ACCUMULATE_GIFT_POINT: u'Баллы за каждые N у.е в заказе'
 }
