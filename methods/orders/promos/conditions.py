@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from methods import working_hours
-from models.order import Order, READY_ORDER
+from models.order import Order
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
@@ -139,7 +139,7 @@ def check_promo_code(condition, client, order):
 
 
 def check_order_number(condition, client):
-    orders = Order.query(Order.client_id == client.key.id(), Order.status == READY_ORDER).fetch()
+    orders = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES).fetch())
     if (len(orders) + 1) % condition.value == 0:
         return True
     else:
