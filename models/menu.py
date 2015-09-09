@@ -195,7 +195,7 @@ class GroupModifier(ndb.Model):
             'order': self.sequence_number,
             'choices': [
                 {
-                    'default': choice.default,
+                    'default': choice.default if choice.default else None,
                     'title': choice.title,
                     'price': float(choice.price) / 100.0,  # в рублях
                     'id': str(choice.choice_id) if choice.choice_id else choice.choice_id_str,
