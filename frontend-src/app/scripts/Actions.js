@@ -8,7 +8,7 @@ const Actions = {
 
     loadMenu() {
          request
-            .post('/api/menu')
+            .get('/api/menu')
             .end((err, res) => {
                 if (res.status == 200) {
                     AppDispatcher.dispatch({
@@ -29,3 +29,5 @@ const Actions = {
             });
     }
 };
+
+export default Actions;
