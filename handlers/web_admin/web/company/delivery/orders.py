@@ -76,7 +76,7 @@ def order_items_values(order):
         for modifier_dict in item_dict['single_modifiers']:
             modifier = SingleModifier.get_by_id(int(modifier_dict['id']))
             modifier.amount = modifier_dict['quantity']
-            item_obj.total_float_price += modifier.float_price * modifier.amount
+            item_obj.total_float_price += modifier.float_price * modifier.amount * item_obj.amount
             item_obj.modifiers.append(modifier)
         for modifier_dict in item_dict['group_modifiers']:
             modifier = GroupModifier.get_by_id(int(modifier_dict['id']))
