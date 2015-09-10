@@ -42,8 +42,8 @@
                         {{ venue.description }}
                     </td>
                     <td rowspan="{{ height }}">
-                        {% set legal = venue.legal.get() %}
-                        {{ legal.person_ooo or legal.person_ip }}
+                        {% set legal = venue.legal.get() if venue.legal else None %}
+                        {{ (legal.person_ooo or legal.person_ip) if legal else '' }}
                     </td>
                     <td rowspan="{{ height }}">
                         {{ '+%s (%s)' % (venue.timezone_offset, venue.timezone_name) }}

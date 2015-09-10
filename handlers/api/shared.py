@@ -39,6 +39,10 @@ class GetInvitationUrlHandler(ApiHandler):
         client = Client.get_by_id(client_id)
         if not client:
             self.abort(400)
+
+        config = Config.get()
+        if not config.SHARED_INVITATION_ENABLED:
+            self.abort(403)
         share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
                             Share.share_type == branch_io.INVITATION).get()
         if not share:
@@ -62,7 +66,6 @@ class GetInvitationUrlHandler(ApiHandler):
             share.promo_code = promo_code.key
             share.put()
 
-        config = Config.get()
         self.render_json({
             'text': config.SHARED_INVITATION_TEXT,
             'urls': [channel_url.dict() for channel_url in share.channel_urls],

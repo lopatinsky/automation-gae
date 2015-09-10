@@ -24,7 +24,10 @@
     <p>
         <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
         <b>Телефон:</b> {{ order.client.tel }}<br>
-        <b>Комментарий</b> {{ order.comment }}
+        {% for key in order.client.extra_data %}
+            <b>{{ key }}:</b> {{ order.client.extra_data[key] }}<br>
+        {% endfor %}
+        <b>Комментарий:</b> {{ order.comment }}
     </p>
     {% if venue and delivery_type_str %}
         <p>

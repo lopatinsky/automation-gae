@@ -11,6 +11,7 @@ from google.appengine.ext.ndb import GeoPt
 from config import config, AUTO_APP, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
+from methods.emails.admins import send_error
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj
 from methods.orders.validation.validation import validate_order
@@ -122,7 +123,9 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
         if config.APP_KIND == RESTO_APP:
-            success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'])
+            success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'],
+                                                  order_json.get('order_gifts', []),
+                                                  order_json.get('cancelled_order_gifts', []))
             if success:
                 return self.render_json(response)
             else:
@@ -313,6 +316,8 @@ class CheckOrderHandler(ApiHandler):
 
         delivery_time_minutes = self.request.get('delivery_time')     # used for old versions todo: remove
         if delivery_time_minutes:                                     # used for old versions todo: remove
+            send_error('minutes', 'delivery_time field in check order',
+                       'The field is invoked in %s' % namespace_manager.get_namespace())
             delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
         delivery_time_picker = self.request.get('time_picker_value')
 
@@ -335,7 +340,7 @@ class CheckOrderHandler(ApiHandler):
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
                                     address, delivery_time, delivery_slot, delivery_type, delivery_zone)
         elif config.APP_KIND == RESTO_APP:
-            result = resto_validate_order(client, items, venue, delivery_time)
+            result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts)
         else:
             result = {}
         self.render_json(result)

@@ -270,3 +270,12 @@ def add_marked_order_gift(response, item_dicts, new_order_gift_dicts, order_gift
 def return_success(response):
     response.success = True
     return response
+
+
+def set_cash_gift_point(response, outcome, init_total_sum, order):
+    if order:
+        points = init_total_sum / outcome.value
+        order.points_details.append(GiftPointsDetails(points=points))
+        order.put()
+    response.success = True
+    return response

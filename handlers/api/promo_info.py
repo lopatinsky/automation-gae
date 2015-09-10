@@ -20,9 +20,6 @@ class PromoInfoHandler(ApiHandler):
             client = Client.get_by_id(client_id)
             if not client:
                 self.abort(400)
-            share_gifts = [gift.dict() for gift in SharedGift.query(SharedGift.recipient_id == client_id).fetch()]
-        else:
-            share_gifts = []
         gift_items = [gift.dict() for gift in sorted(GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch(),
                                                      key=lambda item: item.points)]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
@@ -49,8 +46,7 @@ class PromoInfoHandler(ApiHandler):
                 'text': self.BONUS_TEXT
             },
             'shares': {
-                'items': share_items,
-                'gifts': share_gifts
+                'items': share_items
             }
         })
 

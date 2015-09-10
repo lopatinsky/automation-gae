@@ -2,6 +2,7 @@
 import threading
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
+from webapp2 import cached_property
 
 OTHER = -1
 VENUE = 0
@@ -39,7 +40,7 @@ class Version(ndb.Model):
 
 
 class Config(ndb.Model):
-    @property
+    @cached_property
     def APP_KIND(self):
         from models.proxy.resto import RestoCompany
         if RestoCompany.get():
@@ -109,6 +110,7 @@ class Config(ndb.Model):
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
+    COMPULSORY_DELIVERY_EMAIL_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
 

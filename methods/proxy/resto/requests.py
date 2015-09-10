@@ -107,14 +107,15 @@ def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, t
     return _post_request(path, payload=payload)
 
 
-def post_resto_place_order(resto_venue, resto_customer, auto_client, order, items, payment_dict, address):
+def post_resto_place_order(resto_venue, resto_customer, auto_client, order, items, gifts, payment_dict, address):
     from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
     from methods.proxy.resto.payment_types import REVERSE_PAYMENT_TYPE_MAP
     path = '/api/venue/%s/order/new' % resto_venue.key.id()
     payload = {
         'custom_data': '',
-        'bonus_sum': 0,
-        'discount_sum': 0,
+        'bonus_sum': order.wallet_payment,
+        'discount_sum': order.init_total_sum - order.total_sum,
+        'gifts': json.dumps(gifts),
         'customer_id': resto_customer.resto_customer_id,
         'address': json.dumps(address),
         'comment': order.comment,
@@ -125,7 +126,7 @@ def post_resto_place_order(resto_venue, resto_customer, auto_client, order, item
         'date': timestamp(order.delivery_time),
         'paymentType': REVERSE_PAYMENT_TYPE_MAP[order.payment_type_id],
         'items': json.dumps(items),
-        'sum': order.total_sum,
+        'sum': order.init_total_sum,
         'deliveryType': REVERSE_DELIVERY_TYPE_MAP[order.delivery_type]
     }
     return _post_request(path, payload=payload)

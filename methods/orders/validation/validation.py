@@ -11,7 +11,8 @@ from models import MenuItem, SingleModifier, GroupModifier, \
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
-    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address
+    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
+    check_client_info
 from models.venue import DELIVERY
 
 
@@ -270,8 +271,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
         logging.warning('Sending error: %s' % error)
-        return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gifts,
-                                 cancelled_order_gifts, shared_gift_dicts, error)
+        return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gift_dicts,
+                                 cancelled_order_gift_dicts, shared_gift_dicts, error)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
@@ -325,6 +326,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         return send_error(error)
     valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
                                        total_sum_without_promos)
+    if not valid:
+        return send_error(error)
+    valid, error = check_client_info(client, delivery_type)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)

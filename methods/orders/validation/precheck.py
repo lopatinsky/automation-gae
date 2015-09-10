@@ -101,8 +101,8 @@ def get_venue_and_zone_by_address(address):
             if address['coordinates'].get('lat') and address['coordinates'].get('lon'):
                 has_coords = True
         venues = Venue.fetch_venues(Venue.active == True)
-        nearest_venues = []  # it is used for getting nearest venue if not found by city or polygons
-        # case 1: get venue by city or polygons
+        nearest_venues = []  # it is used for getting nearest venue if zone is not found
+        # case 1: get venue by polygons
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
@@ -110,11 +110,27 @@ def get_venue_and_zone_by_address(address):
                                        key=lambda zone: zone.sequence_number):
                         if zone.status == STATUS_UNAVAILABLE:
                             continue
-                        zone.found = True  # it is used for mark precise address receipt
-                        if zone.search_type == DeliveryZone.CITY:
-                            if address['address']['city'] == zone.address.city:
+                        zone.found = True
+                        if zone.search_type == DeliveryZone.ZONE:
+                            if has_coords and zone.is_included(address):
                                 return venue, zone
-                        elif zone.search_type == DeliveryZone.DISTRICT:
+                        elif zone.search_type == DeliveryZone.NEAREST:
+                            if has_coords:
+                                venue.distance = location.distance(
+                                    GeoPt(address['coordinates']['lat'], address['coordinates']['lon']), venue.coordinates)
+                                venue.zone = zone
+                                nearest_venues.append(venue)
+
+        # case 2: get venue by district
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
+                        zone.found = True
+                        if zone.search_type == DeliveryZone.DISTRICT:
                             if has_coords and zone.address.area:
                                 if not area:
                                     candidates = get_areas_by_coordinates(address['coordinates']['lat'],
@@ -125,18 +141,33 @@ def get_venue_and_zone_by_address(address):
                                         area = u'Not found'
                                 if zone.address.area == area:
                                     return venue, zone
-                        elif zone.search_type == DeliveryZone.ZONE:
-                            if has_coords and zone.is_included(address):
+
+        # case 3: get venue by city
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
+                        zone.found = True
+                        if zone.search_type == DeliveryZone.CITY:
+                            if address['address']['city'] == zone.address.city:
                                 return venue, zone
-                        elif zone.search_type == DeliveryZone.DEFAULT:
+
+        # case 4: get venue by default
+        for venue in venues:
+            for delivery in venue.delivery_types:
+                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
+                    for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                       key=lambda zone: zone.sequence_number):
+                        if zone.status == STATUS_UNAVAILABLE:
+                            continue
+                        zone.found = False
+                        if zone.search_type == DeliveryZone.DEFAULT:
                             return venue, zone
-                        elif zone.search_type == DeliveryZone.NEAREST:
-                            if has_coords:
-                                venue.distance = location.distance(
-                                    GeoPt(address['coordinates']['lat'], address['coordinates']['lon']), venue.coordinates)
-                                venue.zone = zone
-                                nearest_venues.append(venue)
-        # case 2: get nearest venue
+
+        # case 5: get nearest venue
         if nearest_venues:
             venue = sorted(nearest_venues, key=lambda venue: venue.distance)[0]
             return venue, venue.zone
@@ -146,7 +177,7 @@ def get_venue_and_zone_by_address(address):
             not address['coordinates'].get('lat') or\
             not address['coordinates'].get('lon') or\
             not area:
-        # case 3: get first venue with default flag
+        # case 6: get first venue with default flag
         venues = Venue.fetch_venues(Venue.active == True, Venue.default == True)
         for venue in venues:
             for delivery in venue.delivery_types:
@@ -158,7 +189,7 @@ def get_venue_and_zone_by_address(address):
                         zone.found = False  # it is used for mark precise address receipt
                         if zone.status == STATUS_AVAILABLE:
                             return venue, zone
-        # case 4: get first venue
+        # case 7: get first venue
         venues = Venue.fetch_venues(Venue.active == True)
         for venue in venues:
             for delivery in venue.delivery_types:

@@ -230,7 +230,6 @@ class Venue(ndb.Model):
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     schedule = ndb.LocalStructuredProperty(Schedule)
-    takeout_only = ndb.BooleanProperty(indexed=False, default=False)  # todo: need to remove it
     delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phones = ndb.StringProperty(repeated=True)  # use for sending sms
     emails = ndb.StringProperty(repeated=True)  # use for sending email
@@ -306,7 +305,6 @@ class Venue(ndb.Model):
             'lon': self.coordinates.lon,
             'coordinates': str(self.coordinates),
             'is_open': self.is_open(),
-            'takeout_only': self.takeout_only,
             'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
             'schedule': self.schedule.dict() if self.schedule else []
         }

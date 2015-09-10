@@ -33,7 +33,10 @@ def _parse_collection(collection, kind=HOUSE, city_request=None):
             continue
         if not country.get('AdministrativeArea'):
             continue
-        address = country['AdministrativeArea']['SubAdministrativeArea']['Locality']
+        area = country['AdministrativeArea']['SubAdministrativeArea']
+        if area.get('SubAdministrativeArea'):
+            area = area['SubAdministrativeArea']
+        address = area['Locality']
         city = address.get('LocalityName')
         if city_request and city != city_request:
             continue
@@ -83,7 +86,7 @@ def _get_collection(params):
     except Exception as e:
         logging.warning(str(e))
         response = None
-    if response:
+    if response and response.get('response'):
         return response['response']['GeoObjectCollection']['featureMember']
     else:
         return None
