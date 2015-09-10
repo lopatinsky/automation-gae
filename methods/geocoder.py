@@ -33,7 +33,10 @@ def _parse_collection(collection, kind=HOUSE, city_request=None):
             continue
         if not country.get('AdministrativeArea'):
             continue
-        address = country['AdministrativeArea']['SubAdministrativeArea']['Locality']
+        area = country['AdministrativeArea']['SubAdministrativeArea']
+        if area.get('SubAdministrativeArea'):
+            area = area['SubAdministrativeArea']
+        address = area['Locality']
         city = address.get('LocalityName')
         if city_request and city != city_request:
             continue
