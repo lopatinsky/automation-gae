@@ -17,13 +17,18 @@ const MainView = React.createClass({
         }
     },
 
+    _updateInterval: null,
+
     componentDidMount() {
         AuthStore.addChangeListener(this._onAuthStoreChange);
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
+        Actions.loadCurrent();
+        this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
+        clearInterval(this._updateInterval);
     },
 
     getInitialState() {

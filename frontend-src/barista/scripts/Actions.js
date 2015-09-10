@@ -1,6 +1,6 @@
 import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
-import { AuthStore } from "./stores";
+import { AuthStore, OrderStore } from "./stores";
 
 function authRequest(method, url) {
     return request(method, url)
@@ -57,6 +57,58 @@ const Actions = {
                     })
                 }
             });
+    },
+
+    loadCurrent() {
+        AppDispatcher.dispatch({
+            actionType: this.AJAX_SENDING,
+            data: { request: "current" }
+        });
+        authRequest('GET', '/api/admin/orders/current')
+            .end((err, res) => {
+                if (res.status != 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_FAILURE,
+                        data: { request: "current", status: res.status }
+                    })
+                } else {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_SUCCESS,
+                        data: {
+                            request: "current",
+                            orders: res.body.orders,
+                            timestamp: res.body.timestamp
+                        }
+                    })
+                }
+            });
+    },
+
+    loadUpdates() {
+        AppDispatcher.dispatch({
+            actionType: this.AJAX_SENDING,
+            data: { request: "updates" }
+        });
+        authRequest('GET', '/api/admin/orders/updates')
+            .query({ timestamp: OrderStore.lastServerTimestamp })
+            .end((err, res) => {
+                if (res.status != 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_FAILURE,
+                        data: { request: "updates", status: res.status }
+                    })
+                } else {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_SUCCESS,
+                        data: {
+                            request: "updates",
+                            new_orders: res.body.new_orders,
+                            updated: res.body.updated,
+                            timestamp: res.body.timestamp
+                        }
+                    })
+                }
+            })
     }
 };
 
