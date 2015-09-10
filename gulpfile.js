@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    gutil = require('gulp-util'),
     reactify = require('reactify'),
     browserify = require('browserify'),
     concat = require('gulp-concat'),
@@ -34,7 +35,6 @@ function registerTasks(targetName) {
         stylesTaskName = targetName + '-styles',
         watchTaskName = targetName + '-watch';
 
-
     gulp.task(stylesTaskName, function () {
         gulp.src(path.STYLES)
             .pipe(concat('bundle.css'))
@@ -43,11 +43,16 @@ function registerTasks(targetName) {
             .pipe(gulp.dest(path.FONTS_OUT));
     });
 
-    function _build(x) {
-        return x
+    gulp.task(scriptsTaskName, function () {
+        browserify({
+            entries: path.SCRIPT_MAIN,
+            transform: [babelify, reactify],
+            extensions: ['.jsx'],
+            debug: true
+        })
             .bundle()
             .on('error', function (e) {
-                console.log(e)
+                gutil.log('Build error: ' + e.message);
             })
             .pipe(source('bundle.js'))
             .pipe(buffer())
@@ -55,16 +60,19 @@ function registerTasks(targetName) {
             .pipe(uglify('bundle.js'))
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest(path.SCRIPTS_OUT));
-    }
-
-    gulp.task(scriptsTaskName, function () {
-        _build(browserify({
-            entries: path.SCRIPT_MAIN,
-            transform: [babelify, reactify],
-            extensions: ['.jsx'],
-            debug: true
-        }));
     });
+
+    function _rebundle(x) {
+        return x
+            .bundle()
+            .on('error', function (e) {
+                gutil.log(e.message);
+            })
+            .pipe(source('bundle.js'))
+            .pipe(gulp.dest(path.SCRIPTS_OUT)).on('finish', function () {
+                gutil.log("Rebuild success");
+            });
+    }
 
     gulp.task(targetName, [scriptsTaskName, stylesTaskName]);
 
@@ -79,9 +87,11 @@ function registerTasks(targetName) {
             debug: true,
             cache: {}, packageCache: {}, fullPaths: true
         }));
-        return _build(watcher.on('update', function () {
-            _build(watcher);
-        }));
+        watcher.on('update', function () {
+            gutil.log("Starting rebuild");
+            _rebundle(watcher);
+        });
+        return _rebundle(watcher);
     });
 }
 
