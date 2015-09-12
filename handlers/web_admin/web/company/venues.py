@@ -27,6 +27,7 @@ class CreateVenueHandler(CompanyBaseHandler):
         else:
             legals = LegalInfo.query().fetch()
             self.render('/venues/edit_venue.html', **{
+                'DEFAULT_EMAIL': 'elenamarchenko.lm@gmail.com',
                 'legals': legals,
                 'lat': lat,
                 'lon': lon,
