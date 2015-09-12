@@ -33,83 +33,67 @@ class ReportHandler(BaseHandler):
         self.render('/reports/main.html')
 
 
-class ClientsReportHandler(BaseHandler):
+class BaseReportHandler(BaseHandler):
+    def render_report(self, report_name, html_values):
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, report_name, report_name + '.html', **html_values)
+        else:
+            self.render('/reports/%s.html' % report_name, **html_values)
+
+
+class ClientsReportHandler(BaseReportHandler):
     def get(self):
         html_values = clients.get(**get_standart_params(self.request))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'clients', 'clients.html', **html_values)
-        else:
-            self.render('/reports/clients.html', **html_values)
+        self.render_report('clients', html_values)
 
 
-class MenuItemsReportHandler(BaseHandler):
+class MenuItemsReportHandler(BaseReportHandler):
     def get(self):
         html_values = menu_items.get(**get_standart_params(self.request))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'menu_items', 'menu_items.html', **html_values)
-        else:
-            self.render('/reports/menu_items.html', **html_values)
+        self.render_report('menu_items', html_values)
 
 
-class VenuesReportHandler(BaseHandler):
+class VenuesReportHandler(BaseReportHandler):
     def get(self):
         html_values = venues.get(**get_standart_params(self.request, delete_params=['venue_id']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'venues', 'venues.html', **html_values)
-        else:
-            self.render('/reports/venues.html', **html_values)
+        self.render_report('venues', html_values)
 
 
-class VenuesReportWithDatesHandler(BaseHandler):
+class VenuesReportWithDatesHandler(BaseReportHandler):
     def get(self):
         html_values = venues.get_with_dates(**get_standart_params(self.request, delete_params=['venue_id', 'chosen_day']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'venues_with_dates', 'venues_with_dates.html', **html_values)
-        else:
-            self.render('/reports/venues_with_dates.html', **html_values)
+        self.render_report('venues_with_dates', html_values)
 
 
-class OrdersReportHandler(BaseHandler):
+class OrdersReportHandler(BaseReportHandler):
     def get(self):
         html_values = orders.get(**get_standart_params(self.request))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'oders', 'orders.html', **html_values)
-        else:
-            self.render('/reports/orders.html', **html_values)
+        self.render_report('orders', html_values)
 
 
-class RepeatedOrdersHandler(BaseHandler):
+class RepeatedOrdersHandler(BaseReportHandler):
     def get(self):
         html_values = repeated_orders.get(**get_standart_params(self.request, delete_params=['venue_id', 'chosen_day']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'repeated_oders', 'repeated_orders.html', **html_values)
-        else:
-            self.render('/reports/repeated_orders.html', **html_values)
+        self.render_report('repeated_orders', html_values)
 
 
-class SquareTableHandler(BaseHandler):
+class SquareTableHandler(BaseReportHandler):
     def get(self):
         square = square_table.get()
         if not square:
             self.response.write("Report not ready")
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'square_table', 'square_table.html', square=square)
-        else:
-            self.render('/reports/square_table.html', square=square)
+        self.render_report('square_table', square)
 
 
-class NotificationsReportHandler(BaseHandler):
+class NotificationsReportHandler(BaseReportHandler):
     def get(self):
         html_values = notifications.get(**get_standart_params(self.request, {
             'chosen_type': self.request.get('selected_type')
         }, delete_params=['venue_id', 'chosen_day']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'repeated_notification', 'notification.html', **html_values)
-        else:
-            self.render('/reports/notification.html', **html_values)
+        self.render_report('notification', html_values)
 
 
-class CardBindingReportHandler(BaseHandler):
+class CardBindingReportHandler(BaseReportHandler):
     def get(self):
         html_values = card_binding.get(**get_standart_params(self.request, {
             'chosen_year': self.request.get_range("selected_year"),
@@ -117,13 +101,10 @@ class CardBindingReportHandler(BaseHandler):
             'client_id': self.request.get("client_id"),
             'chosen_days': self.request.get_all('selected_day'),
         }, delete_params=['chosen_day', 'venue_id']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'card_binding', 'card_binding.html', **html_values)
-        else:
-            self.render('/reports/card_binding.html', **html_values)
+        self.render_report('card_binding', html_values)
 
 
-class CompaniesReportHandler(BaseHandler):
+class CompaniesReportHandler(BaseReportHandler):
     def get(self):
         chosen_namespaces = []
         for namespace in metadata.get_namespaces():
@@ -133,7 +114,4 @@ class CompaniesReportHandler(BaseHandler):
             'chosen_object_type': self.request.get("selected_object_type"),
             'chosen_namespaces': chosen_namespaces
         }, delete_params=['venue_id']))
-        if self.request.get("button") == "xls":
-            excel.send_excel_file(self, 'companies', 'companies.html', **html_values)
-        else:
-            self.render('/reports/companies.html', **html_values)
+        self.render_report('companies', html_values)

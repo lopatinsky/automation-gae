@@ -4,6 +4,7 @@ from google.appengine.api import namespace_manager
 from webapp2 import cached_property
 from webapp2_extras import jinja2
 from handlers.web_admin.auth_base import AuthBaseHandler
+from methods import excel
 from models import CompanyUser
 
 
@@ -30,10 +31,13 @@ class CompanyBaseHandler(AuthBaseHandler):
         rendered = self.jinja2.render_template('/company' + template_name, **values)
         self.response.write(rendered)
 
-    def report_render(self, template_name, **values):
+    def render_report(self, report_name, values):
         values.update(padmin=self.user)  # todo: replace padmin to user
-        rendered = self.jinja2.render_template('/mt/reports' + template_name, **values)
-        self.response.write(rendered)
+        if self.request.get("button") == "xls":
+            excel.send_excel_file(self, report_name, report_name + '.html', **values)
+        else:
+            rendered = self.jinja2.render_template('/mt/reports/%s.html' % report_name, **values)
+            self.response.write(rendered)
     
     @cached_property
     def user(self):
