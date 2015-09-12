@@ -1,4 +1,5 @@
 # coding:utf-8
+from datetime import datetime, timedelta, date, time
 from google.appengine.ext.ndb import metadata
 
 __author__ = 'dvpermyakov'
@@ -12,10 +13,13 @@ from methods.report import clients, menu_items, notifications, orders, repeated_
 def get_standart_params(request, values=None, delete_params=None):
     params = {
         'venue_id': request.get("selected_venue"),
-        'chosen_year': request.get_range("selected_year"),
-        'chosen_month': request.get_range("selected_month"),
-        'chosen_day': request.get_range("selected_day"),
     }
+    try:
+        params["start"] = datetime.strptime(request.get("start"), "%Y-%m-%d")
+        params["end"] = datetime.strptime(request.get("end"), "%Y-%m-%d")
+    except ValueError:
+        params["start"] = params["end"] = datetime.combine(date.today(), time())
+    params["end"] = params["end"] + timedelta(days=1) - timedelta(microseconds=1)
     if delete_params:
         for param in delete_params:
             del params[param]
@@ -31,9 +35,7 @@ class ReportHandler(BaseHandler):
 
 class ClientsReportHandler(BaseHandler):
     def get(self):
-        html_values = clients.get(**get_standart_params(self.request, {
-            'chosen_days': self.request.get_all('selected_day')
-        }, delete_params=['chosen_day']))
+        html_values = clients.get(**get_standart_params(self.request))
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'clients', 'clients.html', **html_values)
         else:
@@ -69,9 +71,7 @@ class VenuesReportWithDatesHandler(BaseHandler):
 
 class OrdersReportHandler(BaseHandler):
     def get(self):
-        html_values = orders.get(**get_standart_params(self.request, {
-            'chosen_days': self.request.get_all('selected_day'),
-        }, delete_params=['chosen_day']))
+        html_values = orders.get(**get_standart_params(self.request))
         if self.request.get("button") == "xls":
             excel.send_excel_file(self, 'oders', 'orders.html', **html_values)
         else:
