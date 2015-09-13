@@ -17,8 +17,10 @@ def _send(namespace, emails):
     namespace_manager.set_namespace(namespace)
     config = Config.get()
 
-    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-    report_data = orders.get('0', yesterday.year, yesterday.month, yesterday.day)
+    today = datetime.datetime.combine(datetime.date.today(), datetime.time())
+    yesterday = today - datetime.timedelta(days=1)
+    yesterday_end = today - datetime.timedelta(microseconds=1)
+    report_data = orders.get('0', yesterday, yesterday_end)
 
     excel_file = excel.send_excel_file(None, 'orders', 'orders.html', **report_data)
     io = StringIO()
