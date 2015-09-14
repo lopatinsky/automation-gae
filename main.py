@@ -182,6 +182,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/subscription', [
             Route('/info', api.SubscriptionInfoHandler),
+            Route('/tariffs', api.SubscriptionTariffsHandler),
             Route('/buy', api.BuySubscriptionHandler),
         ]),
 

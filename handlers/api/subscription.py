@@ -4,8 +4,9 @@ import logging
 from handlers.api.base import ApiHandler
 from methods.orders.create import card_payment_performing, paypal_payment_performing
 from datetime import datetime, timedelta
+from methods.rendering import timestamp
 from methods.subscription import get_subscription
-from models import Order, Client, Venue
+from models import Order, Client, Venue, STATUS_AVAILABLE
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.specials import SubscriptionTariff, Subscription, SubscriptionMenuItem
 
@@ -24,6 +25,14 @@ class SubscriptionInfoHandler(ApiHandler):
         self.render_json(subscription_dict)
 
 
+class SubscriptionTariffsHandler(ApiHandler):
+    def get(self):
+        tariffs = SubscriptionTariff.query(SubscriptionTariff.status == STATUS_AVAILABLE).fetch()
+        self.render_json({
+            'tariffs': [tariff.dict() for tariff in tariffs]
+        })
+
+
 class BuySubscriptionHandler(ApiHandler):
     def render_error(self, description):
         self.response.set_status(400)
@@ -40,7 +49,7 @@ class BuySubscriptionHandler(ApiHandler):
         client = Client.get_by_id(int(client_id))
         tariff = SubscriptionTariff.get()
         payment_json = json.loads(self.request.get('payment'))
-        order_id = 'subscription_%s_%s' % (client.key.id(), datetime.utcnow())
+        order_id = 'subscription_%s_%s' % (client.key.id(), timestamp(datetime.utcnow()))
         order = Order(id=order_id)
         order.payment_type_id = payment_json['type_id']
         order.venue_id = str(Venue.query(Venue.active == True).get().key.id())

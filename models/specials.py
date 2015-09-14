@@ -135,6 +135,9 @@ class SubscriptionMenuItem(WindowMenuItem):
 class SubscriptionTariff(ndb.Model):
     ID = 1
 
+    status = ndb.IntegerProperty(default=STATUS_AVAILABLE, choices=STATUS_CHOICES)
+    title = ndb.StringProperty(required=True)
+    description = ndb.StringProperty(required=True)
     price = ndb.IntegerProperty(required=True)
     amount = ndb.IntegerProperty(required=True)
     duration_seconds = ndb.IntegerProperty(required=True)
@@ -142,6 +145,15 @@ class SubscriptionTariff(ndb.Model):
     @classmethod
     def get(cls):
         return cls.get_by_id(cls.ID)
+
+    def dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'price': self.price,
+            'amount': self.amount,
+            'days': int(self.duration_seconds) / 60 / 60 / 24 if self.duration_seconds else 0
+        }
 
 
 class Subscription(ndb.Model):
