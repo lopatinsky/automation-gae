@@ -66,26 +66,27 @@ class SharedPromo(ndb.Model):
         from methods.push import send_client_push
         from methods.empatika_promos import register_order
         from methods.empatika_wallet import deposit
-        from config import Config
+        from models.config.config import Config
         config = Config.get()
-        if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS or config.SHARED_INVITATION_SENDER_WALLET_POINTS:
+        module = config.SHARE_INVITATION_MODULE
+        if module.sender_accumulated_points or module.sender_wallet_points:
             sender_order_id = "sender_referral_%s" % self.recipient.id()
-            if config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS:
-                register_order(user_id=self.sender.id(), points=config.SHARED_INVITATION_SENDER_ACCUMULATED_POINTS,
+            if module.sender_accumulated_points:
+                register_order(user_id=self.sender.id(), points=module.sender_accumulated_points,
                                order_id=sender_order_id)
-            if config.SHARED_INVITATION_SENDER_WALLET_POINTS:
-                deposit(self.sender.id(), config.SHARED_INVITATION_SENDER_WALLET_POINTS * 100, source=sender_order_id)
+            if module.sender_wallet_points:
+                deposit(self.sender.id(), module.sender_wallet_points * 100, source=sender_order_id)
             sender = self.sender.get()
             text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
             header = u'Бонусы!'
             send_client_push(sender, text, header, namespace)
-        if config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS or config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS:
+        if module.recipient_accumulated_points or module.recipient_wallet_points:
             recipient_order_id = "recipient_referral_%s" % self.recipient.id()
-            if config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS:
-                register_order(user_id=self.recipient.id(), points=config.SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS,
+            if module.recipient_accumulated_points:
+                register_order(user_id=self.recipient.id(), points=module.recipient_accumulated_points,
                                order_id=recipient_order_id)
-            if config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS:
-                deposit(self.recipient.id(), config.SHARED_INVITATION_RECIPIENT_WALLET_POINTS * 100,
+            if module.recipient_wallet_points:
+                deposit(self.recipient.id(), module.recipient_wallet_points * 100,
                         source=recipient_order_id)
             recipient = self.recipient.get()
             text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'

@@ -9,6 +9,7 @@ from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
 from models.promo import Promo, GiftMenuItem
+from models.specials import Subscription
 from models.user import Courier
 from models.venue import Venue, DeliveryZone, Address, DeliverySlot
 
@@ -39,6 +40,11 @@ CONFUSED_VENUE = 1
 CONFUSED_SELF = 2
 CONFUSED_OTHER = 3
 CONFUSED_CHOICES = (CONFUSED_VENUE, CONFUSED_TIME, CONFUSED_SELF, CONFUSED_OTHER)
+
+
+class SubscriptionDetails(ndb.Model):
+    subscription = ndb.KeyProperty(kind=Subscription, required=True)
+    amount = ndb.IntegerProperty(required=True)
 
 
 class CashBack(ndb.Model):
@@ -128,6 +134,7 @@ class Order(ndb.Model):
     gift_details = ndb.LocalStructuredProperty(GiftPositionDetails, repeated=True)
     shared_gift_details = ndb.LocalStructuredProperty(SharedGiftPositionDetails, repeated=True)
     points_details = ndb.LocalStructuredProperty(GiftPointsDetails, repeated=True)
+    subscription_details = ndb.LocalStructuredProperty(SubscriptionDetails)
     promo_code_performings = ndb.KeyProperty(kind=PromoCodePerforming, repeated=True)
     promos = ndb.KeyProperty(kind=Promo, repeated=True, indexed=False)
     actual_delivery_time = ndb.DateTimeProperty(indexed=False)
@@ -144,7 +151,7 @@ class Order(ndb.Model):
 
     @classmethod
     def get(cls, client):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.history import get_orders
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:

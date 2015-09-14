@@ -176,6 +176,16 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/menu_item_day', [
+            Route('/info', api)
+        ]),
+
+        PathPrefixRoute('/subscription', [
+            Route('/info', api.SubscriptionInfoHandler),
+            Route('/tariffs', api.SubscriptionTariffsHandler),
+            Route('/buy', api.BuySubscriptionHandler),
+        ]),
+
         PathPrefixRoute('/promo_code', [
             Route('/enter', api.EnterPromoCode),
             Route('/history', api.PromoCodeHistoryHandler),
@@ -188,6 +198,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/modules', api.CompanyModulesHandler),
             Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 

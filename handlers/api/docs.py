@@ -1,6 +1,6 @@
 # coding=utf-8
 from base import ApiHandler
-from config import config
+from models.config.config import config
 from models import STATUS_AVAILABLE
 from models.legal import LegalInfo
 

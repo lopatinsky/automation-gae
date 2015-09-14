@@ -2,8 +2,8 @@
 from urlparse import urlparse
 
 from .base import ApiHandler
-from config import config
-from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, SharedGift, Client
+from models.config.config import config
+from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, Client
 from models.specials import STATUS_ACTIVE
 from models.share import SharedGiftMenuItem
 

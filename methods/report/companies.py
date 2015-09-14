@@ -1,6 +1,6 @@
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
-from config import Config
+from models.config.config import Config
 from models import Order
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP

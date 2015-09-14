@@ -2,10 +2,12 @@
 import copy
 from datetime import timedelta
 import logging
-from config import config
+
+from models.config.config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
+from methods.subscription import get_subscription_menu_item
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
@@ -131,7 +133,10 @@ def group_item_dicts(item_dicts):
 def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
-        menu_item = copy.copy(MenuItem.get(item['item_id']))
+        menu_item = MenuItem.get(item['item_id'])
+        if not menu_item:
+            menu_item = get_subscription_menu_item(item)
+        menu_item = copy.copy(menu_item)
         if with_gift_obj:
             menu_item.gift_obj = item['gift_obj']
         else:

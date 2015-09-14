@@ -1,7 +1,9 @@
 import json
+
 from google.appengine.api.namespace_manager import namespace_manager
+
 from .base import ApiHandler
-from config import config, RESTO_APP
+from models.config.config import config, RESTO_APP
 from methods.proxy.resto.registration import resto_registration
 from models import STATUS_AVAILABLE
 from methods.branch_io import INVITATION, GIFT

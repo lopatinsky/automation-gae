@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
+
 from google.appengine.ext.ndb import GeoPt
-from config import Config
+
+from models.config.config import Config
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
@@ -51,11 +53,13 @@ def set_client_info(client_json, headers, order=None):
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
-    for field in config.EXTRA_CLIENT_INFO_FIELDS:
-        value = client_json.get(latinize(field))
-        if order:
-            order.comment += ' %s: %s,' % (field, value)
-        extra_json[field] = value
+    if config.CLIENT_MODULE:
+        for field in config.CLIENT_MODULE.extra_fields:
+            field = field.get()
+            value = client_json.get(latinize(field.title))
+            if order:
+                order.comment += ' %s: %s,' % (field.title, value)
+            extra_json[field] = value
     client.extra_data = extra_json
     client.put()
     return client

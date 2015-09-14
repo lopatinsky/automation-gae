@@ -1,9 +1,11 @@
 # coding=utf-8
 from datetime import timedelta, datetime
 import logging
-from config import config, VENUE, BAR, Config
+
+from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
+from methods.subscription import get_subscription, get_amount_of_subscription_items
 from methods.working_hours import check_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.venue import DELIVERY, DELIVERY_MAP
@@ -306,4 +308,15 @@ def check_client_info(client, delivery_type):
     if config.COMPULSORY_DELIVERY_EMAIL_VALIDATES:
         if delivery_type == DELIVERY and not client.email:
             return False, u'Не введен email'
+    return True, None
+
+
+def check_subscription(client, item_dicts):
+    subscription = get_subscription(client)
+    amount = get_amount_of_subscription_items(item_dicts)
+    if amount:
+        if not subscription:
+            return False, u'У Вас нет абонемента'
+        if subscription.amount < amount:
+            return False, u'Не хватает позиций на абонементе'
     return True, None

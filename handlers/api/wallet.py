@@ -3,7 +3,7 @@ import logging
 import time
 
 from .base import ApiHandler
-from config import config
+from models.config.config import config
 from methods import alfa_bank, empatika_wallet
 from models.legal import LegalInfo
 

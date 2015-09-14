@@ -4,10 +4,9 @@ from urlparse import urlparse
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
-
 from webapp2_extras import security
 
-from config import config, EMAIL_FROM
+from models.config.config import config, EMAIL_FROM
 from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
@@ -21,7 +20,7 @@ from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 __author__ = 'dvpermyakov'
 
 
-def card_payment_performing(payment_json, amount, order):
+def card_payment_performing(payment_json, amount, order, put_order=True):
     binding_id = payment_json['binding_id']
     client_id = payment_json['client_id']
     return_url = payment_json['return_url']
@@ -34,19 +33,21 @@ def card_payment_performing(payment_json, amount, order):
         return success, result
 
     order.payment_id = result
-    order.put()
+    if put_order:
+        order.put()
     success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_password, order.payment_id, binding_id)
     if not success:
         error = u"Не удалось произвести оплату. %s" % error
     return success, error
 
 
-def paypal_payment_performing(payment_json, amount, order, client):
+def paypal_payment_performing(payment_json, amount, order, client, put_order=True):
     correlation_id = payment_json['correlation_id']
     success, info = paypal.authorize(order.key.id(), amount / 100.0, client.paypal_refresh_token, correlation_id)
     if success:
         order.payment_id = info
-        order.put()
+        if put_order:
+            order.put()
     error = None
     if not success:
         error = u'Не удалось произвести оплату'

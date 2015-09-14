@@ -11,10 +11,11 @@ class MenuHandler(ApiHandler):
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
-        self.render_json({
+        response = {
             "menu": MenuCategory.get_menu_dict(venue),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
-        })
+        }
+        self.render_json(response)
 
 
 class DynamicInfoHandler(ApiHandler):

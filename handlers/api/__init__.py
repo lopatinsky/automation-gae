@@ -17,8 +17,9 @@ from twilio import ReceiveSms
 from paypal import BindPaypalHandler, UnbindPaypalHandler
 from docs import AboutHandler, LicenceHandler, NdaHandler, PaymentRulesHandler, PaypalPrivacyPolicyHandler, \
     PaypalUserAgreementHandler
-from company import CompanyInfoHandler, CompanyBaseUrlsHandler
+from company import CompanyInfoHandler, CompanyBaseUrlsHandler, CompanyModulesHandler
 from address import AddressByAddressHandler, ValidateAddressHandler
 from statuses import StatusHandler, ClientSettingSuccessHandler
 from demo import DemoLoginHandler
 from promo_code import EnterPromoCode, PromoCodeHistoryHandler
+from subscription import BuySubscriptionHandler, SubscriptionInfoHandler, SubscriptionTariffsHandler

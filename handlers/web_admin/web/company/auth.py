@@ -1,9 +1,11 @@
 # coding=utf-8
 import logging
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from config import Config
+
+from models.config.config import Config
 from methods.auth import set_current_user
 
 __author__ = 'dvpermyakov'

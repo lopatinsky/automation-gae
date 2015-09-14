@@ -20,7 +20,7 @@ class SingleModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_single_modifier_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -107,7 +107,7 @@ class GroupModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_group_modifier_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -116,7 +116,7 @@ class GroupModifier(ndb.Model):
             return get_group_modifier_by_id(modifier_id)
 
     def get_choice_by_id(self, choice_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             choice_id = int(choice_id)
@@ -231,7 +231,7 @@ class MenuCategory(ndb.Model):
         return category
 
     def get_categories(self):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_categories
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -241,7 +241,7 @@ class MenuCategory(ndb.Model):
 
     def get_items(self, only_available=False):
         from methods.proxy.resto.menu import get_products
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
@@ -366,7 +366,7 @@ class MenuItem(ndb.Model):
 
     @classmethod
     def get(cls, product_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_product_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
