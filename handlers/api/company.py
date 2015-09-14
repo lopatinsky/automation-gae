@@ -68,6 +68,11 @@ class CompanyInfoHandler(ApiHandler):
         self.render_json(response)
 
 
+class CompanyModulesHandler(ApiHandler):
+    def get(self):
+        pass
+
+
 class CompanyBaseUrlsHandler(ApiHandler):
     def get(self):
         companies = []

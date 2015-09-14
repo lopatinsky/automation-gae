@@ -198,6 +198,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/modules', api.CompanyModulesHandler),
             Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 
