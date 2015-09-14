@@ -118,6 +118,14 @@ def mark_item_with_quantity(condition, item_dicts):
     return True
 
 
+def check_marked_quantity(condition, item_dicts):
+    amount = 0
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark']:
+            amount += 1
+    return amount >= condition.value
+
+
 def check_marked_min_sum(condition, item_dicts):
     marked_sum = 0
     for item_dict in item_dicts:
