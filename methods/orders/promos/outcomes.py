@@ -288,3 +288,17 @@ def forbid_menu_item(response, outcome, item_dicts):
             response.success = True
             response.error = u'Продукт %s недоступен' % item_dicts[0]['item'].title
     return response
+
+
+def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
+    cheapest_item_dict = None
+    if item_dicts:
+        for item_dict in item_dicts:
+            if not cheapest_item_dict or (item_dict['persistent_mark'] and item_dict['price'] < cheapest_item_dict['price']):
+                cheapest_item_dict = item_dict
+    if cheapest_item_dict:
+        discount = int(cheapest_item_dict['price'] * float(outcome.value / 100.0))
+        if _apply_discounts(cheapest_item_dict, promo, discount):
+            cheapest_item_dict['promos'].append(promo)
+            response.success = True
+    return response

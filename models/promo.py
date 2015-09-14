@@ -62,10 +62,11 @@ class PromoOutcome(ndb.Model):
     EMPTY = 14
     CASH_ACCUMULATE_GIFT_POINT = 15
     FORBID_MENU_ITEM = 16
+    MARKED_DISCOUNT_CHEAPEST = 17
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
                PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY,
-               CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM)
+               CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM, MARKED_DISCOUNT_CHEAPEST)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -233,5 +234,6 @@ OUTCOME_MAP = {
     PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)',
     PromoOutcome.EMPTY: u'Выводить сообщение',
     PromoOutcome.CASH_ACCUMULATE_GIFT_POINT: u'Баллы за каждые N у.е в заказе',
-    PromoOutcome.FORBID_MENU_ITEM: u'Запрет на продукт'
+    PromoOutcome.FORBID_MENU_ITEM: u'Запрет на продукт',
+    PromoOutcome.MARKED_DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе (метка)'
 }
