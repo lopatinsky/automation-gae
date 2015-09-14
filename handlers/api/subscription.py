@@ -6,7 +6,7 @@ from methods.orders.create import card_payment_performing, paypal_payment_perfor
 from datetime import datetime, timedelta
 from methods.rendering import timestamp
 from methods.subscription import get_subscription
-from models import Order, Client, Venue, STATUS_AVAILABLE
+from models import Order, Client, Venue, STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.specials import SubscriptionTariff, Subscription, SubscriptionMenuItem
 
@@ -34,6 +34,8 @@ class SubscriptionTariffsHandler(ApiHandler):
 
 
 class BuySubscriptionHandler(ApiHandler):
+    LAST_BUYING_SECONDS = 10
+
     def render_error(self, description):
         self.response.set_status(400)
         logging.warning('error: %s' % description)
@@ -47,7 +49,15 @@ class BuySubscriptionHandler(ApiHandler):
         if not client_id:
             self.abort(400)
         client = Client.get_by_id(int(client_id))
-        tariff = SubscriptionTariff.get()
+        tariff_id = self.request.get_range('tariff_id')
+        if not tariff_id:
+            return self.render_error(u'Тариф не найден')
+        tariff = SubscriptionTariff.get_by_id(int(tariff_id))
+        if tariff.status == STATUS_UNAVAILABLE:
+            return self.render_error(u'Тариф не доступен')
+        subscription = get_subscription(client)
+        if subscription and (datetime.utcnow() - subscription.updated).seconds < self.LAST_BUYING_SECONDS:
+            return self.render_error(u'Вы уже совершили покупку')
         payment_json = json.loads(self.request.get('payment'))
         order_id = 'subscription_%s_%s' % (client.key.id(), timestamp(datetime.utcnow()))
         order = Order(id=order_id)
@@ -64,8 +74,7 @@ class BuySubscriptionHandler(ApiHandler):
                 return self.render_error(error)
         else:
             return self.render_error(u'Возможна оплата только картой')
-        subscription = get_subscription(client)
-        expiration = datetime.utcnow() + timedelta(seconds=604800)  # todo: set tariff.duration_seconds
+        expiration = datetime.utcnow() + timedelta(seconds=tariff.duration_seconds)
         if subscription:
             subscription.rest += tariff.amount
             subscription.expiration = expiration

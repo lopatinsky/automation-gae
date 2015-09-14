@@ -148,6 +148,7 @@ class SubscriptionTariff(ndb.Model):
 
     def dict(self):
         return {
+            'id': self.key.id(),
             'title': self.title,
             'description': self.description,
             'price': self.price,
