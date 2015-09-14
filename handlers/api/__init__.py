@@ -22,3 +22,4 @@ from address import AddressByAddressHandler, ValidateAddressHandler
 from statuses import StatusHandler, ClientSettingSuccessHandler
 from demo import DemoLoginHandler
 from promo_code import EnterPromoCode, PromoCodeHistoryHandler
+from subscription import BuySubscriptionHandler, SubscriptionInfoHandler

@@ -49,6 +49,9 @@ def cancel_order(order, status, namespace, comment=None):
         for performing in order.promo_code_performings:
             performing = performing.get()
             performing.recover()
+        if order.subscription_details:
+            subscription = order.subscription_details.subscription.get()
+            subscription.recover(order.subscription_details.amount)
 
         order.status = status
         order.return_datetime = datetime.utcnow()

@@ -38,6 +38,29 @@ class Version(ndb.Model):
             'force': self.force
         }
 
+MENU_LOCATION = 0
+LOCATION_CHOICES = [MENU_LOCATION]
+
+SUBSCRIPTION = 0
+KINDS = [SUBSCRIPTION]
+
+
+class NavigationWindow(ndb.Model):
+    enable = ndb.BooleanProperty(default=False)
+    title = ndb.StringProperty()
+    text = ndb.StringProperty()
+    location = ndb.IntegerProperty(choices=LOCATION_CHOICES)
+    kind = ndb.IntegerProperty(choices=KINDS)
+
+
+class Navigation(ndb.Model):
+    windows = ndb.LocalStructuredProperty(NavigationWindow, repeated=True)
+
+    def get_menu_window(self):
+        for window in self.windows:
+            if window.location == MENU_LOCATION:
+                return window
+
 
 class Config(ndb.Model):
     @cached_property
@@ -117,6 +140,8 @@ class Config(ndb.Model):
     EXTRA_CLIENT_INFO_FIELDS = ndb.StringProperty(indexed=False, repeated=True)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
+
+    NAVIGATION = ndb.LocalStructuredProperty(Navigation)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:

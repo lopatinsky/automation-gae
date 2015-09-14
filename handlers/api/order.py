@@ -20,10 +20,12 @@ from methods.orders.validation.precheck import get_order_id, set_client_info, ge
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
 from methods.proxy.resto.check_order import resto_validate_order
 from methods.proxy.resto.place_order import resto_place_order
+from methods.subscription import get_subscription
+from methods.subscription import get_amount_of_subscription_items
 from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
 from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
-    CONFUSED_OTHER
+    CONFUSED_OTHER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
 
@@ -170,6 +172,21 @@ class OrderHandler(ApiHandler):
             success, error = paypal_payment_performing(order_json['payment'], payment_amount, self.order, client)
             if not success:
                 return self.render_json(error)
+
+        subscription = get_subscription(client)
+        logging.info('subscription before %s' % subscription)
+        if subscription:
+            amount = get_amount_of_subscription_items(order_json['items'])
+        else:
+            amount = 0
+        logging.info('amount = %s' % amount)
+        if subscription and amount:
+            success = subscription.deduct(amount)
+            if success:
+                self.order.subscription_details = SubscriptionDetails(subscription=subscription.key, amount=amount)
+            else:
+                return self.render_json(u'Не удалось произвести покупку по абонементу')
+        logging.info('subscription after %s' % subscription)
 
         if self.order.wallet_payment > 0:
             empatika_wallet.pay(client.key.id(), self.order.key.id(), int(self.order.wallet_payment * 100))

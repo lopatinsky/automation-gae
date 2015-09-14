@@ -15,13 +15,14 @@ from methods import alfa_bank
 from methods.emails.admins import send_error
 from methods.emails.postmark import send_email
 from methods.sms.sms_pilot import send_sms
+from methods.subscription import get_subscription, get_amount_of_subscription_items
 from models.payment_types import PAYMENT_TYPE_MAP
 from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 
 __author__ = 'dvpermyakov'
 
 
-def card_payment_performing(payment_json, amount, order):
+def card_payment_performing(payment_json, amount, order, put_order=True):
     binding_id = payment_json['binding_id']
     client_id = payment_json['client_id']
     return_url = payment_json['return_url']
@@ -34,19 +35,21 @@ def card_payment_performing(payment_json, amount, order):
         return success, result
 
     order.payment_id = result
-    order.put()
+    if put_order:
+        order.put()
     success, error = alfa_bank.hold_and_check(legal.alfa_login, legal.alfa_password, order.payment_id, binding_id)
     if not success:
         error = u"Не удалось произвести оплату. %s" % error
     return success, error
 
 
-def paypal_payment_performing(payment_json, amount, order, client):
+def paypal_payment_performing(payment_json, amount, order, client, put_order=True):
     correlation_id = payment_json['correlation_id']
     success, info = paypal.authorize(order.key.id(), amount / 100.0, client.paypal_refresh_token, correlation_id)
     if success:
         order.payment_id = info
-        order.put()
+        if put_order:
+            order.put()
     error = None
     if not success:
         error = u'Не удалось произвести оплату'
