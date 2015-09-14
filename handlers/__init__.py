@@ -2,7 +2,7 @@ import sys
 
 from google.appengine.api import app_identity
 
-from config import Config
+from models.config.config import Config
 from methods.emails import admins
 
 _APP_ID = app_identity.get_application_id()

@@ -8,7 +8,7 @@ from google.appengine.ext import ndb, deferred
 from webapp2 import RequestHandler, cached_property
 from webapp2_extras import jinja2
 
-from config import Config
+from models.config.config import Config
 from methods.sms import sms_pilot
 from methods.emails import mandrill
 from models import DeliverySlot, MenuCategory, MenuItem, CompanyUser, Venue, DAY_SECONDS, HOUR_SECONDS, STATUS_AVAILABLE

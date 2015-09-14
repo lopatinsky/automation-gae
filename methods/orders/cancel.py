@@ -3,8 +3,8 @@ import logging
 from datetime import datetime
 
 from google.appengine.ext import deferred
-from config import EMAIL_FROM
 
+from models.config.config import EMAIL_FROM
 from methods import empatika_wallet, push, paypal
 from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos

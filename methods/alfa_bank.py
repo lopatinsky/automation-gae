@@ -1,8 +1,10 @@
 import json
 import logging
 import urllib
+
 from google.appengine.api import urlfetch
-from config import Config
+
+from models.config.config import Config
 from models import PaymentErrorsStatistics
 
 ALPHA_CARD_LIMIT_CODES = [-20010, 902, 116, 123]

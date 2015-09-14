@@ -1,7 +1,9 @@
 # coding=utf-8
 from urlparse import urlparse
+
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from config import DEMO_HOSTNAME
+
+from models.config.config import DEMO_HOSTNAME
 from handlers.api.base import ApiHandler
 from models import CompanyUser
 

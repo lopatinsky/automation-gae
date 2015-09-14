@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
+
 from google.appengine.ext.ndb import GeoPt
-from config import Config
+
+from models.config.config import Config
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error

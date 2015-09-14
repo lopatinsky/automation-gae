@@ -8,7 +8,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
 
-from config import config, AUTO_APP, RESTO_APP
+from models.config.config import config, AUTO_APP, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.emails.admins import send_error

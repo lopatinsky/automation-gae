@@ -1,13 +1,15 @@
 import json
 import logging
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
+from webapp2_extras import auth
+
 from methods.versions import is_test_version, update_company_versions
 from models.proxy.unified_app import AutomationCompany
-from config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
-from webapp2_extras import auth
+from models.config.config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 
 
 class FakeFloat(float):

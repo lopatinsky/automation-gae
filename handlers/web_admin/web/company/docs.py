@@ -1,8 +1,10 @@
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
+
 from base import CompanyBaseHandler
 from methods.auth import company_user_required
-from config import config, Config
+from models.config.config import config, Config
 from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'

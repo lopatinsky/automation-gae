@@ -1,5 +1,6 @@
 from datetime import datetime
-from config import Config, Version, TEST_VERSIONS
+
+from models.config.config import Config, Version, TEST_VERSIONS
 
 __author__ = 'dvpermyakov'
 

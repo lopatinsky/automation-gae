@@ -1,7 +1,8 @@
 # coding=utf-8
 from datetime import timedelta, datetime
 import logging
-from config import config, VENUE, BAR
+
+from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.subscription import get_subscription, get_amount_of_subscription_items

@@ -2,8 +2,8 @@
 import copy
 from datetime import timedelta
 import logging
-from google.appengine.ext import ndb
-from config import config
+
+from models.config.config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
@@ -15,7 +15,6 @@ from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupM
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
     check_client_info
-from models.specials import SubscriptionMenuItem
 from models.venue import DELIVERY
 
 

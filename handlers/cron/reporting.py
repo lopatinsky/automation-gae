@@ -1,14 +1,15 @@
 # coding=utf-8
 import datetime
 from StringIO import StringIO
+
 from google.appengine.api import namespace_manager, mail, app_identity
 from google.appengine.ext import deferred
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
-from config import Config
+
+from models.config.config import Config
 from methods import excel
 from methods.report import orders
-
 
 _EMAIL_SENDER = "reports@%s.appspotmail.com" % app_identity.get_application_id()
 

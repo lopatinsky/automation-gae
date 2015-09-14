@@ -1,8 +1,10 @@
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
+
 from base import ApiHandler
-from config import config, Config
+from models.config.config import config, Config
 from methods.rendering import latinize
 from methods.versions import is_available_version, get_version
 from models import STATUS_AVAILABLE, Venue

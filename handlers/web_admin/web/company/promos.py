@@ -1,7 +1,8 @@
 # coding:utf-8
 from datetime import datetime
 import json
-from config import config, Config
+
+from models.config.config import config, Config
 from methods.auth import company_user_required
 from methods.rendering import STR_TIME_FORMAT
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem, GroupModifier

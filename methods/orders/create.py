@@ -4,10 +4,9 @@ from urlparse import urlparse
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
-
 from webapp2_extras import security
 
-from config import config, EMAIL_FROM
+from models.config.config import config, EMAIL_FROM
 from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
@@ -15,7 +14,6 @@ from methods import alfa_bank
 from methods.emails.admins import send_error
 from methods.emails.postmark import send_email
 from methods.sms.sms_pilot import send_sms
-from methods.subscription import get_subscription, get_amount_of_subscription_items
 from models.payment_types import PAYMENT_TYPE_MAP
 from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 

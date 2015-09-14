@@ -1,4 +1,4 @@
-from config import Config
+from models.config.config import Config
 from methods.auth import company_user_required
 from models import PaymentType, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from base import CompanyBaseHandler

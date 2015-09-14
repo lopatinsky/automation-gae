@@ -1,7 +1,9 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+
 from google.appengine.api.taskqueue import taskqueue
-from config import Config
+
+from models.config.config import Config
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import company_user_required
 from methods.rendering import HTML_STR_TIME_FORMAT, STR_DATETIME_FORMAT

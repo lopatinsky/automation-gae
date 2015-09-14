@@ -1,4 +1,4 @@
-from config import config
+from models.config.config import config
 
 __author__ = 'dvpermyakov'
 

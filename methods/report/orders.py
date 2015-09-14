@@ -1,7 +1,7 @@
 # coding=utf-8
 from datetime import datetime, timedelta
-import logging
-from config import config
+
+from models.config.config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import DELIVERY_MAP

@@ -3,7 +3,7 @@ import json
 
 from google.appengine.ext.deferred import deferred
 
-from config import EMAIL_FROM, Config
+from models.config.config import EMAIL_FROM, Config
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.sms.sms_pilot import send_sms
