@@ -126,7 +126,7 @@ class Promo(ndb.Model):
 
     @classmethod
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.promo import get_promos
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:

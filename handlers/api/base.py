@@ -8,8 +8,9 @@ from webapp2_extras import jinja2
 from webapp2_extras import auth
 
 from methods.versions import is_test_version, update_company_versions
+from models.config.version import PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 from models.proxy.unified_app import AutomationCompany
-from models.config.config import Config, PRODUCTION_HOSTNAME, DEMO_HOSTNAME
+from models.config.config import Config
 
 
 class FakeFloat(float):

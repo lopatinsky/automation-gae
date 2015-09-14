@@ -3,9 +3,9 @@ from urlparse import urlparse
 
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 
-from models.config.config import DEMO_HOSTNAME
 from handlers.api.base import ApiHandler
 from models import CompanyUser
+from models.config.version import DEMO_HOSTNAME
 
 __author__ = 'dvpermyakov'
 

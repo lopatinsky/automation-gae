@@ -1,8 +1,5 @@
 from handlers.api.base import ApiHandler
-from methods.navigation import get_menu_navigation_dict
-from methods.subscription import get_subscription
-from models import MenuCategory, Venue, Client
-from models.specials import SubscriptionMenuItem, DayMenuItem
+from models import MenuCategory, Venue
 
 
 class MenuHandler(ApiHandler):
@@ -18,14 +15,6 @@ class MenuHandler(ApiHandler):
             "menu": MenuCategory.get_menu_dict(venue),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         }
-        response.update({
-            "navigation_window": get_menu_navigation_dict()
-        })
-        day_item = DayMenuItem.get()
-        if day_item:
-            response.update({
-                "day_item": day_item.dict()
-            })
         self.render_json(response)
 
 

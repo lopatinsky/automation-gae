@@ -20,9 +20,12 @@ class SubscriptionInfoHandler(ApiHandler):
             self.abort(400)
         client = Client.get_by_id(int(client_id))
         subscription = get_subscription(client)
-        subscription_dict = subscription.dict()
-        subscription_dict.update(SubscriptionMenuItem.get().dict())
-        self.render_json(subscription_dict)
+        if subscription:
+            subscription_dict = subscription.dict()
+            subscription_dict.update(SubscriptionMenuItem.get().dict())
+            self.render_json(subscription_dict)
+        else:
+            self.render_json({})
 
 
 class SubscriptionTariffsHandler(ApiHandler):
