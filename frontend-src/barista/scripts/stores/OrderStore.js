@@ -1,4 +1,6 @@
 import Map from 'es6-map';
+import moment from 'moment';
+import _ from 'moment/locale/ru';
 import Actions from '../Actions';
 import BaseStore from './BaseStore';
 
@@ -44,7 +46,7 @@ class Order {
         this.status = obj.status;
         this.deliveryType = obj.delivery_type;
         this.address = obj.address;
-        this.deliveryTime = obj.delivery_time;
+        this.deliveryTime = moment(obj.delivery_time * 1000);
         this.paymentType = obj.payment_type_id;
         this.total = obj.total;
         this.walletPayment = obj.wallet_payment;
@@ -52,8 +54,17 @@ class Order {
         this.items = obj.items;
         this.gifts = obj.gifts;
         this.client = obj.client;
+        this.client.phone = Order._formatPhone(this.client.phone);
         this.comment = obj.comment;
         this.returnComment = obj.return_comment;
+    }
+
+    static _formatPhone(str) {
+        if (str.length != 11) {
+            return str;
+        }
+        const parts = ['8', str.substring(1, 4), str.substring(4, 7), str.substring(7, 9), str.substring(9, 11)];
+        return `${parts[0]} ${parts[1]} ${parts[2]}-${parts[3]} ${parts[4]}`;
     }
 
     get statusName() {
