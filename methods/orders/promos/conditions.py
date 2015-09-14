@@ -144,3 +144,11 @@ def check_order_number(condition, client):
         return True
     else:
         return False
+
+
+def check_item_not_in_order(condition, item_dicts):
+    amount = 0
+    for item_dict in item_dicts:
+        if _check_item(condition.item_details, item_dict):
+            amount += 1
+    return amount == 0
