@@ -279,3 +279,12 @@ def set_cash_gift_point(response, outcome, init_total_sum, order):
         order.put()
     response.success = True
     return response
+
+
+def forbid_menu_item(response, outcome, item_dicts):
+    if outcome.item_details.item:
+        item_dicts = _get_promo_item_dicts(outcome.item_details, item_dicts)
+        if item_dicts:
+            response.success = True
+            response.error = u'Продукт %s недоступен' % item_dicts[0]['item'].title
+    return response
