@@ -4,6 +4,24 @@ import assign from 'object-assign';
 
 const NavItem = React.createClass({
     mixins: [State],
+    _renderLabel() {
+        if (this.props.label) {
+            const labelStyle = {
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                width: 28,
+                height: 28,
+                lineHeight: '28px',
+                marginTop: -50,
+                borderRadius: 14,
+                background: 'red',
+                color: 'white'
+            };
+            return <div style={labelStyle}>{this.props.label}</div>;
+        }
+        return null;
+    },
     render() {
         let isActive = this.isActive(this.props.route);
         let imageUrl = `/static/barista/img/sections${isActive ? '-active' : ''}/${this.props.route}.png`;
@@ -17,6 +35,7 @@ const NavItem = React.createClass({
             assign(linkStyle, {
                 display: 'table-cell',
                 height: '100%',
+                position: 'relative',
                 verticalAlign: 'middle'
             });
         } else {
@@ -32,6 +51,7 @@ const NavItem = React.createClass({
             <Link to={this.props.route} style={linkStyle}>
                 <img src={imageUrl} width={60}/>
                 <div>{this.props.text}</div>
+                {this._renderLabel()}
             </Link>
         </div>;
     }
@@ -52,8 +72,8 @@ const Nav = React.createClass({
             right: 0
         };
         return <div style={style}>
-            <NavItem horizontal={isHorizontal} route='current'  text='Заказы'/>
-            <NavItem horizontal={isHorizontal} route='delivery' text='Доставка'/>
+            <NavItem horizontal={isHorizontal} route='current'  text='Заказы'    label={this.props.orderCount}/>
+            <NavItem horizontal={isHorizontal} route='delivery' text='Доставка'  label={this.props.deliveryCount}/>
             <NavItem horizontal={isHorizontal} route='history'  text='История'/>
             <NavItem horizontal={isHorizontal} route='returns'  text='Отмененные'/>
             <NavItem horizontal={isHorizontal} route='stoplist' text='Стоп-лист'/>

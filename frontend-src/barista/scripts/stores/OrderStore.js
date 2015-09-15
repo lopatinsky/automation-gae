@@ -1,4 +1,3 @@
-import Map from 'es6-map';
 import moment from 'moment';
 import _ from 'moment/locale/ru';
 import Actions from '../Actions';
@@ -57,6 +56,7 @@ class Order {
         this.client.phone = Order._formatPhone(this.client.phone);
         this.comment = obj.comment;
         this.returnComment = obj.return_comment;
+        this.address = obj.address ? obj.address.formatted_address : null;
     }
 
     static _formatPhone(str) {
@@ -97,7 +97,11 @@ const OrderStore = new BaseStore({
     _addOrders(array) {
         for (let rawOrder of array) {
             let o = new Order(rawOrder);
-            this._knownOrders.set(o.id, o);
+            if (o.status == this.STATUS.NEW || o.status == this.STATUS.CONFIRMED) {
+                this._knownOrders.set(o.id, o);
+            } else {
+                this._knownOrders.delete(o.id);
+            }
         }
     },
     _setTimestamp(newTimestamp) {

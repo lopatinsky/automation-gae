@@ -6,6 +6,14 @@ function authRequest(method, url) {
     return request(method, url)
         .query({token: AuthStore.token});
 }
+authRequest.get = function get(url) {
+    return authRequest('GET', url);
+};
+authRequest.post = function post(url) {
+    return authRequest('POST', url);
+};
+
+const BASE_URL = 'http://m-test.doubleb-automation-production.appspot.com/api/';
 
 const Actions = {
     AJAX_SENDING: "AJAX_SENDING",
@@ -18,7 +26,7 @@ const Actions = {
             data: { request: "login" }
         });
         request
-            .post('/api/admin/login')
+            .post(BASE_URL + 'admin/login')
             .type('form')
             .send({ email: login, password, lat: 0, lon: 0 })
             .end((err, res) => {
@@ -41,7 +49,7 @@ const Actions = {
             actionType: this.AJAX_SENDING,
             data: { request: "logout" }
         });
-        authRequest('POST', '/api/admin/logout')
+        authRequest.post(BASE_URL + 'admin/logout')
             .type('form')
             .send({ password })
             .end((err, res) => {
@@ -64,7 +72,7 @@ const Actions = {
             actionType: this.AJAX_SENDING,
             data: { request: "current" }
         });
-        authRequest('GET', '/api/admin/orders/current')
+        authRequest.get(BASE_URL + 'admin/orders/current')
             .end((err, res) => {
                 if (res.status != 200) {
                     AppDispatcher.dispatch({
@@ -89,7 +97,7 @@ const Actions = {
             actionType: this.AJAX_SENDING,
             data: { request: "updates" }
         });
-        authRequest('GET', '/api/admin/orders/updates')
+        authRequest.get(BASE_URL + 'admin/orders/updates')
             .query({ timestamp: OrderStore.lastServerTimestamp })
             .end((err, res) => {
                 if (res.status != 200) {
