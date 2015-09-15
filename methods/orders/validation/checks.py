@@ -1,6 +1,7 @@
 # coding=utf-8
 from datetime import timedelta, datetime
 import logging
+from google.appengine.api.namespace_manager import namespace_manager
 
 from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
@@ -195,7 +196,10 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         return False, gifts_description
     order_gifts_description = check(order_gift_dicts)
     if order_gifts_description:
-        return False, order_gift_dicts
+        if namespace_manager.get_namespace() == 'sushimarket':
+            return True, None
+        else:
+            return False, order_gifts_description
     else:
         return True, None
 
