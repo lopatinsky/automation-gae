@@ -123,7 +123,7 @@ class Promo(ndb.Model):
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
-    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
+    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
     priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)

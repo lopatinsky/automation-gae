@@ -437,3 +437,30 @@ class DownPromoHandler(CompanyBaseHandler):
             'promo_id': promo.key.id(),
             'next_id': next_.key.id()
         }, separators=(',', ':')))
+
+
+class PromoConflictsHandler(CompanyBaseHandler):
+    @company_user_required
+    def get(self):
+        promo_id = self.request.get_range('promo_id')
+        promo = Promo.get_by_id(promo_id)
+        if not promo:
+            self.abort(400)
+        self.render('/promos/conflicts.html',
+                    main_promo=promo,
+                    promos=Promo.query(Promo.status == STATUS_AVAILABLE).fetch())
+
+    @company_user_required
+    def post(self):
+        promo_id = self.request.get_range('promo_id')
+        main_promo = Promo.get_by_id(promo_id)
+        if not main_promo:
+            self.abort(400)
+        conflicts = []
+        for promo in Promo.query(Promo.status == STATUS_AVAILABLE).fetch():
+            confirmed = bool(self.request.get('%s' % promo.key.id()))
+            if confirmed:
+                conflicts.append(promo.key)
+        main_promo.conflicts = conflicts
+        main_promo.put()
+        self.redirect('/company/promos/list')

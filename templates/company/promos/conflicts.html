@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <input type="number" name="promo_id" value="{{ main_promo.key.id() }}" hidden>
+        {% for promo in promos %}
+            {% if promo.key != main_promo.key %}
+                <label>
+                    <input type="checkbox" name="{{ promo.key.id() }}"
+                            {% if promo.key in main_promo.conflicts %} checked {% endif %}>
+                    {{ promo.title }}
+                </label><br>
+            {% endif %}
+        {% endfor %}
+        <input type="submit">
+        <a href="/company/promos/list">Назад</a>
+    </form>
+</body>
+</html>

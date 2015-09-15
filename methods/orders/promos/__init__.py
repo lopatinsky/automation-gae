@@ -152,6 +152,9 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
     unavail_order_gift_dicts = []
     for promo in _get_promos(venue):
         _update_item_dict(item_dicts)
+        for conflict in promo.conflicts:
+            if conflict in (promo.key for promo in promos):
+                continue
         apply_promo = True
         for condition in promo.conditions:
             if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type,
