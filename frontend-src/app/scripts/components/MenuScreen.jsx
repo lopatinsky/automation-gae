@@ -25,6 +25,7 @@ const MenuScreen = React.createClass({
     },
 
     _onMenuItemTap(category, item) {
+        Actions.setMenuItem(item);
         this.transitionTo('menu_item', {category_id: category.info.category_id, item_id: item.id });
     },
 

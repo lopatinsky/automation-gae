@@ -1,5 +1,5 @@
 import React from 'react';
-import { Toolbar, MenuScreen } from '../components'
+import { Toolbar, MenuScreen, NavigationDrawer } from '../components'
 
 const MenuView = React.createClass({
     render() {
@@ -7,6 +7,7 @@ const MenuView = React.createClass({
             <div>
                 <Toolbar title='Меню' />
                 <MenuScreen />
+                <NavigationDrawer />
             </div>
         );
     }
