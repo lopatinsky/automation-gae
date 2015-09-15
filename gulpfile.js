@@ -44,9 +44,9 @@ function registerTasks(targetName) {
     });
 
     gulp.task(scriptsTaskName, function () {
-        browserify({
+        return browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify, reactify],
+            transform: [babelify],
             extensions: ['.jsx'],
             debug: true
         })
@@ -82,7 +82,7 @@ function registerTasks(targetName) {
 
         var watcher = watchify(browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify, reactify],
+            transform: [babelify],
             extensions: ['.jsx'],
             debug: true,
             cache: {}, packageCache: {}, fullPaths: true
