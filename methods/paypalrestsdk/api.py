@@ -158,7 +158,7 @@ class Api(object):
         logging.info('Request[%s]: %s' % (method, url))
         start_time = datetime.datetime.now()
 
-        response = urlfetch.fetch(url, kwargs.get("data"), method, kwargs.get("headers"))
+        response = urlfetch.fetch(url, kwargs.get("data"), method, kwargs.get("headers"), deadline=30)
 
         duration = datetime.datetime.now() - start_time
         logging.info('Response[%d]: %s, Duration: %s.%ss.' % (response.status_code, None, duration.seconds, duration.microseconds))
