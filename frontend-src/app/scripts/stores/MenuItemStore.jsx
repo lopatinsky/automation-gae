@@ -1,4 +1,5 @@
 import BaseStore from './BaseStore';
+import Actions from '../Actions';
 
 const MenuItemStore = new BaseStore({
 
@@ -26,7 +27,8 @@ const MenuItemStore = new BaseStore({
     _setItem(item) {
         this.item = item;
         for (var i = 0; i < item.group_modifiers.length; i++) {
-            this.setChoice(item.group_modifiers[i], modifier.choices[0]);
+            var modifier = item.group_modifiers[i];
+            this.setChoice(modifier, modifier.choices[0]);
         }
     }
 }, action => {

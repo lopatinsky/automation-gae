@@ -1,10 +1,12 @@
 import React from 'react';
 import { Card, CardMedia, CardText, CardActions, FlatButton, CardTitle } from 'material-ui';
 import { MenuItemStore } from '../stores';
+import Actions from '../Actions';
 
 const MenuItemScreen = React.createClass({
     _onModifierTap(modifier) {
-
+        Actions.setModifier(modifier);
+        this.refs.modifierDialog.show();
     },
 
     _getModifiers() {
@@ -28,12 +30,13 @@ const MenuItemScreen = React.createClass({
                     </CardMedia>
                     <CardText>{item.description}</CardText>
                     <CardActions>
-                        <FlatButton label={item.price}/>
+                        <FlatButton label={item.price} />
                     </CardActions>
                 </Card>
                 <List>
-                    {this._getModifiers}
+                    {this._getModifiers()}
                 </List>
+                <ModifierDialog ref="modifierDialog" />
             </div>
         );
     }

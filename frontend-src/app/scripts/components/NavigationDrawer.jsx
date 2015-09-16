@@ -2,6 +2,10 @@ import React from 'react';
 import { LeftNav } from 'material-ui';
 
 const NavigationDrawer = React.createClass({
+    toggle() {
+        this.refs.leftNav.toggle();
+    },
+
     _leftNavItems() {
         return [{
                 route: 'menu',

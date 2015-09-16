@@ -1,6 +1,8 @@
 import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
 
+const base_url = "http://mycompany.app.doubleb-automation-production.appspot.com";
+
 const Actions = {
     INIT: "INIT",
     AJAX_SENDING: "AJAX_SENDING",
@@ -9,7 +11,7 @@ const Actions = {
 
     loadMenu() {
         request
-            .get('/api/menu')
+            .get(base_url + '/api/menu')
             .end((err, res) => {
                 if (res.status == 200) {
                     AppDispatcher.dispatch({
@@ -37,6 +39,16 @@ const Actions = {
             data: {
                 request: "menu_item",
                 item: item
+            }
+        })
+    },
+
+    setModifier(modifier) {
+        AppDispatcher.dispatch({
+            actionType: this.INIT,
+            data: {
+                request: "modifier",
+                modifier: modifier
             }
         })
     }
