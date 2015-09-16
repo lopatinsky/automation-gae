@@ -22,6 +22,7 @@ const MenuItemStore = new BaseStore({
 
     setChoice(modifier, choice) {
         modifier.chosen_choice = choice;
+        this._changed();
     },
 
     _setItem(item) {

@@ -4,3 +4,4 @@ export { default as MenuItemScreen } from './MenuItemScreen';
 export { default as NavigationDrawer } from './NavigationDrawer';
 export { default as ModifierDialog } from './ModifierDialog';
 export { default as OrderScreen } from './OrderScreen';
+export { default as ChoicesFragment } from './ChoicesFragment';

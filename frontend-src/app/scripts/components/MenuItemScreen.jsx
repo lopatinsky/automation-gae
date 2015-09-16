@@ -1,9 +1,17 @@
 import React from 'react';
-import { Card, CardMedia, CardText, CardActions, FlatButton, CardTitle } from 'material-ui';
-import { MenuItemStore } from '../stores';
+import { List, ListItem, Card, CardMedia, CardText, CardActions, FlatButton, CardTitle } from 'material-ui';
+import { MenuItemStore, ModifierStore } from '../stores';
+import { ModifierDialog } from '../components';
 import Actions from '../Actions';
 
 const MenuItemScreen = React.createClass({
+
+    _refresh() {
+        this.setState({
+            item: MenuItemStore.getItem()
+        });
+    },
+
     _onModifierTap(modifier) {
         Actions.setModifier(modifier);
         this.refs.modifierDialog.show();
@@ -11,7 +19,7 @@ const MenuItemScreen = React.createClass({
 
     _getModifiers() {
         var modifiers = MenuItemStore.getModifiers();
-        modifiers.map(modifier => {
+        return modifiers.map(modifier => {
             return (
                 <ListItem
                     primaryText={modifier.chosen_choice.title}
@@ -20,8 +28,22 @@ const MenuItemScreen = React.createClass({
         });
     },
 
+    getInitialState: function() {
+        return {
+            item: MenuItemStore.getItem()
+        }
+    },
+
+    componentDidMount() {
+        MenuItemStore.addChangeListener(this._refresh);
+    },
+
+    componentWillUnmount() {
+        MenuItemStore.removeChangeListener(this._refresh);
+    },
+
     render() {
-        var item = MenuItemStore.getItem();
+        var item = this.state.item;
         return (
             <div>
                 <Card>
