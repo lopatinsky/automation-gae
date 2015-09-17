@@ -1,11 +1,10 @@
 import React from 'react';
 import { List, ListItem, Card, CardMedia, CardText, CardActions, FlatButton, CardTitle } from 'material-ui';
-import { MenuItemStore, ModifierStore } from '../stores';
-import { ModifierDialog } from '../components';
+import { MenuItemStore, ModifierStore, OrderStore } from '../stores';
+import { ModifierDialog, SingleModifiersDialog } from '../components';
 import Actions from '../Actions';
 
 const MenuItemScreen = React.createClass({
-
     _refresh() {
         this.setState({
             item: MenuItemStore.getItem()
@@ -17,6 +16,14 @@ const MenuItemScreen = React.createClass({
         this.refs.modifierDialog.show();
     },
 
+    _onSingleModifierTap() {
+        this.refs.singleModifiersDialog.show();
+    },
+
+    _addItem() {
+        OrderStore.addItem(MenuItemStore.getItem(), MenuItemStore.getPrice());
+    },
+
     _getModifiers() {
         var modifiers = MenuItemStore.getModifiers();
         return modifiers.map(modifier => {
@@ -26,6 +33,15 @@ const MenuItemScreen = React.createClass({
                     onClick={() => this._onModifierTap(modifier)}/>
             );
         });
+    },
+
+    _getSingleModifiers() {
+        var modifiers = MenuItemStore.getSingleModifiers();
+        if (modifiers.length > 0) {
+            return <ListItem
+                        primaryText={'Добавки'}
+                        onClick={() => this._onSingleModifierTap()}/>;
+        }
     },
 
     getInitialState: function() {
@@ -52,13 +68,15 @@ const MenuItemScreen = React.createClass({
                     </CardMedia>
                     <CardText>{item.description}</CardText>
                     <CardActions>
-                        <FlatButton label={item.price} />
+                        <FlatButton label={MenuItemStore.getPrice()} onClick={this._addItem} />
                     </CardActions>
                 </Card>
                 <List>
                     {this._getModifiers()}
+                    {this._getSingleModifiers()}
                 </List>
                 <ModifierDialog ref="modifierDialog" />
+                <SingleModifiersDialog ref="singleModifiersDialog" />
             </div>
         );
     }

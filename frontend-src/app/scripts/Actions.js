@@ -9,7 +9,12 @@ const Actions = {
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
 
-    loadMenu() {
+    load() {
+        this._loadVenues();
+        this._loadMenu();
+    },
+
+    _loadMenu() {
         request
             .get(base_url + '/api/menu')
             .end((err, res) => {
@@ -30,7 +35,29 @@ const Actions = {
                     })
                 }
             });
+    },
 
+    _loadVenues() {
+        request
+            .get(base_url + '/api/venues')
+            .end((err, res) => {
+                if (res.status == 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_SUCCESS,
+                        data: {
+                            request: "venues",
+                            venues: res.body.venues
+                        }
+                    })
+                } else {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_FAILURE,
+                        data: {
+                            request: "venues"
+                        }
+                    })
+                }
+            });
     },
 
     setMenuItem(item) {

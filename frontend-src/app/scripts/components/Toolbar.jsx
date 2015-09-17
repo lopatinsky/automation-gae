@@ -1,20 +1,46 @@
 import React from 'react';
-import { AppBar } from 'material-ui';
+import { AppBar, NavigationArrowBack, IconButton, FlatButton } from 'material-ui';
+import { Navigation } from 'react-router';
+import { OrderStore } from '../stores';
 
 const Toolbar = React.createClass({
+    ORDER_BUTTON: 'order',
+
+    mixins: [Navigation],
+
+    _refresh() {
+        this.setState({});
+    },
 
     leftTap() {
-        if (this.props.view) {
-            this.props.view.toolbarLeftTap();
+        this.props.view.toolbarLeftTap();
+    },
+
+    rightTap() {
+        if (this.props.right == this.ORDER_BUTTON) {
+            this.transitionTo('order');
         }
     },
 
+    componentDidMount() {
+        OrderStore.addChangeListener(this._refresh);
+    },
+
+    componentWillUnmount() {
+        OrderStore.removeChangeListener(this._refresh);
+    },
+
     render() {
+        var rightElement;
+        if (this.props.right == this.ORDER_BUTTON) {
+            var label = "Sum: " + OrderStore.getTotalSum();
+            rightElement = <FlatButton label={label}  onClick={this.rightTap} />;
+        }
         return (
             <AppBar
                 title={this.props.title}
-                iconClassNameRight="muidocs-icon-navigation-expand-more"
-                onLeftIconButtonTouchTap={this.leftTap} />
+                onLeftIconButtonTouchTap={this.leftTap}
+                iconElementRight={rightElement} />
         );
     }
 });

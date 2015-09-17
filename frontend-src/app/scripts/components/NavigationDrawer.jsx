@@ -1,7 +1,14 @@
 import React from 'react';
 import { LeftNav } from 'material-ui';
+import { Navigation } from 'react-router';
 
 const NavigationDrawer = React.createClass({
+    mixins: [Navigation],
+
+    _selectMenuItem(e, selectedIndex, menuItem) {
+        this.transitionTo(menuItem.route);
+    },
+
     toggle() {
         this.refs.leftNav.toggle();
     },
@@ -9,22 +16,22 @@ const NavigationDrawer = React.createClass({
     _leftNavItems() {
         return [{
                 route: 'menu',
-                text: 'Меню'
+                text: 'РњРµРЅСЋ'
             }, {
                 route: 'order',
-                text: 'Мой заказ'
+                text: 'РњРѕР№ Р·Р°РєР°Р·'
             }, {
                 route: 'venues',
-                text: 'Кофейни'
+                text: 'РљРѕС„РµР№РЅРё'
             }, {
                 route: 'history',
-                text: 'История'
+                text: 'РСЃС‚РѕСЂРёСЏ'
             }
         ];
     },
 
     render() {
-        return <LeftNav ref="leftNav" docked={false} menuItems={this._leftNavItems()} />;
+        return <LeftNav ref="leftNav" docked={false} menuItems={this._leftNavItems()} onChange={this._selectMenuItem}/>;
     }
 });
 export default NavigationDrawer;

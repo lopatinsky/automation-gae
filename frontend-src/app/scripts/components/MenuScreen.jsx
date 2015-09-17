@@ -1,41 +1,38 @@
 import React from 'react';
-import { Tabs, Tab, List, ListItem, Avatar } from 'material-ui';
+import { Tabs, Tab, RefreshIndicator } from 'material-ui';
 import { Navigation } from 'react-router';
 import { MenuStore } from '../stores';
+import { MenuItem, MenuCategory } from '../components';
 import Actions from '../Actions';
 
 const MenuScreen = React.createClass({
     mixins: [Navigation],
 
     _getItems(category) {
-        return category.items.map(item => {
-            return (
-                <ListItem
-                    primaryText={item.title}
-                    secondaryText={item.description}
-                    leftAvatar={<Avatar src={item.pic}/>}
-                    rightAvatar={<Avatar>{item.price}</Avatar>}
-                    onClick={() => this._onMenuItemTap(category, item)}/>
-            );
-        });
+        if (category.categories.length > 0) {
+            return category.categories.map(inner_category => {
+                return (
+                    <MenuCategory category={inner_category} categories={category.categories} />
+                );
+            });
+        } else {
+            return category.items.map(item => {
+                return (
+                    <MenuItem item={item} category={category} />
+                );
+            });
+        }
     },
 
     _refresh() {
-        this.setState({ load: true});
-    },
-
-    _onMenuItemTap(category, item) {
-        Actions.setMenuItem(item);
-        this.transitionTo('menu_item', {category_id: category.info.category_id, item_id: item.id });
-    },
-
-    getInitialState: function() {
-        return { load: false};
+        this.setState({});
     },
 
     componentDidMount() {
         MenuStore.addChangeListener(this._refresh);
-        Actions.loadMenu();
+        if (MenuStore.getCategories() == null) {
+            Actions.load();
+        }
     },
 
     componentWillUnmount() {
@@ -48,9 +45,7 @@ const MenuScreen = React.createClass({
                 return (
                     <Tab
                         label={category.info.title}>
-                        <List>
-                            {this._getItems(category)}
-                        </List>
+                        {this._getItems(category)}
                     </Tab>
                 );
             });
@@ -60,7 +55,7 @@ const MenuScreen = React.createClass({
                 </Tabs>
             );
         } else {
-            return <p>Меню еще не загрузилось</p>
+            return <RefreshIndicator size={40} left={80} top={5} status="loading" />
         }
     }
 });

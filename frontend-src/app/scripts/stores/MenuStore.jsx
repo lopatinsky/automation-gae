@@ -2,6 +2,9 @@ import BaseStore from './BaseStore';
 import Actions from '../Actions';
 
 const MenuStore = new BaseStore({
+    previousCategories: [],
+    categories: null,
+
     getCategory(category_id) {
         for (var i = 0; i < this.categories.length; i++) {
             if (category_id == this.categories[i].info.category_id) {
@@ -29,6 +32,23 @@ const MenuStore = new BaseStore({
                 return this.categories[i].items;
             }
         }
+    },
+
+    nextCategories(categories) {
+        this.previousCategories.push(this.categories);
+        this.categories = categories;
+        this._changed();
+    },
+
+    canUndoCategories() {
+        return this.previousCategories.length > 0;
+    },
+
+    undoCategories() {
+        if (this.previousCategories.length > 0) {
+            this.categories = this.previousCategories.pop();
+        }
+        this._changed();
     },
 
     _saveMenu(menu) {
