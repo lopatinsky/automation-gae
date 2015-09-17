@@ -308,9 +308,9 @@ def check_address(delivery_type, address):
     return True, None
 
 
-def check_client_info(client, delivery_type):
+def check_client_info(client, delivery_type, order):
     if config.COMPULSORY_DELIVERY_EMAIL_VALIDATES:
-        if delivery_type == DELIVERY and not client.email:
+        if delivery_type == DELIVERY and not client.email and order:
             return False, u'Не введен email'
     return True, None
 

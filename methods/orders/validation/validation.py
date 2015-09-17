@@ -333,7 +333,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                                        total_sum_without_promos)
     if not valid:
         return send_error(error)
-    valid, error = check_client_info(client, delivery_type)
+    valid, error = check_client_info(client, delivery_type, order)
     if not valid:
         return send_error(error)
     valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
