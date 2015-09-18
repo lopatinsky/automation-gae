@@ -99,7 +99,7 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
     elif condition.method == PromoCondition.CHECK_VERSION:
         return check_version(condition, client)
     elif condition.method == PromoCondition.CHECK_GEO_PUSH:
-        return check_geo_push(client)
+        return check_geo_push(client, order)
     else:
         return True
 

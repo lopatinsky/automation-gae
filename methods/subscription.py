@@ -12,7 +12,11 @@ def get_subscription(client):
 
 
 def get_subscription_menu_item(item_dict):
-    return SubscriptionMenuItem.query(SubscriptionMenuItem.item == ndb.Key(MenuItem, int(item_dict['item_id']))).get()
+    item_id = item_dict.get('item_id')
+    if not item_id:
+        item_id = item_dict.get('item').key.id()
+    item_id = int(item_id)
+    return SubscriptionMenuItem.query(SubscriptionMenuItem.item == ndb.Key(MenuItem, item_id)).get()
 
 
 def get_amount_of_subscription_items(item_dicts):

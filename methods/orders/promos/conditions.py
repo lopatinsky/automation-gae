@@ -3,6 +3,7 @@ import logging
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE
+from models.config.config import Config
 from models.geo_push import GeoPush
 from models.order import Order
 from outcomes import get_item_dict
@@ -171,7 +172,16 @@ def check_version(condition, client):
 
 def check_geo_push(client, order):
     push = GeoPush.query(GeoPush.client == client.key, GeoPush.status == STATUS_AVAILABLE).get()
-    if push and order:
-        order.geo_push = push.key
-        push.deactivate()
-    return push is not None
+    success = False
+    if push:
+        config = Config.get()
+        last_day = datetime.utcnow() - timedelta(days=config.GEO_PUSH_MODULE.days_without_order)
+        last_order = Order.query(Order.date_created > last_day,
+                                 Order.client_id == client.key.id(),
+                                 Order.status.IN(NOT_CANCELED_STATUSES)).get()
+        if not last_order:
+            success = True
+            if order:
+                order.geo_push = push.key
+                push.deactivate()
+    return success

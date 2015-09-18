@@ -14,7 +14,7 @@ from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupM
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
-    check_client_info
+    check_client_info, check_subscription, check_empty_order
 from models.venue import DELIVERY
 
 
@@ -348,6 +348,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     success, error, rest_points, full_points = check_gifts(gifts, client)
     if not valid:
         return send_error(error)
+    success, error = check_subscription(client, item_dicts)
+    if not valid:
+        return send_error(error)
 
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
@@ -374,6 +377,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         if not valid:
             return send_error(error)
 
+    success, error = check_empty_order(order, item_dicts, gift_dicts, order_gift_dicts, shared_gift_dicts)
+    if not success:
+        return send_error(error)
+
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
@@ -386,8 +393,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             max_wallet_payment = 0.0
 
     logging.info('item_dicts = %s' % item_dicts)
-
-    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts):
+    
+    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts) or order.geo_push:
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
