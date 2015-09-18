@@ -28,7 +28,7 @@ class PromoInfoHandler(ApiHandler):
         promo_dicts = []
         for promo in sorted(Promo.query_promos(Promo.status == STATUS_AVAILABLE),
                             key=lambda query_promo: -query_promo.priority):
-            if not promo.visible:
+            if not promo.visible or promo.hide_in_list:
                 continue
             text = u'%s_%s' % (promo.title.strip() if promo.title else u'',
                                promo.description.strip() if promo.description else u'')

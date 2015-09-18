@@ -131,6 +131,7 @@ class Promo(ndb.Model):
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+    hide_in_list = ndb.BooleanProperty(default=False)
 
     @classmethod
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
