@@ -336,7 +336,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_client_info(client, delivery_type, order)
     if not valid:
         return send_error(error)
-    valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
+    valid, error = check_stop_list(venue, delivery_type, item_dicts, gift_dicts, order_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts)

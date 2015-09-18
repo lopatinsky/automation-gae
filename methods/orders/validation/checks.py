@@ -17,14 +17,18 @@ __author__ = 'dvpermyakov'
 MAX_SECONDS_LOSS = 120
 
 
-def _get_substitute(origin_item, venue):
+def _get_substitute(origin_item, delivery_type, venue):
     for item in MenuItem.query(MenuItem.title == origin_item.title).fetch():
         if origin_item.key == item.key:
             continue
         if venue.key not in item.restrictions:
             if item.price != origin_item.price:
-                description = u'Позиция "%s" имеет другую цену в выбранной точке %s. ' \
-                              u'Заменить?' % (item.title, venue.title)
+                if delivery_type == DELIVERY:
+                    place = u'при заказе на доставку'
+                else:
+                    place = u'в выбранной точке %s' % venue.title
+                description = u'Позиция "%s" имеет другую цену %s. ' \
+                              u'Заменить?' % (item.title, place)
                 auto = False
             else:
                 description = u'Позиция должна автоматически замениться'
@@ -177,9 +181,12 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
-                description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
+                if delivery_type == DELIVERY:
+                    description = u'При заказе на доставку нет %s.' % item.title
+                else:
+                    description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue)
+                substitute = _get_substitute(item, delivery_type, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
             if item.key in delivery_items:
@@ -204,7 +211,7 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         return True, None
 
 
-def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
+def check_stop_list(venue, delivery_type, item_dicts, gift_dicts, order_gift_dicts):
     def check(item_dicts):
         description = None
         stop_list_choices = [choice.get().choice_id for choice in venue.group_choice_modifier_stop_list]
@@ -213,7 +220,7 @@ def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
             if item.key in venue.stop_lists:
                 description = u'В "%s" позиция "%s" временно недоступна' % (venue.title, item.title)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue)
+                substitute = _get_substitute(item, delivery_type, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
             for single_modifier in item_dict['single_modifiers']:
