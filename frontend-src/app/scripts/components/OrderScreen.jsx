@@ -2,13 +2,13 @@ import React from 'react';
 import { OrderStore, VenuesStore } from '../stores';
 import { OrderMenuItem, VenuesDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton } from 'material-ui';
+import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu } from 'material-ui';
 
 const OrderScreen = React.createClass({
     mixins: [Navigation],
 
     _order() {
-        return 1;
+        alert('order tap');
     },
 
     _refresh() {
@@ -40,6 +40,10 @@ const OrderScreen = React.createClass({
         VenuesStore.setChosenDelivery(delivery);
     },
 
+    _onSlotTap(e, selectedIndex, menuItem) {
+        OrderStore.setSlotId(menuItem.slot_id);
+    },
+
     _getVenueInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == '2') {
@@ -54,16 +58,26 @@ const OrderScreen = React.createClass({
     },
 
     _getTimeInput() {
-        var venue = VenuesStore.getChosenVenue();
-        return <div>
-            <DatePicker
-                hintText="Выберите дату"
-                autoOk={true} />
-            <TimePicker
-                hintText="Выберитее время"
-                format="24hr"
-                autoOk={true} />
-        </div>;
+        var delivery = VenuesStore.getChosenDelivery();
+        if (delivery.slots.length > 0) {
+            var menuItems = delivery.slots.map(slot => {
+                return { slot_id: slot.id, text: slot.name };
+            });
+            return <DropDownMenu
+                menuItems={menuItems}
+                selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
+                onChange={this._onSlotTap}/>;
+        } else {
+            return <div>
+                <DatePicker
+                    hintText="Выберите дату"
+                    autoOk={true} />
+                <TimePicker
+                    hintText="Выберитее время"
+                    format="24hr"
+                    autoOk={true} />
+            </div>;
+        }
     },
 
     _getDeliveryTypes() {
@@ -81,10 +95,12 @@ const OrderScreen = React.createClass({
 
     componentDidMount() {
         VenuesStore.addChangeListener(this._refresh);
+        OrderStore.addChangeListener(this._refresh);
     },
 
     componentWillUnmount() {
         VenuesStore.removeChangeListener(this._refresh);
+        OrderStore.addChangeListener(this._refresh);
     },
 
     render() {
@@ -100,7 +116,7 @@ const OrderScreen = React.createClass({
             <List>
                 {this._getVenueInput()}
             </List>
-
+            {this._getTimeInput()}
             <VenuesDialog ref="venuesDialog"/>
             <FlatButton label='Заказать' onClick={this._order} />
         </div>;

@@ -10,6 +10,18 @@ const VenuesStore = new BaseStore({
     },
 
     setChosenVenue(venue) {
+        var found = false;
+        if (this.chosenDelivery != null) {
+            for (var i = 0; i < venue.deliveries.length; i++) {
+            if (this.chosenDelivery.id == venue.deliveries[i].id) {
+                found = true;
+                this.chosenDelivery = venue.deliveries[i];
+            }
+        }
+        }
+        if (found == false && venue.deliveries.length > 0) {
+            this.chosenDelivery = venue.deliveries[0];
+        }
         this.chosenVenue = venue;
         this._changed();
     },
@@ -23,6 +35,14 @@ const VenuesStore = new BaseStore({
         this._changed();
     },
 
+    getSlotIndex(slot_id) {
+        for (var i = 0; i < this.chosenDelivery.slots.length; i++) {
+            if (slot_id == this.chosenDelivery.slots[i].id) {
+                return i;
+            }
+        }
+    },
+
     getVenues() {
         return this.venues;
     },
@@ -30,10 +50,7 @@ const VenuesStore = new BaseStore({
     _saveVenues(venues) {
         this.venues = venues;
         if (venues.length > 0) {
-            this.chosenVenue = venues[0];
-            if (this.chosenVenue.deliveries.length > 0) {
-                this.setChosenDelivery(this.chosenVenue.deliveries[0]);
-            }
+            this.setChosenVenue(venues[0]);
         }
     }
 
