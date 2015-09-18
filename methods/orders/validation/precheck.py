@@ -260,6 +260,8 @@ def after_validation_check(validation_result, order):
     delivery_sum = validation_result['delivery_sum']
     if order.total_sum and round(total_sum * 100) != round(order.total_sum * 100):
         return False, u"Сумма заказа была пересчитана"
+    if not order.delivery_sum:
+        order.delivery_sum = delivery_sum
     if order.delivery_sum and round(delivery_sum * 100) != round(order.delivery_sum * 100):
         return False, u"Сумма доставки была пересчитана"
     if order.wallet_payment and round(order.wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):
