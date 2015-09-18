@@ -64,7 +64,7 @@ class Order {
             return str;
         }
         const parts = ['8', str.substring(1, 4), str.substring(4, 7), str.substring(7, 9), str.substring(9, 11)];
-        return `${parts[0]} ${parts[1]} ${parts[2]}-${parts[3]} ${parts[4]}`;
+        return `${parts[0]} ${parts[1]} ${parts[2]}-${parts[3]}-${parts[4]}`;
     }
 
     get statusName() {
@@ -94,14 +94,16 @@ const OrderStore = new BaseStore({
 
     _knownOrders: new Map(),
     lastServerTimestamp: null,
-    _addOrders(array) {
+    _addOrder(order) {
+        if (order.status == this.STATUS.NEW || order.status == this.STATUS.CONFIRMED) {
+            this._knownOrders.set(order.id, order);
+        } else {
+            this._knownOrders.delete(order.id);
+        }
+    },
+    _addRawOrders(array) {
         for (let rawOrder of array) {
-            let o = new Order(rawOrder);
-            if (o.status == this.STATUS.NEW || o.status == this.STATUS.CONFIRMED) {
-                this._knownOrders.set(o.id, o);
-            } else {
-                this._knownOrders.delete(o.id);
-            }
+            this._addOrder(new Order(rawOrder));
         }
     },
     _setTimestamp(newTimestamp) {
@@ -109,15 +111,36 @@ const OrderStore = new BaseStore({
     },
 
     loadCurrent(orders, timestamp) {
-        this._addOrders(orders);
+        this._addRawOrders(orders);
         this._setTimestamp(timestamp);
         this._changed();
     },
     loadUpdates(newOrders, updates, timestamp) {
-        this._addOrders(newOrders);
-        this._addOrders(updates);
+        this._addRawOrders(newOrders);
+        this._addRawOrders(updates);
         this._setTimestamp(timestamp);
         this._changed();
+    },
+
+    _saveAndChanged(order) {
+        this._addOrder(order);
+        this._changed();
+    },
+    close(order) {
+        order.status = this.STATUS.DONE;
+        this._saveAndChanged(order);
+    },
+    postpone(order, { mins }) {
+        order.deliveryTime.add(mins, 'minutes');
+        this._saveAndChanged(order);
+    },
+    cancel(order) {
+        order.status = this.STATUS.CANCELED_BY_RESTAURANT;
+        this._saveAndChanged(order);
+    },
+    confirm(order) {
+        order.status = this.STATUS.CONFIRMED;
+        this._saveAndChanged(order);
     },
 
     _getOrders(filter) {
@@ -144,6 +167,9 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request == 'updates') {
                 OrderStore.loadUpdates(action.data.new_orders, action.data.updated, action.data.timestamp);
+            }
+            if (action.data.request.substring(0, 13) == 'order_action_') {
+                OrderStore[action.data.action](action.data.order, action.data.options);
             }
             break;
     }

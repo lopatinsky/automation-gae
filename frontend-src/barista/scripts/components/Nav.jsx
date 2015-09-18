@@ -8,11 +8,12 @@ const NavItem = React.createClass({
         if (this.props.label) {
             const labelStyle = {
                 position: 'absolute',
-                right: 12,
+                left: '50%',
                 top: '50%',
                 width: 28,
                 height: 28,
                 lineHeight: '28px',
+                marginLeft: 8,
                 marginTop: -50,
                 borderRadius: 14,
                 background: 'red',
@@ -25,7 +26,13 @@ const NavItem = React.createClass({
     render() {
         let isActive = this.isActive(this.props.route);
         let imageUrl = `/static/barista/img/sections${isActive ? '-active' : ''}/${this.props.route}.png`;
-        let style, linkStyle = { textAlign: 'center', textDecoration: 'none', color: isActive ? '#65A329' : '#666666'};
+        let style,
+            linkStyle = {
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: isActive ? '#65A329' : '#666666',
+                position: 'relative'
+            };
         if (this.props.horizontal) {
             style = {
                 display: 'table',
@@ -35,7 +42,6 @@ const NavItem = React.createClass({
             assign(linkStyle, {
                 display: 'table-cell',
                 height: '100%',
-                position: 'relative',
                 verticalAlign: 'middle'
             });
         } else {

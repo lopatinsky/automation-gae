@@ -104,13 +104,30 @@ const MainView = React.createClass({
                  orderCount={this.state.orderAhead.length}
                  deliveryCount={this.state.delivery.length}/>
             <div style={contentStyle}>
-                <RouteHandler orderAhead={this.state.orderAhead} delivery={this.state.delivery}/>
+                <RouteHandler orderAhead={this.state.orderAhead}
+                              delivery={this.state.delivery}
+                              onTouchTapCancel={this._onTouchTapCancel}
+                              onTouchTapConfirm={this._onTouchTapConfirm}
+                              onTouchTapDone={this._onTouchTapDone}
+                              onTouchTapPostpone={this._onTouchTapPostpone}/>
             </div>
             {this._renderLogoutDialog()}
         </div>;
     },
     _onLogoutClick() {
         this.refs.logoutDialog.show();
+    },
+    _onTouchTapCancel(order) {
+        Actions.cancelOrder(order);
+    },
+    _onTouchTapConfirm(order) {
+        Actions.confirmOrder(order)
+    },
+    _onTouchTapDone(order) {
+        Actions.doneOrder(order);
+    },
+    _onTouchTapPostpone(order) {
+        Actions.postponeOrder(order, 5);
     }
 });
 export default MainView;

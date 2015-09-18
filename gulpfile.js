@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
-    reactify = require('reactify'),
     browserify = require('browserify'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
