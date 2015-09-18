@@ -8,17 +8,19 @@ __author__ = 'dvpermyakov'
 
 STRING = 0
 NUMBER = 1
-TYPE_CHOICES = (STRING, NUMBER)
+NUMBER_PLUS_MINUS = 2
+TYPE_CHOICES = (STRING, NUMBER, NUMBER_PLUS_MINUS)
 
 
 class Field(ndb.Model):
     title = ndb.StringProperty(required=True)
     type = ndb.IntegerProperty(required=True, choices=TYPE_CHOICES)
+    order = ndb.IntegerProperty(required=True)
 
 
 class ClientModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
-    extra_fields = ndb.KeyProperty(kind=Field, repeated=True)
+    extra_fields = ndb.StructuredProperty(Field, repeated=True)
 
     def dict(self):
         return {
@@ -27,14 +29,15 @@ class ClientModule(ndb.Model):
             'fields': [{
                 'title': field.title,
                 'field': latinize(field.title),
-                'type': field.type
-            } for field in self.extra_fields]
+                'type': field.type,
+                'order': field.order
+            } for field in sorted(self.extra_fields, key=lambda field: field.order)]
         }
 
 
 class OrderModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
-    extra_fields = ndb.KeyProperty(kind=Field, repeated=True)
+    extra_fields = ndb.StructuredProperty(Field, repeated=True)
 
     def dict(self):
         return {
