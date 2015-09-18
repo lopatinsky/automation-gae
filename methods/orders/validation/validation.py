@@ -393,8 +393,8 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             max_wallet_payment = 0.0
 
     logging.info('item_dicts = %s' % item_dicts)
-    
-    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts) or order.geo_push:
+
+    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts) or (order and order.geo_push):
         grouped_item_dicts = group_item_dicts(item_dicts)
         grouped_gift_dicts = group_item_dicts(gift_dicts)
         grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
