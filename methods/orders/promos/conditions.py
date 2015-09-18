@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 import logging
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
+from models import STATUS_AVAILABLE
+from models.geo_push import GeoPush
 from models.order import Order
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
@@ -165,3 +167,11 @@ def check_item_not_in_order(condition, item_dicts):
 
 def check_version(condition, client):
     return CLIENT_VERSIONS[condition.value] in client.user_agent
+
+
+def check_geo_push(client, order):
+    push = GeoPush.query(GeoPush.client == client.key, GeoPush.status == STATUS_AVAILABLE).get()
+    if push and order:
+        order.geo_push = push.key
+        push.deactivate()
+    return push is not None

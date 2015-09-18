@@ -3,6 +3,7 @@ import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
 from methods.rendering import timestamp
+from models.geo_push import GeoPush
 from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
 from models.client import Client
@@ -148,6 +149,7 @@ class Order(ndb.Model):
     email_key_postpone = ndb.StringProperty()
     email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
+    geo_push = ndb.KeyProperty(kind=GeoPush)
 
     @classmethod
     def get(cls, client):

@@ -214,6 +214,9 @@ app = WSGIApplication([
                 Route('/get_url', api.GetGiftUrlHandler),
             ]),
         ]),
+        PathPrefixRoute('/geo_push', [
+            Route('/add', api.AddPushHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/company', [

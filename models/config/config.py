@@ -4,6 +4,7 @@ SHARE_GIFT = 1
 SHARE_INVITATION = 2
 ORDER_INFO_MODULE = 3
 CLIENT_INFO_MODULE = 4
+GEO_PUSH_MODULE = 5
 MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, CLIENT_INFO_MODULE)
 
 from google.appengine.api import memcache
@@ -14,6 +15,7 @@ from models.config.share import ShareInvitationModule, ShareGiftModule
 from models.config.field import ClientModule, OrderModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
+from models.config.geo_push import GeoPushModule
 
 OTHER = -1
 VENUE = 0
@@ -70,6 +72,7 @@ class Config(ndb.Model):
     SUBSCRIPTION_MODULE = ndb.LocalStructuredProperty(SubscriptionModule)
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
+    GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 

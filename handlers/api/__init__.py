@@ -23,3 +23,4 @@ from statuses import StatusHandler, ClientSettingSuccessHandler
 from demo import DemoLoginHandler
 from promo_code import EnterPromoCode, PromoCodeHistoryHandler
 from subscription import BuySubscriptionHandler, SubscriptionInfoHandler, SubscriptionTariffsHandler
+from geo_push import AddPushHandler

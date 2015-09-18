@@ -52,6 +52,9 @@ def cancel_order(order, status, namespace, comment=None):
         if order.subscription_details:
             subscription = order.subscription_details.subscription.get()
             subscription.recover(order.subscription_details.amount)
+        if order.geo_push:
+            geo_push = order.geo_push.get()
+            geo_push.recover()
 
         order.status = status
         order.return_datetime = datetime.utcnow()

@@ -73,6 +73,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.CLIENT_MODULE.dict())
         if config.ORDER_MODULE:
             modules.append(config.ORDER_MODULE.dict())
+        if config.GEO_PUSH_MODULE:
+            modules.append(config.GEO_PUSH_MODULE.dict())
         self.render_json({
             'modules': modules
         })
