@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardText, FlatButton } from 'material-ui';
-import { OrderStore } from '../stores';
+import { AjaxStore, OrderStore } from '../stores';
+import { SpinnerWrap } from '../components';
 
 const OrderCard = React.createClass({
     _modifierStr(mod) {
@@ -8,6 +9,7 @@ const OrderCard = React.createClass({
     },
     getInitialState() {
         return {
+            sendingRequest: false,
             handle: {
                 cancel: this._handleAction.bind(this, 'Cancel'),
                 postpone: this._handleAction.bind(this, 'Postpone'),
@@ -15,6 +17,17 @@ const OrderCard = React.createClass({
                 done: this._handleAction.bind(this, 'Done')
             }
         };
+    },
+    componentDidMount() {
+        AjaxStore.addChangeListener(this._onAjaxStoreChange);
+    },
+    componentWillUnmount() {
+        AjaxStore.removeChangeListener(this._onAjaxStoreChange);
+    },
+    _onAjaxStoreChange() {
+        this.setState({
+            sendingRequest: AjaxStore.sending[`order_action_${this.props.order.id}`]
+        });
     },
     _renderItem(item, index, array) {
         const modifiers = [];
@@ -52,9 +65,9 @@ const OrderCard = React.createClass({
             primaryActionHandler = this.state.handle.done;
         }
         return <div style={{borderTop: '1px solid #ccc', textAlign: 'right', padding: 8}}>
-            <FlatButton label='Отменить' onTouchTap={this.state.handle.cancel}/>
-            <FlatButton label='Перенести' onTouchTap={this.state.handle.postpone}/>
-            <FlatButton label={primaryActionLabel} onTouchTap={primaryActionHandler} secondary={true}/>
+            <FlatButton label='Отменить' onTouchTap={this.state.handle.cancel} disabled={this.state.sendingRequest}/>
+            <FlatButton label='Перенести' onTouchTap={this.state.handle.postpone} disabled={this.state.sendingRequest}/>
+            <FlatButton label={primaryActionLabel} onTouchTap={primaryActionHandler} disabled={this.state.sendingRequest} secondary={true}/>
         </div>;
     },
     render() {
@@ -68,44 +81,46 @@ const OrderCard = React.createClass({
             items = order.items.map(this._renderItem),
             gifts = order.gifts.map(this._renderItem);
         return <Card style={{margin:'0 12px 12px', fontWeight: 300}}>
-            <CardText>
-                <div style={{display: 'table', width:'100%', marginBottom: 6}}>
-                    <div style={{width: '13%', ...cellStyle}}>
-                        <div>#{order.number}</div>
-                        <div>{order.statusName}</div>
-                    </div>
-                    <div style={{width: '8%', ...cellStyle}}>
-                        <div style={bolderStyle}>{order.deliveryTime.format('H:mm')}</div>
-                        <div>{order.deliveryTime.format('D MMM')}</div>
-                    </div>
-                    <div style={{width: '14%', ...bolderStyle, ...cellStyle}}>
-                        <div>{order.client.name}</div>
-                        <div>{order.client.phone}</div>
-                    </div>
-                    <div style={{width: '65%', ...cellStyle}}>
-                        <table style={{borderSpacing: 0, width: '100%'}}>
-                            {items}
-                            {gifts}
-                        </table>
-                        <div style={{textAlign: 'right'}}>
-                            <div>
-                                <span style={bolderStyle}>{order.paymentTypeName}: </span>
-                                <span style={boldStyle}>{order.paymentSum} р.</span>
+            <SpinnerWrap show={this.state.sendingRequest}>
+                <CardText>
+                    <div style={{display: 'table', width:'100%', marginBottom: 6}}>
+                        <div style={{width: '13%', ...cellStyle}}>
+                            <div>#{order.number}</div>
+                            <div>{order.statusName}</div>
+                        </div>
+                        <div style={{width: '8%', ...cellStyle}}>
+                            <div style={bolderStyle}>{order.deliveryTime.format('H:mm')}</div>
+                            <div>{order.deliveryTime.format('D MMM')}</div>
+                        </div>
+                        <div style={{width: '14%', ...bolderStyle, ...cellStyle}}>
+                            <div>{order.client.name}</div>
+                            <div>{order.client.phone}</div>
+                        </div>
+                        <div style={{width: '65%', ...cellStyle}}>
+                            <table style={{borderSpacing: 0, width: '100%'}}>
+                                {items}
+                                {gifts}
+                            </table>
+                            <div style={{textAlign: 'right'}}>
+                                <div>
+                                    <span style={bolderStyle}>{order.paymentTypeName}: </span>
+                                    <span style={boldStyle}>{order.paymentSum} р.</span>
+                                </div>
+                                {order.walletPayment > 0 && <div>Оплата баллами: {order.walletPayment} р.</div>}
                             </div>
-                            {order.walletPayment > 0 && <div>Оплата баллами: {order.walletPayment} р.</div>}
                         </div>
                     </div>
-                </div>
-                <div>{
-                    order.deliveryType == OrderStore.DELIVERY_TYPE.DELIVERY ?
-                        order.address :
-                        order.deliveryTypeName
-                }</div>
-                {order.comment && <div>
-                    Комментарий клиента: <span style={bolderStyle}>{order.comment}</span>
-                </div>}
-            </CardText>
-            {this._renderActions()}
+                    <div>{
+                        order.deliveryType == OrderStore.DELIVERY_TYPE.DELIVERY ?
+                            order.address :
+                            order.deliveryTypeName
+                    }</div>
+                    {order.comment && <div>
+                        Комментарий клиента: <span style={bolderStyle}>{order.comment}</span>
+                    </div>}
+                </CardText>
+                {this._renderActions()}
+            </SpinnerWrap>
         </Card>
     }
 });

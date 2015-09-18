@@ -1,8 +1,8 @@
 import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
-import { AppBar, Dialog, FlatButton, TextField, CircularProgress } from 'material-ui';
-import { Nav } from '../components';
+import { AppBar, Dialog, FlatButton, TextField } from 'material-ui';
+import { Nav, SpinnerWrap } from '../components';
 import { AuthStore, AjaxStore, OrderStore } from '../stores';
 import Actions from '../Actions';
 
@@ -60,7 +60,7 @@ const MainView = React.createClass({
     },
 
     _renderLogoutDialog() {
-        let controlsProps = this.state.loggingOut ? { style: { opacity: 0 }, disabled: true } : {};
+        let controlsProps = this.state.loggingOut ? { disabled: true } : {};
         let actions = [
             <FlatButton key='cancel'
                         label='Отмена'
@@ -71,24 +71,20 @@ const MainView = React.createClass({
                         onTouchTap={this._logoutSubmit}
                         {...controlsProps}
                         secondary={true}/>
-        ], contentStyle = { maxWidth: 400 }, progressStyles = {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            marginLeft: -25,
-            marginTop: -25
-        };
+        ], contentStyle = { maxWidth: 400 };
         return <Dialog ref='logoutDialog'
                        title='Выход'
                        actions={actions}
                        contentStyle={contentStyle}>
-            <TextField ref='logoutPassword'
-                       type='password'
-                       floatingLabelText='Пароль'
-                       fullWidth={true}
-                       {...controlsProps}
-                       onEnterKeyDown={this._logoutSubmit}/>
-            {this.state.loggingOut && <CircularProgress style={progressStyles}/>}
+            <SpinnerWrap show={this.state.loggingOut}>
+                <TextField ref='logoutPassword'
+                           type='password'
+                           floatingLabelText='Пароль'
+                           fullWidth={true}
+                           {...controlsProps}
+                           disabled={this.state.loggingOut}
+                           onEnterKeyDown={this._logoutSubmit}/>
+            </SpinnerWrap>
         </Dialog>;
     },
 
