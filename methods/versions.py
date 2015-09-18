@@ -5,6 +5,10 @@ from models.config.version import TEST_VERSIONS, Version
 
 __author__ = 'dvpermyakov'
 
+CLIENT_VERSIONS = {
+    0: 'farsh/1.1.1.3'
+}
+
 
 def is_test_version(url):
     test = False

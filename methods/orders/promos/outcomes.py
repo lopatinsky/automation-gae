@@ -302,3 +302,10 @@ def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
             cheapest_item_dict['promos'].append(promo)
             response.success = True
     return response
+
+
+def set_delivery_message(response, promo, delivery_type, delivery_zone):
+    if delivery_type == DELIVERY:
+        promo.title = u'Стоимость доставки: %s' % delivery_zone.price
+        response.success = True
+    return response

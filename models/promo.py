@@ -63,10 +63,11 @@ class PromoOutcome(ndb.Model):
     CASH_ACCUMULATE_GIFT_POINT = 15
     FORBID_MENU_ITEM = 16
     MARKED_DISCOUNT_CHEAPEST = 17
+    DELIVERY_MESSAGE = 18
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
                PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY,
-               CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM, MARKED_DISCOUNT_CHEAPEST)
+               CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM, MARKED_DISCOUNT_CHEAPEST, DELIVERY_MESSAGE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -96,12 +97,14 @@ class PromoCondition(ndb.Model):
     CHECK_ORDER_NUMBER = 19
     CHECK_ITEM_NOT_IN_ORDER = 20
     CHECK_MARKED_QUANTITY = 21
+    CHECK_DEVICE_TYPE = 22
+    CHECK_VERSION = 23
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
                MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
                MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER, CHECK_ITEM_NOT_IN_ORDER,
-               CHECK_MARKED_QUANTITY)
+               CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -217,7 +220,9 @@ CONDITION_MAP = {
     PromoCondition.CHECK_PROMO_CODE: u'Клиент активировал промо-код из группы',
     PromoCondition.CHECK_ORDER_NUMBER: u'Кратный N заказ клиента',
     PromoCondition.CHECK_ITEM_NOT_IN_ORDER: u'Продукта нет в заказе',
-    PromoCondition.CHECK_MARKED_QUANTITY: u'Минимальное кол-во помеченных продуктов (метка)'
+    PromoCondition.CHECK_MARKED_QUANTITY: u'Минимальное кол-во помеченных продуктов (метка)',
+    PromoCondition.CHECK_DEVICE_TYPE: u'Тип телефона',
+    PromoCondition.CHECK_VERSION: u'Номер версии'
 }
 
 OUTCOME_MAP = {
@@ -238,5 +243,6 @@ OUTCOME_MAP = {
     PromoOutcome.EMPTY: u'Выводить сообщение',
     PromoOutcome.CASH_ACCUMULATE_GIFT_POINT: u'Баллы за каждые N у.е в заказе',
     PromoOutcome.FORBID_MENU_ITEM: u'Запрет на продукт',
-    PromoOutcome.MARKED_DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе (метка)'
+    PromoOutcome.MARKED_DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе (метка)',
+    PromoOutcome.DELIVERY_MESSAGE: u'Сообщение о доставке'
 }

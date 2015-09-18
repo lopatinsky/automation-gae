@@ -9,7 +9,7 @@ from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
 from methods.rendering import latinize, get_phone, get_separated_name_surname, \
-    parse_time_picker_value
+    parse_time_picker_value, get_device_type
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
@@ -50,6 +50,7 @@ def set_client_info(client_json, headers, order=None):
     client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
     client.user_agent = headers['User-Agent']
+    client.device_type = get_device_type(client.user_agent)
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}

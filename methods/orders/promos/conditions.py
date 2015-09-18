@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from methods import working_hours
+from methods.versions import CLIENT_VERSIONS
 from models.order import Order
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
@@ -160,3 +161,7 @@ def check_item_not_in_order(condition, item_dicts):
         if _check_item(condition.item_details, item_dict):
             amount += 1
     return amount == 0
+
+
+def check_version(condition, client):
+    return CLIENT_VERSIONS[condition.value] in client.user_agent

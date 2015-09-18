@@ -3,11 +3,11 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
     check_group_modifier_choice, check_payment_type, check_happy_hours_created_time, mark_item_with_category, \
     mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
-    check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity
+    check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity, check_version
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
-    return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest
+    return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest, set_delivery_message
 
 
 class OutcomeResult:
@@ -94,6 +94,10 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_item_not_in_order(condition, item_dicts)
     elif condition.method == PromoCondition.CHECK_MARKED_QUANTITY:
         return check_marked_quantity(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_DEVICE_TYPE:
+        return check_condition_by_value(condition, client.device_type)
+    elif condition.method == PromoCondition.CHECK_VERSION:
+        return check_version(condition, client)
     else:
         return True
 
@@ -137,6 +141,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return forbid_menu_item(response, outcome, items)
     elif outcome.method == PromoOutcome.MARKED_DISCOUNT_CHEAPEST:
         return set_discount_marked_cheapest(response, outcome, items, promo)
+    elif outcome.method == PromoOutcome.DELIVERY_MESSAGE:
+        return set_delivery_message(response, promo, delivery_type, delivery_zone)
     else:
         response.success = True
         return response
