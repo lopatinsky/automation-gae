@@ -394,23 +394,15 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('item_dicts = %s' % item_dicts)
 
-    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts) or (order and order.geo_push):
-        grouped_item_dicts = group_item_dicts(item_dicts)
-        grouped_gift_dicts = group_item_dicts(gift_dicts)
-        grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
-        grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
-        grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
-        grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
-        grouped_shared_gift_dicts = group_item_dicts(
-            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
-        grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
-    else:
-        grouped_item_dicts = []
-        grouped_gift_dicts = []
-        grouped_new_order_gift_dicts = []
-        grouped_unavail_order_gift_dicts = []
-        grouped_order_gift_dicts = []
-        grouped_cancelled_order_gift_dicts = []
+    grouped_item_dicts = group_item_dicts(item_dicts)
+    grouped_gift_dicts = group_item_dicts(gift_dicts)
+    grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
+    grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
+    grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
+    grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
+    grouped_shared_gift_dicts = group_item_dicts(
+        [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
+    grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
     if not item_dicts and not gift_dicts:
