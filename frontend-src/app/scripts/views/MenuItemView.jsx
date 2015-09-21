@@ -14,7 +14,7 @@ const MenuItemView = React.createClass({
         var item = MenuStore.getItem(this.props.params.category_id, this.props.params.item_id);
         return (
             <div>
-                <Toolbar title={item.title} view={this} right='order' />
+                <Toolbar title={item.title} view={this} right='order' back={true} />
                 <MenuItemScreen item={item} />
             </div>
         );
