@@ -48,7 +48,8 @@ class CompanySignupHandler(CompanyBaseHandler):
             values = {
                 'namespace': namespace,
                 'login': login,
-                'password_raw': password
+                'password_raw': password,
+                'rights': CompanyUser.RIGHTS_MASK_ADMIN,
             }
             success, user = CompanyUser.create_user(login, **values)
             if not success:
@@ -101,7 +102,7 @@ class LoginHandler(CompanyBaseHandler):
 
 
 class LogoutHandler(CompanyBaseHandler):
-    #@company_user_required
+    #@full_rights_required
     def get(self):
         if "namespace" in self.session:
             del self.session["namespace"]

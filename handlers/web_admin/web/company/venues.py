@@ -2,7 +2,7 @@
 from datetime import datetime
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
-from methods.auth import company_user_required
+from methods.auth import full_rights_required
 from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, DeliveryZone
 from methods import geocoder
@@ -12,7 +12,7 @@ from models.venue import DELIVERY
 
 
 class CreateVenueHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         lat = self.request.get('lat')
         lon = self.request.get('lon')
@@ -34,7 +34,7 @@ class CreateVenueHandler(CompanyBaseHandler):
                 'address': address_str
             })
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue = Venue()
         venue.title = self.request.get('title')
@@ -49,14 +49,14 @@ class CreateVenueHandler(CompanyBaseHandler):
 
 
 class EnableVenuesHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venues = Venue.query().fetch()
         for venue in venues:
             venue.days = [day for day in venue.schedule.days] if venue.schedule else []
         self.render('/venues/enable_venues.html', venues=venues)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venues = Venue.query().fetch()
         for v in venues:
@@ -69,7 +69,7 @@ class EnableVenuesHandler(CompanyBaseHandler):
 
 
 class EditVenueHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
@@ -77,7 +77,7 @@ class EditVenueHandler(CompanyBaseHandler):
         legals = LegalInfo.query().fetch()
         self.render('/venues/edit_venue.html', venue=venue, legals=legals)
 
-    @company_user_required
+    @full_rights_required
     def post(self, venue_id):
         venue = Venue.get_by_id(int(venue_id))
         if not venue:
@@ -93,7 +93,7 @@ class EditVenueHandler(CompanyBaseHandler):
 
 
 class VenueListHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         self.render('/menu/venue_list.html', **{
             'venues': Venue.query().fetch()
@@ -101,7 +101,7 @@ class VenueListHandler(CompanyBaseHandler):
 
 
 class AddRestrictionHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
@@ -124,7 +124,7 @@ class AddRestrictionHandler(CompanyBaseHandler):
             'venue': venue
         })
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
@@ -142,7 +142,7 @@ class AddRestrictionHandler(CompanyBaseHandler):
 
 
 class MapVenuesHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venues = []
         for venue in Venue.query().fetch():
@@ -155,7 +155,7 @@ class MapVenuesHandler(CompanyBaseHandler):
 
 
 class ChooseDeliveryZonesHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
@@ -174,7 +174,7 @@ class ChooseDeliveryZonesHandler(CompanyBaseHandler):
                 zone.has = False
         self.render('/venues/choose_zones.html', zones=zones, venue=venue)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
@@ -200,7 +200,7 @@ class ChooseDeliveryZonesHandler(CompanyBaseHandler):
 
 
 class EditVenueScheduleHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
@@ -227,7 +227,7 @@ class EditVenueScheduleHandler(CompanyBaseHandler):
             'days': days
         })
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
