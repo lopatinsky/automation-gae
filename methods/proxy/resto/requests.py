@@ -7,8 +7,7 @@ from methods.rendering import timestamp
 __author__ = 'dvpermyakov'
 
 
-BASE_URL = 'http://empatika-resto-test.appspot.com'
-
+BASE_URL = 'http://empatika-resto.appspot.com'
 
 def _get_request(path, params=None, log_response=True):
     url = '%s%s' % (BASE_URL, path)
