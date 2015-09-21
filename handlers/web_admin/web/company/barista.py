@@ -41,17 +41,18 @@ class SignupHandler(CompanyBaseHandler):
         elif venue_id and venue_id not in venue_ids:
             error = u"Неправильно выбрана кофейня"
         else:
+            company_namespace = namespace_manager.get_namespace()
             venue_key = venue_ids.get(venue_id, None)
             values = {
                 'login': login,
-                'namespace': self.user.namespace,
+                'namespace': company_namespace,
                 'venue': venue_key,
                 'password_raw': password
             }
             namespace_manager.set_namespace('')
             success, user = Admin.create_user(login, **values)
             if success:
-                namespace_manager.set_namespace(self.user.namespace)
+                namespace_manager.set_namespace(company_namespace)
                 success, user = Admin.create_user(login, **values)
                 if success:
                     logging.info(user)
@@ -87,21 +88,22 @@ class AutoCreateAdmins(CompanyBaseHandler):
             login_rus = [c for c in venue.title.lower() if 'a' <= c <= 'z' or u'а' <= c <= u'я']
             login_en = ''.join(trans_dict.get(c, c) for c in login_rus)
 
+            company_namespace = namespace_manager.get_namespace()
+
             auth_id = login_en
             values = {
                 'login': login_en,
                 'venue': venue.key,
-                'namespace': self.user.namespace,
+                'namespace': company_namespace,
                 'password_raw': '0000'
             }
             namespace_manager.set_namespace('')
             success, info = Admin.create_user(auth_id, **values)
+            namespace_manager.set_namespace(company_namespace)
             if success:
-                namespace_manager.set_namespace(self.user.namespace)
                 success, info = Admin.create_user(auth_id, **values)
                 if success:
                     logging.info(info)
-            namespace_manager.set_namespace(self.user.namespace)
             if not success:
                 self.abort(500)
         self.redirect_to("barista_main")
@@ -122,6 +124,7 @@ class ChangeLoginAdmins(CompanyBaseHandler):
         admin = Admin.get_by_id(admin_id)
         if not admin:
             self.abort(500)
+        company_namespace = namespace_manager.get_namespace()
         namespace_manager.set_namespace('')
         login = admin.login
         admin = Admin.query(Admin.login == login).get()
@@ -140,7 +143,7 @@ class ChangeLoginAdmins(CompanyBaseHandler):
             info.put()
             admin.delete_auth_ids()
             admin.key.delete()
-            namespace_manager.set_namespace(self.user.namespace)
+            namespace_manager.set_namespace(company_namespace)
             admin = Admin.get_by_id(admin_id)
             if not admin:
                 self.abort(500)

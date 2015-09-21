@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+from google.appengine.api import namespace_manager
 
 from google.appengine.api.taskqueue import taskqueue
 
@@ -137,12 +138,13 @@ class AddPushesHandler(CompanyBaseHandler):
         if not send_now and start < datetime.utcnow() + timedelta(seconds=MAX_SECONDS_LOSS):
             return error(u'Введите время больше текущего в utc')
         channels = []
+        company_namespace = namespace_manager.get_namespace()
         if self.request.get('company'):
-            company_channel = get_channels(self.user.namespace)[COMPANY_CHANNEL]
+            company_channel = get_channels(company_namespace)[COMPANY_CHANNEL]
             channels.append(Channel(name=u'Всем', channel=company_channel))
         for venue in Venue.query(Venue.active == True).fetch():
             if self.request.get(str(venue.key.id())):
-                venue_channel = get_channels(self.user.namespace)[VENUE_CHANNEL]
+                venue_channel = get_channels(company_namespace)[VENUE_CHANNEL]
                 channels.append(Channel(name=venue.title, channel=venue_channel))
         notification = Notification(start=start, text=text, popup_text=full_text, header=header, channels=channels)
         notification.put()

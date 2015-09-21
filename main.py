@@ -222,8 +222,9 @@ app = WSGIApplication([
     PathPrefixRoute('/company', [
         Route('/create', company_admin.CompanySignupHandler),
         Route('/login', company_admin.LoginHandler, 'company_login'),
-        Route('/logout', company_admin.LogoutHandler),
+        Route('/logout', company_admin.LogoutHandler, 'company_logout'),
         Route('/main', company_admin.AutomationMainHandler, 'company_main'),
+        Route('/choose', company_admin.ChooseNamespaceHandler, 'company_choose_namespace'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         PathPrefixRoute('/venues', [

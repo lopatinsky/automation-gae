@@ -103,5 +103,7 @@ class LoginHandler(CompanyBaseHandler):
 class LogoutHandler(CompanyBaseHandler):
     #@company_user_required
     def get(self):
+        if "namespace" in self.session:
+            del self.session["namespace"]
         self.auth.unset_session()
         self.redirect('/company/login')
