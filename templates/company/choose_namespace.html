@@ -14,5 +14,8 @@
         </select>
         <input type="submit" value="Выбрать">
     </form>
+    {% if user.has_rights((user.RIGHTS_BIT_REPORT,)) %}
+        <a href="/mt/report/companies">Отчет по всем компаниям</a>
+    {% endif %}
 </body>
 </html>

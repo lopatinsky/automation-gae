@@ -1,7 +1,8 @@
+from google.appengine.ext.ndb import metadata
 from handlers.maintenance.report import get_standart_params
 from methods.auth import check_rights_decorator
 from base import CompanyBaseHandler
-from methods.report import clients, menu_items, orders
+from methods.report import clients, menu_items, orders, companies
 from models.user import CompanyUser
 
 
@@ -33,3 +34,19 @@ class OrdersReportHandler(CompanyBaseHandler):
     def get(self):
         html_values = orders.get(**get_standart_params(self.request))
         self.render_report('orders', html_values)
+
+
+class CompaniesReportHandler(CompanyBaseHandler):
+    @_check_rights
+    def get(self):
+        if self.user.namespace:
+            self.abort(403)
+        chosen_namespaces = []
+        for namespace in metadata.get_namespaces():
+            if self.request.get(namespace):
+                chosen_namespaces.append(namespace)
+        html_values = companies.get(**get_standart_params(self.request, {
+            'chosen_object_type': self.request.get("selected_object_type"),
+            'chosen_namespaces': chosen_namespaces
+        }, delete_params=['venue_id']))
+        self.render_report('companies', html_values)
