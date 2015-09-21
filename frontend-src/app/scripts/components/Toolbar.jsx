@@ -1,12 +1,13 @@
 import React from 'react';
 import { AppBar, IconButton, FlatButton, Icons } from 'material-ui';
+import Router from 'react-router';
 import { Navigation } from 'react-router';
-import { OrderStore } from '../stores';
+import { OrderStore, MenuStore } from '../stores';
 
 const Toolbar = React.createClass({
     ORDER_BUTTON: 'order',
 
-    mixins: [Navigation],
+    mixins: [Navigation, Router.State],
 
     _refresh() {
         this.setState({});
@@ -37,7 +38,13 @@ const Toolbar = React.createClass({
             rightElement = <FlatButton label={label}  onClick={this.rightTap} />;
         }
         var leftElement;
-        if (this.props.back == true) {
+        var nestedCategory = false;
+        alert(this.getPathname());
+        alert(MenuStore.getCategories().length);
+        if (this.getPathname() == 'menu' && MenuStore.getCategories().length > 0) {
+            nestedCategory = true;
+        }
+        if (this.props.back == true || nestedCategory) {
             leftElement = <IconButton onClick={this.leftTap}>
                 <Icons.NavigationChevronLeft/>
             </IconButton>;
