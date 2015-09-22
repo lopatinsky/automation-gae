@@ -2,7 +2,7 @@ import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import { AppBar, Dialog, FlatButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
-import { Nav, SpinnerWrap } from '../components';
+import { Nav, SpinnerWrap, Clock } from '../components';
 import { AuthStore, AjaxStore, OrderStore } from '../stores';
 import Actions from '../Actions';
 
@@ -150,6 +150,7 @@ const MainView = React.createClass({
                  orderCount={this.state.orderAhead.length}
                  deliveryCount={this.state.delivery.length}/>
             <div style={contentStyle}>
+                <Clock/>
                 <RouteHandler orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
                               onTouchTapCancel={this._onTouchTapCancel}
