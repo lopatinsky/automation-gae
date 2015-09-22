@@ -6,7 +6,7 @@ from google.appengine.ext.ndb import metadata
 from base import ApiHandler
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
-from models import STATUS_AVAILABLE, Venue
+from models import STATUS_AVAILABLE, Venue, Client
 from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY, DeliveryZone
 from models.specials import get_channels
@@ -62,6 +62,11 @@ class CompanyInfoHandler(ApiHandler):
 
 class CompanyModulesHandler(ApiHandler):
     def get(self):
+        client_id = int(self.request.headers.get('Client-Id') or 0)
+        if client_id:
+            client = Client.get_by_id(client_id)
+        else:
+            client = None
         modules = []
         if config.SUBSCRIPTION_MODULE:
             modules.append(config.SUBSCRIPTION_MODULE.dict())
@@ -74,7 +79,7 @@ class CompanyModulesHandler(ApiHandler):
         if config.ORDER_MODULE:
             modules.append(config.ORDER_MODULE.dict())
         if config.GEO_PUSH_MODULE:
-            modules.append(config.GEO_PUSH_MODULE.dict())
+            modules.append(config.GEO_PUSH_MODULE.dict(client))
         self.render_json({
             'modules': modules
         })
