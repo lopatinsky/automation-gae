@@ -36,7 +36,8 @@ const ORDER_STATUS = {
         [ORDER_PAYMENT_TYPE.CASH]: "Наличными",
         [ORDER_PAYMENT_TYPE.CARD]: "Картой",
         [ORDER_PAYMENT_TYPE.PAYPAL]: "PayPal"
-    };
+    },
+    ORDER_POSTPONE_OPTIONS = [5, 10, 15, 20, 25, 30];
 
 class Order {
     constructor(obj) {
@@ -91,6 +92,7 @@ const OrderStore = new BaseStore({
     DELIVERY_TYPE_NAMES: ORDER_DELIVERY_TYPE_NAMES,
     PAYMENT_TYPE: ORDER_PAYMENT_TYPE,
     PAYMENT_TYPE_NAMES: ORDER_PAYMENT_TYPE_NAMES,
+    POSTPONE_OPTIONS: ORDER_POSTPONE_OPTIONS,
 
     _knownOrders: new Map(),
     lastServerTimestamp: null,

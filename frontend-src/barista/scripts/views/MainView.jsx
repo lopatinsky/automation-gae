@@ -1,7 +1,7 @@
 import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
-import { AppBar, Dialog, FlatButton, TextField } from 'material-ui';
+import { AppBar, Dialog, FlatButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
 import { Nav, SpinnerWrap } from '../components';
 import { AuthStore, AjaxStore, OrderStore } from '../stores';
 import Actions from '../Actions';
@@ -37,6 +37,7 @@ const MainView = React.createClass({
         return {
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders(),
+            pendingOrder: null,
             loggingOut: AjaxStore.sending.logout
         };
     },
@@ -88,6 +89,55 @@ const MainView = React.createClass({
         </Dialog>;
     },
 
+    _renderCancelDialog() {
+        let actions = [
+            <FlatButton key='back'
+                        label='Назад'
+                        onTouchTap={() => { this.refs.cancelDialog.dismiss() }}/>,
+            <FlatButton key='ok'
+                        label='Отменить заказ'
+                        secondary={true}
+                        onTouchTap={this._cancelSubmit}/>
+        ];
+        return <Dialog ref='cancelDialog'
+                       title='Отмена заказа'
+                       actions={actions}
+                       contentStyle={{maxWidth: 600}}>
+            <TextField ref='returnComment'
+                       type='text'
+                       floatingLabelText='Введите комментарий'
+                       fullWidth={true}/>
+        </Dialog>
+    },
+
+    _renderPostponeDialog() {
+        let actions = [
+            <FlatButton key='back'
+                        label='Назад'
+                        onTouchTap={() => { this.refs.postponeDialog.dismiss() }}/>,
+            <FlatButton key='ok'
+                        label='Перенести'
+                        secondary={true}
+                        onTouchTap={this._postponeSubmit}/>
+        ],
+            options = OrderStore.POSTPONE_OPTIONS.map(
+                    i => <RadioButton key={i}
+                                      value={'' + i}
+                                      label={`${i} минут`}
+                                      style={{marginBottom: 8}}/>
+            );
+        return <Dialog ref='postponeDialog'
+                       title='Перенос заказа'
+                       actions={actions}
+                       contentStyle={{maxWidth: 400}}>
+            <RadioButtonGroup name='postponeMinutes'
+                              ref='postponeMinutes'
+                              defaultSelected='10'>
+                {options}
+            </RadioButtonGroup>
+        </Dialog>
+    },
+
     render() {
         let isHorizontal = this.state.window.width > this.state.window.height;
         let contentStyle = isHorizontal ? {paddingLeft: 100, paddingTop: 80} : {paddingTop: 180};
@@ -108,22 +158,37 @@ const MainView = React.createClass({
                               onTouchTapPostpone={this._onTouchTapPostpone}/>
             </div>
             {this._renderLogoutDialog()}
+            {this._renderCancelDialog()}
+            {this._renderPostponeDialog()}
         </div>;
     },
     _onLogoutClick() {
         this.refs.logoutDialog.show();
     },
+
     _onTouchTapCancel(order) {
-        Actions.cancelOrder(order);
+        this.setState({ pendingOrder: order });
+        this.refs.cancelDialog.show();
     },
+    _cancelSubmit() {
+        this.refs.cancelDialog.dismiss();
+        Actions.cancelOrder(this.state.pendingOrder, this.refs.returnComment.getValue());
+    },
+
     _onTouchTapConfirm(order) {
         Actions.confirmOrder(order)
     },
     _onTouchTapDone(order) {
         Actions.doneOrder(order);
     },
+
     _onTouchTapPostpone(order) {
-        Actions.postponeOrder(order, 5);
+        this.setState({ pendingOrder: order });
+        this.refs.postponeDialog.show();
+    },
+    _postponeSubmit() {
+        this.refs.postponeDialog.dismiss();
+        Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
     }
 });
 export default MainView;

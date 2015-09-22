@@ -79,8 +79,10 @@ const Actions = {
             }));
     },
 
-    cancelOrder(order) {
+    cancelOrder(order, comment) {
         doRequest.post(`order_action_${order.id}`, `admin/orders/${order.id}/cancel`)
+            .type('form')
+            .send({ comment })
             .end(res => ({ order, action: 'cancel' }));
     },
 
