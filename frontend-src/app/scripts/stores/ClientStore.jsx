@@ -30,7 +30,7 @@ const ClientStore = new BaseStore({
         return localStorage.getItem("client_id");
     },
 
-    getCLientDict() {
+    getClientDict() {
         return {
             id: this.getClientId(),
             name: this.getName(),

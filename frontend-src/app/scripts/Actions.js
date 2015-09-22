@@ -223,13 +223,35 @@ const Actions = {
                 order: JSON.stringify(OrderStore.getOrderDict())
             })
             .end((err, res) => {
-                if (res.status == 200) {
+                if (res.status == 201) {
 
                 } else {
                     alert(res.status);
                 }
             });
+    },
+
+    loadHistory() {
+        request
+            .get(base_url + '/api/history')
+            .query({
+                client_id: ClientStore.getClientId()
+            })
+            .end((err, res) => {
+                if (res.status == 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.INIT,
+                        data: {
+                            request: "history",
+                            orders: res.body.orders
+                        }
+                    });
+                } else {
+                    alert(res.status);
+                }
+            });
     }
+
 };
 
 export default Actions;

@@ -1,5 +1,8 @@
 import BaseStore from './BaseStore';
 import Actions from '../Actions';
+import ClientStore from './ClientStore';
+import VenuesStore from './VenuesStore';
+import PaymentsStore from './PaymentsStore';
 
 const OrderStore = new BaseStore({
     totalSum: 0,
@@ -16,6 +19,10 @@ const OrderStore = new BaseStore({
 
     getTotalSum() {
         return this.totalSum;
+    },
+
+    getDeliverySum() {
+        return this.deliverySum;
     },
 
     getItems() {
@@ -47,15 +54,16 @@ const OrderStore = new BaseStore({
 
     getOrderDict() {
         return {
-            delivery_type: '',
-            client: '',
+            delivery_type: VenuesStore.getChosenDelivery().id,
+            client: ClientStore.getClientDict(),
+            payment: PaymentsStore.getPaymentDict(),
             device_type: 2,
-            delivery_slot_id: '',
-            total_sum: '',
-            delivery_sum: '',
-            items: '',
-            venue_id: '',
-            time_picker_value: '',
+            delivery_slot_id: this.getSlotId(),
+            total_sum: this.getTotalSum(),
+            delivery_sum: this.getDeliverySum(),
+            items: this.getItemsDict(),
+            venue_id: VenuesStore.getChosenVenue().id,
+            //time_picker_value: '',
             comment: ''
         }
     },
@@ -65,6 +73,7 @@ const OrderStore = new BaseStore({
         this.deliverySum = deliverySum;
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
+        Actions.order();
     }
 
 }, action => {

@@ -50,7 +50,8 @@ def set_client_info(client_json, headers, order=None):
     client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
     client.user_agent = headers['User-Agent']
-    client.device_type = get_device_type(client.user_agent)
+    if not client.device_type:
+        client.device_type = get_device_type(client.user_agent)
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}

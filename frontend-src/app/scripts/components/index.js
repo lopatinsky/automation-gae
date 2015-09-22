@@ -15,3 +15,4 @@ export { default as VenuesDialog } from './VenuesDialog';
 export { default as ClientInfoDialog } from './ClientInfoDialog';
 export { default as PaymentTypesDialog } from './PaymentTypesDialog';
 export { default as AddressScreen } from './AddressScreen';
+export { default as HistoryScreen } from './HistoryScreen';
