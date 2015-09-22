@@ -178,14 +178,16 @@ class Promo(ndb.Model):
         icon = None
         if self.outcomes:
             outcome = self.outcomes[0]
-            if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT]:
+            if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT,
+                                  PromoOutcome.PERCENT_GIFT_POINT, PromoOutcome.CASH_ACCUMULATE_GIFT_POINT]:
                 icon = self._get_url(hostname, self.BONUS_ICON)
             elif outcome.method in [PromoOutcome.CASH_BACK]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
             elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
-                                    PromoOutcome.FIX_DISCOUNT]:
+                                    PromoOutcome.FIX_DISCOUNT, PromoOutcome.DELIVERY_SUM_DISCOUNT,
+                                    PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT, PromoOutcome.MARKED_DISCOUNT_CHEAPEST]:
                 icon = self._get_url(hostname, self.DISCOUNT_ICON)
-            elif outcome.method in [PromoOutcome.ORDER_GIFT]:
+            elif outcome.method in [PromoOutcome.ORDER_GIFT, PromoOutcome.MARKED_ORDER_GIFT]:
                 icon = self._get_url(hostname, self.GIFT_ICON)
         return {
             'id': self.key.id(),
