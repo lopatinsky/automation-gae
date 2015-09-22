@@ -174,19 +174,16 @@ class OrderHandler(ApiHandler):
                 return self.render_json(error)
 
         subscription = get_subscription(client)
-        logging.info('subscription before %s' % subscription)
         if subscription:
             amount = get_amount_of_subscription_items(order_json['items'])
         else:
             amount = 0
-        logging.info('amount = %s' % amount)
         if subscription and amount:
             success = subscription.deduct(amount)
             if success:
                 self.order.subscription_details = SubscriptionDetails(subscription=subscription.key, amount=amount)
             else:
                 return self.render_json(u'Не удалось произвести покупку по абонементу')
-        logging.info('subscription after %s' % subscription)
 
         if self.order.wallet_payment > 0:
             empatika_wallet.pay(client.key.id(), self.order.key.id(), int(self.order.wallet_payment * 100))

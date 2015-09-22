@@ -25,5 +25,4 @@ def get_amount_of_subscription_items(item_dicts):
         menu_item = get_subscription_menu_item(item_dict)
         if menu_item:
             amount += item_dict['quantity']
-    logging.info('amount in method %s' % amount)
     return amount
