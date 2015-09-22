@@ -25,10 +25,12 @@ const Toolbar = React.createClass({
 
     componentDidMount() {
         OrderStore.addChangeListener(this._refresh);
+        MenuStore.addChangeListener(this._refresh);
     },
 
     componentWillUnmount() {
         OrderStore.removeChangeListener(this._refresh);
+        MenuStore.removeChangeListener(this._refresh);
     },
 
     render() {
@@ -39,9 +41,7 @@ const Toolbar = React.createClass({
         }
         var leftElement;
         var nestedCategory = false;
-        alert(this.getPathname());
-        alert(MenuStore.getCategories().length);
-        if (this.getPathname() == 'menu' && MenuStore.getCategories().length > 0) {
+        if (this.getPathname() == '/' && MenuStore.canUndoCategories()) {
             nestedCategory = true;
         }
         if (this.props.back == true || nestedCategory) {

@@ -3,26 +3,23 @@ import BaseStore from './BaseStore';
 import Actions from '../Actions';
 
 const ClientStore = new BaseStore({
-    name: '',
-    phone: '',
-    email: '',
-
     getName() {
-        return this.name;
+        return localStorage.getItem('name');
     },
 
     getPhone() {
-        return this.phone;
+        return localStorage.getItem('phone');
     },
 
     getEmail() {
-        return this.email;
+        return localStorage.getItem('email');
     },
 
     setInfo(name, phone, email) {
-        this.name = name;
-        this.phone = phone;
-        this.email = email;
+        localStorage.setItem('name', name);
+        localStorage.setItem('phone', phone);
+        localStorage.setItem('email', email);
+        this._changed();
     },
 
     setClientId(client_id) {
@@ -31,6 +28,15 @@ const ClientStore = new BaseStore({
 
     getClientId() {
         return localStorage.getItem("client_id");
+    },
+
+    getCLientDict() {
+        return {
+            id: this.getClientId(),
+            name: this.getName(),
+            phone: this.getPhone(),
+            email: this.getEmail()
+        }
     }
 
 }, action => {
@@ -42,6 +48,10 @@ const ClientStore = new BaseStore({
             break;
         case Actions.AJAX_FAILURE:
             alert("Failure");
+            break;
+        case Actions.INIT:
+            ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
+            break;
     }
 });
 

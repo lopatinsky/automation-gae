@@ -12,3 +12,6 @@ export { default as MenuItem } from './MenuItem';
 export { default as MenuCategory } from './MenuCategory';
 export { default as OrderMenuItem } from './OrderMenuItem';
 export { default as VenuesDialog } from './VenuesDialog';
+export { default as ClientInfoDialog } from './ClientInfoDialog';
+export { default as PaymentTypesDialog } from './PaymentTypesDialog';
+export { default as AddressScreen } from './AddressScreen';

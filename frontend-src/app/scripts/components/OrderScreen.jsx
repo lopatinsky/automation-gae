@@ -1,14 +1,15 @@
 import React from 'react';
-import { OrderStore, VenuesStore } from '../stores';
-import { OrderMenuItem, VenuesDialog } from '../components';
+import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
+import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog } from '../components';
 import { Navigation } from 'react-router';
 import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu } from 'material-ui';
+import Actions from '../Actions';
 
 const OrderScreen = React.createClass({
     mixins: [Navigation],
 
     _order() {
-        alert('order tap');
+        Actions.checkOrder();
     },
 
     _refresh() {
@@ -28,12 +29,20 @@ const OrderScreen = React.createClass({
         this.transitionTo('menu');
     },
 
+    _onClientInfoTap() {
+        this.refs.clientInfoDialog.show();
+    },
+
+    _onPaymentTypeTap() {
+        this.refs.paymentTypesDialog.show();
+    },
+
     _onVenueTap() {
         this.refs.venuesDialog.show();
     },
 
     _onAddressTap() {
-        alert('Address tap');
+        this.transitionTo('address');
     },
 
     _onDeliveryTap(delivery) {
@@ -48,7 +57,7 @@ const OrderScreen = React.createClass({
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == '2') {
             return <ListItem
-                        primaryText={'Введите адрес'}
+                        primaryText={AddressStore.getAddressStr()}
                         onClick={this._onAddressTap}/>
         } else {
             return <ListItem
@@ -96,11 +105,15 @@ const OrderScreen = React.createClass({
     componentDidMount() {
         VenuesStore.addChangeListener(this._refresh);
         OrderStore.addChangeListener(this._refresh);
+        ClientStore.addChangeListener(this._refresh);
+        PaymentsStore.addChangeListener(this._refresh);
     },
 
     componentWillUnmount() {
         VenuesStore.removeChangeListener(this._refresh);
-        OrderStore.addChangeListener(this._refresh);
+        OrderStore.removeChangeListener(this._refresh);
+        ClientStore.removeChangeListener(this._refresh);
+        PaymentsStore.removeChangeListener(this._refresh);
     },
 
     render() {
@@ -116,8 +129,16 @@ const OrderScreen = React.createClass({
             <List>
                 {this._getVenueInput()}
             </List>
+            <Card onClick={this._onClientInfoTap}>
+                <CardText>{ClientStore.getName()}</CardText>
+            </Card>
+            <Card onClick={this._onPaymentTypeTap}>
+                <CardText>{PaymentsStore.getChosenPaymentType().title}</CardText>
+            </Card>
             {this._getTimeInput()}
             <VenuesDialog ref="venuesDialog"/>
+            <ClientInfoDialog ref="clientInfoDialog"/>
+            <PaymentTypesDialog ref="paymentTypesDialog"/>
             <FlatButton label='Заказать' onClick={this._order} />
         </div>;
     }
