@@ -2,11 +2,13 @@
 
 __author__ = 'dvpermyakov'
 
-from google.appengine.api import urlfetch
 import urllib
 import json
 import logging
-from config import config
+
+from google.appengine.api import urlfetch
+
+from models.config.config import config
 
 BASE_URL = 'http://geocode-maps.yandex.ru/1.x/'
 MAX_RESULT = 15

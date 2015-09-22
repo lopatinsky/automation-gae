@@ -20,7 +20,7 @@ class PaymentType(ndb.Model):  # self.key.id() == type
 
     @classmethod
     def get(cls, payment_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.payment_types import get_payment_type
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -30,7 +30,7 @@ class PaymentType(ndb.Model):  # self.key.id() == type
 
     @classmethod
     def fetch_types(cls, *args, **kwargs):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.payment_types import get_payment_types
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:

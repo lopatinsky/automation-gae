@@ -1,8 +1,21 @@
 # coding=utf-8
-import threading
+SUBSCRIPTION = 0
+SHARE_GIFT = 1
+SHARE_INVITATION = 2
+ORDER_INFO_MODULE = 3
+CLIENT_INFO_MODULE = 4
+GEO_PUSH_MODULE = 5
+MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, CLIENT_INFO_MODULE)
+
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from webapp2 import cached_property
+from models.config.local import LocalConfigProxy
+from models.config.share import ShareInvitationModule, ShareGiftModule
+from models.config.field import ClientModule, OrderModule
+from models.config.subscription import SubscriptionModule
+from models.config.version import Version
+from models.config.geo_push import GeoPushModule
 
 OTHER = -1
 VENUE = 0
@@ -14,29 +27,11 @@ MEAL_LOGIC = 1
 OTHER = 2
 SCREEN_LOGICS = (COFFEE_LOGIC, MEAL_LOGIC, OTHER)
 
-DEMO_HOSTNAME = u'automation-demo.appspot.com'
-PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
-TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
-
 EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 AUTO_APP = 0
 RESTO_APP = 1
 APP_CHOICES = (AUTO_APP, RESTO_APP)
-
-
-class Version(ndb.Model):
-    created = ndb.DateTimeProperty(required=True)
-    updated = ndb.DateTimeProperty(required=True)
-    number = ndb.IntegerProperty()
-    available = ndb.BooleanProperty(default=True)
-    force = ndb.BooleanProperty(default=False)
-
-    def dict(self):
-        return {
-            'text': u'Обновите приложение!',
-            'force': self.force
-        }
 
 
 class Config(ndb.Model):
@@ -72,23 +67,16 @@ class Config(ndb.Model):
 
     IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=False)
 
-    SHARED_INVITATION_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
-    SHARED_GIFT_ENABLED = ndb.BooleanProperty(indexed=False, default=False)
-
-    SHARED_INVITATION_ABOUT_TITLE = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_ABOUT_DESCRIPTION = ndb.StringProperty(indexed=False)
-
-    SHARED_INVITATION_TEXT = ndb.StringProperty(indexed=False)
-    SHARED_INVITATION_IMAGE = ndb.StringProperty(indexed=False)
-
-    SHARED_INVITATION_SENDER_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
-    SHARED_INVITATION_SENDER_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
-    SHARED_INVITATION_RECIPIENT_ACCUMULATED_POINTS = ndb.IntegerProperty(indexed=False, default=0)
-    SHARED_INVITATION_RECIPIENT_WALLET_POINTS = ndb.IntegerProperty(indexed=False, default=0)
+    SHARE_GIFT_MODULE = ndb.LocalStructuredProperty(ShareGiftModule)
+    SHARE_INVITATION_MODULE = ndb.LocalStructuredProperty(ShareInvitationModule)
+    SUBSCRIPTION_MODULE = ndb.LocalStructuredProperty(SubscriptionModule)
+    CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
+    ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
+    GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
-    APP_NAME = ndb.StringProperty(indexed=False)
+    APP_NAME = ndb.StringProperty(indexed=False)   # todo: getting info from company module
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
@@ -114,8 +102,6 @@ class Config(ndb.Model):
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
 
-    EXTRA_CLIENT_INFO_FIELDS = ndb.StringProperty(indexed=False, repeated=True)
-
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
 
     def get_place_str(self):
@@ -123,6 +109,16 @@ class Config(ndb.Model):
             return u'Кофейня'
         elif self.PLACE_TYPE == BAR:
             return u'Бар'
+
+    @property
+    def SHARE_GIFT_ENABLED(self):
+        from models import STATUS_AVAILABLE
+        return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE else False
+
+    @property
+    def SHARE_INVITATION_ENABLED(self):
+        from models import STATUS_AVAILABLE
+        return config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE if config.SHARE_INVITATION_MODULE else False
 
     @property
     def WALLET_ENABLED(self):
@@ -155,21 +151,5 @@ class Config(ndb.Model):
     def get(cls):
         config = cls.get_by_id(1)
         return config
-
-
-class LocalConfigProxy(object):
-    _local = threading.local()
-
-    @property
-    def _config_object(self):
-        try:
-            self._local.config
-        except AttributeError:
-            self._local.config = Config.get()
-        return self._local.config
-
-    def __getattr__(self, item):
-        return getattr(self._config_object, item)
-
 
 config = LocalConfigProxy()

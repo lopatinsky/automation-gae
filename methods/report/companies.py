@@ -1,8 +1,6 @@
-from datetime import datetime
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
-from config import Config
-from methods.report.report_methods import suitable_date, PROJECT_STARTING_YEAR
+from models.config.config import Config
 from models import Order
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP
@@ -19,11 +17,8 @@ class Company:
         self.in_production = in_production
 
 
-def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namespaces):
+def get(start, end, chosen_object_type, chosen_namespaces):
     if not chosen_namespaces:
-        chosen_year = datetime.now().year
-        chosen_month = datetime.now().month
-        chosen_day = datetime.now().day
         chosen_object_type = '0'
     companies = []
     skip_companies = []
@@ -39,8 +34,6 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
             skip_companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
     if not chosen_namespaces:
         chosen_namespaces = [c.namespace for c in companies]
-    start = suitable_date(chosen_day, chosen_month, chosen_year, True)
-    end = suitable_date(chosen_day, chosen_month, chosen_year, False)
     statuses = (READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)  # it can be tunable
     total = {
         'orders_number': 0,
@@ -91,11 +84,8 @@ def get(chosen_year, chosen_month, chosen_day, chosen_object_type, chosen_namesp
         'chosen_namespaces': chosen_namespaces,
         'statuses': statuses,
         'status_map': STATUS_MAP,
-        'start_year': PROJECT_STARTING_YEAR,
-        'end_year': datetime.now().year,
-        'chosen_year': chosen_year,
-        'chosen_month': chosen_month,
-        'chosen_day': chosen_day,
+        'start': start,
+        'end': end,
         'chosen_object_type': chosen_object_type,
         'total': total
     }

@@ -3,8 +3,8 @@ import logging
 from datetime import datetime
 
 from google.appengine.ext import deferred
-from config import EMAIL_FROM
 
+from models.config.config import EMAIL_FROM
 from methods import empatika_wallet, push, paypal
 from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos
@@ -49,6 +49,12 @@ def cancel_order(order, status, namespace, comment=None):
         for performing in order.promo_code_performings:
             performing = performing.get()
             performing.recover()
+        if order.subscription_details:
+            subscription = order.subscription_details.subscription.get()
+            subscription.recover(order.subscription_details.amount)
+        if order.geo_push:
+            geo_push = order.geo_push.get()
+            geo_push.recover()
 
         order.status = status
         order.return_datetime = datetime.utcnow()

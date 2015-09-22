@@ -61,10 +61,13 @@ class PromoOutcome(ndb.Model):
     MARKED_ORDER_GIFT = 13
     EMPTY = 14
     CASH_ACCUMULATE_GIFT_POINT = 15
+    FORBID_MENU_ITEM = 16
+    MARKED_DISCOUNT_CHEAPEST = 17
+    DELIVERY_MESSAGE = 18
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
                PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY,
-               CASH_ACCUMULATE_GIFT_POINT)
+               CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM, MARKED_DISCOUNT_CHEAPEST, DELIVERY_MESSAGE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -92,11 +95,17 @@ class PromoCondition(ndb.Model):
     MARK_ITEM_WITH_QUANTITY = 17
     CHECK_PROMO_CODE = 18
     CHECK_ORDER_NUMBER = 19
+    CHECK_ITEM_NOT_IN_ORDER = 20
+    CHECK_MARKED_QUANTITY = 21
+    CHECK_DEVICE_TYPE = 22
+    CHECK_VERSION = 23
+    CHECK_GEO_PUSH = 24
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
                MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
-               MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER)
+               MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER, CHECK_ITEM_NOT_IN_ORDER,
+               CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -118,15 +127,16 @@ class Promo(ndb.Model):
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
-    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo  # Not Implemented
+    conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
     priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+    hide_in_list = ndb.BooleanProperty(default=False)
 
     @classmethod
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.promo import get_promos
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -168,14 +178,16 @@ class Promo(ndb.Model):
         icon = None
         if self.outcomes:
             outcome = self.outcomes[0]
-            if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT]:
+            if outcome.method in [PromoOutcome.ACCUMULATE_GIFT_POINT, PromoOutcome.ORDER_ACCUMULATE_GIFT_POINT,
+                                  PromoOutcome.PERCENT_GIFT_POINT, PromoOutcome.CASH_ACCUMULATE_GIFT_POINT]:
                 icon = self._get_url(hostname, self.BONUS_ICON)
             elif outcome.method in [PromoOutcome.CASH_BACK]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
             elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
-                                    PromoOutcome.FIX_DISCOUNT]:
+                                    PromoOutcome.FIX_DISCOUNT, PromoOutcome.DELIVERY_SUM_DISCOUNT,
+                                    PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT, PromoOutcome.MARKED_DISCOUNT_CHEAPEST]:
                 icon = self._get_url(hostname, self.DISCOUNT_ICON)
-            elif outcome.method in [PromoOutcome.ORDER_GIFT]:
+            elif outcome.method in [PromoOutcome.ORDER_GIFT, PromoOutcome.MARKED_ORDER_GIFT]:
                 icon = self._get_url(hostname, self.GIFT_ICON)
         return {
             'id': self.key.id(),
@@ -210,7 +222,12 @@ CONDITION_MAP = {
     PromoCondition.MARK_NOT_ITEM: u'Не продукт (метка)',
     PromoCondition.MARK_ITEM_WITH_QUANTITY: u'Минимальное кол-во помеченных продуктов каждого типа (метка)',
     PromoCondition.CHECK_PROMO_CODE: u'Клиент активировал промо-код из группы',
-    PromoCondition.CHECK_ORDER_NUMBER: u'Кратный N заказ клиента'
+    PromoCondition.CHECK_ORDER_NUMBER: u'Кратный N заказ клиента',
+    PromoCondition.CHECK_ITEM_NOT_IN_ORDER: u'Продукта нет в заказе',
+    PromoCondition.CHECK_MARKED_QUANTITY: u'Минимальное кол-во помеченных продуктов (метка)',
+    PromoCondition.CHECK_DEVICE_TYPE: u'Тип телефона',
+    PromoCondition.CHECK_VERSION: u'Номер версии',
+    PromoCondition.CHECK_GEO_PUSH: u'Клиент активировал гео-пуш'
 }
 
 OUTCOME_MAP = {
@@ -229,5 +246,8 @@ OUTCOME_MAP = {
     PromoOutcome.REMOVE_PERSISTENT_MARK: u'Удалить метку (метка)',
     PromoOutcome.MARKED_ORDER_GIFT: u'Подарить помеченные продукты (метка)',
     PromoOutcome.EMPTY: u'Выводить сообщение',
-    PromoOutcome.CASH_ACCUMULATE_GIFT_POINT: u'Баллы за каждые N у.е в заказе'
+    PromoOutcome.CASH_ACCUMULATE_GIFT_POINT: u'Баллы за каждые N у.е в заказе',
+    PromoOutcome.FORBID_MENU_ITEM: u'Запрет на продукт',
+    PromoOutcome.MARKED_DISCOUNT_CHEAPEST: u'Скидка на самый дешевый продукт в заказе (метка)',
+    PromoOutcome.DELIVERY_MESSAGE: u'Сообщение о доставке'
 }

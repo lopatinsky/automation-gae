@@ -26,6 +26,26 @@ class User(polymodel.PolyModel, models.User):
 class CompanyUser(User):
     ROLE = 'company'
 
+    # these are numbers of bits for individual privileges
+    RIGHTS_BIT_REPORT = 0
+    RIGHTS_BIT_CONFIG = 1
+
+    ALL_RIGHTS_BITS = (RIGHTS_BIT_REPORT, RIGHTS_BIT_CONFIG)
+
+    # these are commonly used combined masks
+    # 63 bits for admins -- so we can put this into datastore and freely add new rights
+    RIGHTS_MASK_ADMIN = 0x7fffffffffffffff
+
+    rights = ndb.IntegerProperty(indexed=False, required=True)
+
+    @staticmethod
+    def make_mask(bits):
+        return sum(1 << bit for bit in bits)
+
+    def has_rights(self, required_bits):
+        required_mask = self.make_mask(required_bits)
+        return self.rights & required_mask == required_mask
+
 
 class Admin(User):
 

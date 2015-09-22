@@ -7,7 +7,10 @@
     {% if user %}
         <nav>
             <p>
-                {{ user.login }}
+                {{ user.login }} -- компания {{ _app_name if _app_name is not none else "не выбрана" }}
+                {% if not user.namespace %}
+                    <a href="/company/choose">Сменить компанию</a>
+                {% endif %}
                 <a href="/company/logout">Выйти</a>
             </p>
         </nav>

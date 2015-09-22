@@ -2,6 +2,7 @@
 from datetime import datetime
 import time
 import re
+from models.client import ANDROID_DEVICE, IOS_DEVICE
 
 STR_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 STR_DATE_FORMAT = "%Y-%m-%d"
@@ -55,3 +56,10 @@ def parse_time_picker_value(time_picker_value):
         return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT)
     except ValueError:
         return datetime.strptime(time_picker_value, AM_PM_STR_DATETIME_FORMAT)
+
+
+def get_device_type(user_agent):
+    if 'Android' in user_agent:
+        return ANDROID_DEVICE
+    else:
+        return IOS_DEVICE

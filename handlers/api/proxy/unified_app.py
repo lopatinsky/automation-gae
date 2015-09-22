@@ -1,6 +1,7 @@
 from google.appengine.api.namespace_manager import namespace_manager
+
 from ..base import ApiHandler
-from config import Config
+from models.config.config import Config
 from models import STATUS_AVAILABLE
 from models.proxy.unified_app import AutomationCompany
 

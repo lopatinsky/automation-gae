@@ -1,5 +1,5 @@
-from config import Config
-from methods.auth import company_user_required
+from models.config.config import Config
+from methods.auth import full_rights_required
 from models import PaymentType, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from base import CompanyBaseHandler
 from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
@@ -9,7 +9,7 @@ __author__ = 'dvpermyakov'
 
 
 class PaymentTypesHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         cash = PaymentType.get_by_id(str(CASH_PAYMENT_TYPE))
         if not cash:
@@ -23,7 +23,7 @@ class PaymentTypesHandler(CompanyBaseHandler):
         self.render('/payment_types.html', payments=PaymentType.query().fetch(), config=Config.get(),
                     CARD_PAYMENT_TYPE=str(CARD_PAYMENT_TYPE))
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         for payment in PaymentType.query().fetch():
             confirmed = bool(self.request.get(str(payment.key.id())))

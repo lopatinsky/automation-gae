@@ -3,7 +3,7 @@ import json
 
 from google.appengine.ext.deferred import deferred
 
-from config import EMAIL_FROM, Config
+from models.config.config import EMAIL_FROM, Config
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.sms.sms_pilot import send_sms
@@ -25,9 +25,11 @@ import logging
 class GetInvitationInfoHandler(ApiHandler):
     def get(self):
         config = Config.get()
+        if not config.SHARE_INVITATION_ENABLED:
+            self.abort(403)
         self.render_json({
-            'title': config.SHARED_INVITATION_ABOUT_TITLE,
-            'description': config.SHARED_INVITATION_ABOUT_DESCRIPTION
+            'title': config.SHARE_INVITATION_MODULE.about_title,
+            'description': config.SHARE_INVITATION_MODULE.about_description
         })
 
 
@@ -41,7 +43,7 @@ class GetInvitationUrlHandler(ApiHandler):
             self.abort(400)
 
         config = Config.get()
-        if not config.SHARED_INVITATION_ENABLED:
+        if not config.SHARE_INVITATION_ENABLED:
             self.abort(403)
         share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
                             Share.share_type == branch_io.INVITATION).get()
@@ -67,9 +69,9 @@ class GetInvitationUrlHandler(ApiHandler):
             share.put()
 
         self.render_json({
-            'text': config.SHARED_INVITATION_TEXT,
+            'text': config.SHARE_INVITATION_MODULE.invitation_text,
             'urls': [channel_url.dict() for channel_url in share.channel_urls],
-            'image': config.SHARED_INVITATION_IMAGE,
+            'image': config.SHARE_INVITATION_MODULE.invitation_image,
             'promo_code': share.promo_code.id()
         })
 

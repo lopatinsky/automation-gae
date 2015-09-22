@@ -9,6 +9,8 @@ from clear_pings import ClearPingsHandler
 from creating_orders import CheckCreatingOrdersHandler
 from cancel_gifts import CancelGiftsHandler
 from images import ResizeImageHandler
+from geo_push import CloseGeoPushesHandler
+from subsciption import CloseSubscriptionHandler
 
 __author__ = 'ilyazorin'
 
@@ -26,4 +28,6 @@ app = webapp2.WSGIApplication([
     ('/cron/resize_image', ResizeImageHandler),
     ('/cron/cancel_gifts', CancelGiftsHandler),
     ('/cron/send_reports', ReportSendHandler),
+    ('/cron/subscription', CloseSubscriptionHandler),
+    ('/cron/geo_push', CloseGeoPushesHandler),
 ], debug=True)

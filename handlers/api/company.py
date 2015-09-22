@@ -1,9 +1,10 @@
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
+
 from base import ApiHandler
-from config import config, Config
-from methods.rendering import latinize
+from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
 from models import STATUS_AVAILABLE, Venue
 from models.proxy.resto import RestoCompany
@@ -32,15 +33,6 @@ class CompanyInfoHandler(ApiHandler):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
         response = {
-            'extra_client_fields': [{
-                'fields': [{
-                    'title': field,
-                    'field': latinize(field),
-                    'type': 'string'
-                } for field in config.EXTRA_CLIENT_INFO_FIELDS],
-                'module': None,
-                'group': 0
-            }],
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
             'delivery_types': deliveries.values(),
             'cities': cities,
@@ -53,10 +45,10 @@ class CompanyInfoHandler(ApiHandler):
                 'enabled': config.WALLET_ENABLED,
             },
             'share_gift': {
-                'enabled': config.SHARED_GIFT_ENABLED,
+                'enabled': config.SHARE_GIFT_ENABLED,
             },
             'share_invitation': {
-                'enabled': config.SHARED_INVITATION_ENABLED,
+                'enabled': config.SHARE_INVITATION_ENABLED,
             },
             'new_version_popup': {
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
@@ -66,6 +58,26 @@ class CompanyInfoHandler(ApiHandler):
         }
         response.update(config.get_company_dict())
         self.render_json(response)
+
+
+class CompanyModulesHandler(ApiHandler):
+    def get(self):
+        modules = []
+        if config.SUBSCRIPTION_MODULE:
+            modules.append(config.SUBSCRIPTION_MODULE.dict())
+        if config.SHARE_GIFT_MODULE:
+            modules.append(config.SHARE_GIFT_MODULE.dict())
+        if config.SHARE_INVITATION_MODULE:
+            modules.append(config.SHARE_INVITATION_MODULE.dict())
+        if config.CLIENT_MODULE:
+            modules.append(config.CLIENT_MODULE.dict())
+        if config.ORDER_MODULE:
+            modules.append(config.ORDER_MODULE.dict())
+        if config.GEO_PUSH_MODULE:
+            modules.append(config.GEO_PUSH_MODULE.dict())
+        self.render_json({
+            'modules': modules
+        })
 
 
 class CompanyBaseUrlsHandler(ApiHandler):

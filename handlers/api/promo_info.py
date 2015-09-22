@@ -2,8 +2,8 @@
 from urlparse import urlparse
 
 from .base import ApiHandler
-from config import config
-from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, SharedGift, Client
+from models.config.config import config
+from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, Client
 from models.specials import STATUS_ACTIVE
 from models.share import SharedGiftMenuItem
 
@@ -28,7 +28,7 @@ class PromoInfoHandler(ApiHandler):
         promo_dicts = []
         for promo in sorted(Promo.query_promos(Promo.status == STATUS_AVAILABLE),
                             key=lambda query_promo: -query_promo.priority):
-            if not promo.visible:
+            if not promo.visible or promo.hide_in_list:
                 continue
             text = u'%s_%s' % (promo.title.strip() if promo.title else u'',
                                promo.description.strip() if promo.description else u'')

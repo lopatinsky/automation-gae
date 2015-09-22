@@ -130,7 +130,7 @@ class DeliveryZone(ndb.Model):
 
     @classmethod
     def get(cls, zone_key):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.company import get_delivery_zone
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -247,7 +247,7 @@ class Venue(ndb.Model):
 
     @classmethod
     def get(cls, venue_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
@@ -258,7 +258,7 @@ class Venue(ndb.Model):
 
     @classmethod
     def fetch_venues(cls, *args, **kwargs):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.venues import get_venues
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -322,7 +322,7 @@ class Venue(ndb.Model):
         return working_hours.check(self.schedule, now)
 
     def update_address(self):
-        from config import Config
+        from models.config.config import Config
         from methods import geocoder, timezone
 
         candidates = geocoder.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)

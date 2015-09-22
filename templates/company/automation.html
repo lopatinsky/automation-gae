@@ -5,21 +5,27 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <a href="/company/payment_types">Типы оплат</a><br>
-    <a href="/company/menu/main">Меню</a><br>
-    <a href="/company/venues">Кофейни</a><br>
-    <a href="/company/promos/list">Акции</a><br>
-    <a href="/company/promo_code/list">Промо коды</a><br>
-    <a href="/company/report/main">Отчеты</a><br>
-    <a href="/company/barista/list">Баристы</a><br>
-    <a href="/company/docs/about">О компании</a><br>
-    <a href="/company/docs/legal/list">Список юр. лиц</a><br>
-    <a href="/company/delivery/orders/current">Доставка</a><br>
-    <a href="/company/delivery/types">Типы доставок</a><br>
-    <a href="/company/delivery/slots/list">Слоты</a><br>
-    <a href="/company/delivery/zone/list">Зоны доставки</a><br>
-    <a href="/company/notifications/news/list">Новости</a><br>
-    <a href="/company/notifications/pushes/list">Пуши</a><br>
-    <a href="/company/alfa_settings">Альфа</a>
+    {% if user.has_rights((user.RIGHTS_BIT_CONFIG,)) %}
+        <a href="/company/payment_types">Типы оплат</a><br>
+        <a href="/company/menu/main">Меню</a><br>
+        <a href="/company/venues">Кофейни</a><br>
+        <a href="/company/promos/list">Акции</a><br>
+        <a href="/company/promo_code/list">Промо коды</a><br>
+    {% endif %}
+    {% if user.has_rights((user.RIGHTS_BIT_REPORT,)) %}
+        <a href="/company/report/main">Отчеты</a><br>
+    {% endif %}
+    {% if user.has_rights((user.RIGHTS_BIT_CONFIG,)) %}
+        <a href="/company/barista/list">Баристы</a><br>
+        <a href="/company/docs/about">О компании</a><br>
+        <a href="/company/docs/legal/list">Список юр. лиц</a><br>
+        <a href="/company/delivery/orders/current">Доставка</a><br>
+        <a href="/company/delivery/types">Типы доставок</a><br>
+        <a href="/company/delivery/slots/list">Слоты</a><br>
+        <a href="/company/delivery/zone/list">Зоны доставки</a><br>
+        <a href="/company/notifications/news/list">Новости</a><br>
+        <a href="/company/notifications/pushes/list">Пуши</a><br>
+        <a href="/company/alfa_settings">Альфа</a>
+    {% endif %}
 </body>
 </html>

@@ -1,7 +1,9 @@
 import json
 import logging
+
 from google.appengine.api import urlfetch
-from config import config
+
+from models.config.config import config
 from methods import paypalrestsdk
 from methods.paypalrestsdk.payments import Authorization
 

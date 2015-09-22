@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-from config import config
+
+from models.config.config import config
 from methods import alfa_bank, push, paypal
 from models import Client
 from models.share import SharedPromo

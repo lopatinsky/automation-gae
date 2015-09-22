@@ -2,17 +2,19 @@
 import copy
 from datetime import timedelta
 import logging
-from config import config
+
+from models.config.config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
+from methods.subscription import get_subscription_menu_item
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
-    check_client_info
+    check_client_info, check_subscription, check_empty_order
 from models.venue import DELIVERY
 
 
@@ -131,7 +133,10 @@ def group_item_dicts(item_dicts):
 def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
-        menu_item = copy.copy(MenuItem.get(item['item_id']))
+        menu_item = MenuItem.get(item['item_id'])
+        if not menu_item:
+            menu_item = get_subscription_menu_item(item)
+        menu_item = copy.copy(menu_item)
         if with_gift_obj:
             menu_item.gift_obj = item['gift_obj']
         else:
@@ -328,10 +333,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                                        total_sum_without_promos)
     if not valid:
         return send_error(error)
-    valid, error = check_client_info(client, delivery_type)
+    valid, error = check_client_info(client, delivery_type, order)
     if not valid:
         return send_error(error)
-    valid, error = check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts)
+    valid, error = check_stop_list(venue, delivery_type, item_dicts, gift_dicts, order_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts)
@@ -341,6 +346,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     if not valid:
         return send_error(error)
     success, error, rest_points, full_points = check_gifts(gifts, client)
+    if not valid:
+        return send_error(error)
+    success, error = check_subscription(client, item_dicts)
     if not valid:
         return send_error(error)
 
@@ -382,23 +390,15 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     logging.info('item_dicts = %s' % item_dicts)
 
-    if len(item_dicts) or len(gift_dicts) or len(shared_gift_dicts):
-        grouped_item_dicts = group_item_dicts(item_dicts)
-        grouped_gift_dicts = group_item_dicts(gift_dicts)
-        grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
-        grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
-        grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
-        grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
-        grouped_shared_gift_dicts = group_item_dicts(
-            [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
-        grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
-    else:
-        grouped_item_dicts = []
-        grouped_gift_dicts = []
-        grouped_new_order_gift_dicts = []
-        grouped_unavail_order_gift_dicts = []
-        grouped_order_gift_dicts = []
-        grouped_cancelled_order_gift_dicts = []
+    grouped_item_dicts = group_item_dicts(item_dicts)
+    grouped_gift_dicts = group_item_dicts(gift_dicts)
+    grouped_new_order_gift_dicts = group_item_dicts(new_order_gift_dicts)
+    grouped_unavail_order_gift_dicts = group_item_dicts(unavail_order_gift_dicts)
+    grouped_order_gift_dicts = group_item_dicts(order_gift_dicts)
+    grouped_cancelled_order_gift_dicts = group_item_dicts(cancelled_order_gift_dicts)
+    grouped_shared_gift_dicts = group_item_dicts(
+        [shared_gift_dict for shared_gift_dict in shared_gift_dicts if not shared_gift_dict.get('found')])
+    grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
     if not item_dicts and not gift_dicts:

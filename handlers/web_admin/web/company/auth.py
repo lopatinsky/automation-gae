@@ -1,9 +1,11 @@
 # coding=utf-8
 import logging
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from config import Config
+
+from models.config.config import Config
 from methods.auth import set_current_user
 
 __author__ = 'dvpermyakov'
@@ -46,7 +48,8 @@ class CompanySignupHandler(CompanyBaseHandler):
             values = {
                 'namespace': namespace,
                 'login': login,
-                'password_raw': password
+                'password_raw': password,
+                'rights': CompanyUser.RIGHTS_MASK_ADMIN,
             }
             success, user = CompanyUser.create_user(login, **values)
             if not success:
@@ -99,7 +102,9 @@ class LoginHandler(CompanyBaseHandler):
 
 
 class LogoutHandler(CompanyBaseHandler):
-    #@company_user_required
+    #@full_rights_required
     def get(self):
+        if "namespace" in self.session:
+            del self.session["namespace"]
         self.auth.unset_session()
         self.redirect('/company/login')

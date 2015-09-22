@@ -1,4 +1,4 @@
-from config import config, Config
+from models.config.config import config, Config
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from models.legal import LegalInfo
 

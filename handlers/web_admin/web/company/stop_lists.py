@@ -1,17 +1,17 @@
 from base import CompanyBaseHandler
-from methods.auth import company_user_required
+from methods.auth import full_rights_required
 from models import Venue, MenuItem, STATUS_AVAILABLE
 
 
 class MainStopListHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venues = Venue.query().fetch()
         self.render('/stop_list/main.html', venues=venues)
 
 
 class StopListsHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)
@@ -26,7 +26,7 @@ class StopListsHandler(CompanyBaseHandler):
                 product.stopped = False
         self.render('/stop_list/list.html', venue=venue, products=products)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue_id = self.request.get_range('venue_id')
         venue = Venue.get_by_id(venue_id)

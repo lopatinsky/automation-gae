@@ -33,7 +33,7 @@
         <label>
             Почты:
             <input type="text" name="emails"
-                    {% if venue %} value="{{ ','.join(venue.emails) }}" {% endif %}>
+                    {% if venue %} value="{{ ','.join(venue.emails) }}" {% else %} value="{{ DEFAULT_EMAIL }}" {% endif %}>
         </label><br>
         <label>
             Юрлицо:

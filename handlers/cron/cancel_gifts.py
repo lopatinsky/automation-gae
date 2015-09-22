@@ -4,7 +4,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 
-from config import Config
+from models.config.config import Config
 from methods.emails import admins
 from models import SharedGift
 

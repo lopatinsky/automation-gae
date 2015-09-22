@@ -1,11 +1,9 @@
 # coding=utf-8
-from datetime import datetime, timedelta
-import logging
-from config import config
+from datetime import timedelta
+from models.config.config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import DELIVERY_MAP
-from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from models import Order, Client, Venue
 
 
@@ -65,36 +63,12 @@ def _total(orders, status, payment_type):
         "sum_after_wallet": sum_after_wallet,
     }
 
-def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
+
+def get(venue_id, start, end):
     if not venue_id:
         venue_id = 0
-        chosen_year = datetime.now().year
-        chosen_month = datetime.now().month
-        chosen_day = datetime.now().day
     else:
         venue_id = int(venue_id)
-
-    if not chosen_year:
-        chosen_year = datetime.now().year
-        chosen_month = datetime.now().month
-        chosen_day = datetime.now().day
-    else:
-        chosen_year = int(chosen_year)
-
-    if not chosen_year:
-        chosen_month = 0
-    if not chosen_month:
-        chosen_day = 0
-
-    if chosen_day is not None:
-        start = suitable_date(chosen_day, chosen_month, chosen_year, True)
-        end = suitable_date(chosen_day, chosen_month, chosen_year, False)
-    else:
-        chosen_days = [int(day) for day in chosen_days]
-        min_day = min(chosen_days)
-        max_day = max(chosen_days)
-        start = suitable_date(min_day, chosen_month, chosen_year, True)
-        end = suitable_date(max_day, chosen_month, chosen_year, False)
 
     query = Order.query(Order.date_created >= start, Order.date_created <= end)
     if venue_id:
@@ -114,12 +88,9 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
     values = {
         'venues': Venue.query().fetch(),
         'orders': order_dicts,
-        'start_year': PROJECT_STARTING_YEAR,
-        'end_year': datetime.now().year,
         'chosen_venue': venue_id,
-        'chosen_year': chosen_year,
-        'chosen_month': chosen_month,
-        'chosen_day': chosen_day,
+        'start': start,
+        'end': end,
         'totals': totals,
         'DELIVERY_TYPE_MAP': DELIVERY_MAP
     }

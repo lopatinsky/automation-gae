@@ -57,6 +57,7 @@
                 <th rowspan="2">Приоритет</th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Описание</th>
+                <th rowspan="2">Конфликты</th>
                 <th colspan="3">Условия</th>
                 <th colspan="3">Последствия</th>
             </tr>
@@ -94,6 +95,9 @@
                         </a>
                     </td>
                     <td rowspan="{{ height + 1 }}">{{ promo.description }}</td>
+                    <td rowspan="{{ height + 1 }}">
+                        <a href="/company/promos/conflicts?promo_id={{ promo.key.id() }}">Конфликты</a>
+                    </td>
                     <td colspan="3">
                         <a href="{{ '/company/promos/conditions/add?promo_id=%s' % promo.key.id() }}">Добавить условие</a>
                         <a href="{{ '/company/promos/conditions/happy_hours?promo_id=%s' % promo.key.id() }}">Добавить счастливые часы</a>

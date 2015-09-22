@@ -1,13 +1,15 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
+
 from google.appengine.ext.ndb import GeoPt
-from config import Config
+
+from models.config.config import Config
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
 from methods.rendering import latinize, get_phone, get_separated_name_surname, \
-    parse_time_picker_value
+    parse_time_picker_value, get_device_type
 from models import Order, Client, Venue, STATUS_AVAILABLE, DeliverySlot, DeliveryZone, STATUS_UNAVAILABLE
 from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
@@ -48,14 +50,17 @@ def set_client_info(client_json, headers, order=None):
     client.tel = get_phone(client_json.get('phone'))
     client.email = client_json.get('email')
     client.user_agent = headers['User-Agent']
+    client.device_type = get_device_type(client.user_agent)
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
-    for field in config.EXTRA_CLIENT_INFO_FIELDS:
-        value = client_json.get(latinize(field))
-        if order:
-            order.comment += ' %s: %s,' % (field, value)
-        extra_json[field] = value
+    if config.CLIENT_MODULE:
+        for field in config.CLIENT_MODULE.extra_fields:
+            field = field.get()
+            value = client_json.get(latinize(field.title))
+            if order:
+                order.comment += ' %s: %s,' % (field.title, value)
+            extra_json[field] = value
     client.extra_data = extra_json
     client.put()
     return client
@@ -255,6 +260,8 @@ def after_validation_check(validation_result, order):
     delivery_sum = validation_result['delivery_sum']
     if order.total_sum and round(total_sum * 100) != round(order.total_sum * 100):
         return False, u"Сумма заказа была пересчитана"
+    if not order.delivery_sum:
+        order.delivery_sum = delivery_sum
     if order.delivery_sum and round(delivery_sum * 100) != round(order.delivery_sum * 100):
         return False, u"Сумма доставки была пересчитана"
     if order.wallet_payment and round(order.wallet_payment * 100) != round(validation_result['max_wallet_payment'] * 100):

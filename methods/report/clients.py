@@ -3,8 +3,6 @@ from models.order import READY_ORDER, CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLI
 __author__ = 'dvpermyakov'
 
 from models import Order, Client, Venue
-from datetime import datetime
-from report_methods import PROJECT_STARTING_YEAR, suitable_date
 from google.appengine.ext import ndb
 
 
@@ -36,17 +34,9 @@ class ReportedClient:
         self.average_order_cost = (self.venue_sum+ self.cancel_sum) / self.amount_orders
 
 
-def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chosen_days=None):
+def clients_table(start, end, venue_id):
     clients = {}
-    if chosen_days:
-        chosen_days = [int(day) for day in chosen_days]
-        min_day = min(chosen_days)
-        max_day = max(chosen_days)
-        query = Order.query(Order.date_created >= suitable_date(min_day, chosen_month, chosen_year, True))
-        query = query.filter(Order.date_created <= suitable_date(max_day, chosen_month, chosen_year, False))
-    else:
-        query = Order.query(Order.date_created >= suitable_date(chosen_day, chosen_month, chosen_year, True))
-        query = query.filter(Order.date_created <= suitable_date(chosen_day, chosen_month, chosen_year, False))
+    query = Order.query(Order.date_created >= start, Order.date_created <= end)
     if venue_id != 0:
         query = query.filter(Order.venue_id == str(venue_id))
     query = query.filter(ndb.OR(Order.status == READY_ORDER,
@@ -73,33 +63,14 @@ def clients_table(chosen_year=0, chosen_month=0, chosen_day=0, venue_id=0, chose
         sum(client.cancel_sum for client in clients.values())
 
 
-def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
+def get(venue_id, start, end):
     if not venue_id:
         venue_id = 0
-        chosen_year = datetime.now().year
-        chosen_month = datetime.now().month
-        chosen_day = datetime.now().day
     else:
         venue_id = int(venue_id)
 
-    if not chosen_year:
-        chosen_year = datetime.now().year
-        chosen_month = datetime.now().month
-        chosen_day = datetime.now().day
-    else:
-        chosen_year = int(chosen_year)
-
-    if not chosen_year:
-        chosen_month = 0
-    if not chosen_month:
-        chosen_day = 0
-
-    if not chosen_days:
-        clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
-            clients_table(chosen_year, chosen_month, chosen_day, venue_id)
-    else:
-        clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
-            clients_table(chosen_year, chosen_month, chosen_day, venue_id, chosen_days)
+    clients, venue_total_number, venue_revenue, venue_menu_cost, venue_total_payment, venue_c_number, venue_c_sum = \
+        clients_table(start, end, venue_id)
     chosen_venue = Venue.get_by_id(venue_id) if venue_id else None
     values = {
         'venues': Venue.query().fetch(),
@@ -111,10 +82,7 @@ def get(venue_id, chosen_year, chosen_month, chosen_day=None, chosen_days=None):
         'venue_cancel_number': venue_c_number,
         'venue_cancel_sum': venue_c_sum,
         'chosen_venue': chosen_venue,
-        'start_year': PROJECT_STARTING_YEAR,
-        'end_year': datetime.now().year,
-        'chosen_year': chosen_year,
-        'chosen_month': chosen_month,
-        'chosen_day': chosen_day
+        'start': start,
+        'end': end
     }
     return values

@@ -1,7 +1,9 @@
 import json
 import urllib
+
 from google.appengine.api import urlfetch
-from config import config
+
+from models.config.config import config
 
 PROMOS_BASE_URL = "http://empatika-promos.appspot.com/api"
 

@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 import logging
 from methods import working_hours
+from methods.versions import CLIENT_VERSIONS
+from models import STATUS_AVAILABLE
+from models.config.config import Config
+from models.geo_push import GeoPush
 from models.order import Order
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
@@ -118,6 +122,14 @@ def mark_item_with_quantity(condition, item_dicts):
     return True
 
 
+def check_marked_quantity(condition, item_dicts):
+    amount = 0
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark']:
+            amount += 1
+    return amount >= condition.value
+
+
 def check_marked_min_sum(condition, item_dicts):
     marked_sum = 0
     for item_dict in item_dicts:
@@ -144,3 +156,32 @@ def check_order_number(condition, client):
         return True
     else:
         return False
+
+
+def check_item_not_in_order(condition, item_dicts):
+    amount = 0
+    for item_dict in item_dicts:
+        if _check_item(condition.item_details, item_dict):
+            amount += 1
+    return amount == 0
+
+
+def check_version(condition, client):
+    return CLIENT_VERSIONS[condition.value] in client.user_agent
+
+
+def check_geo_push(client, order):
+    push = GeoPush.query(GeoPush.client == client.key, GeoPush.status == STATUS_AVAILABLE).get()
+    success = False
+    if push:
+        config = Config.get()
+        last_day = datetime.utcnow() - timedelta(days=config.GEO_PUSH_MODULE.days_without_order)
+        last_order = Order.query(Order.date_created > last_day,
+                                 Order.client_id == client.key.id(),
+                                 Order.status.IN(NOT_CANCELED_STATUSES)).get()
+        if not last_order:
+            success = True
+            if order:
+                order.geo_push = push.key
+                push.deactivate()
+    return success

@@ -177,6 +177,16 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/menu_item_day', [
+            Route('/info', api)
+        ]),
+
+        PathPrefixRoute('/subscription', [
+            Route('/info', api.SubscriptionInfoHandler),
+            Route('/tariffs', api.SubscriptionTariffsHandler),
+            Route('/buy', api.BuySubscriptionHandler),
+        ]),
+
         PathPrefixRoute('/promo_code', [
             Route('/enter', api.EnterPromoCode),
             Route('/history', api.PromoCodeHistoryHandler),
@@ -189,6 +199,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/modules', api.CompanyModulesHandler),
             Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 
@@ -204,13 +215,17 @@ app = WSGIApplication([
                 Route('/get_url', api.GetGiftUrlHandler),
             ]),
         ]),
+        PathPrefixRoute('/geo_push', [
+            Route('/add', api.AddPushHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/company', [
         Route('/create', company_admin.CompanySignupHandler),
         Route('/login', company_admin.LoginHandler, 'company_login'),
-        Route('/logout', company_admin.LogoutHandler),
+        Route('/logout', company_admin.LogoutHandler, 'company_logout'),
         Route('/main', company_admin.AutomationMainHandler, 'company_main'),
+        Route('/choose', company_admin.ChooseNamespaceHandler, 'company_choose_namespace'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         PathPrefixRoute('/venues', [
@@ -324,6 +339,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/promos', [
             Route('/list', company_admin.PromoListHandler),
+            Route('/conflicts', company_admin.PromoConflictsHandler),
             Route('/up', company_admin.UpPromoHandler),
             Route('/down', company_admin.DownPromoHandler),
             Route('/api_keys', company_admin.ChangeApiKeysHandler),
