@@ -333,8 +333,7 @@ def check_subscription(client, item_dicts):
     return True, None
 
 
-def check_empty_order(order, item_dicts, gift_dicts, order_gift_dicts, shared_gift_dicts):
-    if order:
-        if not item_dicts or not gift_dicts or not order_gift_dicts or not shared_gift_dicts:
-            return False, u'Добавьте что-нибудь в заказ'
+def check_empty_order(item_dicts, gift_dicts, order_gift_dicts, shared_gift_dicts):
+    if not item_dicts and not gift_dicts and not order_gift_dicts and not shared_gift_dicts:
+        return False, u'Добавьте что-нибудь в заказ'
     return True, None

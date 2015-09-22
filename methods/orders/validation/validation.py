@@ -377,10 +377,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         if not valid:
             return send_error(error)
 
-    success, error = check_empty_order(order, item_dicts, gift_dicts, order_gift_dicts, shared_gift_dicts)
-    if not success:
-        return send_error(error)
-
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
