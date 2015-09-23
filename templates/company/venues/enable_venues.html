@@ -18,6 +18,7 @@
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th>Статус</th>
+                <th>Id</th>
                 <th>Название</th>
                 <th>Адрес</th>
                 <th>Юрлицо</th>
@@ -33,6 +34,9 @@
                 <tr>
                     <td rowspan="{{ height }}">
                         <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ venue.key.id() }}
                     </td>
                     <td rowspan="{{ height }}">
                         <a href="/company/venues/{{ venue.key.id() }}">
