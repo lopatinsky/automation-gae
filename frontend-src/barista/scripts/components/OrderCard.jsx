@@ -41,7 +41,7 @@ const OrderCard = React.createClass({
             <td style={{padding: 0}}>
                 {array == this.props.order.gifts && <span style={{fontWeight: 500}}>Подарок! </span>}
                 <span style={{fontWeight: 400}}>{item.title} </span>
-                {modifiers.length && <span>({modifiers.join(', ')})</span>}
+                {!!modifiers.length && <span>({modifiers.join(', ')})</span>}
             </td>
             <td style={{fontWeight: 500, padding: 0, width: 1}}>
                 x{item.quantity}
