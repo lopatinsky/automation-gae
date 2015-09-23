@@ -274,7 +274,7 @@ def return_success(response):
 
 def set_cash_gift_point(response, outcome, init_total_sum, order):
     if order:
-        points = init_total_sum / outcome.value
+        points = int(init_total_sum / outcome.value)
         order.points_details.append(GiftPointsDetails(points=points))
         order.put()
     response.success = True
