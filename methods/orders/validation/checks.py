@@ -189,6 +189,9 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
                 substitute = _get_substitute(item, delivery_type, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
+                    if item_dict.get('gift_obj'):
+                        del item_dict['substitutes']
+                        description = None
             if item.key in delivery_items:
                 description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
             if item.category in delivery_categories:
