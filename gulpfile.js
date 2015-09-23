@@ -24,7 +24,13 @@ var targets = {
         FONTS: [],
         FONTS_OUT: 'static/barista/fonts',
         SCRIPT_MAIN: 'frontend-src/barista/scripts/main',
-        SCRIPTS_OUT: 'static/barista/scripts'
+        SCRIPTS_OUT: 'static/barista/scripts',
+        COPY: [
+            {
+                FROM: 'node_modules/soundmanager2/swf/*.*',
+                TO: 'static/barista/swf'
+            }
+        ]
     }
 };
 
@@ -40,6 +46,12 @@ function registerTasks(targetName) {
             .pipe(gulp.dest(path.STYLES_OUT));
         gulp.src(path.FONTS)
             .pipe(gulp.dest(path.FONTS_OUT));
+        if (path.COPY) {
+            for (var i = 0; i < path.COPY.length; ++ i) {
+                gulp.src(path.COPY[i].FROM)
+                    .pipe(gulp.dest(path.COPY[i].TO));
+            }
+        }
     });
 
     gulp.task(scriptsTaskName, function () {

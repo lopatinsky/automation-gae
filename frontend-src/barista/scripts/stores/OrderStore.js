@@ -121,7 +121,7 @@ const OrderStore = new BaseStore({
         this._addRawOrders(newOrders);
         this._addRawOrders(updates);
         this._setTimestamp(timestamp);
-        this._changed();
+        this._changed({ hasNewOrders: !! newOrders.length });
     },
 
     _saveAndChanged(order) {

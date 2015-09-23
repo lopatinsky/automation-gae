@@ -2,6 +2,7 @@ import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import { AppBar, Dialog, FlatButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
+import { SoundManager } from 'soundmanager2';
 import { Nav, SpinnerWrap, Clock } from '../components';
 import { AuthStore, AjaxStore, OrderStore } from '../stores';
 import Actions from '../Actions';
@@ -49,11 +50,15 @@ const MainView = React.createClass({
             this.transitionTo("login");
         }
     },
-    _onOrderStoreChange() {
+    _onOrderStoreChange(data) {
         this.setState({
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders()
         });
+        if (data && data.hasNewOrders) {
+            console.log("has new orders");
+            soundManager.play('new_orders');
+        }
     },
 
     _logoutSubmit() {
