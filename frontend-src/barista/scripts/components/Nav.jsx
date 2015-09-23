@@ -66,17 +66,22 @@ const NavItem = React.createClass({
 const Nav = React.createClass({
     render() {
         let isHorizontal = this.props.horizontal;
-        let style = isHorizontal ? {
+        let style = {
             position: 'fixed',
-            top: 64,
-            bottom: 0,
-            width: 100
-        } : {
-            position: 'fixed',
-            top: 80,
-            left: 0,
-            right: 0
+            background: '#eeeeee',
+            zIndex: 1
         };
+        Object.assign(style,
+            isHorizontal ? {
+                top: 64,
+                bottom: 0,
+                width: 100
+            } : {
+                top: 64,
+                left: 0,
+                right: 0,
+                paddingTop: 16
+            });
         return <div style={style}>
             <NavItem horizontal={isHorizontal} route='current'  text='Заказы'    label={this.props.orderCount}/>
             <NavItem horizontal={isHorizontal} route='delivery' text='Доставка'  label={this.props.deliveryCount}/>

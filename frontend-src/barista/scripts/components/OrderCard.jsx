@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton } from 'material-ui';
+import { Card, CardText, FlatButton, Styles } from 'material-ui';
 import { AjaxStore, OrderStore } from '../stores';
 import { SpinnerWrap } from '../components';
 
@@ -77,12 +77,16 @@ const OrderCard = React.createClass({
             },
             bolderStyle = { fontWeight: 400 },
             boldStyle = { fontWeight: 500 },
-            order = this.props.order,
+            { order, highlightColor } = this.props,
+            contentStyle = Styles.AutoPrefix.all({
+                transition: "background-color 0.2s ease-in-out",
+                backgroundColor: highlightColor
+            }),
             items = order.items.map(this._renderItem),
             gifts = order.gifts.map(this._renderItem);
         return <Card style={{margin:'0 12px 12px', fontWeight: 300}}>
             <SpinnerWrap show={this.state.sendingRequest}>
-                <CardText>
+                <CardText style={contentStyle}>
                     <div style={{display: 'table', width:'100%', marginBottom: 6}}>
                         <div style={{width: '13%', ...cellStyle}}>
                             <div>#{order.number}</div>

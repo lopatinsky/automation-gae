@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import { Styles } from 'material-ui';
 import OrderCard from './OrderCard';
 
 const CurrentTimeLine = React.createClass({
@@ -30,6 +31,18 @@ const OrderList = React.createClass({
     componentWillUnmount() {
         clearInterval(this._updateInterval);
     },
+    _getHighlightColor(order) {
+        const msRemain = order.deliveryTime.diff(this.state.time);
+        if (msRemain > 5 * 60 * 1000) {
+            return Styles.Colors.white;
+        } else if (msRemain > 0) {
+            return Styles.Colors.yellow300;
+        } else if (msRemain > -5 * 60 * 1000) {
+            return Styles.Colors.orange300;
+        } else {
+            return Styles.Colors.red400;
+        }
+    },
 
     render() {
         const actions = {};
@@ -41,6 +54,7 @@ const OrderList = React.createClass({
         const orders = this.props.orders.map(
                 order => <OrderCard key={order.id}
                                     order={order}
+                                    highlightColor={this._getHighlightColor(order)}
                                     {...actions}/>
         );
 
