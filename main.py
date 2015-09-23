@@ -234,6 +234,7 @@ app = WSGIApplication([
             Route('/create', company_admin.CreateVenueHandler),
             Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
             Route('/schedule', company_admin.EditVenueScheduleHandler),
+            Route('/time_break', company_admin.EditVenueTimeBreakHandler),
         ]),
 
         PathPrefixRoute('/delivery', [

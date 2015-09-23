@@ -7,7 +7,7 @@ from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.subscription import get_subscription, get_amount_of_subscription_items
-from methods.working_hours import check_with_errors
+from methods.working_hours import check_with_errors, check_in_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.venue import DELIVERY, DELIVERY_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
@@ -161,6 +161,10 @@ def check_venue(venue, delivery_time, delivery_type, client):
         if venue.problem:
             place_name = config.get_place_str()
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
+        if venue.time_break:
+            valid, error = check_in_with_errors(venue.time_break, delivery_time + timedelta(hours=venue.timezone_offset))
+            if not valid:
+                return False, error
     else:
         if delivery_type == DELIVERY:
             return False, u'На Ваш адрес доставки нет. Подробности в настройках о компании.'

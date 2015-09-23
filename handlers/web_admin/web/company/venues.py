@@ -244,3 +244,50 @@ class EditVenueScheduleHandler(CompanyBaseHandler):
         venue.schedule = schedule
         venue.put()
         self.redirect('/company/venues')
+
+
+class EditVenueTimeBreakHandler(CompanyBaseHandler):
+    @full_rights_required
+    def get(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        days = []
+        venue_days = {}
+        if venue.time_break:
+            for day in venue.time_break.days:
+                venue_days[day.weekday] = {
+                    'start': day.start_str(),
+                    'end': day.end_str()
+                }
+        for day in DaySchedule.DAYS:
+            days.append({
+                'name': DaySchedule.DAY_MAP[day],
+                'value': day,
+                'exist': True if venue_days.get(day) else False,
+                'start': venue_days[day]['start'] if venue_days.get(day) else '00:00',
+                'end': venue_days[day]['end'] if venue_days.get(day) else '00:00'
+            })
+        self.render('/schedule.html', **{
+            'venue': venue,
+            'days': days
+        })
+
+    @full_rights_required
+    def post(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        days = []
+        for day in DaySchedule.DAYS:
+            confirmed = bool(self.request.get(str(day)))
+            if confirmed:
+                start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
+                end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
+                days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
+        schedule = Schedule(days=days)
+        venue.time_break = schedule
+        venue.put()
+        self.redirect('/company/venues')

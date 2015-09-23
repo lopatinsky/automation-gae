@@ -25,6 +25,7 @@
                 <th>Телефоны</th>
                 <th>Почты</th>
                 <th>Выбрать зоны</th>
+                <th>Перерывы</th>
                 <th>Расписание</th>
             </tr>
             {% for venue in venues %}
@@ -56,6 +57,9 @@
                     </td>
                     <td rowspan="{{ height }}">
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
+                    </td>
+                    <td rowspan="{{ height }}">
+                        <a href="{{ '/company/venues/time_break?venue_id=%s' % venue.key.id() }}">Выбрать</a>
                     </td>
                     {% if venue.days %}
                         {% for day in venue.days %}
