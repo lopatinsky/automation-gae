@@ -16,3 +16,4 @@ export { default as ClientInfoDialog } from './ClientInfoDialog';
 export { default as PaymentTypesDialog } from './PaymentTypesDialog';
 export { default as AddressScreen } from './AddressScreen';
 export { default as HistoryScreen } from './HistoryScreen';
+export { default as PromosScreen } from './PromosScreen';

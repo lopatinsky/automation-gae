@@ -250,6 +250,27 @@ const Actions = {
                     alert(res.status);
                 }
             });
+    },
+
+    loadPromos() {
+        request
+            .get(base_url + '/api/promo/list')
+            .query({
+                client_id: ClientStore.getClientId()
+            })
+            .end((err, res) => {
+                if (res.status == 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_SUCCESS,
+                        data: {
+                            request: "promos",
+                            promos: res.body.promos
+                        }
+                    });
+                } else {
+                    alert(res.status);
+                }
+            });
     }
 
 };
