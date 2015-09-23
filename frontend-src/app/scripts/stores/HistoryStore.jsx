@@ -8,6 +8,15 @@ const HistoryStore = new BaseStore({
         return this.orders;
     },
 
+    getOrder(orderId) {
+        var orders = this.getOrders();
+        for (var i = 0; i < orders.length; i++) {
+            if (orders[i].order_id == orderId) {
+                return orders[i];
+            }
+        }
+    },
+
     _setOrders(orders) {
         this.orders = orders;
         this._changed();

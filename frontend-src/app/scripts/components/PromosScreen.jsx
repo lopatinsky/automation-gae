@@ -4,6 +4,10 @@ import { PromosStore } from '../stores';
 import Actions from '../Actions';
 
 const PromosScreen = React.createClass({
+    _refresh() {
+        this.setState({});
+    },
+
     getPromos() {
         var promos = PromosStore.getPromos();
         return promos.map(promo => {

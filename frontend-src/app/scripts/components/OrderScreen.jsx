@@ -2,7 +2,8 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
 import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu } from 'material-ui';
+import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu }
+    from 'material-ui';
 import Actions from '../Actions';
 
 const OrderScreen = React.createClass({
@@ -13,6 +14,13 @@ const OrderScreen = React.createClass({
     },
 
     _refresh() {
+        var orderId = OrderStore.getOrderId();
+        if (orderId != null) {
+            OrderStore.setOrderId(null);
+            this.transitionTo('historyOrder', {
+                order_id: orderId
+            });
+        }
         this.setState({});
     },
 
@@ -120,9 +128,9 @@ const OrderScreen = React.createClass({
         return <div>
             {this._getItems()}
             Итого: {OrderStore.getTotalSum()}
-            <Card onClick={this._onMenuTap}>
-                <CardText>Меню</CardText>
-            </Card>
+            <div>
+                <FlatButton label='Меню' onClick={this._onMenuTap} />
+            </div>
             <RadioButtonGroup name='group'>
                 {this._getDeliveryTypes()}
             </RadioButtonGroup>
@@ -139,7 +147,9 @@ const OrderScreen = React.createClass({
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
-            <FlatButton label='Заказать' onClick={this._order} />
+            <div>
+                <FlatButton label='Заказать' onClick={this._order} />
+            </div>
         </div>;
     }
 });

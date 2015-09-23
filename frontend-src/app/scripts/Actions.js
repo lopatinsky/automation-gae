@@ -1,6 +1,6 @@
 import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
-import { ClientStore, VenuesStore, AddressStore, PaymentsStore,OrderStore } from './stores';
+import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from './stores';
 
 const base_url = "http://mycompany.app.doubleb-automation-production.appspot.com";
 
@@ -23,6 +23,7 @@ const Actions = {
         AppDispatcher.dispatch({
             actionType: this.INIT,
             data: {
+                request: 'client',
                 name: name,
                 phone: phone,
                 email: email
@@ -224,7 +225,13 @@ const Actions = {
             })
             .end((err, res) => {
                 if (res.status == 201) {
-
+                    AppDispatcher.dispatch({
+                        actionType: this.AJAX_SUCCESS,
+                        data: {
+                            request: "order",
+                            orderId: res.body.order_id
+                        }
+                    });
                 } else {
                     alert(res.status);
                 }

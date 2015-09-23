@@ -5,6 +5,7 @@ import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
 
 const OrderStore = new BaseStore({
+    orderId: null,
     totalSum: 0,
     validationSum: 0,
     deliverySum: 0,
@@ -74,6 +75,15 @@ const OrderStore = new BaseStore({
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
         Actions.order();
+    },
+
+    setOrderId(orderId) {
+        this.orderId = orderId;
+        this._changed();
+    },
+
+    getOrderId() {
+        return this.orderId;
     }
 
 }, action => {
@@ -86,6 +96,11 @@ const OrderStore = new BaseStore({
                     action.data.delivery_sum_str,
                     action.data.promos
                 );
+            }
+            break;
+        case Actions.AJAX_SUCCESS:
+            if (action.data.request == "order") {
+                OrderStore.setOrderId(action.data.orderId);
             }
             break;
     }

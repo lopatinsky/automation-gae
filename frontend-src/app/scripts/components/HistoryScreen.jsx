@@ -1,17 +1,26 @@
 import React from 'react';
 import { Card, CardText } from 'material-ui';
 import { HistoryStore } from '../stores';
+import { Navigation } from 'react-router';
 import Actions from '../Actions';
 
 const HistoryScreen = React.createClass({
+    mixins: [Navigation],
+
     _refresh() {
         this.setState({});
+    },
+
+    _onOrderTap(order) {
+        this.transitionTo('historyOrder', {
+            order_id: order.order_id
+        });
     },
 
     getOrders() {
         var orders = HistoryStore.getOrders();
         return orders.map(order => {
-            return <Card>
+            return <Card onClick={() => this._onOrderTap(order)}>
                 <CardText>
                     {order.number}
                 </CardText>
@@ -20,8 +29,8 @@ const HistoryScreen = React.createClass({
     },
 
     componentDidMount() {
-        HistoryStore.addChangeListener(this._refresh);
         Actions.loadHistory();
+        HistoryStore.addChangeListener(this._refresh);
     },
 
     componentWillUnmount() {

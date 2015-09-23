@@ -33,13 +33,17 @@ const AddressScreen = React.createClass({
             }
         );
         return <div>
-            <DropDownMenu
-                menuItems={cities}
-                selectedIndex={AddressStore.getCityIndex(AddressStore.getChosenCity())}
-                onChange={this._onCityTap}/>
-            <TextField hintText="Улица" ref="street" value={AddressStore.getStreet()} onChange={this._setAddress}/>
-            <TextField hintText="Дом" ref="home" value={AddressStore.getHome()} onChange={this._setAddress}/>
-            <TextField hintText="Квартира" ref="flat" value={AddressStore.getFlat()} onChange={this._setAddress}/>
+            <div>
+                <DropDownMenu
+                    menuItems={cities}
+                    selectedIndex={AddressStore.getCityIndex(AddressStore.getChosenCity())}
+                    onChange={this._onCityTap}/>
+            </div>
+            <div>
+                <TextField hintText="Улица" ref="street" value={AddressStore.getStreet()} onChange={this._setAddress}/>
+                <TextField hintText="Дом" ref="home" value={AddressStore.getHome()} onChange={this._setAddress}/>
+                <TextField hintText="Квартира" ref="flat" value={AddressStore.getFlat()} onChange={this._setAddress}/>
+            </div>
         </div>;
     }
 });

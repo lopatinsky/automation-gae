@@ -50,7 +50,9 @@ const ClientStore = new BaseStore({
             alert("Failure");
             break;
         case Actions.INIT:
-            ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
+            if (action.data.request == "client") {
+                ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
+            }
             break;
     }
 });

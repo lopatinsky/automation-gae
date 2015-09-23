@@ -6,3 +6,5 @@ export { default as VenuesView } from './VenuesView';
 export { default as HistoryView } from './HistoryView';
 export { default as AddressView } from './AddressView';
 export { default as PromosView } from './PromosView';
+export { default as HistoryOrderView } from './HistoryOrderView';
+export { default as SettingsView } from './SettingsView';

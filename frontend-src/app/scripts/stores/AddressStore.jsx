@@ -4,15 +4,11 @@ import Actions from '../Actions';
 
 const AddressStore = new BaseStore({
     cities: [],
-    city: '',
-    street: '',
-    home: '',
-    flat: '',
 
     _setCities(cities) {
         this.cities = cities;
         if (cities.length > 0) {
-            this.city = cities[0];
+            this.setChosenCity(cities[0]);
         }
     },
 
@@ -21,23 +17,23 @@ const AddressStore = new BaseStore({
     },
 
     getChosenCity() {
-        return this.city;
+        return localStorage.getItem('city');
     },
 
     setChosenCity(city) {
-        this.city = city;
+        localStorage.setItem('city', city);
     },
 
     getStreet() {
-        return this.street;
+        return localStorage.getItem('street');
     },
 
     getHome() {
-        return this.home;
+        return localStorage.getItem('home');
     },
 
     getFlat() {
-        return this.flat;
+        return localStorage.getItem('flat');
     },
 
     getCityIndex(city) {
@@ -49,14 +45,14 @@ const AddressStore = new BaseStore({
     },
 
     setAddress(street, home, flat) {
-        this.street = street;
-        this.home = home;
-        this.flat = flat;
+        localStorage.setItem('street', street);
+        localStorage.setItem('home', home);
+        localStorage.setItem('flat', flat);
         this._changed();
     },
 
     getAddressStr() {
-        return this.city + ', ' + this.street + ', ' + this.home;
+        return this.getChosenCity() + ', ' + this.getStreet() + ', ' + this.getHome();
     },
 
     getAddressDict() {

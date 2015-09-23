@@ -7,3 +7,4 @@ export { default as ClientStore } from './ClientStore';
 export { default as PaymentsStore } from './PaymentsStore';
 export { default as AddressStore } from './AddressStore';
 export { default as HistoryStore } from './HistoryStore';
+export { default as PromosStore } from './PromosStore';

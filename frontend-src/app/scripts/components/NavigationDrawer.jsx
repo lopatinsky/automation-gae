@@ -26,6 +26,12 @@ const NavigationDrawer = React.createClass({
             }, {
                 route: 'history',
                 text: 'История'
+            }, {
+                route: 'promos',
+                text: 'Акции'
+            }, {
+                route: 'settings',
+                text: 'Настройки'
             }
         ];
     },
