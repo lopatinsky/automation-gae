@@ -253,10 +253,11 @@ class EditVenueTimeBreakHandler(CompanyBaseHandler):
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)
+        index = self.request.get_range('index')
         days = []
         venue_days = {}
-        if venue.time_break:
-            for day in venue.time_break.days:
+        if len(venue.time_break) > index and venue.time_break[index]:
+            for day in venue.time_break[index].days:
                 venue_days[day.weekday] = {
                     'start': day.start_str(),
                     'end': day.end_str()
@@ -271,7 +272,8 @@ class EditVenueTimeBreakHandler(CompanyBaseHandler):
             })
         self.render('/schedule.html', **{
             'venue': venue,
-            'days': days
+            'days': days,
+            'index': index
         })
 
     @full_rights_required
@@ -280,6 +282,7 @@ class EditVenueTimeBreakHandler(CompanyBaseHandler):
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)
+        index = self.request.get_range('index')
         days = []
         for day in DaySchedule.DAYS:
             confirmed = bool(self.request.get(str(day)))
@@ -288,6 +291,11 @@ class EditVenueTimeBreakHandler(CompanyBaseHandler):
                 end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
                 days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
         schedule = Schedule(days=days)
-        venue.time_break = schedule
+        if not venue.time_break:
+            venue.time_break = [schedule]
+        elif len(venue.time_break) > index:
+            venue.time_break[index] = schedule
+        else:
+            venue.time_break.append(schedule)
         venue.put()
         self.redirect('/company/venues')

@@ -162,9 +162,10 @@ def check_venue(venue, delivery_time, delivery_type, client):
             place_name = config.get_place_str()
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
         if venue.time_break:
-            valid, error = check_in_with_errors(venue.time_break, delivery_time + timedelta(hours=venue.timezone_offset))
-            if not valid:
-                return False, error
+            for time_break in venue.time_break:
+                valid, error = check_in_with_errors(time_break, delivery_time + timedelta(hours=venue.timezone_offset))
+                if not valid:
+                    return False, error
     else:
         if delivery_type == DELIVERY:
             return False, u'На Ваш адрес доставки нет. Подробности в настройках о компании.'

@@ -63,7 +63,12 @@
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
                     </td>
                     <td rowspan="{{ height }}">
-                        <a href="{{ '/company/venues/time_break?venue_id=%s' % venue.key.id() }}">Выбрать</a>
+                        {% if venue.time_break %}
+                            {% for time_break in venue.time_break %}
+                                <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), loop.index0) }}">Выбрать</a>
+                            {% endfor %}
+                        {% endif %}
+                        <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), venue.time_break|length) }}">Добавить</a>
                     </td>
                     {% if venue.days %}
                         {% for day in venue.days %}

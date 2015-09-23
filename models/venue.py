@@ -230,7 +230,7 @@ class Venue(ndb.Model):
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     schedule = ndb.LocalStructuredProperty(Schedule)
-    time_break = ndb.LocalStructuredProperty(Schedule)
+    time_break = ndb.LocalStructuredProperty(Schedule, repeated=True)
     delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phones = ndb.StringProperty(repeated=True)  # use for sending sms
     emails = ndb.StringProperty(repeated=True)  # use for sending email
