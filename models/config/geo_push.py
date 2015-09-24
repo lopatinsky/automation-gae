@@ -10,11 +10,10 @@ __author__ = 'dvpermyakov'
 class GeoPoint(ndb.Model):
     location = ndb.GeoPtProperty(required=True)
     radius = ndb.IntegerProperty(required=True)
-    ident = ndb.StringProperty(required=True, indexed=False)
 
-    def dict(self):
+    def dict(self, index):
         return {
-            'id': self.ident,
+            'id': str(index),
             'lat': self.location.lat,
             'lon': self.location.lon,
             'radius': self.radius
@@ -48,6 +47,6 @@ class GeoPushModule(ndb.Model):
                 'days_without_push': self.days_without_push,
                 'last_order': last_order is not None,
                 'last_order_timestamp': last_order_timestamp,
-                'points': [point.dict() for point in self.points]
+                'points': [point.dict(index) for index, point in enumerate(self.points)]
             }
         }
