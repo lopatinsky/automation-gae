@@ -113,6 +113,7 @@ const OrderStore = new BaseStore({
     },
 
     loadCurrent(orders, timestamp) {
+        this.clear();
         this._addRawOrders(orders);
         this._setTimestamp(timestamp);
         this._changed();
@@ -122,6 +123,11 @@ const OrderStore = new BaseStore({
         this._addRawOrders(updates);
         this._setTimestamp(timestamp);
         this._changed({ hasNewOrders: !! newOrders.length });
+    },
+
+    clear() {
+        this._knownOrders.clear();
+        this._changed();
     },
 
     _saveAndChanged(order) {
@@ -172,6 +178,9 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request.substring(0, 13) == 'order_action_') {
                 OrderStore[action.data.action](action.data.order, action.data.options);
+            }
+            if (action.data.request == "logout") {
+                OrderStore.clear();
             }
             break;
     }
