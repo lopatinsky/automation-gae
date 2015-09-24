@@ -355,7 +355,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
         valid, error = check_wallet_payment(total_sum_without_promos + (delivery_zone.price if delivery_zone else 0),
-                                            wallet_payment_sum)
+                                            wallet_payment_sum, venue)
         if not valid:
             return send_error(error)
 
@@ -373,12 +373,12 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
         valid, error = check_wallet_payment(total_sum + (delivery_zone.price if delivery_zone else 0),
-                                            wallet_payment_sum)
+                                            wallet_payment_sum, venue)
         if not valid:
             return send_error(error)
 
     max_wallet_payment = 0.0
-    if config.WALLET_ENABLED:
+    if config.WALLET_ENABLED and not venue.wallet_restriction:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
                                                      from_memcache=order is None,
                                                      set_zero_if_fail=True)

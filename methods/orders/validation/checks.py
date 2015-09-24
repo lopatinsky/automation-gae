@@ -255,12 +255,13 @@ def check_stop_list(venue, delivery_type, item_dicts, gift_dicts, order_gift_dic
     return True, None
 
 
-def check_wallet_payment(total_sum, wallet_payment_sum):
+def check_wallet_payment(total_sum, wallet_payment_sum, venue):
     valid = not config.WALLET_ENABLED or wallet_payment_sum <= config.GET_MAX_WALLET_SUM(total_sum)
-    if valid:
-        return True, None
-    else:
+    if not valid:
         return False, u'Невозможно оплатить бонусами сумму большую, чем %s' % config.GET_MAX_WALLET_SUM(total_sum)
+    if wallet_payment_sum and venue.wallet_restriction:
+        return False, u'В данном заведение невозможна оплата баллами'
+    return True, None
 
 
 def check_gifts(gifts, client):

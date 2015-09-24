@@ -243,6 +243,7 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)
 
