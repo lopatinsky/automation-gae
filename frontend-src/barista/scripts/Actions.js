@@ -93,7 +93,7 @@ const Actions = {
 
     doneOrder(order) {
         doRequest.post(`order_action_${order.id}`, `admin/orders/${order.id}/close`)
-            .end(res => ({ order, action: 'done' }));
+            .end(res => ({ order, action: 'close' }));
     },
 
     postponeOrder(order, mins) {
