@@ -3,7 +3,6 @@ from google.appengine.ext import ndb
 from methods.rendering import timestamp
 from models import STATUS_AVAILABLE, STATUS_CHOICES, Order
 from models.config.config import GEO_PUSH_MODULE
-from models.order import READY_ORDER
 
 __author__ = 'dvpermyakov'
 
@@ -11,9 +10,11 @@ __author__ = 'dvpermyakov'
 class GeoPoint(ndb.Model):
     location = ndb.GeoPtProperty(required=True)
     radius = ndb.IntegerProperty(required=True)
+    ident = ndb.StringProperty(required=True, indexed=False)
 
     def dict(self):
         return {
+            'id': self.ident,
             'lat': self.location.lat,
             'lon': self.location.lon,
             'radius': self.radius
