@@ -62,6 +62,10 @@ const AddressStore = new BaseStore({
                 street: this.getStreet(),
                 home: this.getHome(),
                 flat: this.getFlat()
+            },
+            coordinates: {
+                lat: 0,
+                lon: 0
             }
         }
     }

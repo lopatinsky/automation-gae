@@ -3,7 +3,7 @@ import Actions from '../Actions';
 import ClientStore from './ClientStore';
 import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
-import assign from 'object-assign';
+import MenuItemStore from './MenuItemStore';
 
 const OrderStore = new BaseStore({
     orderId: null,
@@ -42,7 +42,7 @@ const OrderStore = new BaseStore({
             if (modifier.chosen_choice != null) {
                 choice_id = modifier.chosen_choice.id
             } else {
-                choice_id = MenuItemStore.getDefaultModifierChoice();
+                choice_id = MenuItemStore.getDefaultModifierChoice(modifier).id;
             }
             return {
                 quantity: 1,
@@ -128,7 +128,7 @@ const OrderStore = new BaseStore({
     },
 
     setDay(date) {
-        this.dayStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        this.dayStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
         this._changed();
     },
 

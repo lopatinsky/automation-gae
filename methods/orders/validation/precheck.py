@@ -231,6 +231,7 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
         if not delivery_time:
             delivery_time = datetime.utcnow()
         delivery_time += timedelta(minutes=delivery_time_minutes)
+    logging.info(delivery_time)
     return delivery_time
 
 
