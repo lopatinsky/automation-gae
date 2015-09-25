@@ -13,7 +13,7 @@ from models.client import IOS_DEVICE, ANDROID_DEVICE, Client
 from models.order import Order
 
 
-def _refresh_client_info(request, android_id, client_id=None):
+def _refresh_client_info(request, android_id, device_phone, client_id=None):
     def refresh(client):
         client.user_agent = request.headers["User-Agent"]
         if 'iOS' in client.user_agent:
@@ -22,6 +22,8 @@ def _refresh_client_info(request, android_id, client_id=None):
             client.device_type = ANDROID_DEVICE
         if android_id:
             client.android_id = android_id
+        if device_phone and not client.tel:
+            client.tel = device_phone
         client.put()
 
     current_namespace = namespace_manager.get_namespace()
@@ -50,6 +52,7 @@ def _perform_registration(request):
 
     client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
     android_id = request.get('android_id')
+    device_phone = request.get('device_phone')
 
     client = None
     if client_id:
@@ -61,9 +64,9 @@ def _perform_registration(request):
             client_id = client.key.id()  # it is need to share gift
 
     if not client:
-        client = _refresh_client_info(request, android_id)
+        client = _refresh_client_info(request, android_id, device_phone)
     else:
-        client = _refresh_client_info(request, android_id, client_id)
+        client = _refresh_client_info(request, android_id, device_phone, client_id)
 
     response['client_id'] = client.key.id()
     client_name = client.name or ''
