@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 from methods.rendering import latinize
 from models import STATUS_CHOICES, STATUS_AVAILABLE
-from models.config.config import ORDER_INFO_MODULE
+from models.config.config import ORDER_INFO_MODULE, CLIENT_INFO_MODULE
 
 __author__ = 'dvpermyakov'
 
@@ -24,7 +24,7 @@ class ClientModule(ndb.Model):
 
     def dict(self):
         return {
-            'type': 2,
+            'type': CLIENT_INFO_MODULE,
             'enable': self.status == STATUS_AVAILABLE,
             'fields': [{
                 'title': field.title,
