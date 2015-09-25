@@ -10,6 +10,8 @@ __author__ = 'dvpermyakov'
 def __get_group_modifiers(resto_modifiers):
     group_modifiers = {}
     for resto_modifier in resto_modifiers:
+        if not resto_modifier.get('groupId'):
+            continue
         modifier = GroupModifier(id=resto_modifier['groupId'])
         modifier.title = resto_modifier['name']
         modifier.choices = []
