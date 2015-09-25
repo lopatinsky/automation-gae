@@ -2,8 +2,10 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
 import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, FlatButton, TimePicker, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu }
+import { List, ListItem, Card, CardText, FlatButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu }
     from 'material-ui';
+import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
+import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
 import Actions from '../Actions';
 
 const OrderScreen = React.createClass({
@@ -78,6 +80,14 @@ const OrderScreen = React.createClass({
         }
     },
 
+    _setTime(time) {
+        OrderStore.setTime(time);
+    },
+
+    _setDate(date) {
+        OrderStore.setDay(date);
+    },
+
     _getTimeInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.slots.length > 0) {
@@ -90,10 +100,20 @@ const OrderScreen = React.createClass({
                 onChange={this._onSlotTap}/>;
         } else {
             return <div>
-                <DatePicker
+                <Card onClick={() => this.refs.datePicker.show()}>
+                    <CardText>
+                        {OrderStore.getFullTimeStr()}
+                    </CardText>
+                </Card>
+                <DatePickerDialog
+                    ref='datePicker'
+                    onAccept={this._setDate}
+                    onDismiss={() => this.refs.timePicker.show()}
                     hintText="Выберите дату"
                     autoOk={true} />
-                <TimePicker
+                <TimePickerDialog
+                    ref='timePicker'
+                    onAccept={this._setTime}
                     hintText="Выберитее время"
                     format="24hr"
                     autoOk={true} />

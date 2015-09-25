@@ -191,7 +191,7 @@ const Actions = {
                 venue_id: VenuesStore.getChosenVenue().id,
                 payment: JSON.stringify(PaymentsStore.getPaymentDict()),
                 delivery_slot_id: OrderStore.getSlotId(),
-                //time_picker_value: '',
+                time_picker_value: OrderStore.getFullTimeStr(),
                 items: JSON.stringify(OrderStore.getItemsDict())
             })
             .end((err, res) => {

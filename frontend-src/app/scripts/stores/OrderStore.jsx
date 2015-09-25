@@ -3,6 +3,7 @@ import Actions from '../Actions';
 import ClientStore from './ClientStore';
 import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
+import assign from 'object-assign';
 
 const OrderStore = new BaseStore({
     orderId: null,
@@ -11,6 +12,8 @@ const OrderStore = new BaseStore({
     deliverySumStr: '',
     items: [],
     slotId: null,
+    dayStr: null,
+    timeStr: null,
     promos: [],
 
     getSlotId() {
@@ -102,7 +105,7 @@ const OrderStore = new BaseStore({
             delivery_sum: this.getDeliverySum(),
             items: this.getItemsDict(),
             venue_id: VenuesStore.getChosenVenue().id,
-            //time_picker_value: '',
+            time_picker_value: this.getFullTimeStr(),
             comment: ''
         }
     },
@@ -122,6 +125,26 @@ const OrderStore = new BaseStore({
 
     getOrderId() {
         return this.orderId;
+    },
+
+    setDay(date) {
+        this.dayStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        this._changed();
+    },
+
+    setTime(date) {
+        this.timeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+        this._changed();
+    },
+
+    getFullTimeStr() {
+        if (this.dayStr == null) {
+            this.setDay(new Date());
+        }
+        if (this.timeStr == null) {
+            this.setTime(new Date());
+        }
+        return `${this.dayStr} ${this.timeStr}`;
     }
 
 }, action => {
