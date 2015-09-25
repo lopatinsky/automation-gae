@@ -9,7 +9,7 @@ const PaymentTypesDialog = React.createClass({
         return payment_types.map(payment_type => {
             return (
                 <ListItem
-                    primaryText={payment_type.title}
+                    primaryText={payment_type.really_title}
                     onClick={() => this.dismiss(payment_type)}/>
             );
         });

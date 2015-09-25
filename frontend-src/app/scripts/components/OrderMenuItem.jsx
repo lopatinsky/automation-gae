@@ -4,6 +4,10 @@ import { OrderStore } from '../stores';
 import Actions from '../Actions';
 
 const OrderMenuItem = React.createClass({
+    _removeItem() {
+        OrderStore.removeItem(this.props.item);
+    },
+
     render() {
         var item = this.props.item;
         return (
@@ -11,6 +15,9 @@ const OrderMenuItem = React.createClass({
                 <CardText>
                     {item.title}
                 </CardText>
+                <div>
+                    <FlatButton label='Удалить' onClick={this._removeItem} />
+                </div>
             </Card>
         );
     }

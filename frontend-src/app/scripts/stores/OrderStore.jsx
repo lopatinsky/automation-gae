@@ -6,7 +6,6 @@ import PaymentsStore from './PaymentsStore';
 
 const OrderStore = new BaseStore({
     orderId: null,
-    totalSum: 0,
     validationSum: 0,
     deliverySum: 0,
     deliverySumStr: '',
@@ -19,7 +18,11 @@ const OrderStore = new BaseStore({
     },
 
     getTotalSum() {
-        return this.totalSum;
+        var totalSum = 0;
+        for (var i = 0; i < this.items.length; i++) {
+            totalSum += this.items[i].totalSum;
+        }
+        return totalSum;
     },
 
     getDeliverySum() {
@@ -30,13 +33,42 @@ const OrderStore = new BaseStore({
         return this.items;
     },
 
+    getGroupModifierDict(item) {
+        return item.group_modifiers.map(modifier => {
+            var choice_id;
+            if (modifier.chosen_choice != null) {
+                choice_id = modifier.chosen_choice.id
+            } else {
+                choice_id = MenuItemStore.getDefaultModifierChoice();
+            }
+            return {
+                quantity: 1,
+                group_modifier_id: modifier.modifier_id,
+                choice: choice_id
+            };
+        });
+    },
+
+    getSingleModifierDict(item) {
+        var modifiers = [];
+        for (var i = 0; i < item.single_modifiers.length; i++) {
+            if (item.single_modifiers[i].quantity > 0) {
+                modifiers.push({
+                    single_modifier_id: item.single_modifiers[i].modifier_id,
+                    quantity: item.single_modifiers[i].quantity
+                })
+            }
+        }
+        return modifiers;
+    },
+
     getItemsDict() {
         return this.getItems().map(item => {
             return {
                 quantity: 1,
                 item_id: item.id,
-                single_modifiers: [],
-                group_modifiers: []
+                single_modifiers: this.getSingleModifierDict(item),
+                group_modifiers: this.getGroupModifierDict(item)
             }
         });
     },
@@ -47,8 +79,14 @@ const OrderStore = new BaseStore({
     },
 
     addItem(item, totalSum) {
+        item.totalSum = totalSum;
         this.items.push(item);
-        this.totalSum += totalSum;
+        this.validationSum = this.totalSum;
+        this._changed();
+    },
+
+    removeItem(item) {
+        this.items.splice(this.items.indexOf(item), 1);
         this.validationSum = this.totalSum;
         this._changed();
     },

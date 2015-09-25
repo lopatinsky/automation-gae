@@ -46,6 +46,7 @@ class PaymentType(ndb.Model):  # self.key.id() == type
     def dict(self):
         dct = {
             'id': int(self.key.id()),
-            'title': self.title
+            'title': self.title,
+            'really_title': PAYMENT_TYPE_MAP[int(self.key.id())]
         }
         return dct

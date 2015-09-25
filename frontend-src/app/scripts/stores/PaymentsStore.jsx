@@ -16,6 +16,10 @@ const PaymentsStore = new BaseStore({
         return this.payment_types;
     },
 
+    getChosenPaymentTypeTitle() {
+        return this.chosen_payment_type.really_title;
+    },
+
     getChosenPaymentType() {
         return this.chosen_payment_type;
     },

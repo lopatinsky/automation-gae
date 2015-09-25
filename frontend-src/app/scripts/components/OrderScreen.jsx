@@ -21,6 +21,10 @@ const OrderScreen = React.createClass({
                 order_id: orderId
             });
         }
+        var slots = VenuesStore.getChosenDelivery().slots;
+        if (slots.length > 0 && OrderStore.getSlotId() == null) {
+            OrderStore.setSlotId(slots[0].id);
+        }
         this.setState({});
     },
 
@@ -131,7 +135,7 @@ const OrderScreen = React.createClass({
             <div>
                 <FlatButton label='Меню' onClick={this._onMenuTap} />
             </div>
-            <RadioButtonGroup name='group'>
+            <RadioButtonGroup name='group' valueSelected={VenuesStore.getChosenDelivery().name}>
                 {this._getDeliveryTypes()}
             </RadioButtonGroup>
             <List>
@@ -141,7 +145,7 @@ const OrderScreen = React.createClass({
                 <CardText>{ClientStore.getName()}</CardText>
             </Card>
             <Card onClick={this._onPaymentTypeTap}>
-                <CardText>{PaymentsStore.getChosenPaymentType().title}</CardText>
+                <CardText>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
             </Card>
             {this._getTimeInput()}
             <VenuesDialog ref="venuesDialog"/>

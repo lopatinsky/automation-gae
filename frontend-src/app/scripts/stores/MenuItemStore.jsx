@@ -66,11 +66,19 @@ const MenuItemStore = new BaseStore({
         this._changed();
     },
 
+    getDefaultModifierChoice(modifier) {
+        for (var i = 0; i < modifier.choices.length; i++) {
+            if (modifier.choices[i].default) {
+                return modifier.choices[i];
+            }
+        }
+    },
+
     _setItem(item) {
         this.item = item;
         for (var i = 0; i < item.group_modifiers.length; i++) {
             var modifier = item.group_modifiers[i];
-            this.setChoice(modifier, modifier.choices[0]);
+            this.setChoice(modifier, this.getDefaultModifierChoice(modifier));
         }
         for (i = 0; i < item.single_modifiers.length; i++) {
             item.single_modifiers[i].quantity = 0;
