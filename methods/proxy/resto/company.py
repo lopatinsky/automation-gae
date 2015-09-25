@@ -14,8 +14,8 @@ DELIVERY_TYPE_MAP = {
 }
 
 REVERSE_DELIVERY_TYPE_MAP = {
-    SELF: 'self',
-    DELIVERY: 'delivery'
+    SELF: 1,
+    DELIVERY: 0
 }
 
 
