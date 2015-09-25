@@ -217,6 +217,7 @@ class OrderHandler(ApiHandler):
         self.response.status_int = 201
         self.render_json({
             'order_id': self.order.key.id(),
+            'number': self.order.number,
             'delivery_time': validation_result['delivery_time'],
             'delivery_slot_name': validation_result['delivery_slot_name']
         })
