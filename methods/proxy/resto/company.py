@@ -2,7 +2,7 @@ from datetime import time
 from google.appengine.api import memcache
 from models.proxy.resto import RestoCompany
 from models.schedule import Schedule, DaySchedule
-from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address
+from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address, DeliverySlot
 from requests import get_resto_company_info, get_resto_delivery_types
 
 __author__ = 'dvpermyakov'
@@ -37,6 +37,7 @@ def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_
     for resto_deliery_type in resto_delivery_types:
         delivery_type = DeliveryType()
         delivery_type.delivery_type = DELIVERY_TYPE_MAP[resto_deliery_type['name']]
+        delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
         delivery_type.status = resto_deliery_type['available']
         if delivery_type.delivery_type == DELIVERY:
             for id, city in enumerate(resto_delivery_cities):

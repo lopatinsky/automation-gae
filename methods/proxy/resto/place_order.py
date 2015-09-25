@@ -7,6 +7,7 @@ from methods.rendering import STR_DATETIME_FORMAT
 from models import Order
 from models.order import NEW_ORDER
 from models.proxy.resto import RestoClient
+from models.venue import DELIVERY
 from requests import post_resto_place_order
 
 __author__ = 'dvpermyakov'
@@ -14,7 +15,10 @@ __author__ = 'dvpermyakov'
 
 def resto_place_order(client, venue, order, payment_json, items_json, order_gifts, cancelled_order_gifts):
     resto_client = RestoClient.get(client)
-    resto_address_dict = get_resto_address_dict(order.address)
+    if order.delivery_type == DELIVERY:
+        resto_address_dict = get_resto_address_dict(order.address)
+    else:
+        resto_address_dict = {}
     items, item_dicts = get_item_and_item_dicts(items_json)
     resto_item_dicts = get_resto_item_dicts(items_json)
     resto_gift_dicts = get_resto_item_dicts(order_gifts)
