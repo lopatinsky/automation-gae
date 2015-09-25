@@ -41,6 +41,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
         success = True
         response = {
             'order_id': order.key.id(),
+            'number': order.number,
             'delivery_time': datetime.strftime(order.delivery_time, STR_DATETIME_FORMAT),
             'delivery_slot_name': None
         }
