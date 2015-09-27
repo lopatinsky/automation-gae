@@ -11,7 +11,7 @@ const CurrentTimeLine = React.createClass({
         const style = {
             height: 4,
             margin: '0 12px 12px',
-            background: this.context.muiTheme.palette.primary2Color
+            background: this.context.muiTheme.rawTheme.palette.primary2Color
         };
         return <div style={style}/>
     }

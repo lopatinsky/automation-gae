@@ -1,6 +1,5 @@
 import React from 'react';
 import { State, Link } from 'react-router';
-import assign from 'object-assign';
 
 const NavItem = React.createClass({
     mixins: [State],
@@ -39,7 +38,7 @@ const NavItem = React.createClass({
                 width: '100%',
                 height: '20%'
             };
-            assign(linkStyle, {
+            Object.assign(linkStyle, {
                 display: 'table-cell',
                 height: '100%',
                 verticalAlign: 'middle'
@@ -49,7 +48,7 @@ const NavItem = React.createClass({
                 float: 'left',
                 width: '20%'
             };
-            assign(linkStyle, {
+            Object.assign(linkStyle, {
                 display: 'block'
             });
         }
