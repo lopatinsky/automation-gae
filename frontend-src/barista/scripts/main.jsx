@@ -5,18 +5,6 @@ import { soundManager } from 'soundmanager2';
 import { RootView, LoginView, MainView, CurrentView, DeliveryView, ReturnsView, HistoryView, StopListView }
     from './views';
 
-soundManager.setup({
-    url: '/static/barista/swf',
-    debugMode: false,
-    onready() {
-        soundManager.createSound({
-            id: 'new_orders',
-            url: '/static/barista/sounds/ship_horn.mp3',
-            autoLoad: true
-        });
-    }
-});
-
 const routes = <Route path='/' handler={RootView}>
     <Route name='login' path='login' handler={LoginView}/>
     <Route handler={MainView}>

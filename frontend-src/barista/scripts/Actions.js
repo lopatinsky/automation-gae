@@ -1,6 +1,6 @@
 import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
-import { AuthStore, OrderStore } from "./stores";
+import { AuthStore, OrderStore, SystemStore } from "./stores";
 
 const BASE_URL = 'http://m-test.doubleb-automation-production.appspot.com/api/';
 
@@ -101,6 +101,22 @@ const Actions = {
             .type('form')
             .send({ mins })
             .end(res => ({ order, action: 'postpone', options: { mins } }));
+    },
+
+    INIT_APP: "INIT_APP",
+    initApp() {
+        AppDispatcher.dispatch({
+            actionType: this.INIT_APP,
+            data: null
+        })
+    },
+
+    TESTED_SOUND: "TESTED_SOUND",
+    testedSound() {
+        AppDispatcher.dispatch({
+            actionType: this.TESTED_SOUND,
+            data: null
+        });
     }
 };
 

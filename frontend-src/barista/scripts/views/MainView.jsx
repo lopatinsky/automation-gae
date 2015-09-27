@@ -1,10 +1,10 @@
 import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
-import { AppBar, Dialog, FlatButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
+import { AppBar, Dialog, FlatButton, RaisedButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
 import { SoundManager } from 'soundmanager2';
 import { Nav, SpinnerWrap, Clock } from '../components';
-import { AuthStore, AjaxStore, OrderStore } from '../stores';
+import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
 import Actions from '../Actions';
 
 const MainView = React.createClass({
@@ -24,6 +24,7 @@ const MainView = React.createClass({
         AuthStore.addChangeListener(this._onAuthStoreChange);
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
+        SystemStore.addChangeListener(this._onSystemStoreChange);
         Actions.loadCurrent();
         this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
     },
@@ -31,11 +32,13 @@ const MainView = React.createClass({
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
         OrderStore.removeChangeListener(this._onOrderStoreChange);
+        SystemStore.addChangeListener(this._onSystemStoreChange);
         clearInterval(this._updateInterval);
     },
 
     getInitialState() {
         return {
+            soundMayNotWork: SystemStore.soundMayNotWork,
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders(),
             pendingOrder: null,
@@ -59,6 +62,9 @@ const MainView = React.createClass({
             console.log("has new orders");
             soundManager.play('new_orders');
         }
+    },
+    _onSystemStoreChange() {
+        this.setState({ soundMayNotWork: SystemStore.soundMayNotWork });
     },
 
     _logoutSubmit() {
@@ -145,7 +151,7 @@ const MainView = React.createClass({
 
     render() {
         let isHorizontal = this.state.window.width > this.state.window.height;
-        let contentStyle = isHorizontal ? {paddingLeft: 100, paddingTop: 80} : {paddingTop: 180};
+        let contentStyle = isHorizontal ? {paddingLeft: 100, paddingTop: 116} : {paddingTop: 216};
         return <div>
             <AppBar title={AuthStore.login}
                     showMenuIconButton={false}
@@ -154,8 +160,11 @@ const MainView = React.createClass({
             <Nav horizontal={isHorizontal}
                  orderCount={this.state.orderAhead.length}
                  deliveryCount={this.state.delivery.length}/>
+            <Clock horizontal={isHorizontal}>
+                {' '}
+                {this.state.soundMayNotWork && <RaisedButton label='Тест звука' onTouchTap={this._onSoundButtonClick}/>}
+            </Clock>
             <div style={contentStyle}>
-                <Clock/>
                 <RouteHandler orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
                               onTouchTapCancel={this._onTouchTapCancel}
@@ -195,6 +204,11 @@ const MainView = React.createClass({
     _postponeSubmit() {
         this.refs.postponeDialog.dismiss();
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
+    },
+
+    _onSoundButtonClick() {
+        soundManager.play('new_orders');
+        Actions.testedSound();
     }
 });
 export default MainView;

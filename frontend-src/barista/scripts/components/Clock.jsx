@@ -14,11 +14,19 @@ const Clock = React.createClass({
     },
     render() {
         const style = {
+            position: 'fixed',
+            left: this.props.horizontal ? 100 : 0,
+            right: 0,
+            top: this.props.horizontal ? 80 : 180,
             textAlign: 'center',
             fontSize: 24,
+            lineHeight: '24px',
             paddingBottom: 12
         };
-        return <div style={style}>{this.state.time.format('H:mm:ss')}</div>
+        return <div style={style}>
+            {this.state.time.format('H:mm:ss')}
+            {this.props.children}
+        </div>
     }
 });
 export default Clock;
