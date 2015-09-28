@@ -28,7 +28,7 @@ def done_order(order, namespace, with_push=True):
     for performing in order.promo_code_performings:
         performing = performing.get()
         promo_code = performing.promo_code.get()
-        if not promo_code.persisit:
+        if not promo_code.persist:
             performing.close()
 
     order.status = READY_ORDER
