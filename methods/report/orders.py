@@ -8,7 +8,7 @@ from models import Order, Client, Venue
 
 
 def _order_data(order):
-    venue = Venue.get_by_id(int(order.venue_id))
+    venue = Venue.get(order.venue_id)
     dct = {
         "order_id": order.key.id(),
         "comment": order.comment if order.comment else '',
