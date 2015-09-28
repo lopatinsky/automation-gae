@@ -110,14 +110,6 @@ const Actions = {
             data: null
         })
     },
-
-    TESTED_SOUND: "TESTED_SOUND",
-    testedSound() {
-        AppDispatcher.dispatch({
-            actionType: this.TESTED_SOUND,
-            data: null
-        });
-    }
 };
 
 export default Actions;

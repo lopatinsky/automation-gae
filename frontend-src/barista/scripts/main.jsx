@@ -1,7 +1,6 @@
 import _ from './inject';
 import React from 'react';
 import Router, { Route, DefaultRoute } from 'react-router';
-import { soundManager } from 'soundmanager2';
 import { RootView, LoginView, MainView, CurrentView, DeliveryView, ReturnsView, HistoryView, StopListView }
     from './views';
 

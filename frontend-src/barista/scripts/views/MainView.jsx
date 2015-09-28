@@ -2,7 +2,6 @@ import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import { AppBar, Dialog, FlatButton, RaisedButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
-import { SoundManager } from 'soundmanager2';
 import { Nav, SpinnerWrap, Clock } from '../components';
 import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
 import Actions from '../Actions';
@@ -60,7 +59,7 @@ const MainView = React.createClass({
         });
         if (data && data.hasNewOrders) {
             console.log("has new orders");
-            soundManager.play('new_orders');
+            SystemStore.playSound();
         }
     },
     _onSystemStoreChange() {
@@ -160,10 +159,7 @@ const MainView = React.createClass({
             <Nav horizontal={isHorizontal}
                  orderCount={this.state.orderAhead.length}
                  deliveryCount={this.state.delivery.length}/>
-            <Clock horizontal={isHorizontal}>
-                {' '}
-                {this.state.soundMayNotWork && <RaisedButton label='Тест звука' onTouchTap={this._onSoundButtonClick}/>}
-            </Clock>
+            <Clock horizontal={isHorizontal}/>
             <div style={contentStyle}>
                 <RouteHandler orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
@@ -207,7 +203,8 @@ const MainView = React.createClass({
     },
 
     _onSoundButtonClick() {
-        soundManager.play('new_orders');
+        this._onSoundButtonClick = () => {};
+        SystemStore.playSound();
         Actions.testedSound();
     }
 });
