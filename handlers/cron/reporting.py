@@ -60,7 +60,7 @@ def _send(namespace):
 
 class ReportSendHandler(RequestHandler):
     def get(self):
-        for namespace in ['redcup']:  # metadata.get_namespaces():
+        for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             config = Config.get()
             if not config:
