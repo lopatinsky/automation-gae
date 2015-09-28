@@ -64,15 +64,14 @@ def _total(orders, status, payment_type):
     }
 
 
-def get(venue_id, start, end):
-    if not venue_id:
-        venue_id = 0
-    else:
-        venue_id = int(venue_id)
+def get(venue_id, start, end, venue_ids=()):
+    if venue_id and venue_id != '0':
+        venue_ids = venue_id,
+    print venue_ids
 
     query = Order.query(Order.date_created >= start, Order.date_created <= end)
-    if venue_id:
-        query = query.filter(Order.venue_id == str(venue_id))
+    if venue_ids:
+        query = query.filter(Order.venue_id.IN(venue_ids))
     orders = query.fetch()
     order_dicts = [_order_data(order) for order in orders]
 

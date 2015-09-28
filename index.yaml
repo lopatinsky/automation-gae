@@ -47,7 +47,6 @@ indexes:
   properties:
   - name: venue_id
   - name: date_created
-    direction: desc
 
 - kind: Order
   properties:

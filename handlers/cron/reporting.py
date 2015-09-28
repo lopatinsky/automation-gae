@@ -6,43 +6,63 @@ from google.appengine.api import namespace_manager, mail, app_identity
 from google.appengine.ext import deferred
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
+from methods.rendering import latinize
 
 from models.config.config import Config
 from methods import excel
 from methods.report import orders
+from models.legal import LegalInfo
 
 _EMAIL_SENDER = "reports@%s.appspotmail.com" % app_identity.get_application_id()
 
 
-def _send(namespace, emails):
+def _send(namespace):
     namespace_manager.set_namespace(namespace)
     config = Config.get()
+    company_emails = config.REPORT_EMAILS.split(",") if config.REPORT_EMAILS else ()
 
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
     yesterday = today - datetime.timedelta(days=1)
     yesterday_end = today - datetime.timedelta(microseconds=1)
-    report_data = orders.get('0', yesterday, yesterday_end)
 
-    excel_file = excel.send_excel_file(None, 'orders', 'orders.html', **report_data)
-    io = StringIO()
-    excel_file.save(io)
+    all_reports = []
 
-    subject = u"Приложение %s - отчет" % config.APP_NAME
-    body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
-    filename = u"report-%s-%s.xls" % (namespace, yesterday.strftime("%d-%m-%Y"))
-    filename = filename.encode('utf-8')
+    legals = LegalInfo.query().fetch()
+    for legal in legals:
+        legal_emails = legal.report_emails.split(",") if legal.report_emails else ()
+        if not legal_emails and not company_emails:
+            continue
+        venue_ids = legal.get_venue_ids()
+        if not venue_ids:
+            continue
 
-    mail.send_mail(_EMAIL_SENDER, emails, subject, body, attachments=[mail.Attachment(filename, io.getvalue())])
+        report_data = orders.get(None, yesterday, yesterday_end, venue_ids=legal.get_venue_ids())
+        excel_file = excel.send_excel_file(None, 'orders', 'orders.html', **report_data)
+        io = StringIO()
+        excel_file.save(io)
+
+        legal_name = legal.person_ooo or legal.person_ip
+        filename = u"report-%s-%s-%s.xls" % (namespace, latinize(legal_name), yesterday.strftime("%d-%m-%Y"))
+        filename = filename.encode('utf-8')
+        attachment = mail.Attachment(filename, io.getvalue())
+        all_reports.append(attachment)
+
+        if legal_emails:
+            subject = u"Приложение %s - отчет для %s" % (config.APP_NAME, legal_name)
+            body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
+            mail.send_mail(_EMAIL_SENDER, legal_emails, subject, body, attachments=[attachment])
+
+    if company_emails:
+        subject = u"Приложение %s - отчет" % config.APP_NAME
+        body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
+        mail.send_mail(_EMAIL_SENDER, company_emails, subject, body, attachments=all_reports)
 
 
 class ReportSendHandler(RequestHandler):
     def get(self):
-        for namespace in metadata.get_namespaces():
+        for namespace in ['redcup']:  # metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             config = Config.get()
             if not config:
                 continue
-            if not config.REPORT_EMAILS:
-                continue
-            emails = config.REPORT_EMAILS.split(",")
-            deferred.defer(_send, namespace, emails)
+            deferred.defer(_send, namespace)

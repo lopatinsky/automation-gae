@@ -50,6 +50,10 @@
             ОГРНИП
             <input type="text" name="ogrnip" {% if legal %}  value="{{ legal.ogrnip }}" {% endif %}>
         </label><br>
+        <label>
+            Email для отчетов (через запятую)
+            <input type="text" name="report_emails" {% if legal %}  value="{{ legal.report_emails }}" {% endif %}>
+        </label><br>
         <input type="submit">
         <a href="/company/docs/legal/list">Назад</a>
     </form>

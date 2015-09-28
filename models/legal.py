@@ -20,3 +20,10 @@ class LegalInfo(ndb.Model):
 
     alfa_login = ndb.StringProperty(required=True, indexed=False, default='empatika_autopay-api')
     alfa_password = ndb.StringProperty(required=True, indexed=False, default='empatika_autopay')
+
+    report_emails = ndb.StringProperty(indexed=False)
+
+    def get_venue_ids(self):
+        from models import Venue
+        venue_keys = Venue.query(Venue.legal == self.key).fetch(keys_only=True)
+        return [str(key.id()) for key in venue_keys]
