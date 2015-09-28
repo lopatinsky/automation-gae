@@ -17,10 +17,14 @@ const Clock = React.createClass({
             position: 'fixed',
             left: this.props.horizontal ? 100 : 0,
             right: 0,
-            top: this.props.horizontal ? 80 : 180,
+            top: this.props.horizontal ? 64 : 164,
+            zIndex: 1,
+            height: 24,
+            background: '#eeeeee',
             textAlign: 'center',
             fontSize: 24,
             lineHeight: '24px',
+            paddingTop: 16,
             paddingBottom: 12
         };
         return <div style={style}>
