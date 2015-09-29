@@ -52,7 +52,7 @@ def _send(namespace):
             body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
             mail.send_mail(_EMAIL_SENDER, legal_emails, subject, body, attachments=[attachment])
 
-    if company_emails:
+    if company_emails and all_reports:
         subject = u"Приложение %s - отчет" % config.APP_NAME
         body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
         mail.send_mail(_EMAIL_SENDER, company_emails, subject, body, attachments=all_reports)
