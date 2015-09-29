@@ -4,6 +4,8 @@ import ClientStore from './ClientStore';
 import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
 import MenuItemStore from './MenuItemStore';
+import AddressStore from './AddressStore';
+import assign from 'object-assign';
 
 const OrderStore = new BaseStore({
     orderId: null,
@@ -11,10 +13,13 @@ const OrderStore = new BaseStore({
     deliverySum: 0,
     deliverySumStr: '',
     items: [],
+    orderGifts: [],
     slotId: null,
     dayStr: null,
     timeStr: null,
     promos: [],
+    errors: [],
+    orderError: null,
 
     getSlotId() {
         return this.slotId;
@@ -28,12 +33,53 @@ const OrderStore = new BaseStore({
         return totalSum;
     },
 
+    getValidationTotalSum() {
+        return this.validationSum;
+    },
+
     getDeliverySum() {
         return this.deliverySum;
     },
 
+    getDeliverySumStr() {
+        return this.deliverySumStr;
+    },
+
     getItems() {
         return this.items;
+    },
+
+    getOrderGifts() {
+        return this.orderGifts;
+    },
+
+    getOrderGiftsDict() {
+        return this.getOrderGifts().map(item => {
+            return {
+                quantity: item.quantity,
+                item_id: item.id,
+                group_modifiers: item.group_modifiers.map(modifier => {
+                    return {
+                        quantity: 1,
+                        group_modifier_id: modifier.id,
+                        choice: modifier.choice
+                    };
+                }),
+                single_modifiers: []
+            }
+        });
+    },
+
+    getPromos() {
+        return this.promos;
+    },
+
+    getErrors() {
+        return this.errors;
+    },
+
+    getOrderError() {
+        return this.orderError;
     },
 
     getGroupModifierDict(item) {
@@ -78,6 +124,7 @@ const OrderStore = new BaseStore({
 
     setSlotId(slotId) {
         this.slotId = slotId;
+        Actions.checkOrder();
         this._changed();
     },
 
@@ -85,42 +132,101 @@ const OrderStore = new BaseStore({
         item.totalSum = totalSum;
         this.items.push(item);
         this.validationSum = this.totalSum;
+        Actions.checkOrder();
         this._changed();
     },
 
     removeItem(item) {
         this.items.splice(this.items.indexOf(item), 1);
         this.validationSum = this.totalSum;
+        Actions.checkOrder();
         this._changed();
     },
 
     getOrderDict() {
-        return {
-            delivery_type: VenuesStore.getChosenDelivery().id,
+        var delivery = VenuesStore.getChosenDelivery();
+        var dict = {
+            delivery_type: delivery.id,
             client: ClientStore.getClientDict(),
             payment: PaymentsStore.getPaymentDict(),
             device_type: 2,
-            delivery_slot_id: this.getSlotId(),
-            total_sum: this.getTotalSum(),
-            delivery_sum: this.getDeliverySum(),
+            total_sum: this.getValidationTotalSum(),
             items: this.getItemsDict(),
-            venue_id: VenuesStore.getChosenVenue().id,
-            time_picker_value: this.getFullTimeStr(),
+            order_gifts: this.getOrderGiftsDict(),
             comment: ''
+        };
+        if (delivery.id == 2) {
+            assign(dict, {
+                delivery_sum: this.getDeliverySum(),
+                address: AddressStore.getAddressDict()
+            });
+        } else {
+            assign(dict, {
+                venue_id: VenuesStore.getChosenVenue().id
+            });
         }
+        if (delivery.slots.length > 0) {
+            assign(dict, {
+                delivery_slot_id: this.getSlotId()
+            });
+        } else {
+            assign(dict, {
+                time_picker_value: this.getFullTimeStr()
+            });
+        }
+        return dict;
     },
 
-    setValidationInfo(validationSum, deliverySum, deliverySumStr, promos) {
+    getCheckOrderDict() {
+        var delivery = VenuesStore.getChosenDelivery();
+        var dict = {
+            client_id: ClientStore.getClientId(),
+            delivery_type: VenuesStore.getChosenDelivery().id,
+            payment: JSON.stringify(PaymentsStore.getPaymentDict()),
+            items: JSON.stringify(this.getItemsDict())
+        };
+        if (delivery.id == 2) {
+            assign(dict, {
+                address: JSON.stringify(AddressStore.getAddressDict())
+            });
+        } else {
+            assign(dict, {
+                venue_id: VenuesStore.getChosenVenue().id
+            });
+        }
+        if (delivery.slots.length > 0) {
+            assign(dict, {
+                delivery_slot_id: this.getSlotId()
+            });
+        } else {
+            assign(dict, {
+                time_picker_value: this.getFullTimeStr()
+            });
+        }
+        return dict;
+    },
+
+    setValidationInfo(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors) {
         this.validationSum = validationSum;
+        this.orderGifts = orderGifts;
         this.deliverySum = deliverySum;
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
-        Actions.order();
+        this.errors = errors;
+        this.orderError = null;
+        this._changed();
+    },
+
+    setOrderError(error) {
+        this.orderError = error;
+        this._changed();
     },
 
     setOrderId(orderId) {
         this.orderId = orderId;
+        this.orderError = null;
         this._changed();
+        Actions.setOrderSuccess(orderId);
     },
 
     getOrderId() {
@@ -129,11 +235,13 @@ const OrderStore = new BaseStore({
 
     setDay(date) {
         this.dayStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        Actions.checkOrder();
         this._changed();
     },
 
     setTime(date) {
         this.timeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+        Actions.checkOrder();
         this._changed();
     },
 
@@ -142,7 +250,10 @@ const OrderStore = new BaseStore({
             this.setDay(new Date());
         }
         if (this.timeStr == null) {
-            this.setTime(new Date());
+            var now = new Date();
+            var delivery = VenuesStore.getChosenDelivery();
+            now.setTime(now.getTime() + (delivery.time_picker_min * 1000));
+            this.setTime(now);
         }
         return `${this.dayStr} ${this.timeStr}`;
     }
@@ -153,15 +264,22 @@ const OrderStore = new BaseStore({
             if (action.data.request == "order") {
                 OrderStore.setValidationInfo(
                     action.data.total_sum,
+                    action.data.orderGifts,
                     action.data.delivery_sum,
                     action.data.delivery_sum_str,
-                    action.data.promos
+                    action.data.promos,
+                    action.data.errors
                 );
             }
             break;
         case Actions.AJAX_SUCCESS:
             if (action.data.request == "order") {
                 OrderStore.setOrderId(action.data.orderId);
+            }
+            break;
+        case Actions.ERROR:
+            if (action.data.request == "order") {
+                OrderStore.setOrderError(action.data.error);
             }
             break;
     }

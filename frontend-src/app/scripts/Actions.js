@@ -7,6 +7,7 @@ const base_url = "http://mycompany.app.doubleb-automation-production.appspot.com
 const Actions = {
     INIT: "INIT",
     UPDATE: "UPDATE",
+    ERROR: "ERROR",
     AJAX_SENDING: "AJAX_SENDING",
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
@@ -184,32 +185,21 @@ const Actions = {
         request
             .post(base_url + '/api/check_order')
             .type('form')
-            .send({
-                client_id: ClientStore.getClientId(),
-                delivery_type: VenuesStore.getChosenDelivery().id,
-                address: JSON.stringify(AddressStore.getAddressDict()),
-                venue_id: VenuesStore.getChosenVenue().id,
-                payment: JSON.stringify(PaymentsStore.getPaymentDict()),
-                delivery_slot_id: OrderStore.getSlotId(),
-                time_picker_value: OrderStore.getFullTimeStr(),
-                items: JSON.stringify(OrderStore.getItemsDict())
-            })
+            .send(OrderStore.getCheckOrderDict())
             .end((err, res) => {
                 if (res.status == 200) {
-                    if (res.body.valid) {
-                        AppDispatcher.dispatch({
+                    AppDispatcher.dispatch({
                         actionType: this.UPDATE,
                         data: {
                             request: "order",
                             total_sum: res.body.total_sum,
                             delivery_sum: res.body.delivery_sum,
                             delivery_sum_str: res.body.delivery_sum_str,
-                            promos: res.body.promos
+                            promos: res.body.promos,
+                            errors: res.body.errors,
+                            orderGifts: res.body.new_order_gifts
                         }
                     });
-                    } else {
-                        alert(res.body.errors[0]);
-                    }
                 } else {
                     alert(res.status);
                 }
@@ -233,9 +223,25 @@ const Actions = {
                         }
                     });
                 } else {
-                    alert(res.status);
+                    AppDispatcher.dispatch({
+                        actionType: this.ERROR,
+                        data: {
+                            request: "order",
+                            error: res.body.description
+                        }
+                    });
                 }
             });
+    },
+
+    setOrderSuccess(orderId) {
+        request
+            .post(base_url + '/api/set_order_success')
+            .type('form')
+            .send({
+                order_id: orderId
+            })
+            .end((err, res) => {});
     },
 
     loadHistory() {

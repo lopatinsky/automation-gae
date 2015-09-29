@@ -1,5 +1,6 @@
 import BaseStore from './BaseStore';
 import Actions from '../Actions';
+import assign from 'object-assign';
 
 const PaymentsStore = new BaseStore({
     payment_types: [],
@@ -26,13 +27,19 @@ const PaymentsStore = new BaseStore({
 
     setChosenPaymentType(payment_type) {
         this.chosen_payment_type = payment_type;
+        Actions.checkOrder();
         this._changed();
     },
 
     getPaymentDict() {
-        return {
-            type_id: this.getChosenPaymentType().id
+        var paymentType = this.getChosenPaymentType();
+        var dict = {};
+        if (paymentType != null) {
+            assign(dict, {
+                type_id: paymentType.id
+            });
         }
+        return dict;
     }
 
 }, action => {

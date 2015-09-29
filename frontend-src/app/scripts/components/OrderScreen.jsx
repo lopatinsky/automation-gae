@@ -2,7 +2,7 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
 import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, FlatButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu }
+import { List, ListItem, Card, CardText, FlatButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
@@ -12,7 +12,7 @@ const OrderScreen = React.createClass({
     mixins: [Navigation],
 
     _order() {
-        Actions.checkOrder();
+        Actions.order();
     },
 
     _refresh() {
@@ -27,12 +27,64 @@ const OrderScreen = React.createClass({
         if (slots.length > 0 && OrderStore.getSlotId() == null) {
             OrderStore.setSlotId(slots[0].id);
         }
+        if (OrderStore.getOrderError() != null) {
+            this.refs.orderSnackBar.show();
+        }
         this.setState({});
+    },
+
+    _getPromos() {
+        return OrderStore.getPromos().map(promo => {
+            return <div>{promo.text + '\n'}</div>
+        });
+    },
+
+    _getDeliveryDescription() {
+        var delivery = VenuesStore.getChosenDelivery();
+        if (delivery.id == 2 && OrderStore.getDeliverySumStr().length > 0) {
+            return <div>
+                {OrderStore.getDeliverySumStr()}
+            </div>;
+        } else {
+            return '';
+        }
+    },
+
+    _getErrors() {
+        return OrderStore.getErrors().map(error => {
+            return <div>{error + '\n'}</div>
+        });
+    },
+
+    _getTotalSum() {
+        var menuTotalSum = OrderStore.getTotalSum();
+        var validationTotalSum = OrderStore.getValidationTotalSum();
+        var deliverySum = OrderStore.getDeliverySum();
+        if (menuTotalSum != validationTotalSum + deliverySum) {
+            return <div>
+                <strike>{menuTotalSum}</strike>
+                {validationTotalSum + deliverySum}
+            </div>;
+        } else {
+            return <div>
+                {validationTotalSum + deliverySum}
+            </div>;
+        }
     },
 
     _getItems() {
         var items = OrderStore.getItems();
         return items.map(item => {
+            return (
+                <OrderMenuItem item={item} />
+            );
+        });
+    },
+
+    _getOrderGifts() {
+        var items = OrderStore.getOrderGifts();
+        return items.map(item => {
+            item.title += ' Подарок!';
             return (
                 <OrderMenuItem item={item} />
             );
@@ -139,6 +191,7 @@ const OrderScreen = React.createClass({
         OrderStore.addChangeListener(this._refresh);
         ClientStore.addChangeListener(this._refresh);
         PaymentsStore.addChangeListener(this._refresh);
+        this._refresh();
     },
 
     componentWillUnmount() {
@@ -151,7 +204,8 @@ const OrderScreen = React.createClass({
     render() {
         return <div>
             {this._getItems()}
-            Итого: {OrderStore.getTotalSum()}
+            {this._getOrderGifts()}
+            {this._getTotalSum()}
             <div>
                 <FlatButton label='Меню' onClick={this._onMenuTap} />
             </div>
@@ -168,12 +222,20 @@ const OrderScreen = React.createClass({
                 <CardText>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
             </Card>
             {this._getTimeInput()}
+            {this._getPromos()}
+            {this._getDeliveryDescription()}
+            {this._getErrors()}
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <div>
                 <FlatButton label='Заказать' onClick={this._order} />
             </div>
+            <Snackbar
+                ref='orderSnackBar'
+                message={OrderStore.getOrderError()}
+                autoHideDuration='1000'
+                onDismiss={Actions.checkOrder} />
         </div>;
     }
 });

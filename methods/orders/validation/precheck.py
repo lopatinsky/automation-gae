@@ -55,7 +55,7 @@ def set_client_info(client_json, headers, order=None):
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
-    if config.CLIENT_MODULE:
+    if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
         for field in config.CLIENT_MODULE.extra_fields:
             field = field.get()
             value = client_json.get(latinize(field.title))
