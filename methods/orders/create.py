@@ -25,7 +25,7 @@ def card_payment_performing(payment_json, amount, order, put_order=True):
     client_id = payment_json['client_id']
     return_url = payment_json['return_url']
 
-    legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+    legal = Venue.get(order.venue_id).legal.get()
 
     success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order.key.id(), return_url,
                                               client_id)

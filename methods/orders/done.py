@@ -45,7 +45,7 @@ def done_order(order, namespace, with_push=True):
         shared_promo.deactivate(namespace_manager.get_namespace())
 
     if order.has_card_payment:
-        legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+        legal = Venue.get(order.venue_id).legal.get()
         alfa_bank.deposit(legal.alfa_login, legal.alfa_password, order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
