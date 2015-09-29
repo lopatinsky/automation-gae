@@ -3,18 +3,19 @@ import logging
 import urllib
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
+from methods.unique import get_temporary_user, USER_AGENT
 
 __author__ = 'dvpermyakov'
 
-
 BASE_URL = 'http://empatika-resto.appspot.com'
+
 
 def _get_request(path, params=None, log_response=True):
     url = '%s%s' % (BASE_URL, path)
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
-    response = urlfetch.fetch(url, method='GET', deadline=60)
+    response = urlfetch.fetch(url, method='GET', deadline=60, headers={'User-Agent': get_temporary_user()[USER_AGENT]})
     logging.info(response.status_code)
     response = json.loads(response.content)
     if log_response:
@@ -31,7 +32,8 @@ def _post_request(path, params=None, payload=None, log_response=True):
         payload = {k: unicode(v).encode('utf-8') for k, v in payload.iteritems()}
         payload = urllib.urlencode(payload)
     logging.info('payload = %s' % payload)
-    response = urlfetch.fetch(url, method='POST', payload=payload, deadline=60)
+    response = urlfetch.fetch(url, method='POST', payload=payload, deadline=60,
+                              headers={'User-Agent': get_temporary_user()[USER_AGENT]})
     logging.info(response.status_code)
     response = json.loads(response.content)
     if log_response:
