@@ -6,7 +6,7 @@ import logging
 from google.appengine.api import urlfetch
 from google.appengine.api.namespace_manager import namespace_manager
 
-from methods.emails.mandrill import send_email
+from methods.emails.admins import send_error
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
@@ -37,10 +37,10 @@ def _send_push(channels, data, device_type):
         logging.info(result)
         if result and (result.get('code') or result.get('error')):
             text = u'Namespace = %s\nCode = %s, Error = %s' % (namespace_manager.get_namespace(), result.get('code'), result.get('error'))
-            send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Ошибка Parse', text)
+            send_error('push', u'Ошибка Parse', text)
     except Exception as e:
         text = str(e)
-        send_email('dvpermyakov1@gmail.com', 'dvpermyakov1@gmail.com', u'Parse упал', text)
+        send_error('push', u'Parse упал', text)
         result = None
     return result
 
