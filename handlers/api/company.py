@@ -54,7 +54,8 @@ class CompanyInfoHandler(ApiHandler):
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
                 'version': get_version(self.request.headers.get('Version', 0)).dict()
             },
-            'cancel_order': RestoCompany.get() is not None
+            'cancel_order': RestoCompany.get() is not None,
+            'back_end': config.APP_KIND
         }
         response.update(config.get_company_dict())
         self.render_json(response)
