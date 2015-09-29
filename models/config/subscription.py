@@ -16,7 +16,6 @@ class SubscriptionModule(ndb.Model):
     def dict(self):
         return {
             'type': SUBSCRIPTION,
-            'enable': self.status == STATUS_AVAILABLE,
             'info': {
                 'menu': {
                     'title': self.menu_title,

@@ -68,17 +68,17 @@ class CompanyModulesHandler(ApiHandler):
         else:
             client = None
         modules = []
-        if config.SUBSCRIPTION_MODULE:
+        if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status:
             modules.append(config.SUBSCRIPTION_MODULE.dict())
-        if config.SHARE_GIFT_MODULE:
+        if config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status:
             modules.append(config.SHARE_GIFT_MODULE.dict())
-        if config.SHARE_INVITATION_MODULE:
+        if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status:
             modules.append(config.SHARE_INVITATION_MODULE.dict())
-        if config.CLIENT_MODULE:
+        if config.CLIENT_MODULE and config.CLIENT_MODULE.status:
             modules.append(config.CLIENT_MODULE.dict())
-        if config.ORDER_MODULE:
+        if config.ORDER_MODULE and config.ORDER_MODULE.status:
             modules.append(config.ORDER_MODULE.dict())
-        if config.GEO_PUSH_MODULE:
+        if config.GEO_PUSH_MODULE and config.GEO_PUSH_MODULE.status:
             modules.append(config.GEO_PUSH_MODULE.dict(client))
         self.render_json({
             'modules': modules

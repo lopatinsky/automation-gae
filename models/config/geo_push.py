@@ -39,7 +39,6 @@ class GeoPushModule(ndb.Model):
                 last_order_timestamp = timestamp(last_order.date_created)
         return {
             'type': GEO_PUSH_MODULE,
-            'enable': self.status == STATUS_AVAILABLE,
             'info': {
                 'head': self.head,
                 'text': self.text,

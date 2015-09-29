@@ -40,7 +40,6 @@ class ClientModule(ndb.Model):
                 groups[field.group_title].append(field.dict())
         return {
             'type': CLIENT_INFO_MODULE,
-            'enable': self.status == STATUS_AVAILABLE,
             'groups': [{
                 'fields': fields,
                 'group_title': group_title,
@@ -56,7 +55,6 @@ class OrderModule(ndb.Model):
     def dict(self):
         return {
             'type': ORDER_INFO_MODULE,
-            'enable': self.status == STATUS_AVAILABLE,
             'fields': [{
                 'title': field.title,
                 'field': latinize(field.title),
