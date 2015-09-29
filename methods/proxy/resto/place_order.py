@@ -25,7 +25,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
     order.init_total_sum = get_init_total_sum(items)
     resto_place_result = post_resto_place_order(venue, resto_client, client, order, resto_item_dicts, resto_gift_dicts,
                                                 payment_json, resto_address_dict)
-    if resto_place_result.get('error') and resto_place_result['error'] == True:
+    if resto_place_result.get('error') == True or resto_place_result.get('code') == '100':
         success = False
         response = {
             'description': resto_place_result['description']
