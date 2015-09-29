@@ -35,6 +35,5 @@ class ShareGiftModule(ndb.Model):
 
     def dict(self):
         return {
-            'type': SHARE_GIFT,
-            'enable': self.status == STATUS_AVAILABLE
+            'type': SHARE_GIFT
         }

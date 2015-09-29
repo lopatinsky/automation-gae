@@ -20,8 +20,7 @@ class PromoInfoHandler(ApiHandler):
             client = Client.get_by_id(client_id)
             if not client:
                 self.abort(400)
-        gift_items = [gift.dict() for gift in sorted(GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch(),
-                                                     key=lambda item: item.points)]
+        gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).order(GiftMenuItem.points).fetch()]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         hostname = urlparse(self.request.url).hostname
         promo_texts = []
