@@ -34,18 +34,27 @@ def get_item_and_item_dicts(items):
 
 
 def get_resto_item_dicts(init_item_dicts):
-    return [{
-        'id': item_dict['item_id'],
-        'name': '',
-        'amount': item_dict['quantity'],
-        'modifiers': [{
+    item_dicts = []
+    for item_dict in init_item_dicts:
+        modifiers = [{
             'groupId': modifier['group_modifier_id'],
             'groupName': '',
             'id': modifier['choice'],
             'name': '',
             'amount': modifier['quantity']
         } for modifier in item_dict['group_modifiers']]
-    } for item_dict in init_item_dicts]
+        modifiers.extend([{
+            'id': modifier['single_modifier_id'],
+            'name': '',
+            'amount': modifier['quantity']
+        } for modifier in item_dict['single_modifiers']])
+        item_dicts.append({
+            'id': item_dict['item_id'],
+            'name': '',
+            'amount': item_dict['quantity'],
+            'modifiers': modifiers
+        })
+    return item_dicts
 
 
 def get_item_dicts_by_resto(resto_item_dicts):
