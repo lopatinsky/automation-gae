@@ -56,11 +56,10 @@ def set_client_info(client_json, headers, order=None):
     extra_json = {}
     if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
         for field in config.CLIENT_MODULE.extra_fields:
-            field = field.get()
             value = client_json.get(latinize(field.title))
             if order:
                 order.comment += ' %s: %s,' % (field.title, value)
-            extra_json[field] = value
+            extra_json[field.title] = value
     client.extra_data = extra_json
     client.put()
     return client
