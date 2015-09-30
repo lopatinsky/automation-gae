@@ -334,12 +334,31 @@ class MenuCategory(ndb.Model):
 
     @classmethod
     def get_menu_dict(cls, venue=None):
+        from models.config.config import Config
+        from models.specials import SubscriptionMenuItem
         init_category = cls.get_initial_category()
         category_dicts = []
         for category in init_category.get_categories():
             category_dict = category.dict(venue)
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
+        config = Config.get()
+        if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE:
+            logging.info('subscription is included')
+            module = config.SUBSCRIPTION_MODULE
+            category_dicts.append({
+                'info': {
+                    'category_id': str(1),
+                    'title': module.menu_title,
+                    'pic': '',
+                    'restrictions': {
+                        'venues': []  # todo: update restrictions
+                    },
+                    'order': 100100100
+                },
+                'items': [item.dict() for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()],
+                'categories': []
+            })
         return category_dicts
 
 
