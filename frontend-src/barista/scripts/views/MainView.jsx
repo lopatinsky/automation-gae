@@ -23,7 +23,6 @@ const MainView = React.createClass({
         AuthStore.addChangeListener(this._onAuthStoreChange);
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
-        SystemStore.addChangeListener(this._onSystemStoreChange);
         Actions.loadCurrent();
         this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
     },
@@ -31,13 +30,11 @@ const MainView = React.createClass({
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
         OrderStore.removeChangeListener(this._onOrderStoreChange);
-        SystemStore.addChangeListener(this._onSystemStoreChange);
         clearInterval(this._updateInterval);
     },
 
     getInitialState() {
         return {
-            soundMayNotWork: SystemStore.soundMayNotWork,
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders(),
             pendingOrder: null,
@@ -58,12 +55,8 @@ const MainView = React.createClass({
             delivery: OrderStore.getDeliveryOrders()
         });
         if (data && data.hasNewOrders) {
-            console.log("has new orders");
             SystemStore.playSound();
         }
-    },
-    _onSystemStoreChange() {
-        this.setState({ soundMayNotWork: SystemStore.soundMayNotWork });
     },
 
     _logoutSubmit() {
@@ -200,12 +193,6 @@ const MainView = React.createClass({
     _postponeSubmit() {
         this.refs.postponeDialog.dismiss();
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
-    },
-
-    _onSoundButtonClick() {
-        this._onSoundButtonClick = () => {};
-        SystemStore.playSound();
-        Actions.testedSound();
     }
 });
 export default MainView;
