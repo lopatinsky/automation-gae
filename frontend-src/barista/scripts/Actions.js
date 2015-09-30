@@ -21,7 +21,7 @@ function doRequest(id, method, url) {
                     actionType: Actions.AJAX_FAILURE,
                     data: {
                         request: id,
-                        status: err.status || 0
+                        err
                     }
                 })
             } else {
