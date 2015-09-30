@@ -130,6 +130,10 @@ const OrderStore = new BaseStore({
         this._setTimestamp(timestamp);
         this._changed({ hasNewOrders: !! newOrders.length });
     },
+    loadFailed(err) {
+        this.wasLastLoadSuccessful = false;
+        this._changed({ showError: err.status });
+    },
 
     clear() {
         this._knownOrders.clear();
@@ -191,6 +195,11 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request == "logout") {
                 OrderStore.clear();
+            }
+            break;
+        case Actions.AJAX_FAILURE:
+            if (action.data.request == 'current' || action.data.request == 'updates') {
+                OrderStore.loadFailed(action.data.err);
             }
             break;
     }

@@ -24,7 +24,6 @@ const MainView = React.createClass({
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
         Actions.loadCurrent();
-        this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
@@ -37,12 +36,19 @@ const MainView = React.createClass({
         return {
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders(),
+            loadingOrders: AjaxStore.sending.current,
+            loadedOrders: OrderStore.loadedOrders,
+            lastSuccessfulLoadTime: OrderStore.lastSuccessfulLoadTime,
+            wasLastLoadSuccessful: OrderStore.wasLastLoadSuccessful,
             pendingOrder: null,
             loggingOut: AjaxStore.sending.logout
         };
     },
     _onAjaxStoreChange(data) {
-        this.setState({ loggingOut: AjaxStore.sending.logout });
+        this.setState({
+            loadingOrders: AjaxStore.sending.current,
+            loggingOut: AjaxStore.sending.logout
+        });
     },
     _onAuthStoreChange() {
         if (!AuthStore.token) {
@@ -52,8 +58,14 @@ const MainView = React.createClass({
     _onOrderStoreChange(data) {
         this.setState({
             orderAhead: OrderStore.getOrderAheadOrders(),
-            delivery: OrderStore.getDeliveryOrders()
+            delivery: OrderStore.getDeliveryOrders(),
+            loadedOrders: OrderStore.loadedOrders,
+            lastSuccessfulLoadTime: OrderStore.lastSuccessfulLoadTime,
+            wasLastLoadSuccessful: OrderStore.wasLastLoadSuccessful
         });
+        if (this._updateInterval == null && OrderStore.loadedOrders) {
+            this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
+        }
         if (data && data.hasNewOrders) {
             SystemStore.playSound();
         }
@@ -152,10 +164,13 @@ const MainView = React.createClass({
             <Nav horizontal={isHorizontal}
                  orderCount={this.state.orderAhead.length}
                  deliveryCount={this.state.delivery.length}/>
-            <Clock horizontal={isHorizontal}/>
+            <Clock horizontal={isHorizontal} lastUpdate={this.state.lastSuccessfulLoadTime}/>
             <div style={contentStyle}>
-                <RouteHandler orderAhead={this.state.orderAhead}
+                <RouteHandler loadedOrders={this.state.loadedOrders}
+                              loadingOrders={this.state.loadingOrders}
+                              orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
+                              tryReload={this._tryReloadOrders}
                               onTouchTapCancel={this._onTouchTapCancel}
                               onTouchTapConfirm={this._onTouchTapConfirm}
                               onTouchTapDone={this._onTouchTapDone}
@@ -165,6 +180,11 @@ const MainView = React.createClass({
             {this._renderCancelDialog()}
             {this._renderPostponeDialog()}
         </div>;
+    },
+    _tryReloadOrders() {
+        if (!this.state.loadedOrders && !this.state.loadingOrders) {
+            Actions.loadCurrent();
+        }
     },
     _onLogoutClick() {
         this.refs.logoutDialog.show();

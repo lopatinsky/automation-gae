@@ -27,10 +27,16 @@ const Clock = React.createClass({
             paddingTop: 16,
             paddingBottom: 12
         };
+        let content = this.state.time.format('H:mm:ss');
+        if (this.props.lastUpdate) {
+            const seconds = this.state.time.diff(this.props.lastUpdate, 'seconds');
+            if (seconds > 30) {
+                content = <span style={{color: 'red'}}>Проверьте интернет!</span>
+            }
+        }
         return <div style={style}>
-            {this.state.time.format('H:mm:ss')}
-            {this.props.children}
-        </div>
+            {content}
+        </div>;
     }
 });
 export default Clock;

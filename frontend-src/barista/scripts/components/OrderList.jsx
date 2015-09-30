@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Styles } from 'material-ui';
+import { RaisedButton, CircularProgress, Styles } from 'material-ui';
 import OrderCard from './OrderCard';
 
 const CurrentTimeLine = React.createClass({
@@ -44,7 +44,7 @@ const OrderList = React.createClass({
         }
     },
 
-    render() {
+    _renderLoaded() {
         const actions = {};
         for (let [key, value] of Object.entries(this.props)) {
             if (key.substring(0, 10) == "onTouchTap") {
@@ -68,6 +68,29 @@ const OrderList = React.createClass({
         return <div style={{overflow: 'hidden'}}>
             {orders}
         </div>;
+    },
+
+    _renderLoading() {
+        return <div style={{textAlign: 'center'}}>
+            <CircularProgress size={2}/>
+        </div>;
+    },
+
+    _renderFailed() {
+        return <div style={{textAlign: 'center'}}>
+            <div>Не удалось загрузить заказы.</div>
+            <RaisedButton secondary={true} onTouchTap={this.props.tryReload} label='Попробовать снова'/>
+        </div>
+    },
+
+    render() {
+        if (this.props.loadedOrders) {
+            return this._renderLoaded();
+        } else if (this.props.loadingOrders) {
+            return this._renderLoading();
+        } else {
+            return this._renderFailed();
+        }
     }
 });
 export default OrderList;
