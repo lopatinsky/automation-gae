@@ -39,7 +39,7 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
                     result['single_modifiers'].remove(modifier)
             if self.additional_group_choice_restrictions:
                 result['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
-            memcache.set('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()), result, time=300)
+            memcache.set('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()), result, time=24*3600)
         return result
 
 
