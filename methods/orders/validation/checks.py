@@ -331,7 +331,6 @@ def check_client_info(client, delivery_type, order):
             return False, u'Не введен email'
     if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
         for field in config.CLIENT_MODULE.extra_fields:
-            logging.info(field.required)
             if not field.required:
                 continue
             if not client.extra_data.get(latinize(field.title)):
@@ -342,6 +341,8 @@ def check_client_info(client, delivery_type, order):
 def check_subscription(client, item_dicts):
     subscription = get_subscription(client)
     amount = get_amount_of_subscription_items(item_dicts)
+    logging.info('Subscription needs %s points' % amount)
+    logging.info('Subscription is found = %s' % subscription)
     if amount:
         if not subscription:
             return False, u'У Вас нет абонемента'

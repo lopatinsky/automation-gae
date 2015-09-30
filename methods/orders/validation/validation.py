@@ -346,10 +346,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
     if not valid:
         return send_error(error)
-    success, error, rest_points, full_points = check_gifts(gifts, client)
+    valid, error, rest_points, full_points = check_gifts(gifts, client)
     if not valid:
         return send_error(error)
-    success, error = check_subscription(client, item_dicts)
+    valid, error = check_subscription(client, item_dicts)
     if not valid:
         return send_error(error)
 
