@@ -24,7 +24,7 @@ class SubscriptionInfoHandler(ApiHandler):
             subscription_dict = subscription.dict()
             subscription_dict.update({
                 'items': [item.dict()
-                          for item in SubscriptionMenuItem.query(Subscription.status == STATUS_AVAILABLE).fetch()]
+                          for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()]
             })
             self.render_json(subscription_dict)
         else:
@@ -92,7 +92,7 @@ class BuySubscriptionHandler(ApiHandler):
         subscription_dict = subscription.dict()
         subscription_dict.update({
             'items': [item.dict()
-                      for item in SubscriptionMenuItem.query(Subscription.status == STATUS_AVAILABLE).fetch()]
+                      for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()]
         })
         self.render_json({
             'success': True,
