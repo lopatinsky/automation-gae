@@ -178,6 +178,7 @@ def set_item_dicts(items, is_gift=False):
     for item in items:
         item_dicts.append({
             'item': item,
+            'quantity': 1,
             'image': item.picture,
             'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
             'share_gift_obj': item.share_gift_obj if hasattr(item, 'share_gift_obj') else None,
