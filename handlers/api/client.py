@@ -5,7 +5,7 @@ import json
 
 class ClientHandler(ApiHandler):
     def post(self):
-        extra_fields = json.loads(self.request.get('groups'))
+        extra_fields = json.loads(self.request.get('groups', '{}'))
         client_json = {
             'id': self.request.get_range('client_id'),
             'name': self.request.get('client_name'),

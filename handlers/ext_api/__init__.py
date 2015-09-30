@@ -17,6 +17,7 @@ class ExportLegalsHandler(GAEAuthBaseHandler):
                 result.append({
                     'id': [namespace, legal.key.id()],
                     'app_name': cfg.APP_NAME or "",
-                    'name': legal.person_ooo or legal.person_ip
+                    'name': legal.person_ooo or legal.person_ip,
+                    'production': cfg.IN_PRODUCTION,
                 })
         self.render_json({"legals": result})
