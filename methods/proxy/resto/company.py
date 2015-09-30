@@ -62,36 +62,45 @@ def _get_company_info():
     resto_company = RestoCompany.get()
     resto_company_info = get_resto_company_info(resto_company)
     resto_delivery_types = get_resto_delivery_types(resto_company)
-    schedule = memcache.get('schedule_%s' % resto_company.key.id())
-    if not schedule:
-        schedule = __get_company_schedule(resto_company_info['schedule'])
-        memcache.set('schedule_%s' % resto_company.key.id(), schedule, time=3600)
-    delivery_types = memcache.get('delivery_types_%s' % resto_company.key.id())
-    delivery_zones = memcache.get('delivery_zones_%s' % resto_company.key.id())
-    if not delivery_types or not delivery_zones:
-        delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
-                                                              resto_company_info['cities'],
-                                                              resto_company_info['min_order_sum'])
-        memcache.set('delivery_types_%s' % resto_company.key.id(), delivery_types, time=3600)
-        memcache.set('delivery_zones_%s' % resto_company.key.id(), delivery_zones, time=3600)
-    company_info_dict = memcache.get('company_info_%s' % resto_company.key.id())
-    if not company_info_dict:
-        company_info_dict = __get_company_info_dict(resto_company_info)
-        memcache.set('company_info_%s' % resto_company.key.id(), company_info_dict, time=3600)
+    schedule = __get_company_schedule(resto_company_info['schedule'])
+    delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
+                                                          resto_company_info['cities'],
+                                                          resto_company_info['min_order_sum'])
+    company_info_dict = __get_company_info_dict(resto_company_info)
     return schedule, delivery_types, delivery_zones, company_info_dict
 
 
 def get_company_schedule():
-    return _get_company_info()[0]
+    resto_company = RestoCompany.get()
+    schedule = memcache.get('schedule_%s' % resto_company.key.id())
+    if not schedule:
+        schedule = _get_company_info()[0]
+        memcache.set('schedule_%s' % resto_company.key.id(), schedule, time=3600)
+    return schedule
 
 
 def get_delivery_types():
-    return _get_company_info()[1]
+    resto_company = RestoCompany.get()
+    delivery_types = memcache.get('delivery_type_%s' % resto_company.key.id())
+    if not delivery_types:
+        delivery_types = _get_company_info()[1]
+        memcache.set('delivery_type_%s' % resto_company.key.id(), delivery_types, time=3600)
+    return delivery_types
 
 
 def get_delivery_zone(zone_key):
-    return _get_company_info()[2][zone_key]
+    resto_company = RestoCompany.get()
+    delivery_zone = memcache.get('delivery_zone_%s_%s' % (resto_company.key.id(), zone_key))
+    if not delivery_zone:
+        delivery_zone = _get_company_info()[2][zone_key]
+        memcache.set('delivery_zone_%s_%s' % (resto_company.key.id(), zone_key), delivery_zone, time=3600)
+    return delivery_zone
 
 
 def get_company_info_dict():
-    return _get_company_info()[3]
+    resto_company = RestoCompany.get()
+    info = memcache.get('company_info_%s' % resto_company.key.id())
+    if not info:
+        info = _get_company_info()[3]
+        memcache.set('info_%s' % resto_company.key.id(), info, time=3600)
+    return info
