@@ -2,6 +2,7 @@
 from datetime import timedelta, datetime
 import logging
 from google.appengine.api.namespace_manager import namespace_manager
+from methods.rendering import latinize
 
 from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
@@ -328,6 +329,13 @@ def check_client_info(client, delivery_type, order):
     if config.COMPULSORY_DELIVERY_EMAIL_VALIDATES:
         if delivery_type == DELIVERY and not client.email and order:
             return False, u'Не введен email'
+    if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
+        for field in config.CLIENT_MODULE.extra_fields:
+            logging.info(field.required)
+            if not field.required:
+                continue
+            if not client.extra_data.get(latinize(field.title)):
+                return False, u'Не введено поле "%s"' % field.title
     return True, None
 
 

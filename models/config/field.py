@@ -13,6 +13,7 @@ TYPE_CHOICES = (STRING, NUMBER, NUMBER_PLUS_MINUS)
 
 
 class Field(ndb.Model):
+    required = ndb.BooleanProperty(default=False)
     title = ndb.StringProperty(required=True)
     group_title = ndb.StringProperty()  # todo: should be required
     type = ndb.IntegerProperty(required=True, choices=TYPE_CHOICES)
