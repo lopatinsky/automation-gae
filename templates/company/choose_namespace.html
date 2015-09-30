@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Автоматизация</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label for="namespace">Выберите компанию:</label>
+        <select name="namespace" id="namespace">
+            {% for ns, name in namespaces %}
+                <option value="{{ ns }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Выбрать">
+    </form>
+    {% if user.has_rights((user.RIGHTS_BIT_REPORT,)) %}
+        <a href="/mt/report/companies">Отчет по всем компаниям</a>
+    {% endif %}
+</body>
+</html>

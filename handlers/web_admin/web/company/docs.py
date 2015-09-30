@@ -1,8 +1,10 @@
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
+
 from base import CompanyBaseHandler
-from methods.auth import company_user_required
-from config import config, Config
+from methods.auth import full_rights_required
+from models.config.config import config, Config
 from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'
@@ -23,7 +25,7 @@ def _get_values():
 
 
 class LegalListHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         namespace = namespace_manager.get_namespace()
         values = {
@@ -36,7 +38,7 @@ class LegalListHandler(CompanyBaseHandler):
 
 
 class AddLegalListHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         self.render('/docs/add_legal.html')
 
@@ -53,6 +55,7 @@ class AddLegalListHandler(CompanyBaseHandler):
         legal.kpp = self.request.get('kpp')
         legal.ogrn = self.request.get('ogrn')
         legal.ogrnip = self.request.get('ogrnip')
+        legal.report_emails = self.request.get('report_emails')
         legal.put()
         self.redirect('/company/docs/legal/list')
 
@@ -81,22 +84,23 @@ class EditLegalHandler(CompanyBaseHandler):
         legal.kpp = self.request.get('kpp')
         legal.ogrn = self.request.get('ogrn')
         legal.ogrnip = self.request.get('ogrnip')
+        legal.report_emails = self.request.get('report_emails')
         legal.put()
         self.redirect('/company/docs/legal/list')
 
 
 class AboutCompanyHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         self.render('/docs/about.html', **_get_values())
 
 
 class SetAboutCompanyHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         self.render('/docs/set_about.html', **_get_values())
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         config = Config.get()
         config.APP_NAME = self.request.get('name')

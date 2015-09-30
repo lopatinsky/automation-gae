@@ -31,6 +31,9 @@ class DaySchedule(ndb.Model):
     def get_valid_time_str(self):
         return u'Заказы в этот день доступны c %s до %s.' % (self.start_str(), self.end_str())
 
+    def get_time_break_str(self):
+        return u'Перерыв c %s до %s.' % (self.start_str(), self.end_str())
+
     def str(self):
         return u'%s, %s - %s' % (self.DAY_MAP[self.weekday], self.start_str(), self.end_str())
 

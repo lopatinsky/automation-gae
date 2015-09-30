@@ -20,7 +20,7 @@ class SingleModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_single_modifier_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -107,7 +107,7 @@ class GroupModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_group_modifier_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -116,7 +116,7 @@ class GroupModifier(ndb.Model):
             return get_group_modifier_by_id(modifier_id)
 
     def get_choice_by_id(self, choice_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             choice_id = int(choice_id)
@@ -231,7 +231,7 @@ class MenuCategory(ndb.Model):
         return category
 
     def get_categories(self):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_categories
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -241,7 +241,7 @@ class MenuCategory(ndb.Model):
 
     def get_items(self, only_available=False):
         from methods.proxy.resto.menu import get_products
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
@@ -334,12 +334,31 @@ class MenuCategory(ndb.Model):
 
     @classmethod
     def get_menu_dict(cls, venue=None):
+        from models.config.config import Config
+        from models.specials import SubscriptionMenuItem
         init_category = cls.get_initial_category()
         category_dicts = []
         for category in init_category.get_categories():
             category_dict = category.dict(venue)
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
+        config = Config.get()
+        if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE:
+            logging.info('subscription is included')
+            module = config.SUBSCRIPTION_MODULE
+            category_dicts.append({
+                'info': {
+                    'category_id': str(1),
+                    'title': module.menu_title,
+                    'pic': '',
+                    'restrictions': {
+                        'venues': []  # todo: update restrictions
+                    },
+                    'order': 100100100
+                },
+                'items': [item.dict() for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()],
+                'categories': []
+            })
         return category_dicts
 
 
@@ -366,7 +385,7 @@ class MenuItem(ndb.Model):
 
     @classmethod
     def get(cls, product_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_product_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:

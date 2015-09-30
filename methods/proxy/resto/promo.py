@@ -12,10 +12,11 @@ def get_promos():
     promos = memcache.get('promos_%s' % resto_company.key.id())
     if not promos:
         promos = []
-        for resto_promo in resto_promos['promos']:
+        for index, resto_promo in enumerate(resto_promos['promos']):
             promo = Promo(id=resto_promo['id'])
             promo.title = resto_promo['name']
             promo.description = resto_promo['description']
+            promo.priority = index
             promos.append(promo)
         memcache.set('promos_%s' % resto_company.key.id(), promos, time=3600)
     return promos

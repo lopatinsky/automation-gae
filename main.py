@@ -3,7 +3,7 @@ from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
 from handlers.api.user import admin
-from handlers import wizard, web_admin
+from handlers import wizard, web_admin, ext_api
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -176,6 +176,16 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/menu_item_day', [
+            Route('/info', api)
+        ]),
+
+        PathPrefixRoute('/subscription', [
+            Route('/info', api.SubscriptionInfoHandler),
+            Route('/tariffs', api.SubscriptionTariffsHandler),
+            Route('/buy', api.BuySubscriptionHandler),
+        ]),
+
         PathPrefixRoute('/promo_code', [
             Route('/enter', api.EnterPromoCode),
             Route('/history', api.PromoCodeHistoryHandler),
@@ -188,6 +198,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
+            Route('/modules', api.CompanyModulesHandler),
             Route('/base_urls', api.CompanyBaseUrlsHandler),
         ]),
 
@@ -203,13 +214,17 @@ app = WSGIApplication([
                 Route('/get_url', api.GetGiftUrlHandler),
             ]),
         ]),
+        PathPrefixRoute('/geo_push', [
+            Route('/add', api.AddPushHandler),
+        ]),
     ]),
 
     PathPrefixRoute('/company', [
         Route('/create', company_admin.CompanySignupHandler),
         Route('/login', company_admin.LoginHandler, 'company_login'),
-        Route('/logout', company_admin.LogoutHandler),
+        Route('/logout', company_admin.LogoutHandler, 'company_logout'),
         Route('/main', company_admin.AutomationMainHandler, 'company_main'),
+        Route('/choose', company_admin.ChooseNamespaceHandler, 'company_choose_namespace'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         PathPrefixRoute('/venues', [
@@ -219,6 +234,7 @@ app = WSGIApplication([
             Route('/create', company_admin.CreateVenueHandler),
             Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
             Route('/schedule', company_admin.EditVenueScheduleHandler),
+            Route('/time_break', company_admin.EditVenueTimeBreakHandler),
         ]),
 
         PathPrefixRoute('/delivery', [
@@ -323,6 +339,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/promos', [
             Route('/list', company_admin.PromoListHandler),
+            Route('/conflicts', company_admin.PromoConflictsHandler),
             Route('/up', company_admin.UpPromoHandler),
             Route('/down', company_admin.DownPromoHandler),
             Route('/api_keys', company_admin.ChangeApiKeysHandler),
@@ -396,6 +413,10 @@ app = WSGIApplication([
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
         ]),
+    ]),
+
+    PathPrefixRoute('/ext', [
+        Route('/export_legals', ext_api.ExportLegalsHandler),
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),

@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-from config import config
+
+from models.config.config import config
 from methods import alfa_bank, push, paypal
 from models import Client
 from models.share import SharedPromo
@@ -26,7 +28,7 @@ def done_order(order, namespace, with_push=True):
     for performing in order.promo_code_performings:
         performing = performing.get()
         promo_code = performing.promo_code.get()
-        if not promo_code.persisit:
+        if not promo_code.persist:
             performing.close()
 
     order.status = READY_ORDER
@@ -43,7 +45,7 @@ def done_order(order, namespace, with_push=True):
         shared_promo.deactivate(namespace_manager.get_namespace())
 
     if order.has_card_payment:
-        legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+        legal = Venue.get(order.venue_id).legal.get()
         alfa_bank.deposit(legal.alfa_login, legal.alfa_password, order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)

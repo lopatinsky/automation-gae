@@ -1,10 +1,12 @@
 import json
 import logging
 import urllib
+
 from google.appengine.api import urlfetch
 from google.appengine.api.urlfetch_errors import DeadlineExceededError
-from config import config
 from google.appengine.api import memcache
+
+from models.config.config import config
 
 WALLET_BASE_URL = "http://empatika-wallet.appspot.com/api"
 

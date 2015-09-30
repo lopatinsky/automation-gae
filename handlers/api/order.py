@@ -8,7 +8,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
 
-from config import config, AUTO_APP, RESTO_APP
+from models.config.config import config, AUTO_APP, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.emails.admins import send_error
@@ -20,10 +20,12 @@ from methods.orders.validation.precheck import get_order_id, set_client_info, ge
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
 from methods.proxy.resto.check_order import resto_validate_order
 from methods.proxy.resto.place_order import resto_place_order
+from methods.subscription import get_subscription
+from methods.subscription import get_amount_of_subscription_items
 from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
 from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
-    CONFUSED_OTHER
+    CONFUSED_OTHER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
 
@@ -62,9 +64,8 @@ class OrderHandler(ApiHandler):
         if self.order.delivery_type in [SELF, IN_CAFE, PICKUP]:
             venue_id = order_json.get('venue_id')
             if not venue_id:
-                return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать точку.")
-            venue_id = int(venue_id)
-            venue = Venue.get_by_id(venue_id)
+                return self.render_error(u"Произошла ошибка. Попробуйте заново выбрать точку.")
+            venue = Venue.get(venue_id)
             if not venue:
                 return self.render_error(u"Кофейня не найдена")
         elif self.order.delivery_type in [DELIVERY]:
@@ -171,6 +172,18 @@ class OrderHandler(ApiHandler):
             if not success:
                 return self.render_json(error)
 
+        subscription = get_subscription(client)
+        if subscription:
+            amount = get_amount_of_subscription_items(order_json['items'])
+        else:
+            amount = 0
+        if subscription and amount:
+            success = subscription.deduct(amount)
+            if success:
+                self.order.subscription_details = SubscriptionDetails(subscription=subscription.key, amount=amount)
+            else:
+                return self.render_json(u'Не удалось произвести покупку по абонементу')
+
         if self.order.wallet_payment > 0:
             empatika_wallet.pay(client.key.id(), self.order.key.id(), int(self.order.wallet_payment * 100))
 
@@ -203,6 +216,7 @@ class OrderHandler(ApiHandler):
         self.response.status_int = 201
         self.render_json({
             'order_id': self.order.key.id(),
+            'number': self.order.number,
             'delivery_time': validation_result['delivery_time'],
             'delivery_slot_name': validation_result['delivery_slot_name']
         })
@@ -270,8 +284,6 @@ class ReturnOrderHandler(ApiHandler):
 ## client can't be None => it violates logic
 class CheckOrderHandler(ApiHandler):
     def post(self):
-        logging.info(self.request.POST)
-
         client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
         client = Client.get_by_id(client_id)
         if not client:

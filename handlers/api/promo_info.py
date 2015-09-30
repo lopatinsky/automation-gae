@@ -2,8 +2,8 @@
 from urlparse import urlparse
 
 from .base import ApiHandler
-from config import config
-from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, SharedGift, Client
+from models.config.config import config
+from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, Client
 from models.specials import STATUS_ACTIVE
 from models.share import SharedGiftMenuItem
 
@@ -20,15 +20,14 @@ class PromoInfoHandler(ApiHandler):
             client = Client.get_by_id(client_id)
             if not client:
                 self.abort(400)
-        gift_items = [gift.dict() for gift in sorted(GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).fetch(),
-                                                     key=lambda item: item.points)]
+        gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).order(GiftMenuItem.points).fetch()]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()]
         hostname = urlparse(self.request.url).hostname
         promo_texts = []
         promo_dicts = []
         for promo in sorted(Promo.query_promos(Promo.status == STATUS_AVAILABLE),
                             key=lambda query_promo: -query_promo.priority):
-            if not promo.visible:
+            if not promo.visible or promo.hide_in_list:
                 continue
             text = u'%s_%s' % (promo.title.strip() if promo.title else u'',
                                promo.description.strip() if promo.description else u'')

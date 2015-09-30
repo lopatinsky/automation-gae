@@ -131,7 +131,7 @@ class DeliveryZone(ndb.Model):
 
     @classmethod
     def get(cls, zone_key):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.company import get_delivery_zone
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -231,6 +231,7 @@ class Venue(ndb.Model):
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     schedule = ndb.LocalStructuredProperty(Schedule)
+    time_break = ndb.LocalStructuredProperty(Schedule, repeated=True)
     delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phones = ndb.StringProperty(repeated=True)  # use for sending sms
     emails = ndb.StringProperty(repeated=True)  # use for sending email
@@ -243,12 +244,13 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)
 
     @classmethod
     def get(cls, venue_id):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
@@ -259,7 +261,7 @@ class Venue(ndb.Model):
 
     @classmethod
     def fetch_venues(cls, *args, **kwargs):
-        from config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.venues import get_venues
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
@@ -323,7 +325,7 @@ class Venue(ndb.Model):
         return working_hours.check(self.schedule, now)
 
     def update_address(self):
-        from config import Config
+        from models.config.config import Config
         from methods import geocoder, timezone
 
         candidates = geocoder.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)

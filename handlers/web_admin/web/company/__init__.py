@@ -17,10 +17,10 @@ from menu import AddGroupModifierHandler, AddGroupModifierItemHandler, AddMenuIt
 from payment_type import CompanyBaseHandler, PaymentTypesHandler
 from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, ChooseMenuItemHandler, \
     AddPromoConditionHandler, AddPromoOutcomeHandler, ListGiftsHandler, AddGiftHandler, EditPromoHandler, \
-    UpPromoHandler, DownPromoHandler, AddHappyHoursHandler
+    UpPromoHandler, DownPromoHandler, AddHappyHoursHandler, PromoConflictsHandler
 from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
-    VenueListHandler, ChooseDeliveryZonesHandler, EditVenueScheduleHandler
+    VenueListHandler, ChooseDeliveryZonesHandler, EditVenueScheduleHandler, EditVenueTimeBreakHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler, LegalListHandler, AddLegalListHandler, EditLegalHandler
@@ -32,6 +32,7 @@ from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, Ma
     AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler
 from promo_code import ListPromoCodeHandler, AddPromoCodeHandler, ActivationsPromoCodeHandler
 from alfa_settings import AlfaSettingsHandler
+from choose_ns import ChooseNamespaceHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

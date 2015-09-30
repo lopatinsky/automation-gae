@@ -1,6 +1,6 @@
 # coding=utf-8
 from base import CompanyBaseHandler
-from methods.auth import company_user_required
+from methods.auth import full_rights_required
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DAY_SECONDS, HOUR_SECONDS, DeliverySlot
 from models.venue import DELIVERY_MAP, DELIVERY_TYPES, SELF, IN_CAFE, DELIVERY, PICKUP, DeliveryType
 
@@ -8,7 +8,7 @@ __author__ = 'dvpermyakov'
 
 
 class DeliveryTypesHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         def delivery_dict(delivery):
             return {
@@ -37,7 +37,7 @@ class DeliveryTypesHandler(CompanyBaseHandler):
             venue.deliveries = deliveries.values()
         self.render('/delivery_settings/delivery_types.html', venues=venues)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         for venue in Venue.query().fetch():
             for delivery in venue.delivery_types:
@@ -58,7 +58,7 @@ class DeliveryTypesHandler(CompanyBaseHandler):
 
 
 class DeliverySlotListHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         slots = DeliverySlot.query().order(DeliverySlot.value).fetch()
         for slot in slots:
@@ -67,7 +67,7 @@ class DeliverySlotListHandler(CompanyBaseHandler):
 
 
 class DeliverySlotAddHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         types = []
         for slot_type in DeliverySlot.CHOICES:
@@ -77,7 +77,7 @@ class DeliverySlotAddHandler(CompanyBaseHandler):
             })
         self.render('/delivery_settings/delivery_slot_add.html', types=types)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         slot = DeliverySlot()
         slot.name = self.request.get('name')
@@ -90,7 +90,7 @@ class DeliverySlotAddHandler(CompanyBaseHandler):
 
 
 class DeliverySlotEditHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         slot_id = self.request.get_range('slot_id')
         slot = DeliverySlot.get_by_id(slot_id)
@@ -104,7 +104,7 @@ class DeliverySlotEditHandler(CompanyBaseHandler):
             })
         self.render('/delivery_settings/delivery_slot_add.html', types=types, slot=slot)
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         slot_id = self.request.get_range('slot_id')
         slot = DeliverySlot.get_by_id(slot_id)
@@ -120,7 +120,7 @@ class DeliverySlotEditHandler(CompanyBaseHandler):
 
 
 class ChooseSlotsHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         venue_id = int(self.request.get('venue_id'))
         venue = Venue.get_by_id(venue_id)
@@ -134,7 +134,7 @@ class ChooseSlotsHandler(CompanyBaseHandler):
             'slots': DeliverySlot.query().order(DeliverySlot.value).fetch()
         })
 
-    @company_user_required
+    @full_rights_required
     def post(self):
         venue_id = int(self.request.get('venue_id'))
         venue = Venue.get_by_id(venue_id)

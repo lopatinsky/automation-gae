@@ -33,7 +33,7 @@ class CheckCreatingOrdersHandler(RequestHandler):
                     if order.has_card_payment:
                         try:
                             # check payment status
-                            legal = Venue.get_by_id(order.venue_id).legal.get()
+                            legal = Venue.get_by_id(int(order.venue_id)).legal.get()
                             status = alfa_bank.check_extended_status(legal.alfa_login, legal.alfa_password,
                                                                      order.payment_id)["alfa_response"]
                             info.append(("status check result", status))

@@ -1,7 +1,22 @@
 from datetime import datetime
-from config import Config, Version, TEST_VERSIONS
+
+from models.config.config import Config
+from models.config.version import TEST_VERSIONS, Version
 
 __author__ = 'dvpermyakov'
+
+CLIENT_VERSIONS = {
+    0: 'farsh/1.1.1.3',
+    1: 'Pastadeli/1.1.4',
+    2: 'Pastadeli/1.1.3',
+    3: 'Magnolia/1.0',
+    4: 'SushiCrab/1.0',
+    5: 'Ladolchevita/1.0',
+    6: 'MeatMe/1.1.2',
+    7: 'Chikarabar/1.0.2',
+    8: 'Banzay/1.0',
+    9: '7 Donuts/1.0'
+}
 
 
 def is_test_version(url):

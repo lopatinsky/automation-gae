@@ -1,6 +1,8 @@
 # coding=utf-8
+from google.appengine.api import namespace_manager
+from jinja2 import TemplateNotFound
 from base import ApiHandler
-from config import config
+from models.config.config import config
 from models import STATUS_AVAILABLE
 from models.legal import LegalInfo
 
@@ -33,8 +35,11 @@ class AboutHandler(ApiHandler):
 
 class LicenceHandler(ApiHandler):
     def get(self):
-        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
-            self.render_doc('auto_licence_agreement.html', **_get_values(legal))
+        try:
+            self.render_doc('%s/license_agreement.html' % namespace_manager.get_namespace())
+        except TemplateNotFound:
+            for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+                self.render_doc('auto_licence_agreement.html', **_get_values(legal))
 
 
 class NdaHandler(ApiHandler):
@@ -44,8 +49,11 @@ class NdaHandler(ApiHandler):
 
 class PaymentRulesHandler(ApiHandler):
     def get(self):
-        for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
-            self.render_doc('auto_payment_rules.html', **_get_values(legal))
+        try:
+            self.render_doc('%s/payment_rules.html' % namespace_manager.get_namespace())
+        except TemplateNotFound:
+            for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
+                self.render_doc('auto_payment_rules.html', **_get_values(legal))
 
 
 class PaypalPrivacyPolicyHandler(ApiHandler):

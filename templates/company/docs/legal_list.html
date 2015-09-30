@@ -19,6 +19,7 @@
             <th>КПП</th>
             <th>ОГРН</th>
             <th>ОГРНИП</th>
+            <th>Email для отчетов</th>
         </tr>
         {% for legal in legals %}
             <tr>
@@ -35,6 +36,7 @@
                 <td>{{ legal.kpp }}</td>
                 <td>{{ legal.ogrn }}</td>
                 <td>{{ legal.ogrnip }}</td>
+                <td>{{ legal.report_emails }}</td>
             </tr>
         {% endfor %}
     </table>

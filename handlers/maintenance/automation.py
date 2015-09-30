@@ -1,8 +1,10 @@
 # coding:utf-8
 from urlparse import urlparse
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
-from config import Config
+
+from models.config.config import Config
 
 __author__ = 'dvpermyakov'
 

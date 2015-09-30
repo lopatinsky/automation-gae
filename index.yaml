@@ -47,7 +47,6 @@ indexes:
   properties:
   - name: venue_id
   - name: date_created
-    direction: desc
 
 - kind: Order
   properties:
@@ -110,3 +109,15 @@ indexes:
   - name: status
   - name: priority
     direction: desc
+
+- kind: GeoPush
+  properties:
+  - name: client
+  - name: status
+  - name: created
+    direction: desc
+
+- kind: GiftMenuItem
+  properties:
+  - name: status
+  - name: points

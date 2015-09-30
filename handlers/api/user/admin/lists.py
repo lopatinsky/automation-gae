@@ -1,9 +1,10 @@
+# coding=utf-8
 import datetime
 from handlers.api.user.admin.base import AdminApiHandler
 from methods.auth import api_admin_required
 from methods.orders import search_orders
 from methods.rendering import timestamp
-from models import Order
+from models import Order, Venue
 from models.order import CREATING_ORDER, NEW_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER
 
 
@@ -15,7 +16,11 @@ class OrderListBaseHandler(AdminApiHandler):
 
     @api_admin_required
     def get(self):
+        venue = self.venue_or_error
         orders = self._get_orders()
+        if not venue:
+            for order in orders:
+                order.comment += u' Точка: %s' % Venue.get(order.venue_id).title
         dct = {'orders': [order.dict() for order in orders if order.status != CREATING_ORDER]}
         if self._with_timestamp:
             dct['timestamp'] = timestamp(datetime.datetime.utcnow())

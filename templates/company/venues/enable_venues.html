@@ -18,6 +18,7 @@
         <table style="border-collapse:collapse; width:100%" border="1">
             <tr>
                 <th>Статус</th>
+                <th>Id</th>
                 <th>Название</th>
                 <th>Адрес</th>
                 <th>Юрлицо</th>
@@ -25,6 +26,7 @@
                 <th>Телефоны</th>
                 <th>Почты</th>
                 <th>Выбрать зоны</th>
+                <th>Перерывы</th>
                 <th>Расписание</th>
             </tr>
             {% for venue in venues %}
@@ -32,6 +34,9 @@
                 <tr>
                     <td rowspan="{{ height }}">
                         <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ venue.key.id() }}
                     </td>
                     <td rowspan="{{ height }}">
                         <a href="/company/venues/{{ venue.key.id() }}">
@@ -56,6 +61,14 @@
                     </td>
                     <td rowspan="{{ height }}">
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {% if venue.time_break %}
+                            {% for time_break in venue.time_break %}
+                                <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), loop.index0) }}">Выбрать</a>
+                            {% endfor %}
+                        {% endif %}
+                        <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), venue.time_break|length) }}">Добавить</a>
                     </td>
                     {% if venue.days %}
                         {% for day in venue.days %}

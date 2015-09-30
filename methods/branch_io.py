@@ -1,7 +1,8 @@
 # coding: utf-8
 import logging
-from google.appengine.api import urlfetch
 import json
+
+from google.appengine.api import urlfetch
 
 BASE_URL = 'https://api.branch.io'
 BRANCH_API_KEY = '155014419024204427'
@@ -45,7 +46,7 @@ FEATURE_MAP = {
 
 
 def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
-    from config import Config
+    from models.config.config import Config
     config = Config.get()
     params = {
         'app_id': BRANCH_API_KEY,
@@ -59,6 +60,7 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
         },
         'alias': alias if alias else None,
         'identity': share_id,
+        'campaign': config.APP_NAME,
         'tags': [user_agent],
         'feature': FEATURE_MAP[feature],
         'channel': CHANNEL_MAP[channel]

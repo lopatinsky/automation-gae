@@ -1,7 +1,8 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+from google.appengine.api import namespace_manager
 from ..base import CompanyBaseHandler
-from methods.auth import company_user_required
+from methods.auth import full_rights_required
 from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
 from methods.rendering import timestamp
 from methods.orders.done import done_order
@@ -105,7 +106,7 @@ def order_items_values(order):
 
 
 class DeliveryOrdersHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(NOT_CANCELED_STATUSES))\
             .order(-Order.date_created).fetch()
@@ -132,7 +133,7 @@ class DeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class OrderItemsHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -142,7 +143,7 @@ class OrderItemsHandler(CompanyBaseHandler):
 
 
 class NewDeliveryOrdersHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def get(self):
         last_time = int(self.request.get('last_time'))
         start = datetime.fromtimestamp(last_time)
@@ -159,38 +160,38 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class ConfirmOrderHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        confirm_order(order, self.user.namespace)
+        confirm_order(order, namespace_manager.get_namespace())
         self.render_json(_order_json(order, old_status))
 
 
 class CloseOrderHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        done_order(order, self.user.namespace)
+        done_order(order, namespace_manager.get_namespace())
         self.render_json(_order_json(order, old_status))
 
 
 class CancelOrderHandler(CompanyBaseHandler):
-    @company_user_required
+    @full_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
         if not order:
             self.abort(400)
         old_status = order.status
-        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER, self.user.namespace)
+        success = cancel_order(order, CANCELED_BY_BARISTA_ORDER, namespace_manager.get_namespace())
         response = _order_json(order, old_status)
         response.update({
             'success': success

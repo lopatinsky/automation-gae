@@ -1,6 +1,7 @@
 import logging
+
 from .base import ApiHandler
-from config import config
+from models.config.config import config
 from methods import alfa_bank
 from models import CardBindingPayment, Client
 

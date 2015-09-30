@@ -3,11 +3,11 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
     check_group_modifier_choice, check_payment_type, check_happy_hours_created_time, mark_item_with_category, \
     mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
-    check_promo_code, check_order_number
+    check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity, check_version, check_geo_push
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
-    return_success, set_cash_gift_point
+    return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest, set_delivery_message
 
 
 class OutcomeResult:
@@ -90,6 +90,18 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_promo_code(condition, client, order)
     elif condition.method == PromoCondition.CHECK_ORDER_NUMBER:
         return check_order_number(condition, client)
+    elif condition.method == PromoCondition.CHECK_ITEM_NOT_IN_ORDER:
+        return check_item_not_in_order(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_MARKED_QUANTITY:
+        return check_marked_quantity(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_DEVICE_TYPE:
+        return check_condition_by_value(condition, client.device_type)
+    elif condition.method == PromoCondition.CHECK_VERSION:
+        return check_version(condition, client)
+    elif condition.method == PromoCondition.CHECK_GEO_PUSH:
+        return check_geo_push(client, order)
+    elif condition.method == PromoCondition.CHECK_VENUE:
+        return check_condition_by_value(condition, int(venue.key.id()))
     else:
         return True
 
@@ -129,6 +141,12 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return return_success(response)
     elif outcome.method == PromoOutcome.CASH_ACCUMULATE_GIFT_POINT:
         return set_cash_gift_point(response, outcome, _get_initial_total_sum(items), order)
+    elif outcome.method == PromoOutcome.FORBID_MENU_ITEM:
+        return forbid_menu_item(response, outcome, items)
+    elif outcome.method == PromoOutcome.MARKED_DISCOUNT_CHEAPEST:
+        return set_discount_marked_cheapest(response, outcome, items, promo)
+    elif outcome.method == PromoOutcome.DELIVERY_MESSAGE:
+        return set_delivery_message(response, promo, delivery_type, delivery_zone)
     else:
         response.success = True
         return response
@@ -145,6 +163,9 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
     for promo in _get_promos(venue):
         _update_item_dict(item_dicts)
         apply_promo = True
+        for conflict in promo.conflicts:
+            if conflict in (promo.key for promo in promos):
+                apply_promo = False
         for condition in promo.conditions:
             if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type,
                                     total_sum, order):

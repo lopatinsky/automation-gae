@@ -3,8 +3,8 @@ import logging
 from datetime import datetime
 
 from google.appengine.ext import deferred
-from config import EMAIL_FROM
 
+from models.config.config import EMAIL_FROM
 from methods import empatika_wallet, push, paypal
 from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos
@@ -19,7 +19,7 @@ __author__ = 'dvpermyakov'
 def cancel_order(order, status, namespace, comment=None):
     success = True
     if order.has_card_payment:
-        legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+        legal = Venue.get(order.venue_id).legal.get()
         return_result = alfa_bank.reverse(legal.alfa_login, legal.alfa_password, order.payment_id)
         success = str(return_result['errorCode']) == '0'
     elif order.has_paypal_payment:
@@ -49,6 +49,12 @@ def cancel_order(order, status, namespace, comment=None):
         for performing in order.promo_code_performings:
             performing = performing.get()
             performing.recover()
+        if order.subscription_details:
+            subscription = order.subscription_details.subscription.get()
+            subscription.recover(order.subscription_details.amount)
+        if order.geo_push:
+            geo_push = order.geo_push.get()
+            geo_push.recover()
 
         order.status = status
         order.return_datetime = datetime.utcnow()
@@ -71,7 +77,7 @@ def cancel_order(order, status, namespace, comment=None):
             push.send_order_push(order, push_text, namespace)
         elif status == CANCELED_BY_CLIENT_ORDER:
             message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
-            venue = Venue.get_by_id(int(order.venue_id))
+            venue = Venue.get(order.venue_id)
             sms_pilot.send_sms(venue.phones, message)
             for email in venue.emails:
                 if email:

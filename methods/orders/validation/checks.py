@@ -1,10 +1,14 @@
 # coding=utf-8
 from datetime import timedelta, datetime
 import logging
-from config import config, VENUE, BAR, Config
+from google.appengine.api.namespace_manager import namespace_manager
+from methods.rendering import latinize
+
+from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
-from methods.working_hours import check_with_errors
+from methods.subscription import get_subscription, get_amount_of_subscription_items
+from methods.working_hours import check_with_errors, check_in_with_errors
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.venue import DELIVERY, DELIVERY_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
@@ -14,14 +18,18 @@ __author__ = 'dvpermyakov'
 MAX_SECONDS_LOSS = 120
 
 
-def _get_substitute(origin_item, venue):
+def _get_substitute(origin_item, delivery_type, venue):
     for item in MenuItem.query(MenuItem.title == origin_item.title).fetch():
         if origin_item.key == item.key:
             continue
         if venue.key not in item.restrictions:
             if item.price != origin_item.price:
-                description = u'Позиция "%s" имеет другую цену в выбранной точке %s. ' \
-                              u'Заменить?' % (item.title, venue.title)
+                if delivery_type == DELIVERY:
+                    place = u'при заказе на доставку'
+                else:
+                    place = u'в выбранной точке %s' % venue.title
+                description = u'Позиция "%s" имеет другую цену %s. ' \
+                              u'Заменить?' % (item.title, place)
                 auto = False
             else:
                 description = u'Позиция должна автоматически замениться'
@@ -154,6 +162,11 @@ def check_venue(venue, delivery_time, delivery_type, client):
         if venue.problem:
             place_name = config.get_place_str()
             return False, u"%s временно не принимает заказы: %s" % (place_name, venue.problem)
+        if venue.time_break:
+            for time_break in venue.time_break:
+                valid, error = check_in_with_errors(time_break, delivery_time + timedelta(hours=venue.timezone_offset))
+                if not valid:
+                    return False, error
     else:
         if delivery_type == DELIVERY:
             return False, u'На Ваш адрес доставки нет. Подробности в настройках о компании.'
@@ -174,11 +187,17 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         for item_dict in item_dicts:
             item = item_dict['item']
             if venue.key in item.restrictions:
-                description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
+                if delivery_type == DELIVERY:
+                    description = u'При заказе на доставку нет %s.' % item.title
+                else:
+                    description = u'В "%s" нет %s. Выберите другое заведение.' % (venue.title, item.title)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue)
+                substitute = _get_substitute(item, delivery_type, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
+                    if item_dict.get('gift_obj'):
+                        del item_dict['substitutes']
+                        description = None
             if item.key in delivery_items:
                 description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
             if item.category in delivery_categories:
@@ -193,12 +212,15 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         return False, gifts_description
     order_gifts_description = check(order_gift_dicts)
     if order_gifts_description:
-        return False, order_gift_dicts
+        if namespace_manager.get_namespace() == 'sushimarket':
+            return True, None
+        else:
+            return False, order_gifts_description
     else:
         return True, None
 
 
-def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
+def check_stop_list(venue, delivery_type, item_dicts, gift_dicts, order_gift_dicts):
     def check(item_dicts):
         description = None
         stop_list_choices = [choice.get().choice_id for choice in venue.group_choice_modifier_stop_list]
@@ -207,7 +229,7 @@ def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
             if item.key in venue.stop_lists:
                 description = u'В "%s" позиция "%s" временно недоступна' % (venue.title, item.title)
                 item_dict['errors'].append(description)
-                substitute = _get_substitute(item, venue)
+                substitute = _get_substitute(item, delivery_type, venue)
                 if substitute:
                     item_dict['substitutes'].append(substitute)
             for single_modifier in item_dict['single_modifiers']:
@@ -234,12 +256,13 @@ def check_stop_list(venue, item_dicts, gift_dicts, order_gift_dicts):
     return True, None
 
 
-def check_wallet_payment(total_sum, wallet_payment_sum):
+def check_wallet_payment(total_sum, wallet_payment_sum, venue):
     valid = not config.WALLET_ENABLED or wallet_payment_sum <= config.GET_MAX_WALLET_SUM(total_sum)
-    if valid:
-        return True, None
-    else:
+    if not valid:
         return False, u'Невозможно оплатить бонусами сумму большую, чем %s' % config.GET_MAX_WALLET_SUM(total_sum)
+    if wallet_payment_sum and venue.wallet_restriction:
+        return False, u'В данном заведение невозможна оплата баллами'
+    return True, None
 
 
 def check_gifts(gifts, client):
@@ -302,8 +325,33 @@ def check_address(delivery_type, address):
     return True, None
 
 
-def check_client_info(client, delivery_type):
+def check_client_info(client, delivery_type, order):
     if config.COMPULSORY_DELIVERY_EMAIL_VALIDATES:
-        if delivery_type == DELIVERY and not client.email:
+        if delivery_type == DELIVERY and not client.email and order:
             return False, u'Не введен email'
+    if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
+        for field in config.CLIENT_MODULE.extra_fields:
+            if not field.required:
+                continue
+            if not client.extra_data.get(latinize(field.title)):
+                return False, u'Не введено поле "%s"' % field.title
+    return True, None
+
+
+def check_subscription(client, item_dicts):
+    subscription = get_subscription(client)
+    amount = get_amount_of_subscription_items(item_dicts)
+    logging.info('Subscription needs %s points' % amount)
+    logging.info('Subscription is found = %s' % subscription)
+    if amount:
+        if not subscription:
+            return False, u'У Вас нет абонемента'
+        if subscription.amount < amount:
+            return False, u'Не хватает позиций на абонементе'
+    return True, None
+
+
+def check_empty_order(item_dicts, gift_dicts, order_gift_dicts, shared_gift_dicts):
+    if not item_dicts and not gift_dicts and not order_gift_dicts and not shared_gift_dicts:
+        return False, u'Добавьте что-нибудь в заказ'
     return True, None

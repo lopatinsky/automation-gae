@@ -274,8 +274,41 @@ def return_success(response):
 
 def set_cash_gift_point(response, outcome, init_total_sum, order):
     if order:
-        points = init_total_sum / outcome.value
+        points = int(init_total_sum / outcome.value)
         order.points_details.append(GiftPointsDetails(points=points))
         order.put()
     response.success = True
+    return response
+
+
+def forbid_menu_item(response, outcome, item_dicts):
+    if outcome.item_details.item:
+        item_dicts = _get_promo_item_dicts(outcome.item_details, item_dicts)
+        if item_dicts:
+            response.success = True
+            response.error = u'Продукт %s недоступен' % item_dicts[0]['item'].title
+    return response
+
+
+def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
+    cheapest_item_dict = None
+    if item_dicts:
+        for item_dict in item_dicts:
+            if item_dict['persistent_mark'] and (not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
+                cheapest_item_dict = item_dict
+    if cheapest_item_dict:
+        discount = int(cheapest_item_dict['price'] * float(outcome.value / 100.0))
+        if _apply_discounts(cheapest_item_dict, promo, discount):
+            cheapest_item_dict['promos'].append(promo)
+            response.success = True
+    return response
+
+
+def set_delivery_message(response, promo, delivery_type, delivery_zone):
+    if delivery_type == DELIVERY:
+        if delivery_zone.price:
+            promo.title = u'Стоимость доставки: %s' % delivery_zone.price
+        else:
+            promo.title = u'Бесплатная доставка'
+        response.success = True
     return response
