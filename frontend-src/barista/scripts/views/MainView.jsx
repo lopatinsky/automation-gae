@@ -1,7 +1,12 @@
 import React from 'react';
 import { RouteHandler, Navigation } from 'react-router';
 import { OnResize } from 'react-window-mixins';
-import { AppBar, Dialog, FlatButton, RaisedButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui';
+import AppBar from 'material-ui/lib/app-bar';
+import Dialog from 'material-ui/lib/dialog';
+import FlatButton from 'material-ui/lib/flat-button';
+import TextField from 'material-ui/lib/text-field';
+import RadioButtonGroup from 'material-ui/lib/radio-button-group';
+import RadioButton from 'material-ui/lib/radio-button';
 import { Nav, SpinnerWrap, Clock } from '../components';
 import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
 import Actions from '../Actions';

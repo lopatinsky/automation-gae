@@ -1,5 +1,8 @@
 import React from 'react';
-import { Card, CardText, FlatButton, Styles } from 'material-ui';
+import Card from 'material-ui/lib/card/card';
+import CardText from 'material-ui/lib/card/card-text';
+import FlatButton from 'material-ui/lib/flat-button';
+import AutoPrefix from 'material-ui/lib/styles/auto-prefix';
 import { AjaxStore, OrderStore } from '../stores';
 import { SpinnerWrap } from '../components';
 
@@ -78,7 +81,7 @@ const OrderCard = React.createClass({
             bolderStyle = { fontWeight: 400 },
             boldStyle = { fontWeight: 500 },
             { order, highlightColor } = this.props,
-            contentStyle = Styles.AutoPrefix.all({
+            contentStyle = AutoPrefix.all({
                 transition: "background-color 0.2s ease-in-out",
                 backgroundColor: highlightColor
             }),

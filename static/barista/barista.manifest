@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#
+
 /static/barista/styles/bundle.css
 /static/barista/scripts/bundle.js
 /static/barista/img/sections/current.png
@@ -16,4 +16,4 @@ CACHE MANIFEST
 
 NETWORK:
 *
-# 0.7049010025803
+# 0.8346506340894848

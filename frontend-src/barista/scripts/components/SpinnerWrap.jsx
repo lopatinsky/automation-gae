@@ -1,6 +1,6 @@
 import React from 'react';
-import { CircularProgress, Styles } from 'material-ui';
-const AutoPrefix = Styles.AutoPrefix;
+import CircularProgress from 'material-ui/lib/circular-progress';
+import AutoPrefix from 'material-ui/lib/styles/auto-prefix';
 
 const SpinnerWrap = React.createClass({
     getDefaultProps() {

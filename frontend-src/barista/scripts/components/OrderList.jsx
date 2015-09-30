@@ -1,6 +1,8 @@
 import React from 'react';
 import moment from 'moment';
-import { RaisedButton, CircularProgress, Styles } from 'material-ui';
+import RaisedButton from 'material-ui/lib/raised-button';
+import CircularProgress from 'material-ui/lib/circular-progress';
+import Colors from 'material-ui/lib/styles/colors';
 import OrderCard from './OrderCard';
 
 const CurrentTimeLine = React.createClass({
@@ -34,13 +36,13 @@ const OrderList = React.createClass({
     _getHighlightColor(order) {
         const msRemain = order.deliveryTime.diff(this.state.time);
         if (msRemain > 5 * 60 * 1000) {
-            return Styles.Colors.white;
+            return Colors.white;
         } else if (msRemain > 0) {
-            return Styles.Colors.yellow300;
+            return Colors.yellow300;
         } else if (msRemain > -5 * 60 * 1000) {
-            return Styles.Colors.orange300;
+            return Colors.orange300;
         } else {
-            return Styles.Colors.red400;
+            return Colors.red400;
         }
     },
 

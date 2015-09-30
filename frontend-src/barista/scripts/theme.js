@@ -1,5 +1,6 @@
-import { Styles } from 'material-ui';
-const { Colors, ThemeManager, LightRawTheme } = Styles;
+import Colors from 'material-ui/lib/styles/colors';
+import ThemeManager from 'material-ui/lib/styles/theme-manager';
+import LightRawTheme from 'material-ui/lib/styles/raw-themes/light-raw-theme';
 
 const lightMuiTheme = ThemeManager.getMuiTheme(LightRawTheme);
 const palette = {
