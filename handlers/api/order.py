@@ -64,7 +64,7 @@ class OrderHandler(ApiHandler):
         if self.order.delivery_type in [SELF, IN_CAFE, PICKUP]:
             venue_id = order_json.get('venue_id')
             if not venue_id:
-                return self.render_error(u"Произошла ошибка. Попробуйте выбрать заново выбрать точку.")
+                return self.render_error(u"Произошла ошибка. Попробуйте заново выбрать точку.")
             venue = Venue.get(venue_id)
             if not venue:
                 return self.render_error(u"Кофейня не найдена")
