@@ -54,11 +54,12 @@ def set_client_info(client_json, headers, order=None):
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
+    groups = client_json['groups'] or {}
     if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
         for field in config.CLIENT_MODULE.extra_fields:
             group_key = latinize(field.group_title)
             field_key = latinize(field.title)
-            group_dict = client_json.get(group_key)
+            group_dict = groups.get(group_key)
             value = group_dict.get(field_key) if group_dict else None
             if order:
                 order.comment += ' %s: %s,' % (field.title, value)
