@@ -54,7 +54,7 @@ def set_client_info(client_json, headers, order=None):
     client.version = headers.get('Version', 0)
     config = Config.get()
     extra_json = {}
-    groups = client_json['groups'] or {}
+    groups = client_json.get('groups') or {}
     if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
         for field in config.CLIENT_MODULE.extra_fields:
             group_key = latinize(field.group_title)
