@@ -95,6 +95,9 @@ const OrderStore = new BaseStore({
     POSTPONE_OPTIONS: ORDER_POSTPONE_OPTIONS,
 
     _knownOrders: new Map(),
+    loadedOrders: false,
+    lastSuccessfulLoadTime: null,
+    wasLastLoadSuccessful: false,
     lastServerTimestamp: null,
     _addOrder(order) {
         if (order.status == this.STATUS.NEW || order.status == this.STATUS.CONFIRMED) {
@@ -109,11 +112,14 @@ const OrderStore = new BaseStore({
         }
     },
     _setTimestamp(newTimestamp) {
+        this.wasLastLoadSuccessful = true;
+        this.lastSuccessfulLoadTime = moment();
         this.lastServerTimestamp = newTimestamp;
     },
 
     loadCurrent(orders, timestamp) {
         this.clear();
+        this.loadedOrders = true;
         this._addRawOrders(orders);
         this._setTimestamp(timestamp);
         this._changed();
@@ -127,6 +133,10 @@ const OrderStore = new BaseStore({
 
     clear() {
         this._knownOrders.clear();
+        this.loadedOrders = false;
+        this.lastSuccessfulLoadTime = null;
+        this.wasLastLoadSuccessful = false;
+        this.lastServerTimestamp = null;
         this._changed();
     },
 
