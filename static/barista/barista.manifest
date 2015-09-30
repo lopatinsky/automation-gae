@@ -1,0 +1,19 @@
+CACHE MANIFEST
+#
+/static/barista/styles/bundle.css
+/static/barista/scripts/bundle.js
+/static/barista/img/sections/current.png
+/static/barista/img/sections/delivery.png
+/static/barista/img/sections/history.png
+/static/barista/img/sections/returns.png
+/static/barista/img/sections/stoplist.png
+/static/barista/img/sections-active/current.png
+/static/barista/img/sections-active/delivery.png
+/static/barista/img/sections-active/history.png
+/static/barista/img/sections-active/returns.png
+/static/barista/img/sections-active/stoplist.png
+/static/barista/sounds/ship_horn.mp3
+
+NETWORK:
+*
+# 0.7049010025803
