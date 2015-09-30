@@ -18,12 +18,5 @@ class CheckOrderSuccessHandler(RequestHandler):
         order = Order.get_by_id(order_id)
         if not order.response_success:
             client = Client.get_by_id(order.client_id)
-            body = u"Order timeout in app (bad internet connection)\n" \
-                   u"Order number: %s\n" \
-                   u"Client name: %s %s\n" \
-                   u"Client phone: %s" % (order_id, client.name, client.surname, client.tel)
-            logging.warning(body)
-            admins.send_error('network', 'Order timeout', body)
-
             sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов." % (client.name, order_id)
             sms_pilot.send_sms([sms_phone(client.tel)], sms_text)
