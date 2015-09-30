@@ -119,9 +119,7 @@ class WindowMenuItem(ndb.Model):
         return cls.get_by_id(cls.ID)
 
     def dict(self):
-        return {
-            'item': self.item.get().dict(),
-        }
+        return self.item.get().dict()
 
 
 class DayMenuItem(WindowMenuItem):
