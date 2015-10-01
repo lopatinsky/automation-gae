@@ -1,4 +1,5 @@
 # coding=utf-8
+import copy
 from datetime import datetime, timedelta
 from google.appengine.api import namespace_manager
 from ..base import CompanyBaseHandler
@@ -69,7 +70,7 @@ def _update_order_info(orders):
 
 def order_items_values(order):
     def _process_item_dict(item_dict, gift=False):
-        item_obj = MenuItem.get_by_id(int(item_dict['id']))
+        item_obj = copy.copy(MenuItem.get_by_id(int(item_dict['id'])))
         item_obj.amount = item_dict['quantity']
         item_obj.total_float_price = item_obj.float_price * item_obj.amount
         item_obj.modifiers = []
