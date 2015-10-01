@@ -2,7 +2,7 @@ import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
 import { AuthStore, OrderStore, SystemStore } from "./stores";
 
-const BASE_URL = 'http://m-test.doubleb-automation-production.appspot.com/api/';
+const BASE_URL = '/api/';
 
 function doRequest(id, method, url) {
     const req = request(method, BASE_URL + url);
