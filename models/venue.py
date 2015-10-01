@@ -51,6 +51,7 @@ class Address(ndb.Model):
 
     def dict(self):
         return {
+            'formatted_address': self.str(),
             'address': {
                 'country': self.country,
                 'city': self.city,

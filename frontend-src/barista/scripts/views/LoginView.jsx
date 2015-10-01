@@ -1,7 +1,12 @@
 import React from 'react';
 import { Navigation } from 'react-router';
-import { Card, CardTitle, CardText, CardActions, FlatButton, CircularProgress, Snackbar } from 'material-ui';
-import { InputGroup } from '../components';
+import Card from 'material-ui/lib/card/card';
+import CardTitle from 'material-ui/lib/card/card-title';
+import CardText from 'material-ui/lib/card/card-text';
+import CardActions from 'material-ui/lib/card/card-actions';
+import FlatButton from 'material-ui/lib/flat-button';
+import Snackbar from 'material-ui/lib/snackbar';
+import { InputGroup, SpinnerWrap } from '../components';
 import { required } from '../validators';
 import Actions from '../Actions';
 import { AuthStore, AjaxStore } from '../stores';
@@ -34,14 +39,8 @@ const LoginView = React.createClass({
                 textAlign: 'left',
                 margin: '0 auto',
                 position: 'relative'
-            }, progress: {
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                marginLeft: -25,
-                marginTop: -25
             }
-        }
+        };
     },
     getInitialState() {
         return {
@@ -82,7 +81,7 @@ const LoginView = React.createClass({
                 <div style={styles.card}>
                     <Card>
                         <CardTitle title='Вход'/>
-                        <div style={{opacity: this.state.loggingIn ? 0 : 1}}>
+                        <SpinnerWrap show={this.state.loggingIn}>
                             <CardText style={{paddingTop:0, paddingBottom:0}}>
                                 <InputGroup ref='login'
                                             floatingLabelText='Логин'
@@ -101,8 +100,7 @@ const LoginView = React.createClass({
                             <CardActions style={{textAlign:'right'}}>
                                 <FlatButton label='Войти' secondary={true} onTouchTap={this.submit} disabled={this.state.loggingIn}/>
                             </CardActions>
-                        </div>
-                        {this.state.loggingIn && <CircularProgress style={styles.progress}/>}
+                        </SpinnerWrap>
                     </Card>
                     <Snackbar ref='error' message={this.state.errorMessage} autoHideDuration={5000}/>
                 </div>

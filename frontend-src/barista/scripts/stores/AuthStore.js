@@ -31,8 +31,8 @@ const AuthStore = new BaseStore({
             }
             break;
         case Actions.AJAX_FAILURE:
-            if (action.data.status == 401 && action.data.request != "login") {
-                AuthStore.logout();
+            if (action.data.err.status == 401 && action.data.request != "login") {
+                AuthStore.doLogout();
             }
             break;
     }
