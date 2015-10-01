@@ -67,7 +67,6 @@ def _total(orders, status, payment_type):
 def get(venue_id, start, end, venue_ids=()):
     if venue_id and venue_id != '0':
         venue_ids = venue_id,
-    print venue_ids
 
     query = Order.query(Order.date_created >= start, Order.date_created <= end)
     if venue_ids:
