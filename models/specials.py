@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import transactional
 from methods.rendering import timestamp
-from models import STATUS_AVAILABLE, STATUS_CHOICES, MenuItem
+from models import STATUS_AVAILABLE, STATUS_CHOICES, MenuItem, STATUS_UNAVAILABLE
 from models.client import Client
 
 SMS_SUCCESS = 1
@@ -177,6 +177,10 @@ class Subscription(ndb.Model):
             return True
         else:
             return False
+
+    def close(self):
+        self.status = STATUS_UNAVAILABLE
+        self.put()
 
     def dict(self):
         return {

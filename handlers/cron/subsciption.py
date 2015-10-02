@@ -14,8 +14,11 @@ class CloseSubscriptionHandler(RequestHandler):
             namespace_manager.set_namespace(namespace)
             config = Config.get()
             now = datetime.utcnow()
-            subscription_number = Subscription.query(Subscription.expiration < now).count()
-            text = 'Subscription count = %s are expired. In company %s\n' % (subscription_number, config.APP_NAME)
-            namespace_subscription[namespace] = text
+            subscriptions = Subscription.query(Subscription.expiration < now).fetch()
+            for subscription in subscriptions:
+                subscription.close()
+            if len(subscriptions) > 0:
+                text = 'Subscription count = %s are expired. In company %s\n' % (len(subscriptions), config.APP_NAME)
+                namespace_subscription[namespace] = text
         if namespace_subscription:
             admins.send_error('subscription', 'Subscriptions are expired', ''.join(namespace_subscription.values()))
