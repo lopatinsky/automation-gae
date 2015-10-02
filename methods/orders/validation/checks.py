@@ -346,7 +346,7 @@ def check_subscription(client, item_dicts):
     if amount:
         if not subscription:
             return False, u'У Вас нет абонемента'
-        if subscription.amount < amount:
+        if subscription.rest < amount:
             return False, u'Не хватает позиций на абонементе'
     return True, None
 
