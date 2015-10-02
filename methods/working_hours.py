@@ -28,3 +28,12 @@ def check_with_errors(schedule, time):
         return False, u'Заказы в этот день недели недоступны.'
     else:
         return False, day.get_valid_time_str()
+
+
+def check_in_with_errors(schedule, time):
+    valid = check(schedule, time)
+    if valid:
+        day = schedule.get_day(time.isoweekday())
+        return False, day.get_time_break_str()
+    else:
+        return True, None

@@ -1,6 +1,6 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
-    reactify = require('reactify'),
+    insert = require('gulp-insert'),
     browserify = require('browserify'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
@@ -25,7 +25,9 @@ var targets = {
         FONTS: [],
         FONTS_OUT: 'static/barista/fonts',
         SCRIPT_MAIN: 'frontend-src/barista/scripts/main',
-        SCRIPTS_OUT: 'static/barista/scripts'
+        SCRIPTS_OUT: 'static/barista/scripts',
+        MANIFEST: 'frontend-src/barista/barista.manifest',
+        MANIFEST_OUT: 'static/barista'
     },
     app: {
         STYLES: 'frontend-src/app/styles/*.*',
@@ -34,16 +36,29 @@ var targets = {
         FONTS_OUT: 'static/app/fonts',
         SCRIPT_MAIN: 'frontend-src/app/scripts/main',
         SCRIPTS_OUT: 'static/app/scripts'
+
     }
 };
 
 function registerTasks(targetName) {
     var path = targets[targetName],
+        manifestTaskName = targetName + '-manifest',
         scriptsTaskName = targetName + '-scripts',
         stylesTaskName = targetName + '-styles',
         watchTaskName = targetName + '-watch';
 
-    gulp.task(stylesTaskName, function () {
+    function updateManifest() {
+        gutil.log("Updating manifest");
+        gulp.src(path.MANIFEST)
+            .pipe(insert.append('# ' + Math.random() + '\n'))
+            .pipe(gulp.dest(path.MANIFEST_OUT));
+    }
+
+    gulp.task(manifestTaskName, function () {
+        return updateManifest();
+    });
+
+    gulp.task(stylesTaskName, [manifestTaskName], function () {
         gulp.src(path.STYLES)
             .pipe(concat('bundle.css'))
             .pipe(gulp.dest(path.STYLES_OUT));
@@ -51,10 +66,10 @@ function registerTasks(targetName) {
             .pipe(gulp.dest(path.FONTS_OUT));
     });
 
-    gulp.task(scriptsTaskName, function () {
-        browserify({
+    gulp.task(scriptsTaskName, [manifestTaskName], function () {
+        return browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify, reactify],
+            transform: [babelify],
             extensions: ['.jsx'],
             debug: true
         })
@@ -79,18 +94,19 @@ function registerTasks(targetName) {
             .pipe(source('bundle.js'))
             .pipe(gulp.dest(path.SCRIPTS_OUT)).on('finish', function () {
                 gutil.log("Rebuild success");
+                updateManifest();
             });
     }
 
-    gulp.task(targetName, [scriptsTaskName, stylesTaskName]);
+    gulp.task(targetName, [scriptsTaskName, stylesTaskName, manifestTaskName]);
 
-    gulp.task(watchTaskName, [stylesTaskName], function () {
+    gulp.task(watchTaskName, [stylesTaskName, manifestTaskName], function () {
         gulp.watch(path.STYLES, [stylesTaskName]);
         gulp.watch(path.FONTS, [stylesTaskName]);
 
         var watcher = watchify(browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify, reactify],
+            transform: [babelify],
             extensions: ['.jsx'],
             debug: true,
             cache: {}, packageCache: {}, fullPaths: true

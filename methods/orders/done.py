@@ -28,7 +28,7 @@ def done_order(order, namespace, with_push=True):
     for performing in order.promo_code_performings:
         performing = performing.get()
         promo_code = performing.promo_code.get()
-        if not promo_code.persisit:
+        if not promo_code.persist:
             performing.close()
 
     order.status = READY_ORDER
@@ -37,7 +37,6 @@ def done_order(order, namespace, with_push=True):
     order.email_key_postpone = None
     order.email_key_confirm = None
     order.actual_delivery_time = datetime.utcnow()
-    order.put()
 
     client_key = ndb.Key(Client, order.client_id)
     shared_promo = SharedPromo.query(SharedPromo.recipient == client_key, SharedPromo.status == SharedPromo.READY).get()
@@ -45,10 +44,12 @@ def done_order(order, namespace, with_push=True):
         shared_promo.deactivate(namespace_manager.get_namespace())
 
     if order.has_card_payment:
-        legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+        legal = Venue.get(order.venue_id).legal.get()
         alfa_bank.deposit(legal.alfa_login, legal.alfa_password, order.payment_id, 0)  # TODO check success
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
+
+    order.put()
 
     if with_push:
         text = u"Заказ №%s выдан." % order.key.id()

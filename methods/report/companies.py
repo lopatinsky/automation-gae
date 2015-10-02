@@ -78,6 +78,8 @@ def get(start, end, chosen_object_type, chosen_namespaces):
 
     total['average_orders_sum'] = round(total['orders_sum'] / total['orders_number'], 2) if total['orders_number'] else 0
 
+    companies = sorted(companies,
+                       key=lambda company: -sum(value[READY_ORDER]['orders_number'] for key, value in company.info.iteritems()))
     companies.extend(skip_companies)
     return {
         'companies': companies,

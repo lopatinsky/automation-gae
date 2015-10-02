@@ -100,6 +100,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_version(condition, client)
     elif condition.method == PromoCondition.CHECK_GEO_PUSH:
         return check_geo_push(client, order)
+    elif condition.method == PromoCondition.CHECK_VENUE:
+        return check_condition_by_value(condition, int(venue.key.id()))
     else:
         return True
 

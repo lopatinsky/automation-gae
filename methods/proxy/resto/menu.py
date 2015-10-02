@@ -10,6 +10,8 @@ __author__ = 'dvpermyakov'
 def __get_group_modifiers(resto_modifiers):
     group_modifiers = {}
     for resto_modifier in resto_modifiers:
+        if not resto_modifier.get('groupId'):
+            continue
         modifier = GroupModifier(id=resto_modifier['groupId'])
         modifier.title = resto_modifier['name']
         modifier.choices = []
@@ -43,7 +45,7 @@ def __get_products(category, resto_products):
         product.category = category.key
         product.title = resto_product['name']
         product.description = resto_product['description']
-        product.weight = resto_product['weight']
+        product.weight = resto_product['weight'] * 1000
         product.kal = int(resto_product['energyAmount'])
         product.picture = resto_product['images'][0] if resto_product['images'] else ''
         product.price = int(resto_product['price'] * 100)

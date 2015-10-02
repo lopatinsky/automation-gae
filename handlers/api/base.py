@@ -11,6 +11,7 @@ from methods.versions import is_test_version, update_company_versions
 from models.config.version import PRODUCTION_HOSTNAME, DEMO_HOSTNAME
 from models.proxy.unified_app import AutomationCompany
 from models.config.config import Config
+from methods.unique import set_user_agent
 
 
 class FakeFloat(float):
@@ -68,6 +69,7 @@ class ApiHandler(RequestHandler):
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         self.test = is_test_version(self.request.url)
         update_company_versions(self.request.headers.get('Version', 0))
+        set_user_agent(self.request.headers['User-Agent'])
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)

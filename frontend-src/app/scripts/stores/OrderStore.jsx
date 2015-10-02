@@ -28,7 +28,7 @@ const OrderStore = new BaseStore({
     getTotalSum() {
         var totalSum = 0;
         for (var i = 0; i < this.items.length; i++) {
-            totalSum += this.items[i].totalSum;
+            totalSum += this.items[i].totalSum * this.items[i].quantity;
         }
         return totalSum;
     },
@@ -114,7 +114,7 @@ const OrderStore = new BaseStore({
     getItemsDict() {
         return this.getItems().map(item => {
             return {
-                quantity: 1,
+                quantity: item.quantity,
                 item_id: item.id,
                 single_modifiers: this.getSingleModifierDict(item),
                 group_modifiers: this.getGroupModifierDict(item)
@@ -130,17 +130,65 @@ const OrderStore = new BaseStore({
 
     addItem(item, totalSum) {
         item.totalSum = totalSum;
-        this.items.push(item);
-        this.validationSum = this.totalSum;
+        for (i = 0; i < item.group_modifiers.length; i++) {
+            if (item.group_modifiers[i].chosen_choice == null) {
+                item.group_modifiers[i].chosen_choice = MenuItemStore.getDefaultModifierChoice(item.group_modifiers[i]);
+            }
+        }
+        var found = false;
+        for (var i = 0; i < this.items.length; i++) {
+            if (this.compareItems(item, this.items[i])) {
+                this.items[i].quantity += 1;
+                found = true;
+            }
+        }
+        alert(found);
+        if (found == false) {
+            alert('add');
+            item.quantity = 1;
+            this.items.push(item);
+        }
+        this.validationSum = this.getTotalSum();
         Actions.checkOrder();
         this._changed();
     },
 
     removeItem(item) {
         this.items.splice(this.items.indexOf(item), 1);
-        this.validationSum = this.totalSum;
+        this.validationSum = this.getTotalSum();
         Actions.checkOrder();
         this._changed();
+    },
+
+    compareItems(item1, item2) {
+        if (item1.id != item2.id) {
+            return false;
+        }
+        alert('item is ok');
+        var modifiers1 = item1.group_modifiers;
+        var modifiers2 = item2.group_modifiers;
+        if (modifiers1.length != modifiers2.length) {
+            return false;
+        }
+        for (var i = 0; i < modifiers1.length; i++) {
+            if (modifiers1[i].chosen_choice.id != modifiers2[i].chosen_choice.id) {
+                return false;
+            }
+        }
+        alert('group is ok');
+        modifiers1 = item1.single_modifiers;
+        modifiers2 = item2.single_modifiers;
+        if (modifiers1.length != modifiers2.length) {
+            return false;
+        }
+        alert('sing len is ok');
+        for (i = 0; i < modifiers1.length; i++) {
+            if (modifiers1[i].quantity != modifiers2[i].quantity) {
+                return false;
+            }
+        }
+        alert('it is ok');
+        return true;
     },
 
     getOrderDict() {

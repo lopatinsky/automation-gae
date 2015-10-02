@@ -54,3 +54,8 @@ cron:
   url: /cron/send_reports
   schedule: every day 07:30
   timezone: Europe/Moscow
+
+- description: close subscription
+  url: /cron/subscription
+  schedule: every day 07:00
+  timezone: Europe/Moscow

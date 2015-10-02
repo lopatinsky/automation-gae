@@ -24,7 +24,7 @@ const AjaxStore = new BaseStore({
             AjaxStore.succeeded(action.data.request);
             break;
         case Actions.AJAX_FAILURE:
-            AjaxStore.failed(action.data.request, action.data.status);
+            AjaxStore.failed(action.data.request, action.data.err.status);
             break;
     }
 });

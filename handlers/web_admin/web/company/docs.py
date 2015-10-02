@@ -55,6 +55,7 @@ class AddLegalListHandler(CompanyBaseHandler):
         legal.kpp = self.request.get('kpp')
         legal.ogrn = self.request.get('ogrn')
         legal.ogrnip = self.request.get('ogrnip')
+        legal.report_emails = self.request.get('report_emails')
         legal.put()
         self.redirect('/company/docs/legal/list')
 
@@ -83,6 +84,7 @@ class EditLegalHandler(CompanyBaseHandler):
         legal.kpp = self.request.get('kpp')
         legal.ogrn = self.request.get('ogrn')
         legal.ogrnip = self.request.get('ogrnip')
+        legal.report_emails = self.request.get('report_emails')
         legal.put()
         self.redirect('/company/docs/legal/list')
 

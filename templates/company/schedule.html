@@ -6,6 +6,9 @@
 <body>
     {% include '/company/header.html' %}
     <form method="post">
+        {% if index %}
+            <input type="text" name="index" value="{{ index }}" hidden>
+        {% endif %}
         {% if venue %}
             <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
         {% elif promo %}

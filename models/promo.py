@@ -1,5 +1,7 @@
 # coding=utf-8
 import random
+from google.appengine.api import memcache
+from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier, STATUS_CHOICES
@@ -17,24 +19,27 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
     additional_group_choice_restrictions = ndb.IntegerProperty(repeated=True)
 
     def dict(self):
-        item = self.item.get()
-        result = item.dict()
-        result['id'] = str(self.key.id())
-        result.update({
-            'points': self.points
-        })
-        for modifier in result['group_modifiers']:
-            choice_dicts = modifier['choices']
-            for choice_dict in choice_dicts[:]:
-                if int(choice_dict['id']) in self.additional_group_choice_restrictions:
-                    choice_dict['price'] = 0
-                    modifier['choices'] = [choice_dict]
-                    break
-        for modifier in result['single_modifiers'][:]:
-            if modifier['price'] > 0:
-                result['single_modifiers'].remove(modifier)
-        if self.additional_group_choice_restrictions:
-            result['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
+        result = memcache.get('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()))
+        if not result:
+            item = self.item.get()
+            result = item.dict()
+            result['id'] = str(self.key.id())
+            result.update({
+                'points': self.points
+            })
+            for modifier in result['group_modifiers']:
+                choice_dicts = modifier['choices']
+                for choice_dict in choice_dicts[:]:
+                    if int(choice_dict['id']) in self.additional_group_choice_restrictions:
+                        choice_dict['price'] = 0
+                        modifier['choices'] = [choice_dict]
+                        break
+            for modifier in result['single_modifiers'][:]:
+                if modifier['price'] > 0:
+                    result['single_modifiers'].remove(modifier)
+            if self.additional_group_choice_restrictions:
+                result['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
+            memcache.set('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()), result, time=24*3600)
         return result
 
 
@@ -100,12 +105,13 @@ class PromoCondition(ndb.Model):
     CHECK_DEVICE_TYPE = 22
     CHECK_VERSION = 23
     CHECK_GEO_PUSH = 24
+    CHECK_VENUE = 25
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
                MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
                MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER, CHECK_ITEM_NOT_IN_ORDER,
-               CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH)
+               CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH, CHECK_VENUE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -227,7 +233,8 @@ CONDITION_MAP = {
     PromoCondition.CHECK_MARKED_QUANTITY: u'Минимальное кол-во помеченных продуктов (метка)',
     PromoCondition.CHECK_DEVICE_TYPE: u'Тип телефона',
     PromoCondition.CHECK_VERSION: u'Номер версии',
-    PromoCondition.CHECK_GEO_PUSH: u'Клиент активировал гео-пуш'
+    PromoCondition.CHECK_GEO_PUSH: u'Клиент активировал гео-пуш',
+    PromoCondition.CHECK_VENUE: u'Заказ в кофейне'
 }
 
 OUTCOME_MAP = {

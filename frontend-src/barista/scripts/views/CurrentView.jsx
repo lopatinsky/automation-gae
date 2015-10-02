@@ -1,10 +1,10 @@
 import React from 'react';
+import { OrderList } from '../components';
 
 const CurrentView = React.createClass({
     render() {
-        return <div>
-            This is CurrentView
-        </div>;
+        let { orderAhead: orders, ...other } = this.props;
+        return <OrderList orders={orders} {...other}/>;
     }
 });
 export default CurrentView;

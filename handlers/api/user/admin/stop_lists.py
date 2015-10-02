@@ -12,7 +12,8 @@ class MenuHandler(AdminApiHandler):
     @api_admin_required
     def get(self):
         venue = self.venue_or_error
-        logging.info(venue)
+        if not venue:
+            return self.send_error(u'Нет связки с точкой')
         url = u'http://%s.1.%s/api/menu?venue_id=%s&dynamic' % (self.user.namespace,
                                                                 urlparse(self.request.url).hostname, venue.key.id())
         self.redirect(str(url))
@@ -22,6 +23,8 @@ class ModifiersHandler(AdminApiHandler):
     @api_admin_required
     def get(self):
         venue = self.venue_or_error
+        if not venue:
+            return self.send_error(u'Нет связки с точкой')
         url = u'http://%s.1.%s/api/modifiers?venue_id=%s' % (self.user.namespace, urlparse(self.request.url).hostname,
                                                              venue.key.id())
         self.redirect(str(url))
@@ -31,6 +34,8 @@ class DynamicInfoHandler(AdminApiHandler):
     @api_admin_required
     def get(self):
         venue = self.venue_or_error
+        if not venue:
+            return self.send_error(u'Нет связки с точкой')
         url = u'http://%s.1.%s/api/dynamic_info?venue_id=%s' % (self.user.namespace,
                                                                 urlparse(self.request.url).hostname, venue.key.id())
         self.redirect(str(url))
@@ -40,6 +45,8 @@ class SetStopListHandler(AdminApiHandler):
     @api_admin_required
     def post(self):
         venue = self.venue_or_error
+        if not venue:
+            return self.send_error(u'Нет связки с точкой')
         stop_list = json.loads(self.request.get('stop_list'))
         for item_id in stop_list.get('stopped'):
             item = MenuItem.get_by_id(int(item_id))

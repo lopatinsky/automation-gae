@@ -9,9 +9,10 @@ from models.config.config import Config
 SMSPILOT_API_KEY = 'YMO7263H170NDGPX2N3863D17EX88HX9P96MFK5O4DKKBQ8D9J897J9O6TQH8741'
 
 
-def send_sms(to, text):
+def send_sms(to, text, company_footer=True):
     config = Config.get()
-    text += u'\n%s' % config.APP_NAME
+    if company_footer:
+        text += u'\n%s' % config.APP_NAME
     data = {
         'apikey': SMSPILOT_API_KEY,
         'send': [

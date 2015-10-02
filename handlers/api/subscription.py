@@ -22,7 +22,10 @@ class SubscriptionInfoHandler(ApiHandler):
         subscription = get_subscription(client)
         if subscription:
             subscription_dict = subscription.dict()
-            subscription_dict.update(SubscriptionMenuItem.get().dict())
+            subscription_dict.update({
+                'items': [item.dict()
+                          for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()]
+            })
             self.render_json(subscription_dict)
         else:
             self.render_json({})
@@ -87,7 +90,10 @@ class BuySubscriptionHandler(ApiHandler):
             subscription = Subscription(client=client.key, tariff=tariff.key, rest=tariff.amount, expiration=expiration)
             subscription.put()
         subscription_dict = subscription.dict()
-        subscription_dict.update(SubscriptionMenuItem.get().dict())
+        subscription_dict.update({
+            'items': [item.dict()
+                      for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()]
+        })
         self.render_json({
             'success': True,
             'subscription': subscription_dict

@@ -21,7 +21,6 @@ class ShareInvitationModule(ndb.Model):
     def dict(self):
         return {
             'type': SHARE_INVITATION,
-            'enable': self.status == STATUS_AVAILABLE,
             'info': {
                 'about': {
                     'title': self.about_title,
@@ -36,6 +35,5 @@ class ShareGiftModule(ndb.Model):
 
     def dict(self):
         return {
-            'type': SHARE_GIFT,
-            'enable': self.status == STATUS_AVAILABLE
+            'type': SHARE_GIFT
         }

@@ -13,7 +13,7 @@ const OrderMenuItem = React.createClass({
         return (
             <Card>
                 <CardText>
-                    {item.title}
+                    {item.title} {' x ' + item.quantity}
                 </CardText>
                 <div>
                     <FlatButton label='Удалить' onClick={this._removeItem} />

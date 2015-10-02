@@ -51,6 +51,7 @@ class Address(ndb.Model):
 
     def dict(self):
         return {
+            'formatted_address': self.str(),
             'address': {
                 'country': self.country,
                 'city': self.city,
@@ -230,6 +231,7 @@ class Venue(ndb.Model):
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     schedule = ndb.LocalStructuredProperty(Schedule)
+    time_break = ndb.LocalStructuredProperty(Schedule, repeated=True)
     delivery_types = ndb.LocalStructuredProperty(DeliveryType, repeated=True)
     phones = ndb.StringProperty(repeated=True)  # use for sending sms
     emails = ndb.StringProperty(repeated=True)  # use for sending email
@@ -242,6 +244,7 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)
 

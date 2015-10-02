@@ -25,7 +25,7 @@ def card_payment_performing(payment_json, amount, order, put_order=True):
     client_id = payment_json['client_id']
     return_url = payment_json['return_url']
 
-    legal = Venue.get_by_id(int(order.venue_id)).legal.get()
+    legal = Venue.get(order.venue_id).legal.get()
 
     success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order.key.id(), return_url,
                                               client_id)
@@ -73,6 +73,16 @@ def send_venue_sms(venue, order):
                     error_text = str(e)
                     error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
                     send_error('sms_error', 'Send sms', error_text)
+
+
+def send_demo_sms(client):
+    text = u'Поздравляем! На Вашу почту поступил тестовый заказ. Хотите боевой?\nhttp://rbcn.mobi/'
+    try:
+        send_sms([client.tel], text, company_footer=False)
+    except Exception as e:
+        error_text = str(e)
+        error_text += u' В демо компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
+        send_error('sms_error', 'Send sms', error_text)
 
 
 def send_venue_email(venue, order, url, jinja2):

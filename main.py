@@ -3,8 +3,8 @@ from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
 
 from handlers.api.user import admin
-from handlers import wizard, web_admin
 from handlers import web_app
+from handlers import wizard, web_admin, ext_api
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -235,6 +235,7 @@ app = WSGIApplication([
             Route('/create', company_admin.CreateVenueHandler),
             Route('/choose_zones', company_admin.ChooseDeliveryZonesHandler),
             Route('/schedule', company_admin.EditVenueScheduleHandler),
+            Route('/time_break', company_admin.EditVenueTimeBreakHandler),
         ]),
 
         PathPrefixRoute('/delivery', [
@@ -415,6 +416,10 @@ app = WSGIApplication([
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
         ]),
+    ]),
+
+    PathPrefixRoute('/ext', [
+        Route('/export_legals', ext_api.ExportLegalsHandler),
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),

@@ -178,6 +178,7 @@ def set_item_dicts(items, is_gift=False):
     for item in items:
         item_dicts.append({
             'item': item,
+            'quantity': 1,
             'image': item.picture,
             'gift_obj': item.gift_obj if hasattr(item, 'gift_obj') else None,
             'share_gift_obj': item.share_gift_obj if hasattr(item, 'share_gift_obj') else None,
@@ -248,12 +249,18 @@ def get_order_position_details(item_dicts):
 
 
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
-                      shared_gift_dicts=(), error=None):
+                      shared_gift_dicts=(), error=None, client=None):
+    if client:
+        # not use success and description
+        success, description, rest_points, full_points = check_gifts(gift_dicts, client)
+    else:
+        rest_points = 0
+        full_points = 0
     return {
         'valid': valid,
         'more_gift': False,
-        'rest_points': 0,
-        'full_points': 0,
+        'rest_points': rest_points,
+        'full_points': full_points,
         'errors': [error] if error else [],
         'items': group_item_dicts(item_dicts) if item_dicts else [],
         'gifts': group_item_dicts(gift_dicts) if gift_dicts else [],
@@ -277,7 +284,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     def send_error(error):
         logging.warning('Sending error: %s' % error)
         return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gift_dicts,
-                                 cancelled_order_gift_dicts, shared_gift_dicts, error)
+                                 cancelled_order_gift_dicts, shared_gift_dicts, error, client)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
@@ -345,17 +352,17 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
     if not valid:
         return send_error(error)
-    success, error, rest_points, full_points = check_gifts(gifts, client)
+    valid, error, rest_points, full_points = check_gifts(gifts, client)
     if not valid:
         return send_error(error)
-    success, error = check_subscription(client, item_dicts)
+    valid, error = check_subscription(client, item_dicts)
     if not valid:
         return send_error(error)
 
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
         valid, error = check_wallet_payment(total_sum_without_promos + (delivery_zone.price if delivery_zone else 0),
-                                            wallet_payment_sum)
+                                            wallet_payment_sum, venue)
         if not valid:
             return send_error(error)
 
@@ -373,15 +380,17 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     wallet_payment_sum = payment_info['wallet_payment'] if payment_info.get('wallet_payment') else 0.0
     if config.WALLET_ENABLED:
         valid, error = check_wallet_payment(total_sum + (delivery_zone.price if delivery_zone else 0),
-                                            wallet_payment_sum)
+                                            wallet_payment_sum, venue)
         if not valid:
             return send_error(error)
 
     max_wallet_payment = 0.0
-    if config.WALLET_ENABLED:
+    if config.WALLET_ENABLED and not venue.wallet_restriction:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
                                                      from_memcache=order is None,
                                                      set_zero_if_fail=True)
+        if wallet_balance < 100:
+            wallet_balance = 0
         max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum + (delivery_zone.price if delivery_zone else 0)),
                                  wallet_balance / 100.0)
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
@@ -445,7 +454,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_slot_name': delivery_slot.name
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS else None
     }
-    logging.info('validation result = %s' % result)
     logging.info('total sum = %s' % total_sum)
 
     if with_details:

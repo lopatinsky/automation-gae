@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 from methods.rendering import latinize
 from models import STATUS_CHOICES, STATUS_AVAILABLE
-from models.config.config import ORDER_INFO_MODULE
+from models.config.config import ORDER_INFO_MODULE, CLIENT_INFO_MODULE
 
 __author__ = 'dvpermyakov'
 
@@ -13,9 +13,19 @@ TYPE_CHOICES = (STRING, NUMBER, NUMBER_PLUS_MINUS)
 
 
 class Field(ndb.Model):
+    required = ndb.BooleanProperty(default=False)
     title = ndb.StringProperty(required=True)
+    group_title = ndb.StringProperty()  # todo: should be required
     type = ndb.IntegerProperty(required=True, choices=TYPE_CHOICES)
     order = ndb.IntegerProperty(required=True)
+
+    def dict(self):
+        return {
+            'title': self.title,
+            'field': latinize(self.title),
+            'type': self.type,
+            'order': self.order
+        }
 
 
 class ClientModule(ndb.Model):
@@ -23,15 +33,19 @@ class ClientModule(ndb.Model):
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
 
     def dict(self):
+        groups = {}
+        for field in self.extra_fields:
+            if not groups.get(field.group_title):
+                groups[field.group_title] = [field.dict()]
+            else:
+                groups[field.group_title].append(field.dict())
         return {
-            'type': 2,
-            'enable': self.status == STATUS_AVAILABLE,
-            'fields': [{
-                'title': field.title,
-                'field': latinize(field.title),
-                'type': field.type,
-                'order': field.order
-            } for field in sorted(self.extra_fields, key=lambda field: field.order)]
+            'type': CLIENT_INFO_MODULE,
+            'groups': [{
+                'fields': fields,
+                'group_title': group_title,
+                'group_field': latinize(group_title)
+            } for group_title, fields in groups.iteritems()]
         }
 
 
@@ -42,7 +56,6 @@ class OrderModule(ndb.Model):
     def dict(self):
         return {
             'type': ORDER_INFO_MODULE,
-            'enable': self.status == STATUS_AVAILABLE,
             'fields': [{
                 'title': field.title,
                 'field': latinize(field.title),

@@ -60,6 +60,7 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
         },
         'alias': alias if alias else None,
         'identity': share_id,
+        'campaign': config.APP_NAME,
         'tags': [user_agent],
         'feature': FEATURE_MAP[feature],
         'channel': CHANNEL_MAP[channel]

@@ -47,6 +47,9 @@ class GetInvitationUrlHandler(ApiHandler):
             self.abort(403)
         share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
                             Share.share_type == branch_io.INVITATION).get()
+        logging.info('Found share: %s' % share)
+        if share and not share.promo_code and not share.channel_urls:
+            self.abort(412)
         if not share:
             share = Share(share_type=branch_io.INVITATION, sender=client.key)
             share.put()  # need share id

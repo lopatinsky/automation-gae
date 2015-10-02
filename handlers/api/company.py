@@ -6,7 +6,7 @@ from google.appengine.ext.ndb import metadata
 from base import ApiHandler
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
-from models import STATUS_AVAILABLE, Venue
+from models import STATUS_AVAILABLE, Venue, Client
 from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY, DeliveryZone
 from models.specials import get_channels
@@ -54,7 +54,8 @@ class CompanyInfoHandler(ApiHandler):
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
                 'version': get_version(self.request.headers.get('Version', 0)).dict()
             },
-            'cancel_order': RestoCompany.get() is not None
+            'cancel_order': RestoCompany.get() is not None,
+            'back_end': config.APP_KIND
         }
         response.update(config.get_company_dict())
         self.render_json(response)
@@ -62,19 +63,24 @@ class CompanyInfoHandler(ApiHandler):
 
 class CompanyModulesHandler(ApiHandler):
     def get(self):
+        client_id = int(self.request.headers.get('Client-Id') or 0)
+        if client_id:
+            client = Client.get_by_id(client_id)
+        else:
+            client = None
         modules = []
-        if config.SUBSCRIPTION_MODULE:
+        if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status:
             modules.append(config.SUBSCRIPTION_MODULE.dict())
-        if config.SHARE_GIFT_MODULE:
+        if config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status:
             modules.append(config.SHARE_GIFT_MODULE.dict())
-        if config.SHARE_INVITATION_MODULE:
+        if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status:
             modules.append(config.SHARE_INVITATION_MODULE.dict())
-        if config.CLIENT_MODULE:
+        if config.CLIENT_MODULE and config.CLIENT_MODULE.status:
             modules.append(config.CLIENT_MODULE.dict())
-        if config.ORDER_MODULE:
+        if config.ORDER_MODULE and config.ORDER_MODULE.status:
             modules.append(config.ORDER_MODULE.dict())
-        if config.GEO_PUSH_MODULE:
-            modules.append(config.GEO_PUSH_MODULE.dict())
+        if config.GEO_PUSH_MODULE and config.GEO_PUSH_MODULE.status:
+            modules.append(config.GEO_PUSH_MODULE.dict(client))
         self.render_json({
             'modules': modules
         })

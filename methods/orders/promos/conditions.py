@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import logging
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE
@@ -32,7 +31,6 @@ def check_condition_min_by_value(condition, value):
 
 def check_first_order(client):
     order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
-    logging.info('check first order = %s' % order)
     return order is None
 
 
@@ -43,7 +41,6 @@ def check_repeated_order(condition, client):
                             Order.date_created > min_time).get()
     else:
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
-    logging.info('check repeated order = %s' % order)
     return order is not None
 
 
