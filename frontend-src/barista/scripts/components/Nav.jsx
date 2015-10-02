@@ -45,8 +45,8 @@ const NavItem = React.createClass({
             });
         } else {
             style = {
-                float: 'left',
-                width: '20%'
+                display: 'table-cell',
+                width: '1%'
             };
             Object.assign(linkStyle, {
                 display: 'block'
@@ -76,9 +76,11 @@ const Nav = React.createClass({
                 bottom: 0,
                 width: 100
             } : {
+                display: 'table',
+                tableLayout: 'fixed',
                 top: 64,
                 left: 0,
-                right: 0,
+                width: '100%',
                 paddingTop: 16
             });
         return <div style={style}>
