@@ -355,4 +355,6 @@ class CheckOrderHandler(ApiHandler):
             result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts)
         else:
             result = {}
+
+        logging.info('validation result = %s' % result)
         self.render_json(result)
