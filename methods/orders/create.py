@@ -75,6 +75,16 @@ def send_venue_sms(venue, order):
                     send_error('sms_error', 'Send sms', error_text)
 
 
+def send_demo_sms(client):
+    text = u'На вашу почту будет отправлен заказ. Ru-beacon: http://rbcn.mobi/'
+    try:
+        send_sms([client.tel], text)
+    except Exception as e:
+        error_text = str(e)
+        error_text += u' В демо компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
+        send_error('sms_error', 'Send sms', error_text)
+
+
 def send_venue_email(venue, order, url, jinja2):
     if venue.emails:
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()

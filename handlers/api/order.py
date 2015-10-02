@@ -3,6 +3,7 @@ import copy
 import logging
 import json
 from datetime import datetime, timedelta
+from urlparse import urlparse
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
@@ -13,7 +14,7 @@ from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.emails.admins import send_error
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
-    paypal_payment_performing, set_address_obj
+    paypal_payment_performing, set_address_obj, send_demo_sms
 from methods.orders.validation.validation import validate_order
 from methods.orders.cancel import cancel_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
@@ -24,6 +25,7 @@ from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
 from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
+from models.config.version import DEMO_HOSTNAME
 from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
     CONFUSED_OTHER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
@@ -212,6 +214,8 @@ class OrderHandler(ApiHandler):
         send_venue_sms(venue, self.order)
         send_venue_email(venue, self.order, self.request.url, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())
+        if urlparse(self.request.url).hostname == DEMO_HOSTNAME:
+            send_demo_sms(client)
 
         self.response.status_int = 201
         self.render_json({
