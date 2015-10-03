@@ -286,7 +286,7 @@ def check_address(delivery_type, address):
         address = address.get('address') if address else None
         if not address:
             return False, u'Введите адрес'
-        if not address['city']:
+        if not address['city'] and not address['street']:
             return False, u'Не выбран город'
         if not address['street']:
             return False, u'Не выбрана улица'
