@@ -17,7 +17,7 @@ const MenuItem = React.createClass({
 
     _addItem(e) {
         e.stopPropagation();
-        OrderStore.addItem(this.props.item, this.props.item.price);
+        OrderStore.addItem(this.props.item);
     },
 
     render() {

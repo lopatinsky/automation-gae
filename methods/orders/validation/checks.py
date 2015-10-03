@@ -145,6 +145,8 @@ def check_venue(venue, delivery_time, delivery_type, client):
                                                 PromoCodePerforming.status == PromoCodePerforming.PROCESSING_ACTION).fetch():
         if performing.promo_code.get().kind == KIND_ALL_TIME_HACK:
             return True, None
+    if not delivery_time:
+        return False, u'Не выбрано время'
     if venue:
         if not venue.active:
             logging.warn("order attempt to inactive venue: %s", venue.key.id())

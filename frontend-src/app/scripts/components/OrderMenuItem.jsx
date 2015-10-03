@@ -8,12 +8,32 @@ const OrderMenuItem = React.createClass({
         OrderStore.removeItem(this.props.item);
     },
 
+    _getGroupModifiers(item) {
+        return item.group_modifiers.map(modifier => {
+            return <div>
+                {modifier.chosen_choice.title}
+            </div>;
+        });
+    },
+
+    _getSingleModifiers(item) {
+        return item.single_modifiers.map(modifier => {
+            if (modifier.quantity > 0) {
+                return <div>
+                    {modifier.title + ' x ' + modifier.quantity}
+                </div>;
+            }
+        });
+    },
+
     render() {
         var item = this.props.item;
         return (
             <Card>
                 <CardText>
-                    {item.title} {' x ' + item.quantity}
+                    {item.title + ' x ' + item.quantity}
+                    {this._getGroupModifiers(item)}
+                    {this._getSingleModifiers(item)}
                 </CardText>
                 <div>
                     <FlatButton label='Удалить' onClick={this._removeItem} />

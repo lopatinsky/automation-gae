@@ -21,9 +21,11 @@ __author__ = 'dvpermyakov'
 
 
 def card_payment_performing(payment_json, amount, order, put_order=True):
-    binding_id = payment_json['binding_id']
-    client_id = payment_json['client_id']
-    return_url = payment_json['return_url']
+    binding_id = payment_json.get('binding_id')
+    client_id = payment_json.get('client_id')
+    return_url = payment_json.get('return_url')
+    if not binding_id or not client_id or not return_url:
+        return False, u'Карта не найдена'
 
     legal = Venue.get(order.venue_id).legal.get()
 

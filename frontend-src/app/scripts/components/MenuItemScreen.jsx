@@ -21,7 +21,7 @@ const MenuItemScreen = React.createClass({
     },
 
     _addItem() {
-        OrderStore.addItem(MenuItemStore.getItem(), MenuItemStore.getPrice());
+        OrderStore.addItem(MenuItemStore.getItem());
     },
 
     _getModifiers() {
