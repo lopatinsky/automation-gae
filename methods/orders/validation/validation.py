@@ -249,13 +249,7 @@ def get_order_position_details(item_dicts):
 
 
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
-                      shared_gift_dicts=(), error=None, client=None):
-    if client:
-        # not use success and description
-        success, description, rest_points, full_points = check_gifts(gift_dicts, client)
-    else:
-        rest_points = 0
-        full_points = 0
+                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0):
     return {
         'valid': valid,
         'more_gift': False,
@@ -283,8 +277,12 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
         logging.warning('Sending error: %s' % error)
+        if client:
+            _, __, rest_points, full_points = check_gifts(gifts, client)
+        else:
+            rest_points, full_points = 0, 0
         return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gift_dicts,
-                                 cancelled_order_gift_dicts, shared_gift_dicts, error, client)
+                                 cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
