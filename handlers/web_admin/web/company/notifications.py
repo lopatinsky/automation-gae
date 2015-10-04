@@ -93,7 +93,7 @@ class PushesListHandler(CompanyBaseHandler):
         for push in pushes:
             push.created_str = push.created.strftime(STR_DATETIME_FORMAT)
         utc_time = datetime.utcnow().strftime(STR_DATETIME_FORMAT)
-        self.render('/notifications/pushes_list.html', pushes=pushes, config=Config.get(), utc_time=utc_time,
+        self.render('/notifications/pushes_list.html', pushes=pushes, utc_time=utc_time,
                     PUSH_STATUS_MAP=NOTIFICATION_STATUS_MAP, STATUS_CREATED=STATUS_CREATED)
 
 
@@ -177,7 +177,7 @@ class CancelPushHandler(CompanyBaseHandler):
 class ChangeParseApiKeys(CompanyBaseHandler):
     @full_rights_required
     def get(self):
-        self.render('/notifications/parse_api_keys.html', config=Config.get())
+        self.render('/notifications/parse_api_keys.html')
 
     @full_rights_required
     def post(self):

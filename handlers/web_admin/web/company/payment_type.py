@@ -20,7 +20,7 @@ class PaymentTypesHandler(CompanyBaseHandler):
         paypal = PaymentType.get_by_id(str(PAYPAL_PAYMENT_TYPE))
         if not paypal:
             PaymentType(id=str(PAYPAL_PAYMENT_TYPE), title='paypal', status=STATUS_UNAVAILABLE).put()
-        self.render('/payment_types.html', payments=PaymentType.query().fetch(), config=Config.get(),
+        self.render('/payment_types.html', payments=PaymentType.query().fetch(),
                     CARD_PAYMENT_TYPE=str(CARD_PAYMENT_TYPE))
 
     @full_rights_required
