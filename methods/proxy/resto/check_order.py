@@ -1,7 +1,7 @@
 import logging
 from methods.orders.validation.validation import get_response_dict, set_modifiers, set_price_with_modifiers, \
     set_item_dicts, group_item_dicts, is_equal
-from models.proxy.resto import RestoClient
+from models.proxy.resto import RestoClient, RestoCompany
 from requests import post_resto_check_order
 
 __author__ = 'dvpermyakov'
@@ -90,13 +90,15 @@ def get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts, cancelled
 
 
 def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gifts, cancelled_order_gifts):
+    resto_company = RestoCompany.get()
     items, item_dicts = get_item_and_item_dicts(init_item_dicts)
     order_gifts, order_gift_dicts = get_item_and_item_dicts(order_gifts)
     cancelled_order_gifts, cancelled_order_gift_dicts = get_item_and_item_dicts(cancelled_order_gifts)
     total_sum = get_init_total_sum(items)
     resto_client = RestoClient.get(client)
     resto_item_dicts = get_resto_item_dicts(init_item_dicts)
-    resto_validation = post_resto_check_order(venue, resto_item_dicts, client, resto_client, total_sum, delivery_time)
+    resto_validation = post_resto_check_order(resto_company, venue, resto_item_dicts, client, resto_client, total_sum,
+                                              delivery_time)
     order_gifts_from_resto = get_item_dicts_by_resto(resto_validation.get('gifts', []))
     new_order_gifts, unavail_order_gifts = get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts,
                                                                     cancelled_order_gifts)
