@@ -69,7 +69,7 @@ def get_resto_delivery_types(resto_company):
 
 def get_resto_menu(resto_company):
     path = '/api/company/%s/menu' % resto_company.key.id()
-    return _get_request(path, log_response=False)
+    return _get_request(resto_company, path, log_response=False)
 
 
 def get_resto_company_info(resto_company):
