@@ -1,7 +1,7 @@
 from datetime import datetime
 from google.appengine.ext import ndb
 from methods.rendering import STR_DATETIME_FORMAT
-from models import Order, Address, MenuItem, GroupModifier
+from models import Order, Address, MenuItem, GroupModifier, SingleModifier
 from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails
 from models.payment_types import CASH_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany, RestoClient
@@ -19,11 +19,18 @@ def _get_address(resto_address):
     return address
 
 
-def _get_group_modifier(resto_modifier):
-    modifier = ChosenGroupModifierDetails()
-    modifier.group_modifier = ndb.Key(GroupModifier, resto_modifier['groupId'])
-    modifier.group_choice_id_str = resto_modifier['id']
-    return modifier
+def _get_modifiers(resto_modifiers):
+    group_modifiers = []
+    single_modifiers = []
+    for resto_modifier in resto_modifiers:
+        if resto_modifier.get('groupId'):
+            modifier = ChosenGroupModifierDetails()
+            modifier.group_modifier = ndb.Key(GroupModifier, resto_modifier['groupId'])
+            modifier.group_choice_id_str = resto_modifier['id']
+            group_modifiers.append(modifier)
+        else:
+            single_modifiers.append(ndb.Key(SingleModifier, resto_modifier['id']))
+    return group_modifiers, single_modifiers
 
 
 def _get_item_details(resto_item):
@@ -31,7 +38,7 @@ def _get_item_details(resto_item):
     detail.item = ndb.Key(MenuItem, resto_item['id'])
     detail.price = int(resto_item['sum'] * 100)
     detail.revenue = int(resto_item['sum'] * 100)
-    detail.group_modifiers = [_get_group_modifier(resto_modifier) for resto_modifier in resto_item['modifiers']]
+    detail.group_modifiers, detail.single_modifiers = _get_modifiers(resto_item['modifiers'])
     return detail
 
 

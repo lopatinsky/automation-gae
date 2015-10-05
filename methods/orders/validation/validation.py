@@ -69,11 +69,12 @@ def _group_single_modifiers(modifiers):
             result[modifier.id()]['quantity'] += 1
         else:
             modifier_obj = modifier.get()
-            result[modifier.id()] = {
-                'id': str(modifier.id()),
-                'name': modifier_obj.title,
-                'quantity': 1
-            }
+            if modifier_obj:
+                result[modifier.id()] = {
+                    'id': str(modifier.id()),
+                    'name': modifier_obj.title,
+                    'quantity': 1
+                }
     return result.values()
 
 
@@ -86,12 +87,13 @@ def _group_group_modifiers(modifiers):
         else:
             modifier_obj = GroupModifier.get(modifier[0].id())
             choice = modifier_obj.get_choice_by_id(modifier[1])
-            result[key] = {
-                'id': str(modifier[0].id()),
-                'name': choice.title,
-                'choice': str(modifier[1]),
-                'quantity': 1
-            }
+            if modifier_obj and choice:
+                result[key] = {
+                    'id': str(modifier[0].id()),
+                    'name': choice.title,
+                    'choice': str(modifier[1]),
+                    'quantity': 1
+                }
     return result.values()
 
 
