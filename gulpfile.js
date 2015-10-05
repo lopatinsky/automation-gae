@@ -35,8 +35,9 @@ var targets = {
         FONTS: [],
         FONTS_OUT: 'static/app/fonts',
         SCRIPT_MAIN: 'frontend-src/app/scripts/main',
-        SCRIPTS_OUT: 'static/app/scripts'
-
+        SCRIPTS_OUT: 'static/app/scripts',
+        MANIFEST: 'frontend-src/app/app.manifest',
+        MANIFEST_OUT: 'static/app'
     }
 };
 
@@ -49,9 +50,9 @@ function registerTasks(targetName) {
 
     function updateManifest() {
         gutil.log("Updating manifest");
-        gulp.src(path.MANIFEST)
-            .pipe(insert.append('# ' + Math.random() + '\n'))
-            .pipe(gulp.dest(path.MANIFEST_OUT));
+        //gulp.src(path.MANIFEST)
+        //    .pipe(insert.append('# ' + Math.random() + '\n'))
+        //    .pipe(gulp.dest(path.MANIFEST_OUT));
     }
 
     gulp.task(manifestTaskName, function () {

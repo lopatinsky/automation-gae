@@ -1,6 +1,6 @@
 import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
-import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog } from '../components';
+import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog } from '../components';
 import { Navigation } from 'react-router';
 import { List, ListItem, Card, CardText, FlatButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar }
     from 'material-ui';
@@ -105,6 +105,10 @@ const OrderScreen = React.createClass({
 
     _onVenueTap() {
         this.refs.venuesDialog.show();
+    },
+
+    _onCommentTap() {
+        this.refs.commentDialog.show();
     },
 
     _onAddressTap() {
@@ -221,6 +225,9 @@ const OrderScreen = React.createClass({
             <Card onClick={this._onPaymentTypeTap}>
                 <CardText>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
             </Card>
+            <Card onClick={this._onCommentTap}>
+                <CardText>{OrderStore.getComment()}</CardText>
+            </Card>
             {this._getTimeInput()}
             {this._getPromos()}
             {this._getDeliveryDescription()}
@@ -228,6 +235,7 @@ const OrderScreen = React.createClass({
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
+            <CommentDialog ref="commentDialog" />
             <div>
                 <FlatButton label='Заказать' onClick={this._order} />
             </div>

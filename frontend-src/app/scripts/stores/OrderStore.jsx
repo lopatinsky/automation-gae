@@ -13,6 +13,7 @@ const OrderStore = new BaseStore({
     deliverySum: 0,
     deliverySumStr: '',
     items: [],
+    comment: '',
     orderGifts: [],
     slotId: null,
     dayStr: null,
@@ -276,6 +277,14 @@ const OrderStore = new BaseStore({
         this.orderError = null;
         this._changed();
         Actions.setOrderSuccess(orderId);
+    },
+
+    setComment(comment) {
+        this.comment = comment;
+    },
+
+    getComment() {
+        return this.comment;
     },
 
     getOrderId() {
