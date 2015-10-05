@@ -35,9 +35,7 @@ var targets = {
         FONTS: [],
         FONTS_OUT: 'static/app/fonts',
         SCRIPT_MAIN: 'frontend-src/app/scripts/main',
-        SCRIPTS_OUT: 'static/app/scripts',
-        MANIFEST: 'frontend-src/app/app.manifest',
-        MANIFEST_OUT: 'static/app'
+        SCRIPTS_OUT: 'static/app/scripts'
     }
 };
 
@@ -49,10 +47,12 @@ function registerTasks(targetName) {
         watchTaskName = targetName + '-watch';
 
     function updateManifest() {
-        gutil.log("Updating manifest");
-        //gulp.src(path.MANIFEST)
-        //    .pipe(insert.append('# ' + Math.random() + '\n'))
-        //    .pipe(gulp.dest(path.MANIFEST_OUT));
+        if (path.MANIFEST) {
+            gutil.log("Updating manifest");
+            gulp.src(path.MANIFEST)
+                .pipe(insert.append('# ' + Math.random() + '\n'))
+                .pipe(gulp.dest(path.MANIFEST_OUT));
+        }
     }
 
     gulp.task(manifestTaskName, function () {
