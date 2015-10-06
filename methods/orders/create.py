@@ -43,7 +43,10 @@ def card_payment_performing(payment_json, amount, order, put_order=True):
 
 def paypal_payment_performing(payment_json, amount, order, client, put_order=True):
     correlation_id = payment_json['correlation_id']
-    success, info = paypal.authorize(order.key.id(), amount / 100.0, client.paypal_refresh_token, correlation_id)
+    try:
+        success, info = paypal.authorize(order.key.id(), amount / 100.0, client.paypal_refresh_token, correlation_id)
+    except Exception as e:
+        success, info = False, str(e)
     if success:
         order.payment_id = info
         if put_order:
@@ -51,6 +54,7 @@ def paypal_payment_performing(payment_json, amount, order, client, put_order=Tru
     error = None
     if not success:
         error = u'Не удалось произвести оплату'
+        send_error("Paypal error", "Paypal failure", info)
     return success, error
 
 
