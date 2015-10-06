@@ -50,6 +50,7 @@ class ApiHandler(RequestHandler):
                 value = "(VALUE HIDDEN)"
             logging.debug("%s: %s" % (key, value))
         logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
+        logging.debug('Version: %s' % self.request.headers.get('Version'))
         self.request.init_namespace = None
         config = Config.get()
         if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
