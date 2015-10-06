@@ -23,15 +23,17 @@ def send_sms(to, text, company_footer=True):
             } for phone in to
         ]
     }
-    response = urlfetch.fetch("http://smspilot.ru/api2.php", payload=json.dumps(data), method='POST',
-                              headers={'Content-Type': 'application/json'}).content
-    logging.info(response)
-    result = json.loads(response)
-
-    success = "send" in result
-    for message in result.get("send", []):
-        if message["status"] != "0":
-            success = False
+    try:
+        response = urlfetch.fetch("http://smspilot.ru/api2.php", payload=json.dumps(data), method='POST',
+                                  headers={'Content-Type': 'application/json'}).content
+        logging.info(response)
+        result = json.loads(response)
+        success = "send" in result
+        for message in result.get("send", []):
+            if message["status"] != "0":
+                success = False
+    except Exception as e:
+        success = False
+        response = str(e)
     if not success:
         admins.send_error("sms", "SMS failure", response)
-    return json.loads(response)
