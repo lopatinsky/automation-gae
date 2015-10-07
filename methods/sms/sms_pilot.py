@@ -10,8 +10,8 @@ SMSPILOT_API_KEY = 'YMO7263H170NDGPX2N3863D17EX88HX9P96MFK5O4DKKBQ8D9J897J9O6TQH
 
 
 def send_sms(to, text, company_footer=True):
-    config = Config.get()
     if company_footer:
+        config = Config.get()
         text += u'\n%s' % config.APP_NAME
     data = {
         'apikey': SMSPILOT_API_KEY,
@@ -20,9 +20,11 @@ def send_sms(to, text, company_footer=True):
                 'from': 'Ru-beacon',
                 'to': phone,
                 'text': text
-            } for phone in to
+            } for phone in to if phone
         ]
     }
+    if not data['send']:
+        return
     try:
         response = urlfetch.fetch("http://smspilot.ru/api2.php", payload=json.dumps(data), method='POST',
                                   headers={'Content-Type': 'application/json'}).content
