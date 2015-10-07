@@ -11,6 +11,7 @@ from cancel_gifts import CancelGiftsHandler
 from images import ResizeImageHandler
 from geo_push import CloseGeoPushesHandler
 from subsciption import CloseSubscriptionHandler
+from resto_update import UpdateRestoHandler
 
 __author__ = 'ilyazorin'
 
@@ -30,4 +31,5 @@ app = webapp2.WSGIApplication([
     ('/cron/send_reports', ReportSendHandler),
     ('/cron/subscription', CloseSubscriptionHandler),
     ('/cron/geo_push', CloseGeoPushesHandler),
+    ('/cron/update_resto', UpdateRestoHandler),
 ], debug=True)
