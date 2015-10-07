@@ -38,4 +38,5 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 venue_title = venue.title if venue else u'Не определено'
                 mail_body += u'%s (%s),\n' % (order.key.id(), venue_title)
         if namespace_orders:
+            namespace_manager.set_namespace('')
             admins.send_error("order", "Orders not closed", mail_body)

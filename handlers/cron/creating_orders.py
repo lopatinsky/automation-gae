@@ -79,4 +79,5 @@ class CheckCreatingOrdersHandler(RequestHandler):
             mail_body += "List of orders:\n" + \
                          "\n\n".join("\n".join("%s: %s" % t for t in info) for info in namespace_infos[namespace])
         if namespace_infos:
+            namespace_manager.set_namespace('')
             admins.send_error("order", "Orders crashed while creating", mail_body)

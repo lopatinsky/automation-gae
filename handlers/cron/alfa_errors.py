@@ -42,4 +42,5 @@ class CheckAlfaErrorsHandler(RequestHandler):
             mail_body += namespace_errors[namespace]
         if namespace_errors:
             logging.warning(mail_body)
+            namespace_manager.set_namespace('')
             admins.send_error("server", "Payment errors", mail_body)

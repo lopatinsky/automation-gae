@@ -26,4 +26,5 @@ class CancelGiftsHandler(RequestHandler):
                 namespace_cancels[namespace] = 'Gifts not used within %s days: %s. In company %s\n' % \
                                                (MAX_DAYS_BEFORE_CANCEL, len(old_gifts), config.APP_NAME)
         if namespace_cancels:
+            namespace_manager.set_namespace('')
             admins.send_error('order', 'Unused gifts found', ''.join(namespace_cancels.values()))
