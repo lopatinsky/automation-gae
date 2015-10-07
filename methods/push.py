@@ -62,11 +62,13 @@ def _make_push_data(text, header, device_type):
 def _make_order_push_data(order, text):
     data = _make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type)
     if data:
+        data.update({
+            'order_id': str(order.key.id()),
+            'order_status': int(order.status)
+        })
         if order.device_type == IOS_DEVICE:
             data.update({
-                'sound': 'push.caf',
-                'order_id': str(order.key.id()),
-                'order_status': int(order.status)
+                'sound': 'push.caf'
             })
         return data
     else:
