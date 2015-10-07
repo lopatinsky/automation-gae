@@ -1,11 +1,14 @@
 # coding=utf-8
+from google.appengine.api import app_identity, modules
 from google.appengine.ext import ndb
 
 __author__ = 'dvpermyakov'
 
-DEMO_HOSTNAME = u'automation-demo.appspot.com'
-PRODUCTION_HOSTNAME = u'doubleb-automation-production.appspot.com'
-TEST_VERSIONS = ('.test2.', '.p-test.', '.courier.')
+CURRENT_APP_ID = app_identity.get_application_id()
+DEMO_APP_ID = 'automation-demo'
+PRODUCTION_APP_ID = 'doubleb-automation-production'
+CURRENT_VERSION = modules.get_current_version_name()
+TEST_VERSIONS = ('test2', 'p-test', 'courier')
 
 
 class Version(ndb.Model):

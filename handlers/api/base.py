@@ -1,6 +1,5 @@
 import json
 import logging
-from urlparse import urlparse
 
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
@@ -8,7 +7,7 @@ from webapp2_extras import jinja2
 from webapp2_extras import auth
 
 from methods.versions import is_test_version, update_company_versions
-from models.config.version import PRODUCTION_HOSTNAME, DEMO_HOSTNAME
+from models.config.version import PRODUCTION_APP_ID, CURRENT_APP_ID, DEMO_APP_ID
 from models.proxy.unified_app import AutomationCompany
 from models.config.config import Config
 from methods.unique import set_user_agent
@@ -53,7 +52,7 @@ class ApiHandler(RequestHandler):
         logging.debug('Version: %s' % self.request.headers.get('Version'))
         self.request.init_namespace = None
         config = Config.get()
-        if PRODUCTION_HOSTNAME in urlparse(self.request.url).hostname:
+        if CURRENT_APP_ID == PRODUCTION_APP_ID:
             if not config:
                 self.abort(423)
             logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
@@ -63,12 +62,12 @@ class ApiHandler(RequestHandler):
                 if proxy_company:
                     self.request.init_namespace = namespace_manager.get_namespace()
                     namespace_manager.set_namespace(namespace)
-        elif urlparse(self.request.url).hostname == DEMO_HOSTNAME:
+        elif CURRENT_APP_ID == DEMO_APP_ID:
             if not namespace_manager.get_namespace():
                 namespace = self.request.headers.get('Namespace')
                 namespace_manager.set_namespace(namespace)
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
-        self.test = is_test_version(self.request.url)
+        self.test = is_test_version()
         #update_company_versions(self.request.headers.get('Version', 0))
         set_user_agent(self.request.headers['User-Agent'])
         return_value = super(ApiHandler, self).dispatch()

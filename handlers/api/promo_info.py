@@ -1,6 +1,4 @@
 # coding=utf-8
-from urlparse import urlparse
-
 from .base import ApiHandler
 from models.config.config import config
 from models import Promo, GiftMenuItem, STATUS_AVAILABLE, News, Client
@@ -23,7 +21,6 @@ class PromoInfoHandler(ApiHandler):
         gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).order(GiftMenuItem.points).fetch()]
         share_items = [gift.dict() for gift in SharedGiftMenuItem.query(SharedGiftMenuItem.status == STATUS_AVAILABLE).fetch()] \
             if config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status else []
-        hostname = urlparse(self.request.url).hostname
         promo_texts = []
         promo_dicts = []
         for promo in sorted(Promo.query_promos(Promo.status == STATUS_AVAILABLE),
@@ -34,7 +31,7 @@ class PromoInfoHandler(ApiHandler):
                                promo.description.strip() if promo.description else u'')
             if text not in promo_texts:
                 promo_texts.append(text)
-                promo_dicts.append(promo.dict(hostname))
+                promo_dicts.append(promo.dict(self.request.host))
         self.render_json({
             'wallet': {
                 'enable': config.WALLET_ENABLED,

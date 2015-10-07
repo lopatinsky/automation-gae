@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from models.config.config import Config
-from models.config.version import TEST_VERSIONS, Version
+from models.config.version import TEST_VERSIONS, Version, CURRENT_VERSION
 
 __author__ = 'dvpermyakov'
 
@@ -19,12 +19,8 @@ CLIENT_VERSIONS = {
 }
 
 
-def is_test_version(url):
-    test = False
-    for version in TEST_VERSIONS:
-        if version in url:
-            test = True
-    return test
+def is_test_version():
+    return CURRENT_VERSION in TEST_VERSIONS
 
 
 def get_version(version, create=False):

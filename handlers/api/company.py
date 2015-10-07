@@ -1,5 +1,3 @@
-from urlparse import urlparse
-
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
@@ -7,6 +5,7 @@ from base import ApiHandler
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
 from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone
+from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY
 from models.specials import get_channels
@@ -94,7 +93,7 @@ class CompanyBaseUrlsHandler(ApiHandler):
             config = Config.get()
             if config and config.APP_NAME:
                 companies.append({
-                    'base_url': u'http://%s.test.%s' % (namespace, urlparse(self.request.url).hostname),
+                    'base_url': u'http://%s.%s.%s.appspot.com' % (namespace, CURRENT_VERSION, CURRENT_APP_ID),
                     'app_name': config.APP_NAME
                 })
         self.render_json({

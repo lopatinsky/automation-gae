@@ -1,6 +1,4 @@
 # coding=utf-8
-from urlparse import urlparse
-
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
@@ -87,7 +85,7 @@ def send_demo_sms(client):
         send_error('sms_error', 'Send sms', error_text)
 
 
-def send_venue_email(venue, order, url, jinja2):
+def send_venue_email(venue, order, host_url, jinja2):
     if venue.emails:
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         item_values = order_items_values(order)
@@ -102,13 +100,12 @@ def send_venue_email(venue, order, url, jinja2):
                 order.email_key_confirm = security.generate_random_string(entropy=256)
             order.put()
 
-            base_url = urlparse(url).hostname
-            item_values['done_url'] = 'http://%s/email/order/close?key=%s' % (base_url, order.email_key_done)
-            item_values['cancel_url'] = 'http://%s/email/order/cancel?key=%s' % (base_url, order.email_key_cancel)
-            item_values['postpone_url'] = 'http://%s/email/order/postpone?key=%s' % (base_url, order.email_key_postpone)
+            item_values['done_url'] = '%s/email/order/close?key=%s' % (host_url, order.email_key_done)
+            item_values['cancel_url'] = '%s/email/order/cancel?key=%s' % (host_url, order.email_key_cancel)
+            item_values['postpone_url'] = '%s/email/order/postpone?key=%s' % (host_url, order.email_key_postpone)
             item_values['minutes'] = POSTPONE_MINUTES
             if order.delivery_type == DELIVERY:
-                item_values['confirm_url'] = 'http://%s/email/order/confirm?key=%s' % (base_url, order.email_key_confirm)
+                item_values['confirm_url'] = '%s/email/order/confirm?key=%s' % (host_url, order.email_key_confirm)
         for email in venue.emails:
             if email:
                 deferred.defer(send_email, EMAIL_FROM, email, text,

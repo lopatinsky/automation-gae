@@ -1,10 +1,9 @@
 # coding:utf-8
-from urlparse import urlparse
-
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
 from models.config.config import Config
+from models.config.version import CURRENT_VERSION, CURRENT_APP_ID
 
 __author__ = 'dvpermyakov'
 
@@ -24,5 +23,6 @@ class CompaniesListHandler(BaseHandler):
         })
 
     def post(self):
-        url = u'http://%s.1.%s/mt/report' % (self.request.get('company'), urlparse(self.request.url).hostname)
+        url = u'http://%s.%s.%s.appspot.com/mt/report' % (
+            self.request.get('company'), CURRENT_VERSION, CURRENT_APP_ID)
         self.redirect(str(url))

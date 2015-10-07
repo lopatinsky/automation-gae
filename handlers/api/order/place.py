@@ -2,7 +2,6 @@
 import copy
 import logging
 import json
-from urlparse import urlparse
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
@@ -21,7 +20,7 @@ from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
 from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
-from models.config.version import DEMO_HOSTNAME
+from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
@@ -209,9 +208,9 @@ class OrderHandler(ApiHandler):
         self.order.put()
 
         send_venue_sms(venue, self.order)
-        send_venue_email(venue, self.order, self.request.url, self.jinja2)
+        send_venue_email(venue, self.order, self.request.host_url, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())
-        if urlparse(self.request.url).hostname == DEMO_HOSTNAME:
+        if CURRENT_APP_ID == DEMO_APP_ID:
             send_demo_sms(client)
 
         self.response.status_int = 201

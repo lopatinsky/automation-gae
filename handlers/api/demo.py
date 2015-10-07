@@ -1,11 +1,9 @@
 # coding=utf-8
-from urlparse import urlparse
-
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 
 from handlers.api.base import ApiHandler
 from models import CompanyUser
-from models.config.version import DEMO_HOSTNAME
+from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 
 __author__ = 'dvpermyakov'
 
@@ -18,7 +16,7 @@ class DemoLoginHandler(ApiHandler):
         })
 
     def post(self):
-        if urlparse(self.request.url).hostname != DEMO_HOSTNAME:
+        if CURRENT_APP_ID != DEMO_APP_ID:
             self.abort(403)
         login = self.request.get('login')
         password = self.request.get('password')
