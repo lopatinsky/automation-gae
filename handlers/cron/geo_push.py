@@ -9,6 +9,6 @@ class CloseGeoPushesHandler(RequestHandler):
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            pushes = GeoPush.query(GeoPush.status == STATUS_AVAILABLE).featch()
+            pushes = GeoPush.query(GeoPush.status == STATUS_AVAILABLE).fetch()
             for push in pushes:
                 push.deactivate()

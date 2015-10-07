@@ -60,6 +60,11 @@ cron:
   schedule: every day 07:00
   timezone: Europe/Moscow
 
+- description: close geo push
+  url: /cron/geo_push
+  schedule: every day 04:00
+  timezone: Europe/Moscow
+
 - description: update resto
   url: /cron/update_resto
   schedule: every day 04:00
