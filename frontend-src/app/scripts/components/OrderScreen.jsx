@@ -243,7 +243,8 @@ const OrderScreen = React.createClass({
                 ref='orderSnackBar'
                 message={OrderStore.getOrderError()}
                 autoHideDuration='1000'
-                onShow={Actions.checkOrder} />
+                onShow={Actions.checkOrder}
+                onDismiss={() => {OrderStore.setOrderError(null)}}/>
         </div>;
     }
 });

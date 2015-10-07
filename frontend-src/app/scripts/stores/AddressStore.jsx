@@ -48,6 +48,7 @@ const AddressStore = new BaseStore({
         localStorage.setItem('street', street);
         localStorage.setItem('home', home);
         localStorage.setItem('flat', flat);
+        Actions.checkOrder();
         this._changed();
     },
 

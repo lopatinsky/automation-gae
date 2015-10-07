@@ -6,6 +6,7 @@ const AddressView = React.createClass({
     mixins: [Navigation],
 
     toolbarLeftTap() {
+        this.refs.addressScreen.saveAddress();
         this.transitionTo('order');
     },
 
@@ -13,7 +14,7 @@ const AddressView = React.createClass({
         return (
             <div>
                 <Toolbar title="Адрес" view={this} back={true} />
-                <AddressScreen/>
+                <AddressScreen ref="addressScreen"/>
             </div>
         );
     }

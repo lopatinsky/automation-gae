@@ -5,23 +5,27 @@ import Actions from '../Actions';
 
 const AddressScreen = React.createClass({
      _refresh() {
-        this.setState({});
+        this.setState({
+            street: this.refs.street.getValue(),
+            home: this.refs.home.getValue(),
+            flat: this.refs.flat.getValue()
+        });
     },
 
     _onCityTap(e, selectedIndex, menuItem) {
         AddressStore.setChosenCity(menuItem.id);
     },
 
-    _setAddress() {
+    saveAddress() {
         AddressStore.setAddress(this.refs.street.getValue(), this.refs.home.getValue(), this.refs.flat.getValue());
     },
 
-    componentDidMount() {
-        AddressStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        AddressStore.removeChangeListener(this._refresh);
+    getInitialState() {
+        return {
+            street: AddressStore.getStreet(),
+            home: AddressStore.getHome(),
+            flat: AddressStore.getFlat()
+        }
     },
 
     render() {
@@ -40,9 +44,9 @@ const AddressScreen = React.createClass({
                     onChange={this._onCityTap}/>
             </div>
             <div>
-                <TextField hintText="Улица" ref="street" value={AddressStore.getStreet()} onChange={this._setAddress}/>
-                <TextField hintText="Дом" ref="home" value={AddressStore.getHome()} onChange={this._setAddress}/>
-                <TextField hintText="Квартира" ref="flat" value={AddressStore.getFlat()} onChange={this._setAddress}/>
+                <TextField hintText="Улица" ref="street" value={this.state.street} onChange={this._refresh}/>
+                <TextField hintText="Дом" ref="home" value={this.state.home} onChange={this._refresh}/>
+                <TextField hintText="Квартира" ref="flat" value={this.state.flat} onChange={this._refresh}/>
             </div>
         </div>;
     }
