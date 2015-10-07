@@ -85,7 +85,9 @@ def _perform_registration(request):
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
                 if not client_id or \
-                        (not Order.query(Order.client_id == client_id).get() and client_id != share.sender.id()):
+                        (not Order.query(Order.client_id == client_id).get()
+                         and not SharedPromo.query(SharedPromo.recipient == client.key).get()
+                         and client_id != share.sender.id()):
                     SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
             elif share.share_type == GIFT:
                 if share.status == Share.ACTIVE:

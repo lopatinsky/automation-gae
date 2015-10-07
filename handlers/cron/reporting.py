@@ -2,7 +2,7 @@
 import datetime
 from StringIO import StringIO
 
-from google.appengine.api import namespace_manager, mail, app_identity
+from google.appengine.api import namespace_manager, mail
 from google.appengine.ext import deferred
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
@@ -11,9 +11,10 @@ from methods.rendering import latinize
 from models.config.config import Config
 from methods import excel
 from methods.report import orders
+from models.config.version import CURRENT_APP_ID
 from models.legal import LegalInfo
 
-_EMAIL_SENDER = "reports@%s.appspotmail.com" % app_identity.get_application_id()
+_EMAIL_SENDER = "reports@%s.appspotmail.com" % CURRENT_APP_ID
 
 
 def _send(namespace):

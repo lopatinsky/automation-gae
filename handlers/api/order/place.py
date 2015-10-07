@@ -1,33 +1,31 @@
-# coding:utf-8
+# coding=utf-8
 import copy
 import logging
 import json
-from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
 
-from models.config.config import config, AUTO_APP, RESTO_APP
+from models.config.config import config, RESTO_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
-from methods.emails.admins import send_error
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
-    paypal_payment_performing, set_address_obj
+    paypal_payment_performing, set_address_obj, send_demo_sms
 from methods.orders.validation.validation import validate_order
-from methods.orders.cancel import cancel_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
-from methods.proxy.resto.check_order import resto_validate_order
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
-from models import DeliverySlot, PaymentType, Order, Venue, Client, STATUS_UNAVAILABLE
+from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
-from models.order import NEW_ORDER, CREATING_ORDER, CANCELED_BY_CLIENT_ORDER, CONFUSED_CHOICES, \
-    CONFUSED_OTHER, SubscriptionDetails
+from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
+from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
+
+__author__ = 'dvpermyakov'
 
 
 class OrderHandler(ApiHandler):
@@ -210,8 +208,10 @@ class OrderHandler(ApiHandler):
         self.order.put()
 
         send_venue_sms(venue, self.order)
-        send_venue_email(venue, self.order, self.request.url, self.jinja2)
+        send_venue_email(venue, self.order, self.request.host_url, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())
+        if CURRENT_APP_ID == DEMO_APP_ID:
+            send_demo_sms(client)
 
         self.response.status_int = 201
         self.render_json({
@@ -220,139 +220,3 @@ class OrderHandler(ApiHandler):
             'delivery_time': validation_result['delivery_time'],
             'delivery_slot_name': validation_result['delivery_slot_name']
         })
-
-
-class RegisterOrderHandler(ApiHandler):
-    def get(self):
-        self.render_json({'order_id': Order.generate_id()})
-
-
-class ReturnOrderHandler(ApiHandler):
-    def post(self):
-        order_id = int(self.request.get('order_id'))
-        order = Order.get_by_id(order_id)
-        if not order:
-            self.abort(400)
-        elif order.status != NEW_ORDER:
-            self.response.status_int = 412
-            self.render_json({
-                'error': 1,
-                'description': u'Заказ уже выдан или отменен'
-            })
-        else:
-            now = datetime.utcnow()
-            if now - order.date_created < timedelta(seconds=config.CANCEL_ALLOWED_WITHIN) or \
-                    order.delivery_time - now > timedelta(minutes=config.CANCEL_ALLOWED_BEFORE):
-                success = cancel_order(order, CANCELED_BY_CLIENT_ORDER, namespace_manager.get_namespace())
-                if success:
-                    reason_id = self.request.get('reason_id')
-                    if reason_id:
-                        reason_id = int(reason_id)
-                        if reason_id in CONFUSED_CHOICES:
-                            order.cancel_reason = reason_id
-                        if reason_id == CONFUSED_OTHER:
-                            order.cancel_reason_text = self.request.get('reason_text')
-                        order.put()
-                    self.render_json({
-                        'error': 0,
-                        'order_id': order.key.id()
-                    })
-                    logging.info(u'заказ %d отменен' % order_id)
-                else:
-                    self.response.status_int = 422
-                    self.render_json({
-                        'error': 1,
-                        'description': u'При отмене возникла ошибка'  # todo: change this text
-                    })
-            else:
-                self.response.status_int = 412
-                self.render_json({
-                    'error': 1,
-                    'description': u'Отмена заказа невозможна, так как до его исполнения осталось менее %s минут.' %
-                                   config.CANCEL_ALLOWED_BEFORE
-                })
-
-
-#  all required fields should invoke 400
-#  all errors should be catch in validate_order
-## venue can be None         => send error
-## delivery time can be None => send error
-## address can be None       => send error
-## payment can be None       => send error
-
-## delivery slot can't be None => it violates logic
-## client can't be None => it violates logic
-class CheckOrderHandler(ApiHandler):
-    def post(self):
-        client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
-        client = Client.get_by_id(client_id)
-        if not client:
-            self.abort(400)
-
-        delivery_type = int(self.request.get('delivery_type'))
-
-        venue = None
-        delivery_zone = None
-        address = self.request.get('address')
-
-        if delivery_type in [SELF, IN_CAFE, PICKUP]:
-            venue_id = self.request.get('venue_id')
-            if not venue_id or venue_id == '-1':
-                venue = None
-            else:
-                venue = Venue.get(venue_id)
-        elif delivery_type in [DELIVERY]:
-            if address:
-                address = json.loads(address)
-                address = validate_address(address)
-            venue, delivery_zone = get_venue_and_zone_by_address(address)
-
-        raw_payment_info = self.request.get('payment')
-        payment_info = None
-        if raw_payment_info:
-            payment_info = json.loads(raw_payment_info)
-            if (not payment_info.get('type_id') and payment_info.get('type_id') != 0) or \
-                            payment_info.get('type_id') == -1:
-                payment_info = None
-
-        delivery_slot_id = self.request.get('delivery_slot_id')
-        if delivery_slot_id == '-1':
-            self.abort(400)
-        if delivery_slot_id:
-            delivery_slot_id = int(delivery_slot_id)
-            delivery_slot = DeliverySlot.get_by_id(delivery_slot_id)
-            if not delivery_slot:
-                self.abort(400)
-        else:
-            delivery_slot = None
-
-        delivery_time_minutes = self.request.get('delivery_time')     # used for old versions todo: remove
-        if delivery_time_minutes:                                     # used for old versions todo: remove
-            send_error('minutes', 'delivery_time field in check order',
-                       'The field is invoked in %s' % namespace_manager.get_namespace())
-            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
-        delivery_time_picker = self.request.get('time_picker_value')
-
-        delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
-
-        items = json.loads(self.request.get('items'))
-        if self.request.get('gifts'):
-            gifts = json.loads(self.request.get('gifts'))
-        else:
-            gifts = []
-        if self.request.get('order_gifts'):
-            order_gifts = json.loads(self.request.get('order_gifts'))
-        else:
-            order_gifts = []
-        if self.request.get('cancelled_order_gifts'):
-            cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
-        else:
-            cancelled_order_gifts = []
-        if config.APP_KIND == AUTO_APP:
-            result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone)
-        elif config.APP_KIND == RESTO_APP:
-            result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts)
-        else:
-            result = {}
-        self.render_json(result)

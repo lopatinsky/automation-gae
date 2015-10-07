@@ -1,6 +1,7 @@
-from google.appengine.api import app_identity, mail, namespace_manager
+from google.appengine.api import mail, namespace_manager
+from models.config.version import CURRENT_APP_ID
 
-_EMAIL_DOMAIN = "%s.appspotmail.com" % app_identity.get_application_id()
+_EMAIL_DOMAIN = "%s.appspotmail.com" % CURRENT_APP_ID
 
 
 def send_error(scope, subject, body, html=None):

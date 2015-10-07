@@ -7,6 +7,7 @@ __author__ = 'dvpermyakov'
 
 class RestoCompany(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+    test_server = ndb.BooleanProperty(default=False)
 
     @classmethod
     def get(cls):

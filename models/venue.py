@@ -23,6 +23,13 @@ DELIVERY_MAP = {
     PICKUP: u'Самовывоз'
 }
 
+DELIVERY_WHAT_MAP = {
+    SELF: u'с собой',
+    IN_CAFE: u'в кафе',
+    DELIVERY: u'на доставку',
+    PICKUP: u'при самовывозе'
+}
+
 
 class Address(ndb.Model):
     lat = ndb.FloatProperty()
@@ -204,6 +211,7 @@ class DeliveryType(ndb.Model):
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
     item_restrictions = ndb.KeyProperty(kind=MenuItem, repeated=True)
     category_restrictions = ndb.KeyProperty(kind=MenuCategory, repeated=True)
+    schedule_restriction = ndb.LocalStructuredProperty(Schedule)
 
     @classmethod
     def create(cls, delivery_type):

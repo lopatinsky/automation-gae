@@ -37,7 +37,6 @@ def done_order(order, namespace, with_push=True):
     order.email_key_postpone = None
     order.email_key_confirm = None
     order.actual_delivery_time = datetime.utcnow()
-    order.put()
 
     client_key = ndb.Key(Client, order.client_id)
     shared_promo = SharedPromo.query(SharedPromo.recipient == client_key, SharedPromo.status == SharedPromo.READY).get()
@@ -50,10 +49,12 @@ def done_order(order, namespace, with_push=True):
     elif order.has_paypal_payment:
         paypal.capture(order.payment_id, order.total_sum - order.wallet_payment)
 
+    order.put()
+
     if with_push:
         text = u"Заказ №%s выдан." % order.key.id()
         if point_sum:
-            text += u" Начислены баллы на в размере %s." % point_sum
+            text += u" Начислены баллы в размере %s." % point_sum
         if total_cash_back:
             text += u" Начислены бонусы на Ваш счет в размере %s." % (total_cash_back / 100.0)
         push.send_order_push(order, text, namespace, silent=True)

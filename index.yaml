@@ -121,3 +121,8 @@ indexes:
   properties:
   - name: status
   - name: points
+
+- kind: Subscription
+  properties:
+  - name: status
+  - name: expiration

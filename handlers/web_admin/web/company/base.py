@@ -33,10 +33,10 @@ class CompanyBaseHandler(AuthBaseHandler):
         return jinja2.get_jinja2(app=self.app)
 
     def render(self, template_name, **values):
-        app_name = None
-        if namespace_manager.get_namespace() is not None:
-            app_name = config.APP_NAME
-        values.update(user=self.user, _app_name=app_name)
+        cfg = None
+        if namespace_manager.get_namespace():
+            cfg = config
+        values.update(user=self.user, config=cfg)
         rendered = self.jinja2.render_template('/company' + template_name, **values)
         self.response.write(rendered)
 

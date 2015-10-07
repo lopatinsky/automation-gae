@@ -237,7 +237,7 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
 
 
 def check_after_error(order_json, client):
-    MINUTES = 3
+    MINUTES = 1
     min_ago = datetime.utcnow() - timedelta(minutes=MINUTES)
     previous_order = Order.query(Order.client_id == client.key.id(),
                                  Order.status.IN(NOT_CANCELED_STATUSES),
