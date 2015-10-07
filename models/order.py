@@ -2,7 +2,8 @@
 import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
-from methods.rendering import timestamp
+from methods.rendering import timestamp, latinize
+from models import STATUS_AVAILABLE
 from models.geo_push import GeoPush
 from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
@@ -265,18 +266,30 @@ class Order(ndb.Model):
         })
         return dct
 
-    def dict(self):
+    def dict(self, extra_fields_in_comment=True):
         dct = self.history_dict()
+        client = Client.get_by_id(self.client_id)
         dct.update({
             "total_sum": self.total_sum,
             "venue": Venue.get_by_id(int(self.venue_id)).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
-            "client": Client.get_by_id(self.client_id).dict(),
+            "client": client.dict(),
             "pan": self.pan,
-            "comment": self.comment,
+            "comment": self.get_comment(client, extra_fields=extra_fields_in_comment),
             "return_comment": self.return_comment
         })
         return dct
+
+    def get_comment(self, client, extra_fields):
+        from models.config.config import config
+
+        comment = self.comment
+        if extra_fields:
+            if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
+                for field in config.CLIENT_MODULE.extra_fields:
+                    value = client.extra_data and client.extra_data.get(latinize(field.title))
+                    comment += "; %s: %s" % (field.title, value)
+        return comment
 
     @staticmethod
     def generate_id():

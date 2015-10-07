@@ -37,7 +37,7 @@ def check_items_and_gifts(order_json):
         return True
 
 
-def set_client_info(client_json, headers, order=None):
+def set_client_info(client_json, headers):
     client_id = int(client_json.get('id', 0)) or int(headers.get('Client-Id') or 0)
     if not client_id:
         return None
@@ -61,8 +61,6 @@ def set_client_info(client_json, headers, order=None):
             field_key = latinize(field.title)
             group_dict = groups.get(group_key)
             value = group_dict.get(field_key) if group_dict else None
-            if order:
-                order.comment += ' %s: %s,' % (field.title, value)
             extra_json[field_key] = value
     client.extra_data = extra_json
     client.put()
