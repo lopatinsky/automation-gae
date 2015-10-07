@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouteHandler, Navigation } from 'react-router';
+import { RouteHandler, Navigation, State } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import AppBar from 'material-ui/lib/app-bar';
 import Dialog from 'material-ui/lib/dialog';
@@ -13,7 +13,7 @@ import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
 import Actions from '../Actions';
 
 const MainView = React.createClass({
-    mixins: [OnResize, Navigation],
+    mixins: [OnResize, Navigation, State],
 
     statics: {
         willTransitionTo(transition) {
@@ -31,6 +31,8 @@ const MainView = React.createClass({
         OrderStore.addChangeListener(this._onOrderStoreChange);
         SystemStore.addChangeListener(this._onSystemStoreChange);
         Actions.loadCurrent();
+        Actions.loadDeliveryTypes();
+        this._checkDeliveryType();
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
@@ -82,11 +84,20 @@ const MainView = React.createClass({
         if (data && data.hasNewOrders) {
             SystemStore.playSound();
         }
+        this._checkDeliveryType();
     },
     _onSystemStoreChange() {
         this.setState({
             hasUpdate: SystemStore.hasUpdate
         });
+    },
+
+    _checkDeliveryType() {
+        if (!this.state.orderAheadEnabled && this.isActive("current")) {
+            this.transitionTo("delivery");
+        } else if (!this.state.deliveryEnabled && this.isActive("delivery")) {
+            this.transitionTo("current");
+        }
     },
 
     _logoutSubmit() {

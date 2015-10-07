@@ -120,7 +120,7 @@ const OrderStore = new BaseStore({
     },
 
     loadCurrent(orders, timestamp) {
-        this.clear();
+        this._clearOrders();
         this.loadedOrders = true;
         this._addRawOrders(orders);
         this._setTimestamp(timestamp);
@@ -137,12 +137,28 @@ const OrderStore = new BaseStore({
         this._changed({ showError: err.status });
     },
 
-    clear() {
+    setDeliveryTypes(deliveryTypes) {
+        this.orderAheadEnabled = false;
+        this.deliveryEnabled = false;
+        for (let dt of deliveryTypes) {
+            if (dt.id == this.DELIVERY_TYPE.DELIVERY) {
+                this.deliveryEnabled = true;
+            } else {
+                this.orderAheadEnabled = true;
+            }
+        }
+        this._changed();
+    },
+
+    _clearOrders() {
         this._knownOrders.clear();
         this.loadedOrders = false;
         this.lastSuccessfulLoadTime = null;
         this.wasLastLoadSuccessful = false;
         this.lastServerTimestamp = null;
+    },
+    clear() {
+        this._clearOrders();
         this.orderAheadEnabled = true;
         this.deliveryEnabled = true;
         this._changed();
@@ -199,6 +215,9 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request == "logout") {
                 OrderStore.clear();
+            }
+            if (action.data.request == "delivery_types") {
+                OrderStore.setDeliveryTypes(action.data.deliveries);
             }
             break;
         case Actions.AJAX_FAILURE:

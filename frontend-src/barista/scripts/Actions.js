@@ -61,6 +61,13 @@ const Actions = {
             .end(res => ({}));
     },
 
+    loadDeliveryTypes() {
+        doRequest.get("delivery_types", 'admin/delivery_types')
+            .end(res => ({
+                deliveries: res.body.deliveries
+            }));
+    },
+
     loadCurrent() {
         doRequest.get("current", 'admin/orders/current')
             .end(res => ({
