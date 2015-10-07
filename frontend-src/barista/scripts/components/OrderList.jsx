@@ -4,6 +4,7 @@ import RaisedButton from 'material-ui/lib/raised-button';
 import CircularProgress from 'material-ui/lib/circular-progress';
 import Colors from 'material-ui/lib/styles/colors';
 import OrderCard from './OrderCard';
+import OrderCardSimple from './OrderCardSimple';
 
 const CurrentTimeLine = React.createClass({
     contextTypes: {
@@ -72,6 +73,15 @@ const OrderList = React.createClass({
         </div>;
     },
 
+    _renderLoadedSimple() {
+        const orders = this.props.orders.map(
+                order => <OrderCardSimple key={order.id} order={order}/>
+        );
+        return <div style={{overflow: 'hidden'}}>
+            {orders}
+        </div>;
+    },
+
     _renderLoading() {
         return <div style={{textAlign: 'center'}}>
             <CircularProgress size={2}/>
@@ -87,7 +97,7 @@ const OrderList = React.createClass({
 
     render() {
         if (this.props.loadedOrders) {
-            return this._renderLoaded();
+            return this.props.simple ? this._renderLoadedSimple() : this._renderLoaded();
         } else if (this.props.loadingOrders) {
             return this._renderLoading();
         } else {
