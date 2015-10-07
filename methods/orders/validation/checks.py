@@ -338,7 +338,7 @@ def check_client_info(client, delivery_type, order):
         for field in config.CLIENT_MODULE.extra_fields:
             if not field.required:
                 continue
-            if not client.extra_data.get(latinize(field.title)):
+            if not client.extra_data or not client.extra_data.get(latinize(field.title)):
                 return False, u'Не введено поле "%s"' % field.title
     return True, None
 
