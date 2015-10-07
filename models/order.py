@@ -266,7 +266,7 @@ class Order(ndb.Model):
         })
         return dct
 
-    def dict(self):
+    def dict(self, extra_fields_in_comment=True):
         dct = self.history_dict()
         client = Client.get_by_id(self.client_id)
         dct.update({
@@ -275,7 +275,7 @@ class Order(ndb.Model):
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": client.dict(),
             "pan": self.pan,
-            "comment": self.get_comment(client, extra_fields=True),
+            "comment": self.get_comment(client, extra_fields=extra_fields_in_comment),
             "return_comment": self.return_comment
         })
         return dct

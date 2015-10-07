@@ -7,6 +7,10 @@ from models import AdminStatus
 
 class AdminApiHandler(UserApiHandler):
     @cached_property
+    def _is_android_barista_app(self):
+        return self.request.user_agent.startswith("Dalvik/")
+
+    @cached_property
     def _token_entity(self):
         full_token = self.request.get("token")
         if full_token:
