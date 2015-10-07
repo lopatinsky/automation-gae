@@ -281,6 +281,7 @@ const OrderStore = new BaseStore({
 
     setComment(comment) {
         this.comment = comment;
+        this._changed();
     },
 
     getComment() {
@@ -293,8 +294,6 @@ const OrderStore = new BaseStore({
 
     setDay(date) {
         this.dayStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-        Actions.checkOrder();
-        this._changed();
     },
 
     setTime(date) {

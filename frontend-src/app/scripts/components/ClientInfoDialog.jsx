@@ -5,7 +5,11 @@ import Actions from '../Actions';
 
 const ClientInfoDialog = React.createClass({
     _refresh() {
-        this.setState({});
+        this.setState({
+            name: this.refs.name.getValue(),
+            phone: this.refs.phone.getValue(),
+            email: this.refs.email.getValue()
+        });
     },
 
     _setClientInfo() {
@@ -26,20 +30,20 @@ const ClientInfoDialog = React.createClass({
          this.refs.clientInfoDialog.dismiss();
     },
 
-    componentDidMount() {
-        ClientStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        ClientStore.removeChangeListener(this._refresh);
+    getInitialState() {
+        return {
+            name: ClientStore.getName(),
+            phone: ClientStore.getPhone(),
+            email: ClientStore.getEmail()
+        }
     },
 
     render() {
         return (
             <Dialog ref="clientInfoDialog">
-                <TextField hintText="Имя" ref="name" value={ClientStore.getName()} onChange={this._setClientInfo}/>
-                <TextField hintText="Номер телефона" ref="phone" value={ClientStore.getPhone()} onChange={this._setClientInfo}/>
-                <TextField hintText="Email" ref="email" value={ClientStore.getEmail()} onChange={this._setClientInfo}/>
+                <TextField hintText="Имя" ref="name" value={this.state.name} onChange={this._refresh}/>
+                <TextField hintText="Номер телефона" ref="phone" value={this.state.phone} onChange={this._refresh}/>
+                <TextField hintText="Email" ref="email" value={this.state.email} onChange={this._refresh}/>
                 <FlatButton label="Ок" onClick={this._submit} />
             </Dialog>
         );

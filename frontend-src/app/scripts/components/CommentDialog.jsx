@@ -5,11 +5,13 @@ import Actions from '../Actions';
 
 const CommentDialog = React.createClass({
     _refresh() {
-        this.setState({});
+        this.setState({
+            comment: this.refs.comment.getValue()
+        });
     },
 
     _submit() {
-        OrderStore.setComment(this.refs.comment);
+        OrderStore.setComment(this.refs.comment.getValue());
         this.dismiss();
     },
 
@@ -18,21 +20,19 @@ const CommentDialog = React.createClass({
     },
 
     dismiss() {
-         this.refs.commentDialog.dismiss();
+        this.refs.commentDialog.dismiss();
     },
 
-    componentDidMount() {
-        //ClientStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        //ClientStore.removeChangeListener(this._refresh);
+    getInitialState() {
+        return {
+            comment: OrderStore.getComment()
+        }
     },
 
     render() {
         return (
             <Dialog ref="commentDialog">
-                <TextField hintText="Комментарий" ref="comment" value={OrderStore.getComment()} onChange={this._setClientInfo}/>
+                <TextField hintText="Комментарий" ref="comment" value={this.state.comment} onChange={this._refresh} />
                 <FlatButton label="Ок" onClick={this._submit} />
                 <FlatButton label="Отмена" onClick={this.dismiss} />
             </Dialog>
