@@ -27,8 +27,13 @@ def card_payment_performing(payment_json, amount, order, put_order=True):
 
     legal = Venue.get(order.venue_id).legal.get()
 
-    success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order.key.id(), return_url,
-                                              client_id)
+    try:
+        success, result = alfa_bank.create_simple(legal.alfa_login, legal.alfa_password, amount, order.key.id(), return_url,
+                                                  client_id)
+    except Exception as e:
+        send_error("Alfa error", "Alfa failure", str(e))
+        success, result = False, u'Не удалось произвести оплату'
+
     if not success:
         return success, result
 
