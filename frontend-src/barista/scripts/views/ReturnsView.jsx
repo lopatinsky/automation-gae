@@ -35,6 +35,7 @@ const ReturnsView = React.createClass({
         return <OrderList orders={this.state.returns}
                           loadedOrders={this.state.returns != null}
                           loadingOrders={this.state.loading}
+                          tryReload={() => Actions.loadReturns()}
                           simple={true}/>
     }
 

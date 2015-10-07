@@ -35,6 +35,7 @@ const HistoryView = React.createClass({
         return <OrderList orders={this.state.history}
                           loadedOrders={this.state.history != null}
                           loadingOrders={this.state.loading}
+                          tryReload={() => Actions.loadHistory()}
                           simple={true}/>
     }
 

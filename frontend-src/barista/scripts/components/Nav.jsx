@@ -83,7 +83,7 @@ const Nav = React.createClass({
                 width: '100%',
                 paddingTop: 16
             });
-        let navCount = 3; // history, returns, stoplist
+        let navCount = 2; // history, returns -- stoplist is hidden atm
         if (this.props.showCurrent) { navCount += 1; }
         if (this.props.showDelivery) { navCount += 1; }
         return <div style={style}>
@@ -93,7 +93,7 @@ const Nav = React.createClass({
             <NavItem horizontal={isHorizontal} itemCount={navCount} route='delivery' text='Доставка'  label={this.props.deliveryCount}/>}
             <NavItem horizontal={isHorizontal} itemCount={navCount} route='history'  text='История'/>
             <NavItem horizontal={isHorizontal} itemCount={navCount} route='returns'  text='Отмененные'/>
-            <NavItem horizontal={isHorizontal} itemCount={navCount} route='stoplist' text='Стоп-лист'/>
+            {/*<NavItem horizontal={isHorizontal} itemCount={navCount} route='stoplist' text='Стоп-лист'/>*/}
         </div>
     }
 });
