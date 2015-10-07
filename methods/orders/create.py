@@ -69,14 +69,7 @@ def send_client_sms_task(order, namespace):
 def send_venue_sms(venue, order):
     if venue.phones:
         text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
-        for phone in venue.phones:
-            if phone:
-                try:
-                    send_sms([phone], text)
-                except Exception as e:
-                    error_text = str(e)
-                    error_text += u' В компании "%s" (%s).' % (config.APP_NAME, namespace_manager.get_namespace())
-                    send_error('sms_error', 'Send sms', error_text)
+        send_sms(venue.phones, text)
 
 
 def send_demo_sms(client):
