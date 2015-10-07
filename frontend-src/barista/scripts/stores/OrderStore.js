@@ -219,6 +219,14 @@ const OrderStore = new BaseStore({
             if (action.data.request == "delivery_types") {
                 OrderStore.setDeliveryTypes(action.data.deliveries);
             }
+            if (action.data.request == "history") {
+                const history = action.data.history.map(o => new Order(o));
+                OrderStore._changed({ history });
+            }
+            if (action.data.request == "returns") {
+                const returns = action.data.returns.map(o => new Order(o));
+                OrderStore._changed({ returns });
+            }
             break;
         case Actions.AJAX_FAILURE:
             if (action.data.request == 'current' || action.data.request == 'updates') {

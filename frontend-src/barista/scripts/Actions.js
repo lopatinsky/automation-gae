@@ -1,4 +1,5 @@
 import request from 'superagent';
+import moment from 'moment';
 import AppDispatcher from "./AppDispatcher";
 import { AuthStore, OrderStore, SystemStore } from "./stores";
 
@@ -84,6 +85,27 @@ const Actions = {
                 updated: res.body.updated,
                 timestamp: res.body.timestamp
             }));
+    },
+
+    loadHistory() {
+        const start = moment().hours(0).minutes(0).seconds(0).minutes(0),
+            end = moment(start).add(1, 'days');
+
+        doRequest.get("history", 'admin/orders/history')
+            .query({
+                start: start.unix(),
+                end: end.unix()
+            })
+            .end(res => ({
+                history: res.body.orders
+            }));
+    },
+
+    loadReturns() {
+        doRequest.get("returns", 'admin/orders/returns')
+            .end(res => ({
+                returns: res.body.orders
+            }))
     },
 
     cancelOrder(order, comment) {
