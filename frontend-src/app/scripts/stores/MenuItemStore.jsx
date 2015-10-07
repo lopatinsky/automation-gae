@@ -38,18 +38,10 @@ const MenuItemStore = new BaseStore({
         }
     },
 
-    addSingleModifier(modifier_id) {
+    setSingleModifierNumber(modifier_id, number) {
         var modifier = this.getSingleModifier(modifier_id);
-        modifier.quantity += 1;
-        this._changed();
-    },
-
-    deductSingleModifier(modifier_id) {
-        var modifier = this.getSingleModifier(modifier_id);
-        if (modifier.quantity > 0) {
-            modifier.quantity -= 1;
-        }
-        this._changed();
+        modifier.quantity = number;
+        this._changed();  // is it need?
     },
 
     getModifierChoices(modifier_id) {
