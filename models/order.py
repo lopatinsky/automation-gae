@@ -273,7 +273,7 @@ class Order(ndb.Model):
             "total_sum": self.total_sum,
             "venue": Venue.get_by_id(int(self.venue_id)).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
-            "client": client.dict(),
+            "client": client.dict(with_extra_fields=not extra_fields_in_comment),
             "pan": self.pan,
             "comment": self.get_comment(client, extra_fields=extra_fields_in_comment),
             "return_comment": self.return_comment

@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 from methods import fastcounter
+from models import STATUS_AVAILABLE
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -38,13 +39,28 @@ class Client(ndb.Model):
         fastcounter.incr("client_id")
         return value + 1
 
-    def dict(self):
-        return {
+    def dict(self, with_extra_fields=False):
+        dct = {
             "id": self.key.id(),
             "name": self.name,
             "surname": self.surname,
             "phone": self.tel
         }
+        if with_extra_fields:
+            from models.config.config import config
+            from methods.rendering import latinize
+            extra = []
+            if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
+                for field in config.CLIENT_MODULE.extra_fields:
+                    key = latinize(field.title)
+                    value = self.extra_data and self.extra_data.get(key)
+                    extra.append({
+                        "field": key,
+                        "title": field.title,
+                        "value": value
+                    })
+            dct["extra_data"] = extra
+        return dct
 
 
 class CardBindingPayment(ndb.Model):
