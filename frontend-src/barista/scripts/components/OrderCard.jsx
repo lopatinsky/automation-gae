@@ -57,6 +57,18 @@ const OrderCard = React.createClass({
             this.props[methodName](this.props.order) :
             console.log(`missing handler for action ${action}`);
     },
+    _renderExtraData() {
+        const extraData = this.props.order.client.extra_data;
+        if (!extraData.length) {
+            return null;
+        }
+        const elements = extraData.map(elem =>
+            <div key={elem.field}>
+                {elem.title}:
+                <span style={{fontWeight: 400}}> {elem.value == "" || elem.value == null ? "не указано" : elem.value}</span>
+            </div>);
+        return <div>{elements}</div>;
+    },
     _renderActions() {
         let order = this.props.order,
             primaryActionLabel, primaryActionHandler;
@@ -122,6 +134,7 @@ const OrderCard = React.createClass({
                             order.address :
                             order.deliveryTypeName
                     }</div>
+                    {this._renderExtraData()}
                     {order.comment && <div>
                         Комментарий клиента: <span style={bolderStyle}>{order.comment}</span>
                     </div>}
