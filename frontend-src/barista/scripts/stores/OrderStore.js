@@ -99,6 +99,8 @@ const OrderStore = new BaseStore({
     lastSuccessfulLoadTime: null,
     wasLastLoadSuccessful: false,
     lastServerTimestamp: null,
+    orderAheadEnabled: true,
+    deliveryEnabled: true,
     _addOrder(order) {
         if (order.status == this.STATUS.NEW || order.status == this.STATUS.CONFIRMED) {
             this._knownOrders.set(order.id, order);
@@ -141,6 +143,8 @@ const OrderStore = new BaseStore({
         this.lastSuccessfulLoadTime = null;
         this.wasLastLoadSuccessful = false;
         this.lastServerTimestamp = null;
+        this.orderAheadEnabled = true;
+        this.deliveryEnabled = true;
         this._changed();
     },
 

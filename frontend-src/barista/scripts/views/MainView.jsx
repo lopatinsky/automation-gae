@@ -7,6 +7,7 @@ import FlatButton from 'material-ui/lib/flat-button';
 import TextField from 'material-ui/lib/text-field';
 import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 import RadioButton from 'material-ui/lib/radio-button';
+import RaisedButton from 'material-ui/lib/raised-button';
 import { Nav, SpinnerWrap, Clock } from '../components';
 import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
 import Actions from '../Actions';
@@ -28,18 +29,23 @@ const MainView = React.createClass({
         AuthStore.addChangeListener(this._onAuthStoreChange);
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
+        SystemStore.addChangeListener(this._onSystemStoreChange);
         Actions.loadCurrent();
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
         OrderStore.removeChangeListener(this._onOrderStoreChange);
+        SystemStore.addChangeListener(this._onSystemStoreChange);
         clearInterval(this._updateInterval);
     },
 
     getInitialState() {
         return {
+            hasUpdate: SystemStore.hasUpdate,
+            orderAheadEnabled: OrderStore.orderAheadEnabled,
             orderAhead: OrderStore.getOrderAheadOrders(),
+            deliveryEnabled: OrderStore.deliveryEnabled,
             delivery: OrderStore.getDeliveryOrders(),
             loadingOrders: AjaxStore.sending.current,
             loadedOrders: OrderStore.loadedOrders,
@@ -62,7 +68,9 @@ const MainView = React.createClass({
     },
     _onOrderStoreChange(data) {
         this.setState({
+            orderAheadEnabled: OrderStore.orderAheadEnabled,
             orderAhead: OrderStore.getOrderAheadOrders(),
+            deliveryEnabled: OrderStore.deliveryEnabled,
             delivery: OrderStore.getDeliveryOrders(),
             loadedOrders: OrderStore.loadedOrders,
             lastSuccessfulLoadTime: OrderStore.lastSuccessfulLoadTime,
@@ -74,6 +82,11 @@ const MainView = React.createClass({
         if (data && data.hasNewOrders) {
             SystemStore.playSound();
         }
+    },
+    _onSystemStoreChange() {
+        this.setState({
+            hasUpdate: SystemStore.hasUpdate
+        });
     },
 
     _logoutSubmit() {
@@ -167,9 +180,18 @@ const MainView = React.createClass({
                     iconElementRight={<FlatButton label='Выйти' onTouchTap={this._onLogoutClick}/>}
                     style={{position:'fixed',top:0}}/>
             <Nav horizontal={isHorizontal}
+                 showCurrent={this.state.orderAheadEnabled}
                  orderCount={this.state.orderAhead.length}
+                 showDelivery={this.state.deliveryEnabled}
                  deliveryCount={this.state.delivery.length}/>
-            <Clock horizontal={isHorizontal} lastUpdate={this.state.lastSuccessfulLoadTime}/>
+            <Clock horizontal={isHorizontal} lastUpdate={this.state.lastSuccessfulLoadTime}>
+                {this.state.hasUpdate &&
+                    <RaisedButton label="Новая версия"
+                                  secondary={true}
+                                  style={{verticalAlign: 'middle'}}
+                                  onTouchTap={() => window.location.reload()}/>
+                }
+            </Clock>
             <div style={contentStyle}>
                 <RouteHandler loadedOrders={this.state.loadedOrders}
                               loadingOrders={this.state.loadingOrders}

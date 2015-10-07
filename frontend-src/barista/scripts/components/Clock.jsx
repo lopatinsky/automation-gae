@@ -14,28 +14,29 @@ const Clock = React.createClass({
     },
     render() {
         const style = {
-            position: 'fixed',
-            left: this.props.horizontal ? 100 : 0,
-            right: 0,
-            top: this.props.horizontal ? 64 : 164,
-            zIndex: 1,
-            height: 24,
-            background: '#eeeeee',
-            textAlign: 'center',
-            fontSize: 24,
-            lineHeight: '24px',
-            paddingTop: 16,
-            paddingBottom: 12
-        };
-        let content = this.state.time.format('H:mm:ss');
+                position: 'fixed',
+                left: this.props.horizontal ? 100 : 0,
+                right: 0,
+                top: this.props.horizontal ? 64 : 164,
+                zIndex: 1,
+                height: 48,
+                background: '#eeeeee',
+                textAlign: 'center',
+                fontSize: 24,
+                paddingTop: 4
+            },
+            contentStyle = {
+                lineHeight: '48px'
+            };
+        let content = <span style={contentStyle}>{this.state.time.format('H:mm:ss')}</span>
         if (this.props.lastUpdate) {
             const seconds = this.state.time.diff(this.props.lastUpdate, 'seconds');
             if (seconds > 30) {
-                content = <span style={{color: 'red'}}>Проверьте интернет!</span>
+                content = <span style={{color: 'red', ...contentStyle}}>Проверьте интернет!</span>
             }
         }
         return <div style={style}>
-            {content}
+            {content} {this.props.children}
         </div>;
     }
 });
