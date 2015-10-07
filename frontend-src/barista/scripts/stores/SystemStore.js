@@ -1,10 +1,7 @@
-import MobileDetect from 'mobile-detect';
 import { Howler, Howl } from 'howler/howler.min';
 import appCacheNanny from 'appcache-nanny';
 import Actions from '../Actions';
 import BaseStore from './BaseStore';
-
-const detect = new MobileDetect(navigator.userAgent);
 
 const SystemStore = new BaseStore({
     _sound: null,
