@@ -194,15 +194,20 @@ class Order(ndb.Model):
         for item_detail in details:
             if not gift:
                 item = MenuItem.get(item_detail.item.id())
+                gift_obj = None
             else:
-                gift = item_detail.gift.get()
-                item = gift.item.get()
+                gift_obj = item_detail.gift.get()
+                if gift_obj:
+                    item = gift_obj.item.get()
+                else:
+                    logging.warning('Gift is not found = %s' % item_detail.gift)
+                    item = None
             if not item:
                 continue
             item_dicts.append({
                 'item': item,
-                'points': gift.points if gift else None,
-                'price': item_detail.price if not gift else 0,
+                'points': gift_obj.points if gift_obj else None,
+                'price': item_detail.price if not gift_obj else 0,
                 'image': item.picture,
                 'single_modifier_keys':  item_detail.single_modifiers,
                 'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
