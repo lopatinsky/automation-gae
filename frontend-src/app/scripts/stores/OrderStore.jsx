@@ -21,6 +21,7 @@ const OrderStore = new BaseStore({
     promos: [],
     errors: [],
     orderError: null,
+    cancelDescription: null,
 
     getSlotId() {
         return this.slotId;
@@ -89,6 +90,10 @@ const OrderStore = new BaseStore({
 
     getOrderError() {
         return this.orderError;
+    },
+
+    getCancelDescription() {
+        return this.cancelDescription;
     },
 
     getGroupModifierDict(item) {
@@ -272,11 +277,20 @@ const OrderStore = new BaseStore({
         this._changed();
     },
 
+    setCancelDescription(description) {
+        this.cancelDescription = description;
+        this._changed();
+    },
+
     setOrderId(orderId) {
         this.orderId = orderId;
         this.orderError = null;
         this._changed();
         Actions.setOrderSuccess(orderId);
+    },
+
+    clearOrderId() {
+        this.orderId = null;
     },
 
     setComment(comment) {
@@ -339,6 +353,10 @@ const OrderStore = new BaseStore({
                 OrderStore.setOrderError(action.data.error);
             }
             break;
+        case Actions.CANCEL:
+            if (action.data.request == "order") {
+                OrderStore.setCancelDescription(action.data.description);
+            }
     }
 });
 

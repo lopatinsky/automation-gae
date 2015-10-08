@@ -1,8 +1,26 @@
 import React from 'react';
-import { Card, CardText, RefreshIndicator } from 'material-ui';
+import { Card, CardText, RefreshIndicator, Dialog, FlatButton, Snackbar } from 'material-ui';
+import { OrderStore } from '../stores';
 import Actions from '../Actions';
 
 const HistoryOrderScreen = React.createClass({
+    refresh() {
+        var order = this.props.order;
+        if (order != null && OrderStore.getOrderId() == order.order_id) {
+            this.refs.successDialog.show();
+            OrderStore.clearOrderId();
+        }
+        if (OrderStore.getCancelDescription()) {
+            this.refs.cancelSnackBar.show();
+        }
+        this.setState({});
+    },
+
+    cancel() {
+        var order = this.props.order;
+        Actions.cancelOrder(order.order_id);
+    },
+
     getOrder() {
         var order = this.props.order;
         if (order != null) {
@@ -16,9 +34,39 @@ const HistoryOrderScreen = React.createClass({
         }
     },
 
+    getCancelButton() {
+        var order = this.props.order;
+        if (order && order.status == 0) {
+            return <div>
+                <FlatButton label='Отмена' onClick={this.cancel} />
+            </div>;
+        } else {
+            return <div/>;
+        }
+    },
+
+    componentDidMount() {
+        OrderStore.addChangeListener(this.refresh);
+        this.refresh();
+    },
+
+    componentWillUnmount() {
+        OrderStore.removeChangeListener(this.refresh);
+    },
+
+
     render() {
         return <div>
             {this.getOrder()}
+            {this.getCancelButton()}
+            <Dialog
+                ref="successDialog"
+                title="Заказ успешно размещен"/>
+            <Snackbar
+                ref='cancelSnackBar'
+                message={OrderStore.getCancelDescription()}
+                autoHideDuration='1000'
+                onDismiss={() => {OrderStore.setCancelDescription(null)}}/>
         </div>;
     }
 });

@@ -18,7 +18,6 @@ const OrderScreen = React.createClass({
     _refresh() {
         var orderId = OrderStore.getOrderId();
         if (orderId != null) {
-            OrderStore.setOrderId(null);
             this.transitionTo('historyOrder', {
                 order_id: orderId
             });

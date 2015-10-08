@@ -8,6 +8,7 @@ const Actions = {
     INIT: "INIT",
     UPDATE: "UPDATE",
     ERROR: "ERROR",
+    CANCEL: "CANCEL",
     AJAX_SENDING: "AJAX_SENDING",
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
@@ -228,6 +229,42 @@ const Actions = {
                         data: {
                             request: "order",
                             error: res.body.description
+                        }
+                    });
+                }
+            });
+    },
+
+    cancelOrder(order_id) {
+        request
+            .post(base_url + '/api/return')
+            .type('form')
+            .send({
+                order_id: order_id
+            })
+            .end((err, res) => {
+                if (res.status == 200) {
+                    AppDispatcher.dispatch({
+                        actionType: this.CANCEL,
+                        data: {
+                            request: "order",
+                            description: "Ваш заказ был успешно отменен"
+                        }
+                    });
+                } else if (res.status == 412 || res.status == 422) {
+                    AppDispatcher.dispatch({
+                        actionType: this.CANCEL,
+                        data: {
+                            request: "order",
+                            description: res.body.description
+                        }
+                    });
+                } else {
+                    AppDispatcher.dispatch({
+                        actionType: this.CANCEL,
+                        data: {
+                            request: "order",
+                            description: "Непредвиденная ошибка"
                         }
                     });
                 }

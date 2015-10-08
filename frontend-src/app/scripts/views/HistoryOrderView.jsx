@@ -9,6 +9,7 @@ const HistoryOrderView = React.createClass({
 
     _refresh() {
         this.setState({});
+        this.refs.historyOrderScreen.refresh();
     },
 
     componentDidMount() {
@@ -29,7 +30,7 @@ const HistoryOrderView = React.createClass({
         return (
             <div>
                 <Toolbar title='Заказ' view={this} back={true} />
-                <HistoryOrderScreen order={order}/>
+                <HistoryOrderScreen order={order} ref="historyOrderScreen" />
                 <NavigationDrawer ref="navigationDrawer" />
             </div>
         );
