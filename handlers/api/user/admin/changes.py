@@ -1,5 +1,6 @@
 # coding=utf-8
 from handlers.api.user.admin.base import AdminApiHandler
+from methods.emails.admins import send_error
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from methods.orders.postpone import postpone_order
@@ -42,7 +43,11 @@ class DoneOrderHandler(AdminApiHandler):
             self.abort(400)
         if order.status == NEW_ORDER and order.delivery_type in [DELIVERY, PICKUP]:
             return self.render_error(u'Необходимо сначала подтвердить заказ')
-        done_order(order, self.user.namespace)
+        try:
+            done_order(order, self.user.namespace)
+        except Exception as e:
+            send_error('Close error', 'Barista error in closing order', str(e))
+            return self.render_error(u'Непредвиденная ошибка! Повторите позднее! Не отменяйте заказ, если он уже оплачен!')
         self.render_json({
             "success": True,
             "delivery_time": timestamp(order.delivery_time),
