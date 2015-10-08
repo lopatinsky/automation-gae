@@ -1,3 +1,4 @@
+# coding=utf-8
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
@@ -30,6 +31,8 @@ class CompanyInfoHandler(ApiHandler):
         for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
+        if config.ANOTHER_CITY_IN_LIST:
+            cities.append(u'Другой город')
         version = get_version(self.request.headers.get('Version', 0))
         response = {
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,

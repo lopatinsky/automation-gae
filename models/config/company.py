@@ -11,6 +11,7 @@ class CompanyInfo(ndb.Model):
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
+    ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
