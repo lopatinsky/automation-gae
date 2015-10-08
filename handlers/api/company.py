@@ -30,7 +30,7 @@ class CompanyInfoHandler(ApiHandler):
         for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
-
+        version = get_version(self.request.headers.get('Version', 0))
         response = {
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
             'delivery_types': deliveries.values(),
@@ -51,7 +51,7 @@ class CompanyInfoHandler(ApiHandler):
             },
             'new_version_popup': {
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
-                'version': get_version(self.request.headers.get('Version', 0)).dict()
+                'version': version.dict() if version else None
             },
             'cancel_order': RestoCompany.get() is not None,
             'back_end': config.APP_KIND

@@ -41,7 +41,7 @@ def get_version(version, create=False):
 def is_available_version(version):
     version = int(version)
     version_obj = get_version(version)
-    return version_obj and version_obj.available
+    return version_obj is None or version_obj.available
 
 
 def update_company_versions(version):
