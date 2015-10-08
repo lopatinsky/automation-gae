@@ -247,6 +247,13 @@ const Actions = {
                     AppDispatcher.dispatch({
                         actionType: this.CANCEL,
                         data: {
+                            request: "history",
+                            order_id: order_id
+                        }
+                    });
+                    AppDispatcher.dispatch({
+                        actionType: this.CANCEL,
+                        data: {
                             request: "order",
                             description: "Ваш заказ был успешно отменен"
                         }

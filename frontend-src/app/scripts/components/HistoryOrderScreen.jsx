@@ -10,6 +10,11 @@ const HistoryOrderScreen = React.createClass({
             this.refs.successDialog.show();
             OrderStore.clearOrderId();
         }
+        if (OrderStore.getCancelProcessing()) {
+            this.refs.cancelProcessingDialog.show();
+        } else {
+            this.refs.cancelProcessingDialog.dismiss();
+        }
         if (OrderStore.getCancelDescription()) {
             this.refs.cancelSnackBar.show();
         }
@@ -17,6 +22,7 @@ const HistoryOrderScreen = React.createClass({
     },
 
     cancel() {
+        OrderStore.setCancelProcessing();
         var order = this.props.order;
         Actions.cancelOrder(order.order_id);
     },
@@ -62,6 +68,11 @@ const HistoryOrderScreen = React.createClass({
             <Dialog
                 ref="successDialog"
                 title="Заказ успешно размещен"/>
+            <Dialog
+                ref="cancelProcessingDialog"
+                title="Отмена заказа">
+                <RefreshIndicator left={5} top={5} status="loading" />
+            </Dialog>
             <Snackbar
                 ref='cancelSnackBar'
                 message={OrderStore.getCancelDescription()}

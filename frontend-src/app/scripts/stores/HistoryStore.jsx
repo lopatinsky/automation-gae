@@ -17,6 +17,12 @@ const HistoryStore = new BaseStore({
         }
     },
 
+    _setStatus(orderId, status) {
+        var order = this.getOrder(orderId);
+        order.status = status;
+        this._changed();
+    },
+
     _setOrders(orders) {
         this.orders = orders;
         this._changed();
@@ -29,6 +35,10 @@ const HistoryStore = new BaseStore({
                 HistoryStore._setOrders(action.data.orders);
             }
             break;
+        case Actions.CANCEL:
+            if (action.data.request == "history") {
+                HistoryStore._setStatus(action.data.order_id, 2);
+            }
     }
 });
 
