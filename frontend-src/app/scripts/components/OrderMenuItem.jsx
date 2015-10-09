@@ -29,7 +29,7 @@ const OrderMenuItem = React.createClass({
     render() {
         var item = this.props.item;
         return (
-            <Card>
+            <Card style={{margin: '12px 12px 0 12px'}}>
                 <CardText>
                     {item.title + ' x ' + item.quantity}
                     {this._getGroupModifiers(item)}

@@ -22,20 +22,32 @@ const MenuItem = React.createClass({
 
     render() {
         var item = this.props.item;
+        var picCard = <div style={{display: 'table-cell', width: '50%'}}>
+            <CardMedia>
+                <img src={item.pic}/>
+            </CardMedia>
+        </div>;
+        if (item.pic == null || item.pic == '') {
+            picCard = <div/>;
+        }
+        var descriptionCard = <div style={{height: '64px', overflow: 'hidden'}}>
+            {item.description}
+        </div>;
+        if (item.description == '') {
+            descriptionCard = <div/>;
+        }
         return (
             <Card
-                style={{padding:'0 12px 12px', display: 'table', width: '100%'}}
+                style={{margin:'0 12px 12px', display: 'table', width: '93%'}}
                 onClick={this._onMenuItemTap}>
-                <CardMedia
-                    style={{display: 'table-cell'}}>
-                    <img src={item.pic}/>
-                </CardMedia>
-                <div style={{display: 'table', width: '100%'}}>
-                    <CardText style={{display: 'table-cell'}}>
-                        {item.title}
-                    </CardText>
+                {picCard}
+                <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
+                    <div>
+                        <b>{item.title}</b>
+                    </div>
+                    {descriptionCard}
                     <FlatButton
-                        style={{display: 'table-cell'}}
+                        style={{align: 'right bottom', margin: '12px'}}
                         label={item.price}
                         onClick={this._addItem} />
                 </div>

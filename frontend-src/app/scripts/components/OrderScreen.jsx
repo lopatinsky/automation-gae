@@ -2,7 +2,7 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
 import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, FlatButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar }
+import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
@@ -125,13 +125,9 @@ const OrderScreen = React.createClass({
     _getVenueInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == '2') {
-            return <ListItem
-                        primaryText={AddressStore.getAddressStr()}
-                        onClick={this._onAddressTap}/>
+            return <CardText onClick={this._onAddressTap}>{AddressStore.getAddressStr()}</CardText>
         } else {
-            return <ListItem
-                        primaryText={VenuesStore.getChosenVenue().title}
-                        onClick={this._onVenueTap}/>
+            return <CardText onClick={this._onVenueTap}>{VenuesStore.getChosenVenue().title}</CardText>
         }
     },
 
@@ -155,11 +151,9 @@ const OrderScreen = React.createClass({
                 onChange={this._onSlotTap}/>;
         } else {
             return <div>
-                <Card onClick={() => this.refs.datePicker.show()}>
-                    <CardText>
-                        {OrderStore.getFullTimeStr()}
-                    </CardText>
-                </Card>
+                <CardText onClick={() => this.refs.datePicker.show()}>
+                    {OrderStore.getFullTimeStr()}
+                </CardText>
                 <DatePickerDialog
                     ref='datePicker'
                     onAccept={this._setDate}
@@ -208,35 +202,34 @@ const OrderScreen = React.createClass({
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
-            {this._getTotalSum()}
             <div>
-                <FlatButton label='Меню' onClick={this._onMenuTap} />
+                <RaisedButton label='Меню' onClick={this._onMenuTap} style={{width: '93%', margin: '12px 12px 0 12px'}} />
             </div>
-            <RadioButtonGroup name='group' valueSelected={VenuesStore.getChosenDelivery().name}>
-                {this._getDeliveryTypes()}
-            </RadioButtonGroup>
-            <List>
-                {this._getVenueInput()}
-            </List>
-            <Card onClick={this._onClientInfoTap}>
-                <CardText>{ClientStore.getName()}</CardText>
-            </Card>
-            <Card onClick={this._onPaymentTypeTap}>
-                <CardText>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
-            </Card>
-            <Card onClick={this._onCommentTap}>
-                <CardText>{OrderStore.getComment()}</CardText>
-            </Card>
-            {this._getTimeInput()}
+            {this._getTotalSum()}
             {this._getPromos()}
             {this._getDeliveryDescription()}
             {this._getErrors()}
+            <Card style={{margin: '12px 12px 0 12px'}}>
+                <RadioButtonGroup name='group' valueSelected={VenuesStore.getChosenDelivery().name}>
+                    {this._getDeliveryTypes()}
+                </RadioButtonGroup>
+                <ListDivider/>
+                {this._getVenueInput()}
+                <ListDivider/>
+                {this._getTimeInput()}
+                <ListDivider/>
+                <CardText onClick={this._onClientInfoTap}>{ClientStore.getName()}</CardText>
+                <ListDivider/>
+                <CardText onClick={this._onPaymentTypeTap}>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
+                <ListDivider/>
+                <CardText onClick={this._onCommentTap}>{OrderStore.getComment()}</CardText>
+            </Card>
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog" />
             <div>
-                <FlatButton label='Заказать' onClick={this._order} />
+                <RaisedButton label='Заказать' onClick={this._order} style={{width: '93%', margin: '12px 12px 12px 12px'}} />
             </div>
             <Snackbar
                 ref='orderSnackBar'

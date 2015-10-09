@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, FlatButton, CardTitle } from 'material-ui';
+import { List, ListItem, Card, CardMedia, CardText, CardActions, FlatButton, CardTitle, ListDivider, Icons, IconButton } from 'material-ui';
 import { MenuItemStore, ModifierStore, OrderStore } from '../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../components';
 import Actions from '../Actions';
@@ -29,6 +29,7 @@ const MenuItemScreen = React.createClass({
         return modifiers.map(modifier => {
             return (
                 <ListItem
+                    rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
                     primaryText={modifier.chosen_choice.title}
                     onClick={() => this._onModifierTap(modifier)}/>
             );
@@ -39,6 +40,7 @@ const MenuItemScreen = React.createClass({
         var modifiers = MenuItemStore.getSingleModifiers();
         if (modifiers.length > 0) {
             return <ListItem
+                        rightIcon={<Icons.NavigationChevronRight/>}
                         primaryText={'Добавки'}
                         onClick={() => this._onSingleModifierTap()}/>;
         }
@@ -60,23 +62,37 @@ const MenuItemScreen = React.createClass({
 
     render() {
         var item = this.state.item;
+        var picCard = <div>
+            <CardMedia>
+                <img src={item.pic}/>
+            </CardMedia>
+        </div>;
+        var descriptionCard = <div>
+            <CardText>{item.description}</CardText>
+            <ListDivider/>
+        </div>;
+        if (item.description == '') {
+            descriptionCard = <div/>;
+        }
+        if (item.pic == null || item.pic == '') {
+            picCard = <div/>;
+        }
         return (
-            <div>
+            <div style={{padding: '76px 0 0 0'}}>
                 <Card
-                    style={{padding: '64px 0 0 0'}}>
-                    <CardMedia>
-                        <img src={item.pic}/>
-                    </CardMedia>
+                    style={{margin: '0 12px 12px 12px'}}>
+                    {picCard}
                     <CardText>{item.title}</CardText>
-                    <CardText>{item.description}</CardText>
+                    <ListDivider/>
+                    {descriptionCard}
                     <CardActions>
                         <FlatButton label={MenuItemStore.getPrice()} onClick={this._addItem} />
                     </CardActions>
+                    <List>
+                        {this._getModifiers()}
+                        {this._getSingleModifiers()}
+                    </List>
                 </Card>
-                <List>
-                    {this._getModifiers()}
-                    {this._getSingleModifiers()}
-                </List>
                 <ModifierDialog ref="modifierDialog" />
                 <SingleModifiersDialog ref="singleModifiersDialog" />
             </div>
