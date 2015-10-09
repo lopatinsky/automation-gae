@@ -25,6 +25,7 @@ def _refresh_client_info(request, android_id, device_phone, client_id=None):
         if device_phone and not client.tel:
             client.tel = device_phone
         client.put()
+        client.save_session()
 
     current_namespace = namespace_manager.get_namespace()
     if request.init_namespace:

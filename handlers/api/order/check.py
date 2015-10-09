@@ -91,6 +91,8 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
+        client.save_session(True, bool(items or gifts or order_gifts))
+
         if config.APP_KIND == AUTO_APP:
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
                                     address, delivery_time, delivery_slot, delivery_type, delivery_zone)
