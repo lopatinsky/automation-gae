@@ -50,7 +50,9 @@ const MenuScreen = React.createClass({
                 );
             });
             return (
-                <Tabs>
+                <Tabs
+                    tabItemContainerStyle={{overflow: 'scroll', position: 'fixed', height: '32px', padding: '64px 0 0 0', zIndex: '1'}}
+                    contentContainerStyle={{padding: '120px 0 0 0'}}>
                     {categories}
                 </Tabs>
             );

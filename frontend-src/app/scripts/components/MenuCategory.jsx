@@ -14,7 +14,9 @@ const MenuCategory = React.createClass({
     render() {
         var category = this.props.category;
         return (
-            <Card onClick={this._onMenuCategoryTap}>
+            <Card
+                style={{margin:'0 12px 12px'}}
+                onClick={this._onMenuCategoryTap}>
                 <CardText>
                     {category.info.title}
                 </CardText>

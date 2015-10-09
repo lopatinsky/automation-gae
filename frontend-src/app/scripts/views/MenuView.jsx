@@ -13,9 +13,12 @@ const MenuView = React.createClass({
     render() {
         return (
             <div>
-                <Toolbar title='Меню' view={this} right='order' />
+                <Toolbar
+                    title='Меню'
+                    view={this}
+                    right='order'/>
                 <MenuScreen />
-                <NavigationDrawer ref="navigationDrawer" />
+                <NavigationDrawer ref="navigationDrawer"/>
             </div>
         );
     }

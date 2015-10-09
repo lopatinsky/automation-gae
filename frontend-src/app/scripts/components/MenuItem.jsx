@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton } from 'material-ui';
+import { Card, CardText, FlatButton, CardMedia } from 'material-ui';
 import { OrderStore } from '../stores';
 import { Navigation } from 'react-router';
 import Actions from '../Actions';
@@ -23,11 +23,22 @@ const MenuItem = React.createClass({
     render() {
         var item = this.props.item;
         return (
-            <Card onClick={this._onMenuItemTap}>
-                <CardText>
-                    {item.title}
-                </CardText>
-                <FlatButton label={item.price} onClick={this._addItem} />
+            <Card
+                style={{padding:'0 12px 12px', display: 'table', width: '100%'}}
+                onClick={this._onMenuItemTap}>
+                <CardMedia
+                    style={{display: 'table-cell'}}>
+                    <img src={item.pic}/>
+                </CardMedia>
+                <div style={{display: 'table', width: '100%'}}>
+                    <CardText style={{display: 'table-cell'}}>
+                        {item.title}
+                    </CardText>
+                    <FlatButton
+                        style={{display: 'table-cell'}}
+                        label={item.price}
+                        onClick={this._addItem} />
+                </div>
             </Card>
         );
     }

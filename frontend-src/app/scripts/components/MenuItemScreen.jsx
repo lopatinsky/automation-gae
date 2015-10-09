@@ -62,10 +62,12 @@ const MenuItemScreen = React.createClass({
         var item = this.state.item;
         return (
             <div>
-                <Card>
-                    <CardMedia overlay={<CardTitle title={item.title}/>}>
+                <Card
+                    style={{padding: '64px 0 0 0'}}>
+                    <CardMedia>
                         <img src={item.pic}/>
                     </CardMedia>
+                    <CardText>{item.title}</CardText>
                     <CardText>{item.description}</CardText>
                     <CardActions>
                         <FlatButton label={MenuItemStore.getPrice()} onClick={this._addItem} />

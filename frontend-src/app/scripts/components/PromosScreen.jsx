@@ -29,7 +29,7 @@ const PromosScreen = React.createClass({
     },
 
     render() {
-        return <div>
+        return <div style={{padding: '64px 0 0 0'}}>
             {this.getPromos()}
         </div>;
     }
