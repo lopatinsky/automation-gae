@@ -1,4 +1,5 @@
 # coding=utf-8
+import json
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
@@ -57,6 +58,8 @@ def paypal_payment_performing(payment_json, amount, order, client, put_order=Tru
     error = None
     if not success:
         error = u'Не удалось произвести оплату'
+        if not isinstance(info, (str, unicode)):
+            info = json.dumps(info)
         send_error("Paypal error", "Paypal failure", info)
     return success, error
 
