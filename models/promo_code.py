@@ -142,7 +142,8 @@ class PromoCodePerforming(ndb.Model):
             self.status = self.PROCESSING_ACTION
         elif promo_code.kind == KIND_SHARE_INVITATION:
             share = Share.query(Share.promo_code == promo_code.key).get()
-            if client.key.id() != share.sender.id():
+            promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
+            if client.key.id() != share.sender.id() and not promo:
                 SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
         else:
             self.status = self.DONE_ACTION
