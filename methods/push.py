@@ -90,6 +90,7 @@ def send_order_push(order, text, namespace, new_time=None, silent=False):
     data = _make_order_push_data(order, text)
     if new_time:
         data['timestamp'] = timestamp(new_time)
+        data['time_str'] = order.delivery_time_str
     if silent:
         data['content-available'] = 1
     order_channel = get_channels(namespace)[ORDER_CHANNEL] % order.key.id()
