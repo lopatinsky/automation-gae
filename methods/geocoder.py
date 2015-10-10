@@ -39,7 +39,7 @@ def _parse_collection(collection, kind=HOUSE, city_request=None):
         if area.get('SubAdministrativeArea'):
             area = area['SubAdministrativeArea']
         address = area['Locality']
-        city = address.get('LocalityName')
+        city = address.get('LocalityName', '')
         if city_request and city != city_request:
             continue
         if address.get('DependentLocality'):
