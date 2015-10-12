@@ -32,6 +32,23 @@ const OrderScreen = React.createClass({
         this.setState({});
     },
 
+    _getServerInfo() {
+        if (OrderStore.getErrors().length > 0) {
+            return <div style={{padding: '12px 48px 0 36px', color: 'red'}}>
+                {this._getErrors()}
+            </div>
+        } else {
+            return <div>
+                <div style={{padding: '12px 48px 0 36px'}}>
+                    {this._getPromos()}
+                </div>
+                <div style={{padding: '12px 48px 0 36px'}}>
+                    {this._getDeliveryDescription()}
+                </div>
+            </div>;
+        }
+    },
+
     _getPromos() {
         return OrderStore.getPromos().map(promo => {
             return <div>{promo.text + '\n'}</div>
@@ -51,7 +68,7 @@ const OrderScreen = React.createClass({
 
     _getErrors() {
         return OrderStore.getErrors().map(error => {
-            return <div>{error + '\n'}</div>
+            return <div>{error + '\n'}</div>;
         });
     },
 
@@ -60,13 +77,19 @@ const OrderScreen = React.createClass({
         var validationTotalSum = OrderStore.getValidationTotalSum();
         var deliverySum = OrderStore.getDeliverySum();
         if (menuTotalSum != validationTotalSum + deliverySum) {
-            return <div>
-                <strike>{menuTotalSum}</strike>
-                {validationTotalSum + deliverySum}
+            return <div style={{textAlign: 'right', fontSize: '14px'}}>
+                <b>
+                    {'Итого: '}
+                    <strike>{menuTotalSum + ' '}</strike>
+                    {validationTotalSum + deliverySum}
+                </b>
             </div>;
         } else {
-            return <div>
-                {validationTotalSum + deliverySum}
+            return <div style={{textAlign: 'right'}}>
+                <b>
+                    {'Итого: '}
+                    {validationTotalSum + deliverySum}
+                </b>
             </div>;
         }
     },
@@ -203,14 +226,20 @@ const OrderScreen = React.createClass({
             {this._getItems()}
             {this._getOrderGifts()}
             <div>
-                <RaisedButton label='Меню' onClick={this._onMenuTap} style={{width: '93%', margin: '12px 12px 0 12px'}} />
+                <RaisedButton
+                    label='Меню'
+                    onClick={this._onMenuTap}
+                    style={{width: '94%', margin: '12px 12px 0 12px'}} />
             </div>
-            {this._getTotalSum()}
-            {this._getPromos()}
-            {this._getDeliveryDescription()}
-            {this._getErrors()}
+            <div style={{padding: '12px 24px 0 12px'}}>
+                {this._getTotalSum()}
+            </div>
+            {this._getServerInfo()}
             <Card style={{margin: '12px 12px 0 12px'}}>
-                <RadioButtonGroup name='group' valueSelected={VenuesStore.getChosenDelivery().name}>
+                <RadioButtonGroup
+                    style={{margin: '12px'}}
+                    name='group'
+                    valueSelected={VenuesStore.getChosenDelivery().name}>
                     {this._getDeliveryTypes()}
                 </RadioButtonGroup>
                 <ListDivider/>
@@ -229,7 +258,7 @@ const OrderScreen = React.createClass({
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog" />
             <div>
-                <RaisedButton label='Заказать' onClick={this._order} style={{width: '93%', margin: '12px 12px 12px 12px'}} />
+                <RaisedButton label='Заказать' onClick={this._order} style={{width: '94%', margin: '12px 12px 12px 12px'}} />
             </div>
             <Snackbar
                 ref='orderSnackBar'

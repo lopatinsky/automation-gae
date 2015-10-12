@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardText } from 'material-ui';
-import { HistoryStore } from '../stores';
+import { HistoryStore, VenuesStore } from '../stores';
 import { Navigation } from 'react-router';
 import Actions from '../Actions';
 
@@ -20,10 +20,38 @@ const HistoryScreen = React.createClass({
     getOrders() {
         var orders = HistoryStore.getOrders();
         return orders.map(order => {
-            return <Card onClick={() => this._onOrderTap(order)}>
-                <CardText>
-                    {order.number}
-                </CardText>
+            var from_title = '';
+            if (order.delivery_type == 2) {
+                from_title = order.address.formatted_address;
+            } else {
+                var venue = VenuesStore.getVenue(order.venue_id);
+                if (venue != null) {
+                    from_title = venue.title;
+                }
+            }
+
+            return <Card
+                style={{margin: '0 12px 12px 12px', display: 'table', width: '93%'}}
+                onClick={() => this._onOrderTap(order)}>
+                <div style={{display: 'table-cell'}}>
+                    <div>
+                        <b>Мой заказ #{order.number}</b>
+                    </div>
+                    <div>
+                        {order.delivery_time_str}
+                    </div>
+                    <div>
+                        {from_title}
+                    </div>
+                </div>
+                <div style={{display: 'table-cell'}}>
+                    <div>
+                        <b>{order.total} руб.</b>
+                    </div>
+                    <div>
+                        {HistoryStore.getStatus(order.status)}
+                    </div>
+                </div>
             </Card>
         })
     },
@@ -38,7 +66,7 @@ const HistoryScreen = React.createClass({
     },
 
     render() {
-        return <div style={{padding: '64px 0 0 0'}}>
+        return <div style={{padding: '76px 0 0 0'}}>
             {this.getOrders()}
         </div>;
     }

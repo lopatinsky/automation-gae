@@ -1,6 +1,15 @@
 import BaseStore from './BaseStore';
 import Actions from '../Actions';
 
+var STATUSES = {
+    0: 'Новый',
+    1: 'Готов',
+    2: 'Отменен',
+    3: 'Отменен',
+    4: 'Подтвержден'
+};
+
+
 const HistoryStore = new BaseStore({
     orders: [],
 
@@ -15,6 +24,10 @@ const HistoryStore = new BaseStore({
                 return orders[i];
             }
         }
+    },
+
+    getStatus(status) {
+        return STATUSES[status];
     },
 
     _setStatus(orderId, status) {

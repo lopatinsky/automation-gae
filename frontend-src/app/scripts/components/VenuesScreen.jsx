@@ -7,17 +7,23 @@ const VenuesScreen = React.createClass({
         var venues = VenuesStore.getVenues();
         return venues.map(venue => {
             return (
-                <Card>
-                    <CardText>
-                        {venue.title}
-                    </CardText>
+                <Card style={{margin: '0 12px 12px 12px'}}>
+                    <div style={{padding: '12px 0 0 12px'}}>
+                        <b>{venue.title}</b>
+                    </div>
+                    <div style={{padding: '6px 0 0 12px'}}>
+                        {venue.address}
+                    </div>
+                    <div style={{padding: '6px 0 12px 12px'}}>
+                        Пн-вс: 10:00 - 11:00
+                    </div>
                 </Card>
             );
         });
     },
 
     render() {
-        return <div style={{padding: '64px 0 0 0'}}>
+        return <div style={{padding: '76px 0 0 0'}}>
             {this._getVenues()}
         </div>;
     }

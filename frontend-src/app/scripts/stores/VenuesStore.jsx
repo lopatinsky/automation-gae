@@ -49,6 +49,15 @@ const VenuesStore = new BaseStore({
         return this.venues;
     },
 
+    getVenue(venueId) {
+        var venues = this.getVenues();
+        for (var i = 0; i < venues.length; i++) {
+            if (venues[i].id == venueId) {
+                return venues[i];
+            }
+        }
+    },
+
     _saveVenues(venues) {
         this.venues = venues;
         if (venues.length > 0) {

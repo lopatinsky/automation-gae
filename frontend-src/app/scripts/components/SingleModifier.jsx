@@ -39,12 +39,25 @@ const SingleModifier = React.createClass({
     render() {
         var modifier = this.props.modifier;
         return (
-            <Card>
-                <FlatButton label="-" onClick={() => this._deduct()} />
-                <CardText>
-                    {modifier.title}:{this.quantity}
-                </CardText>
-                <FlatButton label="+" onClick={() => this._add()} />
+            <Card style={{margin: '0 0 6px 0'}}>
+                <div style={{display: 'table'}}>
+                    <div style={{display: 'table-cell', width: '100px', padding: '0 0 0 12px'}}>
+                        {modifier.title}
+                    </div>
+                    <div style={{display: 'table-cell', padding: '12px'}}>
+                        <FlatButton
+                            label="-"
+                            onClick={() => this._deduct()} />
+                    </div>
+                    <div style={{display: 'table-cell'}}>
+                        {this.quantity}
+                    </div>
+                    <div style={{display: 'table-cell', padding: '12px'}}>
+                        <FlatButton
+                            label="+"
+                            onClick={() => this._add()} />
+                    </div>
+                </div>
             </Card>
         );
     }

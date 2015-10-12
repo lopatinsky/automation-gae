@@ -40,7 +40,7 @@ const MenuItemScreen = React.createClass({
         var modifiers = MenuItemStore.getSingleModifiers();
         if (modifiers.length > 0) {
             return <ListItem
-                        rightIcon={<Icons.NavigationChevronRight/>}
+                        rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
                         primaryText={'Добавки'}
                         onClick={() => this._onSingleModifierTap()}/>;
         }
