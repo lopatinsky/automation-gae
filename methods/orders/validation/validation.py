@@ -330,7 +330,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_venue(venue, delivery_time, delivery_type, client)
     if not valid:
         return send_error(error)
-    valid, error = check_payment(payment_info, item_dicts, gift_dicts, shared_gift_dicts)
+    valid, error = check_payment(venue, payment_info, item_dicts, gift_dicts, shared_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_delivery_time(delivery_time)

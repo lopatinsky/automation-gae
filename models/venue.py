@@ -9,6 +9,7 @@ from models.legal import LegalInfo
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
 from models.schedule import Schedule
+from models.payment_types import PaymentType
 
 SELF = 0
 IN_CAFE = 1
@@ -252,6 +253,7 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    payment_restrictions = ndb.KeyProperty(kind=PaymentType,repeated=True)
     wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)

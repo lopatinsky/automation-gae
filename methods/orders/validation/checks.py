@@ -104,10 +104,13 @@ def check_delivery_time(delivery_time):
         return True, None
 
 
-def check_payment(payment_info, item_dicts, gift_dicts, shared_gifts):
+def check_payment(venue, payment_info, item_dicts, gift_dicts, shared_gifts):
     if not payment_info:
         if item_dicts or not (gift_dicts and shared_gifts):
             return False, u'Не выбран тип оплаты'
+    for payment_key in venue.payment_restrictions:
+        if str(payment_key.id()) == str(payment_info.get('type_id')):
+            return False, u'Данный тип оплаты не доступен в этой кофейне'
     return True, None
 
 
