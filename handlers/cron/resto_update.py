@@ -1,3 +1,4 @@
+import logging
 from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
@@ -10,17 +11,21 @@ __author__ = 'dvpermyakov'
 
 
 def save_menu(namespace):
+    logging.info(namespace)
     namespace_manager.set_namespace(namespace)
     resto_company = RestoCompany.get()
-    memcache.set('menu_%s' % resto_company.key.id(), None)
-    menu = MenuCategory.get_menu_dict()
-    memcache.set('menu_%s' % namespace, menu, time=24*3600)
+    if resto_company:
+        memcache.set('menu_%s' % resto_company.key.id(), None)
+        menu = MenuCategory.get_menu_dict()
+        memcache.set('menu_%s' % namespace, menu, time=24*3600)
+    else:
+        logging.warning('Not found resto company')
 
 
 class UpdateRestoHandler(RequestHandler):
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            resto_company = RestoCompany.query().get()
+            resto_company = RestoCompany.get()
             if resto_company:
                 deferred.defer(save_menu, namespace)
