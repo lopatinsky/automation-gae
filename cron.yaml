@@ -63,5 +63,5 @@ cron:
 
 - description: update resto
   url: /cron/update_resto
-  schedule: every day 04:00
+  schedule: every 50 minutes
   timezone: Europe/Moscow

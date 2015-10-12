@@ -40,6 +40,7 @@ def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_
         delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
         delivery_type.status = resto_deliery_type['available']
         if delivery_type.delivery_type == DELIVERY:
+            delivery_type.min_time = 3600
             for id, city in enumerate(resto_delivery_cities):
                 zone = DeliveryZone(id=id+1, address=Address(city=city), min_sum=resto_min_sum)
                 delivery_type.delivery_zones.append(zone.key)
