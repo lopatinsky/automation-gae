@@ -74,10 +74,18 @@ class PromoCode(ndb.Model):
             promo_code_key = None
 
     def check(self, client):  # use priority for conditions
+        from models.share import Share, SharedPromo
         if self.status not in PROMO_CODE_ACTIVE_STATUS_CHOICES:
             return False, u'Промо код не активен'
         if PromoCodePerforming.query(PromoCodePerforming.client == client.key, PromoCodePerforming.promo_code == self.key).get():
             return False, u'Вы уже активировали этот промо-код'
+        if self.kind == KIND_SHARE_INVITATION:
+            share = Share.query(Share.promo_code == self.key).get()
+            promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
+            if client.key.id() == share.sender.id():
+                return False, u'Невозможно перейти по собственному промо-коду'
+            if promo:
+                return False, u'Вы уже активировали приглашение!'
         return True, None
 
     def perform(self, client):  # use only after check()
