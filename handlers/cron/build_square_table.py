@@ -1,82 +1,112 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, time
+import logging
+from google.appengine.api import namespace_manager
+from google.appengine.ext import deferred
+from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 from methods.rendering import timestamp
-from models import Order, Client, JsonStorage
-from models.order import READY_ORDER
+from models.client import ANDROID_DEVICE, IOS_DEVICE
+from models.order import Order, READY_ORDER
+from models.specials import JsonStorage
+
+
+def _add_week_task(namespace, start, week_number):
+    namespace_manager.set_namespace(namespace)
+
+    table = JsonStorage.get("square_table_tmp")
+    week_start = start + timedelta(days=7 * week_number)
+    week_end = week_start + timedelta(days=7)
+    logging.info("starting week task for %s, week %s (%s - %s)", namespace, week_number, week_start, week_end)
+
+    client_week = {}
+    for i in xrange(week_number):
+        client_ids = table[i][i]['all']['client_ids']
+        for client_id in client_ids:
+            client_week[client_id] = i
+    logging.info("client_week before current: %s", client_week)
+
+    orders = Order.query(Order.date_created >= week_start,
+                         Order.date_created < week_end,
+                         Order.status == READY_ORDER).fetch()
+    logging.info("week order count: %s", len(orders))
+    for order in orders:
+        client_week.setdefault(order.client_id, week_number)
+
+    weeks_count = len(table)
+    orders_by_client_week = [[] for _ in xrange(weeks_count)]
+    for order in orders:
+        orders_by_client_week[client_week[order.client_id]].append(order)
+
+    for i in xrange(weeks_count):
+        table[i].append(_get_orders_info(orders_by_client_week[i], week_start, week_end))
+
+    if week_number == weeks_count - 1:
+        JsonStorage.save("square_table", table)
+        JsonStorage.delete("square_table_tmp")
+    else:
+        JsonStorage.save("square_table_tmp", table)
+        deferred.defer(_add_week_task, namespace, start, week_number + 1)
+
+
+def _get_orders_info(orders, begin, end):
+    def _add(dct, order):
+        dct['order_number'] += 1
+        dct['goods_number'] += len(order.item_details)
+        dct['gift_number'] += len(order.gift_details) + len(order.order_gift_details)
+        dct['order_sum'] += order.total_sum - order.wallet_payment
+        if not order.client_id in dct['client_ids']:
+            dct['client_ids'].append(order.client_id)
+
+    def make_dict():
+        return {
+            'goods_number': 0,
+            'order_number': 0,
+            'order_sum': 0,
+            'gift_number': 0,
+            'client_ids': []
+        }
+
+    ios = make_dict()
+    android = make_dict()
+    all = make_dict()
+
+    for order in orders:
+        _add(all, order)
+        if order.device_type == IOS_DEVICE:
+            _add(ios, order)
+        elif order.device_type == ANDROID_DEVICE:
+            _add(android, order)
+
+    ios['client_number'] = len(ios['client_ids'])
+    android['client_number'] = len(android['client_ids'])
+    all['client_number'] = len(all['client_ids'])
+
+    return {
+        "android": android,
+        "ios": ios,
+        "all": all,
+        "begin": timestamp(begin),
+        "end": timestamp(end - timedelta(minutes=1))
+    }
+
+
+def _build(namespace):
+    namespace_manager.set_namespace(namespace)
+
+    first_order_ever = Order.query().order(Order.date_created).get()
+    if not first_order_ever:
+        return
+    start_date = first_order_ever.date_created.date()
+    start_time = datetime.combine(start_date, time())
+
+    weeks_count = (datetime.now() - start_time).days / 7 + 1
+    table = [[] for _ in xrange(weeks_count)]
+    JsonStorage.save("square_table_tmp", table)
+
+    deferred.defer(_add_week_task, namespace, start_time, 0)
 
 
 class BuildSquareTableHandler(RequestHandler):
-    def get_orders_info(self, orders, begin, end):
-        goods_number = 0
-        order_number = len(orders)
-        order_sum = 0
-        gift_number = 0
-        client_ids = []
-        for order in orders:
-            goods_number += len(order.items)
-            order_sum += order.total_sum
-            if order.payment_type_id == 666:
-                gift_number += 1
-            if not order.client_id in client_ids:
-                client_ids.append(order.client_id)
-
-        return {
-            "goods_number": goods_number,
-            "order_number": order_number,
-            "order_sum": order_sum,
-            "gift_number": gift_number,
-            "client_number": len(client_ids),
-            "begin": timestamp(begin),
-            "end": timestamp(end - timedelta(minutes=1))
-        }
-
     def get(self):
-        orders = Order.query(Order.status == READY_ORDER).fetch()
-        clients = Client.query().fetch()
-
-        for client in clients:
-            client.first_order_time = None
-        clients_map = {c.key.id(): c for c in clients}
-
-        for order in orders:
-            client = clients_map[order.client_id]
-            if not client.first_order_time or client.first_order_time > order.date_created:
-                client.first_order_time = order.date_created
-
-        clients = [c for c in clients if c.first_order_time is not None]
-        clients = sorted(clients, key=lambda client: client.first_order_time)
-        start_time = clients[0].first_order_time
-        start_time = start_time.replace(hour=0, minute=0)
-
-        def _week_number(dt):
-            return (dt - start_time).days / 7
-
-        def _week_start(number):
-            return start_time + timedelta(days=7 * number)
-
-        weeks_count = _week_number(datetime.now()) + 1
-
-        orders_square = []
-        for i in xrange(weeks_count):
-            orders_row = []
-            for j in xrange(weeks_count):
-                orders_row.append([])
-            orders_square.append(orders_row)
-
-        client_week = {}
-        for client in clients:
-            client_week[client.key.id()] = _week_number(client.first_order_time)
-
-        for order in orders:
-            row = client_week[order.client_id]
-            column = _week_number(order.date_created)
-            orders_square[row][column].append(order)
-
-        square = [
-            [
-                self.get_orders_info(cell, begin=_week_start(i), end=_week_start(i+1))
-                for i, cell in enumerate(row)
-            ]
-            for row in orders_square
-        ]
-        JsonStorage.save("square_table", square)
+        for namespace in metadata.get_namespaces():
+            deferred.defer(_build, namespace)

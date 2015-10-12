@@ -82,7 +82,8 @@ class SquareTableHandler(BaseReportHandler):
         square = square_table.get()
         if not square:
             self.response.write("Report not ready")
-        self.render_report('square_table', square)
+            return
+        self.render_report('square_table', {"square": square})
 
 
 class NotificationsReportHandler(BaseReportHandler):

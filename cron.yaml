@@ -28,13 +28,9 @@ cron:
 #  schedule: every day 07:00
 #  timezone: Europe/Moscow
 
-#- description: clear old pings
-#  url: /cron/clear_pings
-#  schedule: every day 0:00
-
-#- description: build square table report
-#  url: /cron/build_square_table
-#  schedule: every day 0:00
+- description: build square table report
+  url: /cron/build_square_table
+  schedule: every day 0:00
 
 - description: check creating orders
   url: /cron/creating_orders
