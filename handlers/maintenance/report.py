@@ -73,7 +73,8 @@ class OrdersReportHandler(BaseReportHandler):
 
 class RepeatedOrdersHandler(BaseReportHandler):
     def get(self):
-        html_values = repeated_orders.get(**get_standart_params(self.request, delete_params=['venue_id', 'chosen_day']))
+        html_values = repeated_orders.get(chosen_year=self.request.get_range('chosen_year'),
+                                          chosen_month=self.request.get_range('chosen_month'))
         self.render_report('repeated_orders', html_values)
 
 
