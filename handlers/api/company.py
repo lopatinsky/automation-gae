@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
 from base import ApiHandler
+from methods.fuckups import fuckup_ios_delivery_types
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
 from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone
@@ -27,6 +28,9 @@ class CompanyInfoHandler(ApiHandler):
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
                 if venue_delivery.delivery_type == DELIVERY:
                     zones.update(venue_delivery.delivery_zones)
+        deliveries = fuckup_ios_delivery_types(self.request.headers.get('User-Agent'),
+                                               self.request.headers.get('Version', 0),
+                                               deliveries.values())
         cities = []
         for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
@@ -36,7 +40,7 @@ class CompanyInfoHandler(ApiHandler):
         version = get_version(self.request.headers.get('Version', 0))
         response = {
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
-            'delivery_types': deliveries.values(),
+            'delivery_types': deliveries,
             'cities': cities,
             'screen_logic_type': config.SCREEN_LOGIC,
             'push_channels': get_channels(namespace_manager.get_namespace()),
