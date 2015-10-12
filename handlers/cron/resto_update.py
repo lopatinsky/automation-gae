@@ -10,6 +10,7 @@ __author__ = 'dvpermyakov'
 
 
 def save_menu(namespace):
+    namespace_manager.set_namespace(namespace)
     resto_company = RestoCompany.get()
     memcache.set('menu_%s' % resto_company.key.id(), None)
     menu = MenuCategory.get_menu_dict()
