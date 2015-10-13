@@ -14,6 +14,7 @@ def __get_group_modifiers(resto_modifiers):
             continue
         modifier = GroupModifier(id=resto_modifier['groupId'])
         modifier.title = resto_modifier['name']
+        modifier.required = resto_modifier['minAmount'] != 0
         modifier.choices = []
         for resto_choice in resto_modifier['items']:
             choice = GroupModifierChoice(choice_id_str=resto_choice['id'])
