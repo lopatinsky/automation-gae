@@ -11,6 +11,21 @@ NUMBER = 1
 NUMBER_PLUS_MINUS = 2
 TYPE_CHOICES = (STRING, NUMBER, NUMBER_PLUS_MINUS)
 
+PAYMENT_RESTRICTION = 0
+RESTRICTIONS = [PAYMENT_RESTRICTION]
+
+
+class Restriction(ndb.Model):
+    field_title = ndb.StringProperty(required=True)
+    type = ndb.IntegerProperty(required=True, choices=RESTRICTIONS)
+    key = ndb.KeyProperty()
+
+    def dict(self):
+        return {
+            'type': self.type,
+            'value': self.key.id()
+        }
+
 
 class Field(ndb.Model):
     required = ndb.BooleanProperty(default=False)
@@ -52,6 +67,7 @@ class ClientModule(ndb.Model):
 class OrderModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
+    restrictions = ndb.StructuredProperty(Restriction, repeated=True)
 
     def dict(self):
         return {
@@ -59,6 +75,7 @@ class OrderModule(ndb.Model):
             'fields': [{
                 'title': field.title,
                 'field': latinize(field.title),
-                'type': field.type
+                'type': field.type,
+                'restriction': [restriction.dict() for restriction in self.restrictions if restriction.field_title == field.title]
             } for field in self.extra_fields]
         }
