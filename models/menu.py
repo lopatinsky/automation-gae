@@ -333,7 +333,7 @@ class MenuCategory(ndb.Model):
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None):
+    def get_menu_dict(cls, venue=None, subscription_include=False):
         from models.config.config import Config
         from models.specials import SubscriptionMenuItem
         init_category = cls.get_initial_category()
@@ -343,7 +343,9 @@ class MenuCategory(ndb.Model):
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
         config = Config.get()
-        if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE:
+        if config.SUBSCRIPTION_MODULE \
+                and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE \
+                and subscription_include:
             logging.info('subscription is included')
             module = config.SUBSCRIPTION_MODULE
             category_dicts.append({
