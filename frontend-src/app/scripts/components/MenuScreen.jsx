@@ -60,7 +60,7 @@ const MenuScreen = React.createClass({
                 return (
                     <Tab
                         value={category.info.category_id}
-                        label={category.info.title}>
+                        label={<div style={{padding: '0 6px 0 6px', height: '32px'}}>{category.info.title}</div>}>
                         {this._getItems(category)}
                     </Tab>
                 );
@@ -69,7 +69,7 @@ const MenuScreen = React.createClass({
                 <Tabs
                     value={this.state.value}
                     onChange={this._changeTab}
-                    tabItemContainerStyle={{overflow: 'scroll', position: 'fixed', height: '32px', padding: '64px 0 0 0', zIndex: '1'}}
+                    tabItemContainerStyle={{position: 'fixed', overflow: 'auto', height: '32px', zIndex: '1', padding: '64px 0 0 0'}}
                     contentContainerStyle={{padding: '120px 0 0 0'}}>
                     {categories}
                 </Tabs>
