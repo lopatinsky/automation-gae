@@ -73,7 +73,7 @@ def cancel_order(order, status, namespace, comment=None):
             if success_wallet_payment_reverse:
                 push_text += u" Бонусные баллы были возвращены на Ваш счет.\n"
             if comment:
-                push_text += comment
+                push_text += " " + comment
             push.send_order_push(order, push_text, namespace)
         elif status == CANCELED_BY_CLIENT_ORDER:
             message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
