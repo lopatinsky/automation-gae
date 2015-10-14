@@ -13,9 +13,6 @@ from base import BaseHandler
 
 class CompaniesListHandler(BaseHandler):
     def get(self):
-        namespace_manager.set_namespace('coffeehostel')
-        config = Config.get()
-        #config.
         namespaces = []
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
