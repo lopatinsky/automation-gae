@@ -41,19 +41,24 @@ const SingleModifier = React.createClass({
         return (
             <Card style={{margin: '0 0 6px 0'}}>
                 <div style={{display: 'table'}}>
+                    {modifier.price != 0 ? <div style={{display: 'table-cell', width: '24px', padding: '0 0 0 3px'}}>
+                        {modifier.price  + 'p. '}
+                    </div> : ''}
                     <div style={{display: 'table-cell', width: '100px', padding: '0 0 0 12px'}}>
                         {modifier.title}
                     </div>
                     <div style={{display: 'table-cell', padding: '12px'}}>
                         <FlatButton
+                            style={{width: '40px', minWidth: null}}
                             label="-"
                             onClick={() => this._deduct()} />
                     </div>
-                    <div style={{display: 'table-cell'}}>
+                    <div style={{display: 'table-cell', textAlign: 'center'}}>
                         {this.quantity}
                     </div>
                     <div style={{display: 'table-cell', padding: '12px'}}>
                         <FlatButton
+                            style={{width: '40px', minWidth: null}}
                             label="+"
                             onClick={() => this._add()} />
                     </div>

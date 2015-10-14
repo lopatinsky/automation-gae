@@ -36,7 +36,10 @@ const SingleModifiersDialog = React.createClass({
 
     render() {
         return (
-            <Dialog ref="modifierDialog" title='Добавки'>
+            <Dialog
+                autoScrollBodyContent="true"
+                ref="modifierDialog"
+                title='Добавки'>
                 {this._getModifiers()}
                 <FlatButton label='Ок' onClick={this.dismiss} />
             </Dialog>

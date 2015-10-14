@@ -229,7 +229,7 @@ const OrderScreen = React.createClass({
                 <RaisedButton
                     label='Меню'
                     onClick={this._onMenuTap}
-                    style={{width: '94%', margin: '12px 12px 0 12px'}} />
+                    style={{width: '93%', margin: '12px 12px 0 12px'}} />
             </div>
             <div style={{padding: '12px 24px 0 12px'}}>
                 {this._getTotalSum()}
@@ -258,7 +258,10 @@ const OrderScreen = React.createClass({
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog" />
             <div>
-                <RaisedButton label='Заказать' onClick={this._order} style={{width: '94%', margin: '12px 12px 12px 12px'}} />
+                <RaisedButton
+                    label='Заказать'
+                    onClick={this._order}
+                    style={{width: '93%', margin: '12px 12px 12px 12px'}} />
             </div>
             <Snackbar
                 ref='orderSnackBar'

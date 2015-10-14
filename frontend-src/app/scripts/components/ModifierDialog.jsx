@@ -36,7 +36,10 @@ const ModifierDialog = React.createClass({
 
     render() {
         return (
-            <Dialog ref="modifierDialog" title={this.state.modifier.title}>
+            <Dialog
+                autoScrollBodyContent="true"
+                ref="modifierDialog"
+                title={this.state.modifier.title}>
                 <ChoicesFragment dialog={this}/>
             </Dialog>
         );
