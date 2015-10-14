@@ -51,8 +51,21 @@ const MenuStore = new BaseStore({
         this._changed();
     },
 
+    __sort_categories(categories) {
+        categories.sort(function(first, second) {
+            return first.info.order - second.info.order;
+        });
+        for (var i = 0; i < categories.length; i++) {
+            this.__sort_categories(categories[i].categories);
+            categories[i].items.sort(function(first, second) {
+                return first.order - second.order;
+            });
+        }
+    },
+
     _saveMenu(menu) {
         this.categories = menu;
+        this.__sort_categories(this.categories);
         this._changed();
     }
 
