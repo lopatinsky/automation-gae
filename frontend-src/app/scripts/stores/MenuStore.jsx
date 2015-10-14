@@ -23,6 +23,15 @@ const MenuStore = new BaseStore({
         return this.selected;
     },
 
+    getSelectedIndex() {
+        for (var i = 0; i < this.categories.length; i++) {
+            if (this.categories[i].info.category_id == this.selected) {
+                return i;
+            }
+        }
+        return 0;
+    },
+
     getItem(category_id, item_id) {
         var category = this.getCategory(category_id);
         for (var i = 0; i < category.items.length; i++) {
