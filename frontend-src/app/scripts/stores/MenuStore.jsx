@@ -4,6 +4,7 @@ import Actions from '../Actions';
 const MenuStore = new BaseStore({
     previousCategories: [],
     categories: null,
+    selected: null,
 
     getCategory(category_id) {
         for (var i = 0; i < this.categories.length; i++) {
@@ -11,6 +12,15 @@ const MenuStore = new BaseStore({
                 return this.categories[i];
             }
         }
+    },
+
+    setSelected(category_id) {
+        this.selected = category_id;
+        this._changed();
+    },
+
+    getSelected() {
+        return this.selected;
     },
 
     getItem(category_id, item_id) {
