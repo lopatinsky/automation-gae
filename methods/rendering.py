@@ -11,6 +11,7 @@ STR_TIME_FORMAT = "%H:%M"
 HTML_STR_TIME_FORMAT = "%Y-%m-%dT%H:%M"
 
 AM_PM_STR_DATETIME_FORMAT = "%Y-%m-%d %I:%M:%S %p"
+BUGGED_DATETIME_FORMAT = "%Y-%m-%d %H%I:%M:%S %p"
 
 
 def timestamp(datetime_object):
@@ -55,7 +56,10 @@ def parse_time_picker_value(time_picker_value):
     try:
         return datetime.strptime(time_picker_value, STR_DATETIME_FORMAT)
     except ValueError:
-        return datetime.strptime(time_picker_value, AM_PM_STR_DATETIME_FORMAT)
+        try:
+            return datetime.strptime(time_picker_value, AM_PM_STR_DATETIME_FORMAT)
+        except ValueError:
+            return datetime.strptime(time_picker_value, BUGGED_DATETIME_FORMAT)
 
 
 def get_device_type(user_agent):
