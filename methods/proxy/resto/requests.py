@@ -122,6 +122,7 @@ def post_resto_place_order(resto_company, resto_venue, resto_customer, auto_clie
     from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
     path = '/api/venue/%s/order/new' % resto_venue.key.id()
     payload = {
+        'source': 'auto_app',
         'custom_data': '',
         'bonus_sum': order.wallet_payment,
         'discount_sum': order.init_total_sum - order.total_sum,
