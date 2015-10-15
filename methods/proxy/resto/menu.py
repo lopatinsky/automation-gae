@@ -1,10 +1,13 @@
-from google.appengine.api import memcache
+import logging
+from google.appengine.api import memcache, namespace_manager
 from google.appengine.ext import ndb
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
 from models.proxy.resto import RestoCompany
 from requests import get_resto_menu
 
 __author__ = 'dvpermyakov'
+
+_global_resto_menu_cache = {}
 
 
 def __get_group_modifiers(resto_modifiers):
@@ -89,15 +92,25 @@ def __get_categories(parent_category, resto_categories):
     return categories, products, group_modifiers, single_modifiers
 
 
-def _get_menu():
-    resto_company = RestoCompany.get()
-    menu = memcache.get('menu_%s' % resto_company.key.id())
-    if not menu:
-        resto_menu = get_resto_menu(resto_company)
-        init_category = MenuCategory.get_initial_category()
-        menu = __get_categories(init_category, resto_menu['menu'])
-        memcache.set('menu_%s' % resto_company.key.id(), menu, time=3600)
+def _get_menu(force_reload=False):
+    ns = namespace_manager.get_namespace()
+    menu = _global_resto_menu_cache.get(ns)
+    if not menu or force_reload:
+        logging.debug("Not found in instance cache, trying memcache")
+        menu = memcache.get('resto_menu')
+        if not menu or force_reload:
+            logging.debug("Not found in memcache, reloading from resto")
+            resto_company = RestoCompany.get()
+            resto_menu = get_resto_menu(resto_company)
+            init_category = MenuCategory.get_initial_category()
+            menu = __get_categories(init_category, resto_menu['menu'])
+            memcache.set("resto_menu", menu, time=3600)
+        _global_resto_menu_cache[ns] = menu
     return menu
+
+
+def reload_menu():
+    _get_menu(force_reload=True)
 
 
 def get_categories(parent_category):
