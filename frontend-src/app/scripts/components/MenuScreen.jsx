@@ -42,6 +42,7 @@ const MenuScreen = React.createClass({
             <Paper style={{position: 'fixed', margin: '76px 12px 0 12px', zIndex: '9', width: '93%'}}>
                 <DropDownMenu
                     style={{zIndex: '10', width: '100%'}}
+                    underlineStyle={{display: 'none'}}
                     menuItems={menuItems}
                     selectedIndex={MenuStore.getSelectedIndex()}
                     onChange={this._onCategoryTap}/>
