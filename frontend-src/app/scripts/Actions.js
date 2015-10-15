@@ -2,8 +2,8 @@ import request from 'superagent';
 import AppDispatcher from "./AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from './stores';
 
-//const base_url = "http://chikarabar.app.doubleb-automation-production.appspot.com";
-const base_url = '';
+const base_url = "http://meatme.app.doubleb-automation-production.appspot.com";
+//const base_url = '';
 
 const Actions = {
     INIT: "INIT",
