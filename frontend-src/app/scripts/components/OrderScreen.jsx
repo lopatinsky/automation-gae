@@ -169,6 +169,7 @@ const OrderScreen = React.createClass({
                 return { slot_id: slot.id, text: slot.name };
             });
             return <DropDownMenu
+                style={{zIndex: '10', width: '100%'}}
                 menuItems={menuItems}
                 selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
                 onChange={this._onSlotTap}/>;
