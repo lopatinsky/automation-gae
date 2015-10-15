@@ -32,9 +32,20 @@ const CommentDialog = React.createClass({
     render() {
         return (
             <Dialog ref="commentDialog">
-                <TextField hintText="Комментарий" ref="comment" value={this.state.comment} onChange={this._refresh} />
-                <FlatButton label="Ок" onClick={this._submit} />
-                <FlatButton label="Отмена" onClick={this.dismiss} />
+                <TextField
+                    style={{width: '100%'}}
+                    hintText="Комментарий"
+                    ref="comment"
+                    value={this.state.comment}
+                    onChange={this._refresh} />
+                <FlatButton
+                    style={{margin: '12px 0 0 0'}}
+                    label="Ок"
+                    onClick={this._submit} />
+                <FlatButton
+                    style={{margin: '12px 0 0 12px'}}
+                    label="Отмена"
+                    onClick={this.dismiss} />
             </Dialog>
         );
     }
