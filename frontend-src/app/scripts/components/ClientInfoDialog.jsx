@@ -43,7 +43,7 @@ const ClientInfoDialog = React.createClass({
             <Dialog ref="clientInfoDialog">
                 <Card style={{margin: '0 0 12px 0'}}>
                     <TextField
-                        style={{margin: '0 0 0 12px'}}
+                        style={{margin: '0 0 0 12px', width: '95%'}}
                         hintText="Имя"
                         floatingLabelText="Имя"
                         ref="name"
@@ -52,7 +52,7 @@ const ClientInfoDialog = React.createClass({
                 </Card>
                 <Card style={{margin: '0 0 12px 0'}}>
                     <TextField
-                        style={{margin: '0 0 0 12px'}}
+                        style={{margin: '0 0 0 12px', width: '95%'}}
                         hintText="Номер телефона"
                         floatingLabelText="Номер телефона"
                         ref="phone"
@@ -61,7 +61,7 @@ const ClientInfoDialog = React.createClass({
                 </Card>
                 <Card style={{margin: '0 0 12px 0'}}>
                     <TextField
-                        style={{margin: '0 0 0 12px'}}
+                        style={{margin: '0 0 0 12px', width: '95%'}}
                         hintText="Email"
                         floatingLabelText="Email"
                         ref="email"
