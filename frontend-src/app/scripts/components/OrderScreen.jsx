@@ -39,26 +39,28 @@ const OrderScreen = React.createClass({
             </div>
         } else {
             return <div>
-                <div style={{padding: '12px 48px 0 36px'}}>
-                    {this._getPromos()}
-                </div>
-                <div style={{padding: '12px 48px 0 36px'}}>
-                    {this._getDeliveryDescription()}
-                </div>
+                {this._getPromos()}
+                {this._getDeliveryDescription()}
             </div>;
         }
     },
 
     _getPromos() {
-        return OrderStore.getPromos().map(promo => {
-            return <div>{promo.text + '\n'}</div>
-        });
+        if (OrderStore.getPromos() > 0) {
+            return <div style={{padding: '12px 48px 0 36px'}}>
+                {OrderStore.getPromos().map(promo => {
+                    return <div>{promo.text + '\n'}</div>
+                })}
+            </div>;
+        } else {
+            return <div/>;
+        }
     },
 
     _getDeliveryDescription() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == 2 && OrderStore.getDeliverySumStr().length > 0) {
-            return <div>
+            return <div style={{padding: '12px 48px 0 36px'}}>
                 {OrderStore.getDeliverySumStr()}
             </div>;
         } else {
