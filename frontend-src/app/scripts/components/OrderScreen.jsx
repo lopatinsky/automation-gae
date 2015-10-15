@@ -235,7 +235,7 @@ const OrderScreen = React.createClass({
                 {this._getTotalSum()}
             </div>
             {this._getServerInfo()}
-            <Card style={{margin: '12px 12px 0 12px'}}>
+            <Card style={{width: '93%', margin: '12px 12px 0 12px'}}>
                 <RadioButtonGroup
                     style={{margin: '12px'}}
                     name='group'
@@ -247,11 +247,11 @@ const OrderScreen = React.createClass({
                 <ListDivider/>
                 {this._getTimeInput()}
                 <ListDivider/>
-                <CardText onClick={this._onClientInfoTap}>{ClientStore.getName()}</CardText>
+                <CardText onClick={this._onClientInfoTap}>{ClientStore.getRenderedInfo()}</CardText>
                 <ListDivider/>
                 <CardText onClick={this._onPaymentTypeTap}>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
                 <ListDivider/>
-                <CardText onClick={this._onCommentTap}>{OrderStore.getComment()}</CardText>
+                <CardText onClick={this._onCommentTap}>{OrderStore.getRenderedComment()}</CardText>
             </Card>
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>

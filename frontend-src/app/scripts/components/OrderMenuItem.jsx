@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton } from 'material-ui';
+import { Card, CardText, FlatButton, CardMedia } from 'material-ui';
 import { OrderStore } from '../stores';
 import Actions from '../Actions';
 
@@ -28,15 +28,32 @@ const OrderMenuItem = React.createClass({
 
     render() {
         var item = this.props.item;
+        var picCard = <div style={{display: 'table-cell', width: '20%'}}>
+            <CardMedia>
+                <img src={item.pic}/>
+            </CardMedia>
+        </div>;
+        if (item.pic == null || item.pic == '') {
+            picCard = <div/>;
+        }
         return (
-            <Card style={{margin: '12px 12px 0 12px'}}>
-                <CardText>
-                    {item.title + ' x ' + item.quantity}
-                    {this._getGroupModifiers(item)}
-                    {this._getSingleModifiers(item)}
-                </CardText>
-                <div>
-                    <FlatButton label='Удалить' onClick={this._removeItem} />
+            <Card style={{margin: '12px 12px 0 12px', display: 'table', tableLayout: 'fixed', width: '93%'}}>
+                {picCard}
+                <div style={{display: 'table-cell', width: '60%'}}>
+                    <CardText>
+                        {item.title}
+                        {this._getGroupModifiers(item)}
+                        {this._getSingleModifiers(item)}
+                    </CardText>
+                </div>
+                <div style={{display: 'table-cell', width: '20%'}}>
+                    <CardText style={{textAlign: 'right', margin: '0 12px 0 0'}}>
+                        {'x' + item.quantity}
+                    </CardText>
+                    <FlatButton
+                        style={{margin: '0 12px 12px 0'}}
+                        label='Удалить'
+                        onClick={this._removeItem} />
                 </div>
             </Card>
         );

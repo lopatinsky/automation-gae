@@ -317,6 +317,14 @@ const OrderStore = new BaseStore({
         return this.comment;
     },
 
+    getRenderedComment() {
+        if (this.comment == null || this.comment == '') {
+            return 'Комментарий';
+        } else {
+            return this.comment;
+        }
+    },
+
     getOrderId() {
         return this.orderId;
     },
