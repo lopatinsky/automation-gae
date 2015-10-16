@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
+from google.appengine.ext import ndb
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
-from models import STATUS_AVAILABLE
+from models import STATUS_AVAILABLE, Promo
 from models.config.config import Config
 from models.geo_push import GeoPush
 from models.order import Order
@@ -196,3 +197,14 @@ def check_persist_mark(item_dicts):
         if item_dict['persistent_mark']:
             return True
     return False
+
+
+def check_max_promo_uses(condition, client):
+    promo_key = ndb.Key(Promo, condition.value)
+    sum = 0
+    for order in Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).fetch():
+        if promo_key in order.promos:
+            sum += 1
+            if sum >= condition.value:
+                return False
+    return True
