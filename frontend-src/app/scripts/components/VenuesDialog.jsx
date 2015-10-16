@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog} from 'material-ui';
-import { List, ListItem } from 'material-ui';
+import { List, ListItem, ListDivider } from 'material-ui';
 import { VenuesStore } from '../stores';
 
 const VenuesDialog = React.createClass({
@@ -8,10 +8,17 @@ const VenuesDialog = React.createClass({
         var venues = VenuesStore.getVenues();
         return venues.map(venue => {
             return (
-                <ListItem
-                    primaryText={venue.title}
-                    secondaryText={venue.address}
-                    onClick={() => this.dismiss(venue)}/>
+                <div>
+                    <ListItem
+                        onClick={() => this.dismiss(venue)}>
+                        <div>
+                            <div><b>{venue.title}</b></div>
+                            <div style={{padding: '6px 0 0 0'}}>{venue.address}</div>
+                            <div style={{padding: '6px 0 0 0'}}>{venue.schedule_str}</div>
+                        </div>
+                    </ListItem>
+                    <ListDivider/>
+                </div>
             );
         });
     },
@@ -27,7 +34,9 @@ const VenuesDialog = React.createClass({
 
     render() {
         return (
-            <Dialog ref="venuesDialog">
+            <Dialog
+                autoScrollBodyContent="true"
+                ref="venuesDialog">
                 <List>
                     {this._getVenues()}
                 </List>

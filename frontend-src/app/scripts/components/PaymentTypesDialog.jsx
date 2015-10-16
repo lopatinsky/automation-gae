@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog} from 'material-ui';
-import { List, ListItem } from 'material-ui';
+import { List, ListItem, ListDivider } from 'material-ui';
 import { PaymentsStore } from '../stores';
 
 const PaymentTypesDialog = React.createClass({
@@ -8,9 +8,12 @@ const PaymentTypesDialog = React.createClass({
         var payment_types = PaymentsStore.getPaymentTypes();
         return payment_types.map(payment_type => {
             return (
-                <ListItem
-                    primaryText={payment_type.really_title}
-                    onClick={() => this.dismiss(payment_type)}/>
+                <div>
+                    <ListItem
+                        primaryText={payment_type.really_title}
+                        onClick={() => this.dismiss(payment_type)}/>
+                    <ListDivider/>
+                </div>
             );
         });
     },
