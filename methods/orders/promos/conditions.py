@@ -182,3 +182,10 @@ def check_geo_push(client, order):
                 order.geo_push = push.key
                 push.deactivate()
     return success
+
+
+def check_persist_mark(item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark']:
+            return True
+    return False
