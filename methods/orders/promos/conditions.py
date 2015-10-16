@@ -44,6 +44,13 @@ def check_repeated_order(condition, client):
     return order is not None
 
 
+def check_repeated_order_before(condition, client):
+    order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
+    if not order:
+        return False
+    return not check_repeated_order(condition, client)
+
+
 def check_item_in_order(condition, item_dicts):
     amount = 0
     for item_dict in item_dicts:
