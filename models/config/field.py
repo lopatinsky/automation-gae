@@ -12,18 +12,20 @@ NUMBER_PLUS_MINUS = 2
 TYPE_CHOICES = (STRING, NUMBER, NUMBER_PLUS_MINUS)
 
 PAYMENT_RESTRICTION = 0
-RESTRICTIONS = [PAYMENT_RESTRICTION]
+DELIVERY_TYPE_RESTRICTION = 1
+RESTRICTIONS = (PAYMENT_RESTRICTION, DELIVERY_TYPE_RESTRICTION)
 
 
 class Restriction(ndb.Model):
     field_title = ndb.StringProperty(required=True)
     type = ndb.IntegerProperty(required=True, choices=RESTRICTIONS)
-    key = ndb.KeyProperty()
+    key = ndb.KeyProperty()       # if model has key use it
+    value = ndb.StringProperty()  # another way
 
     def dict(self):
         return {
             'type': self.type,
-            'value': self.key.id()
+            'value': self.key.id() if self.key else self.value
         }
 
 
