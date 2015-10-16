@@ -13,20 +13,10 @@ cron:
   url: /cron/alfa_errors
   schedule: every 10 minutes synchronized
 
-#- description: success binding card
-#  url: /cron/sms_notify
-#  schedule: every day 10:00
-#  timezone: Europe/Moscow
-
-#- description: email report binding card
-#  url: /cron/email_notify
-#  schedule: every day 7:00
-#  timezone: Europe/Moscow
-
-#- description: check weekly inactive clients
-#  url: /cron/push_notify
-#  schedule: every day 07:00
-#  timezone: Europe/Moscow
+- description: send sms by module
+  url: /cron/sms_notify
+  schedule: every day 10:00
+  timezone: Europe/Moscow
 
 - description: build square table report
   url: /cron/build_square_table

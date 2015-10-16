@@ -16,6 +16,7 @@ from models.config.field import ClientModule, OrderModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
+from models.config.inactive_clients import SendingSmsModule
 
 OTHER = -1
 VENUE = 0
@@ -73,6 +74,7 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
+    SENDING_SMS_MODULE = ndb.LocalStructuredProperty(SendingSmsModule, repeated=True)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
