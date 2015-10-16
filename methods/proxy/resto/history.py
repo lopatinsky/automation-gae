@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from google.appengine.ext import ndb
+from methods.proxy.resto.venues import get_venues
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order, Address, MenuItem, GroupModifier, SingleModifier
 from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails
@@ -47,6 +48,7 @@ def get_orders(client):
     resto_client = RestoClient.get(client)
     resto_history = get_resto_history(resto_company, resto_client).get('history', [])
     orders = []
+    any_venue = get_venues()[0]  # for timezone offset
     for resto_venue_history in resto_history:
         for resto_order in resto_venue_history.get('local_history', []):
             order = Order(id=resto_order['order_id'])
@@ -56,8 +58,9 @@ def get_orders(client):
             order.address = _get_address(resto_order['address'])
             order.venue_id = resto_order['venue_id']
             order.total_sum = resto_order['sum']
-            order.delivery_time = datetime.fromtimestamp(resto_order['date'])
-            order.delivery_time_str = order.delivery_time.strftime(STR_DATETIME_FORMAT)
+            local_delivery_time = datetime.fromtimestamp(resto_order['date'])
+            order.delivery_time = local_delivery_time - timedelta(hours=any_venue.timezone_offset)
+            order.delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
             order.payment_type_id = CASH_PAYMENT_TYPE  # todo: this is hardcoded
             order.delivery_type = SELF if resto_order['self'] else DELIVERY
             order.item_details = [_get_item_details(resto_item) for resto_item in resto_order['items']]

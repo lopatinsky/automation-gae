@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from google.appengine.ext import ndb
 from methods.orders.validation.validation import get_order_position_details
 from methods.proxy.resto.check_order import get_resto_address_dict, get_resto_item_dicts, get_item_and_item_dicts, \
@@ -39,12 +39,14 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
         order.number = int(resto_place_result['order']['number'])
         order.status = NEW_ORDER
         order.item_details = get_order_position_details(item_dicts)
+        local_delivery_time = order.delivery_time + timedelta(hours=venue.timezone_offset)
+        order.delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
         order.put()
         success = True
         response = {
             'order_id': order.key.id(),
             'number': order.number,
-            'delivery_time': datetime.strftime(order.delivery_time, STR_DATETIME_FORMAT),
+            'delivery_time': order.delivery_time_str,
             'delivery_slot_name': None
         }
     return success, response

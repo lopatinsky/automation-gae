@@ -336,7 +336,7 @@ class Venue(ndb.Model):
 
     def update_address(self):
         from models.config.config import Config
-        from methods import geocoder, timezone
+        from methods import geocoder
 
         candidates = geocoder.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)
         if candidates:
@@ -346,6 +346,10 @@ class Venue(ndb.Model):
             if self.address.country not in config.COUNTRIES:
                 config.COUNTRIES.append(self.address.country)
                 config.put()
+        self.update_timezone()
+
+    def update_timezone(self):
+        from methods import timezone
         zone = timezone.get_time_zone(self.coordinates.lat, self.coordinates.lon)
         if zone:
             self.timezone_offset = zone['offset']
