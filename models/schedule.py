@@ -15,10 +15,32 @@ class DaySchedule(ndb.Model):
         6: u'Суббота',
         7: u'Воскресенье'
     }
+    DAY_SHORT_MAP = {
+        1: u'Пн',
+        2: u'Вт',
+        3: u'Ср',
+        4: u'Чт',
+        5: u'Пт',
+        6: u'Сб',
+        7: u'Вс'
+    }
 
     weekday = ndb.IntegerProperty(required=True, choices=DAYS)
     start = ndb.TimeProperty(required=True)
     end = ndb.TimeProperty(required=True)
+
+    def compare(self, day, weekday_include=False):
+        result = self.start == day.start and self.end == day.end
+        if weekday_include:
+            result = result and self.weekday == day.weekday
+        return result
+
+    def interval_str(self, day):
+        hours_interval_str = '%s - %s' % (self.start_str(), self.end_str())
+        if self.compare(day, weekday_include=True):
+            return '%s: %s' % (self.DAY_SHORT_MAP[self.weekday], hours_interval_str)
+        else:
+            return '%s-%s: %s' % (self.DAY_SHORT_MAP[self.weekday], day.DAY_SHORT_MAP[day.weekday], hours_interval_str)
 
     def start_str(self):
         from methods.rendering import STR_TIME_FORMAT
@@ -52,6 +74,26 @@ class Schedule(ndb.Model):
         for day in self.days:
             if day.weekday == weekday:
                 return day
+
+    def get_days_str(self):
+        def add_interval(result):
+            if result:
+                result += ', '
+            result += start_day.interval_str(current_day)
+            return result
+
+        result = ''
+        if not self.days:
+            return result
+        start_day = self.days[0]
+        current_day = None
+        for day in self.days:
+            if not start_day.compare(day):
+                result = add_interval(result)
+                start_day = day
+            current_day = day
+        result = add_interval(result)
+        return result
 
     def dict(self):
         days_in_result = []

@@ -15,7 +15,7 @@ const VenuesScreen = React.createClass({
                         {venue.address}
                     </div>
                     <div style={{padding: '6px 0 12px 12px'}}>
-                        Пн-вс: 10:00 - 11:00
+                        {venue.schedule_str}
                     </div>
                 </Card>
             );

@@ -309,7 +309,8 @@ class Venue(ndb.Model):
             'coordinates': str(self.coordinates),
             'is_open': self.is_open(),
             'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
-            'schedule': self.schedule.dict() if self.schedule else []
+            'schedule': self.schedule.dict() if self.schedule else [],
+            'schedule_str': self.schedule.get_days_str() if self.schedule else ''
         }
         return dct
 
