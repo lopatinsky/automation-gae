@@ -82,7 +82,7 @@ def _perform_registration(request):
         share_data = json.loads(share_data)
         share_id = share_data.get('share_id')
         if share_id:
-            share = Share.get_by_id(share_id)
+            share = Share.get_by_id(int(share_id))
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
                 if not client_id or \
