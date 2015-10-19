@@ -2,7 +2,7 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../stores';
 import { OrderMenuItem, VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog } from '../components';
 import { Navigation } from 'react-router';
-import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider }
+import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider, FontIcon }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
@@ -150,9 +150,27 @@ const OrderScreen = React.createClass({
     _getVenueInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == '2') {
-            return <CardText onClick={this._onAddressTap}>{AddressStore.getAddressStr()}</CardText>
+            return <div style={{display: 'table'}}>
+                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                          className="material-icons">
+                    location_on
+                </FontIcon>
+                <CardText style={{display: 'table-cell'}}
+                          onClick={this._onAddressTap}>
+                    {AddressStore.getAddressStr()}
+                </CardText>
+            </div>;
         } else {
-            return <CardText onClick={this._onVenueTap}>{VenuesStore.getChosenVenue().title}</CardText>
+            return <div style={{display: 'table'}}>
+                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                          className="material-icons">
+                    location_on
+                </FontIcon>
+                <CardText style={{display: 'table-cell'}}
+                          onClick={this._onVenueTap}>
+                    {VenuesStore.getChosenVenue().title}
+                </CardText>
+            </div>;
         }
     },
 
@@ -170,15 +188,26 @@ const OrderScreen = React.createClass({
             var menuItems = delivery.slots.map(slot => {
                 return { slot_id: slot.id, text: slot.name };
             });
-            return <DropDownMenu
-                style={{zIndex: '10', width: '100%'}}
-                underlineStyle={{display: 'none'}}
-                menuItems={menuItems}
-                selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
-                onChange={this._onSlotTap}/>;
-        } else {
             return <div>
-                <CardText onClick={() => this.refs.datePicker.show()}>
+                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                          className="material-icons">
+                    schedule
+                </FontIcon>
+                <DropDownMenu
+                    style={{zIndex: '10', width: '100%', display: 'table-cell'}}
+                    underlineStyle={{display: 'none'}}
+                    menuItems={menuItems}
+                    selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
+                    onChange={this._onSlotTap}/>
+            </div>;
+        } else {
+            return <div style={{display: 'table'}}>
+                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                          className="material-icons">
+                    schedule
+                </FontIcon>
+                <CardText style={{display: 'table-cell'}}
+                          onClick={() => this.refs.datePicker.show()}>
                     {OrderStore.getFullTimeStr()}
                 </CardText>
                 <DatePickerDialog
@@ -208,6 +237,45 @@ const OrderScreen = React.createClass({
                     onClick={() => this._onDeliveryTap(delivery)}/>
             );
         });
+    },
+
+    _getClientInfo() {
+        return <div style={{display: 'table'}}>
+            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                      className="material-icons">
+                perm_identity
+            </FontIcon>
+            <CardText style={{display: 'table-cell'}}
+                      onClick={this._onClientInfoTap}>
+                {ClientStore.getRenderedInfo()}
+            </CardText>
+        </div>;
+    },
+
+    _getPaymentType() {
+        return <div style={{display: 'table'}}>
+            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                      className="material-icons">
+                account_balance_wallet
+            </FontIcon>
+            <CardText style={{display: 'table-cell'}}
+                      onClick={this._onPaymentTypeTap}>
+                {PaymentsStore.getChosenPaymentTypeTitle()}
+            </CardText>
+        </div>;
+    },
+
+    _getComment() {
+        return <div style={{display: 'table'}}
+                    onClick={this._onCommentTap}>
+            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                      className="material-icons">
+                comment
+            </FontIcon>
+            <CardText style={{display: 'table-cell'}}>
+                {OrderStore.getRenderedComment()}
+            </CardText>
+        </div>;
     },
 
     componentDidMount() {
@@ -251,11 +319,11 @@ const OrderScreen = React.createClass({
                 <ListDivider/>
                 {this._getTimeInput()}
                 <ListDivider/>
-                <CardText onClick={this._onClientInfoTap}>{ClientStore.getRenderedInfo()}</CardText>
+                {this._getClientInfo()}
                 <ListDivider/>
-                <CardText onClick={this._onPaymentTypeTap}>{PaymentsStore.getChosenPaymentTypeTitle()}</CardText>
+                {this._getPaymentType()}
                 <ListDivider/>
-                <CardText onClick={this._onCommentTap}>{OrderStore.getRenderedComment()}</CardText>
+                {this._getComment()}
             </Card>
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, IconButton, FlatButton, Icons } from 'material-ui';
+import { AppBar, IconButton, FlatButton, Icons, FontIcon } from 'material-ui';
 import Router from 'react-router';
 import { Navigation } from 'react-router';
 import { OrderStore, MenuStore } from '../stores';
@@ -36,8 +36,19 @@ const Toolbar = React.createClass({
     render() {
         var rightElement;
         if (this.props.right == this.ORDER_BUTTON) {
-            var label = "Sum: " + OrderStore.getTotalSum();
-            rightElement = <FlatButton label={label}  onClick={this.rightTap} />;
+            var label = OrderStore.getTotalSum() + " руб.";
+            rightElement = <FlatButton
+                onClick={this.rightTap}>
+                <div style={{display: 'table'}}>
+                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+                              className="material-icons">
+                        shopping_basket
+                    </FontIcon>
+                    <div style={{display: 'table-cell'}}>
+                        {label}
+                    </div>
+                </div>
+            </FlatButton>;
         }
         var leftElement;
         var nestedCategory = false;
