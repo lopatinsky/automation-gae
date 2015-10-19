@@ -46,7 +46,7 @@ const OrderScreen = React.createClass({
     },
 
     _getPromos() {
-        if (OrderStore.getPromos() > 0) {
+        if (OrderStore.getPromos().length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
                 {OrderStore.getPromos().map(promo => {
                     return <div>{promo.text + '\n'}</div>
