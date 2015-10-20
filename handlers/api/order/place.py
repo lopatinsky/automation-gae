@@ -18,7 +18,7 @@ from methods.orders.validation.precheck import get_order_id, set_client_info, ge
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
-from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
+from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from models.client import IOS_DEVICE
 from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
@@ -213,10 +213,15 @@ class OrderHandler(ApiHandler):
         if CURRENT_APP_ID == DEMO_APP_ID:
             send_demo_sms(client)
 
+        show_share = False
+        if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE:
+            show_share = True  # todo this is for test only
+
         self.response.status_int = 201
         self.render_json({
             'order_id': self.order.key.id(),
             'number': self.order.number,
             'delivery_time': validation_result['delivery_time'],
-            'delivery_slot_name': validation_result['delivery_slot_name']
+            'delivery_slot_name': validation_result['delivery_slot_name'],
+            'show_share': show_share,
         })

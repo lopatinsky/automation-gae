@@ -47,6 +47,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
             'order_id': order.key.id(),
             'number': order.number,
             'delivery_time': order.delivery_time_str,
-            'delivery_slot_name': None
+            'delivery_slot_name': None,
+            'show_share': False,
         }
     return success, response
