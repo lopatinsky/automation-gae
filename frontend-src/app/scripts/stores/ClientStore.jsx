@@ -15,6 +15,10 @@ const ClientStore = new BaseStore({
         return localStorage.getItem('email');
     },
 
+    getClientId() {
+        return localStorage.getItem('client_id');
+    },
+
     getRenderedInfo() {
         var name = this.getName();
         if (name == '' || name == null) {
