@@ -150,27 +150,23 @@ const OrderScreen = React.createClass({
     _getVenueInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.id == '2') {
-            return <div style={{display: 'table'}}>
-                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                          className="material-icons">
-                    location_on
-                </FontIcon>
-                <CardText style={{display: 'table-cell'}}
-                          onClick={this._onAddressTap}>
-                    {AddressStore.getAddressStr()}
-                </CardText>
-            </div>;
+            return <ListItem
+                        primaryText={AddressStore.getAddressStr()}
+                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            className="material-icons">
+                                      location_on
+                                  </FontIcon>}
+                        onClick={this._onAddressTap}>
+            </ListItem>;
         } else {
-            return <div style={{display: 'table'}}>
-                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                          className="material-icons">
-                    location_on
-                </FontIcon>
-                <CardText style={{display: 'table-cell'}}
-                          onClick={this._onVenueTap}>
-                    {VenuesStore.getChosenVenue().title}
-                </CardText>
-            </div>;
+            return <ListItem
+                        primaryText={VenuesStore.getChosenVenue().title}
+                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            className="material-icons">
+                                      location_on
+                                  </FontIcon>}
+                        onClick={this._onVenueTap}>
+            </ListItem>;
         }
     },
 
@@ -188,8 +184,8 @@ const OrderScreen = React.createClass({
             var menuItems = delivery.slots.map(slot => {
                 return { slot_id: slot.id, text: slot.name };
             });
-            return <div>
-                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
+            return <ListItem style={{display: 'table', width: '100%', tableLayout: 'fixed', height: '32px'}}>
+                <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '18px'}}
                           className="material-icons">
                     schedule
                 </FontIcon>
@@ -199,17 +195,15 @@ const OrderScreen = React.createClass({
                     menuItems={menuItems}
                     selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
                     onChange={this._onSlotTap}/>
-            </div>;
+            </ListItem>;
         } else {
-            return <div style={{display: 'table'}}>
-                <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                          className="material-icons">
-                    schedule
-                </FontIcon>
-                <CardText style={{display: 'table-cell'}}
-                          onClick={() => this.refs.datePicker.show()}>
-                    {OrderStore.getFullTimeStr()}
-                </CardText>
+            return <ListItem
+                        primaryText={OrderStore.getFullTimeStr()}
+                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            className="material-icons">
+                                      schedule
+                                  </FontIcon>}
+                        onClick={() => this.refs.datePicker.show()}>
                 <DatePickerDialog
                     ref='datePicker'
                     onAccept={this._setDate}
@@ -222,7 +216,7 @@ const OrderScreen = React.createClass({
                     hintText="Выберитее время"
                     format="24hr"
                     autoOk={true} />
-            </div>;
+            </ListItem>;
         }
     },
 
@@ -240,42 +234,33 @@ const OrderScreen = React.createClass({
     },
 
     _getClientInfo() {
-        return <div style={{display: 'table'}}>
-            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                      className="material-icons">
-                perm_identity
-            </FontIcon>
-            <CardText style={{display: 'table-cell'}}
-                      onClick={this._onClientInfoTap}>
-                {ClientStore.getRenderedInfo()}
-            </CardText>
-        </div>;
+        return <ListItem
+                    primaryText={ClientStore.getRenderedInfo()}
+                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        className="material-icons">
+                                  perm_identity
+                              </FontIcon>}
+                    onClick={this._onClientInfoTap}/>;
     },
 
     _getPaymentType() {
-        return <div style={{display: 'table'}}>
-            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                      className="material-icons">
-                account_balance_wallet
-            </FontIcon>
-            <CardText style={{display: 'table-cell'}}
-                      onClick={this._onPaymentTypeTap}>
-                {PaymentsStore.getChosenPaymentTypeTitle()}
-            </CardText>
-        </div>;
+        return <ListItem
+                    primaryText={PaymentsStore.getChosenPaymentTypeTitle()}
+                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        className="material-icons">
+                                  account_balance_wallet
+                              </FontIcon>}
+                    onClick={this._onPaymentTypeTap}/>;
     },
 
     _getComment() {
-        return <div style={{display: 'table'}}
-                    onClick={this._onCommentTap}>
-            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                      className="material-icons">
-                comment
-            </FontIcon>
-            <CardText style={{display: 'table-cell'}}>
-                {OrderStore.getRenderedComment()}
-            </CardText>
-        </div>;
+        return <ListItem
+                    primaryText={OrderStore.getRenderedComment()}
+                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        className="material-icons">
+                                comment
+                              </FontIcon>}
+                    onClick={this._onCommentTap}/>;
     },
 
     componentDidMount() {
@@ -315,15 +300,17 @@ const OrderScreen = React.createClass({
                     {this._getDeliveryTypes()}
                 </RadioButtonGroup>
                 <ListDivider/>
-                {this._getVenueInput()}
-                <ListDivider/>
-                {this._getTimeInput()}
-                <ListDivider/>
-                {this._getClientInfo()}
-                <ListDivider/>
-                {this._getPaymentType()}
-                <ListDivider/>
-                {this._getComment()}
+                <List>
+                    {this._getVenueInput()}
+                    <ListDivider/>
+                    {this._getTimeInput()}
+                    <ListDivider/>
+                    {this._getClientInfo()}
+                    <ListDivider/>
+                    {this._getPaymentType()}
+                    <ListDivider/>
+                    {this._getComment()}
+                </List>
             </Card>
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
