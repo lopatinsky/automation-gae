@@ -3,6 +3,7 @@ import { AppBar, IconButton, FlatButton, Icons, FontIcon } from 'material-ui';
 import Router from 'react-router';
 import { Navigation } from 'react-router';
 import { OrderStore, MenuStore } from '../stores';
+import Colors from 'material-ui/lib/styles/colors';
 
 const Toolbar = React.createClass({
     ORDER_BUTTON: 'order',
@@ -40,10 +41,13 @@ const Toolbar = React.createClass({
             rightElement = <FlatButton
                 onClick={this.rightTap}>
                 <div style={{display: 'table'}}>
-                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                              className="material-icons">
-                        shopping_basket
-                    </FontIcon>
+                    <div style={{display: 'table-cell', padding: '0 6px 0 6px'}}>
+                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
+                                  color={Colors.white}
+                                  className="material-icons">
+                            shopping_basket
+                        </FontIcon>
+                    </div>
                     <div style={{display: 'table-cell'}}>
                         {label}
                     </div>
