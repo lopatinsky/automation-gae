@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText } from 'material-ui';
+import { Card, CardText, FontIcon } from 'material-ui';
 import { HistoryStore, VenuesStore } from '../stores';
 import { Navigation } from 'react-router';
 import Actions from '../Actions';
@@ -31,25 +31,29 @@ const HistoryScreen = React.createClass({
             }
 
             return <Card
-                style={{margin: '0 12px 12px 12px', display: 'table', width: '93%'}}
+                style={{margin: '0 12px 12px 12px', width: '93%'}}
                 onClick={() => this._onOrderTap(order)}>
-                <div style={{display: 'table-cell'}}>
-                    <div>
+                <div>
+                    <div style={{padding: '12px 12px 0 12px'}}>
                         <b>Мой заказ #{order.number}</b>
+                        <div style={{float: 'right'}}>
+                            <b>{order.total} руб.</b>
+                        </div>
                     </div>
-                    <div>
+                    <div style={{padding: '12px 12px 0 12px'}}>
                         {order.delivery_time_str}
+                        <div style={{float: 'right'}}>
+                            {HistoryStore.getStatus(order.status)}
+                        </div>
                     </div>
-                    <div>
-                        {from_title}
-                    </div>
-                </div>
-                <div style={{display: 'table-cell'}}>
-                    <div>
-                        <b>{order.total} руб.</b>
-                    </div>
-                    <div>
-                        {HistoryStore.getStatus(order.status)}
+                    <div style={{display: 'table', padding: '12px'}}>
+                        <FontIcon style={{display: 'table-cell', fontSize: '18px', verticalAlign: 'middle'}}
+                                  className="material-icons">
+                            location_on
+                        </FontIcon>
+                        <div style={{display: 'table-cell', padding: '0 0 0 6px'}}>
+                            {from_title}
+                        </div>
                     </div>
                 </div>
             </Card>
