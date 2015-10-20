@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem } from 'material-ui';
+import { List, ListItem, ListDivider } from 'material-ui';
 import { ModifierStore, MenuItemStore } from '../stores';
 
 const ChoicesFragment = React.createClass({
@@ -31,11 +31,23 @@ const ChoicesFragment = React.createClass({
     getChoices() {
         var choices = this.state.modifier.choices;
         return choices.map(choice => {
-            return (
-                <ListItem
-                    primaryText={choice.title}
-                    onClick={() => this._onChoiceTap(choice)}/>
-            );
+            var title = choice.title;
+            if (choice.price > 0) {
+                title = <div style={{display: 'table'}}>
+                    <div style={{display: 'table-cell', padding: '0 6px 0 0'}}>
+                        <b>{choice.price + 'р.'}</b>
+                    </div>
+                    <div style={{display: 'table-cell'}}>
+                        {choice.title}
+                    </div>
+                </div>;
+            }
+            return <div>
+                    <ListItem
+                        primaryText={title}
+                        onClick={() => this._onChoiceTap(choice)}/>
+                    <ListDivider/>
+                </div>;
         });
     },
 
