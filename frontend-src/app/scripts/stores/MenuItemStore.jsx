@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const MenuItemStore = new BaseStore({
 
@@ -78,7 +78,7 @@ const MenuItemStore = new BaseStore({
     }
 }, action => {
     switch (action.actionType) {
-        case Actions.INIT:
+        case ServerRequests.INIT:
             if (action.data.request == "menu_item") {
                 MenuItemStore._setItem(action.data.item);
             }

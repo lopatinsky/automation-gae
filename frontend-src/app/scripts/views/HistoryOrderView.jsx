@@ -1,8 +1,9 @@
 import React from 'react';
 import { HistoryStore } from '../stores';
-import { Toolbar, NavigationDrawer, HistoryOrderScreen } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { HistoryOrderScreen } from '../components/screens';
 import { Navigation } from 'react-router';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const HistoryOrderView = React.createClass({
     mixins: [Navigation],
@@ -13,7 +14,7 @@ const HistoryOrderView = React.createClass({
     },
 
     componentDidMount() {
-        Actions.loadHistory();
+        ServerRequests.loadHistory();
         HistoryStore.addChangeListener(this._refresh);
     },
 

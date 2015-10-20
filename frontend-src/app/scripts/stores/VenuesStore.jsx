@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const VenuesStore = new BaseStore({
     chosenVenue: null,
@@ -23,7 +23,7 @@ const VenuesStore = new BaseStore({
             this.chosenDelivery = venue.deliveries[0];
         }
         this.chosenVenue = venue;
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -33,7 +33,7 @@ const VenuesStore = new BaseStore({
 
     setChosenDelivery(delivery) {
         this.chosenDelivery = delivery;
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -67,12 +67,12 @@ const VenuesStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "venues") {
                 VenuesStore._saveVenues(action.data.venues);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert('failure');
             break;
     }

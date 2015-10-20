@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer, HistoryScreen } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { HistoryScreen } from '../components/screens';
 
 const HistoryView = React.createClass({
     toolbarLeftTap() {

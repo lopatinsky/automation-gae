@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, AddressScreen } from '../components';
+import { Toolbar } from '../components';
+import { AddressScreen } from '../components/screens'
 import { Navigation } from 'react-router';
 
 const AddressView = React.createClass({

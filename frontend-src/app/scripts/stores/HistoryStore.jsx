@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 var STATUSES = {
     0: 'Новый',
@@ -43,12 +43,12 @@ const HistoryStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.INIT:
+        case ServerRequests.INIT:
             if (action.data.request == "history") {
                 HistoryStore._setOrders(action.data.orders);
             }
             break;
-        case Actions.CANCEL:
+        case ServerRequests.CANCEL:
             if (action.data.request == "history") {
                 HistoryStore._setStatus(action.data.order_id, 2);
             }

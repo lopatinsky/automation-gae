@@ -1,6 +1,6 @@
 import request from 'superagent';
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const AddressStore = new BaseStore({
     cities: [],
@@ -48,7 +48,7 @@ const AddressStore = new BaseStore({
         localStorage.setItem('street', street);
         localStorage.setItem('home', home);
         localStorage.setItem('flat', flat);
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -73,12 +73,12 @@ const AddressStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "address") {
                 AddressStore._setCities(action.data.cities);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert("Failure");
             break;
     }

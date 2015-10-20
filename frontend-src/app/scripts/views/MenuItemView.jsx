@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, MenuItemScreen, ModifierDialog } from '../components';
+import { Toolbar } from '../components';
+import { MenuItemScreen } from '../components/screens';
 import { MenuStore } from '../stores';
 import { Navigation } from 'react-router';
 

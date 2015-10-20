@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 import ClientStore from './ClientStore';
 import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
@@ -143,7 +143,7 @@ const OrderStore = new BaseStore({
 
     setSlotId(slotId) {
         this.slotId = slotId;
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -165,14 +165,14 @@ const OrderStore = new BaseStore({
             this.items.push(JSON.parse(JSON.stringify(item)));
         }
         this.validationSum = this.getTotalSum();
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
     removeItem(item) {
         this.items.splice(this.items.indexOf(item), 1);
         this.validationSum = this.getTotalSum();
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -301,7 +301,7 @@ const OrderStore = new BaseStore({
         this.orderId = orderId;
         this.orderError = null;
         this._changed();
-        Actions.setOrderSuccess(orderId);
+        ServerRequests.setOrderSuccess(orderId);
     },
 
     clearOrderId() {
@@ -335,7 +335,7 @@ const OrderStore = new BaseStore({
 
     setTime(date) {
         this.timeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -354,7 +354,7 @@ const OrderStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.UPDATE:
+        case ServerRequests.UPDATE:
             if (action.data.request == "order") {
                 OrderStore.setValidationInfo(
                     action.data.total_sum,
@@ -366,17 +366,17 @@ const OrderStore = new BaseStore({
                 );
             }
             break;
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "order") {
                 OrderStore.setOrderId(action.data.orderId);
             }
             break;
-        case Actions.ERROR:
+        case ServerRequests.ERROR:
             if (action.data.request == "order") {
                 OrderStore.setOrderError(action.data.error);
             }
             break;
-        case Actions.CANCEL:
+        case ServerRequests.CANCEL:
             if (action.data.request == "order") {
                 OrderStore.setCancelDescription(action.data.description);
                 OrderStore.clearCancelProcessing();

@@ -1,6 +1,6 @@
 import request from 'superagent';
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const ClientStore = new BaseStore({
     getName() {
@@ -54,15 +54,15 @@ const ClientStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "register") {
                 ClientStore.setClientId(action.data.client_id);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert("Failure");
             break;
-        case Actions.INIT:
+        case ServerRequests.INIT:
             if (action.data.request == "client") {
                 ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
             }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer, PromosScreen } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { PromosScreen } from '../components/screens';
 
 const PromosView = React.createClass({
     toolbarLeftTap() {

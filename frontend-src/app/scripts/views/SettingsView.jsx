@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer, SettingsScreen } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { SettingsScreen } from '../components/screens';
 
 const SettingsView = React.createClass({
     toolbarLeftTap() {

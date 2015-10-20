@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const MenuStore = new BaseStore({
     previousCategories: [],
@@ -90,12 +90,12 @@ const MenuStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "menu") {
                 MenuStore._saveMenu(action.data.menu);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert('failure');
             break;
     }

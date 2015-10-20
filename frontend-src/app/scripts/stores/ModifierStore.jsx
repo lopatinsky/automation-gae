@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const ModifierStore = new BaseStore({
 
@@ -18,7 +18,7 @@ const ModifierStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.INIT:
+        case ServerRequests.INIT:
             if (action.data.request == "modifier") {
                 ModifierStore._setModifier(action.data.modifier);
             }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, VenuesScreen, NavigationDrawer } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { VenuesScreen } from '../components/screens';
 
 const VenuesView = React.createClass({
     toolbarLeftTap() {

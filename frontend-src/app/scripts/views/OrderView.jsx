@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, OrderScreen, NavigationDrawer } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { OrderScreen } from '../components/screens';
 
 const OrderView = React.createClass({
     toolbarLeftTap() {

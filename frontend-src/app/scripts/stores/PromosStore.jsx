@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 
 const PromosStore = new BaseStore({
     promos: [],
@@ -15,12 +15,12 @@ const PromosStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "promos") {
                 PromosStore._setPromos(action.data.promos);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert('failure');
             break;
     }

@@ -1,5 +1,5 @@
 import BaseStore from './BaseStore';
-import Actions from '../Actions';
+import { ServerRequests } from '../actions';
 import assign from 'object-assign';
 
 const PaymentsStore = new BaseStore({
@@ -27,7 +27,7 @@ const PaymentsStore = new BaseStore({
 
     setChosenPaymentType(payment_type) {
         this.chosen_payment_type = payment_type;
-        Actions.checkOrder();
+        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -44,12 +44,12 @@ const PaymentsStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case Actions.AJAX_SUCCESS:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "payment_types") {
                 PaymentsStore._setPaymentTypes(action.data.payment_types);
             }
             break;
-        case Actions.AJAX_FAILURE:
+        case ServerRequests.AJAX_FAILURE:
             alert('failure');
             break;
     }

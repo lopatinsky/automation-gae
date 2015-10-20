@@ -1,5 +1,6 @@
 import React from 'react';
-import { Toolbar, MenuScreen, NavigationDrawer } from '../components';
+import { Toolbar, NavigationDrawer } from '../components';
+import { MenuScreen } from '../components/screens';
 import { MenuStore } from '../stores';
 
 const MenuView = React.createClass({
