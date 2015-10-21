@@ -27,20 +27,27 @@ const OrderMenuItem = React.createClass({
 
     render() {
         var item = this.props.item;
-        var picCard = <div style={{display: 'table-cell', width: '20%'}}>
-            <CardMedia>
-                <img src={item.pic}/>
-            </CardMedia>
-        </div>;
-        if (item.pic == null || item.pic == '') {
+        var width;
+        var picCard;
+        if (item.pic != null && item.pic != '') {
+            width = '60%';
+            picCard = <div style={{display: 'table-cell', width: '20%'}}>
+                <CardMedia>
+                    <img src={item.pic}/>
+                </CardMedia>
+            </div>;
+        } else {
+            width = '80%';
             picCard = <div/>;
         }
+        alert(width);
         return (
             <Card style={{margin: '12px 12px 0 12px', display: 'table', tableLayout: 'fixed', width: '93%'}}>
                 {picCard}
-                <div style={{display: 'table-cell', width: '60%'}}>
+                <div style={{display: 'table-cell', width: width}}>
                     <CardText>
                         {item.title}
+                        {this.props.gift ? ' В подарок!' : ''}
                         {this._getGroupModifiers(item)}
                         {this._getSingleModifiers(item)}
                     </CardText>
@@ -49,10 +56,12 @@ const OrderMenuItem = React.createClass({
                     <CardText style={{textAlign: 'right', margin: '0 12px 0 0'}}>
                         {'x' + item.quantity}
                     </CardText>
-                    <FlatButton
-                        style={{margin: '0 12px 12px 0'}}
-                        label='Удалить'
-                        onClick={this._removeItem} />
+                    {this.props.gift ? '' :
+                        <FlatButton
+                            style={{margin: '0 12px 12px 0'}}
+                            label='Удалить'
+                            onClick={this._removeItem}/>}
+
                 </div>
             </Card>
         );

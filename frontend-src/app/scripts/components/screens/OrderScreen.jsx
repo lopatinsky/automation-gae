@@ -109,9 +109,8 @@ const OrderScreen = React.createClass({
     _getOrderGifts() {
         var items = OrderStore.getOrderGifts();
         return items.map(item => {
-            item.title += ' Подарок!';
             return (
-                <OrderMenuItem item={item} />
+                <OrderMenuItem item={item} gift={true} />
             );
         });
     },
