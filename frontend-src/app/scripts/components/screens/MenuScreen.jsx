@@ -88,6 +88,7 @@ const MenuScreen = React.createClass({
         } else {
             this.refs.menuProcessingDialog.dismiss();
         }
+        window.scrollTo(0, 0);
         this.setState({
             value: this.value
         });
