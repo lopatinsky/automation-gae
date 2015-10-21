@@ -37,10 +37,10 @@ const VenuesStore = new BaseStore({
         this._changed();
     },
 
-    getSlotIndex(slotId) {
+    getSlot(slotId) {
         for (var i = 0; i < this.chosenDelivery.slots.length; i++) {
             if (slotId == this.chosenDelivery.slots[i].id) {
-                return i;
+                return this.chosenDelivery.slots[i];
             }
         }
     },

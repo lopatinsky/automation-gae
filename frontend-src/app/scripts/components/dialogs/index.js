@@ -4,3 +4,4 @@ export { default as VenuesDialog } from './VenuesDialog';
 export { default as ClientInfoDialog } from './ClientInfoDialog';
 export { default as PaymentTypesDialog } from './PaymentTypesDialog';
 export { default as CommentDialog } from './CommentDialog';
+export { default as TimeSlotsDialog } from './TimeSlotsDialog';

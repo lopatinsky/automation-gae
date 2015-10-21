@@ -1,7 +1,7 @@
 import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
-import { VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog } from '../dialogs';
+import { VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
 import { Navigation } from 'react-router';
 import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider, FontIcon }
     from 'material-ui';
@@ -144,8 +144,8 @@ const OrderScreen = React.createClass({
         VenuesStore.setChosenDelivery(delivery);
     },
 
-    _onSlotTap(e, selectedIndex, menuItem) {
-        OrderStore.setSlotId(menuItem.slot_id);
+    _onSlotTap() {
+        this.refs.timeSlotsDialog.show();
     },
 
     _getVenueInput() {
@@ -182,21 +182,19 @@ const OrderScreen = React.createClass({
     _getTimeInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery.slots.length > 0) {
-            var menuItems = delivery.slots.map(slot => {
-                return { slot_id: slot.id, text: slot.name };
-            });
-            return <ListItem style={{display: 'table', width: '100%', tableLayout: 'fixed', height: '32px'}}>
-                <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '18px'}}
-                          className="material-icons">
-                    schedule
-                </FontIcon>
-                <DropDownMenu
-                    style={{zIndex: '10', width: '100%', display: 'table-cell'}}
-                    underlineStyle={{display: 'none'}}
-                    menuItems={menuItems}
-                    selectedIndex={VenuesStore.getSlotIndex(OrderStore.getSlotId())}
-                    onChange={this._onSlotTap}/>
-            </ListItem>;
+            var slot = VenuesStore.getSlot(OrderStore.getSlotId());
+            if (slot == null) {
+                slot = {
+                    name: 'Загружается...'
+                }
+            }
+            return <ListItem
+                        primaryText={slot.name}
+                        leftIcon={<FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '18px'}}
+                                            className="material-icons">
+                                      schedule
+                                  </FontIcon>}
+                        onClick={this._onSlotTap}/>;
         } else {
             return <ListItem
                         primaryText={OrderStore.getFullTimeStr()}
@@ -316,7 +314,8 @@ const OrderScreen = React.createClass({
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
-            <CommentDialog ref="commentDialog" />
+            <CommentDialog ref="commentDialog"/>
+            <TimeSlotsDialog ref="timeSlotsDialog"/>
             <div>
                 <RaisedButton
                     label='Заказать'
