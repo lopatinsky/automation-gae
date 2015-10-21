@@ -40,30 +40,31 @@ const OrderMenuItem = React.createClass({
             width = '80%';
             picCard = <div/>;
         }
-        alert(width);
         return (
-            <Card style={{margin: '12px 12px 0 12px', display: 'table', tableLayout: 'fixed', width: '93%'}}>
-                {picCard}
-                <div style={{display: 'table-cell', width: width}}>
-                    <CardText>
-                        {item.title}
-                        {this.props.gift ? ' В подарок!' : ''}
-                        {this._getGroupModifiers(item)}
-                        {this._getSingleModifiers(item)}
-                    </CardText>
-                </div>
-                <div style={{display: 'table-cell', width: '20%'}}>
-                    <CardText style={{textAlign: 'right', margin: '0 12px 0 0'}}>
-                        {'x' + item.quantity}
-                    </CardText>
-                    {this.props.gift ? '' :
-                        <FlatButton
-                            style={{margin: '0 12px 12px 0'}}
-                            label='Удалить'
-                            onClick={this._removeItem}/>}
+            <div style={{width: '100%', display: 'table'}}>
+                <Card style={{margin: '12px 12px 0 12px', tableLayout: 'fixed'}}>
+                    {picCard}
+                    <div style={{display: 'table-cell', width: width}}>
+                        <CardText>
+                            {item.title}
+                            {this.props.gift ? ' В подарок!' : ''}
+                            {this._getGroupModifiers(item)}
+                            {this._getSingleModifiers(item)}
+                        </CardText>
+                    </div>
+                    <div style={{display: 'table-cell', width: '20%'}}>
+                        <CardText style={{textAlign: 'right', margin: '0 12px 0 0'}}>
+                            {'x' + item.quantity}
+                        </CardText>
+                        {this.props.gift ? '' :
+                            <FlatButton
+                                style={{margin: '0 12px 12px 0'}}
+                                label='Удалить'
+                                onClick={this._removeItem}/>}
 
-                </div>
-            </Card>
+                    </div>
+                </Card>
+            </div>
         );
     }
 });

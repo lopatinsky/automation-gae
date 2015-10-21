@@ -280,46 +280,48 @@ const OrderScreen = React.createClass({
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
-            <div>
+            <div style={{margin: '12px 12px 0 12px'}}>
                 <RaisedButton
                     label='Меню'
                     onClick={this._onMenuTap}
-                    style={{width: '93%', margin: '12px 12px 0 12px'}} />
+                    style={{width: '100%'}} />
             </div>
             <div style={{padding: '12px 24px 0 12px'}}>
                 {this._getTotalSum()}
             </div>
             {this._getServerInfo()}
-            <Card style={{width: '93%', margin: '12px 12px 0 12px'}}>
-                <RadioButtonGroup
-                    style={{margin: '12px'}}
-                    name='group'
-                    valueSelected={VenuesStore.getChosenDelivery().name}>
-                    {this._getDeliveryTypes()}
-                </RadioButtonGroup>
-                <ListDivider/>
-                <List>
-                    {this._getVenueInput()}
+            <div style={{width: '100%'}}>
+                <Card style={{margin: '12px 12px 0 12px'}}>
+                    <RadioButtonGroup
+                        style={{margin: '12px'}}
+                        name='group'
+                        valueSelected={VenuesStore.getChosenDelivery().name}>
+                        {this._getDeliveryTypes()}
+                    </RadioButtonGroup>
                     <ListDivider/>
-                    {this._getTimeInput()}
-                    <ListDivider/>
-                    {this._getClientInfo()}
-                    <ListDivider/>
-                    {this._getPaymentType()}
-                    <ListDivider/>
-                    {this._getComment()}
-                </List>
-            </Card>
+                    <List>
+                        {this._getVenueInput()}
+                        <ListDivider/>
+                        {this._getTimeInput()}
+                        <ListDivider/>
+                        {this._getClientInfo()}
+                        <ListDivider/>
+                        {this._getPaymentType()}
+                        <ListDivider/>
+                        {this._getComment()}
+                    </List>
+                </Card>
+            </div>
             <VenuesDialog ref="venuesDialog"/>
             <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog"/>
             <TimeSlotsDialog ref="timeSlotsDialog"/>
-            <div>
+            <div style={{margin: '12px'}}>
                 <RaisedButton
                     label='Заказать'
                     onClick={this._order}
-                    style={{width: '93%', margin: '12px 12px 12px 12px'}} />
+                    style={{width: '100%'}} />
             </div>
             <Snackbar
                 ref='orderSnackBar'

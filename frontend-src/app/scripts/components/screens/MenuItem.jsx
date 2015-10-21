@@ -37,21 +37,23 @@ const MenuItem = React.createClass({
             descriptionCard = <div/>;
         }
         return (
-            <Card
-                style={{margin:'0 12px 12px', display: 'table', width: '93%'}}
-                onClick={this._onMenuItemTap}>
-                {picCard}
-                <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
-                    <div>
-                        <b>{item.title}</b>
+            <div style={{width: '100%', display: 'table'}}>
+                <Card
+                    style={{margin:'0 12px 12px'}}
+                    onClick={this._onMenuItemTap}>
+                    {picCard}
+                    <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
+                        <div>
+                            <b>{item.title}</b>
+                        </div>
+                        {descriptionCard}
+                        <FlatButton
+                            style={{align: 'right bottom', margin: '12px'}}
+                            label={item.price}
+                            onClick={this._addItem} />
                     </div>
-                    {descriptionCard}
-                    <FlatButton
-                        style={{align: 'right bottom', margin: '12px'}}
-                        label={item.price}
-                        onClick={this._addItem} />
-                </div>
-            </Card>
+                </Card>
+            </div>
         );
     }
 });

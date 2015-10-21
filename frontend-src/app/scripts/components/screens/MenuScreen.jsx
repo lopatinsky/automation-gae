@@ -40,15 +40,17 @@ const MenuScreen = React.createClass({
         }
         var category = MenuStore.getCategory(categoryId);
         return <div>
-            <Paper style={{position: 'fixed', margin: '76px 12px 0 12px', zIndex: '9', width: '93%'}}>
-                <DropDownMenu
-                    style={{zIndex: '10', width: '100%'}}
-                    underlineStyle={{display: 'none'}}
-                    menuItems={menuItems}
-                    selectedIndex={MenuStore.getSelectedIndex()}
-                    onChange={this._onCategoryTap}/>
-            </Paper>
-            <div style={{padding: '144px 0 0 0'}}  >
+            <div style={{position: 'fixed', marginTop: '76px', zIndex: '9', width: '100%'}}>
+                <Paper style={{margin: '0 12px'}}>
+                    <DropDownMenu
+                        style={{zIndex: '10', width: '100%'}}
+                        underlineStyle={{display: 'none'}}
+                        menuItems={menuItems}
+                        selectedIndex={MenuStore.getSelectedIndex()}
+                        onChange={this._onCategoryTap}/>
+                </Paper>
+            </div>
+            <div style={{padding: '144px 0 0 0'}}>
                 {this._getItems(category)}
             </div>
         </div>;
