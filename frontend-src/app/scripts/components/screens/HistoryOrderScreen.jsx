@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, CardText, RefreshIndicator, Dialog, FlatButton, Snackbar } from 'material-ui';
-import { OrderStore } from '../../stores';
+import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, ListDivider } from 'material-ui';
+import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
+import HistoryOrderItem from './HistoryOrderItem'
 
 const HistoryOrderScreen = React.createClass({
     refresh() {
@@ -27,13 +28,57 @@ const HistoryOrderScreen = React.createClass({
         ServerRequests.cancelOrder(order.order_id);
     },
 
+    _getVenueOutput(order) {
+        var address = '';
+        if (order.address == null && order.venue_id != '' && order.venue_id != null) {
+            var venue = VenuesStore.getVenue(order.venue_id);
+            if (venue != null) {
+               address = venue.address;
+            }
+        } else {
+            if (order.address != null) {
+                address = order.address.formatted_address;
+            }
+        }
+        return <div style={{display: 'table', padding: '12px'}}>
+            <FontIcon style={{display: 'table-cell', fontSize: '18px', verticalAlign: 'middle'}}
+                      className="material-icons">
+                location_on
+            </FontIcon>
+            <div style={{display: 'table-cell', padding: '0 0 0 6px'}}>
+                {address}
+            </div>
+        </div>;
+    },
+
     getOrder() {
         var order = this.props.order;
         if (order != null) {
             return <Card>
-                <CardText>
-                    Заказ {order.number}
-                </CardText>
+                <div style={{padding: '12px'}}>
+                    Заказ <b>#{order.number}</b>
+                    <div style={{float: 'right'}}>
+                        <b>{HistoryStore.getStatus(order.status)}</b>
+                    </div>
+                </div>
+                <ListDivider/>
+                <div>
+                    {order.items.map(item => {
+                        return <HistoryOrderItem item={item} />;
+                    })}
+                </div>
+                <ListDivider/>
+                <div style={{padding: '12px', height: '48px'}}>
+                    <div style={{float: 'right'}}>
+                        {'Итого: ' + order.total}
+                    </div>
+                </div>
+                <ListDivider/>
+                <div style={{padding: '12px'}}>
+                    {'Готов к ' + order.delivery_time_str}
+                </div>
+                <ListDivider/>
+                {this._getVenueOutput(order)}
             </Card>;
         } else {
              return <RefreshIndicator size={40} left={80} top={5} status="loading" />
@@ -43,8 +88,8 @@ const HistoryOrderScreen = React.createClass({
     getCancelButton() {
         var order = this.props.order;
         if (order && order.status == 0) {
-            return <div>
-                <FlatButton label='Отмена' onClick={this.cancel} />
+            return <div style={{float: 'right', padding: '12px'}}>
+                <RaisedButton label='Отмена' onClick={this.cancel} />
             </div>;
         } else {
             return <div/>;
