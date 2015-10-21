@@ -19,6 +19,11 @@ const HistoryScreen = React.createClass({
 
     getOrders() {
         var orders = HistoryStore.getOrders();
+        if (orders.length == 0) {
+            return <div style={{textAlign: 'center'}}>
+                История заказов пуста
+            </div>;
+        }
         return orders.map(order => {
             var from_title = '';
             if (order.delivery_type == 2) {
