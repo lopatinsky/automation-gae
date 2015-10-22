@@ -3,6 +3,7 @@ import { Card, CardText, FontIcon } from 'material-ui';
 import { HistoryStore, VenuesStore } from '../../stores';
 import { Navigation } from 'react-router';
 import { ServerRequests } from '../../actions';
+import settings from '../../settings';
 
 const HistoryScreen = React.createClass({
     mixins: [Navigation],
@@ -41,19 +42,25 @@ const HistoryScreen = React.createClass({
                     onClick={() => this._onOrderTap(order)}>
                     <div>
                         <div style={{padding: '12px 12px 0 12px'}}>
-                            <b>Мой заказ #{order.number}</b>
+                                <b>
+                                    {'Мой заказ '}
+                                    <b style={{color: settings.primaryColor}}>
+                                        {'#' + order.number}
+                                    </b>
+                                </b>
                             <div style={{float: 'right'}}>
                                 <b>{order.total} руб.</b>
                             </div>
                         </div>
-                        <div style={{padding: '12px 12px 0 12px'}}>
+                        <div style={{padding: '6px 12px 0 12px'}}>
                             {order.delivery_time_str}
                             <div style={{float: 'right'}}>
                                 {HistoryStore.getStatus(order.status)}
                             </div>
                         </div>
-                        <div style={{display: 'table', padding: '12px'}}>
+                        <div style={{display: 'table', padding: '6px 12px 12px 12px'}}>
                             <FontIcon style={{display: 'table-cell', fontSize: '18px', verticalAlign: 'middle'}}
+                                      color={settings.primaryColor}
                                       className="material-icons">
                                 location_on
                             </FontIcon>
