@@ -8,7 +8,7 @@ import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGr
 import TimePickerDialog from '../../../../../node_modules/material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from '../../../../../node_modules/material-ui/lib/date-picker/date-picker-dialog';
 import { ServerRequests } from '../../actions/';
-import settings from '../../settings'
+import settings from '../../settings';
 
 const OrderScreen = React.createClass({
     mixins: [Navigation],
