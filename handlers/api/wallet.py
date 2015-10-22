@@ -57,7 +57,11 @@ class WalletBalanceHandler(ApiHandler):
         client_id = self.request.get("client_id") or self.request.headers.get('Client-Id')
         if not client_id:
             self.abort(400)
-        client_id = int(client_id)
+        try:
+            client_id = int(client_id)
+        except Exception as e:
+            logging.warning(str(e))
+            self.abort(400)
         if config.WALLET_API_KEY:
             wallet_balance = empatika_wallet.get_balance(client_id)
             if wallet_balance is None:
