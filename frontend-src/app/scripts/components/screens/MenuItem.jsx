@@ -1,8 +1,9 @@
 import React from 'react';
-import { Card, CardText, RaisedButton, CardMedia } from 'material-ui';
+import { Card, CardText, RaisedButton, CardMedia, FontIcon } from 'material-ui';
 import { OrderStore } from '../../stores';
 import { Navigation } from 'react-router';
 import { AppActions } from '../../actions';
+import Colors from 'material-ui/lib/styles/colors';
 
 const MenuItem = React.createClass({
     mixins: [Navigation],
@@ -20,6 +21,21 @@ const MenuItem = React.createClass({
         OrderStore.addItem(this.props.item);
     },
 
+    _getButton(tableCell) {
+        var item = this.props.item;
+        return <RaisedButton
+            primary={true}
+            style={{margin: '12px', float: 'right', display: tableCell ? 'table-cell' : 'block'}}
+            label={item.price}
+            onClick={this._addItem}>
+            <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
+                      color={Colors.white}
+                      className="material-icons">
+                add_shopping_cart
+            </FontIcon>
+        </RaisedButton>;
+    },
+
     render() {
         var item = this.props.item;
         var picCard = <div style={{display: 'table-cell', width: '50%'}}>
@@ -28,13 +44,24 @@ const MenuItem = React.createClass({
             </CardMedia>
         </div>;
         if (item.pic == null || item.pic == '') {
-            picCard = <div/>;
+            picCard = '';
         }
-        var descriptionCard = <div style={{height: '64px', overflow: 'hidden'}}>
+        var descriptionCard = <div style={{maxHeight: '64px', overflow: 'hidden', lineHeight: '120%', padding: '6px 0 0 0'}}>
             {item.description}
         </div>;
         if (item.description == '') {
             descriptionCard = <div/>;
+        }
+        var grCard = <div/>;
+        if (item.weight > 0) {
+            grCard = <div style={{padding: '6px 0 0 0'}}>
+                {item.weight + ' г'}
+            </div>;
+        }
+        if (item.volume > 0) {
+            grCard = <div style={{padding: '6px 0 0 0'}}>
+                {item.volume + ' мл'}
+            </div>;
         }
         return (
             <div style={{width: '100%', display: 'table'}}>
@@ -43,16 +70,14 @@ const MenuItem = React.createClass({
                     onClick={this._onMenuItemTap}>
                     {picCard}
                     <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
-                        <div>
+                        <div style={{lineHeight: '120%'}}>
                             <b>{item.title}</b>
                         </div>
                         {descriptionCard}
-                        <RaisedButton
-                            primary={true}
-                            style={{align: 'right bottom', margin: '12px'}}
-                            label={item.price}
-                            onClick={this._addItem} />
+                        {grCard}
+                        {picCard != '' ? this._getButton(false) : ''}
                     </div>
+                    {picCard == '' ? this._getButton(true) : ''}
                 </Card>
             </div>
         );

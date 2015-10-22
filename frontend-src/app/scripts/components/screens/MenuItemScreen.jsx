@@ -1,9 +1,10 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, ListDivider, Icons, IconButton }
+import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, ListDivider, Icons, IconButton, FontIcon }
     from 'material-ui';
 import { MenuItemStore, ModifierStore, OrderStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
 import { AppActions } from '../../actions';
+import Colors from 'material-ui/lib/styles/colors';
 
 const MenuItemScreen = React.createClass({
     _refresh() {
@@ -78,6 +79,19 @@ const MenuItemScreen = React.createClass({
         if (item.pic == null || item.pic == '') {
             picCard = <div/>;
         }
+        var grCard = <div/>;
+        if (item.weight > 0) {
+            grCard = <div>
+                <CardText>{item.weight + ' г'}</CardText>
+                <ListDivider/>
+            </div>;
+        }
+        if (item.volume > 0) {
+            grCard = <div>
+                <CardText>{item.volume + ' мл'}</CardText>
+                <ListDivider/>
+            </div>;
+        }
         return (
             <div style={{padding: '76px 0 0 0'}}>
                 <Card
@@ -86,16 +100,22 @@ const MenuItemScreen = React.createClass({
                     <CardText>{item.title}</CardText>
                     <ListDivider/>
                     {descriptionCard}
-                    <CardActions>
-                        <RaisedButton
-                            primary={true}
-                            label={MenuItemStore.getPrice()}
-                            onClick={this._addItem} />
-                    </CardActions>
+                    {grCard}
                     <List style={{paddingTop: '0', paddingBottom: '0'}}>
                         {this._getModifiers()}
                         {this._getSingleModifiers()}
                     </List>
+                    <RaisedButton
+                        primary={true}
+                        style={{margin: '12px', float: 'right'}}
+                        label={MenuItemStore.getPrice()}
+                        onClick={this._addItem}>
+                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
+                                  color={Colors.white}
+                                  className="material-icons">
+                            add_shopping_cart
+                        </FontIcon>
+                    </RaisedButton>
                 </Card>
                 <ModifierDialog ref="modifierDialog" />
                 <SingleModifiersDialog ref="singleModifiersDialog" />
