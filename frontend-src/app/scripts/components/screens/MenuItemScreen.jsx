@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, FlatButton, CardTitle, ListDivider, Icons, IconButton }
+import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, ListDivider, Icons, IconButton }
     from 'material-ui';
 import { MenuItemStore, ModifierStore, OrderStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
@@ -87,9 +87,12 @@ const MenuItemScreen = React.createClass({
                     <ListDivider/>
                     {descriptionCard}
                     <CardActions>
-                        <FlatButton label={MenuItemStore.getPrice()} onClick={this._addItem} />
+                        <RaisedButton
+                            primary={true}
+                            label={MenuItemStore.getPrice()}
+                            onClick={this._addItem} />
                     </CardActions>
-                    <List>
+                    <List style={{paddingTop: '0', paddingBottom: '0'}}>
                         {this._getModifiers()}
                         {this._getSingleModifiers()}
                     </List>

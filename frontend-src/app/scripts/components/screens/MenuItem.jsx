@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton, CardMedia } from 'material-ui';
+import { Card, CardText, RaisedButton, CardMedia } from 'material-ui';
 import { OrderStore } from '../../stores';
 import { Navigation } from 'react-router';
 import { AppActions } from '../../actions';
@@ -47,7 +47,8 @@ const MenuItem = React.createClass({
                             <b>{item.title}</b>
                         </div>
                         {descriptionCard}
-                        <FlatButton
+                        <RaisedButton
+                            primary={true}
                             style={{align: 'right bottom', margin: '12px'}}
                             label={item.price}
                             onClick={this._addItem} />

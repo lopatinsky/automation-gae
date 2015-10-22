@@ -8,6 +8,7 @@ import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGr
 import TimePickerDialog from '../../../../../node_modules/material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from '../../../../../node_modules/material-ui/lib/date-picker/date-picker-dialog';
 import { ServerRequests } from '../../actions/';
+import settings from '../../settings'
 
 const OrderScreen = React.createClass({
     mixins: [Navigation],
@@ -153,6 +154,7 @@ const OrderScreen = React.createClass({
             return <ListItem
                         primaryText={AddressStore.getAddressStr()}
                         leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
@@ -162,6 +164,7 @@ const OrderScreen = React.createClass({
             return <ListItem
                         primaryText={VenuesStore.getChosenVenue().title}
                         leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
@@ -190,6 +193,7 @@ const OrderScreen = React.createClass({
             return <ListItem
                         primaryText={slot.name}
                         leftIcon={<FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '18px'}}
+                                            color={settings.primaryColor}
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
@@ -198,6 +202,7 @@ const OrderScreen = React.createClass({
             return <ListItem
                         primaryText={OrderStore.getFullTimeStr()}
                         leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                            color={settings.primaryColor}
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
@@ -235,6 +240,7 @@ const OrderScreen = React.createClass({
         return <ListItem
                     primaryText={ClientStore.getRenderedInfo()}
                     leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        color={settings.primaryColor}
                                         className="material-icons">
                                   perm_identity
                               </FontIcon>}
@@ -245,6 +251,7 @@ const OrderScreen = React.createClass({
         return <ListItem
                     primaryText={PaymentsStore.getChosenPaymentTypeTitle()}
                     leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        color={settings.primaryColor}
                                         className="material-icons">
                                   account_balance_wallet
                               </FontIcon>}
@@ -255,6 +262,7 @@ const OrderScreen = React.createClass({
         return <ListItem
                     primaryText={OrderStore.getRenderedComment()}
                     leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                                        color={settings.primaryColor}
                                         className="material-icons">
                                 comment
                               </FontIcon>}
@@ -282,6 +290,7 @@ const OrderScreen = React.createClass({
             {this._getOrderGifts()}
             <div style={{margin: '12px 12px 0 12px'}}>
                 <RaisedButton
+                    labelStyle={{color: settings.primaryColor}}
                     label='Меню'
                     onClick={this._onMenuTap}
                     style={{width: '100%'}} />
@@ -318,6 +327,7 @@ const OrderScreen = React.createClass({
             <TimeSlotsDialog ref="timeSlotsDialog"/>
             <div style={{margin: '12px'}}>
                 <RaisedButton
+                    primary={true}
                     label='Заказать'
                     onClick={this._order}
                     style={{width: '100%'}} />
