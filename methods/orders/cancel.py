@@ -78,7 +78,10 @@ def cancel_order(order, status, namespace, comment=None):
         elif status == CANCELED_BY_CLIENT_ORDER:
             message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
             venue = Venue.get(order.venue_id)
-            sms_pilot.send_sms(venue.phones, message)
+            try:
+                sms_pilot.send_sms(venue.phones, message)
+            except:
+                pass
             for email in venue.emails:
                 if email:
                     deferred.defer(postmark.send_email, EMAIL_FROM, email, message, "<html></html>")
