@@ -1,7 +1,10 @@
 import React from 'react';
 import { RouteHandler } from 'react-router';
 import mui from 'material-ui';
+import { Dialog, RefreshIndicator } from 'material-ui';
 import theme from '../theme';
+import { AppActions } from '../actions';
+import { MenuStore } from '../stores';
 
 const AppView = React.createClass({
 
@@ -15,8 +18,36 @@ const AppView = React.createClass({
         };
     },
 
+    refresh() {
+        if (MenuStore.getCategories() == null) {
+            this.refs.processingDialog.show();
+        } else {
+            this.refs.processingDialog.dismiss();
+        }
+    },
+
+    componentDidMount() {
+        MenuStore.addChangeListener(this.refresh);
+        if (MenuStore.getCategories() == null) {
+            AppActions.load();
+        }
+        this.refresh();
+    },
+
+    componentWillUnmount() {
+        MenuStore.removeChangeListener(this.refresh);
+        this.refs.processingDialog.dismiss();
+    },
+
     render() {
-        return <RouteHandler/>;
+        return <div>
+            <RouteHandler/>
+            <Dialog
+                ref="processingDialog"
+                title="Загрузка">
+                <RefreshIndicator left={5} top={5} status="loading" />
+            </Dialog>
+        </div>;
     }
 });
 export default AppView;

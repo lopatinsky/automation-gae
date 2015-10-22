@@ -1,10 +1,9 @@
 import React from 'react';
-import { Tabs, Tab, RefreshIndicator, DropDownMenu, Card, Paper, Dialog } from 'material-ui';
+import { Tabs, Tab, RefreshIndicator, DropDownMenu, Card, Paper } from 'material-ui';
 import { Navigation } from 'react-router';
 import { MenuStore } from '../../stores';
 import MenuItem from './MenuItem';
 import MenuCategory from './MenuCategory';
-import { AppActions } from '../../actions';
 
 const MenuScreen = React.createClass({
     mixins: [Navigation],
@@ -83,11 +82,6 @@ const MenuScreen = React.createClass({
     },
 
     _refresh() {
-        if (MenuStore.getCategories() == null) {
-            this.refs.menuProcessingDialog.show();
-        } else {
-            this.refs.menuProcessingDialog.dismiss();
-        }
         window.scrollTo(0, 0);
         this.setState({
             value: this.value
@@ -96,15 +90,11 @@ const MenuScreen = React.createClass({
 
     componentDidMount() {
         MenuStore.addChangeListener(this._refresh);
-        if (MenuStore.getCategories() == null) {
-            AppActions.load();
-        }
         this._refresh();
     },
 
     componentWillUnmount() {
         MenuStore.removeChangeListener(this._refresh);
-        this.refs.menuProcessingDialog.dismiss();
     },
 
     getInitialState() {
@@ -127,11 +117,6 @@ const MenuScreen = React.createClass({
         }
         return <div>
             {menu}
-            <Dialog
-                ref="menuProcessingDialog"
-                title="Загрузка меню">
-                <RefreshIndicator left={5} top={5} status="loading" />
-            </Dialog>
         </div>;
     }
 });
