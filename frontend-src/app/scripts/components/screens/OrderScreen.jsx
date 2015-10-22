@@ -1,7 +1,7 @@
 import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
-import { VenuesDialog, ClientInfoDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
+import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
 import { Navigation } from 'react-router';
 import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider, FontIcon }
     from 'material-ui';
@@ -120,7 +120,7 @@ const OrderScreen = React.createClass({
     },
 
     _onClientInfoTap() {
-        this.refs.clientInfoDialog.show();
+        this.transitionTo('profile');
     },
 
     _onPaymentTypeTap() {
@@ -313,7 +313,6 @@ const OrderScreen = React.createClass({
                 </Card>
             </div>
             <VenuesDialog ref="venuesDialog"/>
-            <ClientInfoDialog ref="clientInfoDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog"/>
             <TimeSlotsDialog ref="timeSlotsDialog"/>

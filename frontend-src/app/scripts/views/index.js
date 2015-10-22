@@ -8,3 +8,4 @@ export { default as AddressView } from './AddressView';
 export { default as PromosView } from './PromosView';
 export { default as HistoryOrderView } from './HistoryOrderView';
 export { default as SettingsView } from './SettingsView';
+export { default as ProfileView } from './ProfileView';
