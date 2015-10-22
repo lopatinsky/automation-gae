@@ -299,7 +299,7 @@ const OrderScreen = React.createClass({
                         {this._getDeliveryTypes()}
                     </RadioButtonGroup>
                     <ListDivider/>
-                    <List>
+                    <List style={{paddingBottom: '0', paddingTop: '0'}}>
                         {this._getVenueInput()}
                         <ListDivider/>
                         {this._getTimeInput()}
