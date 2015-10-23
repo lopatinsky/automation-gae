@@ -19,7 +19,7 @@ const PromosScreen = React.createClass({
             if (promo.icon == null || promo.icon == '') {
                 picCard = <div/>;
             }
-            var descriptionCard = <div style={{height: '64px', overflow: 'hidden'}}>
+            var descriptionCard = <div style={{lineHeight: '120%', padding: '6px 0 12px 0'}}>
                 {promo.description}
             </div>;
             if (promo.description == '') {
@@ -27,8 +27,8 @@ const PromosScreen = React.createClass({
             }
             return <Card style={{margin: '0 12px 12px 12px'}}>
                 {picCard}
-                <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
-                    <div>
+                <div style={{display: 'table-cell', padding: '12px 12px 0 6px'}}>
+                    <div style={{lineHeight: '120%'}}>
                         <b>{promo.title}</b>
                     </div>
                     {descriptionCard}
