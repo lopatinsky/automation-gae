@@ -179,6 +179,7 @@ const OrderScreen = React.createClass({
 
     _setDate(date) {
         OrderStore.setDay(date);
+        this.refs.timePicker.show();
     },
 
     _getTimeInput() {
@@ -199,7 +200,8 @@ const OrderScreen = React.createClass({
                                   </FontIcon>}
                         onClick={this._onSlotTap}/>;
         } else {
-            return <ListItem
+            return <div>
+                <ListItem
                         primaryText={OrderStore.getFullTimeStr()}
                         leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
                                             color={settings.primaryColor}
@@ -207,10 +209,10 @@ const OrderScreen = React.createClass({
                                       schedule
                                   </FontIcon>}
                         onClick={() => this.refs.datePicker.show()}>
+                </ListItem>
                 <DatePickerDialog
                     ref='datePicker'
                     onAccept={this._setDate}
-                    onDismiss={() => this.refs.timePicker.show()}
                     hintText="Выберите дату"
                     autoOk={true} />
                 <TimePickerDialog
@@ -219,7 +221,7 @@ const OrderScreen = React.createClass({
                     hintText="Выберитее время"
                     format="24hr"
                     autoOk={true} />
-            </ListItem>;
+            </div>;
         }
     },
 
