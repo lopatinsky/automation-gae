@@ -97,7 +97,8 @@ class CheckOrderHandler(ApiHandler):
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
                                     address, delivery_time, delivery_slot, delivery_type, delivery_zone)
         elif config.APP_KIND == RESTO_APP:
-            result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts)
+            result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts,
+                                          delivery_type)
         else:
             result = {}
 

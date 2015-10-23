@@ -103,7 +103,9 @@ def post_resto_register(resto_company, resto_customer):
     return _post_request(resto_company, path, payload=payload)
 
 
-def post_resto_check_order(resto_company, venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time):
+def post_resto_check_order(resto_company, venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time,
+                           delivery_type):
+    from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
     path = '/api/get_order_promo'
     payload = {
         'venue_id': venue.key.id(),
@@ -111,7 +113,8 @@ def post_resto_check_order(resto_company, venue, resto_item_dicts, auto_client, 
         'customer_id': resto_client.key.id() if resto_client else None,
         'sum': total_sum,
         'date': timestamp(delivery_time),
-        'items': json.dumps(resto_item_dicts)
+        'items': json.dumps(resto_item_dicts),
+        'deliveryType': REVERSE_DELIVERY_TYPE_MAP[delivery_type]
     }
     return _post_request(resto_company, path, payload=payload)
 
