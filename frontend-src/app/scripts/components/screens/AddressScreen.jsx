@@ -27,6 +27,14 @@ const AddressScreen = React.createClass({
         }
     },
 
+    componentDidMount() {
+        AddressStore.addChangeListener(this._refresh);
+    },
+
+    componentWillUnmount() {
+        AddressStore.removeChangeListener(this._refresh);
+    },
+
     render() {
         var cities = AddressStore.getCities().map(city => {
                 return {

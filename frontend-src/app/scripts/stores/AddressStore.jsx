@@ -7,9 +7,10 @@ const AddressStore = new BaseStore({
 
     _setCities(cities) {
         this.cities = cities;
-        if (cities.length > 0) {
+        if (cities.length > 0 && this.getChosenCity() == '') {
             this.setChosenCity(cities[0]);
         }
+        this._changed();
     },
 
     getCities() {
@@ -27,6 +28,8 @@ const AddressStore = new BaseStore({
 
     setChosenCity(city) {
         localStorage.setItem('city', city);
+        ServerRequests.checkOrder();
+        this._changed();
     },
 
     getStreet() {
