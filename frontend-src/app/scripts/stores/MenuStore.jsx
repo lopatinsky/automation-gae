@@ -3,7 +3,7 @@ import { ServerRequests } from '../actions';
 
 const MenuStore = new BaseStore({
     previousCategories: [],
-    categories: null,
+    categories: [],
     selected: null,
 
     getCategory(category_id) {
@@ -34,6 +34,9 @@ const MenuStore = new BaseStore({
 
     getItem(category_id, item_id) {
         var category = this.getCategory(category_id);
+        if (category == null) {
+            return null;
+        }
         for (var i = 0; i < category.items.length; i++) {
             if (item_id == category.items[i].id) {
                 return category.items[i];

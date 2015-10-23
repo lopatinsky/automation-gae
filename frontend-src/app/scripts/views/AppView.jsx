@@ -19,7 +19,7 @@ const AppView = React.createClass({
     },
 
     refresh() {
-        if (MenuStore.getCategories() == null) {
+        if (MenuStore.getCategories().length == 0) {
             this.refs.processingDialog.show();
         } else {
             this.refs.processingDialog.dismiss();
@@ -28,7 +28,7 @@ const AppView = React.createClass({
 
     componentDidMount() {
         MenuStore.addChangeListener(this.refresh);
-        if (MenuStore.getCategories() == null) {
+        if (MenuStore.getCategories().length == 0) {
             AppActions.load();
         }
         this.refresh();
