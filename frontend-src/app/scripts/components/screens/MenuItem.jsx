@@ -23,9 +23,10 @@ const MenuItem = React.createClass({
 
     _getButton(tableCell) {
         var item = this.props.item;
+        var style = {position: 'absolute', right: 12, bottom: 12};
         return <RaisedButton
             primary={true}
-            style={{margin: '12px', float: 'right', display: tableCell ? 'table-cell' : 'block'}}
+            style={style}
             label={item.price}
             onClick={this._addItem}>
             <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
@@ -66,15 +67,16 @@ const MenuItem = React.createClass({
         return (
             <div style={{width: '100%', display: 'table'}}>
                 <Card
-                    style={{margin:'0 12px 12px'}}
+                    style={{margin:'0 12px 12px', position: 'relative', minHeight: '64px'}}
                     onClick={this._onMenuItemTap}>
                     {picCard}
-                    <div style={{display: 'table-cell', padding: '12px 0 0 12px'}}>
+                    <div style={{display: 'table-cell', padding: '12px 12px 0 12px'}}>
                         <div style={{lineHeight: '120%'}}>
                             <b>{item.title}</b>
                         </div>
                         {descriptionCard}
                         {grCard}
+                        {picCard != '' ? <div style={{height:60}}/> : ''}
                         {picCard != '' ? this._getButton(false) : ''}
                     </div>
                     {picCard == '' ? this._getButton(true) : ''}
