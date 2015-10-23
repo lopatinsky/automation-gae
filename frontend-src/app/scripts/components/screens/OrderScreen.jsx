@@ -300,7 +300,7 @@ const OrderScreen = React.createClass({
             </div>
             {this._getServerInfo()}
             <div style={{width: '100%'}}>
-                <Card style={{margin: '12px 12px 0 12px'}}>
+                <Card style={{margin: '12px 12px 60px 12px'}}>
                     <RadioButtonGroup
                         style={{margin: '12px'}}
                         name='group'
@@ -325,7 +325,7 @@ const OrderScreen = React.createClass({
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog"/>
             <TimeSlotsDialog ref="timeSlotsDialog"/>
-            <div style={{margin: '12px'}}>
+            <div style={{padding: '12px', position: 'fixed', bottom: '0px', width: '100%'}}>
                 <RaisedButton
                     primary={true}
                     label='Заказать'
