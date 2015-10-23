@@ -2,6 +2,7 @@ import BaseStore from './BaseStore';
 import { ServerRequests } from '../actions';
 
 const VenuesStore = new BaseStore({
+    venues: [],
     chosenVenue: null,
     chosenDelivery: null,
 

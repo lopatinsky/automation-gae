@@ -3,6 +3,10 @@ import { VenuesStore } from '../../stores';
 import { Card, CardText } from 'material-ui';
 
 const VenuesScreen = React.createClass({
+    _refresh() {
+        this.setState({});
+    },
+
     _getVenues() {
         var venues = VenuesStore.getVenues();
         return venues.map(venue => {
@@ -20,6 +24,14 @@ const VenuesScreen = React.createClass({
                 </Card>
             );
         });
+    },
+
+    componentDidMount() {
+        VenuesStore.addChangeListener(this._refresh);
+    },
+
+    componentWillUnmount() {
+        VenuesStore.removeChangeListener(this._refresh);
     },
 
     render() {
