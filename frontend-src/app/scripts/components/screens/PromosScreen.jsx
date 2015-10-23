@@ -10,6 +10,11 @@ const PromosScreen = React.createClass({
 
     getPromos() {
         var promos = PromosStore.getPromos();
+        if (promos.length == 0) {
+            return <div style={{textAlign: 'center'}}>
+                Нет подходящих акций
+            </div>;
+        }
         return promos.map(promo => {
             var picCard = <div style={{display: 'table-cell', width: '25%', padding: '0 12px 12px 12px'}}>
                 <CardMedia>
