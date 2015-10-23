@@ -17,7 +17,12 @@ const AddressStore = new BaseStore({
     },
 
     getChosenCity() {
-        return localStorage.getItem('city');
+        var city = localStorage.getItem('city');
+        if (city == null) {
+            city = '';
+            localStorage.setItem('city', city);
+        }
+        return city;
     },
 
     setChosenCity(city) {
@@ -25,15 +30,30 @@ const AddressStore = new BaseStore({
     },
 
     getStreet() {
-        return localStorage.getItem('street');
+        var street = localStorage.getItem('street');
+        if (street == null) {
+            street = '';
+            localStorage.setItem('street', street);
+        }
+        return street;
     },
 
     getHome() {
-        return localStorage.getItem('home');
+        var home = localStorage.getItem('home');
+        if (home == null) {
+            home = '';
+            localStorage.setItem('home', home);
+        }
+        return home;
     },
 
     getFlat() {
-        return localStorage.getItem('flat');
+        var flat = localStorage.getItem('flat');
+        if (flat == null) {
+            flat = '';
+            localStorage.setItem('flat', flat);
+        }
+        return flat;
     },
 
     getCityIndex(city) {
