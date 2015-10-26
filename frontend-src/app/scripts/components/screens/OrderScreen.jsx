@@ -289,7 +289,6 @@ const OrderScreen = React.createClass({
         OrderStore.addChangeListener(this._refresh);
         ClientStore.addChangeListener(this._refresh);
         PaymentsStore.addChangeListener(this._refresh);
-        this._refresh();
     },
 
     componentWillUnmount() {
@@ -297,6 +296,11 @@ const OrderScreen = React.createClass({
         OrderStore.removeChangeListener(this._refresh);
         ClientStore.removeChangeListener(this._refresh);
         PaymentsStore.removeChangeListener(this._refresh);
+    },
+
+    getInitialState() {
+        this._refresh();
+        return {};
     },
 
     render() {

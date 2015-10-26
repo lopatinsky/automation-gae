@@ -9,7 +9,7 @@ const PaymentsStore = new BaseStore({
     _setPaymentTypes(payment_types) {
         this.payment_types = payment_types;
         if (payment_types.length > 0) {
-            this.chosen_payment_type = payment_types[0];
+            this.setChosenPaymentType(payment_types[0]);
         }
     },
 
