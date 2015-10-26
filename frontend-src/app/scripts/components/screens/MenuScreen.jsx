@@ -60,7 +60,7 @@ const MenuScreen = React.createClass({
             return (
                 <Tab
                     value={category.info.category_id}
-                    label={<div style={{padding: '0 6px 0 6px', height: '32px'}}>{category.info.title}</div>}>
+                    label={<div style={{padding: '0 6px 0 6px', maxHeight: '32px', verticalAlign: 'middle'}}><div style={{lineHeight: '120%'}}>{category.info.title}</div></div>}>
                     {this._getItems(category)}
                 </Tab>
             );
