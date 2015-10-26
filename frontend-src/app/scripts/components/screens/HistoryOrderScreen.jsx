@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, ListDivider } from 'material-ui';
 import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
-import HistoryOrderItem from './HistoryOrderItem'
+import HistoryOrderItem from './HistoryOrderItem';
+import settings from '../../settings';
 
 const HistoryOrderScreen = React.createClass({
     refresh() {
@@ -42,6 +43,7 @@ const HistoryOrderScreen = React.createClass({
         }
         return <div style={{display: 'table', padding: '12px'}}>
             <FontIcon style={{display: 'table-cell', fontSize: '18px', verticalAlign: 'middle'}}
+                      color={settings.primaryColor}
                       className="material-icons">
                 location_on
             </FontIcon>
@@ -56,7 +58,7 @@ const HistoryOrderScreen = React.createClass({
         if (order != null) {
             return <Card>
                 <div style={{padding: '12px'}}>
-                    Заказ <b>#{order.number}</b>
+                    Заказ <b style={{color: settings.primaryColor}}>#{order.number}</b>
                     <div style={{float: 'right'}}>
                         <b>{HistoryStore.getStatus(order.status)}</b>
                     </div>
@@ -89,7 +91,9 @@ const HistoryOrderScreen = React.createClass({
         var order = this.props.order;
         if (order && order.status == 0) {
             return <div style={{float: 'right', padding: '12px'}}>
-                <RaisedButton label='Отмена' onClick={this.cancel} />
+                <RaisedButton label='Отмена'
+                              primary={true}
+                              onClick={this.cancel} />
             </div>;
         } else {
             return <div/>;
