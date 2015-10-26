@@ -25,7 +25,7 @@ const MenuItemView = React.createClass({
         }
         return (
             <div>
-                <Toolbar title={this.state.item.title} view={this} right='order' back={true} />
+                <Toolbar title={item.title} view={this} right='order' back={true} />
                 <MenuItemScreen/>
             </div>
         );
