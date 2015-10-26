@@ -69,7 +69,7 @@ const MenuScreen = React.createClass({
             <Tabs
                 value={this.state.value}
                 onChange={this._changeTab}
-                tabItemContainerStyle={{position: 'fixed', overflow: 'auto', height: '32px', zIndex: '1', padding: '64px 0 0 0'}}
+                tabItemContainerStyle={{position: 'fixed', overflow: 'auto', height: '32px', zIndex: '3', padding: '64px 0 0 0'}}
                 contentContainerStyle={{padding: '120px 0 0 0'}}>
                 {categories}
             </Tabs>

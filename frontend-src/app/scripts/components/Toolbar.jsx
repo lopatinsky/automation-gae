@@ -66,7 +66,7 @@ const Toolbar = React.createClass({
         }
         return (
             <AppBar
-                style={{position: 'fixed', height: '64px'}}
+                style={{position: 'fixed', height: '64px', zIndex: '4'}}
                 title={this.props.title}
                 onLeftIconButtonTouchTap={this.leftTap}
                 iconElementLeft={leftElement}
