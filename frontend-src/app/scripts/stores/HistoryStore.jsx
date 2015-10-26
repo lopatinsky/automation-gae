@@ -11,6 +11,7 @@ var STATUSES = {
 
 
 const HistoryStore = new BaseStore({
+    loading: false,
     orders: [],
 
     getOrders() {
@@ -30,6 +31,20 @@ const HistoryStore = new BaseStore({
         return STATUSES[status];
     },
 
+    setLoading() {
+        this.loading = true;
+        this._changed();
+    },
+
+    unsetLoading() {
+        this.loading = false;
+        this._changed();
+    },
+
+    isLoading() {
+        return this.loading;
+    },
+
     _setStatus(orderId, status) {
         var order = this.getOrder(orderId);
         order.status = status;
@@ -46,12 +61,25 @@ const HistoryStore = new BaseStore({
         case ServerRequests.INIT:
             if (action.data.request == "history") {
                 HistoryStore._setOrders(action.data.orders);
+                HistoryStore. unsetLoading();
             }
             break;
         case ServerRequests.CANCEL:
             if (action.data.request == "history") {
                 HistoryStore._setStatus(action.data.order_id, 2);
+                HistoryStore. unsetLoading();
             }
+            break;
+        case ServerRequests.ERROR:
+            if (action.data.request == "history") {
+                HistoryStore.unsetLoading();
+            }
+            break;
+         case ServerRequests.AJAX_SENDING:
+            if (action.data.request == "history") {
+                HistoryStore.setLoading();
+            }
+            break;
     }
 });
 

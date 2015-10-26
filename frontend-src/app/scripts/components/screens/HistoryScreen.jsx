@@ -3,12 +3,18 @@ import { Card, CardText, FontIcon } from 'material-ui';
 import { HistoryStore, VenuesStore } from '../../stores';
 import { Navigation } from 'react-router';
 import { ServerRequests } from '../../actions';
+import { LoadingDialog } from '../dialogs'
 import settings from '../../settings';
 
 const HistoryScreen = React.createClass({
     mixins: [Navigation],
 
     _refresh() {
+        if (HistoryStore.isLoading()) {
+            this.refs.processingDialog.show();
+        } else {
+            this.refs.processingDialog.dismiss();
+        }
         this.setState({});
     },
 
@@ -77,15 +83,20 @@ const HistoryScreen = React.createClass({
     componentDidMount() {
         ServerRequests.loadHistory();
         HistoryStore.addChangeListener(this._refresh);
+        this._refresh();
     },
 
     componentWillUnmount() {
         HistoryStore.removeChangeListener(this._refresh);
+        this.refs.processingDialog.dismiss();
     },
 
     render() {
         return <div style={{padding: '76px 0 0 0'}}>
             {this.getOrders()}
+            <LoadingDialog
+                ref='processingDialog'
+                title='Загрузка..'/>
         </div>;
     }
 });

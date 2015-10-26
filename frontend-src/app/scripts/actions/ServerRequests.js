@@ -253,6 +253,12 @@ const ServerRequests = {
     },
 
     loadHistory() {
+        AppDispatcher.dispatch({
+            actionType: this.AJAX_SENDING,
+            data: {
+                request: "history"
+            }
+        });
         request
             .get(base_url + '/api/history')
             .query({
@@ -268,7 +274,12 @@ const ServerRequests = {
                         }
                     });
                 } else {
-                    alert(res.status);
+                    AppDispatcher.dispatch({
+                        actionType: this.ERROR,
+                        data: {
+                            request: "history"
+                        }
+                    });
                 }
             });
     },
