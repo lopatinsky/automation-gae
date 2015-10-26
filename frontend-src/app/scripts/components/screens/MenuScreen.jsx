@@ -83,6 +83,7 @@ const MenuScreen = React.createClass({
 
     _refresh() {
         window.scrollTo(0, 0);
+        this.value = MenuStore.getSelected();
         this.setState({
             value: this.value
         });

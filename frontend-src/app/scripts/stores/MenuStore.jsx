@@ -4,7 +4,13 @@ import { ServerRequests } from '../actions';
 const MenuStore = new BaseStore({
     previousCategories: [],
     categories: [],
-    selected: null,
+
+    _removeSelected() {
+        var categories = this.getCategories();
+        for (var i = 0; i < categories.length; i++) {
+            categories[i].selected = false;
+        }
+    },
 
     getCategory(category_id) {
         for (var i = 0; i < this.categories.length; i++) {
@@ -15,17 +21,26 @@ const MenuStore = new BaseStore({
     },
 
     setSelected(category_id) {
-        this.selected = category_id;
+        this._removeSelected();
+        var category = this.getCategory(category_id);
+        category.selected = true;
         this._changed();
     },
 
     getSelected() {
-        return this.selected;
+        var categories = this.getCategories();
+        for (var i = 0; i < categories.length; i++) {
+            if (categories[i].selected == true) {
+                return categories[i].info.category_id;
+            }
+        }
+        return null;
     },
 
     getSelectedIndex() {
+        var selected = this.getSelected();
         for (var i = 0; i < this.categories.length; i++) {
-            if (this.categories[i].info.category_id == this.selected) {
+            if (this.categories[i].info.category_id == selected) {
                 return i;
             }
         }
@@ -67,6 +82,7 @@ const MenuStore = new BaseStore({
     },
 
     undoCategories() {
+        this._removeSelected();
         if (this.previousCategories.length > 0) {
             this.categories = this.previousCategories.pop();
         }

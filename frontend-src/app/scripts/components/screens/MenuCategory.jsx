@@ -8,6 +8,7 @@ const MenuCategory = React.createClass({
 
     _onMenuCategoryTap() {
         MenuStore.nextCategories(this.props.categories);
+        MenuStore.setSelected(this.props.category.info.category_id);
     },
 
     render() {
