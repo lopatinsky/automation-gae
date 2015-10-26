@@ -24,9 +24,12 @@ const OrderScreen = React.createClass({
                 order_id: orderId
             });
         }
-        var slots = VenuesStore.getChosenDelivery().slots;
-        if (slots.length > 0 && OrderStore.getSlotId() == null) {
-            OrderStore.setSlotId(slots[0].id);
+        var delivery = VenuesStore.getChosenDelivery();
+        if (delivery) {
+            var slots = delivery.slots;
+            if (slots.length > 0 && OrderStore.getSlotId() == null) {
+                OrderStore.setSlotId(slots[0].id);
+            }
         }
         if (OrderStore.getOrderError() != null) {
             this.refs.orderSnackBar.show();
@@ -61,7 +64,7 @@ const OrderScreen = React.createClass({
 
     _getDeliveryDescription() {
         var delivery = VenuesStore.getChosenDelivery();
-        if (delivery.id == 2 && OrderStore.getDeliverySumStr().length > 0) {
+        if (delivery && delivery.id == 2 && OrderStore.getDeliverySumStr().length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
                 {OrderStore.getDeliverySumStr()}
             </div>;
@@ -150,6 +153,9 @@ const OrderScreen = React.createClass({
 
     _getVenueInput() {
         var delivery = VenuesStore.getChosenDelivery();
+        if (!delivery) {
+            return <div/>;
+        }
         if (delivery.id == '2') {
             return <ListItem
                         primaryText={AddressStore.getAddressStr()}
@@ -184,6 +190,9 @@ const OrderScreen = React.createClass({
 
     _getTimeInput() {
         var delivery = VenuesStore.getChosenDelivery();
+        if (!delivery) {
+            return <div/>;
+        }
         if (delivery.slots.length > 0) {
             var slot = VenuesStore.getSlot(OrderStore.getSlotId());
             if (slot == null) {
@@ -227,15 +236,19 @@ const OrderScreen = React.createClass({
 
     _getDeliveryTypes() {
         var venue = VenuesStore.getChosenVenue();
-        return venue.deliveries.map(delivery => {
-            return (
-                <RadioButton
-                    label={delivery.name}
-                    name={delivery.name}
-                    value={delivery.name}
-                    onClick={() => this._onDeliveryTap(delivery)}/>
-            );
-        });
+        if (venue) {
+            return venue.deliveries.map(delivery => {
+                return (
+                    <RadioButton
+                        label={delivery.name}
+                        name={delivery.name}
+                        value={delivery.name}
+                        onClick={() => this._onDeliveryTap(delivery)}/>
+                );
+            });
+        } else {
+            return <div/>;
+        }
     },
 
     _getClientInfo() {
@@ -287,6 +300,7 @@ const OrderScreen = React.createClass({
     },
 
     render() {
+        var delivery = VenuesStore.getChosenDelivery();
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
@@ -306,7 +320,7 @@ const OrderScreen = React.createClass({
                     <RadioButtonGroup
                         style={{margin: '12px'}}
                         name='group'
-                        valueSelected={VenuesStore.getChosenDelivery().name}>
+                        valueSelected={delivery ? delivery.name : null}>
                         {this._getDeliveryTypes()}
                     </RadioButtonGroup>
                     <ListDivider/>

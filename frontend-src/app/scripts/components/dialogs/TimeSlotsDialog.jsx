@@ -5,6 +5,9 @@ import { OrderStore, VenuesStore } from '../../stores';
 const TimeSlotsDialog = React.createClass({
     _getSlots() {
         var delivery = VenuesStore.getChosenDelivery();
+        if (!delivery) {
+            return <div/>;
+        }
         return delivery.slots.map(slot => {
             return (
                 <div>

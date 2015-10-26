@@ -18,7 +18,11 @@ const PaymentsStore = new BaseStore({
     },
 
     getChosenPaymentTypeTitle() {
-        return this.chosen_payment_type.really_title;
+        if (this.chosen_payment_type) {
+           return this.chosen_payment_type.really_title;
+        } else {
+            return 'Выберите тип оплаты'
+        }
     },
 
     getChosenPaymentType() {
