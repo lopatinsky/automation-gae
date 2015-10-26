@@ -144,28 +144,31 @@ const ServerRequests = {
     },
 
     checkOrder() {
-        request
-            .post(base_url + '/api/check_order')
-            .type('form')
-            .send(OrderStore.getCheckOrderDict())
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.UPDATE,
-                        data: {
-                            request: "order",
-                            total_sum: res.body.total_sum,
-                            delivery_sum: res.body.delivery_sum,
-                            delivery_sum_str: res.body.delivery_sum_str,
-                            promos: res.body.promos,
-                            errors: res.body.errors,
-                            orderGifts: res.body.new_order_gifts
-                        }
-                    });
-                } else {
-                    alert(res.status);
-                }
-            });
+        var dict = OrderStore.getCheckOrderDict();
+        if (dict) {
+            request
+                .post(base_url + '/api/check_order')
+                .type('form')
+                .send(dict)
+                .end((err, res) => {
+                    if (res.status == 200) {
+                        AppDispatcher.dispatch({
+                            actionType: this.UPDATE,
+                            data: {
+                                request: "order",
+                                total_sum: res.body.total_sum,
+                                delivery_sum: res.body.delivery_sum,
+                                delivery_sum_str: res.body.delivery_sum_str,
+                                promos: res.body.promos,
+                                errors: res.body.errors,
+                                orderGifts: res.body.new_order_gifts
+                            }
+                        });
+                    } else {
+                        alert(res.status);
+                    }
+                });
+        }
     },
 
     order() {
