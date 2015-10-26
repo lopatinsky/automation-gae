@@ -241,7 +241,7 @@ const OrderStore = new BaseStore({
         var delivery = VenuesStore.getChosenDelivery();
         var dict = {
             client_id: ClientStore.getClientId(),
-            delivery_type: VenuesStore.getChosenDelivery().id,
+            delivery_type: delivery ? delivery.id : '0',
             payment: JSON.stringify(PaymentsStore.getPaymentDict()),
             items: JSON.stringify(this.getItemsDict())
         };

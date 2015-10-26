@@ -7,6 +7,7 @@ import { AppActions } from '../actions';
 import { MenuStore } from '../stores';
 
 const AppView = React.createClass({
+    dialogTitle: "Загрузка...",
 
     childContextTypes: {
         muiTheme: React.PropTypes.object
@@ -42,10 +43,16 @@ const AppView = React.createClass({
     render() {
         return <div>
             <RouteHandler/>
-            <Dialog
-                ref="processingDialog"
-                title="Загрузка">
-                <RefreshIndicator left={5} top={5} status="loading" />
+            <Dialog ref="processingDialog"
+                    bodyStyle={{padding: '12px'}}>
+                <div style={{display: 'table', width: '100%'}}>
+                    <div style={{display: 'table-cell', height: '40', width: '40', verticalAlign: 'middle'}}>
+                        <RefreshIndicator left={12} top={12} size={40} status="loading" />
+                    </div>
+                    <div style={{display: 'table-cell', paddingLeft: '12px', verticalAlign: 'middle'}}>
+                        <b>{this.dialogTitle}</b>
+                    </div>
+                </div>
             </Dialog>
         </div>;
     }
