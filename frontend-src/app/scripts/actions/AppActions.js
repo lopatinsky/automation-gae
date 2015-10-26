@@ -10,6 +10,7 @@ const AppActions = {
         ServerRequests._loadMenu();
         ServerRequests._loadPaymentTypes();
         ServerRequests._loadCompanyInfo();
+        ServerRequests.loadPromos();
     },
 
     setClientInfo(name, phone, email) {
