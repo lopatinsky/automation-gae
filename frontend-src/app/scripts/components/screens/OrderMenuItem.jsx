@@ -27,10 +27,6 @@ const OrderMenuItem = React.createClass({
     },
 
     _getDeleteButton() {
-         //return <FlatButton
-         //   style={{margin: '0 12px 12px 0'}}
-         //   label='Удалить'
-         //   onClick={this._removeItem}/>;
         return <IconButton
                     onClick={this._removeItem}
                     iconClassName="material-icons"
