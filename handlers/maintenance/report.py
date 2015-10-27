@@ -67,7 +67,8 @@ class VenuesReportWithDatesHandler(BaseReportHandler):
 
 class OrdersReportHandler(BaseReportHandler):
     def get(self):
-        html_values = orders.get(**get_standart_params(self.request))
+        html_values = orders.get(lite=self.request.get('lite') == 'on',
+                                 **get_standart_params(self.request))
         self.render_report('orders', html_values)
 
 
