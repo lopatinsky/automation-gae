@@ -12,6 +12,7 @@ var STATUSES = {
 
 const HistoryStore = new BaseStore({
     loading: false,
+    loadsCount: 0,
     orders: [],
 
     getOrders() {
@@ -45,6 +46,10 @@ const HistoryStore = new BaseStore({
         return this.loading;
     },
 
+    isOrderLoaded() {
+        return this.loadsCount > 0;
+    },
+
     _setStatus(orderId, status) {
         var order = this.getOrder(orderId);
         order.status = status;
@@ -53,6 +58,7 @@ const HistoryStore = new BaseStore({
 
     _setOrders(orders) {
         this.orders = orders;
+        this.loadsCount += 1;
         this._changed();
     }
 

@@ -10,7 +10,7 @@ const HistoryScreen = React.createClass({
     mixins: [Navigation],
 
     _refresh() {
-        if (HistoryStore.isLoading()) {
+        if (HistoryStore.isLoading() && !HistoryStore.isOrderLoaded()) {
             this.refs.processingDialog.show();
         } else {
             this.refs.processingDialog.dismiss();
@@ -96,7 +96,7 @@ const HistoryScreen = React.createClass({
             {this.getOrders()}
             <LoadingDialog
                 ref='processingDialog'
-                title='Загрузка..'/>
+                title='Загрузка истории'/>
         </div>;
     }
 });
