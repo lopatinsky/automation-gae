@@ -9,9 +9,15 @@ import settings from '../../settings';
 const HistoryOrderScreen = React.createClass({
     refresh() {
         var order = this.props.order;
-        if (order != null && OrderStore.getOrderId() == order.order_id) {
-            this.refs.successDialog.show();
-            OrderStore.clearOrderId();
+        if (OrderStore.getOrderId() != null) {
+            if (order != null && OrderStore.getOrderId() == order.order_id) {
+                this.refs.doneProcessingDialog.dismiss();
+                this.refs.successDialog.show();
+                 OrderStore.clearOrderId();
+            } else {
+                this.refs.doneProcessingDialog.show();
+            }
+
         }
         if (OrderStore.getCancelProcessing()) {
             this.refs.cancelProcessingDialog.show();
@@ -116,6 +122,9 @@ const HistoryOrderScreen = React.createClass({
             {this.getOrder()}
             {this.getCancelButton()}
             <SuccessPlaceOrderDialog ref="successDialog" />
+            <LoadingDialog
+                ref="doneProcessingDialog"
+                title="Загрузка заказа"/>
             <LoadingDialog
                 ref="cancelProcessingDialog"
                 title="Отмена заказа"/>
