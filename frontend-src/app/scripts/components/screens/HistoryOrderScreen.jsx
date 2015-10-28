@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, ListDivider } from 'material-ui';
 import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
-import { SuccessPlaceOrderDialog } from '../dialogs';
+import { SuccessPlaceOrderDialog, LoadingDialog } from '../dialogs';
 import HistoryOrderItem from './HistoryOrderItem';
 import settings from '../../settings';
 
@@ -116,11 +116,9 @@ const HistoryOrderScreen = React.createClass({
             {this.getOrder()}
             {this.getCancelButton()}
             <SuccessPlaceOrderDialog ref="successDialog" />
-            <Dialog
+            <LoadingDialog
                 ref="cancelProcessingDialog"
-                title="Отмена заказа">
-                <RefreshIndicator left={5} top={5} status="loading" />
-            </Dialog>
+                title="Отмена заказа"/>
             <Snackbar
                 ref='cancelSnackBar'
                 message={OrderStore.getCancelDescription()}
