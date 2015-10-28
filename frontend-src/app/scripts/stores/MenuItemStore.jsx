@@ -71,6 +71,14 @@ const MenuItemStore = new BaseStore({
         for (var i = 0; i < item.group_modifiers.length; i++) {
             var modifier = item.group_modifiers[i];
             this.setChoice(modifier, this.getDefaultModifierChoice(modifier));
+            modifier.with_price = false;
+            for (var j = 0; j < modifier.choices.length; j++) {
+                var choice =  modifier.choices[j];
+                if (choice.price > 0) {
+                    modifier.with_price = true;
+                    break;
+                }
+            }
         }
         for (i = 0; i < item.single_modifiers.length; i++) {
             item.single_modifiers[i].quantity = 0;
