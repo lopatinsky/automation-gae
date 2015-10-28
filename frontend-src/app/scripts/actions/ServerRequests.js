@@ -107,7 +107,14 @@ const ServerRequests = {
                             request: "address",
                             cities: res.body.cities
                         }
-                    })
+                    });
+                    AppDispatcher.dispatch({
+                        actionType: this.INIT,
+                        data: {
+                            request: "company",
+                            info: res.body
+                        }
+                    });
                 } else {
                     AppDispatcher.dispatch({
                         actionType: this.AJAX_FAILURE,

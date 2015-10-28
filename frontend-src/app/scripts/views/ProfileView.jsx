@@ -8,7 +8,12 @@ const ProfileView = React.createClass({
 
     toolbarLeftTap() {
         this.refs.profileScreen.saveProfile();
-        this.transitionTo('order');
+        var settings = this.props.params.settings;
+        if (settings) {
+            this.transitionTo('settings');
+        } else {
+            this.transitionTo('order');
+        }
     },
 
     render() {

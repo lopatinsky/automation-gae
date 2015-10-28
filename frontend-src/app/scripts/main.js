@@ -13,7 +13,7 @@ const routes = <Route path='/' handler={AppView}>
     <Route path='/venues' name='venues' handler={VenuesView}/>
     <Route path='/history' name='history' handler={HistoryView}/>
     <Route path='/address' name='address' handler={AddressView}/>
-    <Route path='/profile' name='profile' handler={ProfileView}/>
+    <Route path='/profile/:settings?' name='profile' handler={ProfileView}/>
     <Route path='/promos' name='promos' handler={PromosView}/>
     <Route path='/order/:order_id' name='historyOrder' handler={HistoryOrderView}/>
     <Route path='/settings' name='settings' handler={SettingsView}/>
