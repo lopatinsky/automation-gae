@@ -354,8 +354,9 @@ const OrderScreen = React.createClass({
             </div>
             <Snackbar
                 ref='orderSnackBar'
+                style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
                 message={OrderStore.getOrderError()}
-                autoHideDuration='1000'
+                autoHideDuration='5000'
                 onShow={ServerRequests.checkOrder}
                 onDismiss={() => {OrderStore.setOrderError(null)}}/>
         </div>;
