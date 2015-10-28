@@ -121,8 +121,8 @@ const HistoryOrderScreen = React.createClass({
                 title="Отмена заказа"/>
             <Snackbar
                 ref='cancelSnackBar'
+                style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
                 message={OrderStore.getCancelDescription()}
-                autoHideDuration='1000'
                 onDismiss={() => {OrderStore.setCancelDescription(null)}}/>
         </div>;
     }
