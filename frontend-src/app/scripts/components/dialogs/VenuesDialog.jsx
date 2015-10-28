@@ -12,9 +12,9 @@ const VenuesDialog = React.createClass({
                     <ListItem
                         onClick={() => this.dismiss(venue)}>
                         <div>
-                            <div><b>{venue.title}</b></div>
-                            <div style={{padding: '6px 0 0 0'}}>{venue.address}</div>
-                            <div style={{padding: '6px 0 0 0'}}>{venue.schedule_str}</div>
+                            <div style={{fontSize: '14px', lineHeight: '120%'}}><b>{venue.title}</b></div>
+                            <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.address}</div>
+                            <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.schedule_str}</div>
                         </div>
                     </ListItem>
                     <ListDivider/>
@@ -35,7 +35,9 @@ const VenuesDialog = React.createClass({
     render() {
         return (
             <Dialog
-                autoScrollBodyContent="true"
+                contentStyle={{width: '90%'}}
+                bodyStyle={{padding: '12px', overflowY: 'auto', maxHeight: '487px'}}
+                autoScrollBodyContent={true}
                 ref="venuesDialog">
                 <List>
                     {this._getVenues()}

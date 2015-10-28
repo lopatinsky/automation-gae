@@ -36,7 +36,7 @@ class DaySchedule(ndb.Model):
         return result
 
     def interval_str(self, day):
-        hours_interval_str = '%s - %s' % (self.start_str(), self.end_str())
+        hours_interval_str = '%s-%s' % (self.start_str(), self.end_str())
         if self.compare(day, weekday_include=True):
             return '%s: %s' % (self.DAY_SHORT_MAP[self.weekday], hours_interval_str)
         else:

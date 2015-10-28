@@ -32,6 +32,7 @@ const TimeSlotsDialog = React.createClass({
     render() {
         return (
             <Dialog
+                bodyStyle={{padding: '12px'}}
                 autoScrollBodyContent="true"
                 ref="timeSlotsDialog">
                 <List>

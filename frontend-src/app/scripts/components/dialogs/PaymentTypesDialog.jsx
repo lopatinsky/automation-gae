@@ -28,7 +28,9 @@ const PaymentTypesDialog = React.createClass({
 
     render() {
         return (
-            <Dialog ref="paymentTypesDialog">
+            <Dialog
+                bodyStyle={{padding: '12px'}}
+                ref="paymentTypesDialog">
                 <List>
                     {this._getPaymentTypes()}
                 </List>
