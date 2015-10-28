@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton } from 'material-ui';
+import { Card, CardText, FlatButton, ListDivider } from 'material-ui';
 import { MenuItemStore } from '../../stores';
 
 const SingleModifier = React.createClass({
@@ -39,31 +39,42 @@ const SingleModifier = React.createClass({
     render() {
         var modifier = this.props.modifier;
         return (
-            <Card style={{margin: '0 0 6px 0'}}>
-                <div style={{display: 'table'}}>
-                    {modifier.price != 0 ? <div style={{display: 'table-cell', width: '24px', padding: '0 0 0 3px'}}>
-                        {modifier.price  + 'p. '}
-                    </div> : ''}
-                    <div style={{display: 'table-cell', width: '100px', padding: '0 0 0 12px'}}>
-                        {modifier.title}
+            <div>
+                <div style={{display: 'table', width: '100%', padding: '3px 0'}}>
+                     <div style={{display: 'table-cell', width: '15%', verticalAlign: 'middle'}}>
+                        <b>{modifier.price  + 'p.'}</b>
                     </div>
-                    <div style={{display: 'table-cell', padding: '12px'}}>
-                        <FlatButton
-                            style={{width: '40px', minWidth: null}}
-                            label="-"
-                            onClick={() => this._deduct()} />
+                    <div style={{display: 'table-cell', padding: '0 0 0 12px', verticalAlign: 'middle'}}>
+                        <div style={{lineHeight: '120%'}}>
+                            {modifier.title}
+                        </div>
                     </div>
-                    <div style={{display: 'table-cell', textAlign: 'center'}}>
-                        {this.quantity}
-                    </div>
-                    <div style={{display: 'table-cell', padding: '12px'}}>
-                        <FlatButton
-                            style={{width: '40px', minWidth: null}}
-                            label="+"
-                            onClick={() => this._add()} />
+                    <div style={{display: 'table-cell'}}>
+                        <div style={{display: 'table', float: 'right', verticalAlign: 'middle'}}>
+                            {this.quantity > 0 ?
+                                <div style={{display: 'table-cell'}}>
+                                    <FlatButton
+                                        style={{width: '40px', minWidth: null}}
+                                        label="-"
+                                        onClick={() => this._deduct()} />
+                                </div>
+                            : null}
+                            {this.quantity > 0 ?
+                                <div style={{display: 'table-cell'}}>
+                                    {this.quantity}
+                                </div>
+                            : null}
+                            <div style={{display: 'table-cell'}}>
+                                <FlatButton
+                                    style={{width: '40px', minWidth: null}}
+                                    label="+"
+                                    onClick={() => this._add()} />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </Card>
+                <ListDivider/>
+            </div>
         );
     }
 });

@@ -38,10 +38,11 @@ const SingleModifiersDialog = React.createClass({
         return (
             <Dialog
                 autoScrollBodyContent="true"
+                contentStyle={{width: '90%'}}
                 ref="modifierDialog"
-                title='Добавки'>
+                title='Добавки'
+                actions={[{text: 'Ок', onTouchTap: this.dismiss}]}>
                 {this._getModifiers()}
-                <FlatButton label='Ок' onClick={this.dismiss} />
             </Dialog>
         );
     }
