@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, ListDivider } from 'material-ui';
 import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
+import { SuccessPlaceOrderDialog } from '../dialogs';
 import HistoryOrderItem from './HistoryOrderItem';
 import settings from '../../settings';
 
@@ -114,9 +115,7 @@ const HistoryOrderScreen = React.createClass({
         return <div style={{padding: '64px 0 0 0'}}>
             {this.getOrder()}
             {this.getCancelButton()}
-            <Dialog
-                ref="successDialog"
-                title="Заказ успешно размещен"/>
+            <SuccessPlaceOrderDialog ref="successDialog" />
             <Dialog
                 ref="cancelProcessingDialog"
                 title="Отмена заказа">

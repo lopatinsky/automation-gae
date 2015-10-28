@@ -6,3 +6,4 @@ export { default as PaymentTypesDialog } from './PaymentTypesDialog';
 export { default as CommentDialog } from './CommentDialog';
 export { default as TimeSlotsDialog } from './TimeSlotsDialog';
 export { default as LoadingDialog } from './LoadingDialog';
+export { default as SuccessPlaceOrderDialog } from './SuccessPlaceOrderDialog';
