@@ -58,6 +58,7 @@ const OrderList = React.createClass({
                 order => <OrderCard key={order.id}
                                     order={order}
                                     highlightColor={this._getHighlightColor(order)}
+                                    appKind={this.props.appKind}
                                     {...actions}/>
         );
 

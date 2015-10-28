@@ -9,7 +9,7 @@ import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 import RadioButton from 'material-ui/lib/radio-button';
 import RaisedButton from 'material-ui/lib/raised-button';
 import { Nav, SpinnerWrap, Clock } from '../components';
-import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
+import { AuthStore, AjaxStore, OrderStore, SystemStore, ConfigStore } from '../stores';
 import Actions from '../Actions';
 
 const MainView = React.createClass({
@@ -30,24 +30,27 @@ const MainView = React.createClass({
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
         SystemStore.addChangeListener(this._onSystemStoreChange);
+        ConfigStore.addChangeListener(this._onConfigStoreChange);
         Actions.loadCurrent();
-        Actions.loadDeliveryTypes();
+        Actions.loadConfig();
         this._checkDeliveryType();
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
         OrderStore.removeChangeListener(this._onOrderStoreChange);
-        SystemStore.addChangeListener(this._onSystemStoreChange);
+        SystemStore.removeChangeListener(this._onSystemStoreChange);
+        ConfigStore.removeChangeListener(this._onConfigStoreChange);
         clearInterval(this._updateInterval);
     },
 
     getInitialState() {
         return {
             hasUpdate: SystemStore.hasUpdate,
-            orderAheadEnabled: OrderStore.orderAheadEnabled,
+            orderAheadEnabled: ConfigStore.orderAheadEnabled,
+            deliveryEnabled: ConfigStore.deliveryEnabled,
+            appKind: ConfigStore.appKind,
             orderAhead: OrderStore.getOrderAheadOrders(),
-            deliveryEnabled: OrderStore.deliveryEnabled,
             delivery: OrderStore.getDeliveryOrders(),
             loadingOrders: AjaxStore.sending.current,
             loadedOrders: OrderStore.loadedOrders,
@@ -70,9 +73,7 @@ const MainView = React.createClass({
     },
     _onOrderStoreChange(data) {
         this.setState({
-            orderAheadEnabled: OrderStore.orderAheadEnabled,
             orderAhead: OrderStore.getOrderAheadOrders(),
-            deliveryEnabled: OrderStore.deliveryEnabled,
             delivery: OrderStore.getDeliveryOrders(),
             loadedOrders: OrderStore.loadedOrders,
             lastSuccessfulLoadTime: OrderStore.lastSuccessfulLoadTime,
@@ -90,6 +91,13 @@ const MainView = React.createClass({
         this.setState({
             hasUpdate: SystemStore.hasUpdate
         });
+    },
+    _onConfigStoreChange() {
+        this.setState({
+            orderAheadEnabled: ConfigStore.orderAheadEnabled,
+            deliveryEnabled: ConfigStore.deliveryEnabled,
+            appKind: ConfigStore.appKind
+        })
     },
 
     _checkDeliveryType() {
@@ -208,11 +216,13 @@ const MainView = React.createClass({
                               loadingOrders={this.state.loadingOrders}
                               orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
+                              appKind={this.state.appKind}
                               tryReload={this._tryReloadOrders}
                               onTouchTapCancel={this._onTouchTapCancel}
                               onTouchTapConfirm={this._onTouchTapConfirm}
                               onTouchTapDone={this._onTouchTapDone}
-                              onTouchTapPostpone={this._onTouchTapPostpone}/>
+                              onTouchTapPostpone={this._onTouchTapPostpone}
+                              onTouchTapSync={this._onTouchTapSync}/>
             </div>
             {this._renderLogoutDialog()}
             {this._renderCancelDialog()}
@@ -251,6 +261,10 @@ const MainView = React.createClass({
     _postponeSubmit() {
         this.refs.postponeDialog.dismiss();
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
+    },
+
+    _onTouchTapSync(order) {
+        console.log("sync", order);
     }
 });
 export default MainView;

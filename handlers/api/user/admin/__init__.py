@@ -1,5 +1,6 @@
 from handlers.api.user.admin.auth import LoginHandler, LogoutHandler
 from handlers.api.user.admin.ping import PingHandler
+from handlers.api.user.admin.config import ConfigHandler
 from handlers.api.user.admin.lists import CurrentOrdersHandler, HistoryHandler, ReturnsHandler
 from handlers.api.user.admin.updates import UpdatesHandler
 from handlers.api.user.admin.changes import CancelOrderHandler, DoneOrderHandler, PostponeOrderHandler, ConfirmOrderHandler, WrongVenueHandler

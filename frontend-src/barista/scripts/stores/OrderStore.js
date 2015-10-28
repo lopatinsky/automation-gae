@@ -99,8 +99,6 @@ const OrderStore = new BaseStore({
     lastSuccessfulLoadTime: null,
     wasLastLoadSuccessful: false,
     lastServerTimestamp: null,
-    orderAheadEnabled: true,
-    deliveryEnabled: true,
     _addOrder(order) {
         if (order.status == this.STATUS.NEW || order.status == this.STATUS.CONFIRMED) {
             this._knownOrders.set(order.id, order);
@@ -137,19 +135,6 @@ const OrderStore = new BaseStore({
         this._changed({ showError: err.status });
     },
 
-    setDeliveryTypes(deliveryTypes) {
-        this.orderAheadEnabled = false;
-        this.deliveryEnabled = false;
-        for (let dt of deliveryTypes) {
-            if (dt.id == this.DELIVERY_TYPE.DELIVERY) {
-                this.deliveryEnabled = true;
-            } else {
-                this.orderAheadEnabled = true;
-            }
-        }
-        this._changed();
-    },
-
     _clearOrders() {
         this._knownOrders.clear();
         this.loadedOrders = false;
@@ -159,8 +144,6 @@ const OrderStore = new BaseStore({
     },
     clear() {
         this._clearOrders();
-        this.orderAheadEnabled = true;
-        this.deliveryEnabled = true;
         this._changed();
     },
 
@@ -215,9 +198,6 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request == "logout") {
                 OrderStore.clear();
-            }
-            if (action.data.request == "delivery_types") {
-                OrderStore.setDeliveryTypes(action.data.deliveries);
             }
             if (action.data.request == "history") {
                 const history = action.data.history.map(o => new Order(o));

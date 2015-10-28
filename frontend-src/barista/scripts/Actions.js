@@ -62,10 +62,10 @@ const Actions = {
             .end(res => ({}));
     },
 
-    loadDeliveryTypes() {
-        doRequest.get("delivery_types", 'admin/delivery_types')
+    loadConfig() {
+        doRequest.get("config", 'admin/config')
             .end(res => ({
-                deliveries: res.body.deliveries
+                config: res.body
             }));
     },
 

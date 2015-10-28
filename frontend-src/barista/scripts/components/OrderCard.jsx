@@ -3,7 +3,7 @@ import Card from 'material-ui/lib/card/card';
 import CardText from 'material-ui/lib/card/card-text';
 import FlatButton from 'material-ui/lib/flat-button';
 import AutoPrefix from 'material-ui/lib/styles/auto-prefix';
-import { AjaxStore, OrderStore } from '../stores';
+import { AjaxStore, OrderStore, ConfigStore } from '../stores';
 import { SpinnerWrap, OrderInfo } from '../components';
 
 const OrderCard = React.createClass({
@@ -14,7 +14,8 @@ const OrderCard = React.createClass({
                 cancel: this._handleAction.bind(this, 'Cancel'),
                 postpone: this._handleAction.bind(this, 'Postpone'),
                 confirm: this._handleAction.bind(this, 'Confirm'),
-                done: this._handleAction.bind(this, 'Done')
+                done: this._handleAction.bind(this, 'Done'),
+                sync: this._handleAction.bind(this, 'Sync')
             }
         };
     },
@@ -36,23 +37,27 @@ const OrderCard = React.createClass({
             console.log(`missing handler for action ${action}`);
     },
     _renderActions() {
-        if (this.props.simple) {
-            return null;
-        }
-        let order = this.props.order,
-            primaryActionLabel, primaryActionHandler;
-        if (order.deliveryType == OrderStore.DELIVERY_TYPE.DELIVERY && order.status == OrderStore.STATUS.NEW) {
-            primaryActionLabel = 'Подтвердить';
-            primaryActionHandler = this.state.handle.confirm;
-        } else {
-            primaryActionLabel = 'Выдать';
-            primaryActionHandler = this.state.handle.done;
-        }
-        return <div style={{borderTop: '1px solid #ccc', textAlign: 'right', padding: 8}}>
-            <FlatButton label='Отменить' onTouchTap={this.state.handle.cancel} disabled={this.state.sendingRequest}/>
-            <FlatButton label='Перенести' onTouchTap={this.state.handle.postpone} disabled={this.state.sendingRequest}/>
-            <FlatButton label={primaryActionLabel} onTouchTap={primaryActionHandler} disabled={this.state.sendingRequest} secondary={true}/>
-        </div>;
+        const style = {borderTop: '1px solid #ccc', textAlign: 'right', padding: 8};
+        if (this.props.appKind == ConfigStore.APP_KIND.AUTO_APP) {
+            let order = this.props.order,
+                primaryActionLabel, primaryActionHandler;
+            if (order.deliveryType == OrderStore.DELIVERY_TYPE.DELIVERY && order.status == OrderStore.STATUS.NEW) {
+                primaryActionLabel = 'Подтвердить';
+                primaryActionHandler = this.state.handle.confirm;
+            } else {
+                primaryActionLabel = 'Выдать';
+                primaryActionHandler = this.state.handle.done;
+            }
+            return <div style={style}>
+                <FlatButton label='Отменить' onTouchTap={this.state.handle.cancel} disabled={this.state.sendingRequest}/>
+                <FlatButton label='Перенести' onTouchTap={this.state.handle.postpone} disabled={this.state.sendingRequest}/>
+                <FlatButton label={primaryActionLabel} onTouchTap={primaryActionHandler} disabled={this.state.sendingRequest} secondary={true}/>
+            </div>;
+        } else if (this.props.appKind == ConfigStore.APP_KIND.RESTO_APP) {
+            return <div style={style}>
+                <FlatButton label='Обновить статус' onTouchTap={this.state.handle.sync} disabled={this.state.sendingRequest} secondary={true}/>
+            </div>
+        } else return null;
     },
     render() {
         let contentStyle = AutoPrefix.all({
