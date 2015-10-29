@@ -66,6 +66,8 @@ class ApiHandler(RequestHandler):
             if not namespace_manager.get_namespace():
                 namespace = self.request.headers.get('Namespace')
                 namespace_manager.set_namespace(namespace)
+        if namespace_manager.get_namespace() == 'mycompany':
+            namespace_manager.set_namespace('shashlichniydom')
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         self.test = is_test_version()
         #update_company_versions(self.request.headers.get('Version', 0))
