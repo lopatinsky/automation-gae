@@ -1,7 +1,9 @@
 import React from 'react';
-import { LeftNav } from 'material-ui';
+import { LeftNav, FontIcon } from 'material-ui';
 import { Navigation } from 'react-router';
 import Router from 'react-router';
+import settings from '../settings';
+import Colors from 'material-ui/lib/styles/colors';
 
 var INDEXES = {
     '/': 0, // menu
@@ -26,31 +28,44 @@ const NavigationDrawer = React.createClass({
         this.refs.leftNav.toggle();
     },
 
+    _getItem(title, icon_name, index) {
+        return <div style={{display: 'table'}}>
+            <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '20px'}}
+                      color={index == this.state.index ? settings.primaryColor : Colors.grey500}
+                      className="material-icons">
+                {icon_name}
+            </FontIcon>
+            <div style={{display: 'table-cell', paddingLeft: '12px'}}>
+                {title}
+            </div>
+        </div>;
+    },
+
     _leftNavItems() {
         return [{
                 index: 0,
                 route: 'menu',
-                text: 'Меню'
+                text: this._getItem('Меню', 'restaurant_menu', 0)
             }, {
                 index: 1,
                 route: 'order',
-                text: 'Мой заказ'
+                text: this._getItem('Заказ', 'shopping_basket', 1)
             }, {
                 index: 2,
                 route: 'venues',
-                text: 'Кофейни'
+                text: this._getItem('Кофейни', 'place', 2)
             }, {
                 index: 3,
                 route: 'history',
-                text: 'История'
+                text: this._getItem('История', 'history', 3)
             }, {
                 index: 4,
                 route: 'promos',
-                text: 'Акции'
+                text: this._getItem('Акции', 'loyalty', 4)
             }, {
                 index: 5,
                 route: 'settings',
-                text: 'Настройки'
+                text: this._getItem('Настройки', 'settings', 5)
             }
         ];
     },
