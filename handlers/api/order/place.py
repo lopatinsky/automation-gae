@@ -14,7 +14,8 @@ from methods.orders.create import send_venue_sms, send_venue_email, send_client_
     paypal_payment_performing, set_address_obj, send_demo_sms
 from methods.orders.validation.validation import validate_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
-    check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
+    check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
+    set_extra_order_info
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
@@ -117,6 +118,9 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Выбранный способ оплаты недоступен.")
 
         self.order.wallet_payment = order_json['payment'].get('wallet_payment', 0)
+
+        extra_fields = order_json.get('extra_order_fields', {})  # todo: it can be checked in validation
+        set_extra_order_info(self.order, extra_fields)
 
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")

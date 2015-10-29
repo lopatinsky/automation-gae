@@ -151,6 +151,7 @@ class Order(ndb.Model):
     email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
     geo_push = ndb.KeyProperty(kind=GeoPush)
+    extra_data = ndb.JsonProperty()
 
     @classmethod
     def get(cls, client):
@@ -288,6 +289,10 @@ class Order(ndb.Model):
             if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
                 for field in config.CLIENT_MODULE.extra_fields:
                     value = client.extra_data and client.extra_data.get(latinize(field.title))
+                    comment += "; %s: %s" % (field.title, value)
+            if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+                for field in config.ORDER_MODULE.extra_fields:
+                    value = self.extra_data and self.extra_data.get(latinize(field.title))
                     comment += "; %s: %s" % (field.title, value)
         return comment
 

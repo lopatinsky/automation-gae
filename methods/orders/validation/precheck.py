@@ -30,6 +30,17 @@ def get_order_id(order_json):
         return Order.generate_id()
 
 
+def set_extra_order_info(order, extra_info):
+    config = Config.get()
+    extra_json = {}
+    if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+        for field in config.ORDER_MODULE.extra_fields:
+            field_key = latinize(field.title)
+            value = extra_info.get(field_key) if extra_info else None
+            extra_json[field_key] = value
+    order.extra_data = extra_json
+
+
 def check_items_and_gifts(order_json):
     if not order_json['items'] and not order_json.get('gifts') and not order_json.get('order_gifts'):
         return False
