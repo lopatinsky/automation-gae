@@ -10,106 +10,6 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Order
-  properties:
-  - name: status
-  - name: date_created
-
-- kind: Order
-  properties:
-  - name: status
-  - name: return_datetime
-
-- kind: Order
-  properties:
-  - name: client_id
-  - name: date_created
-
-- kind: Order
-  properties:
-  - name: client_id
-  - name: date_created
-    direction: desc
-
-- kind: Order
-  properties:
-  - name: status
-  - name: venue_id
-  - name: date_created
-
-- kind: Order
-  properties:
-  - name: status
-  - name: venue_id
-  - name: return_datetime
-
-- kind: Order
-  properties:
-  - name: venue_id
-  - name: date_created
-
-- kind: Order
-  properties:
-  - name: venue_id
-  - name: client_id
-  - name: date_created
-
-- kind: Order
-  properties:
-  - name: venue_id
-  - name: updated
-
-- kind: Order
-  properties:
-  - name: delivery_type
-  - name: status
-  - name: delivery_time
-    direction: desc
-
-- kind: Order
-  properties:
-  - name: delivery_type
-  - name: status
-  - name: date_created
-    direction: desc
-
-- kind: Order
-  properties:
-  - name: status
-  - name: delivery_time
-
-- kind: Order
-  properties:
-  - name: courier
-  - name: updated
-
-- kind: TabletRequest
-  properties:
-  - name: admin_id
-  - name: request_time
-
-- kind: TabletRequest
-  properties:
-  - name: token
-  - name: request_time
-    direction: desc
-
-- kind: Notification
-  properties:
-  - name: type
-  - name: created
-
-- kind: Notification
-  properties:
-  - name: client_id
-  - name: created
-
-- kind: Promo
-  properties:
-  - name: status
-  - name: priority
-    direction: desc
-
 - kind: GeoPush
   properties:
   - name: client
@@ -121,3 +21,82 @@ indexes:
   properties:
   - name: status
   - name: points
+
+- kind: Order
+  properties:
+  - name: client_id
+  - name: date_created
+
+- kind: Order
+  properties:
+  - name: client_id
+  - name: date_created
+    direction: desc
+
+- kind: Order
+  properties:
+  - name: courier
+  - name: updated
+
+- kind: Order
+  properties:
+  - name: delivery_type
+  - name: status
+  - name: date_created
+    direction: desc
+
+- kind: Order
+  properties:
+  - name: delivery_type
+  - name: status
+  - name: delivery_time
+    direction: desc
+
+- kind: Order
+  properties:
+  - name: status
+  - name: date_created
+
+- kind: Order
+  properties:
+  - name: status
+  - name: delivery_time
+
+- kind: Order
+  properties:
+  - name: status
+  - name: return_datetime
+
+- kind: Order
+  properties:
+  - name: status
+  - name: venue_id
+  - name: date_created
+
+- kind: Order
+  properties:
+  - name: status
+  - name: venue_id
+  - name: return_datetime
+
+- kind: Order
+  properties:
+  - name: venue_id
+  - name: client_id
+  - name: date_created
+
+- kind: Order
+  properties:
+  - name: venue_id
+  - name: date_created
+
+- kind: Order
+  properties:
+  - name: venue_id
+  - name: updated
+
+- kind: Promo
+  properties:
+  - name: status
+  - name: priority
+    direction: desc
