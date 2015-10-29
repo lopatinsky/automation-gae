@@ -264,7 +264,7 @@ const MainView = React.createClass({
     },
 
     _onTouchTapSync(order) {
-        console.log("sync", order);
+        Actions.syncOrder(order);
     }
 });
 export default MainView;
