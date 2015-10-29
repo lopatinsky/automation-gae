@@ -11,3 +11,4 @@ from handlers.api.user.admin.revenue import RevenueReportMonthHandler, RevenueRe
 from handlers.api.user.admin.delivery_types import DeliveryTypesHandler
 from handlers.api.user.admin.courier import CourierListHandler
 from handlers.api.user.admin.changes import SendToCourierHandler
+from handlers.api.user.admin.resto import SyncRestoOrderHandler
