@@ -1,4 +1,6 @@
 # coding: utf-8
+from methods.empatika_promos import get_user_points
+from methods.empatika_wallet import get_balance
 
 __author__ = 'dvpermyakov'
 
@@ -41,4 +43,13 @@ class SendSmsInactiveClientsHandler(RequestHandler):
                     if not check_max_promo_uses(condition, client):
                         continue
                 ClientSmsSending(client=client.key, sms_type=module.type).put()
-                deferred.defer(send_sms, [client.tel], module.text)
+                text = module.text
+                if config.WALLET_ENABLED:
+                    balance = get_balance(client.key.id())
+                    if balance:
+                        text += ' На Вашем Личном счете: %s.' % int(balance / 100.0)
+                if config.PROMOS_API_KEY:
+                    points = get_user_points(client.key.id())
+                    if points:
+                        text += ' Вы уже накопили %s баллов.' % points
+                deferred.defer(send_sms, [client.tel], text)
