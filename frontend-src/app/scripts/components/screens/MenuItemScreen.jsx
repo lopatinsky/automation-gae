@@ -26,6 +26,45 @@ const MenuItemScreen = React.createClass({
         OrderStore.addItem(MenuItemStore.getItem());
     },
 
+    _getModifiersTitles() {
+        var modifiers = MenuItemStore.getModifiers();
+        var sModifiers = MenuItemStore.getSingleModifiers();
+        var count = 0;
+        var result = <div>
+            <CardText>
+                {modifiers.map(modifier => {
+                    count += 1;
+                    return <div style={{lineHeight: '120%'}}>
+                        {modifier.chosen_choice.title}
+                        {modifier.chosen_choice.price > 0 ?
+                            <div style={{float: 'right'}}>
+                                {'+ ' + modifier.chosen_choice.price + ' р.'}
+                            </div>
+                        : null}
+                    </div>;
+                })}
+                {sModifiers.map(modifier => {
+                    if (modifier.quantity == 0) {
+                        return null;
+                    }
+                    count += 1;
+                    return <div style={{lineHeight: '120%'}}>
+                        {modifier.title + ' x' + modifier.quantity}
+                        <div style={{float: 'right'}}>
+                            {'+ ' + (modifier.price * modifier.quantity) + ' р.'}
+                        </div>
+                    </div>;
+                })}
+            </CardText>
+            <ListDivider/>
+        </div>;
+        if (count > 0) {
+            return result;
+        } else {
+            return null;
+        }
+    },
+
     _getModifiers() {
         var modifiers = MenuItemStore.getModifiers();
         return modifiers.map(modifier => {
@@ -64,12 +103,12 @@ const MenuItemScreen = React.createClass({
 
     render() {
         var item = this.state.item;
-        var picCard = <div>
+        var picCard = <div style={{lineHeight: '120%'}}>
             <CardMedia>
                 <img src={item.pic}/>
             </CardMedia>
         </div>;
-        var descriptionCard = <div>
+        var descriptionCard = <div style={{lineHeight: '120%'}}>
             <CardText>{item.description}</CardText>
             <ListDivider/>
         </div>;
@@ -101,6 +140,7 @@ const MenuItemScreen = React.createClass({
                     <ListDivider/>
                     {descriptionCard}
                     {grCard}
+                    {this._getModifiersTitles()}
                     <List style={{paddingTop: '0', paddingBottom: '0'}}>
                         {this._getModifiers()}
                         {this._getSingleModifiers()}
