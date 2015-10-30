@@ -222,14 +222,12 @@ const OrderScreen = React.createClass({
                 <DatePickerDialog
                     ref='datePicker'
                     onAccept={this._setDate}
-                    hintText="Выберите дату"
-                    autoOk={true} />
+                    hintText="Выберите дату" />
                 <TimePickerDialog
                     ref='timePicker'
                     onAccept={this._setTime}
                     hintText="Выберитее время"
-                    format="24hr"
-                    autoOk={true} />
+                    format="24hr" />
             </div>;
         }
     },
