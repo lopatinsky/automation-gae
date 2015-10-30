@@ -28,7 +28,7 @@ const HistoryOrderItem = React.createClass({
         var picCard;
         if (item.pic != null && item.pic != '') {
             width = '65%';
-            picCard = <div style={{display: 'table-cell', width: '20%', padding: '2px 0'}}>
+            picCard = <div style={{display: 'table-cell', width: '20%', padding: '2px 0', verticalAlign: 'middle'}}>
                 <CardMedia>
                     <img src={item.pic}/>
                 </CardMedia>
