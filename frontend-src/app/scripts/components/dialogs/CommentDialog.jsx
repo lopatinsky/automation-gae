@@ -16,6 +16,9 @@ const CommentDialog = React.createClass({
 
     show() {
         this.refs.commentDialog.show();
+        this.setState({
+            comment: OrderStore.getComment()
+        });
     },
 
     dismiss() {
@@ -30,21 +33,16 @@ const CommentDialog = React.createClass({
 
     render() {
         return (
-            <Dialog ref="commentDialog">
+            <Dialog
+                bodyStyle={{padding: '12px 24px'}}
+                actions={[{text: 'Ок', onTouchTap: this._submit}, {text: 'Отмена', onTouchTap: this.dismiss}]}
+                ref="commentDialog">
                 <TextField
                     style={{width: '100%'}}
                     hintText="Комментарий"
                     ref="comment"
                     value={this.state.comment}
                     onChange={this._refresh} />
-                <FlatButton
-                    style={{margin: '12px 0 0 0'}}
-                    label="Ок"
-                    onClick={this._submit} />
-                <FlatButton
-                    style={{margin: '12px 0 0 12px'}}
-                    label="Отмена"
-                    onClick={this.dismiss} />
             </Dialog>
         );
     }
