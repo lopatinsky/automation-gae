@@ -1,5 +1,6 @@
 import BaseStore from './BaseStore';
 import { ServerRequests } from '../actions';
+import settings from '../settings';
 
 const MenuStore = new BaseStore({
     previousCategories: [],
@@ -101,9 +102,43 @@ const MenuStore = new BaseStore({
         }
     },
 
+    __getPicture(category) {
+        var i;
+        var pic;
+        if (category.categories.length > 0) {
+            console.log('in getting cats');
+            var categories = category.categories;
+            for (i = 0; i < categories.length; i++) {
+                if (categories[i].info.pic) {
+                    return categories[i].info.pic;
+                }
+                pic = this.__getPicture(categories[i]);
+                if (pic) {
+                    return pic;
+                }
+            }
+        } else {
+            console.log('in getting items');
+            var items = category.items;
+            for (i = 0; i < items.length; i++) {
+                if (items[i].pic) {
+                    return items[i].pic;
+                }
+            }
+        }
+        return settings.defaultCategoryPic;
+    },
+
     _saveMenu(menu) {
         this.categories = menu;
         this.__sort_categories(this.categories);
+        for (var i = 0; i < this.categories.length; i++) {
+            var category = this.categories[i];
+            if (!category.info.pic) {
+                console.log(this.__getPicture(category));
+                category.info.pic = this.__getPicture(category);
+            }
+        }
         this._changed();
     }
 

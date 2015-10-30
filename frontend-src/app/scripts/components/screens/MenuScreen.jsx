@@ -29,6 +29,16 @@ const MenuScreen = React.createClass({
         MenuStore.setSelected(menuItem.category_id);
     },
 
+    _getCategoryList() {
+        var menuCategories = MenuStore.getCategories();
+        var categories = menuCategories.map((category) => {
+           return <MenuCategory category={category} categories={[category]} />;
+        });
+        return <div style={{paddingTop: '76px'}}>
+            {categories}
+        </div>;
+    },
+
     _getCategoryPicker() {
         var menuItems = MenuStore.getCategories().map(category => {
             return {category_id: category.info.category_id, text: category.info.title};
@@ -110,8 +120,10 @@ const MenuScreen = React.createClass({
         if (MenuStore.getCategories() != null) {
             if (MenuStore.getCategories().length < 5) {
                 menu = this._getTabs();
-            } else {
+            } else if (MenuStore.getCategories().length < 9) {
                 menu = this._getCategoryPicker();
+            } else {
+                menu = this._getCategoryList();
             }
         } else {
             menu = '';
