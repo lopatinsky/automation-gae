@@ -20,7 +20,7 @@ const OrderMenuItem = React.createClass({
         return item.single_modifiers.map(modifier => {
             if (modifier.quantity > 0) {
                 return <div>
-                    {modifier.title + ' x ' + modifier.quantity}
+                    {modifier.title + ' x' + modifier.quantity}
                 </div>;
             }
         });
@@ -41,7 +41,7 @@ const OrderMenuItem = React.createClass({
         var picCard;
         if (item.pic != null && item.pic != '') {
             width = '55%';
-            picCard = <div style={{display: 'table-cell', width: '30%'}}>
+            picCard = <div style={{display: 'table-cell', width: '30%', verticalAlign: 'middle'}}>
                 <CardMedia>
                     <img src={item.pic}/>
                 </CardMedia>
