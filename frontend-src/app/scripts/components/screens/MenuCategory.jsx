@@ -22,7 +22,7 @@ const MenuCategory = React.createClass({
             <div style={{width: '100%', display: 'table'}}>
                 <Card style={{margin:'0 12px 12px'}}
                       onClick={this._onMenuCategoryTap}>
-                    {picCard}
+                    {category.info.pic ? picCard: null}
                     <div style={{display: 'table-cell', verticalAlign: 'middle'}}>
                         <CardText>
                             {category.info.title}
