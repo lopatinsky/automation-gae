@@ -78,9 +78,10 @@ const NavigationDrawer = React.createClass({
 
     render() {
         return <LeftNav
+            disableSwipeToOpen={true}
+            docked={false}
             selectedIndex={this.state.index}
             ref="leftNav"
-            docked={false}
             menuItems={this._leftNavItems()}
             onChange={this._selectMenuItem}/>;
     }
