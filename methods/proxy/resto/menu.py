@@ -104,7 +104,10 @@ def _get_menu(force_reload=False):
             resto_menu = get_resto_menu(resto_company)
             init_category = MenuCategory.get_initial_category()
             menu = __get_categories(init_category, resto_menu['menu'])
-            memcache.set("resto_menu", menu, time=3600)
+            try:
+                memcache.set("resto_menu", menu, time=3600)
+            except ValueError:  # value too long :(
+                pass
         _global_resto_menu_cache[ns] = menu
     return menu
 
