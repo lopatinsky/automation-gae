@@ -123,7 +123,12 @@ class OrderHandler(ApiHandler):
         self.order.wallet_payment = order_json['payment'].get('wallet_payment', 0)
 
         # todo: it can be checked in validation
-        extra_fields = order_json.get('extra_order_field', {}) or json.loads(self.request.get('extra_order_field'), '')
+        extra_fields = order_json.get('extra_order_field', {})
+        if not extra_fields:
+            try:
+                extra_fields = json.loads(self.request.get('extra_order_field'))
+            except:
+                pass
         set_extra_order_info(self.order, extra_fields)
 
         if check_after_error(order_json, client):
