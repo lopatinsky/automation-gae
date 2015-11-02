@@ -78,9 +78,6 @@ class ApiHandler(RequestHandler):
         return_value = super(ApiHandler, self).dispatch()
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)
-        # todo: remove it!
-        self.response.headers['Access-Control-Allow-Origin'] = "http://localhost:8080"
-        # todo: remove it!
         return return_value
 
     @cached_property
