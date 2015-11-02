@@ -293,7 +293,8 @@ class Order(ndb.Model):
             if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
                 for field in config.ORDER_MODULE.extra_fields:
                     value = self.extra_data and self.extra_data.get(latinize(field.title))
-                    comment += "; %s: %s" % (field.title, value)
+                    if value:
+                        comment += "; %s: %s" % (field.title, value)
         return comment
 
     @staticmethod
