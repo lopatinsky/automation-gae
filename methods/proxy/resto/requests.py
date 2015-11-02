@@ -145,3 +145,7 @@ def post_resto_place_order(resto_company, resto_venue, resto_customer, auto_clie
     }
     return _post_request(resto_company, path, payload=payload)
 
+
+def get_resto_order_info(resto_company, resto_order_id):
+    path = '/api/order/%s' % resto_order_id
+    return _get_request(resto_company, path)['order']

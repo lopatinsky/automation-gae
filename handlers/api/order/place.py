@@ -43,6 +43,9 @@ class OrderHandler(ApiHandler):
         })
 
     def post(self):
+        if config.BLOCK_ORDER:
+            return self.render_error(u'К сожалению, компания больше не принимает заказы через мобильное приложение')
+
         order_json = json.loads(self.request.get('order'))
 
         order_id = get_order_id(order_json)

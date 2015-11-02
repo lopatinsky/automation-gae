@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from google.appengine.ext import ndb
+from methods.proxy.resto.requests import get_resto_order_info
 from methods.proxy.resto.venues import get_venues
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order, Address, MenuItem, GroupModifier, SingleModifier
-from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails
+from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails, NEW_ORDER, \
+    CANCELED_BY_BARISTA_ORDER
 from models.payment_types import CASH_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany, RestoClient
 from models.venue import SELF, DELIVERY
@@ -66,3 +68,19 @@ def get_orders(client):
             order.item_details = [_get_item_details(resto_item) for resto_item in resto_order['items']]
             orders.append(order)
     return orders
+
+
+def update_status(order):
+    resto_company = RestoCompany.get()
+    resto_info = get_resto_order_info(resto_company, order.key.id())
+    resto_status = resto_info['status']
+    new_status = None
+    if resto_status in (1, 2):
+        new_status = NEW_ORDER
+    elif resto_status == 3:
+        new_status = READY_ORDER
+    elif resto_status == 4:
+        new_status = CANCELED_BY_BARISTA_ORDER
+    if new_status is not None and order.status != new_status:
+        order.status = new_status
+        order.put()

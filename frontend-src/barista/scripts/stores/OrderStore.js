@@ -167,6 +167,9 @@ const OrderStore = new BaseStore({
         order.status = this.STATUS.CONFIRMED;
         this._saveAndChanged(order);
     },
+    sync(order, { newData }) {
+        this._saveAndChanged(new Order(newData));
+    },
 
     _getOrders(filter) {
         const result = [];

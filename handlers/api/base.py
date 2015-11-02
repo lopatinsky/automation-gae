@@ -5,6 +5,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from webapp2_extras import auth
+from methods.fuckups import fuckup_redirection_namespace
 
 from methods.versions import is_test_version, update_company_versions
 from models.config.version import PRODUCTION_APP_ID, CURRENT_APP_ID, DEMO_APP_ID
@@ -50,10 +51,14 @@ class ApiHandler(RequestHandler):
             logging.debug("%s: %s" % (key, value))
         logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
         logging.debug('Version: %s' % self.request.headers.get('Version'))
+        ####
+        fuckup_redirection_namespace()
+        ####
         self.request.init_namespace = None
         config = Config.get()
         if CURRENT_APP_ID == PRODUCTION_APP_ID:
             if not config:
+                logging.debug('namespace=%s' % namespace_manager.get_namespace())
                 self.abort(423)
             logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
             namespace = self.request.headers.get('Namespace')
@@ -66,8 +71,6 @@ class ApiHandler(RequestHandler):
             if not namespace_manager.get_namespace():
                 namespace = self.request.headers.get('Namespace')
                 namespace_manager.set_namespace(namespace)
-        if namespace_manager.get_namespace() == 'mycompany':
-            namespace_manager.set_namespace('shashlichniydom')
         logging.debug('namespace=%s' % namespace_manager.get_namespace())
         self.test = is_test_version()
         #update_company_versions(self.request.headers.get('Version', 0))

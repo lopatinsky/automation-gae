@@ -132,6 +132,11 @@ const Actions = {
             .end(res => ({ order, action: 'postpone', options: { mins } }));
     },
 
+    syncOrder(order) {
+        doRequest.post(`order_action_${order.id}`, `admin/orders/${order.id}/sync`)
+            .end(res => ({ order, action: 'postpone', options: { newData: res.body.order }}));
+    },
+
     INIT_APP: "INIT_APP",
     initApp() {
         AppDispatcher.dispatch({

@@ -45,6 +45,7 @@ class Config(ndb.Model):
             return AUTO_APP
 
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
+    BLOCK_ORDER = ndb.BooleanProperty(default=False)
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
