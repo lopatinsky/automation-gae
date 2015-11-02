@@ -1,10 +1,13 @@
-from google.appengine.api import memcache
+import logging
+from google.appengine.api import memcache, namespace_manager
 from google.appengine.ext import ndb
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
 from models.proxy.resto import RestoCompany
 from requests import get_resto_menu
 
 __author__ = 'dvpermyakov'
+
+_global_resto_menu_cache = {}
 
 
 def __get_group_modifiers(resto_modifiers):
@@ -14,6 +17,7 @@ def __get_group_modifiers(resto_modifiers):
             continue
         modifier = GroupModifier(id=resto_modifier['groupId'])
         modifier.title = resto_modifier['name']
+        modifier.required = resto_modifier['minAmount'] != 0
         modifier.choices = []
         for resto_choice in resto_modifier['items']:
             choice = GroupModifierChoice(choice_id_str=resto_choice['id'])
@@ -46,7 +50,7 @@ def __get_products(category, resto_products):
         product.title = resto_product['name']
         product.description = resto_product['description']
         product.weight = resto_product['weight'] * 1000
-        product.kal = int(resto_product['energyAmount'])
+        product.kal = int(resto_product['energyAmount'] or 0)
         product.picture = resto_product['images'][0] if resto_product['images'] else ''
         product.price = int(resto_product['price'] * 100)
         product.sequence_number = resto_product['order']
@@ -88,15 +92,28 @@ def __get_categories(parent_category, resto_categories):
     return categories, products, group_modifiers, single_modifiers
 
 
-def _get_menu():
-    resto_company = RestoCompany.get()
-    menu = memcache.get('menu_%s' % resto_company.key.id())
-    if not menu:
-        resto_menu = get_resto_menu(resto_company)
-        init_category = MenuCategory.get_initial_category()
-        menu = __get_categories(init_category, resto_menu['menu'])
-        memcache.set('menu_%s' % resto_company.key.id(), menu, time=3600)
+def _get_menu(force_reload=False):
+    ns = namespace_manager.get_namespace()
+    menu = _global_resto_menu_cache.get(ns)
+    if not menu or force_reload:
+        logging.debug("Not found in instance cache, trying memcache")
+        menu = memcache.get('resto_menu')
+        if not menu or force_reload:
+            logging.debug("Not found in memcache, reloading from resto")
+            resto_company = RestoCompany.get()
+            resto_menu = get_resto_menu(resto_company)
+            init_category = MenuCategory.get_initial_category()
+            menu = __get_categories(init_category, resto_menu['menu'])
+            try:
+                memcache.set("resto_menu", menu, time=3600)
+            except ValueError:  # value too long :(
+                pass
+        _global_resto_menu_cache[ns] = menu
     return menu
+
+
+def reload_menu():
+    _get_menu(force_reload=True)
 
 
 def get_categories(parent_category):

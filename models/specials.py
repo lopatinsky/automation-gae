@@ -5,10 +5,7 @@ from google.appengine.ext.ndb import transactional
 from methods.rendering import timestamp
 from models import STATUS_AVAILABLE, STATUS_CHOICES, MenuItem, STATUS_UNAVAILABLE
 from models.client import Client
-
-SMS_SUCCESS = 1
-SMS_PASSIVE = 2
-SMS_CHOICES = (SMS_SUCCESS, SMS_PASSIVE)
+from models.config.inactive_clients import CONDITIONS
 
 COMPANY_CHANNEL = 'company'
 ORDER_CHANNEL = 'order'
@@ -60,14 +57,10 @@ class Notification(ndb.Model):
         self.put()
 
 
-class ClientNotification(Notification):
-    client = ndb.KeyProperty(required=True)
-
-
 class ClientSmsSending(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     client = ndb.KeyProperty(kind=Client, required=True)
-    sms_type = ndb.IntegerProperty(choices=SMS_CHOICES, required=True)
+    sms_type = ndb.IntegerProperty(choices=CONDITIONS, required=True)
 
 
 class News(ndb.Model):

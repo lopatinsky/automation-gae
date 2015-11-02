@@ -9,6 +9,7 @@ from models.legal import LegalInfo
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
 from models.schedule import Schedule
+from models.payment_types import PaymentType
 
 SELF = 0
 IN_CAFE = 1
@@ -21,6 +22,13 @@ DELIVERY_MAP = {
     IN_CAFE: u'В кафе',
     DELIVERY: u'Доставка',
     PICKUP: u'Самовывоз'
+}
+
+DELIVERY_WHAT_MAP = {
+    SELF: u'с собой',
+    IN_CAFE: u'в кафе',
+    DELIVERY: u'на доставку',
+    PICKUP: u'при самовывозе'
 }
 
 
@@ -204,6 +212,7 @@ class DeliveryType(ndb.Model):
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
     item_restrictions = ndb.KeyProperty(kind=MenuItem, repeated=True)
     category_restrictions = ndb.KeyProperty(kind=MenuCategory, repeated=True)
+    schedule_restriction = ndb.LocalStructuredProperty(Schedule)
 
     @classmethod
     def create(cls, delivery_type):
@@ -244,6 +253,7 @@ class Venue(ndb.Model):
     single_modifiers_stop_list = ndb.KeyProperty(kind=SingleModifier, repeated=True)
     group_choice_modifier_stop_list = ndb.KeyProperty(kind=GroupModifierChoice, repeated=True)
     promo_restrictions = ndb.KeyProperty(kind=Promo, repeated=True)
+    payment_restrictions = ndb.KeyProperty(kind=PaymentType,repeated=True)
     wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)
@@ -327,7 +337,7 @@ class Venue(ndb.Model):
 
     def update_address(self):
         from models.config.config import Config
-        from methods import geocoder, timezone
+        from methods import geocoder
 
         candidates = geocoder.get_houses_by_coordinates(self.coordinates.lat, self.coordinates.lon)
         if candidates:
@@ -337,6 +347,10 @@ class Venue(ndb.Model):
             if self.address.country not in config.COUNTRIES:
                 config.COUNTRIES.append(self.address.country)
                 config.put()
+        self.update_timezone()
+
+    def update_timezone(self):
+        from methods import timezone
         zone = timezone.get_time_zone(self.coordinates.lat, self.coordinates.lon)
         if zone:
             self.timezone_offset = zone['offset']

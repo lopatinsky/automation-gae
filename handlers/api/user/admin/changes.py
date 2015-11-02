@@ -1,5 +1,7 @@
 # coding=utf-8
+import logging
 from handlers.api.user.admin.base import AdminApiHandler
+from methods.emails.admins import send_error
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
 from methods.orders.postpone import postpone_order
@@ -7,6 +9,7 @@ from methods.orders.confirm import confirm_order
 from methods.orders.courier import send_to_courier
 from methods.auth import write_access_required, api_admin_required
 from methods.rendering import timestamp
+from models.config.config import config, AUTO_APP
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
 from models.user import Courier
 from models.venue import DELIVERY, PICKUP
@@ -28,6 +31,7 @@ class CancelOrderHandler(AdminApiHandler):
 
 class DoneOrderHandler(AdminApiHandler):
     def render_error(self, description):
+        logging.warning(description)
         self.response.set_status(400)
         self.render_json({
             'success': True,
@@ -40,9 +44,13 @@ class DoneOrderHandler(AdminApiHandler):
         order = self.user.order_by_id(int(order_id))
         if order.status not in [NEW_ORDER, CONFIRM_ORDER]:
             self.abort(400)
-        if order.status == NEW_ORDER and order.delivery_type in [DELIVERY, PICKUP]:
+        if order.status == NEW_ORDER and (order.delivery_type in [DELIVERY, PICKUP] and config.APP_KIND == AUTO_APP):
             return self.render_error(u'Необходимо сначала подтвердить заказ')
-        done_order(order, self.user.namespace)
+        try:
+            done_order(order, self.user.namespace)
+        except Exception as e:
+            send_error('Close error', 'Barista error in closing order', str(e))
+            return self.render_error(u'Непредвиденная ошибка! Повторите позднее! Не отменяйте заказ, если он уже оплачен!')
         self.render_json({
             "success": True,
             "delivery_time": timestamp(order.delivery_time),

@@ -1,5 +1,3 @@
-from models.specials import SMS_PASSIVE
-
 __author__ = 'dvpermyakov'
 
 from models import Client, CardBindingPayment, Notification
@@ -7,7 +5,7 @@ from report_methods import suitable_date, PROJECT_STARTING_YEAR
 from datetime import datetime
 
 
-def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
+def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):  # todo: not work!!!
 
     ALL = 0
     SUCCESS = 1
@@ -42,11 +40,11 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):
             clients = [client]
 
     for client in clients:
-        sms = Notification.query(Notification.client_id == client.key.id(), Notification.type == SMS_PASSIVE).get()
-        if sms:
-            client.sms_date = sms.created if sms.created else None
-        else:
-            client.sms_date = None
+        #sms = Notification.query(Notification.client_id == client.key.id(), Notification.type == SMS_PASSIVE).get()
+        #if sms:
+        #    client.sms_date = sms.created if sms.created else None
+        #else:
+        #    client.sms_date = None
         client.attempts = CardBindingPayment.query(CardBindingPayment.client_id == client.key.id()).fetch()
         client.web_failures = 0
         client.card_errors = []

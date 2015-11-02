@@ -1,11 +1,10 @@
 # coding:utf-8
-import logging
-from urlparse import urlparse
 import json
 
 from handlers.api.user.admin.base import AdminApiHandler
 from methods.auth import api_admin_required
 from models import MenuItem, STATUS_AVAILABLE, SingleModifier, GroupModifierChoice, GroupModifier
+from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 
 
 class MenuHandler(AdminApiHandler):
@@ -14,8 +13,8 @@ class MenuHandler(AdminApiHandler):
         venue = self.venue_or_error
         if not venue:
             return self.send_error(u'Нет связки с точкой')
-        url = u'http://%s.1.%s/api/menu?venue_id=%s&dynamic' % (self.user.namespace,
-                                                                urlparse(self.request.url).hostname, venue.key.id())
+        url = u'http://%s.%s.%s.appspot.com/api/menu?venue_id=%s&dynamic' % (
+            self.user.namespace, CURRENT_VERSION, CURRENT_APP_ID, venue.key.id())
         self.redirect(str(url))
 
 
@@ -25,8 +24,8 @@ class ModifiersHandler(AdminApiHandler):
         venue = self.venue_or_error
         if not venue:
             return self.send_error(u'Нет связки с точкой')
-        url = u'http://%s.1.%s/api/modifiers?venue_id=%s' % (self.user.namespace, urlparse(self.request.url).hostname,
-                                                             venue.key.id())
+        url = u'http://%s.%s.%s.appspot.com/api/modifiers?venue_id=%s' % (
+            self.user.namespace, CURRENT_VERSION, CURRENT_APP_ID, venue.key.id())
         self.redirect(str(url))
 
 
@@ -36,8 +35,8 @@ class DynamicInfoHandler(AdminApiHandler):
         venue = self.venue_or_error
         if not venue:
             return self.send_error(u'Нет связки с точкой')
-        url = u'http://%s.1.%s/api/dynamic_info?venue_id=%s' % (self.user.namespace,
-                                                                urlparse(self.request.url).hostname, venue.key.id())
+        url = u'http://%s.%s.%s.appspot.com/api/dynamic_info?venue_id=%s' % (
+            self.user.namespace, CURRENT_VERSION, CURRENT_APP_ID, venue.key.id())
         self.redirect(str(url))
 
 

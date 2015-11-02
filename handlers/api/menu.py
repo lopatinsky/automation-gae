@@ -7,6 +7,7 @@ from models.config.config import config, RESTO_APP
 
 class MenuHandler(ApiHandler):
     def get(self):
+        subscription_include = self.request.get('request_subscription') == 'true'
         venue_id = self.request.get('venue_id')
         dynamic = "dynamic" in self.request.params
         venue = None
@@ -14,13 +15,8 @@ class MenuHandler(ApiHandler):
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
-        menu = memcache.get('menu_%s' % namespace_manager.get_namespace())
-        if not menu:
-            menu = MenuCategory.get_menu_dict(venue)
-            if not venue and config.APP_KIND == RESTO_APP:
-                memcache.set('menu_%s' % namespace_manager.get_namespace(), menu, time=24*3600)
         response = {
-            "menu": menu,
+            "menu": MenuCategory.get_menu_dict(venue, subscription_include),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         }
         self.render_json(response)

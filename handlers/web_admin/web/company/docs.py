@@ -1,10 +1,9 @@
-from urlparse import urlparse
-
 from google.appengine.api.namespace_manager import namespace_manager
 
 from base import CompanyBaseHandler
 from methods.auth import full_rights_required
 from models.config.config import config, Config
+from models.config.version import CURRENT_VERSION, CURRENT_APP_ID
 from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'
@@ -28,11 +27,12 @@ class LegalListHandler(CompanyBaseHandler):
     @full_rights_required
     def get(self):
         namespace = namespace_manager.get_namespace()
+        host = u'http://%s.%s.%s.appspot.com' % (namespace, CURRENT_VERSION, CURRENT_APP_ID)
         values = {
-            'licence_url': u'http://%s.1.%s/docs/licence_agreement.html' % (namespace, urlparse(self.request.url).hostname),
-            'payment_rules_url': u'http://%s.1.%s/docs/payment_rules.html' % (namespace, urlparse(self.request.url).hostname),
-            'paypal_privacy_policy_url': u'http://%s.1.%s/docs/paypal_privacy_policy.html' % (namespace, urlparse(self.request.url).hostname),
-            'paypal_user_agreement_url': u'http://%s.1.%s/docs/paypal_user_agreement.html' % (namespace, urlparse(self.request.url).hostname),
+            'licence_url': u'%s/docs/licence_agreement.html' % host,
+            'payment_rules_url': u'%s/docs/payment_rules.html' % host,
+            'paypal_privacy_policy_url': u'%s/docs/paypal_privacy_policy.html' % host,
+            'paypal_user_agreement_url': u'%s/docs/paypal_user_agreement.html' % host,
         }
         self.render('/docs/legal_list.html', legals=LegalInfo.query().fetch(), **values)
 

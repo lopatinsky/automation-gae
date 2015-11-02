@@ -67,13 +67,15 @@ class VenuesReportWithDatesHandler(BaseReportHandler):
 
 class OrdersReportHandler(BaseReportHandler):
     def get(self):
-        html_values = orders.get(**get_standart_params(self.request))
+        html_values = orders.get(lite=self.request.get('lite') == 'on',
+                                 **get_standart_params(self.request))
         self.render_report('orders', html_values)
 
 
 class RepeatedOrdersHandler(BaseReportHandler):
     def get(self):
-        html_values = repeated_orders.get(**get_standart_params(self.request, delete_params=['venue_id', 'chosen_day']))
+        html_values = repeated_orders.get(chosen_year=self.request.get_range('selected_year'),
+                                          chosen_month=self.request.get_range('selected_month'))
         self.render_report('repeated_orders', html_values)
 
 
@@ -82,7 +84,8 @@ class SquareTableHandler(BaseReportHandler):
         square = square_table.get()
         if not square:
             self.response.write("Report not ready")
-        self.render_report('square_table', square)
+            return
+        self.render_report('square_table', {"square": square})
 
 
 class NotificationsReportHandler(BaseReportHandler):

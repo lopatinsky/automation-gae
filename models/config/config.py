@@ -16,6 +16,7 @@ from models.config.field import ClientModule, OrderModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
+from models.config.inactive_clients import SendingSmsModule
 
 OTHER = -1
 VENUE = 0
@@ -44,6 +45,7 @@ class Config(ndb.Model):
             return AUTO_APP
 
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
+    BLOCK_ORDER = ndb.BooleanProperty(default=False)
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
@@ -73,6 +75,7 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
+    SENDING_SMS_MODULE = ndb.LocalStructuredProperty(SendingSmsModule, repeated=True)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
@@ -82,6 +85,7 @@ class Config(ndb.Model):
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
+    ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict

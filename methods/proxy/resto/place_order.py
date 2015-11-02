@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from google.appengine.ext import ndb
 from methods.orders.validation.validation import get_order_position_details
 from methods.proxy.resto.check_order import get_resto_address_dict, get_resto_item_dicts, get_item_and_item_dicts, \
@@ -6,7 +6,7 @@ from methods.proxy.resto.check_order import get_resto_address_dict, get_resto_it
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order
 from models.order import NEW_ORDER
-from models.proxy.resto import RestoClient
+from models.proxy.resto import RestoClient, RestoCompany
 from models.venue import DELIVERY
 from requests import post_resto_place_order
 
@@ -14,6 +14,7 @@ __author__ = 'dvpermyakov'
 
 
 def resto_place_order(client, venue, order, payment_json, items_json, order_gifts, cancelled_order_gifts):
+    resto_company = RestoCompany.get()
     resto_client = RestoClient.get(client)
     if order.delivery_type == DELIVERY:
         resto_address_dict = get_resto_address_dict(order.address)
@@ -23,7 +24,8 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
     resto_item_dicts = get_resto_item_dicts(items_json)
     resto_gift_dicts = get_resto_item_dicts(order_gifts)
     order.init_total_sum = get_init_total_sum(items)
-    resto_place_result = post_resto_place_order(venue, resto_client, client, order, resto_item_dicts, resto_gift_dicts,
+    resto_place_result = post_resto_place_order(resto_company, venue, resto_client, client, order, resto_item_dicts,
+                                                resto_gift_dicts,
                                                 payment_json, resto_address_dict)
     if resto_place_result.get('error') == True or resto_place_result.get('code') == '100':
         success = False
@@ -37,12 +39,15 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
         order.number = int(resto_place_result['order']['number'])
         order.status = NEW_ORDER
         order.item_details = get_order_position_details(item_dicts)
+        local_delivery_time = order.delivery_time + timedelta(hours=venue.timezone_offset)
+        order.delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
         order.put()
         success = True
         response = {
             'order_id': order.key.id(),
             'number': order.number,
-            'delivery_time': datetime.strftime(order.delivery_time, STR_DATETIME_FORMAT),
-            'delivery_slot_name': None
+            'delivery_time': order.delivery_time_str,
+            'delivery_slot_name': None,
+            'show_share': False,
         }
     return success, response

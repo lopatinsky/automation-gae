@@ -8,10 +8,18 @@ from methods.unique import get_temporary_user, USER_AGENT
 __author__ = 'dvpermyakov'
 
 BASE_URL = 'http://empatika-resto.appspot.com'
+BASE_URL_TEST = 'http://empatika-resto-test.appspot.com'
 
 
-def _get_request(path, params=None, log_response=True):
-    url = '%s%s' % (BASE_URL, path)
+def __get_base_url(resto_company):
+    if resto_company.test_server:
+        return BASE_URL_TEST
+    else:
+        return BASE_URL
+
+
+def _get_request(resto_company, path, params=None, log_response=True):
+    url = '%s%s' % (__get_base_url(resto_company), path)
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
@@ -23,8 +31,8 @@ def _get_request(path, params=None, log_response=True):
     return response
 
 
-def _post_request(path, params=None, payload=None, log_response=True):
-    url = '%s%s' % (BASE_URL, path)
+def _post_request(resto_company, path, params=None, payload=None, log_response=True):
+    url = '%s%s' % (__get_base_url(resto_company), path)
     if params:
         url = '%s?%s' % (url, urllib.urlencode(params))
     logging.info(url)
@@ -43,12 +51,12 @@ def _post_request(path, params=None, payload=None, log_response=True):
 
 def get_resto_venues(resto_company):
     path = '/api/venues/%s' % resto_company.key.id()
-    return _get_request(path)
+    return _get_request(resto_company, path)
 
 
 def get_resto_payment_types(resto_company):
     path = '/api/company/%s/payment_types' % resto_company.key.id()
-    return _get_request(path)
+    return _get_request(resto_company, path)
 
 
 def get_resto_delivery_types(resto_company):
@@ -56,12 +64,12 @@ def get_resto_delivery_types(resto_company):
     params = {
         'organization_id': resto_company.key.id()
     }
-    return _get_request(path, params)
+    return _get_request(resto_company, path, params)
 
 
 def get_resto_menu(resto_company):
     path = '/api/company/%s/menu' % resto_company.key.id()
-    return _get_request(path, log_response=False)
+    return _get_request(resto_company, path, log_response=False)
 
 
 def get_resto_company_info(resto_company):
@@ -69,12 +77,12 @@ def get_resto_company_info(resto_company):
     params = {
         'company_id': resto_company.key.id()
     }
-    return _get_request(path, params)
+    return _get_request(resto_company, path, params)
 
 
 def get_resto_promos(resto_company):
     path = '/api/company/%s/promos' % resto_company.key.id()
-    return _get_request(path)
+    return _get_request(resto_company, path)
 
 
 def get_resto_history(resto_company, resto_customer):
@@ -83,7 +91,7 @@ def get_resto_history(resto_company, resto_customer):
         'organisation_id': resto_company.key.id(),
         'client_id': resto_customer.resto_customer_id if resto_customer else None
     }
-    return _get_request(path, params)
+    return _get_request(resto_company, path, params)
 
 
 def post_resto_register(resto_company, resto_customer):
@@ -92,10 +100,12 @@ def post_resto_register(resto_company, resto_customer):
         'company_id': resto_company.key.id(),
         'customer_id': resto_customer.resto_customer_id if resto_customer else None
     }
-    return _post_request(path, payload=payload)
+    return _post_request(resto_company, path, payload=payload)
 
 
-def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time):
+def post_resto_check_order(resto_company, venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time,
+                           delivery_type):
+    from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
     path = '/api/get_order_promo'
     payload = {
         'venue_id': venue.key.id(),
@@ -103,16 +113,19 @@ def post_resto_check_order(venue, resto_item_dicts, auto_client, resto_client, t
         'customer_id': resto_client.key.id() if resto_client else None,
         'sum': total_sum,
         'date': timestamp(delivery_time),
-        'items': json.dumps(resto_item_dicts)
+        'items': json.dumps(resto_item_dicts),
+        'deliveryType': REVERSE_DELIVERY_TYPE_MAP[delivery_type]
     }
-    return _post_request(path, payload=payload)
+    return _post_request(resto_company, path, payload=payload)
 
 
-def post_resto_place_order(resto_venue, resto_customer, auto_client, order, items, gifts, payment_dict, address):
+def post_resto_place_order(resto_company, resto_venue, resto_customer, auto_client, order, items, gifts, payment_dict,
+                           address):
     from methods.proxy.resto.payment_types import REVERSE_PAYMENT_TYPE_MAP
     from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
     path = '/api/venue/%s/order/new' % resto_venue.key.id()
     payload = {
+        'source': 'auto_app',
         'custom_data': '',
         'bonus_sum': order.wallet_payment,
         'discount_sum': order.init_total_sum - order.total_sum,
@@ -130,5 +143,9 @@ def post_resto_place_order(resto_venue, resto_customer, auto_client, order, item
         'sum': order.init_total_sum,
         'deliveryType': REVERSE_DELIVERY_TYPE_MAP[order.delivery_type]
     }
-    return _post_request(path, payload=payload)
+    return _post_request(resto_company, path, payload=payload)
 
+
+def get_resto_order_info(resto_company, resto_order_id):
+    path = '/api/order/%s' % resto_order_id
+    return _get_request(resto_company, path)['order']

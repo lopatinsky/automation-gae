@@ -2,7 +2,6 @@
 import copy
 import logging
 import json
-from urlparse import urlparse
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
@@ -15,13 +14,14 @@ from methods.orders.create import send_venue_sms, send_venue_email, send_client_
     paypal_payment_performing, set_address_obj, send_demo_sms
 from methods.orders.validation.validation import validate_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
-    check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check
+    check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
+    set_extra_order_info
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
-from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
+from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from models.client import IOS_DEVICE
-from models.config.version import DEMO_HOSTNAME
+from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.venue import SELF, IN_CAFE, DELIVERY, PICKUP
@@ -43,6 +43,9 @@ class OrderHandler(ApiHandler):
         })
 
     def post(self):
+        if config.BLOCK_ORDER:
+            return self.render_error(u'К сожалению, компания больше не принимает заказы через мобильное приложение')
+
         order_json = json.loads(self.request.get('order'))
 
         order_id = get_order_id(order_json)
@@ -106,7 +109,7 @@ class OrderHandler(ApiHandler):
         self.order.total_sum = float(order_json.get("total_sum"))
         self.order.delivery_sum = int(order_json.get('delivery_sum', 0))
 
-        client = set_client_info(order_json.get('client'), self.request.headers, self.order)
+        client = set_client_info(order_json.get('client'), self.request.headers)
         if not client:
             return self.render_error(u'Неудачная попытка авторизации. Попробуйте позже')
         self.order.client_id = client.key.id()
@@ -118,6 +121,15 @@ class OrderHandler(ApiHandler):
             return self.render_error(u"Выбранный способ оплаты недоступен.")
 
         self.order.wallet_payment = order_json['payment'].get('wallet_payment', 0)
+
+        # todo: it can be checked in validation
+        extra_fields = order_json.get('extra_order_field', {})
+        if not extra_fields:
+            try:
+                extra_fields = json.loads(self.request.get('extra_order_field'))
+            except:
+                pass
+        set_extra_order_info(self.order, extra_fields)
 
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
@@ -209,15 +221,20 @@ class OrderHandler(ApiHandler):
         self.order.put()
 
         send_venue_sms(venue, self.order)
-        send_venue_email(venue, self.order, self.request.url, self.jinja2)
+        send_venue_email(venue, self.order, self.request.host_url, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())
-        if urlparse(self.request.url).hostname == DEMO_HOSTNAME:
+        if CURRENT_APP_ID == DEMO_APP_ID:
             send_demo_sms(client)
+
+        show_share = False
+        if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE:
+            show_share = True  # todo this is for test only
 
         self.response.status_int = 201
         self.render_json({
             'order_id': self.order.key.id(),
             'number': self.order.number,
             'delivery_time': validation_result['delivery_time'],
-            'delivery_slot_name': validation_result['delivery_slot_name']
+            'delivery_slot_name': validation_result['delivery_slot_name'],
+            'show_share': show_share,
         })

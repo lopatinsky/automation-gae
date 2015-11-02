@@ -25,6 +25,7 @@ def _refresh_client_info(request, android_id, device_phone, client_id=None):
         if device_phone and not client.tel:
             client.tel = device_phone
         client.put()
+        client.save_session()
 
     current_namespace = namespace_manager.get_namespace()
     if request.init_namespace:
@@ -81,14 +82,14 @@ def _perform_registration(request):
         share_data = json.loads(share_data)
         share_id = share_data.get('share_id')
         if share_id:
-            share = Share.get_by_id(share_id)
+            share = Share.get_by_id(int(share_id))
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
                 if not client_id or \
-                        (not Order.query(Order.client_id == client_id).get()
-                         and not SharedPromo.query(SharedPromo.recipient == client.key).get()
-                         and client_id != share.sender.id()):
-                    SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
+                        (not Order.query(Order.client_id == client_id).get() and client_id != share.sender.id()):
+                    promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
+                    if not promo:
+                        SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
             elif share.share_type == GIFT:
                 if share.status == Share.ACTIVE:
                     gift = SharedGift.query(SharedGift.share_id == share.key.id()).get()

@@ -22,6 +22,7 @@ def get_venues():
             venue.description = resto_venue['address']
             venue.schedule = get_company_schedule()
             venue.delivery_types = get_delivery_types()
+            venue.update_timezone()
             venues.append(venue)
         memcache.set('venues_%s' % resto_company.key.id(), venues, time=3600)
     return venues

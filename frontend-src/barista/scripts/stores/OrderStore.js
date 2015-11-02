@@ -118,7 +118,7 @@ const OrderStore = new BaseStore({
     },
 
     loadCurrent(orders, timestamp) {
-        this.clear();
+        this._clearOrders();
         this.loadedOrders = true;
         this._addRawOrders(orders);
         this._setTimestamp(timestamp);
@@ -135,12 +135,15 @@ const OrderStore = new BaseStore({
         this._changed({ showError: err.status });
     },
 
-    clear() {
+    _clearOrders() {
         this._knownOrders.clear();
         this.loadedOrders = false;
         this.lastSuccessfulLoadTime = null;
         this.wasLastLoadSuccessful = false;
         this.lastServerTimestamp = null;
+    },
+    clear() {
+        this._clearOrders();
         this._changed();
     },
 
@@ -163,6 +166,9 @@ const OrderStore = new BaseStore({
     confirm(order) {
         order.status = this.STATUS.CONFIRMED;
         this._saveAndChanged(order);
+    },
+    sync(order, { newData }) {
+        this._saveAndChanged(new Order(newData));
     },
 
     _getOrders(filter) {
@@ -195,6 +201,14 @@ const OrderStore = new BaseStore({
             }
             if (action.data.request == "logout") {
                 OrderStore.clear();
+            }
+            if (action.data.request == "history") {
+                const history = action.data.history.map(o => new Order(o));
+                OrderStore._changed({ history });
+            }
+            if (action.data.request == "returns") {
+                const returns = action.data.returns.map(o => new Order(o));
+                OrderStore._changed({ returns });
             }
             break;
         case Actions.AJAX_FAILURE:

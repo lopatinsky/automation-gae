@@ -36,7 +36,7 @@ class AboutHandler(ApiHandler):
 class LicenceHandler(ApiHandler):
     def get(self):
         try:
-            self.render_doc('%s/license_agreement.html' % namespace_manager.get_namespace())
+            self.render_doc('%s/licence_agreement.html' % namespace_manager.get_namespace())
         except TemplateNotFound:
             for legal in LegalInfo.query(LegalInfo.status == STATUS_AVAILABLE).fetch():
                 self.render_doc('auto_licence_agreement.html', **_get_values(legal))

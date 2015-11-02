@@ -10,4 +10,5 @@ html {
 
 body {
     background: #eeeeee;
+    -webkit-text-size-adjust: none;
 }

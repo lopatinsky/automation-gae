@@ -2,7 +2,8 @@
 import logging
 from google.appengine.ext import ndb
 from methods import fastcounter
-from methods.rendering import timestamp
+from methods.rendering import timestamp, latinize
+from models import STATUS_AVAILABLE
 from models.geo_push import GeoPush
 from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
@@ -150,6 +151,7 @@ class Order(ndb.Model):
     email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
     geo_push = ndb.KeyProperty(kind=GeoPush)
+    extra_data = ndb.JsonProperty()
 
     @classmethod
     def get(cls, client):
@@ -194,15 +196,20 @@ class Order(ndb.Model):
         for item_detail in details:
             if not gift:
                 item = MenuItem.get(item_detail.item.id())
+                gift_obj = None
             else:
-                gift = item_detail.gift.get()
-                item = gift.item.get()
+                gift_obj = item_detail.gift.get()
+                if gift_obj:
+                    item = gift_obj.item.get()
+                else:
+                    logging.warning('Gift is not found = %s' % item_detail.gift)
+                    item = None
             if not item:
                 continue
             item_dicts.append({
                 'item': item,
-                'points': gift.points if gift else None,
-                'price': item_detail.price if not gift else 0,
+                'points': gift_obj.points if gift_obj else None,
+                'price': item_detail.price if not gift_obj else 0,
                 'image': item.picture,
                 'single_modifier_keys':  item_detail.single_modifiers,
                 'group_modifier_keys': [modifier.group_modifier_obj() for modifier in item_detail.group_modifiers]
@@ -260,18 +267,35 @@ class Order(ndb.Model):
         })
         return dct
 
-    def dict(self):
+    def dict(self, extra_fields_in_comment=True):
         dct = self.history_dict()
+        client = Client.get_by_id(self.client_id)
         dct.update({
             "total_sum": self.total_sum,
-            "venue": Venue.get_by_id(int(self.venue_id)).admin_dict(),
+            "venue": Venue.get(self.venue_id).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
-            "client": Client.get_by_id(self.client_id).dict(),
+            "client": client.dict(with_extra_fields=not extra_fields_in_comment),
             "pan": self.pan,
-            "comment": self.comment,
+            "comment": self.get_comment(client, extra_fields=extra_fields_in_comment),
             "return_comment": self.return_comment
         })
         return dct
+
+    def get_comment(self, client, extra_fields):
+        from models.config.config import config
+
+        comment = self.comment
+        if extra_fields:
+            if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:
+                for field in config.CLIENT_MODULE.extra_fields:
+                    value = client.extra_data and client.extra_data.get(latinize(field.title))
+                    comment += "; %s: %s" % (field.title, value)
+            if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+                for field in config.ORDER_MODULE.extra_fields:
+                    value = self.extra_data and self.extra_data.get(latinize(field.title))
+                    if value:
+                        comment += "; %s: %s" % (field.title, value)
+        return comment
 
     @staticmethod
     def generate_id():

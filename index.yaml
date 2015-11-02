@@ -100,3 +100,20 @@ indexes:
   - name: status
   - name: priority
     direction: desc
+
+- kind: GeoPush
+  properties:
+  - name: client
+  - name: status
+  - name: created
+    direction: desc
+
+- kind: GiftMenuItem
+  properties:
+  - name: status
+  - name: points
+
+- kind: Subscription
+  properties:
+  - name: status
+  - name: expiration

@@ -93,6 +93,7 @@ app = WSGIApplication([
         PathPrefixRoute('/admin', [
             Route('/login', admin.LoginHandler),
             Route('/logout', admin.LogoutHandler),
+            Route('/config', admin.ConfigHandler),
             Route('/ping', admin.PingHandler),
             Route('/delivery_types', admin.DeliveryTypesHandler),
 
@@ -106,6 +107,7 @@ app = WSGIApplication([
                     Route('/close', admin.DoneOrderHandler),
                     Route('/postpone', admin.PostponeOrderHandler),
                     Route('/confirm', admin.ConfirmOrderHandler),
+                    Route('/sync', admin.SyncRestoOrderHandler),
                     Route('/send_to_courier', admin.SendToCourierHandler),
                     Route('/wrong_venue', admin.WrongVenueHandler),
                 ])

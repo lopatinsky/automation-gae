@@ -37,3 +37,13 @@ def check_in_with_errors(schedule, time):
         return False, day.get_time_break_str()
     else:
         return True, None
+
+
+def check_restriction(schedule, time, what):
+    if not schedule:
+        return False, None
+    valid = check(schedule, time)
+    day = schedule.get_day(time.isoweekday())
+    if valid or not day:
+        return True, None
+    return False, day.get_restriction_time_str(what)

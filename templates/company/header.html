@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
     {% if user %}
         <nav>
             <p>
-                {{ user.login }} -- компания {{ _app_name if _app_name is not none else "не выбрана" }}
+                {{ user.login }} -- компания {{ config.APP_NAME if config else "не выбрана" }}
+                {% if config and not config.IN_PRODUCTION %}
+                    <strong style="color: red">(НЕ ЗАПУЩЕНА)</strong>
+                {% endif %}
                 {% if not user.namespace %}
                     <a href="/company/choose">Сменить компанию</a>
                 {% endif %}
@@ -15,5 +12,3 @@
             </p>
         </nav>
     {% endif %}
-</body>
-</html>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouteHandler, Navigation } from 'react-router';
+import { RouteHandler, Navigation, State } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import AppBar from 'material-ui/lib/app-bar';
 import Dialog from 'material-ui/lib/dialog';
@@ -7,12 +7,13 @@ import FlatButton from 'material-ui/lib/flat-button';
 import TextField from 'material-ui/lib/text-field';
 import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 import RadioButton from 'material-ui/lib/radio-button';
+import RaisedButton from 'material-ui/lib/raised-button';
 import { Nav, SpinnerWrap, Clock } from '../components';
-import { AuthStore, AjaxStore, OrderStore, SystemStore } from '../stores';
+import { AuthStore, AjaxStore, OrderStore, SystemStore, ConfigStore } from '../stores';
 import Actions from '../Actions';
 
 const MainView = React.createClass({
-    mixins: [OnResize, Navigation],
+    mixins: [OnResize, Navigation, State],
 
     statics: {
         willTransitionTo(transition) {
@@ -28,17 +29,27 @@ const MainView = React.createClass({
         AuthStore.addChangeListener(this._onAuthStoreChange);
         AjaxStore.addChangeListener(this._onAjaxStoreChange);
         OrderStore.addChangeListener(this._onOrderStoreChange);
+        SystemStore.addChangeListener(this._onSystemStoreChange);
+        ConfigStore.addChangeListener(this._onConfigStoreChange);
         Actions.loadCurrent();
+        Actions.loadConfig();
+        this._checkDeliveryType();
     },
     componentWillUnmount() {
         AuthStore.removeChangeListener(this._onAuthStoreChange);
         AjaxStore.removeChangeListener(this._onAjaxStoreChange);
         OrderStore.removeChangeListener(this._onOrderStoreChange);
+        SystemStore.removeChangeListener(this._onSystemStoreChange);
+        ConfigStore.removeChangeListener(this._onConfigStoreChange);
         clearInterval(this._updateInterval);
     },
 
     getInitialState() {
         return {
+            hasUpdate: SystemStore.hasUpdate,
+            orderAheadEnabled: ConfigStore.orderAheadEnabled,
+            deliveryEnabled: ConfigStore.deliveryEnabled,
+            appKind: ConfigStore.appKind,
             orderAhead: OrderStore.getOrderAheadOrders(),
             delivery: OrderStore.getDeliveryOrders(),
             loadingOrders: AjaxStore.sending.current,
@@ -73,6 +84,27 @@ const MainView = React.createClass({
         }
         if (data && data.hasNewOrders) {
             SystemStore.playSound();
+        }
+        this._checkDeliveryType();
+    },
+    _onSystemStoreChange() {
+        this.setState({
+            hasUpdate: SystemStore.hasUpdate
+        });
+    },
+    _onConfigStoreChange() {
+        this.setState({
+            orderAheadEnabled: ConfigStore.orderAheadEnabled,
+            deliveryEnabled: ConfigStore.deliveryEnabled,
+            appKind: ConfigStore.appKind
+        })
+    },
+
+    _checkDeliveryType() {
+        if (!this.state.orderAheadEnabled && this.isActive("current")) {
+            this.transitionTo("delivery");
+        } else if (!this.state.deliveryEnabled && this.isActive("delivery")) {
+            this.transitionTo("current");
         }
     },
 
@@ -167,19 +199,30 @@ const MainView = React.createClass({
                     iconElementRight={<FlatButton label='Выйти' onTouchTap={this._onLogoutClick}/>}
                     style={{position:'fixed',top:0}}/>
             <Nav horizontal={isHorizontal}
+                 showCurrent={this.state.orderAheadEnabled}
                  orderCount={this.state.orderAhead.length}
+                 showDelivery={this.state.deliveryEnabled}
                  deliveryCount={this.state.delivery.length}/>
-            <Clock horizontal={isHorizontal} lastUpdate={this.state.lastSuccessfulLoadTime}/>
+            <Clock horizontal={isHorizontal} lastUpdate={this.state.lastSuccessfulLoadTime}>
+                {this.state.hasUpdate &&
+                    <RaisedButton label="Новая версия"
+                                  secondary={true}
+                                  style={{verticalAlign: 'middle'}}
+                                  onTouchTap={() => window.location.reload()}/>
+                }
+            </Clock>
             <div style={contentStyle}>
                 <RouteHandler loadedOrders={this.state.loadedOrders}
                               loadingOrders={this.state.loadingOrders}
                               orderAhead={this.state.orderAhead}
                               delivery={this.state.delivery}
+                              appKind={this.state.appKind}
                               tryReload={this._tryReloadOrders}
                               onTouchTapCancel={this._onTouchTapCancel}
                               onTouchTapConfirm={this._onTouchTapConfirm}
                               onTouchTapDone={this._onTouchTapDone}
-                              onTouchTapPostpone={this._onTouchTapPostpone}/>
+                              onTouchTapPostpone={this._onTouchTapPostpone}
+                              onTouchTapSync={this._onTouchTapSync}/>
             </div>
             {this._renderLogoutDialog()}
             {this._renderCancelDialog()}
@@ -218,6 +261,10 @@ const MainView = React.createClass({
     _postponeSubmit() {
         this.refs.postponeDialog.dismiss();
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
+    },
+
+    _onTouchTapSync(order) {
+        Actions.syncOrder(order);
     }
 });
 export default MainView;

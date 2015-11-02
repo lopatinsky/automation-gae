@@ -36,7 +36,7 @@ const NavItem = React.createClass({
             style = {
                 display: 'table',
                 width: '100%',
-                height: '20%'
+                height: `${1.0 / this.props.itemCount * 100}%`
             };
             Object.assign(linkStyle, {
                 display: 'table-cell',
@@ -45,8 +45,8 @@ const NavItem = React.createClass({
             });
         } else {
             style = {
-                float: 'left',
-                width: '20%'
+                display: 'table-cell',
+                width: '1%'
             };
             Object.assign(linkStyle, {
                 display: 'block'
@@ -76,17 +76,24 @@ const Nav = React.createClass({
                 bottom: 0,
                 width: 100
             } : {
+                display: 'table',
+                tableLayout: 'fixed',
                 top: 64,
                 left: 0,
-                right: 0,
+                width: '100%',
                 paddingTop: 16
             });
+        let navCount = 2; // history, returns -- stoplist is hidden atm
+        if (this.props.showCurrent) { navCount += 1; }
+        if (this.props.showDelivery) { navCount += 1; }
         return <div style={style}>
-            <NavItem horizontal={isHorizontal} route='current'  text='Заказы'    label={this.props.orderCount}/>
-            <NavItem horizontal={isHorizontal} route='delivery' text='Доставка'  label={this.props.deliveryCount}/>
-            <NavItem horizontal={isHorizontal} route='history'  text='История'/>
-            <NavItem horizontal={isHorizontal} route='returns'  text='Отмененные'/>
-            <NavItem horizontal={isHorizontal} route='stoplist' text='Стоп-лист'/>
+            {this.props.showCurrent &&
+            <NavItem horizontal={isHorizontal} itemCount={navCount} route='current'  text='Заказы'    label={this.props.orderCount}/>}
+            {this.props.showDelivery &&
+            <NavItem horizontal={isHorizontal} itemCount={navCount} route='delivery' text='Доставка'  label={this.props.deliveryCount}/>}
+            <NavItem horizontal={isHorizontal} itemCount={navCount} route='history'  text='История'/>
+            <NavItem horizontal={isHorizontal} itemCount={navCount} route='returns'  text='Отмененные'/>
+            {/*<NavItem horizontal={isHorizontal} itemCount={navCount} route='stoplist' text='Стоп-лист'/>*/}
         </div>
     }
 });

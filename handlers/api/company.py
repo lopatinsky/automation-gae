@@ -1,14 +1,15 @@
-from urlparse import urlparse
-
+# coding=utf-8
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
 from base import ApiHandler
+from methods.fuckups import fuckup_ios_delivery_types
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
-from models import STATUS_AVAILABLE, Venue, Client
+from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone
+from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 from models.proxy.resto import RestoCompany
-from models.venue import DELIVERY, DeliveryZone
+from models.venue import DELIVERY
 from models.specials import get_channels
 from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
 
@@ -17,24 +18,29 @@ __author__ = 'dvpermyakov'
 
 class CompanyInfoHandler(ApiHandler):
     def get(self):
-        zones = {}
+        zones = set()
         deliveries = {}
         for venue in Venue.fetch_venues(Venue.active == True):
             for venue_delivery in venue.delivery_types:
-                if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type not in deliveries:
+                if venue_delivery.status == STATUS_UNAVAILABLE:
+                    continue
+                if venue_delivery.delivery_type not in deliveries:
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
-                if venue_delivery.status == STATUS_AVAILABLE and venue_delivery.delivery_type == DELIVERY:
-                    for zone in venue_delivery.delivery_zones:
-                        zone = DeliveryZone.get(zone)
-                        if zone.status == STATUS_AVAILABLE and zone.key not in zones:
-                            zones[zone.key] = zone
+                if venue_delivery.delivery_type == DELIVERY:
+                    zones.update(venue_delivery.delivery_zones)
+        deliveries = fuckup_ios_delivery_types(self.request.headers.get('User-Agent'),
+                                               self.request.headers.get('Version', 0),
+                                               deliveries.values())
         cities = []
-        for zone in sorted(zones.values(), key=lambda zone: zone.sequence_number):
+        for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
                 cities.append(zone.address.city)
+        if config.ANOTHER_CITY_IN_LIST:
+            cities.append(u'Другой город')
+        version = get_version(self.request.headers.get('Version', 0))
         response = {
             'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
-            'delivery_types': deliveries.values(),
+            'delivery_types': deliveries,
             'cities': cities,
             'screen_logic_type': config.SCREEN_LOGIC,
             'push_channels': get_channels(namespace_manager.get_namespace()),
@@ -52,7 +58,7 @@ class CompanyInfoHandler(ApiHandler):
             },
             'new_version_popup': {
                 'show': not is_available_version(self.request.headers.get('Version', 0)),
-                'version': get_version(self.request.headers.get('Version', 0)).dict()
+                'version': version.dict() if version else None
             },
             'cancel_order': RestoCompany.get() is not None,
             'back_end': config.APP_KIND
@@ -94,7 +100,7 @@ class CompanyBaseUrlsHandler(ApiHandler):
             config = Config.get()
             if config and config.APP_NAME:
                 companies.append({
-                    'base_url': u'http://%s.test.%s' % (namespace, urlparse(self.request.url).hostname),
+                    'base_url': u'http://%s.%s.%s.appspot.com' % (namespace, CURRENT_VERSION, CURRENT_APP_ID),
                     'app_name': config.APP_NAME
                 })
         self.render_json({

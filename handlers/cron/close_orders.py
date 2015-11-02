@@ -10,6 +10,7 @@ from methods.emails import admins
 from models import Order, Venue
 from models.order import NOT_CANCELED_STATUSES, READY_ORDER
 from methods.orders.done import done_order
+from models.proxy.resto import RestoCompany
 
 HOURS_BEFORE = 3
 
@@ -21,6 +22,9 @@ class CloseOpenedOrdersHandler(ApiHandler):
         namespace_orders = {}
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
+            resto = RestoCompany.get()
+            if resto:
+                continue
             orders = Order.query(Order.status.IN(statuses),
                                  Order.delivery_time < datetime.utcnow() - timedelta(hours=HOURS_BEFORE)).fetch()
             if orders:
@@ -38,4 +42,5 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 venue_title = venue.title if venue else u'Не определено'
                 mail_body += u'%s (%s),\n' % (order.key.id(), venue_title)
         if namespace_orders:
+            namespace_manager.set_namespace('')
             admins.send_error("order", "Orders not closed", mail_body)

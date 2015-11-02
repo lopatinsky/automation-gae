@@ -7,6 +7,10 @@
 </head>
 <body>
     <form method="get">
+        <label>
+            <input type="checkbox" name="lite" {% if lite %}checked{% endif %}>
+            Краткий
+        </label>
         <select name="selected_venue">
             <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
             {% for venue in venues %}
@@ -33,16 +37,18 @@
             <th>Сумма с учетом скидок</th>
             <th>Сумма с учетом скидок и стоимости доставки</th>
             <th>Итоговая сумма после оплаты баллами</th>
-            <th data-no-excel>id клиента</th>
-            <th>Имя</th>
-            <th data-no-excel>Номер телефона</th>
-            <th>Позиция в заказе</th>
-            <th>Количество</th>
+            <th {% if not lite %}data-no-excel{% endif %}>id клиента</th>
+            {% if not lite %}
+                <th>Имя</th>
+                <th data-no-excel>Номер телефона</th>
+                <th>Позиция в заказе</th>
+                <th>Количество</th>
+            {% endif %}
             <th>Комментарий клиента</th>
             <th>Комментарий отмены</th>
         </tr>
         {% for order in orders %}
-            {% set icount = order["items"]|length %}
+            {% set icount = 1 if lite else order["items"]|length %}
             <tr>
                 <td rowspan="{{ icount }}">{{ order.order_id }}</td>
                 <td rowspan="{{ icount }}">{{ order.venue }}</td>
@@ -57,28 +63,33 @@
                 <td rowspan="{{ icount }}">{{ order.sum_after_delivery }}</td>
                 <td rowspan="{{ icount }}">{{ order.sum_after_wallet }}</td>
                 <td rowspan="{{ icount }}">{{ order.client.id }}</td>
-                <td rowspan="{{ icount }}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
-                <td rowspan="{{ icount }}">{{ order.client.phone }}</td>
-
-                {% if not order["items"] %}
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                {% if not lite %}
+                    <td rowspan="{{ icount }}">{{ '%s %s' % (order.client.name, order.client.surname) }}</td>
+                    <td rowspan="{{ icount }}">{{ order.client.phone }}</td>
                 {% endif %}
 
-                {% for item in order["items"] %}
-                    {% if loop.index0 > 0 %}
-                        </tr>
-                        <tr>
-                    {% endif %}
-                    <td>{{ item.title }}</td>
-                    <td>{{ item.quantity }}</td>
-                    {% if loop.index0 == 0 %}
-                        <td rowspan="{{ icount }}">{{ order.comment }}</td>
-                        <td rowspan="{{ icount }}">{{ order.return_comment }}</td>
-                    {% endif %}
-                {% endfor %}
+                {% if lite %}
+                    <td rowspan="{{ icount }}">{{ order.comment }}</td>
+                    <td rowspan="{{ icount }}">{{ order.return_comment }}</td>
+                {% elif not order["items"] %}
+                    <td></td>
+                    <td></td>
+                    <td rowspan="{{ icount }}">{{ order.comment }}</td>
+                    <td rowspan="{{ icount }}">{{ order.return_comment }}</td>
+                {% else %}
+                    {% for item in order["items"] %}
+                        {% if loop.index0 > 0 %}
+                            </tr>
+                            <tr>
+                        {% endif %}
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.quantity }}</td>
+                        {% if loop.index0 == 0 %}
+                            <td rowspan="{{ icount }}">{{ order.comment }}</td>
+                            <td rowspan="{{ icount }}">{{ order.return_comment }}</td>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </tr>
         {% endfor %}
         {% for total in totals %}
@@ -92,10 +103,12 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                {% if not lite %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>

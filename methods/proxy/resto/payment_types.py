@@ -1,6 +1,6 @@
 from google.appengine.api import memcache
 from models import PaymentType
-from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE
+from models.payment_types import CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, CARD_COURIER_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany
 from requests import get_resto_payment_types
 
@@ -8,12 +8,14 @@ __author__ = 'dvpermyakov'
 
 PAYMENT_TYPE_MAP = {
     1: str(CASH_PAYMENT_TYPE),
-    2: str(CARD_PAYMENT_TYPE)
+    2: str(CARD_PAYMENT_TYPE),
+    3: str(CARD_COURIER_PAYMENT_TYPE)
 }
 
 REVERSE_PAYMENT_TYPE_MAP = {
     CASH_PAYMENT_TYPE: 1,
-    CARD_PAYMENT_TYPE: 2
+    CARD_PAYMENT_TYPE: 2,
+    CARD_COURIER_PAYMENT_TYPE: 3
 }
 
 

@@ -67,7 +67,7 @@ class GetInvitationUrlHandler(ApiHandler):
             share.channel_urls = [ChannelUrl(url=url['url'], channel=url['channel']) for url in urls]
             group_promo_codes = PromoCodeGroup()
             group_promo_codes.put()
-            promo_code = PromoCode.create(group_promo_codes, KIND_SHARE_INVITATION, 1)
+            promo_code = PromoCode.create(group_promo_codes, KIND_SHARE_INVITATION, 100000, title=u'Переход по совету друга')
             share.promo_code = promo_code.key
             share.put()
 

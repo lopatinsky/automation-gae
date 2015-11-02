@@ -21,7 +21,9 @@ class OrderListBaseHandler(AdminApiHandler):
         if not venue:
             for order in orders:
                 order.comment += u' Точка: %s' % Venue.get(order.venue_id).title
-        dct = {'orders': [order.dict() for order in orders if order.status != CREATING_ORDER]}
+        dct = {'orders': [order.dict(extra_fields_in_comment=self._is_android_barista_app)
+                          for order in orders
+                          if order.status != CREATING_ORDER]}
         if self._with_timestamp:
             dct['timestamp'] = timestamp(datetime.datetime.utcnow())
         self.render_json(dct)

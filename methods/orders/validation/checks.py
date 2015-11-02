@@ -8,9 +8,9 @@ from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.subscription import get_subscription, get_amount_of_subscription_items
-from methods.working_hours import check_with_errors, check_in_with_errors
+from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
-from models.venue import DELIVERY, DELIVERY_MAP
+from models.venue import DELIVERY, DELIVERY_MAP, DELIVERY_WHAT_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
 
 __author__ = 'dvpermyakov'
@@ -74,6 +74,11 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, deli
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
+            valid, for_description = check_restriction(delivery.schedule_restriction,
+                                                       delivery_time + timedelta(hours=venue.timezone_offset),
+                                                       DELIVERY_WHAT_MAP[delivery.delivery_type])
+            if not valid:
+                description = for_description
             if delivery_zone and delivery_zone.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
@@ -99,10 +104,13 @@ def check_delivery_time(delivery_time):
         return True, None
 
 
-def check_payment(payment_info, item_dicts, gift_dicts, shared_gifts):
+def check_payment(venue, payment_info, item_dicts, gift_dicts, shared_gifts):
     if not payment_info:
         if item_dicts or not (gift_dicts and shared_gifts):
             return False, u'Не выбран тип оплаты'
+    for payment_key in venue.payment_restrictions:
+        if str(payment_key.id()) == str(payment_info.get('type_id')):
+            return False, u'Данный тип оплаты не доступен в этой кофейне'
     return True, None
 
 
@@ -288,7 +296,7 @@ def check_address(delivery_type, address):
         address = address.get('address') if address else None
         if not address:
             return False, u'Введите адрес'
-        if not address['city']:
+        if not address['city'] and not address['street']:
             return False, u'Не выбран город'
         if not address['street']:
             return False, u'Не выбрана улица'
@@ -335,7 +343,7 @@ def check_client_info(client, delivery_type, order):
         for field in config.CLIENT_MODULE.extra_fields:
             if not field.required:
                 continue
-            if not client.extra_data.get(latinize(field.title)):
+            if not client.extra_data or not client.extra_data.get(latinize(field.title)):
                 return False, u'Не введено поле "%s"' % field.title
     return True, None
 

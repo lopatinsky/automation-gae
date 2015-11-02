@@ -69,11 +69,12 @@ def _group_single_modifiers(modifiers):
             result[modifier.id()]['quantity'] += 1
         else:
             modifier_obj = modifier.get()
-            result[modifier.id()] = {
-                'id': str(modifier.id()),
-                'name': modifier_obj.title,
-                'quantity': 1
-            }
+            if modifier_obj:
+                result[modifier.id()] = {
+                    'id': str(modifier.id()),
+                    'name': modifier_obj.title,
+                    'quantity': 1
+                }
     return result.values()
 
 
@@ -86,12 +87,13 @@ def _group_group_modifiers(modifiers):
         else:
             modifier_obj = GroupModifier.get(modifier[0].id())
             choice = modifier_obj.get_choice_by_id(modifier[1])
-            result[key] = {
-                'id': str(modifier[0].id()),
-                'name': choice.title,
-                'choice': str(modifier[1]),
-                'quantity': 1
-            }
+            if modifier_obj and choice:
+                result[key] = {
+                    'id': str(modifier[0].id()),
+                    'name': choice.title,
+                    'choice': str(modifier[1]),
+                    'quantity': 1
+                }
     return result.values()
 
 
@@ -249,13 +251,7 @@ def get_order_position_details(item_dicts):
 
 
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
-                      shared_gift_dicts=(), error=None, client=None):
-    if client:
-        # not use success and description
-        success, description, rest_points, full_points = check_gifts(gift_dicts, client)
-    else:
-        rest_points = 0
-        full_points = 0
+                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0):
     return {
         'valid': valid,
         'more_gift': False,
@@ -283,8 +279,12 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
     def send_error(error):
         logging.warning('Sending error: %s' % error)
+        if client:
+            _, __, rest_points, full_points = check_gifts(gifts, client)
+        else:
+            rest_points, full_points = 0, 0
         return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gift_dicts,
-                                 cancelled_order_gift_dicts, shared_gift_dicts, error, client)
+                                 cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
@@ -330,7 +330,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_venue(venue, delivery_time, delivery_type, client)
     if not valid:
         return send_error(error)
-    valid, error = check_payment(payment_info, item_dicts, gift_dicts, shared_gift_dicts)
+    valid, error = check_payment(venue, payment_info, item_dicts, gift_dicts, shared_gift_dicts)
     if not valid:
         return send_error(error)
     valid, error = check_delivery_time(delivery_time)

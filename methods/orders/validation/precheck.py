@@ -30,6 +30,17 @@ def get_order_id(order_json):
         return Order.generate_id()
 
 
+def set_extra_order_info(order, extra_info):
+    config = Config.get()
+    extra_json = {}
+    if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+        for field in config.ORDER_MODULE.extra_fields:
+            field_key = latinize(field.title)
+            value = extra_info.get(field_key) if extra_info else None
+            extra_json[field_key] = value
+    order.extra_data = extra_json
+
+
 def check_items_and_gifts(order_json):
     if not order_json['items'] and not order_json.get('gifts') and not order_json.get('order_gifts'):
         return False
@@ -37,7 +48,7 @@ def check_items_and_gifts(order_json):
         return True
 
 
-def set_client_info(client_json, headers, order=None):
+def set_client_info(client_json, headers):
     client_id = int(client_json.get('id', 0)) or int(headers.get('Client-Id') or 0)
     if not client_id:
         return None
@@ -62,8 +73,6 @@ def set_client_info(client_json, headers, order=None):
             field_key = latinize(field.title)
             group_dict = groups.get(group_key)
             value = group_dict.get(field_key) if group_dict else None
-            if order:
-                order.comment += ' %s: %s,' % (field.title, value)
             extra_json[field_key] = value
     client.extra_data = extra_json
     client.put()
@@ -239,7 +248,7 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
 
 
 def check_after_error(order_json, client):
-    MINUTES = 3
+    MINUTES = 1
     min_ago = datetime.utcnow() - timedelta(minutes=MINUTES)
     previous_order = Order.query(Order.client_id == client.key.id(),
                                  Order.status.IN(NOT_CANCELED_STATUSES),

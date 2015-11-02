@@ -6,7 +6,7 @@
         td span {
             display: none
         }
-        .t0 .s0, .t1 .s1, .t2 .s2, .t3 .s3, .t4 .s4 {
+        .t0a .s0a, .t0i .s0i, .t0w .s0w, .t1a .s1a, .t1i .s1i, .t1w .s1w, .t2a .s2a, .t2i .s2i, .t2w .s2w, .t3a .s3a, .t3i .s3i, .t3w .s3w, .t4a .s4a, .t4i .s4i, .t4w .s4w {
             display: inline;
         }
     </style>
@@ -17,12 +17,23 @@
 
     <select name="selected_type">
          {% for type in range(5) %}
-            <option value="t{{ type }}">
-                {{ TYPE_NAMES[type] }}
+            <option value="t{{ type }}i">
+                {{ TYPE_NAMES[type] }} IOS
+            </option>
+         {% endfor %}
+         {% for type in range(5) %}
+            <option value="t{{ type }}a">
+                {{ TYPE_NAMES[type] }} Android
+            </option>
+         {% endfor %}
+         {% for type in range(5) %}
+            <option value="t{{ type }}w">
+                {{ TYPE_NAMES[type] }} ALL
             </option>
          {% endfor %}
     </select>
-    <button name="button" value="xls">Скачать xls</button>
+
+    <button formaction="/mt/report/square_table" formmethod="get" name="button" value="xls">Скачать xls</button>
     <br>
     <table style="border-collapse:collapse; width:100%" border="1" class="0">
         <tr>
@@ -42,11 +53,21 @@
                 </th>
                 {% for column in row %}
                     <td>
-                        <span class="s0">{{ column.goods_number }}</span>
-                        <span class="s1">{{ column.order_number }}</span>
-                        <span class="s2">{{ column.order_sum }}</span>
-                        <span class="s3">{{ column.gift_number }}</span>
-                        <span class="s4">{{ column.client_number }}</span>
+                        <span class="s0a">{{ column['android']['goods_number'] }}</span>
+                        <span class="s1a">{{ column['android']['order_number'] }}</span>
+                        <span class="s2a">{{ column['android']['order_sum'] }}</span>
+                        <span class="s3a">{{ column['android']['gift_number'] }}</span>
+                        <span class="s4a">{{ column['android']['client_number'] }}</span>
+                        <span class="s0i">{{ column['ios']['goods_number'] }}</span>
+                        <span class="s1i">{{ column['ios']['order_number'] }}</span>
+                        <span class="s2i">{{ column['ios']['order_sum'] }}</span>
+                        <span class="s3i">{{ column['ios']['gift_number'] }}</span>
+                        <span class="s4i">{{ column['ios']['client_number'] }}</span>
+                        <span class="s0w">{{ column['all']['goods_number'] }}</span>
+                        <span class="s1w">{{ column['all']['order_number'] }}</span>
+                        <span class="s2w">{{ column['all']['order_sum'] }}</span>
+                        <span class="s3w">{{ column['all']['gift_number'] }}</span>
+                        <span class="s4w">{{ column['all']['client_number'] }}</span>
                     </td>
                 {% endfor %}
             </tr>
@@ -58,7 +79,7 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script>
         $("select").change(function() {
-            $(document.body).removeClass("t0 t1 t2 t3 t4").addClass($(this).val());
+            $(document.body).removeClass("t0a t0i t0w t1a t1i t1w t2a t2i t2w t3a t3i t3w t4a t4i t4w").addClass($(this).val());
         }).change();
     </script>
 </body>

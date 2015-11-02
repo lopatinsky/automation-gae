@@ -7,8 +7,16 @@ from models.venue import DELIVERY_MAP
 from models import Order, Client, Venue
 
 
-def _order_data(order):
-    venue = Venue.get(order.venue_id)
+def _get_venue(venue_id, cache):
+    result = cache.get(venue_id)
+    if not result:
+        result = Venue.get(venue_id)
+        cache[venue_id] = result
+    return result
+
+
+def _order_data(order, lite, venue_cache):
+    venue = _get_venue(order.venue_id, venue_cache)
     dct = {
         "order_id": order.key.id(),
         "comment": order.comment if order.comment else '',
@@ -24,16 +32,19 @@ def _order_data(order):
         "sum_after_wallet": order.total_sum - order.wallet_payment,
         "venue_revenue": sum(d.revenue for d in order.item_details),
         "venue": venue.title,
-        "items": order.grouped_item_dict(order.item_details),
         "delivery_type": order.delivery_type
     }
-    client = Client.get_by_id(order.client_id)
-    dct["client"] = {
-        "id": client.key.id(),
-        "name": client.name,
-        "surname": client.surname,
-        "phone": client.tel
-    }
+    if lite:
+        dct["client"] = {"id": order.client_id}
+    else:
+        dct['items'] = order.grouped_item_dict(order.item_details)
+        client = Client.get_by_id(order.client_id)
+        dct["client"] = {
+            "id": client.key.id(),
+            "name": client.name,
+            "surname": client.surname,
+            "phone": client.tel
+        }
     return dct
 
 
@@ -64,7 +75,7 @@ def _total(orders, status, payment_type):
     }
 
 
-def get(venue_id, start, end, venue_ids=()):
+def get(venue_id, start, end, venue_ids=(), lite=False):
     if venue_id and venue_id != '0':
         venue_ids = venue_id,
 
@@ -72,7 +83,8 @@ def get(venue_id, start, end, venue_ids=()):
     if venue_ids:
         query = query.filter(Order.venue_id.IN(venue_ids))
     orders = query.fetch()
-    order_dicts = [_order_data(order) for order in orders]
+    venue_cache = {}
+    order_dicts = [_order_data(order, lite, venue_cache) for order in orders]
 
     totals = [
         _total(orders, READY_ORDER, CASH_PAYMENT_TYPE),
@@ -84,6 +96,7 @@ def get(venue_id, start, end, venue_ids=()):
     totals = filter(None, totals)
 
     values = {
+        'lite': lite,
         'venues': Venue.query().fetch(),
         'orders': order_dicts,
         'chosen_venue': venue_id,
