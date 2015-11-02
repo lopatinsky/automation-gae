@@ -50,7 +50,7 @@ def __get_products(category, resto_products):
         product.title = resto_product['name']
         product.description = resto_product['description']
         product.weight = resto_product['weight'] * 1000
-        product.kal = int(resto_product['energyAmount'])
+        product.kal = int(resto_product['energyAmount'] or 0)
         product.picture = resto_product['images'][0] if resto_product['images'] else ''
         product.price = int(resto_product['price'] * 100)
         product.sequence_number = resto_product['order']
