@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime, timedelta
 import logging
+from google.appengine.api import memcache
 
 from google.appengine.ext.ndb import GeoPt
+import time
 
 from models.config.config import Config
 from methods import location
@@ -15,6 +17,33 @@ from models.order import NOT_CANCELED_STATUSES
 from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
+
+
+def get_order_id(order_json):
+    def _cache_key(order_id):
+        return "order_%s" % order_id
+
+    def _check(order_id, cache_key):
+        if Order.get_by_id(order_id) or not memcache.add(cache_key, 1):
+            logging.warning("order_id check: %s is in use", order_id)
+            return False
+        return True
+
+    order_id = order_json.get('order_id')
+    if order_id:
+        logging.debug("order_id check: got %s from json", order_id)
+        order_id = int(order_id)
+        cache_key = _cache_key(order_id)
+        return order_id, cache_key if _check(order_id, cache_key) else None, None
+    else:
+        for _ in xrange(3):
+            order_id = Order.generate_id()
+            cache_key = _cache_key(order_id)
+            logging.debug("order_id check: generated %s", order_id)
+            if _check(order_id, cache_key):
+                return order_id, cache_key
+            time.sleep(0.05)  # sleep 50ms for fastcounter
+        return None, None
 
 
 def set_extra_order_info(order, extra_info):
