@@ -17,19 +17,6 @@ from models.venue import DELIVERY
 __author__ = 'dvpermyakov'
 
 
-def get_order_id(order_json):
-    order_id = order_json.get('order_id')
-    if order_id:
-        order_id = int(order_id)
-        order = Order.get_by_id(order_id)
-        if order:
-            return None
-        else:
-            return order_id
-    else:
-        return Order.generate_id()
-
-
 def set_extra_order_info(order, extra_info):
     config = Config.get()
     extra_json = {}

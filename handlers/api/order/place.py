@@ -2,10 +2,12 @@
 import copy
 import logging
 import json
+from google.appengine.api import memcache
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
+import time
 
 from models.config.config import config, RESTO_APP
 from handlers.api.base import ApiHandler
@@ -13,7 +15,7 @@ from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj, send_demo_sms
 from methods.orders.validation.validation import validate_order
-from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
+from methods.orders.validation.precheck import set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
 from methods.proxy.resto.place_order import resto_place_order
@@ -31,10 +33,13 @@ __author__ = 'dvpermyakov'
 
 class OrderHandler(ApiHandler):
     order = None
+    cache_key = None
 
     def render_error(self, description):
         if self.order:
             self.order.key.delete()
+        if self.cache_key:
+            memcache.delete(self.cache_key)
         self.response.set_status(400)
         logging.warning('error: %s' % description)
         self.render_json({
@@ -42,13 +47,35 @@ class OrderHandler(ApiHandler):
             'description': description
         })
 
+    def _get_order_id(self, order_json):
+        def _check(order_id):
+            self.cache_key = "order_%s" % order_id
+            if Order.get_by_id(order_id) or not memcache.add(self.cache_key, 1):
+                logging.warning("order_id check: %s is in use", order_id)
+                return False
+            return True
+
+        order_id = order_json.get('order_id')
+        if order_id:
+            logging.debug("order_id check: got %s from json", order_id)
+            order_id = int(order_id)
+            return order_id if _check(order_id) else None
+        else:
+            for _ in xrange(3):
+                order_id = Order.generate_id()
+                logging.debug("order_id check: generated %s", order_id)
+                if _check(order_id):
+                    return order_id
+                time.sleep(0.05)  # sleep 50ms for fastcounter
+            return None
+
     def post(self):
         if config.BLOCK_ORDER:
             return self.render_error(u'К сожалению, компания больше не принимает заказы через мобильное приложение')
 
         order_json = json.loads(self.request.get('order'))
 
-        order_id = get_order_id(order_json)
+        order_id = self._get_order_id(order_json)
         if not order_id:
             self.abort(409)
         self.order = Order(id=order_id)
