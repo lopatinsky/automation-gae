@@ -21,6 +21,7 @@ def get_venues():
             venue.title = resto_venue['name']
             venue.description = resto_venue['address']
             venue.schedule = get_company_schedule()
+            venue.called_phone = resto_venue['phone']
             venue.delivery_types = get_delivery_types()
             venue.update_timezone()
             venues.append(venue)
