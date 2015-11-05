@@ -8,7 +8,7 @@ from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCat
 from models.legal import LegalInfo
 from models.menu import SingleModifier, MenuItem, GroupModifierChoice
 from models.promo import Promo
-from models.schedule import Schedule
+from models.schedule import Schedule, DaySchedule
 from models.payment_types import PaymentType
 
 SELF = 0
@@ -215,6 +215,7 @@ class DeliveryType(ndb.Model):
     item_restrictions = ndb.KeyProperty(kind=MenuItem, repeated=True)
     category_restrictions = ndb.KeyProperty(kind=MenuCategory, repeated=True)
     schedule_restriction = ndb.LocalStructuredProperty(Schedule)
+    today_schedule = ndb.LocalStructuredProperty(DaySchedule)
 
     @classmethod
     def create(cls, delivery_type):

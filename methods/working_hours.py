@@ -2,17 +2,21 @@
 from datetime import datetime, timedelta
 
 
+def _check_day(date, day, time):
+    open_time = datetime.combine(date, day.start)
+    close_time = datetime.combine(date, day.end)
+    if close_time <= open_time:  # venue works past midnight
+        close_time += timedelta(days=1)
+    return open_time <= time <= close_time
+
+
 def check(schedule, time):
     def check_day(date):
         weekday = date.isoweekday()
         day = schedule.get_day(weekday)
         if not day:
             return False
-        open_time = datetime.combine(date, day.start)
-        close_time = datetime.combine(date, day.end)
-        if close_time <= open_time:  # venue works past midnight
-            close_time += timedelta(days=1)
-        return open_time <= time <= close_time
+        return _check_day(date, day, time)
 
     today = time.date()
     yesterday = (time - timedelta(days=1)).date()
@@ -28,6 +32,15 @@ def check_with_errors(schedule, time):
         return False, u'Заказы в этот день недели недоступны.'
     else:
         return False, day.get_valid_time_str()
+
+
+def check_today_error(schedule_day, time):
+    today = time.date()
+    valid = _check_day(today, schedule_day, time)
+    if not valid:
+        return False, schedule_day.get_restriction_time_str(u'на сегодня')
+    else:
+        return True, None
 
 
 def check_in_with_errors(schedule, time):

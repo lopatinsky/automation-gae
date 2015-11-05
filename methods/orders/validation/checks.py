@@ -8,7 +8,7 @@ from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.subscription import get_subscription, get_amount_of_subscription_items
-from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction
+from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction, check_today_error
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.venue import DELIVERY, DELIVERY_MAP, DELIVERY_WHAT_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
@@ -74,6 +74,11 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, deli
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
+            if delivery.today_schedule and datetime.now().day == delivery_time.day:
+                valid, error = check_today_error(delivery.today_schedule,
+                                                 datetime.now() + timedelta(hours=venue.timezone_offset))
+                if not valid:
+                    return False, error
             valid, for_description = check_restriction(delivery.schedule_restriction,
                                                        delivery_time + timedelta(hours=venue.timezone_offset),
                                                        DELIVERY_WHAT_MAP[delivery.delivery_type])
