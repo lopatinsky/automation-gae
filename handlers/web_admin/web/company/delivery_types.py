@@ -136,6 +136,7 @@ class ChooseSlotsHandler(CompanyBaseHandler):
 
     @full_rights_required
     def post(self):
+        slot_id = self.request.get_range('group')
         venue_id = int(self.request.get('venue_id'))
         venue = Venue.get_by_id(venue_id)
         if not venue:
@@ -145,7 +146,11 @@ class ChooseSlotsHandler(CompanyBaseHandler):
 
         selected_slots = []
         for slot in DeliverySlot.query().fetch():
-            confirmed = bool(self.request.get(str(slot.key.id())))
+            slot.default = False
+            if slot.key.id() == slot_id:
+                slot.default = True
+            slot.put()
+            confirmed = bool(self.request.get('cb_%s' % slot.key.id()))
             if confirmed:
                 selected_slots.append(slot.key)
         delivery_type.delivery_slots = selected_slots

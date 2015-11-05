@@ -86,12 +86,14 @@ class DeliverySlot(ndb.Model):
 
     name = ndb.StringProperty(required=True)
     slot_type = ndb.IntegerProperty(choices=CHOICES, default=MINUTES)
+    default = ndb.BooleanProperty(default=False)
     value = ndb.IntegerProperty()
 
     def dict(self):
         return {
             'id': str(self.key.id()),
-            'name': self.name
+            'name': self.name,
+            'default': self.default
         }
 
 

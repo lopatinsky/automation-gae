@@ -27,7 +27,8 @@
         <br>
         {% for slot in slots %}
              <label>
-                 <input class="cb" type="checkbox" {% if slot.key in delivery_type.delivery_slots %} checked {% endif %} name={{ slot.key.id() }}>
+                 <input type="radio" name="group" value="{{ slot.key.id() }}" {% if slot.default %} checked {% endif %}>
+                 <input class="cb" type="checkbox" {% if slot.key in delivery_type.delivery_slots %} checked {% endif %} name={{ 'cb_%s' % slot.key.id() }}>
                  {{ slot.name }}
              </label><br>
         {% endfor %}
