@@ -259,6 +259,7 @@ class Venue(ndb.Model):
     wallet_restriction = ndb.BooleanProperty(default=False)
     default = ndb.BooleanProperty(default=False)
     legal = ndb.KeyProperty(LegalInfo)
+    called_phone = ndb.StringProperty()
 
     @classmethod
     def get(cls, venue_id):
@@ -322,7 +323,8 @@ class Venue(ndb.Model):
             'is_open': self.is_open(),
             'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
             'schedule': self.schedule.dict() if self.schedule else [],
-            'schedule_str': self.schedule.get_days_str() if self.schedule else ''
+            'schedule_str': self.schedule.get_days_str() if self.schedule else '',
+            'called_phone': self.called_phone
         }
         return dct
 

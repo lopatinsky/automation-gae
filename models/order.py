@@ -262,6 +262,7 @@ class Order(ndb.Model):
             "wallet_payment": self.wallet_payment,
             "delivery_sum": self.delivery_sum,
             "venue_id": str(self.venue_id),
+            "venue": Venue.get(self.venue_id).admin_dict(),
             "items": self.grouped_item_dict(self.item_details),
             "gifts": gifts
         })
@@ -272,7 +273,6 @@ class Order(ndb.Model):
         client = Client.get_by_id(self.client_id)
         dct.update({
             "total_sum": self.total_sum,
-            "venue": Venue.get(self.venue_id).admin_dict(),
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,
             "client": client.dict(with_extra_fields=not extra_fields_in_comment),
             "pan": self.pan,
