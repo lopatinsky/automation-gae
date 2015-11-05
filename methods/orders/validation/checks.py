@@ -79,11 +79,11 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, deli
                                                  datetime.now() + timedelta(hours=venue.timezone_offset))
                 if not valid:
                     return False, error
-            valid, for_description = check_restriction(delivery.schedule_restriction,
-                                                       delivery_time + timedelta(hours=venue.timezone_offset),
-                                                       DELIVERY_WHAT_MAP[delivery.delivery_type])
+            valid, error = check_restriction(delivery.schedule_restriction,
+                                             delivery_time + timedelta(hours=venue.timezone_offset),
+                                             DELIVERY_WHAT_MAP[delivery.delivery_type])
             if not valid:
-                description = for_description
+                return False, error
             if delivery_zone and delivery_zone.min_sum > total_sum:
                 description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):

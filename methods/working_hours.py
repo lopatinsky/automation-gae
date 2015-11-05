@@ -54,9 +54,14 @@ def check_in_with_errors(schedule, time):
 
 def check_restriction(schedule, time, what):
     if not schedule:
-        return False, None
-    valid = check(schedule, time)
-    day = schedule.get_day(time.isoweekday())
-    if valid or not day:
         return True, None
-    return False, day.get_restriction_time_str(what)
+    day = schedule.get_day(time.isoweekday())
+    if not day:
+        return True, None
+    if day.start == day.end:
+        return False, u'Заказы %s в этот день недоступны' % what
+    valid = check(schedule, time)
+    if not valid:
+        return False, day.get_restriction_time_str(what)
+    else:
+        return True, None
