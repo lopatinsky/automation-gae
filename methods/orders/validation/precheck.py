@@ -241,13 +241,23 @@ def get_venue_and_zone_by_address(address):
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
     if delivery_time_picker:
         delivery_time_picker = parse_time_picker_value(delivery_time_picker)
-        if venue and (not delivery_slot or delivery_slot.slot_type != DeliverySlot.STRINGS):
+        if venue and (not delivery_slot or delivery_slot.slot_type == DeliverySlot.MINUTES):
             delivery_time_picker -= timedelta(hours=venue.timezone_offset)
 
     if delivery_slot:
         if delivery_slot.slot_type == DeliverySlot.MINUTES:
             delivery_time_minutes = delivery_slot.value
             delivery_time_picker = datetime.utcnow()
+        elif delivery_slot.slot_type == DeliverySlot.HOURS_FROM_MIDNIGHT:
+            if venue:
+                tz = venue.timezone_offset
+            else:
+                tz = Venue.get_first_tz()
+            if not delivery_time_picker:
+                delivery_time_picker = datetime.now(tz=tz)
+            delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0, microsecond=0)
+            delivery_time_picker += timedelta(hours=delivery_slot.value - tz)
+            delivery_time_picker += timedelta(seconds=1)  # it is need for being after specific hour in schedule
         elif delivery_slot.slot_type == DeliverySlot.STRINGS:
             if delivery_time_picker:
                 delivery_time_picker = delivery_time_picker.replace(hour=0, minute=0, second=0)

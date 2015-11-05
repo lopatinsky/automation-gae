@@ -78,10 +78,12 @@ class Address(ndb.Model):
 class DeliverySlot(ndb.Model):
     MINUTES = 0
     STRINGS = 1
-    CHOICES = (MINUTES, STRINGS)
+    HOURS_FROM_MIDNIGHT = 2
+    CHOICES = (MINUTES, STRINGS, HOURS_FROM_MIDNIGHT)
     CHOICES_MAP = {
         MINUTES: u'Минуты',
-        STRINGS: u'Без значения'
+        STRINGS: u'Без значения',
+        HOURS_FROM_MIDNIGHT: u'Часы от полуночи'
     }
 
     name = ndb.StringProperty(required=True)
@@ -231,7 +233,7 @@ class DeliveryType(ndb.Model):
             'time_picker_max': self.max_time,
             'slots': [slot.dict() for slot in sorted([slot.get() for slot in self.delivery_slots], key=lambda x: x.value)],
             'time_required': True
-            if (self.delivery_slots and self.delivery_slots[0].get().slot_type == DeliverySlot.STRINGS) or not self.delivery_slots
+            if (self.delivery_slots and self.delivery_slots[0].get().slot_type in [DeliverySlot.STRINGS, DeliverySlot.HOURS_FROM_MIDNIGHT]) or not self.delivery_slots
             else False
         }
 
@@ -360,3 +362,8 @@ class Venue(ndb.Model):
         if zone:
             self.timezone_offset = zone['offset']
             self.timezone_name = zone['name']
+
+    @classmethod
+    def get_first_tz(cls):
+        venue = cls.query().fetch()
+        return venue.timezone_offset()
