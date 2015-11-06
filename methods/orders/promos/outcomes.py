@@ -112,6 +112,14 @@ def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_p
     return response
 
 
+def set_fix_cash_back(response, outcome, order):
+    _apply_total_cash_back(outcome.value, 1.0, order)
+    if order:
+        order.put()
+    response.success = True
+    return response
+
+
 def set_discount_cheapest(response, outcome, item_dicts, promo):
     def get_cheapest(item_dicts):
         if not len(item_dicts):

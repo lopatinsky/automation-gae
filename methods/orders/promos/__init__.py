@@ -8,7 +8,8 @@ from conditions import check_condition_by_value, check_first_order, check_condit
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
-    return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest, set_delivery_message
+    return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest, set_delivery_message, \
+    set_fix_cash_back
 
 
 class OutcomeResult:
@@ -154,6 +155,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return set_discount_marked_cheapest(response, outcome, items, promo)
     elif outcome.method == PromoOutcome.DELIVERY_MESSAGE:
         return set_delivery_message(response, promo, delivery_type, delivery_zone)
+    elif outcome.method == PromoOutcome.FIX_CASH_BACK:
+        return set_fix_cash_back(response, outcome, order)
     else:
         response.success = True
         return response
