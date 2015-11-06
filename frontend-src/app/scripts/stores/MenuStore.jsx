@@ -150,7 +150,6 @@ const MenuStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_FAILURE:
-            alert('failure');
             break;
     }
 });

@@ -2,8 +2,7 @@ import request from 'superagent';
 import AppDispatcher from "./../AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from '../stores';
 
-const base_url = "http://mycompany.app.doubleb-automation-production.appspot.com";
-//const base_url = '';
+const base_url = '';
 
 const ServerRequests = {
     INIT: "INIT",
@@ -172,7 +171,12 @@ const ServerRequests = {
                             }
                         });
                     } else {
-                        alert(res.status);
+                        AppDispatcher.dispatch({
+                            actionType: this.AJAX_FAILURE,
+                            data: {
+                                request: "order"
+                            }
+                        });
                     }
                 });
         }
@@ -307,7 +311,12 @@ const ServerRequests = {
                         }
                     });
                 } else {
-                    alert(res.status);
+                     AppDispatcher.dispatch({
+                        actionType: this.AJAX_FAILURE,
+                        data: {
+                            request: "promos"
+                        }
+                     });
                 }
             });
     }

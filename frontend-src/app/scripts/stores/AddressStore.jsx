@@ -102,7 +102,6 @@ const AddressStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_FAILURE:
-            alert("Failure");
             break;
     }
 });

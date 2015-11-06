@@ -74,7 +74,6 @@ const VenuesStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_FAILURE:
-            alert('failure');
             break;
     }
 });

@@ -60,7 +60,6 @@ const ClientStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_FAILURE:
-            alert("Failure");
             break;
         case ServerRequests.INIT:
             if (action.data.request == "client") {
