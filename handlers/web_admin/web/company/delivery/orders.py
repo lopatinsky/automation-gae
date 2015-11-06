@@ -3,7 +3,7 @@ import copy
 from datetime import datetime, timedelta
 from google.appengine.api import namespace_manager
 from ..base import CompanyBaseHandler
-from methods.auth import full_rights_required
+from methods.auth import delivery_rights_required
 from models import Order, Client, Venue, DeliverySlot, MenuItem, SingleModifier, GroupModifier
 from methods.rendering import timestamp
 from methods.orders.done import done_order
@@ -107,7 +107,7 @@ def order_items_values(order):
 
 
 class DeliveryOrdersHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def get(self):
         orders = Order.query(Order.delivery_type == DELIVERY, Order.status.IN(NOT_CANCELED_STATUSES))\
             .order(-Order.date_created).fetch()
@@ -134,7 +134,7 @@ class DeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class OrderItemsHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def get(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -144,7 +144,7 @@ class OrderItemsHandler(CompanyBaseHandler):
 
 
 class NewDeliveryOrdersHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def get(self):
         last_time = int(self.request.get('last_time'))
         start = datetime.fromtimestamp(last_time)
@@ -161,7 +161,7 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
 
 
 class ConfirmOrderHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -173,7 +173,7 @@ class ConfirmOrderHandler(CompanyBaseHandler):
 
 
 class CloseOrderHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)
@@ -185,7 +185,7 @@ class CloseOrderHandler(CompanyBaseHandler):
 
 
 class CancelOrderHandler(CompanyBaseHandler):
-    @full_rights_required
+    @delivery_rights_required
     def post(self):
         order_id = int(self.request.get('order_id'))
         order = Order.get_by_id(order_id)

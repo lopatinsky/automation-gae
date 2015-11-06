@@ -1,7 +1,7 @@
 from google.appengine.api.namespace_manager import namespace_manager
 
 from base import CompanyBaseHandler
-from methods.auth import full_rights_required
+from methods.auth import legal_rights_required, company_info_rights_required
 from models.config.config import config, Config
 from models.config.version import CURRENT_VERSION, CURRENT_APP_ID
 from models.legal import LegalInfo
@@ -24,7 +24,7 @@ def _get_values():
 
 
 class LegalListHandler(CompanyBaseHandler):
-    @full_rights_required
+    @legal_rights_required
     def get(self):
         namespace = namespace_manager.get_namespace()
         host = u'http://%s.%s.%s.appspot.com' % (namespace, CURRENT_VERSION, CURRENT_APP_ID)
@@ -38,10 +38,11 @@ class LegalListHandler(CompanyBaseHandler):
 
 
 class AddLegalListHandler(CompanyBaseHandler):
-    @full_rights_required
+    @legal_rights_required
     def get(self):
         self.render('/docs/add_legal.html')
 
+    @legal_rights_required
     def post(self):
         legal = LegalInfo()
         legal.name = self.request.get('company_name')
@@ -61,6 +62,7 @@ class AddLegalListHandler(CompanyBaseHandler):
 
 
 class EditLegalHandler(CompanyBaseHandler):
+    @legal_rights_required
     def get(self):
         legal_id = self.request.get_range('legal_id')
         legal = LegalInfo.get_by_id(legal_id)
@@ -68,6 +70,7 @@ class EditLegalHandler(CompanyBaseHandler):
             self.abort(400)
         self.render('/docs/add_legal.html', legal=legal)
 
+    @legal_rights_required
     def post(self):
         legal_id = self.request.get_range('legal_id')
         legal = LegalInfo.get_by_id(legal_id)
@@ -90,17 +93,17 @@ class EditLegalHandler(CompanyBaseHandler):
 
 
 class AboutCompanyHandler(CompanyBaseHandler):
-    @full_rights_required
+    @company_info_rights_required
     def get(self):
         self.render('/docs/about.html', **_get_values())
 
 
 class SetAboutCompanyHandler(CompanyBaseHandler):
-    @full_rights_required
+    @company_info_rights_required
     def get(self):
         self.render('/docs/set_about.html', **_get_values())
 
-    @full_rights_required
+    @company_info_rights_required
     def post(self):
         config = Config.get()
         config.APP_NAME = self.request.get('name')

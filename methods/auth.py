@@ -57,7 +57,23 @@ class check_rights_decorator(object):
 
 
 company_user_required = check_rights_decorator(())
-full_rights_required = check_rights_decorator(CompanyUser.ALL_RIGHTS_BITS)
+full_rights_required = check_rights_decorator((CompanyUser.ALL_RIGHTS_BITS,))
+
+report_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_REPORT,))
+venue_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_VENUE,))
+menu_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_MENU,))
+payment_types_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PAYMENT_TYPE,))
+promos_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PROMOS,))
+barista_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_BARISTA,))
+promo_code_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PROMO_CODE,))
+company_info_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_COMPANY_INFO,))
+legal_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_LEGAL,))
+delivery_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_DELIVERY,))
+delivery_types_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_DELIVERY_TYPES,))
+zones_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_ZONES,))
+news_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_NEWS,))
+pushes_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PUSHES,))
+alfa_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_ALFA,))
 
 
 def write_access_required(handler):

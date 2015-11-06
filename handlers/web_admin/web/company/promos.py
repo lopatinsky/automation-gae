@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 from models.config.config import config, Config
-from methods.auth import full_rights_required
+from methods.auth import promos_rights_required
 from methods.rendering import STR_TIME_FORMAT
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem, GroupModifier
 from base import CompanyBaseHandler
@@ -19,7 +19,7 @@ FEATURES_TYPES = (CONDITION, OUTCOME)
 
 
 class PromoListHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promos = Promo.query().order(-Promo.priority).fetch()
         for promo in promos:
@@ -62,7 +62,7 @@ class PromoListHandler(CompanyBaseHandler):
             'outcome_map': OUTCOME_MAP
         })
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         for promo in Promo.query().fetch():
             confirmed_status = bool(self.request.get('status_%s' % promo.key.id()))
@@ -82,14 +82,14 @@ class PromoListHandler(CompanyBaseHandler):
 
 
 class ChangeApiKeysHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         self.render('/promos/api_keys.html', **{
             'promo_api_key': config.PROMOS_API_KEY,
             'wallet_api_key': config.WALLET_API_KEY
         })
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         config = Config.get()
         config.PROMOS_API_KEY = self.request.get('promo_api_key')
@@ -103,11 +103,11 @@ class ChangeApiKeysHandler(CompanyBaseHandler):
 
 
 class AddPromoHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         self.render('/promos/add.html')
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo = Promo()
         promo.title = self.request.get('name')
@@ -118,7 +118,7 @@ class AddPromoHandler(CompanyBaseHandler):
 
 
 class EditPromoHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -126,7 +126,7 @@ class EditPromoHandler(CompanyBaseHandler):
             self.abort(400)
         self.render('/promos/add.html', promo=promo)
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -139,7 +139,7 @@ class EditPromoHandler(CompanyBaseHandler):
 
 
 class ChooseMenuItemHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -180,7 +180,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
             'feature_number': number,
         })
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         item_id = self.request.get('product_id')
         choice_ids = []
@@ -222,7 +222,7 @@ class ChooseMenuItemHandler(CompanyBaseHandler):
 
 
 class AddPromoConditionHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -239,7 +239,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
         methods = sorted(methods, key=lambda method: method['name'])
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -255,7 +255,7 @@ class AddPromoConditionHandler(CompanyBaseHandler):
 
 
 class AddHappyHoursHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -283,7 +283,7 @@ class AddHappyHoursHandler(CompanyBaseHandler):
             'methods': methods
         })
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -306,7 +306,7 @@ class AddHappyHoursHandler(CompanyBaseHandler):
 
 
 class AddPromoOutcomeHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -321,7 +321,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
         methods = sorted(methods, key=lambda method: method['name'])
         self.render('/promos/add_condition_or_outcome.html', promo=promo, methods=methods)
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -337,7 +337,7 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
 
 
 class ListGiftsHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         gifts = GiftMenuItem.query().fetch()
         for gift in gifts:
@@ -350,7 +350,7 @@ class ListGiftsHandler(CompanyBaseHandler):
                 gift.title += u'(%s)' % u', '.join(choice_titles)
         self.render('/promos/gift_list.html', gifts=gifts)
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         for gift in GiftMenuItem.query().fetch():
             confirmed = bool(self.request.get(str(gift.key.id())))
@@ -363,7 +363,7 @@ class ListGiftsHandler(CompanyBaseHandler):
 
 
 class AddGiftHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         categories = MenuCategory.query().fetch()
         for category in categories:
@@ -372,7 +372,7 @@ class AddGiftHandler(CompanyBaseHandler):
                 category.items.append(item)
         self.render('/promos/gift_add.html', categories=categories)
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         for item in MenuItem.query().fetch():
             confirmed = bool(self.request.get(str(item.key.id())))
@@ -394,7 +394,7 @@ class AddGiftHandler(CompanyBaseHandler):
 
 
 class UpPromoHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -417,7 +417,7 @@ class UpPromoHandler(CompanyBaseHandler):
 
 
 class DownPromoHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -440,7 +440,7 @@ class DownPromoHandler(CompanyBaseHandler):
 
 
 class PromoConflictsHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promos_rights_required
     def get(self):
         promo_id = self.request.get_range('promo_id')
         promo = Promo.get_by_id(promo_id)
@@ -450,7 +450,7 @@ class PromoConflictsHandler(CompanyBaseHandler):
                     main_promo=promo,
                     promos=Promo.query(Promo.status == STATUS_AVAILABLE).fetch())
 
-    @full_rights_required
+    @promos_rights_required
     def post(self):
         promo_id = self.request.get_range('promo_id')
         main_promo = Promo.get_by_id(promo_id)

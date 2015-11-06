@@ -5,26 +5,65 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    {% if user.has_rights((user.RIGHTS_BIT_CONFIG,)) %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_PAYMENT_TYPE,)) %}
         <a href="/company/payment_types">Типы оплат</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_MENU,)) %}
         <a href="/company/menu/main">Меню</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_VENUE,)) %}
         <a href="/company/venues">Кофейни</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_PROMOS,)) %}
         <a href="/company/promos/list">Акции</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_PROMO_CODE,)) %}
         <a href="/company/promo_code/list">Промо коды</a><br>
     {% endif %}
+
     {% if user.has_rights((user.RIGHTS_BIT_REPORT,)) %}
         <a href="/company/report/main">Отчеты</a><br>
     {% endif %}
-    {% if user.has_rights((user.RIGHTS_BIT_CONFIG,)) %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_BARISTA,)) %}
         <a href="/company/barista/list">Баристы</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_COMPANY_INFO,)) %}
         <a href="/company/docs/about">О компании</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_LEGAL,)) %}
         <a href="/company/docs/legal/list">Список юр. лиц</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_DELIVERY,)) %}
         <a href="/company/delivery/orders/current">Доставка</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_DELIVERY_TYPES,)) %}
         <a href="/company/delivery/types">Типы доставок</a><br>
         <a href="/company/delivery/slots/list">Слоты</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_ZONES,)) %}
         <a href="/company/delivery/zone/list">Зоны доставки</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_NEWS,)) %}
         <a href="/company/notifications/news/list">Новости</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_PUSHES,)) %}
         <a href="/company/notifications/pushes/list">Пуши</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_ALFA,)) %}
         <a href="/company/alfa_settings">Альфа</a>
     {% endif %}
 </body>

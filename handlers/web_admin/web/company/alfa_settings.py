@@ -1,9 +1,11 @@
+from methods.auth import alfa_rights_required
 from models.config.config import config, Config
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from models.legal import LegalInfo
 
 
 class AlfaSettingsHandler(CompanyBaseHandler):
+    @alfa_rights_required
     def get(self):
         legals = LegalInfo.query().fetch()
         alfa_production = 'test' not in config.ALFA_BASE_URL
@@ -13,6 +15,7 @@ class AlfaSettingsHandler(CompanyBaseHandler):
                     bind_login=config.ALFA_LOGIN,
                     bind_password=config.ALFA_PASSWORD)
 
+    @alfa_rights_required
     def post(self):
         cfg = Config.get()
         cfg.ALFA_BASE_URL = 'https://engine.paymentgate.ru/payment' if self.request.get('alfa') == 'production' \

@@ -1,36 +1,32 @@
 from google.appengine.ext.ndb import metadata
 from handlers.maintenance.report import get_standart_params
-from methods.auth import check_rights_decorator
+from methods.auth import report_rights_required
 from base import CompanyBaseHandler
 from methods.report import clients, menu_items, orders, companies
-from models.user import CompanyUser
-
-
-_check_rights = check_rights_decorator((CompanyUser.RIGHTS_BIT_REPORT,))
 
 
 class ReportHandler(CompanyBaseHandler):
-    @_check_rights
+    @report_rights_required
     def get(self):
         return self.render('/reports/main.html')
 
 
 class ClientsReportHandler(CompanyBaseHandler):
-    @_check_rights
+    @report_rights_required
     def get(self):
         html_values = clients.get(**get_standart_params(self.request))
         self.render_report('clients', html_values)
 
 
 class MenuItemsReportHandler(CompanyBaseHandler):
-    @_check_rights
+    @report_rights_required
     def get(self):
         html_values = menu_items.get(**get_standart_params(self.request))
         self.render_report('menu_items', html_values)
 
 
 class OrdersReportHandler(CompanyBaseHandler):
-    @_check_rights
+    @report_rights_required
     def get(self):
         html_values = orders.get(lite=self.request.get('lite') == 'on',
                                  **get_standart_params(self.request))
@@ -38,7 +34,7 @@ class OrdersReportHandler(CompanyBaseHandler):
 
 
 class CompaniesReportHandler(CompanyBaseHandler):
-    @_check_rights
+    @report_rights_required
     def get(self):
         if self.user.namespace:
             self.abort(403)

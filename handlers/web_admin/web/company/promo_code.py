@@ -1,5 +1,5 @@
 # coding=utf-8
-from methods.auth import full_rights_required
+from methods.auth import promo_code_rights_required
 from base import CompanyBaseHandler
 from models.promo_code import PromoCode, PROMO_CODE_KIND_MAP, PROMO_CODE_KIND_ADMIN, PromoCodeGroup, \
     PROMO_CODE_STATUS_MAP, PromoCodePerforming
@@ -8,7 +8,7 @@ __author__ = 'dvpermyakov'
 
 
 class ListPromoCodeHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promo_code_rights_required
     def get(self):
         codes = PromoCode.query().fetch()
         for code in codes:
@@ -18,7 +18,7 @@ class ListPromoCodeHandler(CompanyBaseHandler):
 
 
 class ActivationsPromoCodeHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promo_code_rights_required
     def get(self):
         key = self.request.get('key')
         promo_code = PromoCode.get_by_id(key)
@@ -31,7 +31,7 @@ class ActivationsPromoCodeHandler(CompanyBaseHandler):
 
 
 class AddPromoCodeHandler(CompanyBaseHandler):
-    @full_rights_required
+    @promo_code_rights_required
     def get(self):
         kinds = []
         for kind in PROMO_CODE_KIND_ADMIN:
@@ -41,7 +41,7 @@ class AddPromoCodeHandler(CompanyBaseHandler):
             })
         self.render('/promo_code/add.html', kinds=kinds)
 
-    @full_rights_required
+    @promo_code_rights_required
     def post(self):
         key = self.request.get('key')
         kind = self.request.get_range('kind')

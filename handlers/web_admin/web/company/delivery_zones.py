@@ -2,7 +2,7 @@ import json
 import logging
 from google.appengine.ext.ndb import GeoPt
 from handlers.web_admin.web.company import CompanyBaseHandler
-from methods.auth import full_rights_required
+from methods.auth import zones_rights_required
 from methods.geocoder import get_cities_by_coordinates, get_areas_by_coordinates
 from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
@@ -11,7 +11,7 @@ __author__ = 'dvpermyakov'
 
 
 class ListDeliveryZonesHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def get(self):
         zones = DeliveryZone.query().order(DeliveryZone.sequence_number).fetch()
         for venue in Venue.query(Venue.active == True).fetch():
@@ -40,7 +40,7 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
             zone.address_str = zone.address.str()
         self.render('/delivery_settings/delivery_zones.html', zones=zones, ZONE_MAP=DeliveryZone.SEARCH_MAP)
 
-    @full_rights_required
+    @zones_rights_required
     def post(self):
         zones = DeliveryZone.query().fetch()
         for zone in zones:
@@ -54,13 +54,13 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
 
 
 class AddingMapDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def get(self):
         self.render('/delivery_settings/map.html')
 
 
 class AddDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def get(self):
         lat = float(self.request.get('lat'))
         lon = float(self.request.get('lon'))
@@ -82,7 +82,7 @@ class AddDeliveryZoneHandler(CompanyBaseHandler):
 
 
 class EditDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def get(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)
@@ -96,7 +96,7 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
             })
         self.render('/delivery_settings/edit_delivery_zones.html', zone=zone, search_types=search_types)
 
-    @full_rights_required
+    @zones_rights_required
     def post(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)
@@ -112,7 +112,7 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
 
 
 class MapDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def get(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)
@@ -127,7 +127,7 @@ class MapDeliveryZoneHandler(CompanyBaseHandler):
         }
         self.render('/delivery_settings/restriction_map.html', **values)
 
-    @full_rights_required
+    @zones_rights_required
     def post(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)
@@ -161,7 +161,7 @@ class MapDeliveryZoneHandler(CompanyBaseHandler):
 
 
 class UpDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def post(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)
@@ -184,7 +184,7 @@ class UpDeliveryZoneHandler(CompanyBaseHandler):
 
 
 class DownDeliveryZoneHandler(CompanyBaseHandler):
-    @full_rights_required
+    @zones_rights_required
     def post(self):
         zone_id = self.request.get_range('zone_id')
         zone = DeliveryZone.get_by_id(zone_id)

@@ -2,7 +2,7 @@
 import logging
 from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property
-from methods.auth import full_rights_required
+from methods.auth import barista_rights_required
 
 __author__ = 'dvpermyakov'
 
@@ -65,7 +65,7 @@ class SignupHandler(CompanyBaseHandler):
 
 
 class ListAdmins(CompanyBaseHandler):
-    @full_rights_required
+    @barista_rights_required
     def get(self):
         admins = Admin.query().fetch()
         admins = sorted(admins, key=lambda a: a.login)
@@ -73,7 +73,7 @@ class ListAdmins(CompanyBaseHandler):
 
 
 class AutoCreateAdmins(CompanyBaseHandler):
-    @full_rights_required
+    @barista_rights_required
     def get(self):
         venues = Venue.fetch_venues()
         for venue in venues:
@@ -110,7 +110,7 @@ class AutoCreateAdmins(CompanyBaseHandler):
 
 
 class ChangeLoginAdmins(CompanyBaseHandler):
-    @full_rights_required
+    @barista_rights_required
     def get(self, admin_id):
         admin_id = int(admin_id)
         admin = Admin.get_by_id(admin_id)
@@ -118,7 +118,7 @@ class ChangeLoginAdmins(CompanyBaseHandler):
             self.abort(500)
         self.render('/barista/change_login.html', admin=admin)
 
-    @full_rights_required
+    @barista_rights_required
     def post(self, admin_id):
         admin_id = int(admin_id)
         admin = Admin.get_by_id(admin_id)
@@ -159,7 +159,7 @@ class ChangeLoginAdmins(CompanyBaseHandler):
 
 
 class ChangePasswordAdmin(CompanyBaseHandler):
-    @full_rights_required
+    @barista_rights_required
     def get(self, admin_id):
         admin_id = int(admin_id)
         admin = Admin.get_by_id(admin_id)
@@ -167,7 +167,7 @@ class ChangePasswordAdmin(CompanyBaseHandler):
             self.abort(500)
         self.render('/barista/change_password.html', admin=admin)
 
-    @full_rights_required
+    @barista_rights_required
     def post(self, admin_id):
         password = self.request.get('password')
         admin_id = int(admin_id)
