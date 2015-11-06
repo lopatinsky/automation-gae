@@ -4,15 +4,30 @@ import { ServerRequests } from '../actions';
 
 const ClientStore = new BaseStore({
     getName() {
-        return localStorage.getItem('name');
+        var name = localStorage.getItem('name');
+        if (name == null) {
+            name = '';
+            localStorage.setItem('name', name);
+        }
+        return name;
     },
 
     getPhone() {
-        return localStorage.getItem('phone');
+        var phone = localStorage.getItem('phone');
+        if (phone == null) {
+            phone = '';
+            localStorage.setItem('phone', phone);
+        }
+        return phone;
     },
 
     getEmail() {
-        return localStorage.getItem('email');
+        var email = localStorage.getItem('email');
+        if (email == null) {
+            email = '';
+            localStorage.setItem('email', email);
+        }
+        return email;
     },
 
     getClientId() {
