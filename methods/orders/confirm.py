@@ -12,5 +12,5 @@ def confirm_order(order, namespace):
     order.put()
 
     client = Client.get_by_id(order.client_id)
-    text = u"%s, заказ №%s был подтвержден." % (client.name, order.key.id())
+    text = u"%s, заказ №%s был подтвержден." % (client.name, order.number)
     push.send_order_push(order, text, namespace)
