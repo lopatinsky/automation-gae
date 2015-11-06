@@ -53,7 +53,7 @@ const NavigationDrawer = React.createClass({
             }, {
                 index: 2,
                 route: 'venues',
-                text: this._getItem('Кофейни', 'place', 2)
+                text: this._getItem('Адреса', 'place', 2)
             }, {
                 index: 3,
                 route: 'history',
