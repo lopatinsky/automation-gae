@@ -103,6 +103,7 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
         if not zone:
             self.abort(400)
         zone.search_type = self.request.get_range('search_type')
+        zone.value = self.request.get_range('value')
         zone.min_sum = self.request.get_range('min_sum')
         zone.price = self.request.get_range('price')
         zone.comment = self.request.get('comment')

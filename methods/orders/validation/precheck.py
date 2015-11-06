@@ -136,7 +136,7 @@ def get_venue_and_zone_by_address(address):
                 has_coords = True
         venues = Venue.fetch_venues(Venue.active == True)
         nearest_venues = []  # it is used for getting nearest venue if zone is not found
-        # case 1: get venue by polygons
+        # case 1: get venue by polygons or radius
         for venue in venues:
             for delivery in venue.delivery_types:
                 if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
@@ -148,6 +148,13 @@ def get_venue_and_zone_by_address(address):
                         if zone.search_type == DeliveryZone.ZONE:
                             if has_coords and zone.is_included(address):
                                 return venue, zone
+                        elif zone.search_type == DeliveryZone.RADIUS:
+                            if has_coords:
+                                distance = location.distance(
+                                    GeoPt(address['coordinates']['lat'], address['coordinates']['lon']),
+                                    GeoPt(zone.address.lat, zone.address.lon))
+                                if distance <= zone.value:
+                                    return venue, zone
                         elif zone.search_type == DeliveryZone.NEAREST:
                             if has_coords:
                                 venue.distance = location.distance(

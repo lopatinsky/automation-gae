@@ -17,6 +17,10 @@
             </select>
         </label><br>
         <label>
+            Значение:
+            <input type="number" name="value" {% if zone and zone.value and zone.value != 0 %} value="{{ zone.value }}" {% endif %}>
+        </label><br>
+        <label>
             Минимальная сумма:
             <input type="number" name="min_sum" {% if zone %} value="{{ zone.min_sum }}" {% endif %}>
         </label><br>
