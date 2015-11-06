@@ -52,7 +52,7 @@ def done_order(order, namespace, with_push=True):
     order.put()
 
     if with_push:
-        text = u"Заказ №%s выдан." % order.key.id()
+        text = u"Заказ №%s выдан." % order.number
         if point_sum:
             text += u" Начислены баллы в размере %s." % point_sum
         if total_cash_back:

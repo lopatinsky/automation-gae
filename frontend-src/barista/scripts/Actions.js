@@ -134,7 +134,7 @@ const Actions = {
 
     syncOrder(order) {
         doRequest.post(`order_action_${order.id}`, `admin/orders/${order.id}/sync`)
-            .end(res => ({ order, action: 'postpone', options: { newData: res.body.order }}));
+            .end(res => ({ order, action: 'sync', options: { newData: res.body.order }}));
     },
 
     INIT_APP: "INIT_APP",
