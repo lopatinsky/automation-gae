@@ -57,7 +57,7 @@ class check_rights_decorator(object):
 
 
 company_user_required = check_rights_decorator(())
-full_rights_required = check_rights_decorator((CompanyUser.ALL_RIGHTS_BITS,))
+full_rights_required = check_rights_decorator(CompanyUser.ALL_RIGHTS_BITS)
 
 report_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_REPORT,))
 venue_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_VENUE,))
