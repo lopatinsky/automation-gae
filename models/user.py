@@ -1,3 +1,4 @@
+# coding=utf-8
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
 from google.appengine.ext.ndb import polymodel
@@ -42,17 +43,21 @@ class CompanyUser(User):
     RIGHTS_BIT_NEWS = 13
     RIGHTS_BIT_PUSHES = 14
     RIGHTS_BIT_ALFA = 15
+    RIGHTS_BIT_USERS = 16
 
     ALL_RIGHTS_BITS = (RIGHTS_BIT_REPORT, RIGHTS_BIT_VENUE, RIGHTS_BIT_MENU, RIGHTS_BIT_PAYMENT_TYPE, RIGHTS_BIT_PROMOS,
                        RIGHTS_BIT_BARISTA, RIGHTS_BIT_PROMO_CODE, RIGHTS_BIT_COMPANY_INFO, RIGHTS_BIT_LEGAL,
                        RIGHTS_BIT_DELIVERY, RIGHTS_BIT_DELIVERY_TYPES, RIGHTS_BIT_ZONES, RIGHTS_BIT_NEWS,
-                       RIGHTS_BIT_PUSHES, RIGHTS_BIT_ALFA)
+                       RIGHTS_BIT_PUSHES, RIGHTS_BIT_ALFA, RIGHTS_BIT_USERS)
 
     # these are commonly used combined masks
     # 63 bits for admins -- so we can put this into datastore and freely add new rights
     RIGHTS_MASK_ADMIN = 0x7fffffffffffffff
 
     rights = ndb.IntegerProperty(indexed=False, required=True)
+
+    def has_all_rights(self):
+        return self.rights == self.RIGHTS_MASK_ADMIN
 
     @staticmethod
     def make_mask(bits):
@@ -187,3 +192,23 @@ class CourierStatus(UserStatus):
     @property
     def user(self):
         return Courier.get_by_id(self.user_id)
+
+
+MAP_RIGHTS = {
+    CompanyUser.RIGHTS_BIT_REPORT: u'Отчеты',
+    CompanyUser.RIGHTS_BIT_VENUE: u'Кофейни',
+    CompanyUser.RIGHTS_BIT_MENU: u'Меню',
+    CompanyUser.RIGHTS_BIT_PAYMENT_TYPE: u'Типы оплат',
+    CompanyUser.RIGHTS_BIT_PROMOS: u'Акции',
+    CompanyUser.RIGHTS_BIT_BARISTA: u'Баристы',
+    CompanyUser.RIGHTS_BIT_PROMO_CODE: u'Промо коды',
+    CompanyUser.RIGHTS_BIT_COMPANY_INFO: u'Инфо о компании',
+    CompanyUser.RIGHTS_BIT_LEGAL: u'Юр. иформация',
+    CompanyUser.RIGHTS_BIT_DELIVERY: u'Доставка',
+    CompanyUser.RIGHTS_BIT_DELIVERY_TYPES: u'Типы доставок',
+    CompanyUser.RIGHTS_BIT_ZONES: u'Зоны',
+    CompanyUser.RIGHTS_BIT_NEWS: u'Новости',
+    CompanyUser.RIGHTS_BIT_PUSHES: u'Пуши',
+    CompanyUser.RIGHTS_BIT_ALFA: u'Альфа',
+    CompanyUser.RIGHTS_BIT_USERS: u'Пользователи'
+}

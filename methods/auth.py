@@ -74,6 +74,7 @@ zones_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_ZONES,))
 news_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_NEWS,))
 pushes_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PUSHES,))
 alfa_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_ALFA,))
+user_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_USERS,))
 
 
 def write_access_required(handler):

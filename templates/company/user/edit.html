@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать/Изменить пользователя</title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        {% if not cur_user %}
+            <label>
+                Логин:
+                <input type="text" name="login">
+            </label><br>
+            <label>
+                Пароль:
+                <input type="text" name="password">
+            </label><br>
+        {% endif %}
+        {% for right in rights %}
+            <input type="checkbox" name="{{ right.value }}"
+                    {% if cur_user and cur_user.has_rights((right.value,)) %} checked {% endif %}
+                    {% if cur_user and cur_user.has_all_rights() %} disabled {% endif %}>
+            <label>{{ right.name }}</label><br>
+        {% endfor %}
+        <input type="submit">
+        <a href="/company/user/list">Назад</a>
+    </form>
+</body>
+</html>

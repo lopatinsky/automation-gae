@@ -399,6 +399,12 @@ app = WSGIApplication([
             ]),
         ]),
 
+        PathPrefixRoute('/user', [
+            Route('/list', company_admin.ListUsersHandler),
+            Route('/create', company_admin.CreateUsersHandler),
+            Route('/edit', company_admin.EditUsersHandler),
+        ]),
+
         Route('/alfa_settings', company_admin.AlfaSettingsHandler),
     ]),
 

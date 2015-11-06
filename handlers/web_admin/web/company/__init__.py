@@ -33,6 +33,7 @@ from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, Ma
 from promo_code import ListPromoCodeHandler, AddPromoCodeHandler, ActivationsPromoCodeHandler
 from alfa_settings import AlfaSettingsHandler
 from choose_ns import ChooseNamespaceHandler
+from users import ListUsersHandler, EditUsersHandler, CreateUsersHandler
 
 
 class AutomationMainHandler(CompanyBaseHandler):

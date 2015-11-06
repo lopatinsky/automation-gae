@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <a href="/company/user/create">Создать</a>
+    <table style="border-collapse:collapse; width:100%" border="1">
+        <tr>
+            <th>Логин</th>
+            <th>Права</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td><a href="{{ '/company/user/edit?user_id=%s' % user.key.id() }}">{{ user.login }}</a></td>
+                <td>{{ user.rights_str }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="/company/main">Назад</a>
+</body>
+</html>

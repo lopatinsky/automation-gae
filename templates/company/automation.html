@@ -64,7 +64,11 @@
     {% endif %}
 
     {% if user.has_rights((user.RIGHTS_BIT_ALFA,)) %}
-        <a href="/company/alfa_settings">Альфа</a>
+        <a href="/company/alfa_settings">Альфа</a><br>
+    {% endif %}
+
+    {% if user.has_rights((user.RIGHTS_BIT_USERS,)) %}
+        <a href="/company/user/list">Пользователи</a><br>
     {% endif %}
 </body>
 </html>
