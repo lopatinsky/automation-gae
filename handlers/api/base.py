@@ -1,16 +1,16 @@
 import json
 import logging
 
-from google.appengine.api.namespace_manager import namespace_manager
 from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from webapp2_extras import auth
+from methods.client import save_city
 from methods.fuckups import fuckup_redirection_namespace
+from methods.rendering import log_params
 
-from methods.versions import is_test_version, update_company_versions
-from models.config.version import PRODUCTION_APP_ID, CURRENT_APP_ID, DEMO_APP_ID
-from models.proxy.unified_app import AutomationCompany
-from models.config.config import Config
+from methods.versions import is_test_version, update_namespace
+from models import Client
+from models.proxy.unified_app import ProxyCity
 from methods.unique import set_user_agent
 
 
@@ -45,37 +45,37 @@ class ApiHandler(RequestHandler):
         return jinja2.get_jinja2(app=self.app)
 
     def dispatch(self):
-        for key, value in self.request.POST.iteritems():
-            if key == "password":
-                value = "(VALUE HIDDEN)"
-            logging.debug("%s: %s" % (key, value))
+        log_params(self.request.POST)
         logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
         logging.debug('Version: %s' % self.request.headers.get('Version'))
+
         ####
         fuckup_redirection_namespace()
         ####
+
         self.request.init_namespace = None
-        config = Config.get()
-        if CURRENT_APP_ID == PRODUCTION_APP_ID:
-            if not config:
-                logging.debug('namespace=%s' % namespace_manager.get_namespace())
-                self.abort(423)
-            logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
-            namespace = self.request.headers.get('Namespace')
-            if namespace:
-                proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
-                if proxy_company:
-                    self.request.init_namespace = namespace_manager.get_namespace()
-                    namespace_manager.set_namespace(namespace)
-        elif CURRENT_APP_ID == DEMO_APP_ID:
-            if not namespace_manager.get_namespace():
-                namespace = self.request.headers.get('Namespace')
-                namespace_manager.set_namespace(namespace)
-        logging.debug('namespace=%s' % namespace_manager.get_namespace())
+        namespace = self.request.headers.get('Namespace')
+        success, init_namespace = update_namespace(namespace)
+        if not success:
+            self.abort(423)
+        self.request.init_namespace = init_namespace
+
         self.test = is_test_version()
-        #update_company_versions(self.request.headers.get('Version', 0))
+
         set_user_agent(self.request.headers['User-Agent'])
+
+        client_id = self.request.headers.get('Client-Id')
+        city_id = self.request.headers.get('City-Id')
+        if city_id and client_id:
+            city = ProxyCity.get_by_id(int(city_id))
+            client = Client.get_by_id(int(client_id))
+            if not city or not client_id:
+                self.abort(400)
+            self.request.city = city
+            save_city(client, city.key.id())
+
         return_value = super(ApiHandler, self).dispatch()
+
         if self.response.status_int == 400 and "iOS/7.0.4" in self.request.headers["User-Agent"]:
             self.response.set_status(406)
         return return_value

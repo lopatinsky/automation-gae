@@ -1,6 +1,5 @@
-from google.appengine.api.datastore_errors import BadValueError
-from google.appengine.ext import ndb
 from handlers.api.base import ApiHandler
+from methods.rendering import get_location
 from models import Venue, STATUS_AVAILABLE
 from models.venue import SELF, IN_CAFE, PICKUP
 
@@ -10,11 +9,7 @@ __author__ = 'ilyazorin'
 class VenuesHandler(ApiHandler):
     def get(self):
         venues = Venue.fetch_venues(Venue.active == True)
-        location = self.request.get("ll")
-        try:
-            location = ndb.GeoPt(location)
-        except BadValueError:
-            location = None
+        location = get_location(self.request.get("ll"))
 
         venue_dicts = []
         for venue in venues:

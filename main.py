@@ -164,6 +164,10 @@ app = WSGIApplication([
         PathPrefixRoute('/proxy', [
             PathPrefixRoute('/unified_app', [
                 Route('/companies', unified_app.CompaniesHandler),
+                Route('/cities', unified_app.CitiesHandler),
+                Route('/venues', unified_app.VenuesHandler),
+                Route('/menu', unified_app.MenuHandler),
+                Route('/product', unified_app.ProductHandler),
             ]),
         ]),
 

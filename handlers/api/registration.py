@@ -1,19 +1,23 @@
 import json
 
 from google.appengine.api.namespace_manager import namespace_manager
+from google.appengine.ext import ndb
 
 from .base import ApiHandler
+from methods.client import save_city
+from methods.geocoder import get_cities_by_coordinates
+from methods.rendering import get_location
 from models.config.config import config, RESTO_APP
 from methods.proxy.resto.registration import resto_registration
 from models import STATUS_AVAILABLE
 from methods.branch_io import INVITATION, GIFT
-from models.proxy.unified_app import AutomationCompany
+from models.proxy.unified_app import AutomationCompany, ProxyCity
 from models.share import SharedPromo, Share, SharedGift
 from models.client import IOS_DEVICE, ANDROID_DEVICE, Client
 from models.order import Order
 
 
-def _refresh_client_info(request, android_id, device_phone, client_id=None):
+def _refresh_client_info(request, response, android_id, device_phone, client_id=None, city_id=None):
     def refresh(client):
         client.user_agent = request.headers["User-Agent"]
         if 'iOS' in client.user_agent:
@@ -24,6 +28,12 @@ def _refresh_client_info(request, android_id, device_phone, client_id=None):
             client.android_id = android_id
         if device_phone and not client.tel:
             client.tel = device_phone
+        if client.city and client.city.id() == city_id:
+            response['show_cities'] = False
+        else:
+            response['show_cities'] = True
+        if city_id:
+            save_city(client, city_id)
         client.put()
         client.save_session()
 
@@ -54,6 +64,15 @@ def _perform_registration(request):
     client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
     android_id = request.get('android_id')
     device_phone = request.get('device_phone')
+    location = get_location(request.get("ll"))
+
+    city_id = None
+    if location:
+        candidates = get_cities_by_coordinates(location.lat, location.lon)
+        if candidates:
+            city_id = ProxyCity.get_city_id(candidates[0]['address']['city'])
+            if city_id:
+                response['location_city_id'] = str(city_id)
 
     client = None
     if client_id:
@@ -65,9 +84,9 @@ def _perform_registration(request):
             client_id = client.key.id()  # it is need to share gift
 
     if not client:
-        client = _refresh_client_info(request, android_id, device_phone)
+        client = _refresh_client_info(request, response, android_id, device_phone, city_id=city_id)
     else:
-        client = _refresh_client_info(request, android_id, device_phone, client_id)
+        client = _refresh_client_info(request, response, android_id, device_phone, client_id, city_id=city_id)
 
     response['client_id'] = client.key.id()
     client_name = client.name or ''

@@ -3,6 +3,7 @@ import logging
 from google.appengine.ext import ndb, deferred
 from methods import fastcounter
 from models import STATUS_AVAILABLE
+from models.proxy.unified_app import ProxyCity
 
 IOS_DEVICE = 0
 ANDROID_DEVICE = 1
@@ -68,10 +69,9 @@ class Client(ndb.Model):
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
     email = ndb.StringProperty()
-
-    extra_data = ndb.JsonProperty()
-
     paypal_refresh_token = ndb.StringProperty(indexed=False)
+    city = ndb.KeyProperty(kind=ProxyCity)
+    extra_data = ndb.JsonProperty()
 
     @classmethod
     def create(cls, client_id=None):

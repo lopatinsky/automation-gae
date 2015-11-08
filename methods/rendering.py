@@ -1,8 +1,10 @@
 # coding=utf-8
 from datetime import datetime
+import logging
 import time
 import re
-from models.client import ANDROID_DEVICE, IOS_DEVICE, WEB_DEVICE
+from google.appengine.api.datastore_errors import BadValueError
+from google.appengine.ext import ndb
 
 STR_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 STR_DATE_FORMAT = "%Y-%m-%d"
@@ -30,6 +32,21 @@ def latinize(name):
             if letter in english:
                 new_name += letter
     return new_name
+
+
+def log_params(params):
+    for key, value in params.iteritems():
+        if key == "password":
+            value = "(VALUE HIDDEN)"
+        logging.debug("%s: %s" % (key, value))
+
+
+def get_location(location):
+    try:
+        location = ndb.GeoPt(location)
+    except BadValueError:
+        location = None
+    return location
 
 
 def get_phone(phone_str):
@@ -63,6 +80,7 @@ def parse_time_picker_value(time_picker_value):
 
 
 def get_device_type(user_agent):
+    from models.client import ANDROID_DEVICE, IOS_DEVICE, WEB_DEVICE
     if 'Android' in user_agent:
         return ANDROID_DEVICE
     elif 'iOS' in user_agent:

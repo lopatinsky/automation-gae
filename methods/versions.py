@@ -1,7 +1,10 @@
 from datetime import datetime
-
+import logging
+from google.appengine.api.namespace_manager import namespace_manager
+from models.config.version import TEST_VERSIONS, Version, CURRENT_VERSION, CURRENT_APP_ID, PRODUCTION_APP_ID, \
+    DEMO_APP_ID
 from models.config.config import Config
-from models.config.version import TEST_VERSIONS, Version, CURRENT_VERSION
+from models.proxy.unified_app import AutomationCompany
 
 __author__ = 'dvpermyakov'
 
@@ -49,3 +52,25 @@ def update_company_versions(version):
     version_obj = get_version(version, create=True)
     version_obj.updated = datetime.utcnow()
     version_obj.put()
+
+
+def update_namespace(namespace):
+    config = Config.get()
+    init_namespace = None
+
+    if CURRENT_APP_ID == PRODUCTION_APP_ID:
+        if not config:
+            logging.debug('namespace=%s' % namespace_manager.get_namespace())
+            return False, init_namespace
+        logging.debug('initial namespace=%s' % namespace_manager.get_namespace())
+        if namespace:
+            proxy_company = AutomationCompany.query(AutomationCompany.namespace == namespace).get()
+            if proxy_company:
+                init_namespace = namespace_manager.get_namespace()
+                namespace_manager.set_namespace(namespace)
+    elif CURRENT_APP_ID == DEMO_APP_ID:
+        if not namespace_manager.get_namespace():
+            namespace_manager.set_namespace(namespace)
+
+    logging.debug('namespace=%s' % namespace_manager.get_namespace())
+    return True, init_namespace
