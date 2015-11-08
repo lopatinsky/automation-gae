@@ -277,13 +277,16 @@ def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(
 
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
                    delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
-    def send_error(error):
+    def send_error(error, override_total_sum_with_promos=False):
         logging.warning('Sending error: %s' % error)
         if client:
             _, __, rest_points, full_points = check_gifts(gifts, client)
         else:
             rest_points, full_points = 0, 0
-        return get_response_dict(False, total_sum_without_promos, item_dicts, gift_dicts, order_gift_dicts,
+        response_total_sum = total_sum_without_promos
+        if override_total_sum_with_promos:
+            response_total_sum = total_sum
+        return get_response_dict(False, response_total_sum, item_dicts, gift_dicts, order_gift_dicts,
                                  cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
     items = set_modifiers(items)
@@ -383,6 +386,10 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                                             wallet_payment_sum, venue)
         if not valid:
             return send_error(error)
+
+    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum)
+    if not valid:
+        return send_error(error, override_total_sum_with_promos=True)
 
     max_wallet_payment = 0.0
     if config.WALLET_ENABLED and not venue.wallet_restriction:
