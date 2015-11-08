@@ -40,7 +40,7 @@ def get(chosen_year, chosen_month):
         for order in query.fetch():
             if order.status != READY_ORDER:
                 continue
-            client = Client.get_by_id(order.client_id)
+            client = Client.get(order.client_id)
             if order.first_for_client is not None:
                 if order.first_for_client:
                     first_order_key = order.key

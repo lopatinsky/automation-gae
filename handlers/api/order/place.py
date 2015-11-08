@@ -55,7 +55,7 @@ class OrderHandler(ApiHandler):
         order_id, self.cache_key = get_order_id(order_json)
         if not order_id:
             self.abort(409)
-        self.order = Order(id=order_id)
+        self.order = Order(id=order_id, unified_app_namespace=self.request.init_namespace)
         self.order.number = order_id
 
         success = check_items_and_gifts(order_json)

@@ -57,7 +57,7 @@ def _update_order_info(orders):
                 else:
                     delivery_time_date = u''
                 delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
-        order.client = Client.get_by_id(order.client_id)
+        order.client = Client.get(order.client_id)
         if order.address:
             order.address_str = order.address.str()
         else:
@@ -155,7 +155,7 @@ class NewDeliveryOrdersHandler(CompanyBaseHandler):
         if orders:
             last_time = timestamp(orders[0].date_created) + 1
         self.render_json({
-            'orders': [_order_delivery_dict(order, Client.get_by_id(order.client_id)) for order in orders],
+            'orders': [_order_delivery_dict(order, Client.get(order.client_id)) for order in orders],
             'last_time': last_time
         })
 

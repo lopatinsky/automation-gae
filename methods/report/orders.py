@@ -38,7 +38,7 @@ def _order_data(order, lite, venue_cache):
         dct["client"] = {"id": order.client_id}
     else:
         dct['items'] = order.grouped_item_dict(order.item_details)
-        client = Client.get_by_id(order.client_id)
+        client = Client.get(order.client_id)
         dct["client"] = {
             "id": client.key.id(),
             "name": client.name,

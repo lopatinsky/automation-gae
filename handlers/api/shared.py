@@ -38,7 +38,7 @@ class GetInvitationUrlHandler(ApiHandler):
         client_id = int(self.request.headers.get('Client-Id') or 0)
         if not client_id:
             self.abort(400)
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.abort(400)
 
@@ -119,7 +119,7 @@ class GetGiftUrlHandler(ApiHandler):
 
     def post(self):
         client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.abort(400)
         sender_phone = get_phone(self.request.get('sender_phone'))

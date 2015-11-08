@@ -1,7 +1,6 @@
 import json
 
 from google.appengine.api.namespace_manager import namespace_manager
-from google.appengine.ext import ndb
 
 from .base import ApiHandler
 from methods.client import save_city
@@ -38,19 +37,20 @@ def _refresh_client_info(request, response, android_id, device_phone, client_id=
         client.save_session()
 
     current_namespace = namespace_manager.get_namespace()
-    if request.init_namespace:
-        namespace_manager.set_namespace(request.init_namespace)
+    client = None
     if client_id:
-        client = Client.get_by_id(client_id)
-    else:
+        if request.init_namespace:
+            namespace_manager.set_namespace(request.init_namespace)
+        client = Client.get(client_id)
+    if not client:
         client = Client.create()
         client_id = client.key.id()
     refresh(client)
-    if request.init_namespace:
+    if request.init_namespace and not Client.is_id_global(client_id):
         namespace_manager.set_namespace(request.init_namespace)
         for company in AutomationCompany.query(AutomationCompany.status == STATUS_AVAILABLE).fetch():
             namespace_manager.set_namespace(company.namespace)
-            other_client = Client.get_by_id(client_id)
+            other_client = Client.get(client_id)
             if not other_client:
                 other_client = Client.create(client_id)
             refresh(other_client)
@@ -75,18 +75,19 @@ def _perform_registration(request):
                 response['location_city_id'] = str(city_id)
 
     client = None
+    client_existed = False
     if client_id:
-        client = Client.get_by_id(client_id)
-    else:
-        if android_id:
-            client = Client.query(Client.android_id == android_id).get()
+        client = Client.get(client_id)
+    elif android_id:
+        client = Client.find_by_android_id(android_id)
         if client:
-            client_id = client.key.id()  # it is need to share gift
-
-    if not client:
-        client = _refresh_client_info(request, response, android_id, device_phone, city_id=city_id)
+            client_id = client.key.id()
+    if client:
+        client_existed = True
     else:
-        client = _refresh_client_info(request, response, android_id, device_phone, client_id, city_id=city_id)
+        client_id = None
+
+    client = _refresh_client_info(request, android_id, device_phone, client_id, city_id=city_id)
 
     response['client_id'] = client.key.id()
     client_name = client.name or ''
@@ -104,8 +105,8 @@ def _perform_registration(request):
             share = Share.get_by_id(int(share_id))
             response["share_type"] = share.share_type
             if share.share_type == INVITATION:
-                if not client_id or \
-                        (not Order.query(Order.client_id == client_id).get() and client_id != share.sender.id()):
+                if not client_existed or \
+                        (not Order.query(Order.client_id == client_id).get() and client.key.id() != share.sender.id()):
                     promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
                     if not promo:
                         SharedPromo(sender=share.sender, recipient=client.key, share_id=share.key.id()).put()
@@ -116,13 +117,12 @@ def _perform_registration(request):
                         gift.perform(client, namespace_manager.get_namespace())
                     response['branch_name'] = share_data.get('name')
                     response['branch_phone'] = share_data.get('phone')
-    return response
+    return response, client
 
 
 class RegistrationHandler(ApiHandler):
     def post(self):
-        response = _perform_registration(self.request)
-        client = Client.get_by_id(response['client_id'])
+        response, client = _perform_registration(self.request)
         if config.APP_KIND == RESTO_APP:
             resto_registration(client)
         self.render_json(response)

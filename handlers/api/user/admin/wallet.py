@@ -13,7 +13,7 @@ class WalletDepositHandler(AdminApiHandler):
     @write_access_required
     def post(self):
         client_id = self.request.get_range('client_id')
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.response.set_status(400)
             self.render_json({"description": u'Клиент не найден'})

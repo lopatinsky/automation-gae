@@ -1,5 +1,7 @@
 from datetime import date
 import logging
+
+from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb, deferred
 from methods import fastcounter
 from models import STATUS_AVAILABLE
@@ -22,9 +24,10 @@ class ClientSession(ndb.Model):
 
     order_screen = ndb.BooleanProperty(default=False, indexed=False)
     non_empty_cart = ndb.BooleanProperty(default=False, indexed=False)
+    has_phone = ndb.BooleanProperty(default=False, indexed=False)
     
     @classmethod
-    def save(cls, client_id, date, order_screen, non_empty_cart):
+    def save(cls, client_id, date, order_screen, non_empty_cart, has_phone):
         key_name = "%s%s%s" % (date.strftime(cls._DATE_FMT_STR), cls._DATE_ID_SEPARATOR, client_id)
         sess = cls.get_by_id(key_name)
         put = False
@@ -36,6 +39,9 @@ class ClientSession(ndb.Model):
             put = True
         if non_empty_cart and not sess.non_empty_cart:
             sess.non_empty_cart = True
+            put = True
+        if has_phone and not sess.has_phone:
+            sess.has_phone = True
             put = True
         if put:
             sess.put()
@@ -59,6 +65,8 @@ class ClientSession(ndb.Model):
 
 
 class Client(ndb.Model):
+    MIN_GLOBAL_ID = 10000
+
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     user_agent = ndb.StringProperty(indexed=False)
@@ -69,15 +77,20 @@ class Client(ndb.Model):
     surname = ndb.StringProperty()
     tel = ndb.StringProperty()
     email = ndb.StringProperty()
+    namespace_created = ndb.StringProperty()
+    extra_data = ndb.JsonProperty()
     paypal_refresh_token = ndb.StringProperty(indexed=False)
     city = ndb.KeyProperty(kind=ProxyCity)
-    extra_data = ndb.JsonProperty()
 
     @classmethod
     def create(cls, client_id=None):
+        ns = namespace_manager.get_namespace()
+        namespace_manager.set_namespace('')
         if not client_id:
             client_id = cls.generate_id()
-        return cls(id=client_id)
+        client = cls(id=client_id, namespace_created=ns)
+        namespace_manager.set_namespace(ns)
+        return client
 
     @staticmethod
     def generate_id():
@@ -87,7 +100,9 @@ class Client(ndb.Model):
 
     def save_session(self, order_screen=False, non_empty_cart=False):
         try:
-            deferred.defer(ClientSession.save, self.key.id(), date.today(), order_screen, non_empty_cart)
+            deferred.defer(ClientSession.save,
+                           self.key.id(), date.today(),
+                           order_screen, non_empty_cart, bool(self.tel))
         except Exception as e:
             logging.error("failed to defer save_session()")
             logging.exception(e)
@@ -114,6 +129,24 @@ class Client(ndb.Model):
                     })
             dct["extra_data"] = extra
         return dct
+
+    @classmethod
+    def is_id_global(cls, client_id):
+        return client_id >= cls.MIN_GLOBAL_ID
+
+    @classmethod
+    def get(cls, client_id):
+        kwds = {}
+        if cls.is_id_global(client_id):
+            kwds['namespace'] = ''
+        return cls.get_by_id(client_id, **kwds)
+
+    @classmethod
+    def find_by_android_id(cls, android_id):
+        client = cls.query(cls.android_id == android_id).get()
+        if not client:
+            client = cls.query(cls.android_id == android_id, namespace='').get()
+        return client
 
 
 class CardBindingPayment(ndb.Model):

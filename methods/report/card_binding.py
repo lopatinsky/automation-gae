@@ -31,7 +31,7 @@ def get(chosen_year, chosen_month, chosen_days, chosen_type, client_id):  # todo
     if client_id:
         if client_id.isdigit():
             client_id = int(client_id)
-            client = Client.get_by_id(client_id)
+            client = Client.get(client_id)
         else:
             client = None
         if not client:

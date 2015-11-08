@@ -51,7 +51,7 @@ def clients_table(start, end, venue_id):
             clients[client_id].add_order(venue_sum, total_sum, payment,
                                          order.status != READY_ORDER)
         else:
-            client = Client.get_by_id(client_id)
+            client = Client.get(client_id)
             clients[client_id] = ReportedClient(client_id, '%s %s' % (client.name, client.surname), client.tel, venue_sum, total_sum, payment,
                                                 order.status != READY_ORDER, order.device_type)
     return clients, \

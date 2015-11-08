@@ -18,7 +18,7 @@ class SubscriptionInfoHandler(ApiHandler):
         client_id = self.request.headers.get('Client-Id', 0)
         if not client_id:
             self.abort(400)
-        client = Client.get_by_id(int(client_id))
+        client = Client.get(int(client_id))
         subscription = get_subscription(client)
         if subscription:
             subscription_dict = subscription.dict()
@@ -54,7 +54,7 @@ class BuySubscriptionHandler(ApiHandler):
         client_id = self.request.headers.get('Client-Id', 0)
         if not client_id:
             self.abort(400)
-        client = Client.get_by_id(int(client_id))
+        client = Client.get(int(client_id))
         tariff_id = self.request.get_range('tariff_id')
         if not tariff_id:
             return self.render_error(u'Тариф не найден')
