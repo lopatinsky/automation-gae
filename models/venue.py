@@ -293,6 +293,14 @@ class Venue(ndb.Model):
                         venues.remove(venue)
             return venues
 
+    @classmethod
+    def get_cities(cls):
+        cities = []
+        for venue in cls.query(cls.active == True).fetch():
+            if venue.address.city not in cities:
+                cities.append(venue.address.city)
+        return cities
+
     def dynamic_info(self):
         items = []
         for item in self.stop_lists:
