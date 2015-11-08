@@ -74,7 +74,7 @@ class PaymentStatusHandler(ApiHandler):
         binding = CardBindingPayment.get_by_id(order_id)
         if alfa_response['OrderStatus'] == 1:
             binding.success = True
-            client = Client.get_by_id(binding.client_id)
+            client = Client.get(binding.client_id)
             client.tied_card = True
             client.put()
         else:

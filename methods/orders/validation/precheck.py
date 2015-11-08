@@ -68,7 +68,7 @@ def set_client_info(client_json, headers):
     client_id = int(client_json.get('id', 0)) or int(headers.get('Client-Id') or 0)
     if not client_id:
         return None
-    client = Client.get_by_id(client_id)
+    client = Client.get(client_id)
     if not client:
         return None
     name, surname = get_separated_name_surname(client_json.get('name'))

@@ -15,7 +15,7 @@ class PromoInfoHandler(ApiHandler):
         client_id = self.request.get('client_id') or int(self.request.headers.get('Client-Id') or 0)
         if client_id:
             client_id = int(client_id)
-            client = Client.get_by_id(client_id)
+            client = Client.get(client_id)
             if not client:
                 self.abort(400)
         gift_items = [gift.dict() for gift in GiftMenuItem.query(GiftMenuItem.status == STATUS_AVAILABLE).order(GiftMenuItem.points).fetch()]

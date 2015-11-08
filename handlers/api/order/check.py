@@ -28,7 +28,7 @@ __author__ = 'dvpermyakov'
 class CheckOrderHandler(ApiHandler):
     def post(self):
         client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.abort(400)
 

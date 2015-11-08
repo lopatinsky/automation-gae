@@ -10,7 +10,7 @@ class AddPushHandler(ApiHandler):
         client_id = int(self.request.headers.get('Client-Id') or 0)
         if not client_id:
             self.abort(400)
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.abort(400)
         push = GeoPush.query(GeoPush.client == client.key, GeoPush.status == STATUS_AVAILABLE).order(-GeoPush.created).get()

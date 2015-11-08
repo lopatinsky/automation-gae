@@ -270,7 +270,7 @@ class Order(ndb.Model):
 
     def dict(self, extra_fields_in_comment=True):
         dct = self.history_dict()
-        client = Client.get_by_id(self.client_id)
+        client = Client.get(self.client_id)
         dct.update({
             "total_sum": self.total_sum,
             "actual_delivery_time": timestamp(self.actual_delivery_time) if self.actual_delivery_time else None,

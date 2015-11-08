@@ -66,7 +66,7 @@ def cancel_order(order, status, namespace, comment=None):
         order.put()
 
         if status == CANCELED_BY_BARISTA_ORDER:
-            client = Client.get_by_id(order.client_id)
+            client = Client.get(order.client_id)
             push_text = u"%s, заказ №%s отменен." % (client.name, order.number)
             if order.has_card_payment:
                 push_text += u" Ваш платеж будет возвращен на карту в течение нескольких минут.\n"

@@ -71,7 +71,7 @@ class CompanyModulesHandler(ApiHandler):
     def get(self):
         client_id = int(self.request.headers.get('Client-Id') or 0)
         if client_id:
-            client = Client.get_by_id(client_id)
+            client = Client.get(client_id)
         else:
             client = None
         modules = []

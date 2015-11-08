@@ -147,7 +147,7 @@ class SharedGift(ndb.Model):
         self.status = self.PERFORMING
         self.recipient_id = client.key.id()
         self.put()
-        sender = Client.get_by_id(self.client_id)
+        sender = Client.get(self.client_id)
         text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
         header = u'Подарок'
         send_client_push(client, text, header, namespace)
@@ -179,7 +179,7 @@ class SharedGift(ndb.Model):
             promo_code.deactivate()
             self.status = self.CANCELED
             self.put()
-            sender = Client.get_by_id(self.client_id)
+            sender = Client.get(self.client_id)
             text = u'Ваш подарок не был получен. Ссылка более не будет активна, а деньги вернутся в ближайшее время.'
             header = u'Отмена подарка'
             send_client_push(sender, text, header, namespace)
@@ -194,12 +194,12 @@ class SharedGift(ndb.Model):
                 'gift_status': self.CHOICES_MAP[self.status]
             })
             item_dicts.append(item_dict)
-        recipient_dict = Client.get_by_id(self.recipient_id).dict()
+        recipient_dict = Client.get(self.recipient_id).dict()
         recipient_dict.update({
             'initial_name': self.recipient_name,
             'initial_phone': self.recipient_phone
         })
-        sender_dict = Client.get_by_id(self.client_id).dict()
+        sender_dict = Client.get(self.client_id).dict()
         return {
             'items': item_dicts,
             'recipient': recipient_dict,

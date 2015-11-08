@@ -17,6 +17,6 @@ class CheckOrderSuccessHandler(RequestHandler):
         order_id = self.request.get_range('order_id')
         order = Order.get_by_id(order_id)
         if not order.response_success:
-            client = Client.get_by_id(order.client_id)
+            client = Client.get(order.client_id)
             sms_text = u"%s, Ваш заказ №%s принят. Проверьте историю заказов." % (client.name, order_id)
             sms_pilot.send_sms([sms_phone(client.tel)], sms_text)
