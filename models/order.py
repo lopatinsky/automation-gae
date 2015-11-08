@@ -152,6 +152,7 @@ class Order(ndb.Model):
     courier = ndb.KeyProperty(kind=Courier)
     geo_push = ndb.KeyProperty(kind=GeoPush)
     extra_data = ndb.JsonProperty()
+    unified_app_namespace = ndb.StringProperty()
 
     @classmethod
     def get(cls, client):
