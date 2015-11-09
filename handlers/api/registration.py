@@ -87,7 +87,7 @@ def _perform_registration(request):
     else:
         client_id = None
 
-    client = _refresh_client_info(request, android_id, device_phone, client_id, city_id=city_id)
+    client = _refresh_client_info(request, response, android_id, device_phone, client_id, city_id=city_id)
 
     response['client_id'] = client.key.id()
     client_name = client.name or ''
