@@ -6,7 +6,7 @@ from webapp2_extras import jinja2
 from handlers.web_admin.auth_base import AuthBaseHandler
 from methods import excel
 from models import CompanyUser
-from models.config.config import config
+from models.config.config import config, COMPANY_STATUS_NAMES, COMPANY_IN_PRODUCTION
 
 
 class CompanyBaseHandler(AuthBaseHandler):
@@ -36,7 +36,8 @@ class CompanyBaseHandler(AuthBaseHandler):
         cfg = None
         if namespace_manager.get_namespace():
             cfg = config
-        values.update(user=self.user, config=cfg)
+        values.update(user=self.user, config=cfg, COMPANY_STATUSES=COMPANY_STATUS_NAMES,
+                      COMPANY_IN_PRODUCTION=COMPANY_IN_PRODUCTION)
         rendered = self.jinja2.render_template('/company' + template_name, **values)
         self.response.write(rendered)
 

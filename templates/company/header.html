@@ -2,8 +2,8 @@
         <nav>
             <p>
                 {{ user.login }} -- компания {{ config.APP_NAME if config else "не выбрана" }}
-                {% if config and not config.IN_PRODUCTION %}
-                    <strong style="color: red">(НЕ ЗАПУЩЕНА)</strong>
+                {% if config and config.COMPANY_STATUS != COMPANY_IN_PRODUCTION %}
+                    <strong style="color: red">({{ COMPANY_STATUSES[config.COMPANY_STATUS].upper() }})</strong>
                 {% endif %}
                 {% if not user.namespace %}
                     <a href="/company/choose">Сменить компанию</a>

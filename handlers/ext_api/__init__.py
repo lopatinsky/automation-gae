@@ -1,7 +1,7 @@
 from google.appengine.api import namespace_manager
 from google.appengine.ext.ndb import metadata
 from .base import GAEAuthBaseHandler
-from models.config.config import Config
+from models.config.config import Config, COMPANY_IN_PRODUCTION
 from models.legal import LegalInfo
 
 
@@ -18,6 +18,6 @@ class ExportLegalsHandler(GAEAuthBaseHandler):
                     'id': [namespace, legal.key.id()],
                     'app_name': cfg.APP_NAME or "",
                     'name': legal.person_ooo or legal.person_ip,
-                    'production': cfg.IN_PRODUCTION,
+                    'production': cfg.COMPANY_STATUS == COMPANY_IN_PRODUCTION,
                 })
         self.render_json({"legals": result})

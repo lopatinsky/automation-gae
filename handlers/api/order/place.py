@@ -8,7 +8,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
 
-from models.config.config import config, RESTO_APP
+from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
@@ -47,8 +47,10 @@ class OrderHandler(ApiHandler):
         })
 
     def post(self):
-        if config.BLOCK_ORDER:
+        if config.COMPANY_STATUS == COMPANY_REMOVED:
             return self.render_error(u'К сожалению, компания больше не принимает заказы через мобильное приложение')
+        elif config.COMPANY_STATUS == COMPANY_PREVIEW:
+            return self.render_error(u'К сожалению, компания пока не принимает заказы через мобильное приложение')
 
         order_json = json.loads(self.request.get('order'))
 

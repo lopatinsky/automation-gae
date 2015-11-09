@@ -1,6 +1,6 @@
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
-from models.config.config import Config
+from models.config.config import Config, COMPANY_IN_PRODUCTION
 from models import Order
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP
@@ -9,12 +9,12 @@ __author__ = 'dvpermyakov'
 
 
 class Company:
-    def __init__(self, namespace, name, in_production):
+    def __init__(self, namespace, name, company_status):
         self.namespace = namespace
         self.name = name
         self.payments = []
         self.info = {}
-        self.in_production = in_production
+        self.company_status = company_status
 
 
 def get(start, end, chosen_object_type, chosen_namespaces):
@@ -28,10 +28,10 @@ def get(start, end, chosen_object_type, chosen_namespaces):
         if not config or not config.APP_NAME:
             continue
         if (chosen_namespaces and namespace in chosen_namespaces) or \
-                (not chosen_namespaces and config.IN_PRODUCTION):
-            companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
+                (not chosen_namespaces and config.COMPANY_STATUS == COMPANY_IN_PRODUCTION):
+            companies.append(Company(namespace, config.APP_NAME, config.COMPANY_STATUS))
         else:
-            skip_companies.append(Company(namespace, config.APP_NAME, config.IN_PRODUCTION))
+            skip_companies.append(Company(namespace, config.APP_NAME, config.COMPANY_STATUS))
     if not chosen_namespaces:
         chosen_namespaces = [c.namespace for c in companies]
     statuses = (READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER)  # it can be tunable

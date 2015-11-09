@@ -45,7 +45,7 @@
                 {% endfor %}
             </tr>
             {% for company in companies %}
-                <tr {% if not company.in_production %}style="background: #cccccc"{% endif %}>
+                <tr {% if company.company_status != COMPANY_IN_PRODUCTION %}style="background: #cccccc"{% endif %}>
                     {% set span = company.payments|length %}
                     <td rowspan="{{ span }}">
                         <input type="checkbox" name="{{ company.namespace }}"

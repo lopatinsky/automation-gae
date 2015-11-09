@@ -19,7 +19,7 @@ def _get_values():
         'report_emails': config.REPORT_EMAILS or '',
         'color': config.ACTION_COLOR,
         'email_buttons': config.EMAIL_REQUESTS,
-        'in_production': config.IN_PRODUCTION,
+        'company_status': config.COMPANY_STATUS,
     }
 
 
@@ -114,6 +114,6 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.REPORT_EMAILS = self.request.get('report_emails')
         config.ACTION_COLOR = "FF%s" % self.request.get('color')[1:]
         config.EMAIL_REQUESTS = bool(self.request.get('email_buttons'))
-        config.IN_PRODUCTION = bool(self.request.get('in_production'))
+        config.COMPANY_STATUS = int(self.request.get('company_status'))
         config.put()
         self.redirect('/company/docs/about')

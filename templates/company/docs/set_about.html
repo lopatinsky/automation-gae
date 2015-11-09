@@ -39,8 +39,14 @@
             <input type="checkbox" name="email_buttons" {% if email_buttons %}checked{% endif %}>
         </label><br>
         <label>
-            Запущен:
-            <input type="checkbox" name="in_production" {% if in_production %}checked{% endif %}>
+            Статус:
+            <select name="company_status">
+                {% for status, status_name in COMPANY_STATUSES.items() %}
+                    <option value="{{ status }}" {% if company_status == status %}selected{% endif %}>
+                        {{ status_name }}
+                    </option>
+                {% endfor %}
+            </select>
         </label><br>
         <input type="submit">
     </form>

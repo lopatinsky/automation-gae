@@ -34,6 +34,18 @@ AUTO_APP = 0
 RESTO_APP = 1
 APP_CHOICES = (AUTO_APP, RESTO_APP)
 
+COMPANY_IN_DEVELOPMENT = 0
+COMPANY_IN_PRODUCTION = 1
+COMPANY_REMOVED = 2
+COMPANY_PREVIEW = 3
+COMPANY_STATUS_CHOICES = (COMPANY_IN_DEVELOPMENT, COMPANY_IN_PRODUCTION, COMPANY_REMOVED, COMPANY_PREVIEW)
+COMPANY_STATUS_NAMES = {
+    COMPANY_IN_DEVELOPMENT: u"Не запущена",
+    COMPANY_IN_PRODUCTION: u"Запущена",
+    COMPANY_REMOVED: u"Отключена",
+    COMPANY_PREVIEW: u"Предпросмотр в общем аппе",
+}
+
 
 class Config(ndb.Model):
     @cached_property
@@ -45,7 +57,7 @@ class Config(ndb.Model):
             return AUTO_APP
 
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
-    BLOCK_ORDER = ndb.BooleanProperty(default=False)
+    COMPANY_STATUS = ndb.IntegerProperty(indexed=False, choices=COMPANY_STATUS_CHOICES, default=COMPANY_IN_DEVELOPMENT)
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
@@ -66,8 +78,6 @@ class Config(ndb.Model):
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
-
-    IN_PRODUCTION = ndb.BooleanProperty(indexed=False, default=False)
 
     SHARE_GIFT_MODULE = ndb.LocalStructuredProperty(ShareGiftModule)
     SHARE_INVITATION_MODULE = ndb.LocalStructuredProperty(ShareInvitationModule)
