@@ -70,7 +70,15 @@ def _parse_time(time):
     return description
 
 
-def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum):
+def check_delivery_min_sum(venue, delivery_type, delivery_zone, total_sum):
+    for delivery in venue.delivery_types:
+        if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
+            if delivery_zone and delivery_zone.min_sum > total_sum:
+                return False, u'Минимальная сумма заказа %s' % delivery_zone.min_sum
+    return True, None
+
+
+def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot):
     description = None
     for delivery in venue.delivery_types:
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
@@ -84,8 +92,6 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, deli
                                              DELIVERY_WHAT_MAP[delivery.delivery_type])
             if not valid:
                 return False, error
-            if delivery_zone and delivery_zone.min_sum > total_sum:
-                description = u'Минимальная сумма заказа %s' % delivery_zone.min_sum
             if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
                 if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:

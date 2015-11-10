@@ -14,7 +14,7 @@ from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupM
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
-    check_client_info, check_subscription, check_empty_order
+    check_client_info, check_subscription, check_empty_order, check_delivery_min_sum
 from models.venue import DELIVERY
 
 
@@ -339,8 +339,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_delivery_time(delivery_time)
     if not valid:
         return send_error(error)
-    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone,
-                                       total_sum_without_promos)
+    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot)
     if not valid:
         return send_error(error)
     valid, error = check_client_info(client, delivery_type, order)
@@ -387,7 +386,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         if not valid:
             return send_error(error)
 
-    valid, error = check_delivery_type(venue, delivery_type, delivery_time, delivery_slot, delivery_zone, total_sum)
+    valid, error = check_delivery_min_sum(venue, delivery_type, delivery_zone, total_sum)
     if not valid:
         return send_error(error, override_total_sum_with_promos=True)
 
