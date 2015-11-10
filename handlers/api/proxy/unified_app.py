@@ -33,7 +33,7 @@ class CitiesHandler(ApiHandler):
             if len(cities) > 1:
                 cities_dict = [{
                     'city': city,
-                    'id': city
+                    'id': base64.b64encode(city.encode('utf-8'))
                 } for city in cities]
             else:
                 return self.render_json({})

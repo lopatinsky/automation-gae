@@ -349,6 +349,13 @@ class Venue(ndb.Model):
             'address': self.description
         }
 
+    @classmethod
+    def get_suitable_venues(cls, city):
+        return [venue for venue in cls.query(cls.address.city == city.city).fetch() if venue.active]
+
+    def suitable_for_city(self, city):
+        return self.address.city == city.city
+
     def is_open(self, minutes_offset=0):
         now = datetime.utcnow() + timedelta(minutes=minutes_offset) + timedelta(hours=self.timezone_offset)
         return working_hours.check(self.schedule, now)

@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -9,8 +10,8 @@ from methods.fuckups import fuckup_redirection_namespace
 from methods.rendering import log_params
 
 from methods.versions import is_test_version, update_namespace
-from models import Client
-from models.proxy.unified_app import ProxyCity
+from models import Client, STATUS_AVAILABLE
+from models.proxy.unified_app import ProxyCity, AutomationCompany
 from methods.unique import set_user_agent
 
 
@@ -67,12 +68,19 @@ class ApiHandler(RequestHandler):
         client_id = self.request.headers.get('Client-Id')
         city_id = self.request.headers.get('City-Id')
         if city_id and client_id:
-            city = ProxyCity.get_by_id(int(city_id))
+            company = AutomationCompany.query(AutomationCompany.status == STATUS_AVAILABLE).get()
+            if company:
+                city = ProxyCity.get_by_id(int(city_id))
+            else:
+                city = ProxyCity(city=base64.b64decode(city_id).decode('utf-8'))
             client = Client.get_by_id(int(client_id))
             if not city or not client_id:
                 self.abort(400)
             self.request.city = city
-            save_city(client, city.key.id())
+            if company:
+                save_city(client, city.key.id())
+        else:
+            self.request.city = None
 
         return_value = super(ApiHandler, self).dispatch()
 

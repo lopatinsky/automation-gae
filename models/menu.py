@@ -239,7 +239,7 @@ class MenuCategory(ndb.Model):
         elif app_kind == RESTO_APP:
             return get_categories(self)
 
-    def get_items(self, only_available=False):
+    def get_items(self, city=None, city_venues=None, only_available=False):
         from methods.proxy.resto.menu import get_products
         from models.config.config import Config, AUTO_APP, RESTO_APP
         app_kind = Config.get().APP_KIND
@@ -249,10 +249,19 @@ class MenuCategory(ndb.Model):
             items = get_products(self)
         else:
             items = []
-        if only_available:
+        if only_available or city:
             for item in items[:]:
-                if item.status != STATUS_AVAILABLE:
+                if only_available and item.status != STATUS_AVAILABLE:
                     items.remove(item)
+                    continue
+                if city and len(item.restrictions) >= len(city_venues):
+                    forbid = True
+                    for venue_key in city_venues:
+                        if venue_key not in item.restrictions:
+                            forbid = False
+                    if forbid:
+                        items.remove(item)
+                        continue
         return items
 
     @staticmethod
@@ -307,9 +316,9 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, venue=None):
+    def dict(self, venue=None, city=None, city_venues=None):
         items = []
-        for item in self.get_items(only_available=True):
+        for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
             if not venue:
                 items.append(item.dict())
             else:
@@ -333,13 +342,18 @@ class MenuCategory(ndb.Model):
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None, subscription_include=False):
+    def get_menu_dict(cls, venue=None, city=None, subscription_include=False):
         from models.config.config import Config
         from models.specials import SubscriptionMenuItem
+        from models import Venue
         init_category = cls.get_initial_category()
         category_dicts = []
+        if city:
+            venue_keys = [city_venue.key for city_venue in Venue.get_suitable_venues(city)]
+        else:
+            venue_keys = []
         for category in init_category.get_categories():
-            category_dict = category.dict(venue)
+            category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys)
             if category_dict['items'] or category_dict['categories']:
                 category_dicts.append(category_dict)
         config = Config.get()

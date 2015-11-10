@@ -14,6 +14,8 @@ class VenuesHandler(ApiHandler):
         venue_dicts = []
         for venue in venues:
             for delivery in venue.delivery_types:
+                if self.request.city and not venue.suitable_for_city(self.request.city):
+                    continue
                 if delivery.status == STATUS_AVAILABLE and delivery.delivery_type in [SELF, IN_CAFE, PICKUP]:
                     venue_dicts.append(venue.dict(location))
                     break

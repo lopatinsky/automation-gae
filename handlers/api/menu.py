@@ -1,8 +1,5 @@
-from google.appengine.api import memcache
-from google.appengine.api.namespace_manager import namespace_manager
 from handlers.api.base import ApiHandler
 from models import MenuCategory, Venue
-from models.config.config import config, RESTO_APP
 
 
 class MenuHandler(ApiHandler):
@@ -11,12 +8,13 @@ class MenuHandler(ApiHandler):
         venue_id = self.request.get('venue_id')
         dynamic = "dynamic" in self.request.params
         venue = None
+        city = self.request.city if self.request.city else None
         if venue_id:
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
         response = {
-            "menu": MenuCategory.get_menu_dict(venue, subscription_include),
+            "menu": MenuCategory.get_menu_dict(venue=venue, city=city, subscription_include=subscription_include),
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         }
         self.render_json(response)
