@@ -12,6 +12,7 @@ from images import ResizeImageHandler
 from geo_push import CloseGeoPushesHandler
 from subsciption import CloseSubscriptionHandler
 from resto_update import UpdateRestoHandler
+from update_hit import UpdateRatingHandler, UpdateHitCategoryHandler
 
 __author__ = 'ilyazorin'
 
@@ -30,4 +31,6 @@ app = webapp2.WSGIApplication([
     ('/cron/subscription', CloseSubscriptionHandler),
     ('/cron/geo_push', CloseGeoPushesHandler),
     ('/cron/update_resto', UpdateRestoHandler),
+    ('/cron/update_rating', UpdateRatingHandler),
+    ('/cron/update_hit', UpdateHitCategoryHandler),
 ], debug=True)

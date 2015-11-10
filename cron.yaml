@@ -55,3 +55,14 @@ cron:
   url: /cron/update_resto
   schedule: every 1 hours from 00:10 to 23:59
   timezone: Europe/Moscow
+
+
+#- description: update rating
+#  url: /cron/update_rating
+#  schedule: every day 04:00
+#  timezone: Europe/Moscow
+
+#- description: update hit category
+#  url: /cron/update_hit
+#  schedule: every day 05:00
+#  timezone: Europe/Moscow

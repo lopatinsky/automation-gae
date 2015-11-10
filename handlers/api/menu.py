@@ -1,4 +1,5 @@
 from handlers.api.base import ApiHandler
+from methods.hit import include_hit_category
 from models import MenuCategory, Venue
 
 
@@ -13,8 +14,10 @@ class MenuHandler(ApiHandler):
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
+        menu = MenuCategory.get_menu_dict(venue=venue, city=city, subscription_include=subscription_include)
+        include_hit_category(menu)
         response = {
-            "menu": MenuCategory.get_menu_dict(venue=venue, city=city, subscription_include=subscription_include),
+            "menu": menu,
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         }
         self.render_json(response)

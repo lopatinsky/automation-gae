@@ -399,6 +399,8 @@ class MenuItem(ndb.Model):
     group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
     stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
 
+    rating = ndb.FloatProperty(default=0)  # in [0,1]
+
     @classmethod
     def get(cls, product_id):
         from models.config.config import Config, AUTO_APP, RESTO_APP
