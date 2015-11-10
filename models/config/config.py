@@ -123,6 +123,8 @@ class Config(ndb.Model):
             return u'Кофейня'
         elif self.PLACE_TYPE == BAR:
             return u'Бар'
+        else:
+            return u'Заведение'
 
     @property
     def SHARE_GIFT_ENABLED(self):
