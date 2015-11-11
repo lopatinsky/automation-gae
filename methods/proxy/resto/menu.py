@@ -65,7 +65,7 @@ def __get_products(category, resto_products):
 
 
 def __get_categories(parent_category, resto_categories):
-    categories = []
+    categories = {}
     products = {}
     group_modifiers = {}
     single_modifiers = {}
@@ -76,9 +76,9 @@ def __get_categories(parent_category, resto_categories):
         category.picture = resto_category['image'][0]['imageUrl'] if resto_category['image'] else ''
         category.sequence_number = resto_category['order']
         if resto_category['children']:
-            child_categories, child_products, child_group_modifiers, child_single_modifiers = \
+            child_categories, child_products, child_group_modifiers, child_single_modifiers, _ = \
                 __get_categories(category, resto_category['children'])
-            categories.extend(child_categories)
+            categories.update(child_categories)
             products.update(child_products)
             group_modifiers.update(child_group_modifiers)
             single_modifiers.update(child_single_modifiers)
@@ -88,8 +88,12 @@ def __get_categories(parent_category, resto_categories):
             products[category.key] = category_products
             group_modifiers.update(product_group_modifiers)
             single_modifiers.update(product_single_modifiers)
-        categories.append(category)
-    return categories, products, group_modifiers, single_modifiers
+        categories[category.key.id()] = category
+
+    categories_by_parent = {}
+    for category in categories.itervalues():
+        categories_by_parent.setdefault(category.category.id(), []).append(category.key.id())
+    return categories, products, group_modifiers, single_modifiers, categories_by_parent
 
 
 def _get_menu(force_reload=False):
@@ -117,11 +121,9 @@ def reload_menu():
 
 
 def get_categories(parent_category):
-    categories = []
-    for category in _get_menu()[0]:
-        if category.category == parent_category.key:
-            categories.append(category)
-    return categories
+    categories_by_id, _, _, _, categories_by_parent = _get_menu()
+    children_ids = categories_by_parent.get(parent_category.key.id(), [])
+    return [categories_by_id[child_id] for child_id in children_ids]
 
 
 def get_products(category):
