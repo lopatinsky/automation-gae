@@ -38,6 +38,7 @@ def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_
         delivery_type = DeliveryType()
         delivery_type.delivery_type = DELIVERY_TYPE_MAP[resto_deliery_type['name']]
         delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
+        delivery_type.min_time = resto_deliery_type['min_time']
         delivery_type.status = resto_deliery_type['available']
         if delivery_type.delivery_type == DELIVERY:
             delivery_type.min_time = 3600
