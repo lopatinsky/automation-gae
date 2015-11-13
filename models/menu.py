@@ -344,7 +344,7 @@ class MenuCategory(ndb.Model):
     @classmethod
     def get_menu_dict(cls, venue=None, city=None, subscription_include=False):
         from models.config.config import Config
-        from models.specials import SubscriptionMenuItem
+        from models.subscription import SubscriptionMenuItem
         from models import Venue
         init_category = cls.get_initial_category()
         category_dicts = []

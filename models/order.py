@@ -11,7 +11,7 @@ from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
 from models.promo import Promo, GiftMenuItem
-from models.specials import Subscription
+from models.subscription import Subscription
 from models.user import Courier
 from models.venue import Venue, DeliveryZone, Address, DeliverySlot
 
@@ -42,6 +42,12 @@ CONFUSED_VENUE = 1
 CONFUSED_SELF = 2
 CONFUSED_OTHER = 3
 CONFUSED_CHOICES = (CONFUSED_VENUE, CONFUSED_TIME, CONFUSED_SELF, CONFUSED_OTHER)
+
+
+class OrderRate(ndb.Model):
+    meal_rate = ndb.FloatProperty(required=True)
+    service_rate = ndb.FloatProperty(required=True)
+    comment = ndb.StringProperty()
 
 
 class SubscriptionDetails(ndb.Model):
@@ -153,6 +159,7 @@ class Order(ndb.Model):
     geo_push = ndb.KeyProperty(kind=GeoPush)
     extra_data = ndb.JsonProperty()
     unified_app_namespace = ndb.StringProperty()
+    rate = ndb.LocalStructuredProperty(OrderRate)
 
     @classmethod
     def get(cls, client):

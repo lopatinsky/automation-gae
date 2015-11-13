@@ -1,7 +1,6 @@
-import logging
 from google.appengine.ext import ndb
 from models import STATUS_AVAILABLE, MenuItem
-from models.specials import Subscription, SubscriptionMenuItem
+from models.subscription import Subscription, SubscriptionMenuItem
 
 __author__ = 'dvpermyakov'
 

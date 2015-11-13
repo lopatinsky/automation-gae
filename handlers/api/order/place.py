@@ -12,7 +12,7 @@ from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PRE
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
-    paypal_payment_performing, set_address_obj, send_demo_sms
+    paypal_payment_performing, set_address_obj, send_demo_sms, send_review_push
 from methods.orders.validation.validation import validate_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
@@ -235,6 +235,8 @@ class OrderHandler(ApiHandler):
         show_share = False
         if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE:
             show_share = True  # todo this is for test only
+
+        send_review_push(self.order)
 
         self.response.status_int = 201
         self.render_json({

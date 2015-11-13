@@ -8,7 +8,7 @@ from methods.rendering import timestamp
 from methods.subscription import get_subscription
 from models import Order, Client, Venue, STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
-from models.specials import SubscriptionTariff, Subscription, SubscriptionMenuItem
+from models.subscription import SubscriptionMenuItem, SubscriptionTariff, Subscription
 
 __author__ = 'dvpermyakov'
 

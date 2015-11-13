@@ -157,6 +157,7 @@ app = WSGIApplication([
         Route('/order_register', api.RegisterOrderHandler),
         Route('/order', api.OrderHandler),
         Route('/set_order_success', api.ClientSettingSuccessHandler),
+        Route('/review', api.OrderReviewHandler),
         Route('/status', api.StatusHandler),
         Route('/return', api.ReturnOrderHandler),
         Route('/history', api.HistoryHandler),
@@ -429,6 +430,7 @@ app = WSGIApplication([
         ]),
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
+            Route('/review', tasks.SendPushReviewHandler),
         ]),
     ]),
 

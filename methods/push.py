@@ -8,12 +8,16 @@ from google.appengine.api.namespace_manager import namespace_manager
 
 from methods.emails.admins import send_error
 from methods.rendering import timestamp
-from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES
+from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES, Client
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from models.config.config import config
 
 IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1', 'ElephantBoutique/1.0', 'MeatMe/1.0']
 ANDROID_FUCKUP = ['pastadeli/4', 'pastadeli/5', 'meatme/4', 'meatme/5']
+
+
+REVIEW_TYPE = 3
+PUSH_TYPES = (REVIEW_TYPE,)
 
 
 def _send_push(channels, data, device_type):
@@ -70,9 +74,7 @@ def _make_order_push_data(order, text):
             data.update({
                 'sound': 'push.caf'
             })
-        return data
-    else:
-        return None
+    return data
 
 
 def _make_share_gift_push_data(client, text):
@@ -81,9 +83,21 @@ def _make_share_gift_push_data(client, text):
         data.update({
             'share_gift': True
         })
-        return data
-    else:
-        return None
+    return data
+
+
+def _make_order_review_push_data(client, order):
+    head = u'Оцените заказ'
+    text = u'Оставьте отзыв о Вашем заказе!'
+    data = _make_push_data(text, head, client.device_type)
+    if data:
+        data.update({
+            'type': REVIEW_TYPE,
+            'review': {
+                'order_id': order.key.id()
+            }
+        })
+    return data
 
 
 def send_order_push(order, text, namespace, new_time=None, silent=False):
@@ -116,3 +130,10 @@ def send_client_push(client, text, header, namespace):
 def send_multichannel_push(text, header, channels, device_type):
     data = _make_push_data(text, header, device_type)
     return _send_push(channels, data, device_type)
+
+
+def send_review_push(order):
+    client = Client.get_by_id(order.client_id)
+    data = _make_order_review_push_data(client, order)
+    client_channel = get_channels(order.key.namespace())[CLIENT_CHANNEL] % client.key.id()
+    return _send_push([client_channel], data, client.device_type)
