@@ -7,6 +7,8 @@ __author__ = 'dvpermyakov'
 
 class ShareInvitationModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+    after_order = ndb.BooleanProperty(default=True)
+    after_number_order = ndb.IntegerProperty(default=3)  # can't be zero
 
     about_title = ndb.StringProperty(required=True)
     about_description = ndb.StringProperty(required=True)

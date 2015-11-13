@@ -6,6 +6,8 @@ from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
+from methods.branch_io import INVITATION
+from models import Share, Order
 
 from models.config.config import config, EMAIL_FROM, Config
 from handlers.api.paypal import paypal
@@ -129,6 +131,21 @@ def send_review_push(order):
         taskqueue.add(url='/task/pushes/review', method='POST', eta=start, params={
             'review_id': review.key.id()
         })
+
+
+def need_to_show_share_invitation(client):
+    module = config.SHARE_INVITATION_MODULE
+    if not module or not module.status:
+        return False
+    if not module.after_order:
+        return False
+    for share in Share.query(Share.sender == client.key).fetch():
+        if share.share_type == INVITATION:
+            return False
+    count = Order.query(Order.client_id == client.key.id()).count()
+    if count % module.after_number_order != 0:
+        return False
+    return True
 
 
 def set_address_obj(address_json, order):
