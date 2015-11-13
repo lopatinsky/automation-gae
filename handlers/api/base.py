@@ -50,9 +50,9 @@ class ApiHandler(RequestHandler):
         logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
         logging.debug('Version: %s' % self.request.headers.get('Version'))
 
-        ####
-        fuckup_redirection_namespace()
-        ####
+        ####################################
+        ## fuckup_redirection_namespace() ##
+        ####################################
 
         self.request.init_namespace = None
         namespace = self.request.headers.get('Namespace')
