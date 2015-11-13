@@ -6,7 +6,9 @@ ORDER_INFO_MODULE = 3
 CLIENT_INFO_MODULE = 4
 GEO_PUSH_MODULE = 5
 HIT_MODULE = 6
-MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, CLIENT_INFO_MODULE, HIT_MODULE)
+MIVAKO_GIFT_MODULE = 7
+MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, CLIENT_INFO_MODULE, HIT_MODULE,
+                MIVAKO_GIFT_MODULE)
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
@@ -19,6 +21,7 @@ from models.config.version import Version
 from models.config.geo_push import GeoPushModule
 from models.config.inactive_clients import SendingSmsModule
 from models.config.hit import HitModule
+from models.config.mivako import MivakoGiftModule
 
 OTHER = -1
 VENUE = 0
@@ -89,6 +92,7 @@ class Config(ndb.Model):
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
     SENDING_SMS_MODULE = ndb.LocalStructuredProperty(SendingSmsModule, repeated=True)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
+    MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 

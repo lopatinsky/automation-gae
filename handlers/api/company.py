@@ -87,6 +87,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.ORDER_MODULE.dict())
         if config.GEO_PUSH_MODULE and config.GEO_PUSH_MODULE.status:
             modules.append(config.GEO_PUSH_MODULE.dict(client))
+        if config.MIVAKO_GIFT_MODULE and config.MIVAKO_GIFT_MODULE.status:
+            modules.append(config.MIVAKO_GIFT_MODULE.dict())
         self.render_json({
             'modules': modules
         })

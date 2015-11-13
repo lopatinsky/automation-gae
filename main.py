@@ -14,6 +14,7 @@ import handlers.web_admin.web.company.excel as company_excel
 from handlers.api.proxy import unified_app
 from handlers import tasks
 from handlers import email_api
+from handlers.api import mivako
 
 
 webapp2_config = {
@@ -219,6 +220,7 @@ app = WSGIApplication([
                 Route('/items', api.SharedGiftListHandler),
                 Route('/history', api.SharedGiftHistoryHandler),
                 Route('/get_url', api.GetGiftUrlHandler),
+                Route('/get_mivako_url', mivako.MivakoGetUrlHandler),
             ]),
         ]),
         PathPrefixRoute('/geo_push', [

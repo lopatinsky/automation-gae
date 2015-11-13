@@ -101,7 +101,8 @@ class SharedGiftMenuItem(ndb.Model):  # self.id() == item.key.id()
     item = ndb.KeyProperty(required=True, kind=MenuItem)
 
     def dict(self):
-        return self.item.get().dict()
+        from models.menu import MenuItem
+        return MenuItem.get(product_id=self.item.id()).dict()
 
 
 class ChosenSharedGiftMenuItem(ndb.Model):
