@@ -5,7 +5,7 @@ from webapp2 import RequestHandler
 from models import STATUS_AVAILABLE
 from models.config.config import Config
 from methods.emails import admins
-from models.specials import Subscription
+from models.subscription import Subscription
 
 
 class CloseSubscriptionHandler(RequestHandler):
