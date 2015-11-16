@@ -94,7 +94,7 @@ def _make_order_review_push_data(client, order):
         data.update({
             'type': REVIEW_TYPE,
             'review': {
-                'order_id': order.key.id()
+                'order_id': str(order.key.id())
             }
         })
     return data
