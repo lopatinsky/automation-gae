@@ -133,7 +133,7 @@ def send_multichannel_push(text, header, channels, device_type):
 
 
 def send_review_push(order):
-    client = Client.get_by_id(order.client_id)
+    client = Client.get(order.client_id)
     data = _make_order_review_push_data(client, order)
     client_channel = get_channels(order.key.namespace())[CLIENT_CHANNEL] % client.key.id()
     return _send_push([client_channel], data, client.device_type)

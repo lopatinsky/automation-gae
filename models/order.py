@@ -159,6 +159,7 @@ class Order(ndb.Model):
     geo_push = ndb.KeyProperty(kind=GeoPush)
     extra_data = ndb.JsonProperty()
     unified_app_namespace = ndb.StringProperty()
+    version = ndb.IntegerProperty(default=0)
     rate = ndb.LocalStructuredProperty(OrderRate)
 
     @classmethod
