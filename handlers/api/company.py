@@ -6,7 +6,7 @@ from base import ApiHandler
 from methods.fuckups import fuckup_ios_delivery_types
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
-from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone
+from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone, STATUS_AVAILABLE
 from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY
@@ -51,7 +51,8 @@ class CompanyInfoHandler(ApiHandler):
                 'enabled': config.WALLET_ENABLED,
             },
             'share_gift': {
-                'enabled': config.SHARE_GIFT_ENABLED,
+                'enabled': config.SHARE_GIFT_ENABLED or (config.MIVAKO_GIFT_MODULE and
+                                                         config.MIVAKO_GIFT_MODULE.status == STATUS_AVAILABLE)
             },
             'share_invitation': {
                 'enabled': config.SHARE_INVITATION_ENABLED,
