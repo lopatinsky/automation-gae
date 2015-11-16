@@ -1,7 +1,8 @@
 # coding=utf-8
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
+from google.appengine.api.taskqueue import taskqueue
 from google.appengine.ext import ndb
 
 from models.config.config import config
@@ -9,9 +10,21 @@ from methods import alfa_bank, push, paypal
 from models import Client
 from models.share import SharedPromo
 from models.order import READY_ORDER
+from models.specials import ReviewPush
 from models.venue import Venue
 
 __author__ = 'dvpermyakov'
+
+
+def send_review_push(order):
+    module = config.REVIEW_MODULE
+    if module and module.status:
+        review = ReviewPush(order=order.key)
+        review.put()
+        start = datetime.utcnow() + timedelta(seconds=module.wait_seconds)
+        taskqueue.add(url='/task/pushes/review', method='POST', eta=start, params={
+            'review_id': review.key.id()
+        })
 
 
 def done_order(order, namespace, with_push=True):
@@ -58,3 +71,4 @@ def done_order(order, namespace, with_push=True):
         if total_cash_back:
             text += u" Начислены бонусы на Ваш счет в размере %s." % (total_cash_back / 100.0)
         push.send_order_push(order, text, namespace, silent=True)
+        send_review_push(order)

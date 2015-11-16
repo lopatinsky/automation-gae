@@ -1,7 +1,5 @@
 # coding=utf-8
 import json
-from datetime import datetime
-from datetime import timedelta
 from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
@@ -9,7 +7,7 @@ from webapp2_extras import security
 from methods.branch_io import INVITATION
 from models import Share, Order
 
-from models.config.config import config, EMAIL_FROM, Config
+from models.config.config import config, EMAIL_FROM
 from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
@@ -18,7 +16,6 @@ from methods.emails.admins import send_error
 from methods.emails.postmark import send_email
 from methods.sms.sms_pilot import send_sms
 from models.payment_types import PAYMENT_TYPE_MAP
-from models.specials import ReviewPush
 from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 
 __author__ = 'dvpermyakov'
@@ -120,17 +117,6 @@ def send_venue_email(venue, order, host_url, jinja2):
             if email:
                 deferred.defer(send_email, EMAIL_FROM, email, text,
                                jinja2.render_template('/company/delivery/items.html', **item_values))
-
-
-def send_review_push(order):
-    module = config.REVIEW_MODULE
-    if module and module.status:
-        review = ReviewPush(order=order.key)
-        review.put()
-        start = datetime.utcnow() + timedelta(seconds=module.wait_seconds)
-        taskqueue.add(url='/task/pushes/review', method='POST', eta=start, params={
-            'review_id': review.key.id()
-        })
 
 
 def need_to_show_share_invitation(client):
