@@ -33,10 +33,10 @@ def _get_delivery_types(takeout_only):
 
 def get_venues():
     company = DoublebCompany.get()
-    venues_dict = get_doubleb_venues(company)
+    venues_dict = get_doubleb_venues(company)['venues']
     venues = []
     for venue_dict in venues_dict:
-        venue = Venue(id=venue_dict['id'])
+        venue = Venue(id=int(venue_dict['id']))
         venue.active = True
         venue.coordinates = GeoPt(lat=venue_dict['coordinates'].split(',')[0],
                                   lon=venue_dict['coordinates'].split(',')[1])
