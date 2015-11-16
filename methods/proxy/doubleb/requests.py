@@ -49,3 +49,8 @@ def _post_request(company, path, params=None, payload=None, log_response=True):
 def get_doubleb_venues(company):
     path = '/api/venues.php'
     return _get_request(company, path)
+
+
+def get_doubleb_payment_types(company):
+    path = '/api/payment/payment_types.php'
+    return _get_request(company, path)

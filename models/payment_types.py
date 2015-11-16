@@ -22,26 +22,30 @@ class PaymentType(ndb.Model):  # self.key.id() == type
 
     @classmethod
     def get(cls, payment_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.payment_types import get_payment_type
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(str(payment_id))
-        elif app_kind == RESTO_APP:
+        elif app_kind in [RESTO_APP, DOUBLEB_APP]:
             return get_payment_type(str(payment_id))
 
     @classmethod
     def fetch_types(cls, **kwargs):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
-        from methods.proxy.resto.payment_types import get_payment_types
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from methods.proxy.resto.payment_types import get_payment_types as resto_get_payment_types
+        from methods.proxy.doubleb.payment_types import get_payment_types as doubleb_get_payment_types
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             filters = []
             for prop_name, value in kwargs.items():
                 filters.append(getattr(PaymentType, prop_name) == value)
             return cls.query(*filters).fetch()
-        elif app_kind == RESTO_APP:
-            types = get_payment_types()
+        elif app_kind in [RESTO_APP, DOUBLEB_APP]:
+            if app_kind == RESTO_APP:
+                types = resto_get_payment_types()
+            else:
+                types = doubleb_get_payment_types()
             for type in types[:]:
                 for name, value in kwargs.items():
                     if getattr(type, name) != value:
