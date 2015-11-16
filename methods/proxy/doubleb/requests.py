@@ -54,3 +54,11 @@ def get_doubleb_venues(company):
 def get_doubleb_payment_types(company):
     path = '/api/payment/payment_types.php'
     return _get_request(company, path)
+
+
+def post_doubleb_registration(company, client):
+    path = '/api/register'
+    payload = {
+        'client_id': client.key.id() if client else None
+    }
+    return _post_request(company, path, payload=payload)
