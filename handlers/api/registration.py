@@ -6,8 +6,9 @@ from .base import ApiHandler
 from methods.client import save_city
 from methods.geocoder import get_cities_by_coordinates
 from methods.rendering import get_location
-from models.config.config import config, RESTO_APP
+from models.config.config import config, RESTO_APP, DOUBLEB_APP
 from methods.proxy.resto.registration import resto_registration
+from methods.proxy.doubleb.registration import doubleb_registration
 from models import STATUS_AVAILABLE
 from methods.branch_io import INVITATION, GIFT
 from models.proxy.unified_app import AutomationCompany, ProxyCity
@@ -125,4 +126,6 @@ class RegistrationHandler(ApiHandler):
         response, client = _perform_registration(self.request)
         if config.APP_KIND == RESTO_APP:
             resto_registration(client)
+        elif config.APP_KIND == DOUBLEB_APP:
+            doubleb_registration(client)
         self.render_json(response)
