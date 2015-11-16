@@ -17,6 +17,7 @@ __author__ = 'dvpermyakov'
 
 
 def send_review_push(order):
+    namespace_manager.set_namespace(order.key.namespace())
     module = config.REVIEW_MODULE
     if module and module.status:
         review = ReviewPush(order=order.key)
