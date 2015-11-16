@@ -39,7 +39,8 @@ EMAIL_FROM = 'noreply-order@ru-beacon.ru'
 
 AUTO_APP = 0
 RESTO_APP = 1
-APP_CHOICES = (AUTO_APP, RESTO_APP)
+DOUBLEB_APP = 2
+APP_CHOICES = (AUTO_APP, RESTO_APP, DOUBLEB_APP)
 
 COMPANY_IN_DEVELOPMENT = 0
 COMPANY_IN_PRODUCTION = 1
@@ -58,8 +59,11 @@ class Config(ndb.Model):
     @cached_property
     def APP_KIND(self):
         from models.proxy.resto import RestoCompany
+        from models.proxy.doubleb import DoublebCompany
         if RestoCompany.get():
             return RESTO_APP
+        elif DoublebCompany.get():
+            return DOUBLEB_APP
         else:
             return AUTO_APP
 

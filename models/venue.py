@@ -269,24 +269,28 @@ class Venue(ndb.Model):
 
     @classmethod
     def get(cls, venue_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
-        elif app_kind == RESTO_APP:
+        elif app_kind in [RESTO_APP, DOUBLEB_APP]:
             for venue in cls.fetch_venues(app_kind):
                 if venue.key.id() == venue_id:
                     return venue
 
     @classmethod
     def fetch_venues(cls, *args, **kwargs):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
-        from methods.proxy.resto.venues import get_venues
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from methods.proxy.resto.venues import get_venues as resto_get_venues
+        from methods.proxy.doubleb.venues import get_venues as doubleb_get_venues
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
-        elif app_kind == RESTO_APP:
-            venues = get_venues()
+        elif app_kind in [RESTO_APP, DOUBLEB_APP]:
+            if app_kind == RESTO_APP:
+                venues = resto_get_venues()
+            else:
+                venues = doubleb_get_venues()
             for venue in venues[:]:
                 for name, value in kwargs.items():
                     if getattr(venue, name) != value:
