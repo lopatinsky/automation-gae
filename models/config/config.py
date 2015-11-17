@@ -8,8 +8,9 @@ GEO_PUSH_MODULE = 5
 HIT_MODULE = 6
 MIVAKO_GIFT_MODULE = 7
 REVIEW_MODULE = 8
+MENU_FRAME_MODULE = 9
 MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, CLIENT_INFO_MODULE, HIT_MODULE,
-                MIVAKO_GIFT_MODULE, REVIEW_MODULE)
+                MIVAKO_GIFT_MODULE, REVIEW_MODULE, MENU_FRAME_MODULE)
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
@@ -21,7 +22,7 @@ from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
 from models.config.inactive_clients import SendingSmsModule
-from models.config.hit import HitModule
+from models.config.menu import HitModule, MenuFrameModule
 from models.config.mivako import MivakoGiftModule
 from models.config.review import ReviewModule
 
@@ -96,6 +97,7 @@ class Config(ndb.Model):
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
     MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)
     REVIEW_MODULE = ndb.LocalStructuredProperty(ReviewModule)
+    MENU_FRAME_MODULE = ndb.LocalStructuredProperty(MenuFrameModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 

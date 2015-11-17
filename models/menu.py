@@ -316,14 +316,15 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, venue=None, city=None, city_venues=None):
+    def dict(self, venue=None, city=None, city_venues=None, exclude_items=False):
         items = []
-        for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
-            if not venue:
-                items.append(item.dict())
-            else:
-                if venue.key not in item.restrictions:
-                    items.append(item.dict(without_restrictions=True))
+        if not exclude_items:
+            for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
+                if not venue:
+                    items.append(item.dict())
+                else:
+                    if venue.key not in item.restrictions:
+                        items.append(item.dict(without_restrictions=True))
         dct = {
             'info': {
                 'category_id': str(self.key.id()),
@@ -332,10 +333,11 @@ class MenuCategory(ndb.Model):
                 'restrictions': {
                     'venues': []  # todo: update restrictions logic for categories
                 },
-                'order': self.sequence_number if self.sequence_number else 0
+                'order': self.sequence_number if self.sequence_number else 0,
+                'items_were_excluded': exclude_items
             },
             'items': items,
-            'categories': [category.dict(venue) for category in self.get_categories()]
+            'categories': [category.dict(venue, exclude_items=exclude_items) for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
@@ -343,38 +345,25 @@ class MenuCategory(ndb.Model):
 
     @classmethod
     def get_menu_dict(cls, venue=None, city=None, subscription_include=False):
-        from models.config.config import Config
-        from models.subscription import SubscriptionMenuItem
         from models import Venue
+        from methods.subscription import get_subscription_category_dict
+        from models.config.menu import MenuFrameModule
         init_category = cls.get_initial_category()
         category_dicts = []
         if city:
             venue_keys = [city_venue.key for city_venue in Venue.get_suitable_venues(city)]
         else:
             venue_keys = []
+        exclude_items = MenuFrameModule.has_module()
         for category in init_category.get_categories():
-            category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys)
-            if category_dict['items'] or category_dict['categories']:
+            category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys, exclude_items=exclude_items)
+            if category_dict['items'] or category_dict['categories'] or exclude_items:
                 category_dicts.append(category_dict)
-        config = Config.get()
-        if config.SUBSCRIPTION_MODULE \
-                and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE \
-                and subscription_include:
-            logging.info('subscription is included')
-            module = config.SUBSCRIPTION_MODULE
-            category_dicts.append({
-                'info': {
-                    'category_id': str(1),
-                    'title': module.menu_title,
-                    'pic': '',
-                    'restrictions': {
-                        'venues': []  # todo: update restrictions
-                    },
-                    'order': 100100100
-                },
-                'items': [item.dict() for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()],
-                'categories': []
-            })
+        if subscription_include:
+            success, category_dict = get_subscription_category_dict()
+            if success:
+                logging.info('subscription is included')
+                category_dicts.append(category_dict)
         return category_dicts
 
 
