@@ -21,6 +21,8 @@ def _get_menu():
         item.picture = ''
         item.description = ''
         item.order = index
+        item.kal = 0
+        item.weight = 0
         items.append(item)
     categories = [category]
     return categories, items
