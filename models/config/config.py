@@ -113,7 +113,7 @@ class Config(ndb.Model):
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
-        if self.APP_KIND == AUTO_APP:
+        if self.APP_KIND in [AUTO_APP, DOUBLEB_APP]:
             return {
                 'app_name': self.APP_NAME,
                 'description': self.COMPANY_DESCRIPTION,
