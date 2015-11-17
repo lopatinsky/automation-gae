@@ -8,7 +8,7 @@ __author__ = 'dvpermyakov'
 class OrderReviewHandler(ApiHandler):
     def post(self):
         client_id = int(self.request.headers.get('Client-Id') or 0)
-        client = Client.get_by_id(client_id)
+        client = Client.get(client_id)
         if not client:
             self.abort(400)
         order_id = self.request.get_range('order_id')
