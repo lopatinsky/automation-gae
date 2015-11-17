@@ -231,22 +231,28 @@ class MenuCategory(ndb.Model):
         return category
 
     def get_categories(self):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
-        from methods.proxy.resto.menu import get_categories
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from methods.proxy.resto.menu import get_categories as resto_get_categories
+        from methods.proxy.doubleb.menu import get_categories as doubleb_get_categories
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return MenuCategory.query(MenuCategory.category == self.key).fetch()
         elif app_kind == RESTO_APP:
-            return get_categories(self)
+            return resto_get_categories(self)
+        elif app_kind == DOUBLEB_APP:
+            return doubleb_get_categories(self)
 
     def get_items(self, city=None, city_venues=None, only_available=False):
-        from methods.proxy.resto.menu import get_products
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_products as resto_get_products
+        from methods.proxy.doubleb.menu import get_items as doubleb_get_products
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
         elif app_kind == RESTO_APP:
-            items = get_products(self)
+            items = resto_get_products(self)
+        elif app_kind == DOUBLEB_APP:
+            items = doubleb_get_products(self)
         else:
             items = []
         if only_available or city:

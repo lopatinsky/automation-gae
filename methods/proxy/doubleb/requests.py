@@ -56,6 +56,11 @@ def get_doubleb_payment_types(company):
     return _get_request(company, path)
 
 
+def get_doubleb_menu(company):
+    path = '/api/menu.php'
+    return _get_request(company, path)
+
+
 def post_doubleb_registration(company, client):
     path = '/api/register'
     payload = {
