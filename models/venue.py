@@ -274,6 +274,8 @@ class Venue(ndb.Model):
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
         elif app_kind in [RESTO_APP, DOUBLEB_APP]:
+            if app_kind == DOUBLEB_APP:
+                venue_id = int(venue_id)
             for venue in cls.fetch_venues(app_kind):
                 if venue.key.id() == venue_id:
                     return venue

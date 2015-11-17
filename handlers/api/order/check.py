@@ -5,9 +5,10 @@ from handlers.api.base import ApiHandler
 from methods.emails.admins import send_error
 from methods.orders.validation.precheck import validate_address, get_venue_and_zone_by_address, get_delivery_time
 from methods.orders.validation.validation import validate_order
+from methods.proxy.doubleb.check_order import doubleb_validate_order
 from methods.proxy.resto.check_order import resto_validate_order
 from models import Client, Venue, DeliverySlot
-from models.config.config import AUTO_APP, RESTO_APP, config
+from models.config.config import AUTO_APP, RESTO_APP, config, DOUBLEB_APP
 from models.venue import SELF, PICKUP, DELIVERY
 from models.venue import IN_CAFE
 
@@ -101,6 +102,8 @@ class CheckOrderHandler(ApiHandler):
         elif config.APP_KIND == RESTO_APP:
             result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts,
                                           delivery_type)
+        elif config.APP_KIND == DOUBLEB_APP:
+            result = doubleb_validate_order(client, venue, items, payment_info, delivery_time)
         else:
             result = {}
 

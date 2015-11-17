@@ -9,7 +9,7 @@ __author__ = 'dvpermyakov'
 def _get_menu():
     company = DoublebCompany.get()
     menu = get_doubleb_menu(company)['menu']
-    category = MenuCategory(id=1)
+    category = MenuCategory(id=667)
     category.category = MenuCategory.get_initial_category().key
     category.title = u'Напитки'
     items = []
@@ -41,3 +41,9 @@ def get_items(category):
         if item.category.id() == category.key.id():
             items.append(item)
     return items
+
+
+def get_product_by_id(product_id):
+    for item in _get_menu()[1]:
+        if item.key.id() == product_id:
+            return item

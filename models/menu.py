@@ -409,13 +409,16 @@ class MenuItem(ndb.Model):
 
     @classmethod
     def get(cls, product_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
-        from methods.proxy.resto.menu import get_product_by_id
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from methods.proxy.resto.menu import get_product_by_id as resto_get_product_by_id
+        from methods.proxy.doubleb.menu import get_product_by_id as doubleb_get_product_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(product_id))
         elif app_kind == RESTO_APP:
-            return get_product_by_id(product_id)
+            return resto_get_product_by_id(product_id)
+        elif app_kind == DOUBLEB_APP:
+            return doubleb_get_product_by_id(product_id)
 
     @property
     def float_price(self):  # в рублях

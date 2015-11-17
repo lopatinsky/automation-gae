@@ -251,7 +251,7 @@ def get_order_position_details(item_dicts):
 
 
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
-                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0):
+                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0, promos=()):
     return {
         'valid': valid,
         'more_gift': False,
@@ -265,7 +265,7 @@ def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(
         'unavail_order_gifts': [],
         'order_gifts': group_item_dicts(order_gifts) if item_dicts else [],
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
-        'promos': [],
+        'promos': promos,
         'total_sum': total_sum,
         'delivery_sum': 0,
         'delivery_sum_str': '',

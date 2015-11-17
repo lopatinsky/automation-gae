@@ -56,14 +56,58 @@ def get_doubleb_payment_types(company):
     return _get_request(company, path)
 
 
-def get_doubleb_menu(company):
+def get_doubleb_menu(company, client=None):
     path = '/api/menu.php'
-    return _get_request(company, path)
+    params = {
+        'client_id': client.key.id() if client else None
+    }
+    return _get_request(company, path, params=params)
 
 
 def post_doubleb_registration(company, client):
     path = '/api/register'
     payload = {
         'client_id': client.key.id() if client else None
+    }
+    return _post_request(company, path, payload=payload)
+
+
+def post_doubleb_check_order(company, client, venue, items, payment, delivery_time):
+    path = '/api/check_order'
+    payload = {
+        'client_id': client.key.id() if client else None,
+        'venue_id': venue.key.id(),
+        'payment': json.dumps(payment),
+        'delivery_time': delivery_time,
+        'items': json.dumps(items),
+    }
+    return _post_request(company, path, payload=payload)
+
+
+def get_order_id(company):
+    path = '/api/order_register.php'
+    return _get_request(company, path)
+
+
+def post_doubleb_place_order(company, auto_client, doubleb_client, venue, items, payment, delivery_time):
+    path = '/api/order.php'
+    payload = {
+        'order': {
+            'order_id': get_order_id(company),
+            'venue_id': venue.key.id(),
+            'comment': 0,
+            'device_type': 0,
+            'delivery_time': delivery_time,
+            'total_sum': 0,
+            'client': {
+                'id': doubleb_client.key.id(),
+                'name': '%s %s' % (auto_client.name, auto_client.surname),
+                'phone': 0,
+                'email': 0
+            },
+            'payment': payment,
+            'items': items,
+            'coordinates': 0
+        },
     }
     return _post_request(company, path, payload=payload)
