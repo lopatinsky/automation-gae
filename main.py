@@ -151,6 +151,7 @@ app = WSGIApplication([
         Route('/client', api.ClientHandler),
         Route('/venues', api.VenuesHandler),
         Route('/menu', api.MenuHandler),
+        Route('/category', api.CategoryHandler),
         Route('/modifiers', api.ModifiersHandler),
         Route('/dynamic_info', api.DynamicInfoHandler),
         Route('/check_order', api.CheckOrderHandler),

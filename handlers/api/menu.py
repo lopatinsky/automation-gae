@@ -26,6 +26,15 @@ class MenuHandler(ApiHandler):
         self.render_json(response)
 
 
+class CategoryHandler(ApiHandler):
+    def get(self):
+        category_id = self.request.get('category_id')
+        category = MenuCategory.get(category_id)
+        self.render_json({
+            'category': category.dict()
+        })
+
+
 class DynamicInfoHandler(ApiHandler):
     def get(self):
         venue_id = self.request.get_range('venue_id')

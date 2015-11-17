@@ -137,6 +137,12 @@ def get_product_by_id(product_id):
                 return product
 
 
+def get_category_by_id(category_id):
+    for category in _get_menu()[0].values():
+        if category.key.id() == category_id:
+            return category
+
+
 def get_group_modifier_by_id(modifier_id):
     modifier_key = ndb.Key(GroupModifier, modifier_id)
     return _get_menu()[2][modifier_key]

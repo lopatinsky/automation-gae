@@ -223,6 +223,16 @@ class MenuCategory(ndb.Model):
     sequence_number = ndb.IntegerProperty()
 
     @classmethod
+    def get(cls, category_id):
+        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_category_by_id
+        app_kind = Config.get().APP_KIND
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(int(category_id))
+        elif app_kind == RESTO_APP:
+            return get_category_by_id(category_id)
+
+    @classmethod
     def get_initial_category(cls):
         category = cls.query(MenuCategory.category == None).get()
         if not category:
