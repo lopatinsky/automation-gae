@@ -344,7 +344,7 @@ class MenuCategory(ndb.Model):
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None, city=None, subscription_include=False):
+    def get_menu_dict(cls, venue=None, city=None, subscription_include=False, menu_frame_include=False):
         from models import Venue
         from methods.subscription import get_subscription_category_dict
         from models.config.menu import MenuFrameModule
@@ -354,7 +354,10 @@ class MenuCategory(ndb.Model):
             venue_keys = [city_venue.key for city_venue in Venue.get_suitable_venues(city)]
         else:
             venue_keys = []
-        exclude_items = MenuFrameModule.has_module()
+        if menu_frame_include:
+            exclude_items = MenuFrameModule.has_module()
+        else:
+            exclude_items = False
         for category in init_category.get_categories():
             category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys, exclude_items=exclude_items)
             if category_dict['items'] or category_dict['categories'] or exclude_items:

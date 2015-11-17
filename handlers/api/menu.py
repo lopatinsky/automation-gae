@@ -6,6 +6,7 @@ from models import MenuCategory, Venue
 class MenuHandler(ApiHandler):
     def get(self):
         subscription_include = self.request.get('request_subscription') == 'true'
+        menu_frame_include = self.request.get('request_menu_frame') == 'true'
         venue_id = self.request.get('venue_id')
         dynamic = "dynamic" in self.request.params
         venue = None
@@ -14,7 +15,9 @@ class MenuHandler(ApiHandler):
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
-        menu = MenuCategory.get_menu_dict(venue=venue, city=city, subscription_include=subscription_include)
+        menu = MenuCategory.get_menu_dict(venue=venue, city=city,
+                                          subscription_include=subscription_include,
+                                          menu_frame_include=menu_frame_include)
         include_hit_category(menu)
         response = {
             "menu": menu,
