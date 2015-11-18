@@ -57,4 +57,7 @@ class MivakoGetUrlHandler(ApiHandler):
             send_email(None, email, u'Подари другу', text)
         recipient = Recipient(name=recipient_name, phone=recipient_phone, email=recipient_email)
         MivakoGift(items=[item.key for item in items], sender=client.key, recipient=recipient)
-        self.render_json({})
+        self.render_json({
+            'success': True,
+            'sms_text': text
+        })
