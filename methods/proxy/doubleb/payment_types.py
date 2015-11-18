@@ -22,3 +22,9 @@ def get_payment_types():
         payment_type.status = STATUS_AVAILABLE
         payment_types.append(payment_type)
     return payment_types
+
+
+def get_payment_type(payment_id):
+    for payment_type in get_payment_types():
+        if payment_type.key.id() == payment_id:
+            return payment_type
