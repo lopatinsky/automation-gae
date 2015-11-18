@@ -7,8 +7,9 @@ from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
+from methods.proxy.doubleb.place_order import doubleb_place_order
 
-from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW
+from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
@@ -148,6 +149,9 @@ class OrderHandler(ApiHandler):
                 return self.render_json(response)
             else:
                 return self.render_error(response['description'])
+
+        if config.APP_KIND == DOUBLEB_APP:
+            doubleb_place_order(self.order, client, venue, order_json['items'], order_json['payment'])
 
         # it is need, because item_id and gift_id are swapping
         gifts_copy = copy.deepcopy(order_json.get('gifts', []))
