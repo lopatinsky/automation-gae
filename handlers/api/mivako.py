@@ -59,5 +59,7 @@ class MivakoGetUrlHandler(ApiHandler):
         MivakoGift(items=[item.key for item in items], sender=client.key, recipient=recipient)
         self.render_json({
             'success': True,
-            'sms_text': text
+            'sms_text': u"""Привет! Дарю тебе ролл "Калифорния с лососем"!
+Получи его при заказе в ресторане www.mivako.ru
+Скачай приложение: %s""" % config.RBCN_MOBI
         })
