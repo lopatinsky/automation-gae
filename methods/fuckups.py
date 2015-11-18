@@ -6,13 +6,6 @@ from models.venue import DELIVERY, SELF, IN_CAFE
 __author__ = 'dvpermyakov'
 
 
-def fuckup_redirection_namespace():
-    if namespace_manager.get_namespace() == 'mycompany':
-        namespace_manager.set_namespace('shashlichniydom')
-    if namespace_manager.get_namespace() == 'mycompany2':
-        namespace_manager.set_namespace('mycompany')
-
-
 # 13.10.2015
 def fuckup_ios_delivery_types(user_agent, version, delivery_types):
     RESTRICTION = {

@@ -2,6 +2,7 @@
 import copy
 from datetime import timedelta
 import logging
+from methods.unique import get_temporary_user, VERSION, USER_AGENT
 
 from models.config.config import config
 from methods import empatika_wallet
@@ -232,6 +233,27 @@ def get_shared_gifts(client):
     return shared_gift_dict
 
 
+def get_delivery_text(delivery_sum, delivery_type, delivery_zone):
+    if delivery_type != DELIVERY:
+        return u''
+    delivery_sum_str = u''
+    user = get_temporary_user()
+    if user.get(VERSION) < 5 or 'iOS' not in user.get(USER_AGENT):
+        if delivery_sum:
+            delivery_sum_str = u'Стоимость доставки %sр' % delivery_sum
+        else:
+            delivery_sum_str = u'Бесплатная доставка'
+    if config.ADDITION_INFO_ABOUT_DELIVERY:
+        delivery_sum_str += u'. %s' % config.ADDITION_INFO_ABOUT_DELIVERY
+    if delivery_zone:
+        if not delivery_zone.found:
+            delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
+        else:
+            if delivery_zone.comment:
+                delivery_sum_str += u'. %s' % delivery_zone.comment
+    return delivery_sum_str
+
+
 def get_order_position_details(item_dicts):
     details = []
     for item_dict in item_dicts:
@@ -420,23 +442,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         delivery_sum = 0
         delivery_sum_str = u''
     else:
-        if delivery_sum:
-            delivery_sum_str = u'Стоимость доставки %sр' % delivery_sum
-        else:
-            if delivery_type == DELIVERY:
-                delivery_sum_str = u'Бесплатная доставка'
-            else:
-                delivery_sum_str = u''
-        if config.ADDITION_INFO_ABOUT_DELIVERY:
-            delivery_sum_str += u'. %s' % config.ADDITION_INFO_ABOUT_DELIVERY
-        if delivery_zone:
-            if not delivery_zone.found:
-                delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
-            else:
-                if delivery_zone.comment:
-                    delivery_sum_str += u'. %s' % delivery_zone.comment
-    if delivery_type != DELIVERY:
-        delivery_sum_str = u''
+        delivery_sum_str = get_delivery_text(delivery_sum, delivery_type, delivery_zone)
     result = {
         'valid': valid,
         'more_gift': len(get_avail_gifts(rest_points)) > 0,
