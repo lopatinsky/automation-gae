@@ -279,12 +279,12 @@ class MenuCategory(ndb.Model):
         fastcounter.incr("category", delta=100, update_interval=1)
         return fastcounter.get_count("category") + random.randint(1, 100)
 
-    @staticmethod
-    def get_categories_in_order():
-        return sorted(MenuCategory.query().fetch(), key=lambda category: category.sequence_number)
+    def get_categories_in_order(self):
+        return sorted(self.get_categories(), key=lambda category: category.sequence_number)
 
     def get_previous_category(self):
-        categories = self.get_categories_in_order()
+        parent = self.category.get()
+        categories = parent.get_categories_in_order()
         index = categories.index(self)
         if index == 0:
             return None
@@ -292,7 +292,8 @@ class MenuCategory(ndb.Model):
             return categories[index - 1]
 
     def get_next_category(self):
-        categories = self.get_categories_in_order()
+        parent = self.category.get()
+        categories = parent.get_categories_in_order()
         index = categories.index(self)
         if index == len(categories) - 1:
             return None
