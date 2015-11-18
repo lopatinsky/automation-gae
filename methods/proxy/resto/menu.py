@@ -3,6 +3,7 @@ from google.appengine.api import memcache, namespace_manager
 from google.appengine.ext import ndb
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
 from models.proxy.resto import RestoCompany
+from models.storages import PickleStorage
 from requests import get_resto_menu
 
 __author__ = 'dvpermyakov'
@@ -101,17 +102,14 @@ def _get_menu(force_reload=False):
     menu = _global_resto_menu_cache.get(ns)
     if not menu or force_reload:
         logging.debug("Not found in instance cache, trying memcache")
-        menu = memcache.get('resto_menu')
-        if not menu or force_reload:
-            logging.debug("Not found in memcache, reloading from resto")
+        menu = PickleStorage.get("resto_menu") if not force_reload else None
+        if not menu:
+            logging.debug("Not found in PickleStorage, reloading from resto")
             resto_company = RestoCompany.get()
             resto_menu = get_resto_menu(resto_company)
             init_category = MenuCategory.get_initial_category()
             menu = __get_categories(init_category, resto_menu['menu'])
-            try:
-                memcache.set("resto_menu", menu, time=3600)
-            except ValueError:  # value too long :(
-                pass
+            PickleStorage.save("resto_menu", menu)
         _global_resto_menu_cache[ns] = menu
     return menu
 
