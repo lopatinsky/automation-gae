@@ -4,8 +4,8 @@ import urllib
 from google.appengine.api import urlfetch
 from methods.unique import get_temporary_user, USER_AGENT
 
-BASE_URL = 'http://empatika-doubleb.appspot.com/'
-BASE_URL_TEST = 'http://empatika-doubleb-test.appspot.com/'
+BASE_URL = 'http://empatika-doubleb.appspot.com'
+BASE_URL_TEST = 'http://empatika-doubleb-test.appspot.com'
 
 
 def __get_base_url(company):
@@ -86,28 +86,27 @@ def post_doubleb_check_order(company, client, venue, items, payment, delivery_ti
 
 def get_order_id(company):
     path = '/api/order_register.php'
-    return _get_request(company, path)
+    return _get_request(company, path)['order_id']
 
 
-def post_doubleb_place_order(company, auto_client, doubleb_client, venue, items, payment, delivery_time):
+def post_doubleb_place_order(company, order, auto_client, doubleb_client, venue, items, payment, delivery_time):
     path = '/api/order.php'
     payload = {
-        'order': {
+        'order': json.dumps({
             'order_id': get_order_id(company),
             'venue_id': venue.key.id(),
-            'comment': 0,
-            'device_type': 0,
+            'comment': order.comment,
+            'device_type': order.device_type,
             'delivery_time': delivery_time,
-            'total_sum': 0,
+            'total_sum': order.total_sum,
             'client': {
                 'id': doubleb_client.key.id(),
                 'name': '%s %s' % (auto_client.name, auto_client.surname),
-                'phone': 0,
-                'email': 0
+                'phone': auto_client.tel,
+                'email': auto_client.email
             },
             'payment': payment,
-            'items': items,
-            'coordinates': 0
-        },
+            'items': items
+        })
     }
     return _post_request(company, path, payload=payload)

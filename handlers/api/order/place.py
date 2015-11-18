@@ -151,7 +151,12 @@ class OrderHandler(ApiHandler):
                 return self.render_error(response['description'])
 
         if config.APP_KIND == DOUBLEB_APP:
-            doubleb_place_order(self.order, client, venue, order_json['items'], order_json['payment'])
+            success, response = doubleb_place_order(self.order, client, venue, order_json['items'],
+                                                    order_json['payment'])
+            if success:
+                return self.render_json(response)
+            else:
+                return self.render_error(response['description'])
 
         # it is need, because item_id and gift_id are swapping
         gifts_copy = copy.deepcopy(order_json.get('gifts', []))
