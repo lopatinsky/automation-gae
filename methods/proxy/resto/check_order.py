@@ -113,6 +113,7 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gi
     if response['valid']:
         updated_value = {
             'max_wallet_payment': resto_validation['max_bonus_payment'],
+            'wallet_balance': resto_validation['balance'],
             'new_order_gifts': group_item_dicts(new_order_gifts),
             'unavail_order_gifts': group_item_dicts(unavail_order_gifts),
             'order_gifts': group_item_dicts(order_gift_dicts),
