@@ -421,7 +421,7 @@ class MenuItem(ndb.Model):
         elif app_kind == RESTO_APP:
             return resto_get_product_by_id(product_id)
         elif app_kind == DOUBLEB_APP:
-            return doubleb_get_product_by_id(product_id)
+            return doubleb_get_product_by_id(int(product_id))
 
     @property
     def float_price(self):  # в рублях

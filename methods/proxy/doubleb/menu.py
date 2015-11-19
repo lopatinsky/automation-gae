@@ -1,9 +1,13 @@
 # coding=utf-8
+import logging
 from methods.proxy.doubleb.requests import get_doubleb_menu
 from models import MenuItem, MenuCategory, GroupModifierChoice, GroupModifier
 from models.proxy.doubleb import DoublebCompany
 
 __author__ = 'dvpermyakov'
+
+
+GRAINS_ID = 1
 
 
 def _set_modifiers(items):
@@ -12,7 +16,7 @@ def _set_modifiers(items):
             if result_item.title == title:
                 result_item.modifier.choices.append(choice)
                 return None
-        new_item.modifier = GroupModifier(id=item.key.id(), title=u'Зерна', choices=[choice])
+        new_item.modifier = GroupModifier(id=GRAINS_ID, title=u'Зерна', choices=[choice])
         return new_item
 
     result_items = []
@@ -82,6 +86,7 @@ def get_group_modifier_by_id(modifier_id):
 
 
 def get_product_by_id(product_id):
+    logging.info('product id = %s' % product_id)
     for item in _get_menu()[1]:
         if item.key.id() == product_id:
             return item
