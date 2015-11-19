@@ -1,5 +1,4 @@
 # coding=utf-8
-import logging
 from methods.proxy.doubleb.requests import get_doubleb_menu
 from models import MenuItem, MenuCategory, GroupModifierChoice, GroupModifier
 from models.proxy.doubleb import DoublebCompany
@@ -86,7 +85,6 @@ def get_group_modifier_by_id(modifier_id):
 
 
 def get_product_by_id(product_id):
-    logging.info('product id = %s' % product_id)
     for item in _get_menu()[1]:
         if item.key.id() == product_id:
             return item
