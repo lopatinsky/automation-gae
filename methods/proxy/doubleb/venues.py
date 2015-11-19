@@ -1,4 +1,5 @@
 from datetime import time
+from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 from methods.proxy.doubleb.requests import get_doubleb_venues
 from models import Venue, STATUS_AVAILABLE
@@ -32,18 +33,21 @@ def _get_delivery_types(takeout_only):
 
 
 def get_venues():
-    company = DoublebCompany.get()
-    venues_dict = get_doubleb_venues(company)['venues']
-    venues = []
-    for venue_dict in venues_dict:
-        venue = Venue(id=int(venue_dict['id']))
-        venue.active = True
-        venue.coordinates = GeoPt(lat=venue_dict['coordinates'].split(',')[0],
-                                  lon=venue_dict['coordinates'].split(',')[1])
-        venue.title = venue_dict['title']
-        venue.description = venue_dict['address']
-        venue.schedule = _get_schedule(venue_dict['schedule'])
-        venue.delivery_types = _get_delivery_types(venue_dict['takeout_only'])
-        venue.update_timezone()
-        venues.append(venue)
+    venues = memcache.get('doubleb_venues')
+    if not venues:
+        company = DoublebCompany.get()
+        venues_dict = get_doubleb_venues(company)['venues']
+        venues = []
+        for venue_dict in venues_dict:
+            venue = Venue(id=int(venue_dict['id']))
+            venue.active = True
+            venue.coordinates = GeoPt(lat=venue_dict['coordinates'].split(',')[0],
+                                      lon=venue_dict['coordinates'].split(',')[1])
+            venue.title = venue_dict['title']
+            venue.description = venue_dict['address']
+            venue.schedule = _get_schedule(venue_dict['schedule'])
+            venue.delivery_types = _get_delivery_types(venue_dict['takeout_only'])
+            venue.update_timezone()
+            venues.append(venue)
+        memcache.set('doubleb_venues', venues, 3600)
     return venues
