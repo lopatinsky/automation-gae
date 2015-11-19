@@ -49,18 +49,20 @@ def _apply_discounts(item_dict, promo, discount, percent=True):
     return False
 
 
-def _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order=None):
+def _apply_cash_back(response, item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order=None):
     if promo not in item_dict['promos']:
+        cash_back_amount = cash_back * item_dict['price']
+        cash_back_without_wallet = cash_back_amount * (1 - wallet_payment_sum / init_total_sum)
+        response.cash_back = cash_back_without_wallet
         if order:
-            cash_back_amount = cash_back * item_dict['price']
-            cash_back_without_wallet = cash_back_amount * (1 - wallet_payment_sum / init_total_sum)
             order.cash_backs.append(CashBack(amount=int(cash_back_without_wallet * 100)))
         item_dict['promos'].append(promo)
         return True
     return False
 
 
-def _apply_total_cash_back(sum_without_wallet, cash_back, order=None):
+def _apply_total_cash_back(response, sum_without_wallet, cash_back, order=None):
+    response.cash_back = int(cash_back * sum_without_wallet)
     if order:
         order.cash_backs.append(CashBack(amount=int(cash_back * sum_without_wallet * 100)))
     return True
@@ -101,10 +103,10 @@ def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_p
     promo_applied = False
     if outcome.item_details.item:
         for item_dict in _get_promo_item_dicts(outcome.item_details, item_dicts):
-            if _apply_cash_back(item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
+            if _apply_cash_back(response, item_dict, promo, cash_back, init_total_sum, wallet_payment_sum, order):
                 promo_applied = True
     else:
-        _apply_total_cash_back(init_total_sum - wallet_payment_sum, cash_back, order)
+        _apply_total_cash_back(response, init_total_sum - wallet_payment_sum, cash_back, order)
         promo_applied = True
     if order:
         order.put()
@@ -113,7 +115,7 @@ def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_p
 
 
 def set_fix_cash_back(response, outcome, order):
-    _apply_total_cash_back(outcome.value, 1.0, order)
+    _apply_total_cash_back(response, outcome.value, 1.0, order)
     if order:
         order.put()
     response.success = True

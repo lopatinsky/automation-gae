@@ -391,13 +391,13 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
             return send_error(error)
 
     if not order:
-        promo_error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        promo_error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, cash_back, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts)
         if promo_error:
             return send_error(promo_error)
     else:
-        error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, delivery_zone = \
+        error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos_info, total_sum, cash_back, delivery_zone = \
             apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, delivery_time, delivery_type,
                          delivery_zone, order_gift_dicts, cancelled_order_gift_dicts, order)
 
@@ -462,6 +462,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
         'wallet_balance': wallet_balance,
+        'wallet_cash_back': cash_back,
         'delivery_time': delivery_time.strftime(STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
         else (delivery_time + timedelta(hours=venue.timezone_offset)).strftime(STR_DATETIME_FORMAT),
