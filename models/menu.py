@@ -107,21 +107,24 @@ class GroupModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
-        from methods.proxy.resto.menu import get_group_modifier_by_id
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from methods.proxy.resto.menu import get_group_modifier_by_id as resto_get_group_modifier_by_id
+        from methods.proxy.doubleb.menu import get_group_modifier_by_id as doubleb_get_group_modifier_by_id
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
-            return get_group_modifier_by_id(modifier_id)
+            return resto_get_group_modifier_by_id(modifier_id)
+        elif app_kind == DOUBLEB_APP:
+            return doubleb_get_group_modifier_by_id(int(modifier_id))
 
     def get_choice_by_id(self, choice_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
             choice_id = int(choice_id)
             choices = self.choices
-        elif app_kind == RESTO_APP:
+        elif app_kind in [RESTO_APP, DOUBLEB_APP]:
             choices = self.get(self.key.id()).choices
         for choice in choices:
             if choice_id == choice.choice_id or choice_id == choice.choice_id_str:
