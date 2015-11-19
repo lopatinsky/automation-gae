@@ -228,6 +228,16 @@ class MenuCategory(ndb.Model):
     sequence_number = ndb.IntegerProperty()
 
     @classmethod
+    def get(cls, category_id):
+        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from methods.proxy.resto.menu import get_category_by_id
+        app_kind = Config.get().APP_KIND
+        if app_kind == AUTO_APP:
+            return cls.get_by_id(int(category_id))
+        elif app_kind == RESTO_APP:
+            return get_category_by_id(category_id)
+
+    @classmethod
     def get_initial_category(cls):
         category = cls.query(MenuCategory.category == None).get()
         if not category:
@@ -280,12 +290,12 @@ class MenuCategory(ndb.Model):
         fastcounter.incr("category", delta=100, update_interval=1)
         return fastcounter.get_count("category") + random.randint(1, 100)
 
-    @staticmethod
-    def get_categories_in_order():
-        return sorted(MenuCategory.query().fetch(), key=lambda category: category.sequence_number)
+    def get_categories_in_order(self):
+        return sorted(self.get_categories(), key=lambda category: category.sequence_number)
 
     def get_previous_category(self):
-        categories = self.get_categories_in_order()
+        parent = self.category.get()
+        categories = parent.get_categories_in_order()
         index = categories.index(self)
         if index == 0:
             return None
@@ -293,7 +303,8 @@ class MenuCategory(ndb.Model):
             return categories[index - 1]
 
     def get_next_category(self):
-        categories = self.get_categories_in_order()
+        parent = self.category.get()
+        categories = parent.get_categories_in_order()
         index = categories.index(self)
         if index == len(categories) - 1:
             return None
@@ -327,14 +338,15 @@ class MenuCategory(ndb.Model):
         else:
             return items[index + 1]
 
-    def dict(self, venue=None, city=None, city_venues=None):
+    def dict(self, venue=None, city=None, city_venues=None, exclude_items=False):
         items = []
-        for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
-            if not venue:
-                items.append(item.dict())
-            else:
-                if venue.key not in item.restrictions:
-                    items.append(item.dict(without_restrictions=True))
+        if not exclude_items:
+            for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
+                if not venue:
+                    items.append(item.dict())
+                else:
+                    if venue.key not in item.restrictions:
+                        items.append(item.dict(without_restrictions=True))
         dct = {
             'info': {
                 'category_id': str(self.key.id()),
@@ -343,49 +355,40 @@ class MenuCategory(ndb.Model):
                 'restrictions': {
                     'venues': []  # todo: update restrictions logic for categories
                 },
-                'order': self.sequence_number if self.sequence_number else 0
+                'order': self.sequence_number if self.sequence_number else 0,
+                'items_were_excluded': exclude_items
             },
             'items': items,
-            'categories': [category.dict(venue) for category in self.get_categories()]
+            'categories': [category.dict(venue, exclude_items=exclude_items) for category in self.get_categories()]
         }
         if venue:
             del dct['info']['restrictions']
         return dct
 
     @classmethod
-    def get_menu_dict(cls, venue=None, city=None, subscription_include=False):
-        from models.config.config import Config
-        from models.subscription import SubscriptionMenuItem
+    def get_menu_dict(cls, venue=None, city=None, subscription_include=False, menu_frame_include=False):
         from models import Venue
+        from methods.subscription import get_subscription_category_dict
+        from models.config.menu import MenuFrameModule
         init_category = cls.get_initial_category()
         category_dicts = []
         if city:
             venue_keys = [city_venue.key for city_venue in Venue.get_suitable_venues(city)]
         else:
             venue_keys = []
+        if menu_frame_include:
+            exclude_items = MenuFrameModule.has_module()
+        else:
+            exclude_items = False
         for category in init_category.get_categories():
-            category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys)
-            if category_dict['items'] or category_dict['categories']:
+            category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys, exclude_items=exclude_items)
+            if category_dict['items'] or category_dict['categories'] or exclude_items:
                 category_dicts.append(category_dict)
-        config = Config.get()
-        if config.SUBSCRIPTION_MODULE \
-                and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE \
-                and subscription_include:
-            logging.info('subscription is included')
-            module = config.SUBSCRIPTION_MODULE
-            category_dicts.append({
-                'info': {
-                    'category_id': str(1),
-                    'title': module.menu_title,
-                    'pic': '',
-                    'restrictions': {
-                        'venues': []  # todo: update restrictions
-                    },
-                    'order': 100100100
-                },
-                'items': [item.dict() for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()],
-                'categories': []
-            })
+        if subscription_include:
+            success, category_dict = get_subscription_category_dict()
+            if success:
+                logging.info('subscription is included')
+                category_dicts.append(category_dict)
         return category_dicts
 
 

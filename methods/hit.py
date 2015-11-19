@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from google.appengine.ext.deferred import deferred
 from models import STATUS_AVAILABLE, MenuCategory, Order, MenuItem, STATUS_UNAVAILABLE
 from models.config.config import Config
-from models.config.hit import HIT_SEQUENCE_NUMBER
+from models.config.menu import HIT_SEQUENCE_NUMBER
 
 __author__ = 'dvpermyakov'
 

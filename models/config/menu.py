@@ -8,6 +8,17 @@ __author__ = 'dvpermyakov'
 HIT_SEQUENCE_NUMBER = 1
 
 
+class MenuFrameModule(ndb.Model):
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+
+    @classmethod
+    def has_module(cls):
+        from models.config.config import Config
+        config = Config.get()
+        module = config.MENU_FRAME_MODULE
+        return module and module.status == STATUS_AVAILABLE
+
+
 class HitModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     consider_days = ndb.IntegerProperty(default=30)

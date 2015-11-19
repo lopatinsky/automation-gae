@@ -6,13 +6,12 @@ from webapp2 import cached_property, RequestHandler
 from webapp2_extras import jinja2
 from webapp2_extras import auth
 from methods.client import save_city
-from methods.fuckups import fuckup_redirection_namespace
 from methods.rendering import log_params
 
 from methods.versions import is_test_version, update_namespace
 from models import Client, STATUS_AVAILABLE
 from models.proxy.unified_app import ProxyCity, AutomationCompany
-from methods.unique import set_user_agent
+from methods.unique import set_user_agent, set_user_version
 
 
 class FakeFloat(float):
@@ -48,11 +47,8 @@ class ApiHandler(RequestHandler):
     def dispatch(self):
         log_params(self.request.POST)
         logging.debug('Client-Id: %s' % self.request.headers.get('Client-Id'))
-        logging.debug('Version: %s' % self.request.headers.get('Version'))
-
-        ####################################
-        ## fuckup_redirection_namespace() ##
-        ####################################
+        version = int(self.request.headers.get('Version') or 0)
+        logging.debug('Version: %s' % version)
 
         self.request.init_namespace = None
         namespace = self.request.headers.get('Namespace')
@@ -64,6 +60,7 @@ class ApiHandler(RequestHandler):
         self.test = is_test_version()
 
         set_user_agent(self.request.headers['User-Agent'])
+        set_user_version(version)
 
         client_id = self.request.headers.get('Client-Id')
         city_id = self.request.headers.get('City-Id')

@@ -1,7 +1,7 @@
 __author__ = 'dvpermyakov'
 
 from datetime import datetime
-from models import JsonStorage
+from models.storages import JsonStorage
 
 
 def get():

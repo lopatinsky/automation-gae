@@ -16,6 +16,7 @@ class OutcomeResult:
     def __init__(self):
         self.success = False
         self.discount = 0.0
+        self.cash_back = 0.0
         self.delivery_sum_discount = 0.0
         self.error = None
 
@@ -170,6 +171,7 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
     promos = []
     new_order_gift_dicts = []
     unavail_order_gift_dicts = []
+    cash_back = 0.0
     for promo in _get_promos(venue):
         _update_item_dict(item_dicts)
         apply_promo = True
@@ -191,6 +193,8 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
                         promos.append(promo)
                     if outcome_response.discount:
                         total_sum -= outcome_response.discount
+                    if outcome_response.cash_back:
+                        cash_back += outcome_response.cash_back
                     if outcome_response.delivery_sum_discount:
                         delivery_zone.price = max(int(delivery_zone.price - outcome_response.delivery_sum_discount), 0)
                     if outcome_response.error:
@@ -205,4 +209,4 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
             unavail_order_gift_dicts.append(order_gift_dict)
     total_sum = _get_final_total_sum(total_sum, item_dicts)
     total_sum = max(0, total_sum)
-    return error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos, total_sum, delivery_zone
+    return error, new_order_gift_dicts, unavail_order_gift_dicts, item_dicts, promos, total_sum, cash_back, delivery_zone

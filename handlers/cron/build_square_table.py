@@ -7,7 +7,7 @@ from webapp2 import RequestHandler
 from methods.rendering import timestamp
 from models.client import ANDROID_DEVICE, IOS_DEVICE
 from models.order import Order, READY_ORDER
-from models.specials import JsonStorage
+from models.storages import JsonStorage
 
 
 def _add_week_task(namespace, start, week_number):

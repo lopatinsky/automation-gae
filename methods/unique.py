@@ -1,9 +1,11 @@
 __author__ = 'dvpermyakov'
 
 USER_AGENT = 0
+VERSION = 1
 
 temporary_user = {
-    USER_AGENT: 'initial'
+    USER_AGENT: 'initial',
+    VERSION: 0
 }
 
 
@@ -17,6 +19,10 @@ def unique(seq):
 
 def set_user_agent(user_agent):
     temporary_user[USER_AGENT] = user_agent
+
+
+def set_user_version(version):
+    temporary_user[VERSION] = version
 
 
 def get_temporary_user():

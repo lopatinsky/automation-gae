@@ -16,7 +16,7 @@ from order import Order
 from payment_types import PaymentType
 from promo import Promo, PromoOutcome, PromoCondition, GiftMenuItem
 from share import Share, SharedGift
-from specials import Notification, JsonStorage, News, Deposit
+from specials import Notification, News, Deposit
 from user import User, CompanyUser, Admin, AdminStatus
 from venue import Venue, DeliverySlot, DeliveryZone, Address
 

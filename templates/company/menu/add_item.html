@@ -33,6 +33,11 @@
         <label>
             Картинка url: <input type="text" name="picture" {% if product and product.picture %} value="{{ product.picture }}" {% endif %}>
         </label><br>
+        {% if not product %}
+            <label>
+                <input type="checkbox" name="restriction_on" checked> Включить на всех точках
+            </label><br>
+        {% endif %}
         <br>
         <label>
             Картинка файл: <input type="file" name="image_file">

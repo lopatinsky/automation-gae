@@ -5,7 +5,7 @@ from alfa import PaymentRegisterHandler, \
     PaymentExtendedStatusHandler
 from venues import VenuesHandler
 from payment_types import PaymentTypesHandler
-from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler
+from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler, CategoryHandler
 from registration import RegistrationHandler
 from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler, OrderReviewHandler
 from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler, SharedGiftListHandler

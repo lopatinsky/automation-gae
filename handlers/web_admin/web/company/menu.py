@@ -9,7 +9,7 @@ from models.menu import SINGLE_MODIFIER, GROUP_MODIFIER
 __author__ = 'dvpermyakov'
 
 from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE, SingleModifier, GroupModifier, \
-    GroupModifierChoice
+    GroupModifierChoice, Venue
 import logging
 
 
@@ -230,6 +230,9 @@ class AddMenuItemHandler(CompanyBaseHandler):
         if item.picture:
             item.icon = get_new_image_url('MenuItemIcon', item.key.id(), url=item.picture, size=ICON_SIZE)
         item.category = category.key
+        if not self.request.get('restriction_on'):
+            for venue in Venue.query().fetch():
+                item.restrictions.append(venue.key)
         item.put()
         self.redirect('/company/menu/item/list?category_id=%s' % category_id)
 

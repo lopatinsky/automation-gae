@@ -2,20 +2,22 @@ from datetime import time
 from google.appengine.api import memcache
 from models.proxy.resto import RestoCompany
 from models.schedule import Schedule, DaySchedule
-from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address, DeliverySlot
+from models.venue import SELF, DELIVERY, DeliveryType, DeliveryZone, Address, DeliverySlot, IN_CAFE
 from requests import get_resto_company_info, get_resto_delivery_types
 
 __author__ = 'dvpermyakov'
 
 
 DELIVERY_TYPE_MAP = {
-    'self': SELF,
-    'delivery': DELIVERY
+    1: SELF,
+    2: IN_CAFE,
+    0: DELIVERY,
 }
 
 REVERSE_DELIVERY_TYPE_MAP = {
     SELF: 1,
-    DELIVERY: 0
+    IN_CAFE: 2,
+    DELIVERY: 0,
 }
 
 
@@ -34,12 +36,12 @@ def __get_company_schedule(resto_schedule):
 def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_sum):
     delivery_types = []
     delivery_zones = {}
-    for resto_deliery_type in resto_delivery_types:
+    for resto_delivery_type in resto_delivery_types:
         delivery_type = DeliveryType()
-        delivery_type.delivery_type = DELIVERY_TYPE_MAP[resto_deliery_type['name']]
+        delivery_type.delivery_type = DELIVERY_TYPE_MAP[resto_delivery_type['type_id']]
         delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
-        delivery_type.min_time = resto_deliery_type['min_time']
-        delivery_type.status = resto_deliery_type['available']
+        delivery_type.min_time = resto_delivery_type['min_time']
+        delivery_type.status = resto_delivery_type['available']
         if delivery_type.delivery_type == DELIVERY:
             delivery_type.min_time = 3600
             for id, city in enumerate(resto_delivery_cities):
