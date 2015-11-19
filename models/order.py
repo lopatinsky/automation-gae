@@ -163,10 +163,10 @@ class Order(ndb.Model):
 
     @classmethod
     def get(cls, client):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.history import get_orders
         app_kind = Config.get().APP_KIND
-        if app_kind == AUTO_APP:
+        if app_kind in [AUTO_APP, DOUBLEB_APP]:
             return cls.query(cls.client_id == client.key.id())
         elif app_kind == RESTO_APP:
             return get_orders(client)
