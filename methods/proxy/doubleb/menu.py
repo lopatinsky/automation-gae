@@ -1,4 +1,5 @@
 # coding=utf-8
+from google.appengine.api import memcache
 from methods.proxy.doubleb.requests import get_doubleb_menu
 from models import MenuItem, MenuCategory, GroupModifierChoice, GroupModifier
 from models.proxy.doubleb import DoublebCompany
@@ -25,7 +26,7 @@ def _set_modifiers(items):
         if l_index == -1 or r_index == -1:
             result_items.append(item)
         else:
-            choice_title = item.title[l_index+1:r_index-1].strip()
+            choice_title = item.title[l_index+1:r_index].strip()
             choice = GroupModifierChoice(choice_id=item.key.id(), title=choice_title)
             title = item.title[:l_index].strip()
             item.title = title
@@ -41,26 +42,30 @@ def _set_modifiers(items):
 
 
 def _get_menu():
-    company = DoublebCompany.get()
-    menu = get_doubleb_menu(company)['menu']
-    category = MenuCategory(id=667)
-    category.category = MenuCategory.get_initial_category().key
-    category.title = u'Напитки'
-    categories = [category]
-    items = []
-    for index, item_dict in enumerate(menu[u'Напитки']):
-        item = MenuItem(id=int(item_dict['id']))
-        item.category = category.key
-        item.price = item_dict['price'] * 100
-        item.title = item_dict['title']
-        item.picture = ''
-        item.description = ''
-        item.order = index
-        item.kal = 0
-        item.weight = 0
-        items.append(item)
-    items, modifiers = _set_modifiers(items)
-    return categories, items, modifiers
+    menu = memcache.get('doubleb_menu')
+    if not menu:
+        company = DoublebCompany.get()
+        menu = get_doubleb_menu(company)['menu']
+        category = MenuCategory(id=667)
+        category.category = MenuCategory.get_initial_category().key
+        category.title = u'Напитки'
+        categories = [category]
+        items = []
+        for index, item_dict in enumerate(menu[u'Напитки']):
+            item = MenuItem(id=int(item_dict['id']))
+            item.category = category.key
+            item.price = item_dict['price'] * 100
+            item.title = item_dict['title']
+            item.picture = ''
+            item.description = ''
+            item.order = index
+            item.kal = 0
+            item.weight = 0
+            items.append(item)
+        items, modifiers = _set_modifiers(items)
+        menu = categories, items, modifiers
+        memcache.set('doubleb_menu', menu, time=3600)
+    return menu
 
 
 def get_categories(parent):
