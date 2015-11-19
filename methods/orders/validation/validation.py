@@ -413,6 +413,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         return send_error(error, override_total_sum_with_promos=True)
 
     max_wallet_payment = 0.0
+    wallet_balance = 0.0
     if config.WALLET_ENABLED and not venue.wallet_restriction:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
                                                      from_memcache=order is None,
@@ -460,6 +461,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'delivery_sum': delivery_sum,
         'delivery_sum_str': delivery_sum_str,
         'max_wallet_payment': max_wallet_payment,
+        'wallet_balance': wallet_balance,
         'delivery_time': delivery_time.strftime(STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
         else (delivery_time + timedelta(hours=venue.timezone_offset)).strftime(STR_DATETIME_FORMAT),
