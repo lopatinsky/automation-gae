@@ -6,7 +6,7 @@ from models.proxy.doubleb import DoublebCompany
 __author__ = 'dvpermyakov'
 
 
-GRAINS_ID = 1
+GRAINS_ID_START_WITH = 'grains'
 
 
 def _set_modifiers(items):
@@ -15,7 +15,7 @@ def _set_modifiers(items):
             if result_item.title == title:
                 result_item.modifier.choices.append(choice)
                 return None
-        new_item.modifier = GroupModifier(id=GRAINS_ID, title=u'Зерна', choices=[choice])
+        new_item.modifier = GroupModifier(id='grains_%s' % new_item.key.id(), title=u'Зерна', choices=[choice])
         return new_item
 
     result_items = []

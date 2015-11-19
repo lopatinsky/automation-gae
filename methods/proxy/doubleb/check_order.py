@@ -2,7 +2,7 @@ import copy
 from datetime import datetime
 from methods.orders.validation.validation import get_response_dict, set_modifiers, set_price_with_modifiers, \
     set_item_dicts
-from methods.proxy.doubleb.menu import GRAINS_ID
+from methods.proxy.doubleb.menu import GRAINS_ID_START_WITH
 from methods.proxy.doubleb.requests import post_doubleb_check_order
 from models.proxy.doubleb import DoublebCompany, DoublebClient
 
@@ -31,7 +31,7 @@ def get_doubleb_item_dicts(items):
     item_dicts = []
     for item in copy.deepcopy(items):
         for modifier in item['group_modifiers']:
-            if modifier['group_modifier_id'] == str(GRAINS_ID):
+            if GRAINS_ID_START_WITH in modifier['group_modifier_id']:
                 item['item_id'] = modifier['choice']
         item_dicts.append({
             'item_id': item['item_id'],

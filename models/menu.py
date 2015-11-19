@@ -116,7 +116,7 @@ class GroupModifier(ndb.Model):
         elif app_kind == RESTO_APP:
             return resto_get_group_modifier_by_id(modifier_id)
         elif app_kind == DOUBLEB_APP:
-            return doubleb_get_group_modifier_by_id(int(modifier_id))
+            return doubleb_get_group_modifier_by_id(modifier_id)
 
     def get_choice_by_id(self, choice_id):
         from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
@@ -125,6 +125,8 @@ class GroupModifier(ndb.Model):
             choice_id = int(choice_id)
             choices = self.choices
         elif app_kind in [RESTO_APP, DOUBLEB_APP]:
+            if app_kind == DOUBLEB_APP:
+                choice_id = int(choice_id)
             choices = self.get(self.key.id()).choices
         for choice in choices:
             if choice_id == choice.choice_id or choice_id == choice.choice_id_str:
