@@ -182,7 +182,7 @@ class OrderHandler(ApiHandler):
         self.order.item_details = validation_result["details"]
         self.order.order_gift_details = validation_result["order_gift_details"]
         self.order.shared_gift_details = validation_result['share_gift_details']
-        self.order.promo_list = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
+        self.order.promos = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
         self.order.delivery_time_str = validation_result['delivery_time']
 
         self.order.status = CREATING_ORDER

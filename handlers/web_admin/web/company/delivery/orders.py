@@ -91,14 +91,21 @@ def order_items_values(order):
         return item_obj
 
     items = []
+    promos = set()
+    menu_sum = 0
     for item_dict in order.grouped_item_dict(order.item_details):
         items.append(_process_item_dict(item_dict))
+        menu_sum += item_dict['price'] * item_dict['quantity']
+        promos.update(set(item_dict['promos']))
+    promos.update(set([key.get().title for key in order.promos]))
 
     for gift_dict in order.grouped_item_dict(order.gift_details, True) + \
                      order.grouped_item_dict(order.order_gift_details):
         items.append(_process_item_dict(gift_dict, True))
 
     order = _update_order_info([order])[0]
+    order.menu_sum = menu_sum
+    order.promo_text = u', '.join(promos)
     order.payment_type_str = PAYMENT_TYPE_MAP[order.payment_type_id]
     return {
         'order': order,

@@ -15,7 +15,11 @@
         <b>Адрес:</b> {{ order.address_str }}
     </p>
     <p>
-        <b>Сумма:</b> {{ order.total_sum }}
+        <b>Cумма к оплате:</b> {{ order.total_sum }}<br>
+        <b>Сумма по меню:</b> {{ order.menu_sum }}
+    </p>
+    <p>
+        <b>Акции:</b> {{ order.promo_text }}
     </p>
     <p>
         <b>Время заказа:</b> {{ order.date_str }}<br>

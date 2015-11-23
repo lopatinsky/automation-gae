@@ -232,6 +232,7 @@ class Order(ndb.Model):
                 "price": group_dict['price_without_promos'] / 100.0,  # в рублях
                 "image": group_dict.get('image'),
                 "pic": group_dict.get('image'),
+                "promos": group_dict.get('promos'),
                 "quantity": group_dict['quantity'],
                 "single_modifiers": group_dict['single_modifiers'],
                 "group_modifiers": group_dict['group_modifiers']
