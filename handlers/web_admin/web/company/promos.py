@@ -4,7 +4,7 @@ import json
 
 from models.config.config import config, Config
 from methods.auth import promos_rights_required
-from methods.rendering import STR_TIME_FORMAT
+from methods.rendering import STR_TIME_FORMAT, STR_DATETIME_FORMAT, HTML_STR_TIME_FORMAT
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE, STATUS_UNAVAILABLE, MenuCategory, MenuItem, GiftMenuItem, GroupModifier
 from base import CompanyBaseHandler
 from models.promo import CONDITION_MAP, OUTCOME_MAP, PromoMenuItem
@@ -23,6 +23,14 @@ class PromoListHandler(CompanyBaseHandler):
     def get(self):
         promos = Promo.query().order(-Promo.priority).fetch()
         for promo in promos:
+            if promo.start:
+                promo.start_str = promo.start.strftime(STR_DATETIME_FORMAT)
+            else:
+                promo.start_str = u'Не задано'
+            if promo.end:
+                promo.end_str = promo.end.strftime(STR_DATETIME_FORMAT)
+            else:
+                promo.end_str = u'Не задано'
             conditions = []
             for condition in promo.conditions[:]:
                 if condition.item_details and condition.item_details.item:
@@ -113,6 +121,12 @@ class AddPromoHandler(CompanyBaseHandler):
         promo.title = self.request.get('name')
         promo.description = self.request.get('description')
         promo.priority = Promo.generate_priority()
+        start = self.request.get('start')
+        if start:
+            promo.start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
+        end = self.request.get('end')
+        if end:
+            promo.end = datetime.strptime(end, HTML_STR_TIME_FORMAT)
         promo.put()
         self.redirect('/company/promos/list')
 

@@ -17,6 +17,14 @@
             Описание:
             <input type="text" name="description" {% if promo %} value="{{ promo.description }}" {% endif %}>
         </label><br>
+        <label>
+            Начало(необязательно):
+            <input type="datetime-local" name="start">
+        </label><br>
+        <label>
+            Конец(необязательно):
+            <input type="datetime-local" name="end">
+        </label><br>
         <input type="submit">
         <a href="/company/promos/list">Назад</a>
     </form>

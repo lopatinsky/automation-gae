@@ -145,6 +145,9 @@ class Promo(ndb.Model):
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     hide_in_list = ndb.BooleanProperty(default=False)
 
+    start = ndb.DateTimeProperty()
+    end = ndb.DateTimeProperty()
+
     @classmethod
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
         from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP

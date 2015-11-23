@@ -66,3 +66,8 @@ cron:
 #  url: /cron/update_hit
 #  schedule: every day 05:00
 #  timezone: Europe/Moscow
+
+- description: update promos
+  url: /cron/update_promos
+  schedule: every 1 hours
+  timezone: Europe/Moscow

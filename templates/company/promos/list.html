@@ -54,6 +54,8 @@
             <tr>
                 <th rowspan="2">Статус</th>
                 <th rowspan="2">Видимость</th>
+                <th rowspan="2">Начало(utc)</th>
+                <th rowspan="2">Конец(utc)</th>
                 <th rowspan="2">Приоритет</th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Описание</th>
@@ -80,6 +82,8 @@
                     <td rowspan="{{ height + 1 }}">
                         <input type="checkbox" name={{ 'visible_%s' % promo.key.id() }} {% if promo.visible %} checked {% endif %}>
                     </td>
+                    <td rowspan="{{ height + 1 }}">{{ promo.start_str }}</td>
+                    <td rowspan="{{ height + 1 }}">{{ promo.end_str }}</td>
                     <td rowspan="{{ height + 1 }}">
                         <button class="up_button" id="{{ promo.key.id() }}">
                             Вверх
