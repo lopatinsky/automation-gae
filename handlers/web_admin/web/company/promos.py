@@ -148,6 +148,13 @@ class EditPromoHandler(CompanyBaseHandler):
             self.abort(400)
         promo.title = self.request.get('name')
         promo.description = self.request.get('description')
+        start = self.request.get('start')
+        if start:
+            promo.start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
+        end = self.request.get('end')
+        if end:
+            promo.end = datetime.strptime(end, HTML_STR_TIME_FORMAT)
+        promo.put()
         promo.put()
         self.redirect('/company/promos/list')
 
