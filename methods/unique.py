@@ -17,6 +17,6 @@ def unique(seq):
 def get_temporary_user():
     request = webapp2.get_request()
     return {
-        USER_AGENT: int(request.headers.get('Version') or 0),
-        VERSION: request.headers['User-Agent']
+        USER_AGENT: request.headers['User-Agent'],
+        VERSION: int(request.headers.get('Version') or 0),
     }
