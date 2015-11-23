@@ -11,7 +11,6 @@ from methods.rendering import log_params
 from methods.versions import is_test_version, update_namespace
 from models import Client, STATUS_AVAILABLE
 from models.proxy.unified_app import ProxyCity, AutomationCompany
-from methods.unique import set_user_agent, set_user_version
 
 
 class FakeFloat(float):
