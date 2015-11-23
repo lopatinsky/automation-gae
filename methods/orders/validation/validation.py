@@ -238,19 +238,25 @@ def get_delivery_text(delivery_sum, delivery_type, delivery_zone):
         return u''
     delivery_sum_str = u''
     user = get_temporary_user()
-    if user.get(VERSION) < 5 or 'iOS' not in user.get(USER_AGENT):
+    with_delivery_sum = user.get(VERSION) < 5 or 'iOS' not in user.get(USER_AGENT)
+    if with_delivery_sum:
         if delivery_sum:
             delivery_sum_str = u'Стоимость доставки %sр' % delivery_sum
         else:
             delivery_sum_str = u'Бесплатная доставка'
     if config.ADDITION_INFO_ABOUT_DELIVERY:
-        delivery_sum_str += u'. %s' % config.ADDITION_INFO_ABOUT_DELIVERY
+        if with_delivery_sum:
+            delivery_sum_str += u'. '
+        with_delivery_sum = True
+        delivery_sum_str += config.ADDITION_INFO_ABOUT_DELIVERY
     if delivery_zone:
+        if with_delivery_sum:
+            delivery_sum_str += u'. '
         if not delivery_zone.found:
-            delivery_sum_str += u'. Точные условия доставки будут уточнены у оператора'
+            delivery_sum_str += u'Точные условия доставки будут уточнены у оператора'
         else:
             if delivery_zone.comment:
-                delivery_sum_str += u'. %s' % delivery_zone.comment
+                delivery_sum_str += delivery_zone.comment
     return delivery_sum_str
 
 
