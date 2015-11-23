@@ -53,6 +53,7 @@ def _make_push_data(text, header, device_type):
     if device_type == IOS_DEVICE:
         return {
             'alert': text,
+            'sound': 'push.caf'
         }
     elif device_type == ANDROID_DEVICE:
         return {
@@ -70,10 +71,6 @@ def _make_order_push_data(order, text):
             'order_id': str(order.key.id()),
             'order_status': int(order.status)
         })
-        if order.device_type == IOS_DEVICE:
-            data.update({
-                'sound': 'push.caf'
-            })
     return data
 
 
