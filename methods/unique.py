@@ -1,12 +1,9 @@
+import webapp2
+
 __author__ = 'dvpermyakov'
 
 USER_AGENT = 0
 VERSION = 1
-
-temporary_user = {
-    USER_AGENT: 'initial',
-    VERSION: 0
-}
 
 
 def unique(seq):
@@ -17,13 +14,9 @@ def unique(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def set_user_agent(user_agent):
-    temporary_user[USER_AGENT] = user_agent
-
-
-def set_user_version(version):
-    temporary_user[VERSION] = version
-
-
 def get_temporary_user():
-    return temporary_user
+    request = webapp2.get_request()
+    return {
+        USER_AGENT: int(request.headers.get('Version') or 0),
+        VERSION: request.headers['User-Agent']
+    }

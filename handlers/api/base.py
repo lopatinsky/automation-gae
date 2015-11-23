@@ -59,9 +59,6 @@ class ApiHandler(RequestHandler):
 
         self.test = is_test_version()
 
-        set_user_agent(self.request.headers['User-Agent'])
-        set_user_version(version)
-
         client_id = self.request.headers.get('Client-Id')
         city_id = self.request.headers.get('City-Id')
         if city_id and client_id:
