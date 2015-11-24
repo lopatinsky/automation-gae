@@ -10,6 +10,7 @@ from methods.geocoder import get_houses_by_address, get_streets_by_address
 from methods.subscription import get_subscription, get_amount_of_subscription_items
 from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction, check_today_error
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
+from models.config.subscription import SubscriptionModule
 from models.venue import DELIVERY, DELIVERY_MAP, DELIVERY_WHAT_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
 
@@ -360,15 +361,16 @@ def check_client_info(client, delivery_type, order):
 
 
 def check_subscription(client, item_dicts):
-    subscription = get_subscription(client)
-    amount = get_amount_of_subscription_items(item_dicts)
-    logging.info('Subscription needs %s points' % amount)
-    logging.info('Subscription is found = %s' % subscription)
-    if amount:
-        if not subscription:
-            return False, u'У Вас нет абонемента'
-        if subscription.rest < amount:
-            return False, u'Не хватает позиций на абонементе'
+    if SubscriptionModule.has_module():
+        subscription = get_subscription(client)
+        amount = get_amount_of_subscription_items(item_dicts)
+        logging.info('Subscription needs %s points' % amount)
+        logging.info('Subscription is found = %s' % subscription)
+        if amount:
+            if not subscription:
+                return False, u'У Вас нет абонемента'
+            if subscription.rest < amount:
+                return False, u'Не хватает позиций на абонементе'
     return True, None
 
 

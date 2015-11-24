@@ -11,6 +11,7 @@ from methods.rendering import STR_DATETIME_FORMAT
 from methods.subscription import get_subscription_menu_item
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
+from models.config.subscription import SubscriptionModule
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
@@ -137,7 +138,7 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     mod_items = []
     for item in items:
         menu_item = MenuItem.get(item['item_id'])
-        if not menu_item:
+        if not menu_item and SubscriptionModule.has_module():
             menu_item = get_subscription_menu_item(item)
         menu_item = copy.copy(menu_item)
         if with_gift_obj:

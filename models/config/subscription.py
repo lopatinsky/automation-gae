@@ -13,6 +13,12 @@ class SubscriptionModule(ndb.Model):
     screen_title = ndb.StringProperty(required=True)
     screen_description = ndb.StringProperty(required=True)
 
+    @classmethod
+    def has_module(cls):
+        from models.config.config import Config
+        config = Config.get()
+        return config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE
+
     def dict(self):
         return {
             'type': SUBSCRIPTION,
