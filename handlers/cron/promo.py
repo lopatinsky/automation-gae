@@ -26,6 +26,7 @@ class UpdatePromosHandler(RequestHandler):
                         if promo.end and datetime.utcnow() >= promo.end:
                             continue
                         promo.status = STATUS_AVAILABLE
+                        promo.visible = True
                         promo.put()
                         text += u'\nАкция "%s" была включена' % promo.title
             if text:
