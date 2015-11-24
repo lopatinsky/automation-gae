@@ -11,6 +11,7 @@ from methods.rendering import STR_DATETIME_FORMAT
 from methods.subscription import get_subscription_menu_item
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
+from models.config.share import ShareGiftModule
 from models.config.subscription import SubscriptionModule
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
@@ -211,6 +212,8 @@ def get_avail_gifts(points):
 
 
 def get_shared_gifts(client):
+    if not ShareGiftModule.has_module():
+        return []
     shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
     shared_gift_dict = []
     for shared_gift in shared_gifts:

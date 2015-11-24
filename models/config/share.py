@@ -35,6 +35,12 @@ class ShareInvitationModule(ndb.Model):
 class ShareGiftModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
 
+    @classmethod
+    def has_module(cls):
+        from models.config.config import Config
+        config = Config.get()
+        return config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE
+
     def dict(self):
         return {
             'type': SHARE_GIFT
