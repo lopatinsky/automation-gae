@@ -145,7 +145,9 @@ class Client(ndb.Model):
     def find_by_android_id(cls, android_id):
         client = cls.query(cls.android_id == android_id).get()
         if not client:
-            client = cls.query(cls.android_id == android_id, namespace='').get()
+            client = cls.query(cls.android_id == android_id,
+                               cls.namespace_created == namespace_manager.get_namespace(),
+                               namespace='').get()
         return client
 
 
