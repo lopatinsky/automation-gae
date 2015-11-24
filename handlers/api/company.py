@@ -7,6 +7,7 @@ from methods.fuckups import fuckup_ios_delivery_types
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
 from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone, STATUS_AVAILABLE
+from models.config.menu import RemaindersModule
 from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 from models.proxy.resto import RestoCompany
 from models.venue import DELIVERY
@@ -90,6 +91,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.GEO_PUSH_MODULE.dict(client))
         if config.MIVAKO_GIFT_MODULE and config.MIVAKO_GIFT_MODULE.status:
             modules.append(config.MIVAKO_GIFT_MODULE.dict())
+        if RemaindersModule.has_module():
+            modules.append(config.REMAINDERS_MODULE.dict())
         self.render_json({
             'modules': modules
         })

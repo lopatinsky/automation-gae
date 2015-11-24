@@ -1,6 +1,9 @@
 from handlers.api.base import ApiHandler
 from methods.hit import include_hit_category
-from models import MenuCategory, Venue
+from methods.proxy.resto.menu import get_remainders
+from models import MenuCategory, Venue, MenuItem
+from models.config.config import Config
+from models.config.menu import RemaindersModule
 
 
 class MenuHandler(ApiHandler):
@@ -24,6 +27,19 @@ class MenuHandler(ApiHandler):
             "dynamic": venue.dynamic_info() if venue and dynamic else None,
         }
         self.render_json(response)
+
+
+class RemainderHandler(ApiHandler):
+    def get(self):
+        item_id = self.request.get('item_id')
+        item = MenuItem.get(item_id)
+        if not item:
+            self.abort(400)
+        if not RemaindersModule.has_module():
+            self.abort(409)
+        self.render_json({
+            'remainders': get_remainders(item_id)
+        })
 
 
 class CategoryHandler(ApiHandler):

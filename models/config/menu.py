@@ -1,6 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 from models import STATUS_CHOICES, STATUS_AVAILABLE, MenuItem, STATUS_UNAVAILABLE
+from models.config.config import REMAINDERS_MODULE
 
 __author__ = 'dvpermyakov'
 
@@ -40,3 +41,19 @@ class HitModule(ndb.Model):
                 continue
             items.append(item)
         return items
+
+
+class RemaindersModule(ndb.Model):
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
+
+    @classmethod
+    def has_module(cls):
+        from models.config.config import Config, RESTO_APP
+        config = Config.get()
+        module = config.REMAINDERS_MODULE
+        return module and module.status == STATUS_AVAILABLE and config.APP_KIND == RESTO_APP
+
+    def dict(self):
+        return {
+            'type': REMAINDERS_MODULE
+        }

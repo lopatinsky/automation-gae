@@ -4,7 +4,7 @@ from google.appengine.ext import ndb
 from models import MenuCategory, MenuItem, GroupModifier, GroupModifierChoice, SingleModifier
 from models.proxy.resto import RestoCompany
 from models.storages import PickleStorage
-from requests import get_resto_menu
+from requests import get_resto_menu, get_resto_remainder
 
 __author__ = 'dvpermyakov'
 
@@ -149,3 +149,15 @@ def get_group_modifier_by_id(modifier_id):
 def get_single_modifier_by_id(modifier_id):
     modifier_key = ndb.Key(SingleModifier, modifier_id)
     return _get_menu()[3][modifier_key]
+
+
+def get_remainders(item_id):
+    resto_company = RestoCompany.get()
+    resto_remainders = get_resto_remainder(resto_company, item_id)['remainders']
+    response = []
+    for key, value in resto_remainders.iteritems():
+        response.append({
+            'venue_id': key,
+            'value': value
+        })
+    return response

@@ -149,3 +149,11 @@ def post_resto_place_order(resto_company, resto_venue, resto_customer, auto_clie
 def get_resto_order_info(resto_company, resto_order_id):
     path = '/api/order/%s' % resto_order_id
     return _get_request(resto_company, path)['order']
+
+
+def get_resto_remainder(resto_company, item_id):
+    path = '/api/company/%s/get_remainders' % resto_company.key.id()
+    params = {
+        'item_id': item_id
+    }
+    return _get_request(resto_company, path, params=params)
