@@ -60,6 +60,12 @@ class ClientSmsSending(ndb.Model):
     sms_type = ndb.IntegerProperty(choices=CONDITIONS, required=True)
 
 
+class ClientPushSending(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    client = ndb.KeyProperty(kind=Client, required=True)
+    type = ndb.IntegerProperty(choices=CONDITIONS, required=True)
+
+
 class News(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     start = ndb.DateTimeProperty(required=True)
