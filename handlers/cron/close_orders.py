@@ -32,7 +32,10 @@ class CloseOpenedOrdersHandler(ApiHandler):
                 namespace_orders[namespace] = orders
             for order in orders:
                 logging.info("closing order id=%s, namespace=%s" % (order.key.id(), namespace))
-                done_order(order, namespace, with_push=False)
+                try:
+                    done_order(order, namespace, with_push=False)
+                except Exception as e:
+                    admins.send_error("closing", "In closing orders occur error!!!", str(e))
         mail_body = u"List of orders not closed:\n"
         for namespace in namespace_orders.keys():
             mail_body += u'In namespace = %s:\n' % namespace
