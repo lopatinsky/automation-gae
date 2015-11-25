@@ -427,11 +427,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     if config.WALLET_ENABLED and not venue.wallet_restriction:
         wallet_balance = empatika_wallet.get_balance(client.key.id(),
                                                      from_memcache=order is None,
-                                                     set_zero_if_fail=True)
-        if wallet_balance < 100:
-            wallet_balance = 0
+                                                     set_zero_if_fail=True) / 100.0
         max_wallet_payment = min(config.GET_MAX_WALLET_SUM(total_sum + (delivery_zone.price if delivery_zone else 0)),
-                                 wallet_balance / 100.0)
+                                 wallet_balance)
         max_wallet_payment = int(max_wallet_payment * 100) / 100.0
         if not item_dicts and not gift_dicts:
             max_wallet_payment = 0.0
