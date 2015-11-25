@@ -29,7 +29,7 @@ class ClientSession(ndb.Model):
     @classmethod
     def save(cls, client_namespace, client_id, date, order_screen, non_empty_cart, has_phone):
         key_name = "%s%s%s" % (date.strftime(cls._DATE_FMT_STR), cls._DATE_ID_SEPARATOR, client_id)
-        key = ndb.Key(id=key_name, namespace=client_namespace)
+        key = ndb.Key(cls, key_name, namespace=client_namespace)
         sess = key.get()
         put = False
         if not sess:
