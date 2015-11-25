@@ -12,6 +12,18 @@ from models.order import NOT_CANCELED_STATUSES
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 
 
+def _get_category_ids(current_id):
+    q = Queue()
+    q.put(current_id)
+    cats = []
+    while not q.empty():
+        current_id = q.get()
+        cats.append(current_id)
+        for category in MenuCategory.query(MenuCategory.category == ndb.Key(MenuCategory, current_id)):
+            q.put(category.key.id())
+    return cats
+
+
 def _check_item(item_details, item_dict):
     from methods.orders.validation.validation import is_equal
     if not item_details.item:
@@ -86,17 +98,7 @@ def check_payment_type(condition, payment_info):
 
 
 def mark_item_with_category(condition, item_dicts):
-    def get_category_ids(current_id):
-        q = Queue()
-        q.put(current_id)
-        cats = []
-        while not q.empty():
-            current_id = q.get()
-            cats.append(current_id)
-            for category in MenuCategory.query(MenuCategory.category == ndb.Key(MenuCategory, current_id)):
-                q.put(category.key.id())
-        return cats
-    cats = get_category_ids(condition.value)
+    cats = _get_category_ids(condition.value)
     for item_dict in item_dicts:
         if item_dict['item'].category.id() not in cats:
             item_dict['temporary_mark'] = False

@@ -1,4 +1,5 @@
 # coding=utf-8
+from methods.orders.promos.conditions import _get_category_ids
 from models.menu import GroupModifier, GroupModifierChoice
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY
@@ -312,8 +313,9 @@ def forbid_menu_item(response, outcome, item_dicts):
 
 
 def forbid_menu_category(response, outcome, item_dicts):
+    cats = _get_category_ids(outcome.value)
     for item_dict in item_dicts:
-        if item_dict['item'].category.id() == outcome.value:
+        if item_dict['item'].category.id() in cats:
             category = item_dict['item'].category.get()
             response.success = True
             response.error = u'Продукты из категории %s недоступны' % category.title
