@@ -245,6 +245,7 @@ class Venue(ndb.Model):
     title = ndb.StringProperty(required=True, indexed=False)
     address = ndb.StructuredProperty(Address)
     description = ndb.StringProperty(indexed=False)
+    extra_info = ndb.StringProperty()
     pic = ndb.StringProperty(indexed=False)
     coordinates = ndb.GeoPtProperty(required=True, indexed=False)
     schedule = ndb.LocalStructuredProperty(Schedule)
@@ -344,7 +345,10 @@ class Venue(ndb.Model):
             'deliveries': [delivery.dict() for delivery in self.delivery_types if delivery.status == STATUS_AVAILABLE],
             'schedule': self.schedule.dict() if self.schedule else [],
             'schedule_str': self.schedule.get_days_str() if self.schedule else '',
-            'called_phone': self.called_phone
+            'time_breaks': [time_break.dict() for time_break in self.time_break],
+            'time_breaks_str': [time_break.get_days_str() for time_break in self.time_break],
+            'called_phone': self.called_phone,
+            'extra_info': self.extra_info
         }
         return dct
 
