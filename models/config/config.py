@@ -151,8 +151,7 @@ class Config(ndb.Model):
 
     @property
     def SHARE_INVITATION_ENABLED(self):
-        from models import STATUS_AVAILABLE
-        return config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE if config.SHARE_INVITATION_MODULE else False
+        return ShareInvitationModule.has_module()
 
     @property
     def WALLET_ENABLED(self):

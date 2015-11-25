@@ -20,3 +20,13 @@ def get_temporary_user():
         USER_AGENT: request.headers['User-Agent'],
         VERSION: int(request.headers.get('Version') or 0),
     }
+
+
+def is_ios_user():
+    user = get_temporary_user()
+    return 'iOS' in user.get(USER_AGENT)
+
+
+def is_android_user():
+    user = get_temporary_user()
+    return 'Android' in user.get(USER_AGENT)

@@ -7,13 +7,11 @@ from google.appengine.api import urlfetch
 from google.appengine.api.namespace_manager import namespace_manager
 
 from methods.emails.admins import send_error
+from methods.fuckups import fuckup_order_channel
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES, Client
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from models.config.config import config
-
-IOS_FUCKUP = ['Pastadeli/1.0', 'Pastadeli/1.1', 'ElephantBoutique/1.0', 'MeatMe/1.0']
-ANDROID_FUCKUP = ['pastadeli/4', 'pastadeli/5', 'meatme/4', 'meatme/5']
 
 
 REVIEW_TYPE = 3
@@ -105,16 +103,7 @@ def send_order_push(order, text, namespace, new_time=None, silent=False):
     if silent:
         data['content-available'] = 1
     order_channel = get_channels(namespace)[ORDER_CHANNEL] % order.key.id()
-    ####### IOS, ANDROID FUCKUP
-    if 'Android' in order.user_agent:
-        for fuckup in ANDROID_FUCKUP:
-            if fuckup in order.user_agent:
-                order_channel = 'order_%s' % order.key.id()
-    if 'iOS' in order.user_agent:
-        for fuckup in IOS_FUCKUP:
-            if fuckup in order.user_agent:
-                order_channel = 'order_%s' % order.key.id()
-    #######
+    order_channel = fuckup_order_channel(order_channel, order)
     return _send_push([order_channel], data, order.device_type)
 
 

@@ -29,9 +29,7 @@ class CompanyInfoHandler(ApiHandler):
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
                 if venue_delivery.delivery_type == DELIVERY:
                     zones.update(venue_delivery.delivery_zones)
-        deliveries = fuckup_ios_delivery_types(self.request.headers.get('User-Agent'),
-                                               self.request.headers.get('Version', 0),
-                                               deliveries.values())
+        deliveries = fuckup_ios_delivery_types(deliveries.values())
         cities = []
         for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
             if zone.address.city not in cities:
@@ -81,7 +79,7 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.SUBSCRIPTION_MODULE.dict())
         if config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status:
             modules.append(config.SHARE_GIFT_MODULE.dict())
-        if config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status:
+        if config.SHARE_INVITATION_ENABLED:
             modules.append(config.SHARE_INVITATION_MODULE.dict())
         if config.CLIENT_MODULE and config.CLIENT_MODULE.status:
             modules.append(config.CLIENT_MODULE.dict())
