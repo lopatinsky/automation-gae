@@ -9,7 +9,7 @@ from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_di
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
     return_success, set_cash_gift_point, forbid_menu_item, set_discount_marked_cheapest, set_delivery_message, \
-    set_fix_cash_back
+    set_fix_cash_back, forbid_menu_category
 
 
 class OutcomeResult:
@@ -158,6 +158,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return set_delivery_message(response, promo, delivery_type, delivery_zone)
     elif outcome.method == PromoOutcome.FIX_CASH_BACK:
         return set_fix_cash_back(response, outcome, order)
+    elif outcome.method == PromoOutcome.FORBID_MENU_CATEGORY:
+        return forbid_menu_category(response, outcome, items)
     else:
         response.success = True
         return response

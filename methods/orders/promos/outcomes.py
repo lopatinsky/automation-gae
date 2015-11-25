@@ -300,6 +300,15 @@ def forbid_menu_item(response, outcome, item_dicts):
     return response
 
 
+def forbid_menu_category(response, outcome, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].category.id() == outcome.value:
+            category = item_dict['item'].category.get()
+            response.success = True
+            response.error = u'Продукты из категории %s недоступны' % category.title
+    return response
+
+
 def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
     cheapest_item_dict = None
     if item_dicts:
