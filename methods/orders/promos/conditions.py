@@ -1,8 +1,9 @@
+from Queue import Queue
 from datetime import datetime, timedelta
 from google.appengine.ext import ndb
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
-from models import STATUS_AVAILABLE, Promo
+from models import STATUS_AVAILABLE, Promo, MenuCategory
 from models.config.config import Config
 from models.geo_push import GeoPush
 from models.order import Order
@@ -85,8 +86,19 @@ def check_payment_type(condition, payment_info):
 
 
 def mark_item_with_category(condition, item_dicts):
+    def get_category_ids(current_id):
+        q = Queue()
+        q.put(current_id)
+        cats = []
+        while not q.empty():
+            current_id = q.get()
+            cats.append(current_id)
+            for category in MenuCategory.query(MenuCategory.category == ndb.Key(MenuCategory, current_id)):
+                q.put(category.key.id())
+        return cats
+    cats = get_category_ids(condition.value)
     for item_dict in item_dicts:
-        if item_dict['item'].category.id() != condition.value:
+        if item_dict['item'].category.id() not in cats:
             item_dict['temporary_mark'] = False
     return True
 
