@@ -27,12 +27,13 @@ class ClientSession(ndb.Model):
     has_phone = ndb.BooleanProperty(default=False, indexed=False)
     
     @classmethod
-    def save(cls, client_id, date, order_screen, non_empty_cart, has_phone):
+    def save(cls, client_namespace, client_id, date, order_screen, non_empty_cart, has_phone):
         key_name = "%s%s%s" % (date.strftime(cls._DATE_FMT_STR), cls._DATE_ID_SEPARATOR, client_id)
-        sess = cls.get_by_id(key_name)
+        key = ndb.Key(id=key_name, namespace=client_namespace)
+        sess = key.get()
         put = False
         if not sess:
-            sess = cls(id=key_name)
+            sess = cls(key=key)
             put = True
         if order_screen and not sess.order_screen:
             sess.order_screen = True
@@ -101,7 +102,7 @@ class Client(ndb.Model):
     def save_session(self, order_screen=False, non_empty_cart=False):
         try:
             deferred.defer(ClientSession.save,
-                           self.key.id(), date.today(),
+                           self.key.namespace() or self.namespace_created, self.key.id(), date.today(),
                            order_screen, non_empty_cart, bool(self.tel))
         except Exception as e:
             logging.error("failed to defer save_session()")
