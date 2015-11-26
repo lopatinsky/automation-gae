@@ -91,6 +91,7 @@ class Config(ndb.Model):
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
+    WALLET_MIN_REAL_PAYMENT = ndb.IntegerProperty(default=0)
 
     SHARE_GIFT_MODULE = ndb.LocalStructuredProperty(ShareGiftModule)
     SHARE_INVITATION_MODULE = ndb.LocalStructuredProperty(ShareInvitationModule)
@@ -160,7 +161,14 @@ class Config(ndb.Model):
     @classmethod
     def GET_MAX_WALLET_SUM(cls, total_sum):  # must be positive
         config = cls.get()
-        return total_sum * config.WALLET_MAX_PERCENT / 100.0
+        percent = total_sum * config.WALLET_MAX_PERCENT / 100.0
+        max_percent = total_sum - config.WALLET_MIN_REAL_PAYMENT
+        if max_percent < 0:
+            return 0.0
+        elif percent > max_percent:
+            return max_percent
+        else:
+            return percent
 
     @property
     def GIFT_ENABLED(self):
