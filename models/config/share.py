@@ -25,7 +25,8 @@ class ShareInvitationModule(ndb.Model):
     def has_module(cls):
         from models.config.config import Config
         config = Config.get()
-        module_enable = config.SHARE_INVITATION_MODULE and config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE
+        module_enable = config.SHARE_INVITATION_MODULE is not None and \
+            config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE
         if is_share_fuckup_ios_user():
             module_enable = False
         return module_enable
@@ -49,7 +50,8 @@ class ShareGiftModule(ndb.Model):
     def has_module(cls):
         from models.config.config import Config
         config = Config.get()
-        return config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE
+        return config.SHARE_GIFT_MODULE is not None and\
+            config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE
 
     def dict(self):
         return {

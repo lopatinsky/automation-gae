@@ -50,7 +50,7 @@ class CompanyInfoHandler(ApiHandler):
                 'enabled': config.WALLET_ENABLED,
             },
             'share_gift': {
-                'enabled': config.SHARE_GIFT_ENABLED or (config.MIVAKO_GIFT_MODULE and
+                'enabled': config.SHARE_GIFT_ENABLED or (config.MIVAKO_GIFT_MODULE is not None and
                                                          config.MIVAKO_GIFT_MODULE.status == STATUS_AVAILABLE)
             },
             'share_invitation': {
