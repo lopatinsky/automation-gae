@@ -46,6 +46,15 @@ DEFAULT_MESSAGE_MAP = {
     KIND_SHARE_INVITATION: u'Вы активировали приглашение друга. Сделайте заказ и получите бонусы!'
 }
 
+DEFAULT_TITLE_MAP = {
+    KIND_SHARE_GIFT: u'Активация подарка',
+    KIND_WALLET: u'Активация баллов на кошелек',
+    KIND_POINTS: u'Акивация баллов',
+    KIND_ORDER_PROMO: u'Активация личной акции',
+    KIND_ALL_TIME_HACK: u'Хак времени',
+    KIND_SHARE_INVITATION: u'Переход по совету друга'
+}
+
 
 class PromoCode(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -62,6 +71,8 @@ class PromoCode(ndb.Model):
 
     @classmethod
     def create(cls, group, kind, amount, value=None, title=None, message=None, promo_code_key=None, persist=False):
+        if not title:
+            title = DEFAULT_TITLE_MAP[kind]
         while True:
             key = security.generate_random_string(length=7).lower() if not promo_code_key else promo_code_key
             if not cls.get_by_id(key):
