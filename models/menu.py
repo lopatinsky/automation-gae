@@ -245,19 +245,23 @@ class MenuCategory(ndb.Model):
             category.put()
         return category
 
-    def get_categories(self):
+    def get_categories(self, venue=None):
         from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.menu import get_categories as resto_get_categories
         from methods.proxy.doubleb.menu import get_categories as doubleb_get_categories
         app_kind = Config.get().APP_KIND
         if app_kind == AUTO_APP:
-            return MenuCategory.query(MenuCategory.category == self.key).fetch()
+            categories = MenuCategory.query(MenuCategory.category == self.key).fetch()
+            for category in categories[:]:
+                if not category.get_items(venue=venue):
+                    categories.remove(category)
+            return categories
         elif app_kind == RESTO_APP:
             return resto_get_categories(self)
         elif app_kind == DOUBLEB_APP:
             return doubleb_get_categories(self)
 
-    def get_items(self, city=None, city_venues=None, only_available=False):
+    def get_items(self, city=None, city_venues=None, only_available=False, venue=None):
         from methods.proxy.resto.menu import get_products as resto_get_products
         from methods.proxy.doubleb.menu import get_items as doubleb_get_products
         from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
@@ -283,6 +287,10 @@ class MenuCategory(ndb.Model):
                     if forbid:
                         items.remove(item)
                         continue
+        if venue:
+            for item in items[:]:
+                if venue.key in item.restrictions:
+                    items.remove(item)
         return items
 
     @staticmethod
@@ -315,8 +323,8 @@ class MenuCategory(ndb.Model):
         fastcounter.incr("category_%s" % self.key.id(), delta=100, update_interval=1)
         return fastcounter.get_count("category_%s" % self.key.id()) + random.randint(1, 100)
 
-    def get_items_in_order(self):
-        return sorted(self.get_items(), key=lambda item: item.sequence_number)
+    def get_items_in_order(self, venue=None):
+        return sorted(self.get_items(venue=venue), key=lambda item: item.sequence_number)
 
     def get_previous(self, item):
         items = self.get_items_in_order()

@@ -111,6 +111,17 @@
 </head>
 <body>
     {% include '/company/header.html' %}
+    <form method="get">
+         <select name="venue_id">
+            <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
+            {% for venue in venues %}
+                 <option value="{{ venue.key.id() }}" {% if chosen_venue and chosen_venue.key.id() == venue.key.id() %} selected {% endif %}>
+                     {{ venue.title }}
+                 </option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form><br>
     <h2>Одиночные модификаторы</h2>
         <button id="show_inactive_single">
             Показать/Скрыть неактивные

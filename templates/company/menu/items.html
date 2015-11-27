@@ -48,6 +48,18 @@
 </head>
 <body>
     {% include '/company/header.html' %}
+    <form method="get">
+         <input type="text" value="{{ category.key.id() }}" name="category_id" hidden>
+         <select name="venue_id">
+            <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
+            {% for venue in venues %}
+                 <option value="{{ venue.key.id() }}" {% if chosen_venue and chosen_venue.key.id() == venue.key.id() %} selected {% endif %}>
+                     {{ venue.title }}
+                 </option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form><br>
     <a href="{{ '/company/menu/item/add?category_id=%s' % category.key.id() }}">Добавить</a><br><br>
     <button id="show_inactive">
         Показать/Скрыть неактивные

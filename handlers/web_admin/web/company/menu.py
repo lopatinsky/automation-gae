@@ -28,13 +28,19 @@ class MainMenuHandler(CompanyBaseHandler):
 class ListCategoriesHandler(CompanyBaseHandler):
     @menu_rights_required
     def get(self):
+        venue_id = self.request.get_range('venue_id')
+        if venue_id:
+            venue = Venue.get_by_id(venue_id)
+        else:
+            venue = None
         category_id = self.request.get_range('category_id')
         if category_id:
             category = MenuCategory.get_by_id(category_id)
         else:
             category = MenuCategory.get_initial_category()
-        categories = sorted(category.get_categories(), key=lambda category: category.sequence_number)
-        self.render('/menu/categories.html', categories=categories, main_category=category)
+        categories = sorted(category.get_categories(venue), key=lambda category: category.sequence_number)
+        self.render('/menu/categories.html', categories=categories, main_category=category,
+                    venues=Venue.query().fetch(), chosen_venue=venue)
 
 
 class UpCategoryHandler(CompanyBaseHandler):
@@ -162,12 +168,18 @@ class DeleteCategoryHandler(CompanyBaseHandler):
 class ListMenuItemsHandler(CompanyBaseHandler):
     @menu_rights_required
     def get(self):
+        venue_id = self.request.get_range('venue_id')
+        if venue_id:
+            venue = Venue.get_by_id(venue_id)
+        else:
+            venue = None
         category_id = self.request.get_range('category_id')
         category = MenuCategory.get_by_id(category_id)
         if not category:
             self.abort(400)
-        items = category.get_items_in_order()
-        self.render('/menu/items.html', items=items, category=category)
+        items = category.get_items_in_order(venue)
+        self.render('/menu/items.html', items=items, category=category,
+                    venues=Venue.query().fetch(), chosen_venue=venue)
 
     @menu_rights_required
     def post(self):
@@ -451,10 +463,17 @@ class SelectDefaultChoiceHandler(CompanyBaseHandler):
 class ModifierList(CompanyBaseHandler):
     @menu_rights_required
     def get(self):
+        venue_id = self.request.get_range('venue_id')
+        if venue_id:
+            venue = Venue.get_by_id(venue_id)
+        else:
+            venue = None
         single_modifier_ids = []
         group_modifier_ids = []
         products = MenuItem.query().fetch()
         for product in products:
+            if venue and venue.key in product.restrictions:
+                continue
             for modifier in product.group_modifiers:
                 if modifier.id not in group_modifier_ids:
                     group_modifier_ids.append(modifier.id())
@@ -485,7 +504,9 @@ class ModifierList(CompanyBaseHandler):
         self.render('/menu/modifiers.html', **{
             'single_modifiers': single_modifiers,
             'group_modifiers': group_modifiers,
-            'inf': SingleModifier.INFINITY
+            'inf': SingleModifier.INFINITY,
+            'venues': Venue.query().fetch(),
+            'chosen_venue': venue
         })
 
     @menu_rights_required

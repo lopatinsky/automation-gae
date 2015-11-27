@@ -41,6 +41,18 @@
 <body>
     {% include '/company/header.html' %}
     <h3>Текущая категория: {{ main_category.title }}</h3>
+    <form method="get">
+         <input type="text" value="{{ main_category.key.id() }}" name="category_id" hidden>
+         <select name="venue_id">
+            <option value="0" {% if not chosen_venue %}selected{% endif %}>Все кофейни</option>
+            {% for venue in venues %}
+                 <option value="{{ venue.key.id() }}" {% if chosen_venue and chosen_venue.key.id() == venue.key.id() %} selected {% endif %}>
+                     {{ venue.title }}
+                 </option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form><br>
     <div>
         <a href="{{ '/company/menu/category/add?main_category_id=%s' % main_category.key.id() }}">
             Добавить категорию
