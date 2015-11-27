@@ -109,7 +109,7 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot):
                 return False, description
             else:
                 return True, None
-    return False, u'К сожалению, в "%s" Вы можете выбрать только %s' % (venue.title, u', '.join(accepted_deliveries))
+    return False, u'К сожалению, в "%s" Вы можете выбрать только %s' % (venue.title, u' или '.join(accepted_deliveries))
 
 
 def check_delivery_time(delivery_time):
