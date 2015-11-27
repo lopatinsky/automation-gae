@@ -418,6 +418,7 @@ class MenuItem(ndb.Model):
     group_modifiers = ndb.KeyProperty(kind=GroupModifier, repeated=True)
 
     restrictions = ndb.KeyProperty(repeated=True)  # kind=Venue (permanent use)
+    time_restriction = ndb.IntegerProperty()  # min time in minutes
     group_choice_restrictions = ndb.IntegerProperty(repeated=True)  # GroupModifierChoice.choice_id
     stop_list_group_choices = ndb.IntegerProperty(repeated=True)    # GroupModifierChoice.choice_id
 

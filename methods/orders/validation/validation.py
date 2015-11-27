@@ -383,7 +383,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     valid, error = check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts)
     if not valid:
         return send_error(error)
-    valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type)
+    valid, error = check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery_type, delivery_time)
     if not valid:
         return send_error(error)
     valid, error, rest_points, full_points = check_gifts(gifts, client)
