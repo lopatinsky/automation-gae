@@ -58,6 +58,10 @@ def _update_order_info(orders):
                     delivery_time_date = u''
                 delivery_time_str = u'%s(%s)' % (delivery_time_date, slot.name)
         order.client = Client.get(order.client_id)
+        extra_dict = {}
+        for client_dict in order.client.dict(with_extra_fields=True)['extra_data']:
+            extra_dict[client_dict['title']] = client_dict['value'] if client_dict['value'] != None else u'Не введено'
+        order.client.extra_data = extra_dict
         if order.address:
             order.address_str = order.address.str()
         else:
