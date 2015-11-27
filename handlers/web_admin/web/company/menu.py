@@ -148,6 +148,17 @@ class EditCategoryHandler(CompanyBaseHandler):
         self.redirect_to('mt_category_list')
 
 
+class DeleteCategoryHandler(CompanyBaseHandler):
+    @menu_rights_required
+    def post(self):
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        category.key.delete()
+        self.redirect_to('mt_category_list')
+
+
 class ListMenuItemsHandler(CompanyBaseHandler):
     @menu_rights_required
     def get(self):

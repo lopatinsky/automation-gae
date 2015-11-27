@@ -54,6 +54,7 @@
             <th>Картинка</th>
             <th>Категории</th>
             <th>Продукты</th>
+            <th>Удалить</th>
         </tr>
         {% for category in categories %}
             <tr id="{{ 'tr_%s' % category.key.id() }}">
@@ -78,6 +79,13 @@
                 </td>
                 <td>
                     <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">Продукты</a>
+                </td>
+                <td>
+                    <form method="post" action="{{ '/company/menu/category/delete?category_id=%s' % category.key.id() }}">
+                        <button>
+                            Удалить
+                        </button>
+                    </form>
                 </td>
             </tr>
         {% endfor %}
