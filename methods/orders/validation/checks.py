@@ -81,7 +81,10 @@ def check_delivery_min_sum(venue, delivery_type, delivery_zone, total_sum):
 
 def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot):
     description = None
+    accepted_deliveries = []
     for delivery in venue.delivery_types:
+        if delivery.status == STATUS_AVAILABLE:
+            accepted_deliveries.append('"%s"' % DELIVERY_MAP[delivery.delivery_type].lower())
         if delivery.status == STATUS_AVAILABLE and delivery.delivery_type == delivery_type:
             if delivery.today_schedule and datetime.now().day == delivery_time.day:
                 valid, error = check_today_error(delivery.today_schedule,
@@ -106,7 +109,7 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot):
                 return False, description
             else:
                 return True, None
-    return False, u'Данный тип доставки недоступен'
+    return False, u'К сожалению, в "%s" Вы можете выбрать только %s' % (venue.title, u', '.join(accepted_deliveries))
 
 
 def check_delivery_time(delivery_time):
