@@ -211,7 +211,7 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
                 delivery_categories = delivery.category_restrictions
         for item_dict in item_dicts:
             item = item_dict['item']
-            if delivery_time <= datetime.utcnow() + timedelta(minutes=item.time_restriction):
+            if item.time_restriction and delivery_time <= datetime.utcnow() + timedelta(minutes=item.time_restriction):
                 return u'Чтобы заказать "%s" выберите время %s больше текущего времени' % (item.title, _parse_time(item.time_restriction * 60))
             if venue.key in item.restrictions:
                 if delivery_type == DELIVERY:
