@@ -32,10 +32,6 @@ handlers:
   script: main.app
   login: admin
 
-- url: /
-  static_files: static/splash/index.html
-  upload: static/splash/index.html
-
 - url: .*
   script: main.app
 
