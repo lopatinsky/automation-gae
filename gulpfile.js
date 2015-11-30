@@ -35,7 +35,9 @@ var targets = {
         FONTS: [],
         FONTS_OUT: 'static/app/fonts',
         SCRIPT_MAIN: 'frontend-src/app/scripts/main',
-        SCRIPTS_OUT: 'static/app/scripts'
+        SCRIPTS_OUT: 'static/app/scripts',
+        MANIFEST: 'frontend-src/app/app.manifest',
+        MANIFEST_OUT: 'static/app'
     }
 };
 
