@@ -82,6 +82,8 @@ class OrderHandler(ApiHandler):
             if address_json:
                 address_json = validate_address(address_json)
                 venue, delivery_zone = get_venue_and_zone_by_address(address_json)
+        if delivery_zone:
+            self.order.delivery_zone = delivery_zone.key
         self.order.venue_id = str(venue.key.id())
 
         if address_json:
