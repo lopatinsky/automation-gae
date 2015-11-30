@@ -10,7 +10,10 @@
         <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
         <br>
         {% for category in categories %}
-            <h3>{{ category.title }}</h3>
+            <h3>
+                {{ category.title }}
+                <input type="checkbox" name="{{ category.key.id() }}">
+            </h3>
             {% for product in category.products %}
                  <label>
                      <input type="checkbox" {% if product.avail %} checked {% endif %} name={{ product.key.id() }}>

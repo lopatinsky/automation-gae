@@ -129,13 +129,15 @@ class AddRestrictionHandler(CompanyBaseHandler):
         venue_id = self.request.get_range('venue_id')
         venue_key = ndb.Key('Venue', venue_id)
         for product in MenuItem.query().fetch():
-            confirmed = bool(self.request.get(str(product.key.id())))
+            confirmed_product = bool(self.request.get(str(product.key.id())))
+            if product.category and self.request.get(str(product.category.id())):
+                confirmed_product = True
             if venue_key in product.restrictions:
-                if confirmed:
+                if confirmed_product:
                     product.restrictions.remove(venue_key)
                     product.put()
             else:
-                if not confirmed:
+                if not confirmed_product:
                     product.restrictions.append(venue_key)
                     product.put()
         self.redirect_to('venues_list')
