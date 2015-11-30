@@ -420,7 +420,7 @@ app = WSGIApplication([
 
     Route('/barista', web_admin.WebBaristaHandler),
 
-    Route('/app', web_app.WebAppHandler),
+    Route('/', web_app.WebAppHandler),
 
     Route('/wizard', wizard.WizardWebHandler),
     Route('/wizard/api/create', wizard.WizardCreateCompanyHandler),
