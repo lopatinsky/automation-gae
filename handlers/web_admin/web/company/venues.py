@@ -118,7 +118,8 @@ class AddRestrictionHandler(CompanyBaseHandler):
                     product.avail = True
                 products.append(product)
             category.products = products
-            categories.append(category)
+            if products:
+                categories.append(category)
         self.render('/menu/select_products_restriction.html', **{
             'categories': categories,
             'venue': venue
