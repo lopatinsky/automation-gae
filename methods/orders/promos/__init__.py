@@ -1,3 +1,4 @@
+from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
@@ -164,6 +165,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return set_marked_discount(response, outcome, items, promo)
     elif outcome.method == PromoOutcome.MARKED_ACCUMULATE_GIFT_POINT:
         return set_marked_gift_points(response, outcome, items, promo, order)
+    elif outcome.method == PromoOutcome.MARKED_FIX_DISCOUNT_CHEAPEST:
+        return set_fix_discount_marked_cheapest(response, outcome, items, promo)
     else:
         response.success = True
         return response

@@ -349,6 +349,19 @@ def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
     return response
 
 
+def set_fix_discount_marked_cheapest(response, outcome, item_dicts, promo):
+    cheapest_item_dict = None
+    if item_dicts:
+        for item_dict in item_dicts:
+            if item_dict['persistent_mark'] and (not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
+                cheapest_item_dict = item_dict
+    if cheapest_item_dict:
+        if _apply_discounts(cheapest_item_dict, promo, outcome.value, percent=False):
+            cheapest_item_dict['promos'].append(promo)
+            response.success = True
+    return response
+
+
 def set_delivery_message(response, promo, delivery_type, delivery_zone):
     if delivery_type == DELIVERY:
         if delivery_zone.price:
