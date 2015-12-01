@@ -109,6 +109,19 @@ def set_marked_discount(response, outcome, item_dicts, promo):
     return response
 
 
+def set_marked_gift_points(response, outcome, item_dicts, promo, order):
+    promo_applied = False
+    for item_dict in item_dicts:
+        if item_dict['persistent_mark'] and item_dict['temporary_mark']:
+            if order:
+                order.points_details.append(GiftPointsDetails(item=outcome.item_details.item, points=outcome.value))
+                order.put()
+            item_dict['promos'].append(promo)
+            promo_applied = True
+    response.success = promo_applied
+    return response
+
+
 def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_payment_sum, order):
     cash_back = float(outcome.value) / 100.0
     promo_applied = False
