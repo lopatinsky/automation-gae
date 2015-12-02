@@ -211,10 +211,16 @@ class DeliveryType(ndb.Model):
     MAX_DAYS = 7
     ONE_DAY_SEC = 86400
 
+    MODE_SLOTS = 0
+    MODE_EXACT_TIME = 1
+    MODE_DATE_AND_SLOTS = 2
+    MODE_DUAL = 3
+
     delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_UNAVAILABLE)
     min_time = ndb.IntegerProperty(default=0)
     max_time = ndb.IntegerProperty(default=ONE_DAY_SEC * MAX_DAYS)
+    dual_mode = ndb.BooleanProperty(default=False)
     delivery_zones = ndb.KeyProperty(kind=DeliveryZone, repeated=True)
     delivery_slots = ndb.KeyProperty(kind=DeliverySlot, repeated=True)
     item_restrictions = ndb.KeyProperty(kind=MenuItem, repeated=True)
@@ -228,16 +234,28 @@ class DeliveryType(ndb.Model):
         delivery.put()
         return delivery
 
+    def get_mode(self):
+        if not self.delivery_slots:
+            return self.MODE_EXACT_TIME
+
+        slot_type = self.delivery_slots[0].get().slot_type
+        if slot_type in (DeliverySlot.STRINGS, DeliverySlot.HOURS_FROM_MIDNIGHT):
+            return self.MODE_DATE_AND_SLOTS
+
+        if self.dual_mode:
+            return self.MODE_DUAL
+        return self.MODE_SLOTS
+
     def dict(self):
+        mode = self.get_mode()
         return {
             'id': str(self.delivery_type),
             'name': DELIVERY_MAP[self.delivery_type],
             'time_picker_min': self.min_time,
             'time_picker_max': self.max_time,
             'slots': [slot.dict() for slot in sorted([slot.get() for slot in self.delivery_slots], key=lambda x: x.value)],
-            'time_required': True
-            if (self.delivery_slots and self.delivery_slots[0].get().slot_type in [DeliverySlot.STRINGS, DeliverySlot.HOURS_FROM_MIDNIGHT]) or not self.delivery_slots
-            else False
+            'mode': mode,
+            'time_required': mode in (self.MODE_EXACT_TIME, self.MODE_DATE_AND_SLOTS),
         }
 
 
