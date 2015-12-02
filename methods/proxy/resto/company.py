@@ -39,7 +39,12 @@ def __get_delivery_types(resto_delivery_types, resto_delivery_cities, resto_min_
     for resto_delivery_type in resto_delivery_types:
         delivery_type = DeliveryType()
         delivery_type.delivery_type = DELIVERY_TYPE_MAP[resto_delivery_type['type_id']]
-        delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
+        if resto_delivery_type['allow_slots']:
+            delivery_type.delivery_slots = DeliverySlot.query().fetch(keys_only=True)
+            delivery_type.dual_mode = resto_delivery_type['allow_dual_mode']
+        else:
+            delivery_type.delivery_slots = []
+            delivery_type.dual_mode = False
         delivery_type.min_time = resto_delivery_type['min_time']
         delivery_type.status = resto_delivery_type['available']
         if delivery_type.delivery_type == DELIVERY:
