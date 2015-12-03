@@ -4,7 +4,7 @@ from datetime import datetime
 
 from google.appengine.ext import deferred
 
-from models.config.config import EMAIL_FROM
+from models.config.config import config, EMAIL_FROM, AUTO_APP
 from methods import empatika_wallet, push, paypal
 from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos
@@ -34,7 +34,7 @@ def cancel_order(order, status, namespace, comment=None):
                 success = False
     if success:
         success_wallet_payment_reverse = False
-        if order.wallet_payment > 0:
+        if order.wallet_payment > 0 and config.APP_KIND == AUTO_APP:
             try:
                 empatika_wallet.reverse(order.client_id, order.key.id())
                 deferred.defer(get_balance, order.client_id, raise_error=True)  # just to update memcache
