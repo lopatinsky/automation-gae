@@ -5,6 +5,7 @@ from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb, deferred
 from methods import fastcounter
 from models import STATUS_AVAILABLE
+from models.config.version import CURRENT_APP_ID, PRODUCTION_APP_ID
 from models.proxy.unified_app import ProxyCity
 
 IOS_DEVICE = 0
@@ -133,7 +134,9 @@ class Client(ndb.Model):
 
     @classmethod
     def is_id_global(cls, client_id):
-        return client_id >= cls.MIN_GLOBAL_ID
+        if CURRENT_APP_ID == PRODUCTION_APP_ID:
+            return client_id >= cls.MIN_GLOBAL_ID
+        return True
 
     @classmethod
     def get(cls, client_id):
