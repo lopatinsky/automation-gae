@@ -5,7 +5,7 @@ from handlers.api.base import ApiHandler
 from methods.orders.create import card_payment_performing, paypal_payment_performing
 from datetime import datetime, timedelta
 from methods.rendering import timestamp
-from methods.subscription import get_subscription
+from methods.subscription import get_subscription, get_subscription_category_dict
 from models import Order, Client, Venue, STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.subscription import SubscriptionMenuItem, SubscriptionTariff, Subscription
@@ -20,15 +20,12 @@ class SubscriptionInfoHandler(ApiHandler):
             self.abort(400)
         client = Client.get(int(client_id))
         subscription = get_subscription(client)
+        dct = {
+            "category": get_subscription_category_dict()[1]
+        }
         if subscription:
-            subscription_dict = subscription.dict()
-            subscription_dict.update({
-                'items': [item.dict()
-                          for item in SubscriptionMenuItem.query(SubscriptionMenuItem.status == STATUS_AVAILABLE).fetch()]
-            })
-            self.render_json(subscription_dict)
-        else:
-            self.render_json({})
+            dct.update(subscription.dict())
+        self.render_json(dct)
 
 
 class SubscriptionTariffsHandler(ApiHandler):
