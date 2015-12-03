@@ -23,7 +23,8 @@
                 <th>Адрес</th>
                 <th>Юрлицо</th>
                 <th>Часовой пояс</th>
-                <th>Телефоны</th>
+                <th>Телефон для клиентов</th>
+                <th>Телефоны для СМС</th>
                 <th>Почты</th>
                 <th>Выбрать зоны</th>
                 <th>Перерывы</th>
@@ -52,6 +53,9 @@
                     </td>
                     <td rowspan="{{ height }}">
                         {{ '+%s (%s)' % (venue.timezone_offset, venue.timezone_name) }}
+                    </td>
+                    <td rowspan="{{ height }}">
+                        {{ venue.called_phone }}
                     </td>
                     <td rowspan="{{ height }}">
                         {{ ','.join(venue.phones) }}

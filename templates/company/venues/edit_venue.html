@@ -26,7 +26,12 @@
                     {% endif %}>
         </label><br>
         <label>
-            Телефоны:
+            Телефон для клиентов:
+            <input type="text" name="called_phone"
+                    {% if venue %} value="{{ venue.called_phone }}" {% endif %}>
+        </label><br>
+        <label>
+            Телефоны для СМС:
             <input type="text" name="phones"
                     {% if venue %} value="{{ ','.join(venue.phones) }}" {% endif %}>
         </label><br>
