@@ -28,7 +28,7 @@
         <label>
             Телефон для клиентов:
             <input type="text" name="called_phone"
-                    {% if venue %} value="{{ venue.called_phone }}" {% endif %}>
+                    {% if venue %} value="{{ venue.called_phone or '' }}" {% endif %}>
         </label><br>
         <label>
             Телефоны для СМС:
