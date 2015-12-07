@@ -48,9 +48,9 @@ class MivakoGetUrlHandler(ApiHandler):
             share_item = SharedGiftMenuItem.get_by_id(item.key.id())
             if not share_item or share_item.status == STATUS_UNAVAILABLE:
                 return self.send_error(u'Продукт %s недоступен' % item.title)
-        text = u'Имя получателя: %s\n' \
-               u'Телефон получателя: %s\n' \
-               u'Email получателя: %s\n' \
+        text = u'Имя получателя: %s<br>' \
+               u'Телефон получателя: %s<br>' \
+               u'Email получателя: %s<br>' \
                u'Подарок: %s' % (recipient_name, recipient_phone, recipient_email,
                                  u', '.join([item.title for item in items]))
         for email in module.emails:
