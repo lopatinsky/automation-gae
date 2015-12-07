@@ -19,10 +19,15 @@ class SubscriptionInfoHandler(ApiHandler):
         if not client_id:
             self.abort(400)
         client = Client.get(int(client_id))
-        subscription = get_subscription(client)
+
+        enabled, category_dict = get_subscription_category_dict()
+        if not enabled:
+            self.abort(400)
         dct = {
-            "category": get_subscription_category_dict()[1]
+            "category": category_dict
         }
+
+        subscription = get_subscription(client)
         if subscription:
             dct.update(subscription.dict())
         self.render_json(dct)
