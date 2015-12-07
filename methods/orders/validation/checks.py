@@ -383,3 +383,10 @@ def check_empty_order(item_dicts, gift_dicts, order_gift_dicts, shared_gift_dict
     if not item_dicts and not gift_dicts and not order_gift_dicts and not shared_gift_dicts:
         return False, u'Добавьте что-нибудь в заказ'
     return True, None
+
+
+def check_availability(item_dicts):
+    for item_dict in item_dicts:
+        if item_dict['item'].status != STATUS_AVAILABLE:
+            return False, u'Позиция "%s" изъята из продажи. Пожалуйста, обновите меню' % item_dict['item'].title
+    return True, None
