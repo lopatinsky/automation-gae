@@ -52,7 +52,7 @@ def done_order(order, namespace, with_push=True):
     order.email_key_confirm = None
     order.actual_delivery_time = datetime.utcnow()
 
-    client_key = ndb.Key(Client, order.client_id)
+    client_key = Client.get(order.client_id).key
     shared_promo = SharedPromo.query(SharedPromo.recipient == client_key, SharedPromo.status == SharedPromo.READY).get()
     if shared_promo:
         shared_promo.deactivate(namespace_manager.get_namespace())
