@@ -115,13 +115,15 @@ class PromoCondition(ndb.Model):
     CHECK_MARK = 26
     CHECK_REPEATED_ORDER_BEFORE = 27
     CHECK_MAX_USES = 28
+    CHECK_MIN_DATE = 29
+    CHECK_MAX_DATE = 30
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
                MARK_ITEM_WITH_CATEGORY, MARK_ITEM_WITHOUT_CATEGORY, CHECK_MARKED_MIN_SUM, MARK_ITEM, MARK_NOT_ITEM,
                MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER, CHECK_ITEM_NOT_IN_ORDER,
                CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH, CHECK_VENUE, CHECK_MARK,
-               CHECK_REPEATED_ORDER_BEFORE, CHECK_MAX_USES)
+               CHECK_REPEATED_ORDER_BEFORE, CHECK_MAX_USES, CHECK_MIN_DATE, CHECK_MAX_DATE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -250,7 +252,9 @@ CONDITION_MAP = {
     PromoCondition.CHECK_VENUE: u'Заказ в кофейне',
     PromoCondition.CHECK_MARK: u'В заказе есть помеченные продукты',
     PromoCondition.CHECK_REPEATED_ORDER_BEFORE: u'Повторных заказов не было в течении N дней',
-    PromoCondition.CHECK_MAX_USES: u'Максимальное кол-во использования акции на пользователя'
+    PromoCondition.CHECK_MAX_USES: u'Максимальное кол-во использования акции на пользователя',
+    PromoCondition.CHECK_MIN_DATE: u'Дата не ранее X',
+    PromoCondition.CHECK_MAX_DATE: u'Дата не позднее X',
 }
 
 OUTCOME_MAP = {

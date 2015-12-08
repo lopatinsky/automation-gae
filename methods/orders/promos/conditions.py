@@ -222,3 +222,19 @@ def check_max_promo_uses(condition, client):
             if sum >= condition.value:
                 return False
     return True
+
+
+def check_min_date(condition, delivery_time):
+    condition_date_str = str(condition.value)
+    condition_date = datetime.strptime(condition_date_str, "%Y%m%d").date()
+    if delivery_time.date() >= condition_date:
+        return True
+    return False
+
+
+def check_max_date(condition, delivery_time):
+    condition_date_str = str(condition.value)
+    condition_date = datetime.strptime(condition_date_str, "%Y%m%d").date()
+    if delivery_time.date() <= condition_date:
+        return True
+    return False
