@@ -16,7 +16,10 @@
     </p>
     <p>
         <b>Cумма к оплате:</b> {{ order.total_sum - order.wallet_payment }}
-            (оплачено бонусами {{ order.wallet_payment }})<br>
+            {% if order.wallet_payment %}
+                (оплачено бонусами {{ order.wallet_payment }})
+            {% endif %}
+        <br>
         <b>Сумма по меню:</b> {{ order.menu_sum }}
     </p>
     <p>
