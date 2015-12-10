@@ -1,4 +1,5 @@
 from handlers.web_admin.web.company.base import CompanyBaseHandler
+from models.config.share import ShareInvitationModule
 
 __author__ = 'Artem'
 from models.config import config
@@ -6,12 +7,17 @@ from models.config import config
 
 class SetInvitationModuleHandler(CompanyBaseHandler):
     def get(self):
-        self.response.out.write('Hello')
-        pass
+        # self.response.write('hello')
+        conf = config.Config.get()
+        if not conf.SHARE_INVITATION_MODULE:
+            conf.SHARE_INVITATION_MODULE = ShareInvitationModule()
+            conf.SHARE_INVITATION_MODULE.status = 0
+        self.render('/config_settings/invitation_module_setup.html')
 
     def post(self):
-        status = self.request.get_range('status', min_value=0, max_value=1, default=1)
-        after_order = self.request.get('after_order')
+        status = self.request.get('status') is not ''
+        # status = self.request.get_range('status', min_value=0, max_value=1, default=1)
+        after_order = self.request.get('after_order') is not ''
         after_number_order = self.request.get_range('after_number_order', min_value=1, default=3)
 
         about_title = self.request.get('about_title')
@@ -27,16 +33,32 @@ class SetInvitationModuleHandler(CompanyBaseHandler):
 
         conf = config.Config.get()
 
-        conf.SHARE_INVITATION_MODULE.status = status
-        conf.SHARE_INVITATION_MODULE.after_order = after_order
-        conf.SHARE_INVITATION_MODULE.after_number_order = after_number_order
-        conf.SHARE_INVITATION_MODULE.about_title = about_title
-        conf.SHARE_INVITATION_MODULE.about_description = about_description
-        conf.SHARE_INVITATION_MODULE.invitation_text = invitation_text
-        conf.SHARE_INVITATION_MODULE.invitation_image = invitation_image
-        conf.SHARE_INVITATION_MODULE.sender_accumulated_points = sender_accumulated_points
-        conf.SHARE_INVITATION_MODULE.sender_wallet_points = sender_wallet_points
-        conf.SHARE_INVITATION_MODULE.recipient_accumulated_points = recipient_accumulated_points
-        conf.SHARE_INVITATION_MODULE.recipient_wallet_points = recipient_wallet_points
+        if not conf.SHARE_INVITATION_MODULE:
+            conf.SHARE_INVITATION_MODULE = ShareInvitationModule()
+
+        share_invitation_module = conf.SHARE_INVITATION_MODULE
+
+        share_invitation_module.status = status
+        share_invitation_module.after_order = after_order
+        share_invitation_module.after_number_order = after_number_order
+        share_invitation_module.about_title = about_title
+        share_invitation_module.about_description = about_description
+        share_invitation_module.invitation_text = invitation_text
+        share_invitation_module.invitation_image = invitation_image
+        share_invitation_module.sender_accumulated_points = sender_accumulated_points
+        share_invitation_module.sender_wallet_points = sender_wallet_points
+        share_invitation_module.recipient_accumulated_points = recipient_accumulated_points
+        share_invitation_module.recipient_wallet_points = recipient_wallet_points
 
         conf.put()
+
+        self.redirect_to('company_main')
+
+
+class CreateBrachApiKey(CompanyBaseHandler):
+    def get(self):
+        
+        pass
+
+    def post(self):
+        pass
