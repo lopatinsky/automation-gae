@@ -1,0 +1,71 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+<form method="post">
+
+
+    <label for="status">Status</label><br>
+    <input type="checkbox" name="status" id="status" checked="{{ config.SHARE_INVITATION_MODULE.status }}">
+
+    <br><br>
+
+    <label for="after_order">After order</label><br>
+    <input type="checkbox" name="after_order" id="after_order"
+           checked="{{ config.SHARE_INVITATION_MODULE.after_order }}">
+
+    <br><br>
+
+    <label for="after_number_order">After number order</label><br>
+    <input type="number" name="after_number_order" id="after_number_order"
+           value="{{ config.SHARE_INVITATION_MODULE.after_number_order }}">
+
+    <br><br>
+
+    <label for="about_title">About title</label><br>
+    <input type="text" name="about_title" id="about_title" value="{{ config.SHARE_INVITATION_MODULE.about_title }}">
+
+    <br><br>
+
+    <label for="about_description">About description</label><br>
+    <textarea name="about_description" id="about_description" rows="4" cols="50">
+        {{- config.SHARE_INVITATION_MODULE.about_description -}}
+    </textarea>
+
+    <br><br>
+
+    <label for="invitation_image">Invitation image</label><br>
+    <input type="url" name="invitation_image" id="invitation_image"
+           value="{{ config.SHARE_INVITATION_MODULE.invitation_image }}">
+
+    <br><br>
+
+    <label for="sender_accumulated_points">Sender accumulated points</label><br>
+    <input type="number" name="sender_accumulated_points" id="sender_accumulated_points"
+           value="{{ config.SHARE_INVITATION_MODULE.sender_accumulated_points }}">
+
+    <br><br>
+
+    <label for="sender_wallet_points">Sender wallet points</label><br>
+    <input type="number" name="sender_wallet_points" id="sender_wallet_points"
+           value="{{ config.SHARE_INVITATION_MODULE.sender_wallet_points }}">
+
+    <br><br>
+
+    <label for="recipient_accumulated_points">Recipient accumulated points</label><br>
+    <input type="number" name="recipient_accumulated_points" id="recipient_accumulated_points"
+           value="{{ config.SHARE_INVITATION_MODULE.recipient_accumulated_points }}">
+
+    <br><br>
+
+    <label for="recipient_wallet_points">Recipient wallet points</label><br>
+    <input type="number" name="recipient_wallet_points" id="recipient_wallet_points"
+           value="{{ config.SHARE_INVITATION_MODULE.recipient_wallet_points }}">
+
+    <br><br>
+
+    <input type="submit" value="Change data">
+</form>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from google.appengine.ext import ndb
+
 from methods.fuckups import is_share_fuckup_ios_user
 from models import STATUS_CHOICES, STATUS_AVAILABLE
 from models.config.config import SHARE_GIFT, SHARE_INVITATION

@@ -14,8 +14,11 @@ MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, ORDER_INFO_MODULE, C
                 MIVAKO_GIFT_MODULE, REVIEW_MODULE, MENU_FRAME_MODULE, REMAINDERS_MODULE)
 
 from google.appengine.api import memcache
+
 from google.appengine.ext import ndb
+
 from webapp2 import cached_property
+
 from models.config.local import LocalConfigProxy
 from models.config.share import ShareInvitationModule, ShareGiftModule
 from models.config.field import ClientModule, OrderModule
@@ -62,6 +65,7 @@ class Config(ndb.Model):
     def APP_KIND(self):
         from models.proxy.resto import RestoCompany
         from models.proxy.doubleb import DoublebCompany
+
         if RestoCompany.get():
             return RESTO_APP
         elif DoublebCompany.get():
@@ -69,17 +73,20 @@ class Config(ndb.Model):
         else:
             return AUTO_APP
 
+# BRANCH_API_KEY = '155014419024204427'
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
     COMPANY_STATUS = ndb.IntegerProperty(indexed=False, choices=COMPANY_STATUS_CHOICES, default=COMPANY_IN_DEVELOPMENT)
 
+    BRANCH_API_KEY = ndb.StringProperty(indexed=False)
+
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
-    
+
     ALFA_BASE_URL = ndb.StringProperty(indexed=False, default="https://test.paymentgate.ru/testpayment")
     ALFA_LOGIN = ndb.StringProperty(indexed=False, default="empatika_autopay-api")
     ALFA_PASSWORD = ndb.StringProperty(indexed=False, default="empatika_autopay")
 
-    PARSE_APP_API_KEY = ndb.StringProperty(indexed=False)   # todo: rewrite pushes, delete field
+    PARSE_APP_API_KEY = ndb.StringProperty(indexed=False)  # todo: rewrite pushes, delete field
     PARSE_REST_API_KEY = ndb.StringProperty(indexed=False)  # todo: rewrite pushes, delete field
 
     EMAIL_REQUESTS = ndb.BooleanProperty(default=False)
@@ -108,7 +115,7 @@ class Config(ndb.Model):
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
-    APP_NAME = ndb.StringProperty(indexed=False)   # todo: getting info from company module
+    APP_NAME = ndb.StringProperty(indexed=False)  # todo: getting info from company module
     COMPANY_DESCRIPTION = ndb.StringProperty(indexed=False)  # suitable name is APP_DESCRIPTION
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
@@ -118,6 +125,7 @@ class Config(ndb.Model):
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
+
         if self.APP_KIND in [AUTO_APP, DOUBLEB_APP]:
             return {
                 'app_name': self.APP_NAME,
@@ -148,6 +156,7 @@ class Config(ndb.Model):
     @property
     def SHARE_GIFT_ENABLED(self):
         from models import STATUS_AVAILABLE
+
         return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE else False
 
     @property
@@ -183,6 +192,7 @@ class Config(ndb.Model):
         api = memcache.get('paypal_api')
         if not api:
             from methods import paypalrestsdk
+
             mode = "sandbox" if self.PAYPAL_SANDBOX else "live"
             api = paypalrestsdk.Api(mode=mode, client_id=self.PAYPAL_CLIENT_ID, client_secret=self.PAYPAL_CLIENT_SECRET)
             memcache.set('paypal_api', api)
@@ -192,5 +202,6 @@ class Config(ndb.Model):
     def get(cls):
         config = cls.get_by_id(1)
         return config
+
 
 config = LocalConfigProxy()

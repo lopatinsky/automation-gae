@@ -1,5 +1,7 @@
 import logging
+
 from google.appengine.ext import ndb
+
 from methods.rendering import timestamp
 from models import STATUS_AVAILABLE, STATUS_CHOICES, Order
 from models.config.config import GEO_PUSH_MODULE
