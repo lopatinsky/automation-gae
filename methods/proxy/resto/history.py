@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from google.appengine.ext import ndb
+
+from methods.proxy.resto.payment_types import PAYMENT_TYPE_MAP
 from methods.proxy.resto.requests import get_resto_order_info
 from methods.proxy.resto.venues import get_venues
 from methods.rendering import STR_DATETIME_FORMAT
@@ -12,6 +14,14 @@ from models.venue import SELF, DELIVERY
 from requests import get_resto_history
 
 __author__ = 'dvpermyakov'
+
+
+STATUS_MAP = {
+    1: NEW_ORDER,
+    2: NEW_ORDER,
+    3: READY_ORDER,
+    4: CANCELED_BY_BARISTA_ORDER
+}
 
 
 def _get_address(resto_address):
@@ -53,9 +63,13 @@ def get_orders(client):
     any_venue = get_venues()[0]  # for timezone offset
     for resto_venue_history in resto_history:
         for resto_order in resto_venue_history.get('local_history', []):
-            order = Order(id=resto_order['order_id'])
+            order_id = resto_order['resto_id'] or resto_order['order_id']
+            order = Order(id=order_id)
             order.client_id = client.key.id()
-            order.status = READY_ORDER
+            if resto_order['status'] is not None:
+                order.status = STATUS_MAP[resto_order['status']]
+            else:
+                resto_order['status'] = READY_ORDER
             order.number = int(resto_order['number'])
             order.address = _get_address(resto_order['address'])
             order.venue_id = resto_order['venue_id']
@@ -63,7 +77,10 @@ def get_orders(client):
             local_delivery_time = datetime.fromtimestamp(resto_order['date'])
             order.delivery_time = local_delivery_time - timedelta(hours=any_venue.timezone_offset)
             order.delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
-            order.payment_type_id = CASH_PAYMENT_TYPE  # todo: this is hardcoded
+            if resto_order['payment_type'] is not None:
+                order.payment_type_id = int(PAYMENT_TYPE_MAP[int(resto_order['payment_type'])])
+            else:
+                order.payment_type_id = CASH_PAYMENT_TYPE
             order.delivery_type = SELF if resto_order['self'] else DELIVERY
             order.item_details = [_get_item_details(resto_item) for resto_item in resto_order['items']]
             orders.append(order)
