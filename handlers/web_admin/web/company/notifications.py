@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+
 from google.appengine.api import namespace_manager
 
 from google.appengine.api.taskqueue import taskqueue
@@ -40,21 +41,32 @@ class AddNewsHandler(CompanyBaseHandler):
         def error(description):
             self.render('/notifications/news_add.html', error=description)
 
+        title = self.request.get('title')
+
+        if not title:
+            return error(u'Введите заголовок')
+
         text = self.request.get('text')
         if not text:
             return error(u'Введите текст')
         image_url = self.request.get('image_url')
-        start = self.request.get('start')
-        if start:
-            try:
-                start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
-            except ValueError:
-                return error(u'Неверное время начала')
+
+        send_now = bool(self.request.get('send_now'))
+        if send_now:
+            start = datetime.utcnow()
         else:
-            return error(u'Введите время начала')
-        if start < datetime.utcnow():
-            return error(u'Введите время больше текущего в utc')
-        news = News(text=text, image_url=image_url, start=start)
+            start = self.request.get('start')
+            if start:
+                try:
+                    start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
+                except ValueError:
+                    return error(u'Неверное время начала')
+            else:
+                return error(u'Введите время начала')
+            if start < datetime.utcnow():
+                return error(u'Введите время больше текущего в utc')
+
+        news = News(text=text, title=title, image_url=image_url, start=start)
         news.put()
         new_url = get_new_image_url('News', news.key.id(), url=image_url)
         if new_url:
@@ -146,12 +158,39 @@ class AddPushesHandler(CompanyBaseHandler):
             if self.request.get(str(venue.key.id())):
                 venue_channel = get_channels(company_namespace)[VENUE_CHANNEL]
                 channels.append(Channel(name=venue.title, channel=venue_channel))
-        notification = Notification(start=start, text=text, popup_text=full_text, header=header, channels=channels)
+        notification = Notification(start=start, text=text, popup_text=full_text, header=header, channels=channels,
+                                    should_popup=True)
+
         notification.put()
         taskqueue.add(url='/task/pushes/start', method='POST', eta=start, params={
             'notification_id': notification.key.id()
         })
         self.redirect('/company/notifications/pushes/list')
+
+
+class SendOrderPush(CompanyBaseHandler):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
+
+
+class SendSimplePush(CompanyBaseHandler):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
+
+
+class SendReviewPush(CompanyBaseHandler):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
+
 
 
 class CancelPushHandler(CompanyBaseHandler):

@@ -4,6 +4,7 @@ import json
 import logging
 
 from google.appengine.api import urlfetch
+
 from google.appengine.api.namespace_manager import namespace_manager
 
 from methods.emails.admins import send_error
@@ -13,9 +14,11 @@ from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CH
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
 from models.config.config import config
 
-
+ORDER_TYPE = 1
+SIMPLE_TYPE = 2
 REVIEW_TYPE = 3
-PUSH_TYPES = (REVIEW_TYPE,)
+NEWS_TYPE = 4
+PUSH_TYPES = (ORDER_TYPE, SIMPLE_TYPE, REVIEW_TYPE, NEWS_TYPE)
 
 
 def _send_push(channels, data, device_type):
@@ -35,10 +38,11 @@ def _send_push(channels, data, device_type):
     }
     try:
         result = json.loads(urlfetch.fetch('https://api.parse.com/1/push', payload=json.dumps(payload), method='POST',
-                            headers=headers, validate_certificate=False, deadline=10).content)
+                                           headers=headers, validate_certificate=False, deadline=10).content)
         logging.info(result)
         if result and (result.get('code') or result.get('error')):
-            text = u'Namespace = %s\nCode = %s, Error = %s' % (namespace_manager.get_namespace(), result.get('code'), result.get('error'))
+            text = u'Namespace = %s\nCode = %s, Error = %s' % (
+                namespace_manager.get_namespace(), result.get('code'), result.get('error'))
             send_error('push', u'Ошибка Parse', text)
     except Exception as e:
         text = str(e)
@@ -47,36 +51,31 @@ def _send_push(channels, data, device_type):
     return result
 
 
-def _make_push_data(text, header, device_type):
+def _make_push_data(text, header, device_type, should_popup, push_type):
     if device_type == IOS_DEVICE:
         return {
             'alert': text,
-            'sound': 'push.caf'
+            'sound': 'push.caf',
+            'should_popup': should_popup,
+            'type': push_type
         }
     elif device_type == ANDROID_DEVICE:
         return {
             'text': text,
             'head': header,
-            'action': 'com.empatika.doubleb.push'
+            'action': 'com.empatika.doubleb.push',
+            'should_popup': should_popup,
+            'type': push_type
         }
     return None
 
 
 def _make_order_push_data(order, text):
-    data = _make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type)
+    data = _make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type, True, ORDER_TYPE)
     if data:
         data.update({
             'order_id': str(order.key.id()),
-            'order_status': int(order.status)
-        })
-    return data
-
-
-def _make_share_gift_push_data(client, text):
-    data = _make_push_data(text, u'Вам прислали подарок!', client.device_type)
-    if data:
-        data.update({
-            'share_gift': True
+            'order_status': int(order.status),
         })
     return data
 
@@ -84,13 +83,33 @@ def _make_share_gift_push_data(client, text):
 def _make_order_review_push_data(client, order):
     head = u'Оцените заказ'
     text = u'Оставьте отзыв о Вашем заказе!'
-    data = _make_push_data(text, head, client.device_type)
+    data = _make_push_data(text, head, client.device_type, False, REVIEW_TYPE)
     if data:
         data.update({
-            'type': REVIEW_TYPE,
             'review': {
                 'order_id': str(order.key.id())
             }
+        })
+    return data
+
+
+def _make_news_push_data(client, news):
+    news_dict = news.dict()
+    text = news_dict['text']
+    # head = 'somenews'
+    head = news_dict['title']
+    data = _make_push_data(text, head, client.device_type, True, NEWS_TYPE)
+    if data:
+        data.update({
+            'news_data': news_dict
+        })
+
+
+def _make_simple_push_data(client, head, text, full_text):
+    data = _make_push_data(text, head, client.device_type, True, SIMPLE_TYPE)
+    if data:
+        data.update({
+            'full_text': full_text
         })
     return data
 
@@ -108,7 +127,7 @@ def send_order_push(order, text, namespace, new_time=None, silent=False):
 
 
 def send_client_push(client, text, header, namespace):
-    data = _make_push_data(text, header, client.device_type)
+    data = _make_push_data(text, header, client.device_type, should_popup=True, push_type='')
     client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
     return _send_push([client_channel], data, client.device_type)
 

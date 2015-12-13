@@ -4,27 +4,37 @@
     <title>Добавить новость</title>
 </head>
 <body>
-    {% include '/company/header.html' %}
-    <form method="post">
-        <label>
-            Текст:
-            <input type="text" name="text" value="{% if news %} {{ news.text }} {% endif %}">
-        </label><br>
-        <label>
-            Картинка (url):
-            <input type="text" name="image_url" value="{% if news %} {{ news.image_url }} {% endif %}">
-        </label><br>
-        <label>
-            Время начала (в utc):
-            <input type="datetime-local" name="start">
-        </label><br>
-        <input type="submit">
-        <a href="/company/notifications/news/list">Назад</a>
-    </form>
-    {% if error %}
-        <p>
-            {{ error }}
-        </p>
-    {% endif %}
+{% include '/company/header.html' %}
+<form method="post">
+
+    <label>
+        Заголовок
+        <input type="text" name="title" value="{% if news %} {{ news.title }} {% endif %}">
+    </label><br>
+    <label>
+        Текст:
+        <input type="text" name="text" value="{% if news %} {{ news.text }} {% endif %}">
+    </label><br>
+    <label>
+        Картинка (url):
+        <input type="text" name="image_url" value="{% if news %} {{ news.image_url }} {% endif %}">
+    </label><br>
+    <label>
+        Время начала (в utc):
+        <input type="datetime-local" name="start">
+    </label>
+    <label>
+        <input type="checkbox" name="send_now"/>
+        Отправить прямо сейчас
+    </label><br>
+
+    <input type="submit">
+    <a href="/company/notifications/news/list">Назад</a>
+</form>
+{% if error %}
+    <p>
+        {{ error }}
+    </p>
+{% endif %}
 </body>
 </html>
