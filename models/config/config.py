@@ -73,7 +73,7 @@ class Config(ndb.Model):
         else:
             return AUTO_APP
 
-# BRANCH_API_KEY = '155014419024204427'
+
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
     COMPANY_STATUS = ndb.IntegerProperty(indexed=False, choices=COMPANY_STATUS_CHOICES, default=COMPANY_IN_DEVELOPMENT)
 

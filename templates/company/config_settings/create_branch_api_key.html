@@ -1,0 +1,28 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+{% if config.BRANCH_API_KEY %}
+    Branch API key is {{ config.BRANCH_API_KEY }} <br>
+    Unfortunately, you can change it only directly from database
+{% else %}
+    <form method="post">
+
+        <label for="branch_key">Input your branch API key</label><br>
+        <input type="text" name="branch_key" id="branch_key">
+
+        <button name="set_key_button" value="key_is_inputed">Save key</button>
+        <br>
+
+        <strong>OR</strong> you can generate API key from Branch <br><br>
+
+        <button name="set_key_button" value="key_is_generated">Generate key</button>
+    </form>
+
+{% endif %}
+<br>
+<a href="/company/config_settings">Back</a>
+</body>
+</html>

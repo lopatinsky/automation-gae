@@ -8,7 +8,7 @@ from handlers import wizard, web_admin, ext_api
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
-from handlers.web_admin.web.company.config_setup import SetInvitationModuleHandler
+from handlers.web_admin.web.company.config_setup import *
 from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
@@ -239,7 +239,9 @@ app = WSGIApplication([
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         PathPrefixRoute('/config_settings', [
-            Route('/invitation_module_setup', SetInvitationModuleHandler)
+            Route('', ConfigMainHandler),
+            Route('/invitation_module_setup', SetInvitationModuleHandler),
+            Route('/create_branch_api_key', CreateBranchApiKeyHandler)
         ]),
 
         PathPrefixRoute('/venues', [
