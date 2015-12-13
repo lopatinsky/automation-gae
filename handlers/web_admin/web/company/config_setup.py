@@ -1,19 +1,28 @@
 from handlers.web_admin.web.company.base import CompanyBaseHandler
+from methods import branch_io
 from models.config.share import ShareInvitationModule
+from methods.auth import config_rights_required
 
 __author__ = 'Artem'
 from models.config import config
 
 
-class SetInvitationModuleHandler(CompanyBaseHandler):
+class ConfigMainHandler(CompanyBaseHandler):
+    @config_rights_required
     def get(self):
-        # self.response.write('hello')
+        self.render('/config_settings/config_settings.html')
+
+
+class SetInvitationModuleHandler(CompanyBaseHandler):
+    @config_rights_required
+    def get(self):
         conf = config.Config.get()
         if not conf.SHARE_INVITATION_MODULE:
             conf.SHARE_INVITATION_MODULE = ShareInvitationModule()
             conf.SHARE_INVITATION_MODULE.status = 0
         self.render('/config_settings/invitation_module_setup.html')
 
+    @config_rights_required
     def post(self):
         status = self.request.get('status') is not ''
         # status = self.request.get_range('status', min_value=0, max_value=1, default=1)
@@ -55,10 +64,30 @@ class SetInvitationModuleHandler(CompanyBaseHandler):
         self.redirect_to('company_main')
 
 
-class CreateBrachApiKey(CompanyBaseHandler):
+class CreateBranchApiKeyHandler(CompanyBaseHandler):
+    @config_rights_required
     def get(self):
-        
-        pass
+        self.render('/config_settings/create_branch_api_key.html')
 
+    @config_rights_required
     def post(self):
-        pass
+        button_type = self.request.get('set_key_button')
+        conf = config.Config.get()
+
+        if button_type == 'key_is_inputed':
+            self.response.write('key_is_inputed')
+            pass
+        elif button_type == 'key_is_generated':
+
+            user_id = 99126033420124274
+            app_name = conf.APP_NAME
+            email = 'team@ru-beacon.ru'
+            dev_name = 'ru-beacon'
+            branch_key, branch_secret = branch_io.create_app_key(user_id=user_id,
+                                                                 app_name=app_name,
+                                                                 dev_name=dev_name,
+                                                                 dev_email=email)
+            self.response.write({
+                'key': branch_key,
+                'secret': branch_secret
+            })
