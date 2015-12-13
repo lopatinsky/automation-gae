@@ -1,6 +1,7 @@
 from datetime import datetime
 from webapp2 import RequestHandler
 from models import Notification
+from models.push import *
 from models.specials import STATUS_CREATED, ReviewPush
 from methods.push import send_multichannel_push, send_review_push
 from models.client import IOS_DEVICE, ANDROID_DEVICE
@@ -18,8 +19,18 @@ class StartPushesHandler(RequestHandler):
             channels = []
             for channel in notification.channels:
                 channels.append(channel.channel)
-            send_multichannel_push(notification.text, notification.header, channels, ANDROID_DEVICE)
-            send_multichannel_push(notification.text, notification.header, channels, IOS_DEVICE)
+
+            android_push = SimplePush(text=notification.text, should_popup=notification.should_popup,
+                                      full_text=notification.popup_text, header=notification.header,
+                                      channels=channels, device_type=ANDROID_DEVICE)
+
+            ios_push = SimplePush(text=notification.text, should_popup=notification.should_popup,
+                                      full_text=notification.popup_text, header=notification.header,
+                                      channels=channels, device_type=IOS_DEVICE)
+
+            android_push.send()
+            ios_push.send()
+
 
             notification.closed()
 
