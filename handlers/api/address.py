@@ -1,6 +1,7 @@
 import json
 import logging
-from base import ApiHandler
+
+from handlers.api.base import ApiHandler
 from methods.orders.validation.checks import check_address
 from methods.geocoder import get_houses_by_address, get_streets_or_houses_by_address
 from methods.orders.validation.precheck import validate_address

@@ -1,4 +1,5 @@
 from webapp2_extras import security
+
 from models import CompanyUser, Admin
 from models.user import Courier
 
@@ -18,6 +19,7 @@ def user_required(handler):  # it is for web barista (not used)
             self.redirect("/admin/login")
         else:
             return handler(self, *args, **kwargs)
+
     return check_user
 
 
@@ -27,6 +29,7 @@ def api_admin_required(handler):  # it is for api barista
             self.abort(401)
         else:
             return handler(self, *args, **kwargs)
+
     return check_user
 
 
@@ -36,6 +39,7 @@ def api_courier_required(handler):  # it is for api courier
             self.abort(401)
         else:
             return handler(self, *args, **kwargs)
+
     return check_user
 
 
@@ -53,6 +57,7 @@ class check_rights_decorator(object):
                 handler.abort(403)
             else:
                 return handler_method(handler, *args, **kwargs)
+
         return check_user
 
 
@@ -75,6 +80,7 @@ news_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_NEWS,))
 pushes_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_PUSHES,))
 alfa_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_ALFA,))
 user_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_USERS,))
+config_rights_required = check_rights_decorator((CompanyUser.RIGHTS_BIT_CONFIG,))
 
 
 def write_access_required(handler):
@@ -83,4 +89,5 @@ def write_access_required(handler):
             self.abort(403)
         else:
             return handler(self, *args, **kwargs)
+
     return check_user

@@ -1,8 +1,11 @@
 # coding=utf-8
+import logging
 from google.appengine.ext import ndb
+
 from methods.rendering import timestamp
 from models.client import Client
 from models.config.inactive_clients import CONDITIONS
+from methods.unique import VERSION, get_temporary_user
 
 COMPANY_CHANNEL = 'company'
 ORDER_CHANNEL = 'order'
@@ -17,6 +20,7 @@ def get_channels(namespace):
         CLIENT_CHANNEL: '%s_client_%s' % (namespace, '%s'),
         VENUE_CHANNEL: '%s_venue_%s' % (namespace, '%s')
     }
+
 
 STATUS_CREATED = 0
 STATUS_ACTIVE = 1
@@ -44,6 +48,7 @@ class Notification(ndb.Model):
     popup_text = ndb.StringProperty()
     header = ndb.StringProperty()  # it is used for Android
     channels = ndb.LocalStructuredProperty(Channel, repeated=True)
+    should_popup = ndb.BooleanProperty(default=False)
 
     def closed(self):
         self.status = STATUS_DONE
@@ -69,9 +74,12 @@ class ClientPushSending(ndb.Model):
 class News(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     start = ndb.DateTimeProperty(required=True)
+    title = ndb.StringProperty()
     text = ndb.StringProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(choices=NOTIFICATION_STATUS_CHOICES, default=STATUS_CREATED)
     image_url = ndb.StringProperty(indexed=False)
+    notification = ndb.StructuredProperty(Notification)
+
 
     def activate(self):
         self.status = STATUS_ACTIVE
@@ -82,12 +90,23 @@ class News(ndb.Model):
         self.put()
 
     def dict(self):
-        return {
-            "id": str(self.key.id()),
-            "text": self.text,
-            "start": timestamp(self.start),
-            "image_url": self.image_url if self.image_url else None
-        }
+        tu = get_temporary_user()
+        logging.critical('tu[VERSION] - {}'.format(tu[VERSION]))
+        if tu[VERSION] <= 5:
+            return {
+                "id": str(self.key.id()),
+                "text": "{0}\n{1}".format(self.title, self.text),
+                "start": timestamp(self.start),
+                "image_url": self.image_url if self.image_url else None
+            }
+        else:
+            return {
+                "id": str(self.key.id()),
+                "title": self.title,
+                "text": self.text,
+                "start": timestamp(self.start),
+                "image_url": self.image_url if self.image_url else None
+            }
 
 
 class Deposit(ndb.Model):

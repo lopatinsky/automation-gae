@@ -4,47 +4,53 @@
     <title>Новые пуши</title>
 </head>
 <body>
-    {% include '/company/header.html' %}
-    <form method="POST">
+{% include '/company/header.html' %}
+<form method="POST">
+    <label>
+        Текст:
+        <input type="text" name="text">
+    </label><br>
+    <label>
+        Заголовок:
+        <input type="text" name="header">
+    </label><br>
+    <label>
+        Полный текст:
+        <input type="text" name="full_text">
+    </label><br>
+    <label>
+        Время отправки (в utc):
+        <input type="datetime-local" name="start">
+    </label>
+    <label>
+        <input type="checkbox" name="send_now"/>
+        Отправить прямо сейчас
+    </label><br>
+
+    <label>
+        <input type="checkbox" name="should_popup">
+        Should popup
+    </label><br>
+
+    Каналы: <br>
+    <label>
+        <input type="checkbox" name="company">
+        Всем
+    </label><br>
+    {% for venue in venues %}
         <label>
-            Текст:
-            <input type="text" name="text">
+            <input type="checkbox" name="{{ venue.key.id() }}">
+            Кто заказывал в {{ venue.title }}
         </label><br>
-        <label>
-            Заголовок:
-            <input type="text" name="header">
-        </label><br>
-        <label>
-            Полный текст:
-            <input type="text" name="full_text">
-        </label><br>
-        <label>
-            Время отправки (в utc):
-            <input type="datetime-local" name="start">
-        </label>
-        <label>
-            <input type="checkbox" name="send_now"/>
-            Отправить прямо сейчас
-        </label><br>
-        Каналы: <br>
-        <label>
-            <input type="checkbox" name="company">
-            Всем
-        </label><br>
-        {% for venue in venues %}
-            <label>
-                <input type="checkbox" name="{{ venue.key.id() }}">
-                Кто заказывал в {{ venue.title }}
-            </label><br>
-        {% endfor %}
-        <br>
-        <input type="submit">
-        <a href="/company/notifications/pushes/list">Назад</a>
-    </form>
-    {% if error %}
-        <p>
-            {{ error }}
-        </p>
-    {% endif %}
+    {% endfor %}
+    <br>
+    <input type="submit">
+    <a href="/company/notifications/pushes/list">Назад</a>
+</form>
+{% if error %}
+    <p>
+        {{ error }}
+    </p>
+{% endif %}
 </body>
 </html>

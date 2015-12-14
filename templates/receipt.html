@@ -6,103 +6,109 @@
 
 <body>
 
-    <header>
-        <table bgcolor="#76D9E7" style="color:#FFFFFF; width:100%; padding:10px 20px;">
-            <tr>
-                <td>
-                    <h1>
-                        Даблби
-                        <small>Кофе и чай</small>
-                    </h1>
-                </td>
-                <td align="right">
-                    <h1>
-                        <small>№ {{ order_number }}</small>
-                    </h1>
-                </td>
-            </tr>
-        </table>
-    </header>
-
-    <div style="display:table; width:100%; height:75%;">
-
-        <div style="width:60%; vertical-align:top; display:table-cell; padding:10px 20px;">
-
-            <h1><b>Благодарим Вас за заказ</b></h1>
-            <p style="font-size:16px">Заказ № <b>{{ order_number }}</b> был сделан {{ date }} в <b>{{ time }}</b></p>
-
-            <hr>
-            <table style="width:100%; font-size:14px">
-                {% for good in goods %}
-                    <tr>
-                        <td>{{ '%s x%s' % (good['title'], good['quantity']) }}</td>
-                        <td style="text-align: right">{{ '%sp.' % (good['quantity']|int * good['price']|int) }}</td>
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="2">
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <h3>Итого к оплате&nbsp;&nbsp;&nbsp;</h3>
-                    </td>
-                    <td>
-                    </td>
-                </tr>
-                <tr style="font-size:16px">
-                    <td>
-                        <div style="display:table">
-                            <div style="vertical-align:middle; display:table-cell; width:20%;">
-                                {% if mastercard %}
-                                    <img src="http://p.empatika-doubleb.appspot.com/static/mastercard.png" width="64" height="39">
-                                {% else %}
-                                    <img src="http://p.empatika-doubleb.appspot.com/static/visa.png" width="69" height="23">
-                                {% endif %}
-                            </div>
-                            <div style="vertical-align:middle; display:table-cell; width:80%;">
-                                <h3>{{ pan if pan else '' }}</h3>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="text-align:right; vertical-align:middle;">
-                        <div><b>{{ '%sp.' % total['sum'] }}</b></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div style="width:40%; vertical-align:top; display:table-cell; padding:10px 20px;">
-            <table style="width:100%; border:1px groove #98EAFF;" align="center" valign="center">
-                <tr>
-                    <td><img src="http://p.empatika-doubleb.appspot.com/static/map.png" width="46" height="54"></td>
-                    <td>
-                        <p><b>Кафе Даблби</b></p>
-                        <p>{{ address }}</p>
-                        <p>{{ phone if phone else '' }}</p>
-                    </td>
-                </tr>
-                <tr><td colspan="2" style="text-align:center">{{ manager }}</td></tr>
-            </table>
-        </div>
-
-    </div>
-
-    <table bgcolor="#CCCCB2" style="width:100%; padding: 5px; background:#CCCCB2">
+<header>
+    <table bgcolor="#76D9E7" style="color:#FFFFFF; width:100%; padding:10px 20px;">
         <tr>
             <td>
-                <div>
-                    {% if owner %}
-                        <h3>{{ owner }}</h3>
-                    {% endif %}
-                    {% if inn %}
-                        <h3>ИНН {{ inn }}</h3>
-                    {% endif %}
-                </div>
+                <h1>
+                    Даблби
+                    <small>Кофе и чай</small>
+                </h1>
+            </td>
+            <td align="right">
+                <h1>
+                    <small>№ {{ order_number }}</small>
+                </h1>
             </td>
         </tr>
     </table>
+</header>
+
+<div style="display:table; width:100%; height:75%;">
+
+    <div style="width:60%; vertical-align:top; display:table-cell; padding:10px 20px;">
+
+        <h1><b>Благодарим Вас за заказ</b></h1>
+
+        <p style="font-size:16px">Заказ № <b>{{ order_number }}</b> был сделан {{ date }} в <b>{{ time }}</b></p>
+
+        <hr>
+        <table style="width:100%; font-size:14px">
+            {% for good in goods %}
+                <tr>
+                    <td>{{ '%s x%s' % (good['title'], good['quantity']) }}</td>
+                    <td style="text-align: right">{{ '%sp.' % (good['quantity']|int * good['price']|int) }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2">
+                    <hr>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <h3>Итого к оплате&nbsp;&nbsp;&nbsp;</h3>
+                </td>
+                <td>
+                </td>
+            </tr>
+            <tr style="font-size:16px">
+                <td>
+                    <div style="display:table">
+                        <div style="vertical-align:middle; display:table-cell; width:20%;">
+                            {% if mastercard %}
+                                <img src="http://p.empatika-doubleb.appspot.com/static/mastercard.png" width="64"
+                                     height="39">
+                            {% else %}
+                                <img src="http://p.empatika-doubleb.appspot.com/static/visa.png" width="69" height="23">
+                            {% endif %}
+                        </div>
+                        <div style="vertical-align:middle; display:table-cell; width:80%;">
+                            <h3>{{ pan if pan else '' }}</h3>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align:right; vertical-align:middle;">
+                    <div><b>{{ '%sp.' % total['sum'] }}</b></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="width:40%; vertical-align:top; display:table-cell; padding:10px 20px;">
+        <table style="width:100%; border:1px groove #98EAFF;" align="center" valign="center">
+            <tr>
+                <td><img src="http://p.empatika-doubleb.appspot.com/static/map.png" width="46" height="54"></td>
+                <td>
+                    <p><b>Кафе Даблби</b></p>
+
+                    <p>{{ address }}</p>
+
+                    <p>{{ phone if phone else '' }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:center">{{ manager }}</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<table bgcolor="#CCCCB2" style="width:100%; padding: 5px; background:#CCCCB2">
+    <tr>
+        <td>
+            <div>
+                {% if owner %}
+                    <h3>{{ owner }}</h3>
+                {% endif %}
+                {% if inn %}
+                    <h3>ИНН {{ inn }}</h3>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

@@ -1,7 +1,9 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 from webapp2_extras.appengine.auth import models
+
 from google.appengine.ext.ndb import polymodel
+
 from models.specials import Deposit
 from models.venue import Venue
 
@@ -44,11 +46,12 @@ class CompanyUser(User):
     RIGHTS_BIT_PUSHES = 14
     RIGHTS_BIT_ALFA = 15
     RIGHTS_BIT_USERS = 16
+    RIGHTS_BIT_CONFIG = 17
 
     ALL_RIGHTS_BITS = (RIGHTS_BIT_REPORT, RIGHTS_BIT_VENUE, RIGHTS_BIT_MENU, RIGHTS_BIT_PAYMENT_TYPE, RIGHTS_BIT_PROMOS,
                        RIGHTS_BIT_BARISTA, RIGHTS_BIT_PROMO_CODE, RIGHTS_BIT_COMPANY_INFO, RIGHTS_BIT_LEGAL,
                        RIGHTS_BIT_DELIVERY, RIGHTS_BIT_DELIVERY_TYPES, RIGHTS_BIT_ZONES, RIGHTS_BIT_NEWS,
-                       RIGHTS_BIT_PUSHES, RIGHTS_BIT_ALFA, RIGHTS_BIT_USERS)
+                       RIGHTS_BIT_PUSHES, RIGHTS_BIT_ALFA, RIGHTS_BIT_USERS, RIGHTS_BIT_CONFIG)
 
     # these are commonly used combined masks
     # 63 bits for admins -- so we can put this into datastore and freely add new rights
@@ -69,7 +72,6 @@ class CompanyUser(User):
 
 
 class Admin(User):
-
     ROLE = 'admin'
 
     venue = ndb.KeyProperty(Venue, indexed=True)  # None for global admin, actual venue for barista
@@ -77,12 +79,14 @@ class Admin(User):
 
     def query_orders(self, *args, **kwargs):
         from models.order import Order
+
         if self.venue:
             return Order.query(Order.venue_id == str(self.venue.id()), *args, **kwargs)
         return Order.query(*args, **kwargs)
 
     def order_by_id(self, order_id):
         from models.order import Order
+
         order = Order.get_by_id(order_id)
         if not order:
             return None
@@ -123,10 +127,12 @@ class Courier(User):
 
     def query_orders(self, *args, **kwargs):
         from models.order import Order
+
         return Order.query(Order.courier == self.key, *args, **kwargs)
 
     def order_by_id(self, order_id):
         from models.order import Order
+
         order = Order.get_by_id(order_id)
         if not order:
             return None
@@ -181,7 +187,6 @@ class AdminStatus(UserStatus):
 
 
 class CourierStatus(UserStatus):
-
     @classmethod
     def create(cls, uid, token, location=None, readonly=None):
         key_name = cls._make_key_name(uid, token)

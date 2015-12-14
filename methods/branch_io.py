@@ -7,7 +7,6 @@ from google.appengine.api import urlfetch
 BASE_URL = 'https://api.branch.io'
 BRANCH_API_KEY = '155014419024204427'
 
-
 VK = 0
 FACEBOOK = 1
 SMS = 2
@@ -47,6 +46,7 @@ FEATURE_MAP = {
 
 def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
     from models.config.config import Config
+
     config = Config.get()
     params = {
         'app_id': BRANCH_API_KEY,
@@ -74,3 +74,22 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
                               headers={'Content-Type': 'application/json'}).content
     logging.info(response)
     return json.loads(response)['url']
+
+
+def create_app_key(user_id, app_name, dev_name, dev_email):
+    params = {
+        'user_id': user_id,
+        'app_name': app_name,
+        'dev_name': dev_name,
+        'dev_email': dev_email
+    }
+    url = '%s%s' % (BASE_URL, '/v1/app')
+    response = urlfetch.fetch(url=url, payload=json.dumps(params), method=urlfetch.POST,
+                              headers={'Content-Type': 'application/json'}).content
+
+    logging.info(response)
+
+    branch_key = json.loads(response)['branch_key']
+    branch_secret = json.loads(response)['branch_secret']
+
+    return branch_key, branch_secret

@@ -8,6 +8,7 @@ from handlers import wizard, web_admin, ext_api
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
+from handlers.web_admin.web.company.config_setup import *
 from handlers.api.user import courier
 import handlers.web_admin.web.company.delivery as company_delivery
 import handlers.web_admin.web.company.excel as company_excel
@@ -15,7 +16,6 @@ from handlers.api.proxy import unified_app
 from handlers import tasks
 from handlers import email_api
 from handlers.api import mivako
-
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -26,7 +26,6 @@ webapp2_config = {
         "user_model": "models.User"
     }
 }
-
 
 app = WSGIApplication([
     PathPrefixRoute('/email', [
@@ -239,6 +238,12 @@ app = WSGIApplication([
         Route('/choose', company_admin.ChooseNamespaceHandler, 'company_choose_namespace'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
+        PathPrefixRoute('/config_settings', [
+            Route('', ConfigMainHandler),
+            Route('/invitation_module_setup', SetInvitationModuleHandler),
+            Route('/create_branch_api_key', CreateBranchApiKeyHandler)
+        ]),
+
         PathPrefixRoute('/venues', [
             Route('', company_admin.EnableVenuesHandler),
             Route('/<venue_id:\d+>', company_admin.EditVenueHandler),
@@ -434,6 +439,7 @@ app = WSGIApplication([
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
             Route('/review', tasks.SendPushReviewHandler),
+            Route('/news', tasks.StartNewsPushesHandler)
         ]),
     ]),
 
