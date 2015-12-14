@@ -91,7 +91,6 @@ class News(ndb.Model):
 
     def dict(self):
         tu = get_temporary_user()
-        logging.critical('tu[VERSION] - {}'.format(tu[VERSION]))
         if tu[VERSION] <= 5:
             return {
                 "id": str(self.key.id()),

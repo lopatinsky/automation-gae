@@ -173,7 +173,6 @@ class BaseSimplePush(Push):
             super(BaseSimplePush, self).__init__(text, device_type)
             self.channels = channels
             self.device_type = device_type
-            logging.critical('hello')
 
         self.should_popup = should_popup
         self.header = header
