@@ -66,7 +66,22 @@ class AddNewsHandler(CompanyBaseHandler):
             if start < datetime.utcnow():
                 return error(u'Введите время больше текущего в utc')
 
-        news = News(text=text, title=title, image_url=image_url, start=start)
+        notification = None
+        if self.request.get('send_push'):
+            channels = []
+            company_namespace = namespace_manager.get_namespace()
+
+            company_channel = get_channels(company_namespace)[COMPANY_CHANNEL]
+            channels.append(Channel(name=u'Всем', channel=company_channel))
+            for venue in Venue.query(Venue.active == True).fetch():
+                if self.request.get(str(venue.key.id())):
+                    venue_channel = get_channels(company_namespace)[VENUE_CHANNEL]
+                    channels.append(Channel(name=venue.title, channel=venue_channel))
+            notification = Notification(start=start, text=text, header=title, channels=channels,
+                                    should_popup=False)
+
+        news = News(text=text, title=title, image_url=image_url, start=start, notification=notification)
+
         news.put()
         new_url = get_new_image_url('News', news.key.id(), url=image_url)
         if new_url:
@@ -165,31 +180,8 @@ class AddPushesHandler(CompanyBaseHandler):
         taskqueue.add(url='/task/pushes/start', method='POST', eta=start, params={
             'notification_id': notification.key.id()
         })
+
         self.redirect('/company/notifications/pushes/list')
-
-
-class SendOrderPush(CompanyBaseHandler):
-    def get(self):
-        pass
-
-    def post(self):
-        pass
-
-
-class SendSimplePush(CompanyBaseHandler):
-    def get(self):
-        pass
-
-    def post(self):
-        pass
-
-
-class SendReviewPush(CompanyBaseHandler):
-    def get(self):
-        pass
-
-    def post(self):
-        pass
 
 
 

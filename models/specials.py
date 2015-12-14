@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 from google.appengine.ext import ndb
 
 from methods.rendering import timestamp
@@ -77,6 +78,8 @@ class News(ndb.Model):
     text = ndb.StringProperty(required=True, indexed=False)
     status = ndb.IntegerProperty(choices=NOTIFICATION_STATUS_CHOICES, default=STATUS_CREATED)
     image_url = ndb.StringProperty(indexed=False)
+    notification = ndb.StructuredProperty(Notification)
+
 
     def activate(self):
         self.status = STATUS_ACTIVE
@@ -88,6 +91,7 @@ class News(ndb.Model):
 
     def dict(self):
         tu = get_temporary_user()
+        logging.critical('tu[VERSION] - {}'.format(tu[VERSION]))
         if tu[VERSION] <= 5:
             return {
                 "id": str(self.key.id()),

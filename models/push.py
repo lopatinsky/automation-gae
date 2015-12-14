@@ -2,7 +2,6 @@
 import datetime
 import json
 import logging
-from abc import ABCMeta
 
 from google.appengine.api import urlfetch
 
@@ -25,8 +24,6 @@ PUSH_TYPES = (ORDER_TYPE, SIMPLE_TYPE, REVIEW_TYPE, NEWS_TYPE)
 class Push(object):
     """Base abstract class for notifications"""
 
-    __metaclass__ = ABCMeta
-
     def __init__(self, text, device_type):
         """
         Initializer for Push class. Keeps two base parameters text and device_type and sets
@@ -36,29 +33,13 @@ class Push(object):
         """
         self.text = text
         self.device_type = device_type
-        self.channels = None
         self.should_popup = None
         self.push_type = None
         self.header = None
-
-    def _make_push_data(self):
-        if self.device_type == IOS_DEVICE:
-            self.data = {
-                'alert': self.text,
-                'sound': 'push.caf',
-                'should_popup': self.should_popup,
-                'type': self.push_type
-            }
-        elif self.device_type == ANDROID_DEVICE:
-            self.data = {
-                'text': self.text,
-                'head': self.header,
-                'action': 'com.empatika.doubleb.push',
-                'should_popup': self.should_popup,
-                'type': self.push_type
-            }
+        self.channels = None
 
     def _send_push(self):
+
         if not self.data or self.device_type not in DEVICE_CHOICES:
             logging.warning(u'Невозможно послать уведомление, data=%s, device_type=%s' % (self.data, self.device_type))
             return
@@ -73,6 +54,7 @@ class Push(object):
             'X-Parse-Application-Id': config.PARSE_APP_API_KEY,
             'X-Parse-REST-API-Key': config.PARSE_REST_API_KEY
         }
+
         try:
             result = json.loads(urlfetch.fetch('https://api.parse.com/1/push',
                                                payload=json.dumps(payload),
@@ -93,8 +75,43 @@ class Push(object):
             result = None
         return result
 
+    @property
+    def data(self):
+        if self.device_type == IOS_DEVICE:
+            return {
+                'alert': self.text,
+                'sound': 'push.caf',
+                'should_popup': self.should_popup,
+                'type': self.push_type
+            }
+        elif self.device_type == ANDROID_DEVICE:
+            return {
+                'text': self.text,
+                'head': self.header,
+                'action': 'com.empatika.doubleb.push',
+                'should_popup': self.should_popup,
+                'type': self.push_type
+            }
 
-class OrderPush(object, Push):
+            # def _make_push_data(self):
+            #     if self.device_type == IOS_DEVICE:
+            #         self.data = {
+            #             'alert': self.text,
+            #             'sound': 'push.caf',
+            #             'should_popup': self.should_popup,
+            #             'type': self.push_type
+            #         }
+            #     elif self.device_type == ANDROID_DEVICE:
+            #         self.data = {
+            #             'text': self.text,
+            #             'head': self.header,
+            #             'action': 'com.empatika.doubleb.push',
+            #             'should_popup': self.should_popup,
+            #             'type': self.push_type
+            #         }
+
+
+class OrderPush(Push):
     """Class for notification that are displayed after user have ordered something
     """
 
@@ -111,21 +128,22 @@ class OrderPush(object, Push):
         self.push_type = ORDER_TYPE
         self.header = u'Заказ %s' % self.order.key.id()
 
-    def _make_push_data(self):
-        """Creates dictionary data of notification"""
-        self.data = super(OrderPush, self)._make_push_data()
-        if self.data:
-            self.data.update({
+    @property
+    def data(self):
+        _data = super(OrderPush, self).data
+
+        if _data:
+            _data.update({
                 'order_id': str(self.order.key.id()),
                 'order_status': int(self.order.status)
             })
+        return _data
 
     def send(self, namespace, new_time=None, silent=False):
         """Sends notification to selected namespaces
         :param new_time: optional param to set time to send notification. If not specified sets to None
         :param silent
         """
-        self._make_push_data()
         if new_time:
             self.data['timestamp'] = timestamp(new_time)
             self.data['time_str'] = self.order.delivery_time_str
@@ -138,59 +156,66 @@ class OrderPush(object, Push):
         return super(OrderPush, self)._send_push()
 
 
-class BaseSimplePush(object, Push):
-    __metaclass__ = ABCMeta
-
+class BaseSimplePush(Push):
     def __init__(self, text, should_popup, header,
                  client=None, namespace=None, channels=None, device_type=None):
 
-        if client and namespace:
+        logging.debug("client: {}, namespace: {}, channels: {}, device_type: {}"
+                      .format(client, namespace, channels, device_type))
+
+        if client is not None and namespace is not None:
             device_type = client.device_type
             client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
             self.channels = [client_channel]
             super(BaseSimplePush, self).__init__(text, device_type)
-        elif channels and device_type:
+
+        if channels is not None and device_type is not None:
+            super(BaseSimplePush, self).__init__(text, device_type)
             self.channels = channels
             self.device_type = device_type
-        else:
-            raise Exception('You must specify either client and namespace or channels and device_type')
+            logging.critical('hello')
+
         self.should_popup = should_popup
         self.header = header
         self.push_type = None
 
-    def _make_push_data(self):
-        super(BaseSimplePush, self)._make_push_data()
+    @property
+    def data(self):
+        return super(BaseSimplePush, self).data
 
     def send(self):
-        return super(BaseSimplePush, self)._send_push()
+        return self._send_push()
 
 
-class SimplePush(object, BaseSimplePush):
+class SimplePush(BaseSimplePush):
     """Simple push class for customizable notifications with custom text, title and full text
     Notification can be created either to send some client or to custom channels
     """
 
     def __init__(self, text, should_popup, full_text, header,
                  client=None, namespace=None, channels=None, device_type=None):
-        super(SimplePush, self).__init__(text, should_popup, header, client, namespace, channels, device_type)
+        super(SimplePush, self).__init__(text=text, should_popup=should_popup, header=header,
+                                         client=client, namespace=namespace,
+                                         channels=channels, device_type=device_type)
 
         self.full_text = full_text
+        self.push_type = SIMPLE_TYPE
 
-    def _make_push_data(self):
-        super(SimplePush, self)._make_push_data()
-        if self.data:
-            self.data.update({
+    @property
+    def data(self):
+        _data = super(SimplePush, self).data
+        if _data:
+            _data.update({
                 'full_text': self.full_text
             })
-
-    def send(self):
-        return super(SimplePush, self).send()
+        return _data
 
 
-class ReviewPush(object, Push):
+class ReviewPush(Push):
     def __init__(self, order):
         client = Client.get(order.client_id)
         device_type = client.device_type
+        self.order = order
         text = u'Оставьте отзыв о вашем заказе'
         super(ReviewPush, self).__init__(text, device_type)
         self.header = u'Оцените заказ'
@@ -198,34 +223,38 @@ class ReviewPush(object, Push):
         client_channel = get_channels(order.key.namespace())[CLIENT_CHANNEL] % client.key.id()
         self.channels = [client_channel]
 
-    def _make_push_data(self):
-        super(ReviewPush, self)._make_push_data()
-        if self.data:
-            self.data.update({
+    @property
+    def data(self):
+        _data = super(ReviewPush, self).data
+        if _data:
+            _data.update({
                 'review': {
                     'order_id': str(self.order.key.id())
                 }
             })
+        return _data
 
     def send(self):
         return super(ReviewPush, self)._send_push()
 
 
-class NewsPush(object, BaseSimplePush):
-    def __init__(self, news, client, namespace, channels, device_type):
+class NewsPush(BaseSimplePush):
+    def __init__(self, news, client=None, namespace=None, channels=None, device_type=None):
         news_dict = news.dict()
-        text = news_dict['text']
-        head = news_dict['title']
-        self.news = news
+        text = news.text
+        head = news.title
 
         super(NewsPush, self).__init__(text, False, head, client, namespace, channels, device_type)
 
-    def _make_push_data(self):
+        self.news = news
+        self.push_type = NEWS_TYPE
+
+    @property
+    def data(self):
+        _data = super(NewsPush, self).data
         news_dict = self.news.dict()
-        if self.data:
-            self.data.update({
+        if _data:
+            _data.update({
                 'news_data': news_dict
             })
-
-    def send(self):
-        return super(NewsPush, self).send()
+        return _data
