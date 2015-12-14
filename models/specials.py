@@ -89,26 +89,32 @@ class News(ndb.Model):
         self.status = STATUS_CANCELLED
         self.put()
 
+    def dict_with_title(self):
+        return {
+            "id": str(self.key.id()),
+            "title": self.title,
+            "text": self.text,
+            "start": timestamp(self.start),
+            "image_url": self.image_url if self.image_url else None
+        }
+
+    def dict_old(self):
+        text = self.text
+        if self.title:
+            text = u"{0}\n{1}".format(self.title, self.text)
+        return {
+            "id": str(self.key.id()),
+            "text": text,
+            "start": timestamp(self.start),
+            "image_url": self.image_url if self.image_url else None
+        }
+
     def dict(self):
         tu = get_temporary_user()
         if tu[VERSION] <= 5:
-            text = self.text
-            if self.title:
-                text = u"{0}\n{1}".format(self.title, self.text)
-            return {
-                "id": str(self.key.id()),
-                "text": text,
-                "start": timestamp(self.start),
-                "image_url": self.image_url if self.image_url else None
-            }
+            return self.dict_old()
         else:
-            return {
-                "id": str(self.key.id()),
-                "title": self.title,
-                "text": self.text,
-                "start": timestamp(self.start),
-                "image_url": self.image_url if self.image_url else None
-            }
+            return self.dict_with_title()
 
 
 class Deposit(ndb.Model):

@@ -239,7 +239,6 @@ class ReviewPush(Push):
 
 class NewsPush(BaseSimplePush):
     def __init__(self, news, client=None, namespace=None, channels=None, device_type=None):
-        news_dict = news.dict()
         text = news.text
         head = news.title
 
@@ -251,8 +250,8 @@ class NewsPush(BaseSimplePush):
     @property
     def data(self):
         _data = super(NewsPush, self).data
-        news_dict = self.news.dict()
         if _data:
+            news_dict = self.news.dict_with_title()
             _data.update({
                 'news_data': news_dict
             })
