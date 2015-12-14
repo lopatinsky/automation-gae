@@ -58,6 +58,7 @@ class Order {
         this.comment = obj.comment;
         this.returnComment = obj.return_comment;
         this.address = obj.address ? obj.address.formatted_address : null;
+        this.extraData = obj.extra_data;
     }
 
     static _formatPhone(str) {

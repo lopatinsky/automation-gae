@@ -25,7 +25,7 @@ const OrderInfo = React.createClass({
         </tr>;
     },
     _renderExtraData() {
-        const extraData = this.props.order.client.extra_data;
+        const extraData = [...this.props.order.client.extra_data, ...this.props.order.extraData];
         if (!extraData.length) {
             return null;
         }

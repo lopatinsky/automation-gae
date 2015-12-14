@@ -139,7 +139,9 @@ class OrderHandler(ApiHandler):
                 extra_fields = json.loads(self.request.get('extra_order_field'))
             except:
                 pass
-        set_extra_order_info(self.order, extra_fields)
+        num_people = order_json.get('num_people')
+        cash_change = order_json.get('cash_change')
+        set_extra_order_info(self.order, extra_fields, num_people, cash_change)
 
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")

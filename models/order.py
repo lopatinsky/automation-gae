@@ -289,6 +289,32 @@ class Order(ndb.Model):
             "comment": self.get_comment(client, extra_fields=extra_fields_in_comment),
             "return_comment": self.return_comment
         })
+        if not extra_fields_in_comment:
+            from models.config.config import config
+            from methods.rendering import latinize
+            extra = []
+            if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+                for field in config.ORDER_MODULE.extra_fields:
+                    key = latinize(field.title)
+                    value = self.extra_data and self.extra_data.get(key)
+                    extra.append({
+                        "field": key,
+                        "title": field.title,
+                        "value": value
+                    })
+                if config.ORDER_MODULE.enable_number_of_people:
+                    extra.append({
+                        "field": "num_people",
+                        "title": u"Количество персон",
+                        "value": self.extra_data.get('num_people')
+                    })
+                if config.ORDER_MODULE.enable_change:
+                    extra.append({
+                        "field": "cash_change",
+                        "title": u"Сдача с",
+                        "value": self.extra_data.get('cash_change')
+                    })
+            dct["extra_data"] = extra
         return dct
 
     def get_comment(self, client, extra_fields):
@@ -300,9 +326,17 @@ class Order(ndb.Model):
                 for field in config.CLIENT_MODULE.extra_fields:
                     value = client.extra_data and client.extra_data.get(latinize(field.title))
                     comment += "; %s: %s" % (field.title, value)
-            if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
+            if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE and self.extra_data:
+                if config.ORDER_MODULE.enable_number_of_people:
+                    value = self.extra_data.get('num_people')
+                    if value:
+                        comment += '; Количество персон: %s' % value
+                if config.ORDER_MODULE.enable_change:
+                    value = self.extra_data.get('cash_change')
+                    if value:
+                        comment += '; Нужна сдача с %s' % value
                 for field in config.ORDER_MODULE.extra_fields:
-                    value = self.extra_data and self.extra_data.get(latinize(field.title))
+                    value = self.extra_data.get(latinize(field.title))
                     if value:
                         comment += "; %s: %s" % (field.title, value)
         return comment

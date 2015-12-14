@@ -46,14 +46,20 @@ def get_order_id(order_json):
         return None, None
 
 
-def set_extra_order_info(order, extra_info):
+def set_extra_order_info(order, extra_info, num_people, cash_change):
     config = Config.get()
     extra_json = {}
     if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
         for field in config.ORDER_MODULE.extra_fields:
+            group_key = latinize(field.group_title)
             field_key = latinize(field.title)
-            value = extra_info.get(field_key) if extra_info else None
+            group_dict = extra_info.get(group_key)
+            value = group_dict.get(field_key) if group_dict else None
             extra_json[field_key] = value
+        if config.ORDER_MODULE.enable_number_of_people:
+            extra_info['num_people'] = num_people
+        if config.ORDER_MODULE.enable_change:
+            extra_info['cash_change'] = cash_change
     order.extra_data = extra_json
 
 
