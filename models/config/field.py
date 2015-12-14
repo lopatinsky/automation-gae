@@ -1,10 +1,11 @@
+from collections import defaultdict
+
 from google.appengine.ext import ndb
 from methods.rendering import latinize
 from models import STATUS_CHOICES, STATUS_AVAILABLE
-from models.config.config import ORDER_INFO_MODULE, CLIENT_INFO_MODULE
+from models.config.config import ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE, CASH_CHANGE_MODULE, CLIENT_INFO_MODULE
 
 __author__ = 'dvpermyakov'
-
 
 STRING = 0
 NUMBER = 1
@@ -70,14 +71,43 @@ class OrderModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
     restrictions = ndb.StructuredProperty(Restriction, repeated=True)
+    enable_number_of_people = ndb.BooleanProperty(default=False)
+    enable_change = ndb.BooleanProperty(default=False)
 
-    def dict(self):
-        return {
-            'type': ORDER_INFO_MODULE,
-            'fields': [{
-                'title': field.title,
-                'field': latinize(field.title),
-                'type': field.type,
-                'restriction': [restriction.dict() for restriction in self.restrictions if restriction.field_title == field.title]
-            } for field in self.extra_fields]
-        }
+    def _main_dict(self):
+        restrictions_dict = defaultdict(list)
+        for restriction in self.restrictions:
+            restrictions_dict[restriction.field_title].append(restriction.dict())
+
+        groups = defaultdict(list)
+        for field in self.extra_fields:
+            dct = field.dict()
+            dct['restrictions'] = restrictions_dict.get(field.title, [])
+            groups[field.group_title].append(dct)
+        if groups:
+            return {
+                'type': ORDER_INFO_MODULE,
+                'groups': [{
+                    'fields': fields,
+                    'group_title': group_title,
+                    'group_field': latinize(group_title)
+                } for group_title, fields in groups.iteritems()]
+            }
+        return None
+
+    def dicts(self):
+        result = []
+
+        main_dict = self._main_dict()
+        if main_dict:
+            result.append(main_dict)
+
+        if self.enable_number_of_people:
+            result.append({
+                'type': NUMBER_OF_PEOPLE_MODULE
+            })
+        if self.enable_change:
+            result.append({
+                'type': CASH_CHANGE_MODULE
+            })
+        return result

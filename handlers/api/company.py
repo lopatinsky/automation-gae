@@ -84,7 +84,7 @@ class CompanyModulesHandler(ApiHandler):
         if config.CLIENT_MODULE and config.CLIENT_MODULE.status:
             modules.append(config.CLIENT_MODULE.dict())
         if config.ORDER_MODULE and config.ORDER_MODULE.status:
-            modules.append(config.ORDER_MODULE.dict())
+            modules.extend(config.ORDER_MODULE.dicts())
         if config.GEO_PUSH_MODULE and config.GEO_PUSH_MODULE.status:
             modules.append(config.GEO_PUSH_MODULE.dict(client))
         if config.MIVAKO_GIFT_MODULE and config.MIVAKO_GIFT_MODULE.status:
