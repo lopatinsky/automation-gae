@@ -92,9 +92,12 @@ class News(ndb.Model):
     def dict(self):
         tu = get_temporary_user()
         if tu[VERSION] <= 5:
+            text = self.text
+            if self.title:
+                text = u"{0}\n{1}".format(self.title, self.text)
             return {
                 "id": str(self.key.id()),
-                "text": "{0}\n{1}".format(self.title, self.text),
+                "text": text,
                 "start": timestamp(self.start),
                 "image_url": self.image_url if self.image_url else None
             }
