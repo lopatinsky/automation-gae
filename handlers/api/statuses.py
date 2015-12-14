@@ -15,13 +15,8 @@ class ClientSettingSuccessHandler(ApiHandler):
 
 
 class StatusHandler(ApiHandler):
-    def post(self):
-        response_json = json.loads(self.request.get('orders'))
-        orders = []
-        for order_id in response_json['orders']:
-            order = Order.get_by_id(int(order_id))
-            if order:
-                orders.append(order)
-        self.render_json({
-            'status': [order.status_dict() for order in orders]
-        })
+    def get(self):
+        order_id = int(self.request.get("order_id"))
+        order = Order.get_by_id(order_id)
+        dct = order.dict() if order else None
+        self.render_json({"order": dct})
