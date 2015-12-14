@@ -3,7 +3,6 @@ from models import News
 from models.client import ANDROID_DEVICE, IOS_DEVICE
 from models.push import NewsPush
 from models.specials import STATUS_CREATED, STATUS_ACTIVE
-from pushes import StartNewsPushesHandler
 
 __author__ = 'dvpermyakov'
 
