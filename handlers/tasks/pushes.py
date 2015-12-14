@@ -35,25 +35,6 @@ class StartPushesHandler(RequestHandler):
             notification.closed()
 
 
-class StartNewsPushesHandler(RequestHandler):
-    def post(self):
-        notification_id = self.request.get_range('notification_id')
-        news = self.request.get('news')
-        notification = Notification.get_by_id(notification_id)
-        if not notification:
-            self.abort(400)
-        if notification.status == STATUS_CREATED:
-            channels = []
-            for channel in notification.channels:
-                channels.append(channel.channel)
-
-            android_push = NewsPush(news=news, channels=channels, device_type=ANDROID_DEVICE)
-            ios_push = NewsPush(news=news, channels=channels, device_type=IOS_DEVICE)
-
-            android_push.send()
-            ios_push.send()
-
-
 class SendPushReviewHandler(RequestHandler):
     def post(self):
         review_id = self.request.get_range('review_id')

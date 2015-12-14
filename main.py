@@ -439,7 +439,6 @@ app = WSGIApplication([
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
             Route('/review', tasks.SendPushReviewHandler),
-            Route('/news', tasks.StartNewsPushesHandler)
         ]),
     ]),
 
