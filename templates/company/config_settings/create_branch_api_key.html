@@ -6,12 +6,17 @@
 
 {% if config.BRANCH_API_KEY %}
     Branch API key is {{ config.BRANCH_API_KEY }} <br>
-    Unfortunately, you can change it only directly from database
+    Branch API secret key is {{ config.BRANCH_SECRET_KEY }}<br>
+    К сожалению, поменять его можно только напрямую из базы данных
 {% else %}
     <form method="post">
 
         <label for="branch_key">Input your branch API key</label><br>
-        <input type="text" name="branch_key" id="branch_key">
+        <input type="text" name="branch_key" id="branch_key"><br>
+
+        <label for="branch_secret">Input your branch secret key</label><br>
+        <input type="text" name="branch_secret" id="branch_secret"><br>
+
 
         <button name="set_key_button" value="key_is_inputed">Save key</button>
         <br>

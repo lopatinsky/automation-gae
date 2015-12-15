@@ -241,7 +241,7 @@ app = WSGIApplication([
         PathPrefixRoute('/config_settings', [
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
-            Route('/create_branch_api_key', CreateBranchApiKeyHandler)
+            Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key')
         ]),
 
         PathPrefixRoute('/venues', [

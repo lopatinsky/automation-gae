@@ -82,6 +82,7 @@ class Config(ndb.Model):
     COMPANY_STATUS = ndb.IntegerProperty(indexed=False, choices=COMPANY_STATUS_CHOICES, default=COMPANY_IN_DEVELOPMENT)
 
     BRANCH_API_KEY = ndb.StringProperty(indexed=False)
+    BRANCH_SECRET_KEY = ndb.StringProperty(indexed=False)
 
     CANCEL_ALLOWED_WITHIN = ndb.IntegerProperty(indexed=False, default=30)  # seconds after creation
     CANCEL_ALLOWED_BEFORE = ndb.IntegerProperty(indexed=False, default=3)  # minutes before delivery_time
@@ -161,11 +162,14 @@ class Config(ndb.Model):
     def SHARE_GIFT_ENABLED(self):
         from models import STATUS_AVAILABLE
 
-        return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE else False
+        return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE \
+                                                                      and config.BRANCH_API_KEY \
+                                                                      and config.BRANCH_SECRET_KEY\
+            else False
 
     @property
     def SHARE_INVITATION_ENABLED(self):
-        return ShareInvitationModule.has_module()
+        return ShareInvitationModule.has_module() and config.BRANCH_API_KEY and config.BRANCH_SECRET_KEY
 
     @property
     def WALLET_ENABLED(self):

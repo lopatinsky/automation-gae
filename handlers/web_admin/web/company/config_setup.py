@@ -1,3 +1,5 @@
+import logging
+
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods import branch_io
 from models.config.share import ShareInvitationModule
@@ -75,19 +77,31 @@ class CreateBranchApiKeyHandler(CompanyBaseHandler):
         conf = config.Config.get()
 
         if button_type == 'key_is_inputed':
-            self.response.write('key_is_inputed')
-            pass
+            branch_key = self.request.get('branch_key')
+            branch_secret = self.request.get('branch_secret')
+            conf.BRANCH_API_KEY = branch_key
+            conf.BRANCH_SECRET_KEY = branch_secret
+            conf.put()
+
         elif button_type == 'key_is_generated':
 
-            user_id = 99126033420124274
+            user_id = '99126033420124274'
             app_name = conf.APP_NAME
-            email = 'team@ru-beacon.ru'
+            email = 'mdburshteyn@gmail.com'
             dev_name = 'ru-beacon'
+
+            logging.debug(u"user_id: {0}, app_name: {1}, dev_name: {2}, dev_email: {3}"
+                          .format(user_id, app_name, dev_name, email))
+
+            """
+            {'secret': u'secret_live_bbKBvZVG0f0JToRUMQIyMT2Xn6z6Ux0G', 'key': u'key_live_ephTZBGrs4LegNtF2COpRmfnrDd2HJvh'}
+            """
             branch_key, branch_secret = branch_io.create_app_key(user_id=user_id,
                                                                  app_name=app_name,
                                                                  dev_name=dev_name,
                                                                  dev_email=email)
-            self.response.write({
-                'key': branch_key,
-                'secret': branch_secret
-            })
+            conf.BRANCH_API_KEY = branch_key
+            conf.BRANCH_SECRET_KEY = branch_secret
+            conf.put()
+
+        self.redirect_to('create_branch_api_key')
