@@ -22,12 +22,10 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
         for venue in Venue.query(Venue.active == True).fetch():
             found = False
             for zone in zones:
-
-                if zone.address:
-                    if zone.address.city == venue.address.city:
-                        if zone.address.street == venue.address.street:
-                            if zone.address.home == venue.address.home:
-                                found = True
+                if zone.address.city == venue.address.city:
+                    if zone.address.street == venue.address.street:
+                        if zone.address.home == venue.address.home:
+                            found = True
 
             if not found:
                 address = venue.address
@@ -45,8 +43,7 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 venue.put()
                 zones.append(zone)
         for zone in zones:
-            if zone.address:
-                zone.address_str = zone.address.str()
+            zone.address_str = zone.address.str()
         self.render('/delivery_settings/delivery_zones.html', zones=zones, ZONE_MAP=DeliveryZone.SEARCH_MAP)
 
     @zones_rights_required
