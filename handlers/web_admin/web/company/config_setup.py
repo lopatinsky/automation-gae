@@ -93,9 +93,6 @@ class CreateBranchApiKeyHandler(CompanyBaseHandler):
             logging.debug(u"user_id: {0}, app_name: {1}, dev_name: {2}, dev_email: {3}"
                           .format(user_id, app_name, dev_name, email))
 
-            """
-            {'secret': u'secret_live_bbKBvZVG0f0JToRUMQIyMT2Xn6z6Ux0G', 'key': u'key_live_ephTZBGrs4LegNtF2COpRmfnrDd2HJvh'}
-            """
             branch_key, branch_secret = branch_io.create_app_key(user_id=user_id,
                                                                  app_name=app_name,
                                                                  dev_name=dev_name,

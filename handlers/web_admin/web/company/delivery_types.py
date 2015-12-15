@@ -1,9 +1,12 @@
 # coding=utf-8
+import logging
 from base import CompanyBaseHandler
 from methods.auth import delivery_types_rights_required
+from methods.rendering import STR_TIME_FORMAT
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DAY_SECONDS, HOUR_SECONDS, DeliverySlot
+from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY_MAP, DELIVERY_TYPES, SELF, IN_CAFE, DELIVERY, PICKUP, DeliveryType
-
+from datetime import datetime
 __author__ = 'dvpermyakov'
 
 
@@ -119,10 +122,104 @@ class DeliverySlotEditHandler(CompanyBaseHandler):
         self.redirect('/company/delivery/slots/list')
 
 
+class DeliverySlotSetupTimeHandler(CompanyBaseHandler):
+    def get(self):
+        venue_id = int(self.request.get('venue_id'))
+
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        delivery_type = int(self.request.get('delivery_type'))
+        delivery_type = venue.get_delivery_type(delivery_type)
+
+        days = []
+        venue_days = {}
+        if delivery_type.schedule_restriction:
+            for day in delivery_type.schedule_restriction.days:
+                venue_days[day.weekday] = {
+                    'start': day.start_str(),
+                    'end': day.end_str()
+                }
+        for day in DaySchedule.DAYS:
+            days.append({
+                'name': DaySchedule.DAY_MAP[day],
+                'value': day,
+                'exist': True if venue_days.get(day) else False,
+                'start': venue_days[day]['start'] if venue_days.get(day) else '00:00',
+                'end': venue_days[day]['end'] if venue_days.get(day) else '00:00'
+            })
+        self.render('/schedule.html', **{
+            'venue_id': venue_id,
+            'delivery_type': delivery_type,
+            'days': days
+        })
+
+    def post(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+
+        if not venue:
+            self.abort(400)
+
+        delivery_type = int(self.request.get('delivery_type'))
+        delivery_type = venue.get_delivery_type(delivery_type)
+
+        logging.critical(delivery_type)
+
+        days = []
+        for day in DaySchedule.DAYS:
+            confirmed = bool(self.request.get(str(day)))
+            logging.critical(confirmed)
+            if confirmed:
+                start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
+                end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
+                days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
+        schedule = Schedule(days=days)
+        logging.critical("new scheldule: {}".format(schedule) )
+        delivery_type.schedule_restriction = schedule
+        delivery_type.put()
+        venue.put()
+        self.redirect_to('delivery_types')
+
+
+# class DeliverySlotSetupTimeHandler(CompanyBaseHandler):
+#     def get(self):
+#         venue_id = int(self.request.get('venue_id'))
+#         venue = Venue.get_by_id(venue_id)
+#
+#         if not venue:
+#             self.abort(400)
+#         delivery_type = int(self.request.get('venue_id'))
+#         delivery_type = venue.get_delivery_type(delivery_type)
+#         day_map = {
+#             1: u'Понедельник',
+#             2: u'Вторник',
+#             3: u'Среда',
+#             4: u'Четверг',
+#             5: u'Пятница',
+#             6: u'Суббота',
+#             7: u'Воскресенье'
+#         }
+#         self.render('/delivery_settings/setup_delivery_time.html', **{
+#             'venue': venue,
+#             'delivery_type': delivery_type,
+#             'days': day_map
+#         })
+#
+#     def post(self):
+#         delivery_type = self.request.get('delivery_type')
+#         schedule_restriction = Schedule()
+#
+#         pass
+#
+#     pass
+
+
 class ChooseSlotsHandler(CompanyBaseHandler):
     @delivery_types_rights_required
     def get(self):
         venue_id = int(self.request.get('venue_id'))
+
         venue = Venue.get_by_id(venue_id)
         if not venue:
             self.abort(400)

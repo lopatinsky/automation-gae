@@ -161,7 +161,7 @@ class BaseSimplePush(Push):
     def __init__(self, text, should_popup, header,
                  client=None, namespace=None, channels=None, device_type=None):
 
-        logging.debug("client: {}, namespace: {}, channels: {}, device_type: {}"
+        logging.debug(u"client: {}, namespace: {}, channels: {}, device_type: {}"
                       .format(client, namespace, channels, device_type))
 
         if client is not None and namespace is not None:

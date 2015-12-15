@@ -25,7 +25,7 @@ from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHan
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler, LegalListHandler, AddLegalListHandler, EditLegalHandler
 from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseSlotsHandler, DeliverySlotListHandler, \
-    DeliverySlotEditHandler
+    DeliverySlotEditHandler, DeliverySlotSetupTimeHandler
 from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, AddPushesHandler, ChangeParseApiKeys, \
     CancelPushHandler, CancelNewsHandler
 from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \

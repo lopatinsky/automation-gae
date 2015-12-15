@@ -1,0 +1,20 @@
+<html>
+<head></head>
+<body>
+{% include '/company/header.html' %}
+<h3>Выберите ограничение по времени доставке для этого слота</h3>
+
+
+<form method="post">
+    {% for day in days %}
+        <label>
+            <input type="checkbox" name="{{ day['value'] }}" {% if day['exist'] %} checked {% endif %}>
+            {{ day['name'] }}
+            <input type="time" name="{{ 'start_%s' % day['value'] }}" value="{{ day['start'] }}">
+            <input type="time" name="{{ 'end_%s' % day['value'] }}" value="{{ day['end'] }}">
+        </label><br>
+    {% endfor %}
+
+</form>
+</body>
+</html>

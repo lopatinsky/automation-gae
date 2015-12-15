@@ -4,36 +4,37 @@
     <title>Выбрать слоты</title>
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
-         $(document).ready(function() {
-            $('#toggle_btn').click(function(e){
+        $(document).ready(function () {
+            $('#toggle_btn').click(function (e) {
                 if ($('.cb').prop('checked')) {
                     $('.cb').prop('checked', false);
                 } else {
                     $('.cb').prop('checked', true);
                 }
             });
-         });
+        });
     </script>
 </head>
 <body>
-    {% include '/company/header.html' %}
-    <h3>Выберите слоты для {{ venue.title }}</h3>
-    <button id="toggle_btn">
-        Выбрать всех
-    </button>
-    <form method="post">
-        <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
-        <input type="text" name="delivery_type" value="{{ delivery_type.delivery_type }}" hidden="">
-        <br>
-        {% for slot in slots %}
-             <label>
-                 <input type="radio" name="group" value="{{ slot.key.id() }}" {% if slot.default %} checked {% endif %}>
-                 <input class="cb" type="checkbox" {% if slot.key in delivery_type.delivery_slots %} checked {% endif %} name={{ 'cb_%s' % slot.key.id() }}>
-                 {{ slot.name }}
-             </label><br>
-        {% endfor %}
-        <label><input type="submit" value="Сохранить"></label>
-        <a href="/company/delivery/types">Назад</a>
-    </form>
+{% include '/company/header.html' %}
+<h3>Выберите слоты для {{ venue.title }}</h3>
+<button id="toggle_btn">
+    Выбрать всех
+</button>
+<form method="post">
+    <input type="text" name="venue_id" value="{{ venue.key.id() }}" hidden>
+    <input type="text" name="delivery_type" value="{{ delivery_type.delivery_type }}" hidden="">
+    <br>
+    {% for slot in slots %}
+        <label>
+            <input type="radio" name="group" value="{{ slot.key.id() }}" {% if slot.default %} checked {% endif %}>
+            <input class="cb" type="checkbox" {% if slot.key in delivery_type.delivery_slots %} checked {% endif %}
+                   name={{ 'cb_%s' % slot.key.id() }}>
+            {{ slot.name }}
+        </label><br>
+    {% endfor %}
+    <label><input type="submit" value="Сохранить"></label>
+    <a href="/company/delivery/types">Назад</a>
+</form>
 </body>
 </html>
