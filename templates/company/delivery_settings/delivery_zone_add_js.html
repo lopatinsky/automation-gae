@@ -1,0 +1,18 @@
+<html>
+<head></head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post" target="_blank">
+    <label for="js_file">
+        Введите url javascript файла, которую вы получили от Yandex API
+    </label><br>
+    <input type="url" id="js_file" name="js_file"><br>
+    <label for="js_text">
+        ИЛИ введите его содержимое
+    </label><br>
+    <textarea rows="4" cols="60" name="js_text" id="js_text"></textarea><br>
+    <input type="submit" value="Загрузить">ы
+</form>
+</body>
+</html>

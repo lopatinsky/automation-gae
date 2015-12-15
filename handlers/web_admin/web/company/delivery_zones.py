@@ -1,6 +1,11 @@
 import json
 import logging
+import re
+
 from google.appengine.ext.ndb import GeoPt
+
+from google.appengine.api import urlfetch
+
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import zones_rights_required
 from methods.geocoder import get_cities_by_coordinates, get_areas_by_coordinates
@@ -17,10 +22,13 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
         for venue in Venue.query(Venue.active == True).fetch():
             found = False
             for zone in zones:
-                if zone.address.city == venue.address.city:
-                    if zone.address.street == venue.address.street:
-                        if zone.address.home == venue.address.home:
-                            found = True
+
+                if zone.address:
+                    if zone.address.city == venue.address.city:
+                        if zone.address.street == venue.address.street:
+                            if zone.address.home == venue.address.home:
+                                found = True
+
             if not found:
                 address = venue.address
                 address.lat = venue.coordinates.lat
@@ -37,7 +45,8 @@ class ListDeliveryZonesHandler(CompanyBaseHandler):
                 venue.put()
                 zones.append(zone)
         for zone in zones:
-            zone.address_str = zone.address.str()
+            if zone.address:
+                zone.address_str = zone.address.str()
         self.render('/delivery_settings/delivery_zones.html', zones=zones, ZONE_MAP=DeliveryZone.SEARCH_MAP)
 
     @zones_rights_required
@@ -57,6 +66,105 @@ class AddingMapDeliveryZoneHandler(CompanyBaseHandler):
     @zones_rights_required
     def get(self):
         self.render('/delivery_settings/map.html')
+
+
+class AddingJSFileDeliveryZoneHandler(CompanyBaseHandler):
+    @zones_rights_required
+    def get(self):
+        self.render('/delivery_settings/delivery_zone_add_js.html')
+
+    @zones_rights_required
+    def post(self):
+
+        js_url = self.request.get('js_file')
+        js_text = self.request.get('js_text')
+
+        if js_text:
+            pass
+        elif js_url:
+            js_text = urlfetch.fetch(js_url).content
+        else:
+            pass
+
+        json_dict = get_json_from_js(js_text)
+        self.response.content_type = 'application/json'
+
+        delivery_maps = json_dict['maps']
+        # self.response.write(json.dumps(delivery_maps))
+
+        for delivery_map in delivery_maps:
+            geo_objects = delivery_map['geoObjects']
+            zones = geo_objects['features']
+            self.response.write(json.dumps(zones))
+            for zone in zones:
+                geometry = zone['geometry']
+                properties = zone['properties']
+
+                zone_name = properties['name']
+                zone_decription = properties['description']
+
+                coordinates_array = geometry['coordinates']
+                delivery_coordinates = coordinates_array[0]
+                ribs_num = len(delivery_coordinates) - 1
+
+                delivery_zone = DeliveryZone()
+                delivery_zone.sequence_number = DeliveryZone.generate_sequence_number()
+                delivery_zone.comment = u'Name: {0}, description: {1}:'.format(zone_name, zone_decription)
+                geo_ribs = []
+
+                for i in range(0, ribs_num - 1):
+                    start_point = delivery_coordinates[i]
+                    end_point = delivery_coordinates[i + 1]
+
+                    geo_rib = GeoRib()
+                    geo_rib.point1 = GeoPt(lat=start_point[1], lon=start_point[0])
+                    geo_rib.point2 = GeoPt(lat=end_point[1], lon=end_point[0])
+                    geo_ribs.append(geo_rib)
+
+                start_point = delivery_coordinates[ribs_num - 1]
+                end_point = delivery_coordinates[0]
+                last_rib = GeoRib()
+                last_rib.point1 = GeoPt(lat=start_point[1], lon=start_point[0])
+                last_rib.point2 = GeoPt(lat=end_point[1], lon=end_point[0])
+
+                delivery_zone.geo_ribs = geo_ribs
+
+                lat, lon = get_mean_coordinate(geo_ribs)
+                candidates = get_cities_by_coordinates(lat, lon)
+                if candidates:
+                    logging.critical('CANDIDATES')
+                    address = candidates[0]['address']
+                    address_obj = Address(**address)
+                    address_obj.lat = lat
+                    address_obj.lon = lon
+                    candidates = get_areas_by_coordinates(lat, lon)
+                    if candidates:
+                        address_obj.area = candidates[0]['address']['area']
+                    delivery_zone.address = address_obj
+                delivery_zone.put()
+
+            self.redirect('/company/delivery/zone/list')
+
+
+def get_mean_coordinate(geo_ribs):
+    lat = 0
+    lon = 0
+    for rib in geo_ribs:
+        lat += rib.point1.lat
+        lat += rib.point2.lat
+        lon += rib.point1.lon
+        lon += rib.point2.lon
+    lat /= len(geo_ribs) * 2
+    lon /= len(geo_ribs) * 2
+
+    logging.critical('lat: %s lon: %s' % (lat, lon))
+
+    return lat, lon
+
+
+def get_json_from_js(js_text):
+    json_text = "{" + re.search(r'\"maps\":\[\{.*\}{2}\]}{2}\]\}', js_text).group()
+    return json.loads(json_text)
 
 
 class AddDeliveryZoneHandler(CompanyBaseHandler):

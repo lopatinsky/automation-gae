@@ -1,5 +1,6 @@
 # coding=utf-8
 import logging
+
 from google.appengine.ext import ndb
 
 from methods.rendering import timestamp
@@ -79,7 +80,6 @@ class News(ndb.Model):
     status = ndb.IntegerProperty(choices=NOTIFICATION_STATUS_CHOICES, default=STATUS_CREATED)
     image_url = ndb.StringProperty(indexed=False)
     notification = ndb.StructuredProperty(Notification)
-
 
     def activate(self):
         self.status = STATUS_ACTIVE
