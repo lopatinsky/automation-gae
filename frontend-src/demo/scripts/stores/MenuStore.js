@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
-import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
 import PersistenceMixin from '../utils/PersistenceMixin';
 
-const MenuStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
+const MenuStore = Object.assign({}, EventEmitter.prototype, PersistenceMixin, {
     _itemCounter: 0,
     _categoryCounter: 0,
     _createItem(title, description, price, imageUrl) {
@@ -42,7 +41,7 @@ const MenuStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
             for (let item of cat.items) {
                 if (item.id == editedItem.id) {
                     found = true;
-                    assign(item, editedItem);
+                    Object.assign(item, editedItem);
                     delete item._new;
                     break;
                 }
@@ -86,7 +85,7 @@ const MenuStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
     finishEditCategory(editedCategory) {
         for (let cat of this.menu) {
             if (cat.id == editedCategory.id) {
-                assign(cat, editedCategory);
+                Object.assign(cat, editedCategory);
                 delete cat._new;
                 break;
             }

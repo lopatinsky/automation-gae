@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
 import PersistenceMixin from '../utils/PersistenceMixin';
@@ -7,7 +6,7 @@ import InfoStore from './InfoStore';
 import MenuStore from './MenuStore';
 import VenueStore from './VenueStore';
 
-const ProgressStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
+const ProgressStore = Object.assign({}, EventEmitter.prototype, PersistenceMixin, {
     steps: {
         INFO: "INFO",
         MENU: "MENU",

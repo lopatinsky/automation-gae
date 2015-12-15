@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
-import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
 import PersistenceMixin from '../utils/PersistenceMixin';
 
-const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
+const InfoStore = Object.assign({}, EventEmitter.prototype, PersistenceMixin, {
     name: '',
     phone: '',
     email: '',
@@ -17,7 +16,7 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
         this.removeListener('change', fn);
     },
     updateMainInfo({name, phone, email}) {
-        assign(this, {name, phone, email});
+        Object.assign(this, {name, phone, email});
         this.emit('change');
     },
     getMainInfo() {
@@ -25,7 +24,7 @@ const InfoStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
         return {name, phone, email};
     },
     setLoginPassword({login, password}) {
-        assign(this, {login, password});
+        Object.assign(this, {login, password});
         this.emit('change');
     },
     getLoginPassword() {

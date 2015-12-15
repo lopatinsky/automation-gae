@@ -88,7 +88,8 @@ class WizardCreateCompanyHandler(BaseHandler):
 
         namespace = self._find_namespace(name)
         password = "%04d" % random.randint(0, 10000)
-        CompanyUser.create_user(namespace, namespace=namespace, password_raw=password, login=namespace)
+        CompanyUser.create_user(namespace, namespace=namespace, password_raw=password,
+                                login=namespace, rights=CompanyUser.RIGHTS_MASK_ADMIN)
 
         namespace_manager.set_namespace(namespace)
         cfg = Config(id=1)

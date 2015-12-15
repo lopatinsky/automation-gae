@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
-import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 import Actions from '../Actions';
 import PersistenceMixin from '../utils/PersistenceMixin';
 
-const VenueStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
+const VenueStore = Object.assign({}, EventEmitter.prototype, PersistenceMixin, {
     title: '',
     address: '',
     lat: null,
@@ -20,7 +19,7 @@ const VenueStore = assign({}, EventEmitter.prototype, PersistenceMixin, {
         this.emit('change');
     },
     updateAddress({address, lat, lng}) {
-        assign(this, {address, lat, lng});
+        Object.assign(this, {address, lat, lng});
         this.emit('change');
     },
     getVenueInfo() {

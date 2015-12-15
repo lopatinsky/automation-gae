@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import assign from 'object-assign';
 import InputGroup from './InputGroup';
 import VenueStore from '../stores/VenueStore';
 import ProgressStore from '../stores/ProgressStore';
@@ -11,7 +10,7 @@ import Actions from '../Actions';
 const Step3 = React.createClass({
     titleValidators: [required('Введите название заведения')],
     getInitialState() {
-        return assign({
+        return Object.assign({
             choosingAddress: false,
             addressBsStyle: null,
             addressHelp: null
