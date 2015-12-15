@@ -115,7 +115,7 @@ class OrderPush(Push):
     """Class for notification that are displayed after user have ordered something
     """
 
-    def __init__(self, text, device_type, order):
+    def __init__(self, text, device_type, order, namespace):
         """
         Initializes OrderPush
         :param text: text to put in notification
@@ -128,6 +128,10 @@ class OrderPush(Push):
         self.push_type = ORDER_TYPE
         self.header = u'Заказ %s' % self.order.key.id()
 
+        order_channel = get_channels(namespace)[ORDER_CHANNEL] % self.order.key.id()
+        order_channel = fuckup_order_channel(order_channel, self.order)
+        self.channels = [order_channel]
+
     @property
     def data(self):
         _data = super(OrderPush, self).data
@@ -139,7 +143,7 @@ class OrderPush(Push):
             })
         return _data
 
-    def send(self, namespace, new_time=None, silent=False):
+    def send(self, new_time=None, silent=False):
         """Sends notification to selected namespaces
         :param new_time: optional param to set time to send notification. If not specified sets to None
         :param silent
@@ -149,9 +153,6 @@ class OrderPush(Push):
             self.data['time_str'] = self.order.delivery_time_str
         if silent:
             self.data['content-available'] = 1
-        order_channel = get_channels(namespace)[ORDER_CHANNEL] % self.order.key.id()
-        order_channel = fuckup_order_channel(order_channel, self.order)
-        self.channels = [order_channel]
 
         return super(OrderPush, self)._send_push()
 

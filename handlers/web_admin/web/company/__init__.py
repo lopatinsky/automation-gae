@@ -29,7 +29,8 @@ from delivery_types import DeliveryTypesHandler, DeliverySlotAddHandler, ChooseS
 from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, AddPushesHandler, ChangeParseApiKeys, \
     CancelPushHandler, CancelNewsHandler
 from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \
-    AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler
+    AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler, \
+    AddingJSFileDeliveryZoneHandler
 from promo_code import ListPromoCodeHandler, AddPromoCodeHandler, ActivationsPromoCodeHandler
 from alfa_settings import AlfaSettingsHandler
 from choose_ns import ChooseNamespaceHandler
