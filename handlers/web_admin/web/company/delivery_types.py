@@ -164,55 +164,22 @@ class DeliverySlotSetupTimeHandler(CompanyBaseHandler):
         delivery_type = int(self.request.get('delivery_type'))
         delivery_type = venue.get_delivery_type(delivery_type)
 
-        logging.critical(delivery_type)
+        logging.debug(delivery_type)
 
         days = []
         for day in DaySchedule.DAYS:
             confirmed = bool(self.request.get(str(day)))
-            logging.critical(confirmed)
+            logging.debug(confirmed)
             if confirmed:
                 start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
                 end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
                 days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
         schedule = Schedule(days=days)
-        logging.critical("new scheldule: {}".format(schedule) )
+        logging.debug("new scheldule: {}".format(schedule))
         delivery_type.schedule_restriction = schedule
         delivery_type.put()
         venue.put()
         self.redirect_to('delivery_types')
-
-
-# class DeliverySlotSetupTimeHandler(CompanyBaseHandler):
-#     def get(self):
-#         venue_id = int(self.request.get('venue_id'))
-#         venue = Venue.get_by_id(venue_id)
-#
-#         if not venue:
-#             self.abort(400)
-#         delivery_type = int(self.request.get('venue_id'))
-#         delivery_type = venue.get_delivery_type(delivery_type)
-#         day_map = {
-#             1: u'Понедельник',
-#             2: u'Вторник',
-#             3: u'Среда',
-#             4: u'Четверг',
-#             5: u'Пятница',
-#             6: u'Суббота',
-#             7: u'Воскресенье'
-#         }
-#         self.render('/delivery_settings/setup_delivery_time.html', **{
-#             'venue': venue,
-#             'delivery_type': delivery_type,
-#             'days': day_map
-#         })
-#
-#     def post(self):
-#         delivery_type = self.request.get('delivery_type')
-#         schedule_restriction = Schedule()
-#
-#         pass
-#
-#     pass
 
 
 class ChooseSlotsHandler(CompanyBaseHandler):
