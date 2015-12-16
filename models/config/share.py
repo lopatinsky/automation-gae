@@ -23,11 +23,11 @@ class ShareInvitationModule(ndb.Model):
     recipient_wallet_points = ndb.IntegerProperty(default=0)
 
     @classmethod
-    def has_module(cls):
-        from models.config.config import Config
-        config = Config.get()
+    def has_module(cls, config):
         module_enable = config.SHARE_INVITATION_MODULE is not None and \
-            config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE
+            config.SHARE_INVITATION_MODULE.status == STATUS_AVAILABLE and \
+            config.BRANCH_API_KEY is not None and \
+            config.BRANCH_SECRET_KEY is not None
         if is_share_fuckup_ios_user():
             module_enable = False
         return module_enable

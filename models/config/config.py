@@ -169,7 +169,7 @@ class Config(ndb.Model):
 
     @property
     def SHARE_INVITATION_ENABLED(self):
-        return ShareInvitationModule.has_module() and config.BRANCH_API_KEY and config.BRANCH_SECRET_KEY
+        return ShareInvitationModule.has_module(self)
 
     @property
     def WALLET_ENABLED(self):
