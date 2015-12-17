@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import user_rights_required
 from models import CompanyUser
+from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.user import MAP_RIGHTS
 
 __author__ = 'dvpermyakov'
@@ -19,7 +20,10 @@ class ListUsersHandler(CompanyBaseHandler):
             for right in CompanyUser.ALL_RIGHTS_BITS:
                 if user.has_rights((right,)):
                     user.rights_str += MAP_RIGHTS[right] + ', '
-        self.render('/user/list.html', users=users)
+
+        public_hostname = "demo.rbcn.mobi" if CURRENT_APP_ID == DEMO_APP_ID else "auto.rbcn.mobi"
+        login_url = "http://%s/company/login" % public_hostname
+        self.render('/user/list.html', users=users, login_url=login_url)
 
 
 class CreateUsersHandler(CompanyBaseHandler):

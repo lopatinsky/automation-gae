@@ -215,5 +215,6 @@ MAP_RIGHTS = {
     CompanyUser.RIGHTS_BIT_NEWS: u'Новости',
     CompanyUser.RIGHTS_BIT_PUSHES: u'Пуши',
     CompanyUser.RIGHTS_BIT_ALFA: u'Альфа',
-    CompanyUser.RIGHTS_BIT_USERS: u'Пользователи'
+    CompanyUser.RIGHTS_BIT_USERS: u'Пользователи',
+    CompanyUser.RIGHTS_BIT_CONFIG: u'Конфигурация',
 }
