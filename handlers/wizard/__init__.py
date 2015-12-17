@@ -122,7 +122,7 @@ class WizardCreateCompanyHandler(BaseHandler):
                     title=item["title"],
                     description=item["description"],
                     picture=item["imageUrl"],
-                    price=int(round(item["price"] * 100)),
+                    price=int(round(float(item["price"]) * 100)),
                     sequence_number=j).put()
             for _ in category.get_items():
                 category.generate_sequence_number()  # only to increase counter
