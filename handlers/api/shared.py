@@ -3,6 +3,7 @@ import json
 
 from google.appengine.ext.deferred import deferred
 
+from methods.branch_io import SMS
 from models.config.config import EMAIL_FROM, Config
 from methods.emails.mandrill import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
@@ -89,6 +90,8 @@ class GetGiftUrlHandler(ApiHandler):
         })
 
     def success(self, sender, gift, promo_code, sender_phone, sender_email, reciptient_name, recipient_phone):
+        cfg = Config.get()
+
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -102,16 +105,12 @@ class GetGiftUrlHandler(ApiHandler):
             'phone': recipient_phone
         }
         url = branch_io.create_url(share.key.id(), branch_io.INVITATION, branch_io.SMS, user_agent, recipient=recipient)
-        share.urls = [url]
+        share.channel_urls = [ChannelUrl(channel=SMS, url=url)]
         share.put()
         gift.share_id = share.key.id()
         gift.put()
-        text = u'ссылка = %s, код = %s' % (url, promo_code.key.id())
-        try:
-            send_sms([sender_phone], text)
-        except Exception as e:
-            logging.warning(str(e))
-        deferred.defer(send_email, EMAIL_FROM, sender_email, u'Подарок другу', text)
+        text = u'Вам подарок от %s в приложении %s! Установите его: %s или введите в нем промо-код %s' % \
+               (sender_phone, cfg.APP_NAME, url, promo_code.key.id())
         self.render_json({
             'success': True,
             'sms_text': text

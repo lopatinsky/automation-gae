@@ -110,6 +110,9 @@ class ChosenSharedGiftMenuItem(ndb.Model):
     group_choice_ids = ndb.IntegerProperty(repeated=True)
     single_modifiers = ndb.KeyProperty(kind=SingleModifier, repeated=True)
 
+    def dict(self):
+        return self.shared_item.get().dict()
+
 
 class SharedGift(ndb.Model):
     READY = 0
@@ -187,24 +190,33 @@ class SharedGift(ndb.Model):
 
     def dict(self):
         from models import Client
+        from models.config.config import Config
         from methods.rendering import timestamp
-        item_dicts = []
-        for share_item in self.share_items:
-            item_dict = share_item.get().dict()
-            item_dict.update({
-                'gift_status': self.CHOICES_MAP[self.status]
-            })
-            item_dicts.append(item_dict)
-        recipient_dict = Client.get(self.recipient_id).dict()
+        item_dicts = [si.get().dict() for si in self.share_items]
+
+        if self.recipient_id:
+            recipient_dict = Client.get(self.recipient_id).dict()
+        else:
+            recipient_dict = {}
         recipient_dict.update({
             'initial_name': self.recipient_name,
             'initial_phone': self.recipient_phone
         })
-        sender_dict = Client.get(self.client_id).dict()
+
+        sender = Client.get(self.client_id)
+        sender_dict = sender.dict()
+
+        cfg = Config.get()
+        share = Share.get_by_id(self.share_id)
+        text = u'Дарю тебе подарок в приложении %s! Установи его: %s или введи в нем промо-код %s' % \
+               (cfg.APP_NAME, share.channel_urls[0].url, self.promo_code.id())
+
         return {
             'items': item_dicts,
             'recipient': recipient_dict,
             'sender': sender_dict,
+            'status': self.status,
+            'sms_text': text,
             'created': timestamp(self.created),
             'updated': timestamp(self.updated)
         }
