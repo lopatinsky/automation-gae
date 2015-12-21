@@ -1,14 +1,12 @@
 # coding=utf-8
 import logging
-from datetime import datetime
-
 from base import CompanyBaseHandler
 from methods.auth import delivery_types_rights_required
 from methods.rendering import STR_TIME_FORMAT
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, DAY_SECONDS, HOUR_SECONDS, DeliverySlot
 from models.schedule import DaySchedule, Schedule
 from models.venue import DELIVERY_MAP, DELIVERY_TYPES, SELF, IN_CAFE, DELIVERY, PICKUP, DeliveryType
-
+from datetime import datetime
 __author__ = 'dvpermyakov'
 
 
@@ -166,18 +164,18 @@ class DeliverySlotSetupTimeHandler(CompanyBaseHandler):
         delivery_type = int(self.request.get('delivery_type'))
         delivery_type = venue.get_delivery_type(delivery_type)
 
-        logging.critical(delivery_type)
+        logging.debug(delivery_type)
 
         days = []
         for day in DaySchedule.DAYS:
             confirmed = bool(self.request.get(str(day)))
-            logging.critical(confirmed)
+            logging.debug(confirmed)
             if confirmed:
                 start = datetime.strptime(self.request.get('start_%s' % day), STR_TIME_FORMAT)
                 end = datetime.strptime(self.request.get('end_%s' % day), STR_TIME_FORMAT)
                 days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
         schedule = Schedule(days=days)
-        logging.critical("new scheldule: {}".format(schedule))
+        logging.debug("new scheldule: {}".format(schedule))
         delivery_type.schedule_restriction = schedule
         delivery_type.put()
         venue.put()

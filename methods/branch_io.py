@@ -5,7 +5,6 @@ import json
 from google.appengine.api import urlfetch
 
 BASE_URL = 'https://api.branch.io'
-BRANCH_API_KEY = '155014419024204427'
 
 VK = 0
 FACEBOOK = 1
@@ -49,7 +48,7 @@ def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipie
 
     config = Config.get()
     params = {
-        'app_id': BRANCH_API_KEY,
+        'branch_key': config.BRANCH_API_KEY,
         'data': {
             'phone': recipient.get('phone') if recipient else None,
             'name': recipient.get('name') if recipient else None,

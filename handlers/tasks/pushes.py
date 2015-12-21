@@ -43,5 +43,5 @@ class SendPushReviewHandler(RequestHandler):
             self.abort(400)
         order = review.order.get()
         send_review_push(order)
-        review.sent = datetime.utcnow()
+        review.sent = datetime.datetime.utcnow()
         review.put()

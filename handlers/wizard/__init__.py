@@ -110,18 +110,20 @@ class WizardCreateCompanyHandler(BaseHandler):
             DeliverySlot(name=u'Через 30 минут', slot_type=0, value=30).put()]
 
         menu = data['menu']
+        init = MenuCategory(category=None, title="Init")
+        init.put()
         for i, category_dict in enumerate(menu):
             MenuCategory.generate_category_sequence_number()  # only to increase counter
-            category = MenuCategory(title=category_dict["title"], sequence_number=i)
+            category = MenuCategory(title=category_dict["title"], sequence_number=i, category=init.key)
+            category.put()
             for j, item in enumerate(category_dict["items"]):
                 MenuItem(
                     category=category.key,
                     title=item["title"],
                     description=item["description"],
                     picture=item["imageUrl"],
-                    price=int(round(item["price"] * 100)),
+                    price=int(round(float(item["price"]) * 100)),
                     sequence_number=j).put()
-            category.put()
             for _ in category.get_items():
                 category.generate_sequence_number()  # only to increase counter
 

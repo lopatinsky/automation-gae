@@ -68,6 +68,7 @@ class SharedGiftListHandler(ApiHandler):
 class NewsHandler(ApiHandler):
     def get(self):
         news = News.query(News.status == STATUS_ACTIVE).fetch()
+        news = sorted(news, key=lambda n: n.start)
         self.render_json({
             'news': [new.dict() for new in news]
         })
