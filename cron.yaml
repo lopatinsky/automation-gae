@@ -15,7 +15,7 @@ cron:
 
 - description: send notify by module
   url: /cron/inactive_notify
-  schedule: every day 14:15
+  schedule: every day 09:00
   timezone: Europe/Moscow
 
 - description: build square table report
