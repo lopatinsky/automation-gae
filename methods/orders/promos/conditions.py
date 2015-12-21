@@ -1,7 +1,9 @@
 # coding=utf-8
 from Queue import Queue
 from datetime import datetime, timedelta
+
 from google.appengine.ext import ndb
+
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE, Promo, MenuCategory
@@ -27,6 +29,7 @@ def _get_category_ids(current_id):
 
 def _check_item(item_details, item_dict):
     from methods.orders.validation.validation import is_equal
+
     if not item_details.item:
         return False
     return is_equal(get_item_dict(item_details), item_dict)
@@ -43,14 +46,18 @@ def check_condition_max_by_value(condition, value):
 def check_condition_min_by_value(condition, value):
     return condition.value <= int(value)
 
+
 def check_registration_date(client, days):
     """Checks, if client registered some days ago"""
     today = datetime.today()
-    return (today - client.created).days >= days
+    days_num = (today - client.created).days
+    return days_num == days or days_num == days + 1
+
 
 def check_first_order(client):
     order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
     return order is None
+
 
 def check_repeated_order(condition, client):
     if condition.value > 0:
@@ -132,6 +139,7 @@ def mark_not_item(condition, item_dicts):
 
 def mark_item_with_quantity(condition, item_dicts):
     from methods.orders.validation.validation import is_equal
+
     for index1, item_dict1 in enumerate(item_dicts):
         amount = 1
         for index2, item_dict2 in enumerate(item_dicts):

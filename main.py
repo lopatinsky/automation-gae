@@ -245,6 +245,7 @@ app = WSGIApplication([
                 Route('/add', AddNotifModuleHandler, 'add_notif_module'),
                 Route('/test_form', TestForm, 'test_form'),
                 Route('/send_notif', NotificatingInactiveUsersHandler, 'send_notif'),
+                Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
             ]),
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),

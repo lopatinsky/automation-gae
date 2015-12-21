@@ -7,7 +7,10 @@ __author__ = 'dvpermyakov'
 CURRENT_APP_ID = app_identity.get_application_id()
 DEMO_APP_ID = 'automation-demo'
 PRODUCTION_APP_ID = 'doubleb-automation-production'
-CURRENT_VERSION = modules.get_current_version_name()
+try:
+    CURRENT_VERSION = modules.get_current_version_name()
+except KeyError: # localhost
+    CURRENT_VERSION = 'test2'
 TEST_VERSIONS = ('test2', 'p-test', 'courier')
 
 

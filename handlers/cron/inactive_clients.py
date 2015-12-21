@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from methods.empatika_promos import get_user_points
 from methods.empatika_wallet import get_balance
 from models.push import SimplePush
@@ -41,8 +42,9 @@ def filter_clients_by_module_logic(module, clients):
     new_clients = []
     for client in clients:
         if module.type == NEW_USERS_WITH_NO_ORDERS:
-            if not check_registration_date(client, module.days) or get_first_order(client) is not None:
+            if not check_registration_date(client, module.days) or get_orders_num(client) >= 1:
                 continue
+                # or get_first_order(client) is not None
         elif module.type == USERS_WITH_ONE_ORDER:
             if get_orders_num(client) != 1 and days_from_last_order(client) >= module.days:
                 continue
@@ -75,10 +77,10 @@ def get_points_balance(config, client):
 
 def get_text(module):
     text = module.text
-    if module.type == NEW_USERS_WITH_NO_ORDERS and not module.already_sent:
+    if module.type == NEW_USERS_WITH_NO_ORDERS:
         text += u"Скидка 50% на первый заказ истекает через 3 дня. Получите скидку сейчас."
-    elif module.type == NEW_USERS_WITH_NO_ORDERS and module.already_sent:
-        text += u"Скидка 50% на первый заказ продлена. Сделайте заказ сейчас."
+    # elif module.type == NEW_USERS_WITH_NO_ORDERS:
+    #     text += u"Скидка 50% на первый заказ продлена. Сделайте заказ сейчас."
     return text
 
 
@@ -105,25 +107,24 @@ class NotificatingInactiveUsersHandler(RequestHandler):
     def apply_module(self, module):
         if not module or not module.status:
             return
+
         cnf = Config.get()
         all_clients = get_clients()
         clients = filter_clients_by_module_logic(module, all_clients)
+        logging.debug('{0}, {1}'.format(module, clients))
         for client in clients:
             text = get_text(module)
-            if not module.already_sent:
-                module.already_sent = True
-                if should_sms(cnf, module, client):
-                    deferred.defer(send_sms, [client.tel], text)
-                    ClientSmsSending(client=client.key, sms_type=module.type).put()
-                    module.already_sent = True
-                if should_push(cnf, module, client):
-                    push = SimplePush(text=module.text, header=module.header, full_text=text, client=client,
-                                      namespace=namespace_manager.get_namespace(), should_popup=True)
 
-                    deferred.defer(push.send)
-                    ClientPushSending(client=client.key, type=module.type).put()
-            else:
-                module.status = 0
+            if should_sms(cnf, module, client):
+                deferred.defer(send_sms, [client.tel], text)
+                ClientSmsSending(client=client.key, sms_type=module.type).put()
+
+            if should_push(cnf, module, client):
+                push = SimplePush(text=module.text, header=module.header, full_text=text, client=client,
+                                  namespace=namespace_manager.get_namespace(), should_popup=True)
+
+                deferred.defer(push.send)
+                ClientPushSending(client=client.key, type=module.type).put()
 
     def get(self):
         for namespace in metadata.get_namespaces():
@@ -134,10 +135,7 @@ class NotificatingInactiveUsersHandler(RequestHandler):
             for module in cnf.NOTIFICATING_INACTIVE_USERS_MODULE:
                 self.apply_module(module)
 
-            self.redirect_to('list_notif_modules')
-
-# class SendSmsInactiveClientsHandler(RequestHandler):
-#     @staticmethod
+# @staticmethod
 #     def get_clients_from_now(days):
 #         namespace = namespace_manager.get_namespace()
 #         namespace_manager.set_namespace('')  # query global clients

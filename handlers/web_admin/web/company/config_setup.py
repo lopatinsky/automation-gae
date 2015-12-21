@@ -2,6 +2,7 @@ import logging
 
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods import branch_io
+from models.config.config import Config
 from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
 from models.config.share import ShareInvitationModule
 from methods.auth import config_rights_required
@@ -123,10 +124,19 @@ class ListNotifModuleHandler(CompanyBaseHandler):
         self.render('/config_settings/inactive_users_notifications/notif_modules.html', types=types)
         pass
 
-
 @config_rights_required
 def post(self):
     pass
+
+
+class DeleteNotifModuleHandler(CompanyBaseHandler):
+    def post(self):
+        module_num = self.request.get_range('module_num')
+        cnf = Config.get()
+        cnf.NOTIFICATING_INACTIVE_USERS_MODULE.pop(module_num)
+        cnf.put()
+        self.redirect_to('list_notif_modules')
+
 
 
 class AddNotifModuleHandler(CompanyBaseHandler):

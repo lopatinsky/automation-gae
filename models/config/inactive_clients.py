@@ -1,7 +1,7 @@
 # coding=utf-8
 from google.appengine.ext import ndb
 
-from models import STATUS_AVAILABLE, STATUS_CHOICES, STATUS_MAP
+from models import STATUS_AVAILABLE, STATUS_CHOICES
 
 __author__ = 'dvpermyakov'
 
@@ -21,7 +21,6 @@ NEW_USERS_WITH_NO_ORDERS = 0
 USERS_WITH_ONE_ORDER = 1
 NOT_TYPES = (NEW_USERS_WITH_NO_ORDERS, USERS_WITH_ONE_ORDER)
 
-
 NOT_TYPES_MAP = {
     NEW_USERS_WITH_NO_ORDERS: u'Новые неактивные клиенты',
     USERS_WITH_ONE_ORDER: u'Неактивные клиенты с одним заказом',
@@ -40,4 +39,4 @@ class NotificatingInactiveUsersModule(ndb.Model):
     should_sms = ndb.BooleanProperty(default=False)
     sms_if_has_points = ndb.BooleanProperty(default=False)
     sms_if_has_cashback = ndb.BooleanProperty(default=False)
-    already_sent = ndb.BooleanProperty(default=False)
+    max_times_sending = ndb.IntegerProperty(default=1)

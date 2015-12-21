@@ -8,73 +8,79 @@
 
 <a href="/company/config_settings/inactive_users_notifications/add">Добавить новый модуль</a><br>
 
-<form>
-    <table style="border-collapse:collapse; width:100%" border="1" id="modules_table">
+
+<table style="border-collapse:collapse; width:100%" border="1" id="modules_table">
+    <tr>
+        <th>Активен</th>
+        <th>Титулка</th>
+        <th>Текст</th>
+        <th>Тип</th>
+        <th>Число дней</th>
+        <th>Получает пуши</th>
+        <th>Получает СМС</th>
+        <th>Получает СМС если есть баллы</th>
+        <th>Получает СМС если есть кэшбек</th>
+
+    </tr>
+    {% for module in config.NOTIFICATING_INACTIVE_USERS_MODULE %}
         <tr>
-            <th>Активен</th>
-            <th>Титулка</th>
-            <th>Текст</th>
-            <th>Тип</th>
-            <th>Число дней</th>
-            <th>Получает пуши</th>
-            <th>Получает СМС</th>
-            <th>Получает СМС если есть баллы</th>
-            <th>Получает СМС если есть кэшбек</th>
+            <td>
+                {% if module.status %}ДА {% else %}НЕТ{% endif %}
+                {#                    <input type="checkbox" {% if module.status %}checked{% endif %} name="status">#}
+            </td>
+            <td>
+                {{ module.header }}
+                {#                    <input type="text" name="header" value="{{ module.header }}">#}
+            </td>
+            <th>
+                {{ module.text }}
+                {#                    <input type="text" name="text" value="{{ module.text }}">#}
+            </th>
+            <td>
+                {#                    <select name="client_type">#}
+                {% for type in types %}
+                    {% if type['value'] == module.type %}
+                        {{ type['name'] }}
+                    {% endif %}
+                    {#                            <option value="{{ type['value'] }}" {% if type == module.type %}#}
+                    {#                                    selected="selected"{% endif %}>#}
+                    {#                                {{ type['name'] }}#}
+                    {#                            </option>#}
+                {% endfor %}
+                {#                    </select>#}
+            </td>
+            <td>
+                {{ module.days }}
+            </td>
+            <td>
+                {% if module.should_push %}ДА {% else %}НЕТ{% endif %}
+            </td>
+            <td>
 
+                {% if module.should_sms %}ДА {% else %}НЕТ{% endif %}
+
+            </td>
+            <td>
+                {% if module.sms_if_has_points %}ДА {% else %}НЕТ{% endif %}
+                {#                    <input type="checkbox" {% if module.sms_if_has_points %}checked{% endif %} name="sms_if_has_points">#}
+            </td>
+            <td>
+                {% if module.sms_if_has_cashback %}ДА {% else %}НЕТ{% endif %}
+                {#                    <input type="checkbox" {% if module.sms_if_has_cashback %}checked{% endif %}#}
+                {#                           name="sms_if_has_cashback">#}
+            </td>
+            <td>
+                <form action="/company/config_settings/inactive_users_notifications/delete_module" method="post">
+                    <input value="{{ config.NOTIFICATING_INACTIVE_USERS_MODULE.index(module) }}" type="hidden"
+                           name="module_num">
+                    <input type="submit" value="Удалить">
+                </form>
+            </td>
         </tr>
-        {% for module in config.NOTIFICATING_INACTIVE_USERS_MODULE %}
-            <tr>
-                <td>
-                    {% if module.status %}ДА {% else %}НЕТ{% endif %}
-                    {#                    <input type="checkbox" {% if module.status %}checked{% endif %} name="status">#}
-                </td>
-                <td>
-                    {{ module.header }}
-                    {#                    <input type="text" name="header" value="{{ module.header }}">#}
-                </td>
-                <th>
-                    {{ module.text }}
-                    {#                    <input type="text" name="text" value="{{ module.text }}">#}
-                </th>
-                <td>
-                    {#                    <select name="client_type">#}
-                    {% for type in types %}
-                        {% if type['value'] == module.type %}
-                            {{ type['name'] }}
-                        {% endif %}
-                        {#                            <option value="{{ type['value'] }}" {% if type == module.type %}#}
-                        {#                                    selected="selected"{% endif %}>#}
-                        {#                                {{ type['name'] }}#}
-                        {#                            </option>#}
-                    {% endfor %}
-                    {#                    </select>#}
-                </td>
-                <td>
-                    {{ module.days }}
-                </td>
-                <td>
-                    {% if module.should_push %}ДА {% else %}НЕТ{% endif %}
-                    {#                    <input type="checkbox" {% if module.should_push %}checked {% endif %} name="should_push">#}
-                </td>
-                <td>
-
-                    {% if module.should_sms %}ДА {% else %}НЕТ{% endif %}
-                    {#                    <input type="checkbox" {% if module.should_sms %}checked{% endif %} name="should_sms">#}
-                </td>
-                <td>
-                    {% if module.sms_if_has_points %}ДА {% else %}НЕТ{% endif %}
-                    {#                    <input type="checkbox" {% if module.sms_if_has_points %}checked{% endif %} name="sms_if_has_points">#}
-                </td>
-                <td>
-                    {% if module.sms_if_has_cashback %}ДА {% else %}НЕТ{% endif %}
-                    {#                    <input type="checkbox" {% if module.sms_if_has_cashback %}checked{% endif %}#}
-                    {#                           name="sms_if_has_cashback">#}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% endfor %}
+</table>
 {#    <input type="submit" value="Сохранить">#}
-</form>
+
 <form action="/company/config_settings/inactive_users_notifications/send_notif" method="get">
     <input type="submit" value="Отправить всем">
 </form>
