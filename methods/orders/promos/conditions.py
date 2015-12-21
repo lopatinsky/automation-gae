@@ -8,7 +8,7 @@ from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE, Promo, MenuCategory
 from models.config.config import Config
-from models.geo_push import GeoPush
+from models.geo_push import GeoPush, LeftBasketPromo
 from models.order import Order
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
@@ -215,6 +215,18 @@ def check_geo_push(client, order):
             if order:
                 order.geo_push = push.key
                 push.deactivate()
+    return success
+
+
+def check_left_basket_promo(client, order):
+    basket_promo = LeftBasketPromo.query(LeftBasketPromo.client == client.key,
+                                         LeftBasketPromo.status == STATUS_AVAILABLE).get()
+    success = False
+    if basket_promo:
+        success = True
+        if order:
+            order.left_basket_promo = basket_promo.key
+            basket_promo.deactivate()
     return success
 
 

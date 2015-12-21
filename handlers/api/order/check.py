@@ -101,20 +101,18 @@ class CheckOrderHandler(ApiHandler):
         client.save_session(True, bool(items or gifts or order_gifts))
 
         module = config.BASKET_NOTIFICATION_MODULE
+        if module and module.status and items:
+            if client.notif_id:
+                taskqueue.Queue(name='default').delete_tasks_by_name([client.notif_id])
+            task = taskqueue.add(url='/task/basket_notification', method='POST', countdown=module.inactivity_duration,
+                                 params={
+                                     'client_id': client_id,
+                                     'namespace': namespace_manager.get_namespace()
+                                 })
+            logging.debug(task)
+            client.notif_id = task.name
+            client.put()
 
-        start_basket = datetime.datetime.now() + datetime.timedelta(seconds=module.inactivity_duration)
-
-        if client.notif_id:
-            taskqueue.Queue(name='default').delete_tasks_by_name(client.notif_id)
-
-        somevar = taskqueue.add(url='/task/basket_notification', method='POST', eta=start_basket, params={
-            'client_id': client_id,
-            'namespace': namespace_manager.get_namespace()
-        })
-
-        logging.debug(somevar)
-        client.notif_id = somevar.name
-        client.put()
         extra_fields = json.loads(self.request.get('extra_order_fields', '{}'))  # todo: it can be checked in validation
 
         if config.APP_KIND == AUTO_APP:
