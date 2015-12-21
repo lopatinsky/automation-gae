@@ -1,4 +1,6 @@
 # coding=utf-8
+from models.config.basket_notification import BasketNotificationModule
+
 SUBSCRIPTION = 0
 SHARE_GIFT = 1
 SHARE_INVITATION = 2
@@ -109,6 +111,7 @@ class Config(ndb.Model):
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
     NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
+    BASKET_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(BasketNotificationModule)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
     MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)
     REVIEW_MODULE = ndb.LocalStructuredProperty(ReviewModule)

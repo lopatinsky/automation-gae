@@ -1,6 +1,11 @@
 import json
 import logging
+import datetime
+
+from google.appengine.api import taskqueue
+
 from google.appengine.api.namespace_manager import namespace_manager
+
 from handlers.api.base import ApiHandler
 from methods.emails.admins import send_error
 from methods.orders.validation.precheck import validate_address, get_venue_and_zone_by_address, get_delivery_time
@@ -70,11 +75,11 @@ class CheckOrderHandler(ApiHandler):
         else:
             delivery_slot = None
 
-        delivery_time_minutes = self.request.get('delivery_time')     # used for old versions todo: remove
-        if delivery_time_minutes:                                     # used for old versions todo: remove
+        delivery_time_minutes = self.request.get('delivery_time')  # used for old versions todo: remove
+        if delivery_time_minutes:  # used for old versions todo: remove
             send_error('minutes', 'delivery_time field in check order',
                        'The field is invoked in %s' % namespace_manager.get_namespace())
-            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)  # used for old versions todo: remove
         delivery_time_picker = self.request.get('time_picker_value')
 
         delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
@@ -92,7 +97,21 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
+
         client.save_session(True, bool(items or gifts or order_gifts))
+
+        module = config.BASKET_NOTIFICATION_MODULE
+        if module and module.status and items:
+            if client.notif_id:
+                taskqueue.Queue(name='default').delete_tasks_by_name([client.notif_id])
+            task = taskqueue.add(url='/task/basket_notification', method='POST', countdown=module.inactivity_duration,
+                                 params={
+                                     'client_id': client_id,
+                                     'namespace': namespace_manager.get_namespace()
+                                 })
+            logging.debug(task)
+            client.notif_id = task.name
+            client.put()
 
         extra_fields = json.loads(self.request.get('extra_order_fields', '{}'))  # todo: it can be checked in validation
 

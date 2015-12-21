@@ -4,7 +4,7 @@ from google.appengine.ext import ndb
 from methods import fastcounter
 from methods.rendering import timestamp, latinize
 from models import STATUS_AVAILABLE
-from models.geo_push import GeoPush
+from models.geo_push import GeoPush, LeftBasketPromo
 from models.promo_code import PromoCodePerforming
 from models.share import SharedGift
 from models.client import Client
@@ -157,6 +157,7 @@ class Order(ndb.Model):
     email_key_confirm = ndb.StringProperty()
     courier = ndb.KeyProperty(kind=Courier)
     geo_push = ndb.KeyProperty(kind=GeoPush)
+    left_basket_promo = ndb.KeyProperty(kind=LeftBasketPromo)
     extra_data = ndb.JsonProperty()
     unified_app_namespace = ndb.StringProperty()
     version = ndb.IntegerProperty(default=0)

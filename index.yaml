@@ -17,6 +17,11 @@ indexes:
   - name: created
     direction: desc
 
+- kind: LeftBasketPromo
+  properties:
+  - name: client
+  - name: created
+
 - kind: GiftMenuItem
   properties:
   - name: status
