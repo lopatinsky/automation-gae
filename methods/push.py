@@ -127,6 +127,7 @@ def send_order_push(order, text, namespace, new_time=None, silent=False):
 
 
 def send_client_push(client, text, header, namespace):
+    logging.debug(client)
     data = _make_push_data(text, header, client.device_type, should_popup=True, push_type='')
     client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
     return _send_push([client_channel], data, client.device_type)

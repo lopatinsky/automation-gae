@@ -1,3 +1,4 @@
+# coding=utf-8
 from Queue import Queue
 from datetime import datetime, timedelta
 from google.appengine.ext import ndb
@@ -42,11 +43,14 @@ def check_condition_max_by_value(condition, value):
 def check_condition_min_by_value(condition, value):
     return condition.value <= int(value)
 
+def check_registration_date(client, days):
+    """Checks, if client registered some days ago"""
+    today = datetime.today()
+    return (today - client.created).days >= days
 
 def check_first_order(client):
     order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
     return order is None
-
 
 def check_repeated_order(condition, client):
     if condition.value > 0:

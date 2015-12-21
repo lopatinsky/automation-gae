@@ -39,8 +39,7 @@ class Push(object):
         self.channels = None
 
     def _send_push(self):
-
-        if not self.data or self.device_type not in DEVICE_CHOICES:
+        if not self.data or self.device_type not in DEVICE_CHOICES or not config.PARSE_APP_API_KEY or not config.PARSE_REST_API_KEY:
             logging.warning(u'Невозможно послать уведомление, data=%s, device_type=%s' % (self.data, self.device_type))
             return
         payload = {
@@ -54,7 +53,7 @@ class Push(object):
             'X-Parse-Application-Id': config.PARSE_APP_API_KEY,
             'X-Parse-REST-API-Key': config.PARSE_REST_API_KEY
         }
-
+        logging.debug(headers)
         try:
             result = json.loads(urlfetch.fetch('https://api.parse.com/1/push',
                                                payload=json.dumps(payload),

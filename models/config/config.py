@@ -18,9 +18,7 @@ MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, CLIENT_INFO_MODULE, 
                 CASH_CHANGE_MODULE)
 
 from google.appengine.api import memcache
-
 from google.appengine.ext import ndb
-
 from webapp2 import cached_property
 
 from models.config.local import LocalConfigProxy
@@ -29,7 +27,7 @@ from models.config.field import ClientModule, OrderModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
-from models.config.inactive_clients import SendingSmsModule
+from models.config.inactive_clients import NotificatingInactiveUsersModule
 from models.config.menu import HitModule, MenuFrameModule, RemaindersModule
 from models.config.mivako import MivakoGiftModule
 from models.config.review import ReviewModule
@@ -77,7 +75,6 @@ class Config(ndb.Model):
         else:
             return AUTO_APP
 
-
     VERSIONS = ndb.LocalStructuredProperty(Version, repeated=True)
     COMPANY_STATUS = ndb.IntegerProperty(indexed=False, choices=COMPANY_STATUS_CHOICES, default=COMPANY_IN_DEVELOPMENT)
 
@@ -111,7 +108,7 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
-    SENDING_SMS_MODULE = ndb.LocalStructuredProperty(SendingSmsModule, repeated=True)
+    NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
     MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)
     REVIEW_MODULE = ndb.LocalStructuredProperty(ReviewModule)
@@ -164,7 +161,7 @@ class Config(ndb.Model):
 
         return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE \
                                                                       and config.BRANCH_API_KEY \
-                                                                      and config.BRANCH_SECRET_KEY\
+                                                                      and config.BRANCH_SECRET_KEY \
             else False
 
     @property

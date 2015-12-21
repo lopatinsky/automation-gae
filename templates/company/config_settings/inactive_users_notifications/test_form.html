@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <style>
+        body {
+            font-size: 62.5%;
+        }
+
+        label, input {
+            display: block;
+        }
+
+        input.text {
+            margin-bottom: 12px;
+            width: 95%;
+            padding: .4em;
+        }
+
+        fieldset {
+            padding: 0;
+            border: 0;
+            margin-top: 25px;
+        }
+
+        h1 {
+            font-size: 1.2em;
+            margin: .6em 0;
+        }
+
+        div#modules-contain {
+            width: 350px;
+            margin: 20px 0;
+        }
+
+        div#modules-contain table {
+            margin: 1em 0;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        div#modules-contain table td, div#modules-contain table th {
+            border: 1px solid #eee;
+            padding: .6em 10px;
+            text-align: left;
+        }
+
+        .ui-dialog .ui-state-error {
+            padding: .3em;
+        }
+
+        .validateTips {
+            border: 1px solid transparent;
+            padding: 0.3em;
+        }
+    </style>
+    <script>
+
+
+        String.format = function () {
+            var s = arguments[0];
+            for (var i = 0; i < arguments.length - 1; i++) {
+                var reg = new RegExp("\\{" + i + "\\}", "gm");
+                s = s.replace(reg, arguments[i + 1]);
+            }
+            return s;
+        };
+
+        $(function () {
+
+            var client_type_field = $("#client_type"),
+                    status_field = $("#status"),
+                    header_field = $("#header"),
+                    text_field = $("#text"),
+                    days_field = $("#days"),
+                    should_push_field = $("#should_push"),
+                    should_sms_field = $("#should_sms"),
+                    sms_if_has_points_field = $("#sms_if_has_points"),
+                    sms_if_has_cashback_field = $("#sms_if_has_cashback");
+            allFields = $([])
+                    .add(status_field)
+                    .add(header_field)
+                    .add(text_field)
+                    .add(days_field)
+                    .add(should_push_field)
+                    .add(should_sms_field)
+                    .add(sms_if_has_points_field)
+                    .add(sms_if_has_cashback_field);
+
+
+
+            function addModule() {
+
+                var statusTd = String.format('<td><input type="checkbox" name="status" {0}></td>', status_field.val() == 'on' ? 'checked' : '');
+
+                var headerTd = String.format('<td><input type="text" name="header" value="{0}"></td>', header_field.val());
+                var textTd = String.format('<td><input type="text" name="header" value="{0}"></td>', text_field.val());
+                var moduleTypes = "{% for type in NOT_TYPES %}{{ NOT_TYPES_MAP[type] }};{% endfor %}".split(',');
+                var typeTds = "<td><select name=\"client_type\">";
+                for (var i = 0; i < moduleTypes.length; ++i) {
+                    var typeTd = String.format("<option value={0}", client_type_field.val());
+                    if (typeTd == client_type_field.val()) {
+                        typeTd += "selected=\"selected\"";
+                    }
+                    typeTd += String.format(">{0}</option>", moduleTypes[client_type_field.val()]);
+                    typeTds += typeTd;
+                }
+                typeTds += "</select></td>";
+
+                var daysTd = String.format('<td><input type="number" name="days" value="{0}"></td>');
+
+                var shouldPushTd = String.format('<td><input type="checkbox" name="should_push" {0}></td>', should_push_field.val() == 'on' ? 'checked' : '');
+                var shouldSmsTd = String.format('<td><input type="checkbox" name="should_sms" {0}></td>',
+                        should_sms_field.val() == 'on' ? 'checked' : '');
+
+                var smsIfHasPointsTd = String.format('<td><input type="checkbox" name="sms_if_has_points" {0}></td>',
+                        sms_if_has_points_field.val() == 'on' ? 'checked' : '');
+
+
+                var smsIfHasCashbackTd = String.format('<td><input type="checkbox" name="sms_if_has_cashback" {0}></td>',
+                        sms_if_has_cashback_field.val() == 'on' ? 'checked' : '');
+
+                var tdArr = [statusTd, headerTd, textTd, daysTd, typeTds , shouldPushTd, shouldSmsTd,
+                    smsIfHasPointsTd, smsIfHasCashbackTd];
+
+                var newModuleTr = "<tr>";
+                for (td in tdArr) {
+                    newModuleTr += tdArr[td];
+                }
+                newModuleTr += "</tr>";
+                alert(newModuleTr);
+                $('#modules').find('tbody').append(newModuleTr);
+                dialog.dialog("close");
+            }
+            dialog = $("#dialog-form").dialog({
+                autoOpen: false,
+                height: 300,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Добавить модуль": addModule,
+                    Cancel: function () {
+                        dialog.dialog("закрыть");
+                    }
+                },
+                close: function () {
+                    form[0].reset();
+                    allFields.removeClass("ui-state-error");
+                }
+            });
+
+            form = dialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+                addUser();
+            });
+
+            $("#create-module").button().on("click", function () {
+                dialog.dialog("open");
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div id="dialog-form" title="Create new module">
+    <p class="validateTips">All form fields are required.</p>
+
+    <form>
+        <fieldset>
+            <label>
+                Выберите тип клиентов: <br>
+                <select name="client_type" id="client_type">
+                    <option value="0">Новые неактивные клиенты</option>
+                    <option value="1">Неактивные клиенты с одним заказом</option>
+                </select>
+            </label>
+            <br>
+            <label>
+                Доступен
+                <input type="checkbox" name="status" id="status">
+            </label><br>
+            <label>
+                Титулка:
+                <input type="text" name="header" id="header">
+            </label><br>
+
+            <label>
+                Текст
+                <input type="text" name="text" id="text">
+            </label><br>
+
+            <label>
+                Количество дней:
+                <input type="number" name="days" id="days">
+            </label><br>
+
+            <label>
+                Отправлять пуш
+                <input type="checkbox" name="should_push" id="should_push">
+            </label><br>
+            <label>
+                Отправлять СМС
+                <input type="checkbox" name="should_sms" id="should_sms">
+            </label><br>
+
+            <label>
+                Отправлять СМС, если есть накопленные баллы
+                <input type="checkbox" name="sms_if_has_points" id="sms_if_has_points">
+            </label><br>
+
+            <label>
+                Отправлять СМС, если есть кэшбэк
+                <input type="checkbox" name="sms_if_has_cashback" id="sms_if_has_cashback">
+            </label><br>
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+</div>
+
+
+<div id="modules-contain" class="ui-widget">
+    <h1>Существующие модули:</h1>
+    <table id="modules" class="ui-widget ui-widget-content">
+        <thead>
+        <tr class="ui-widget-header ">
+            <th>Активен</th>
+            <th>Титулка</th>
+            <th>Текст</th>
+            <th>Дни</th>
+            <th>Тип</th>
+            <th>Получает пуши</th>
+            <th>Получает СМС</th>
+            <th>Получает СМС если есть баллы</th>
+            <th>Получает СМС если есть кэшбек</th>
+
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for module in config.NOTIFICATING_INACTIVE_USERS_MODULE %}
+
+            <tr id="{{ module.key.id() }}">
+                <td>
+                    <input type="checkbox" value="{{ module.status }}" name="status">
+                </td>
+                <td>
+                    <input type="text" name="header" value="{{ module.header }}">
+                </td>
+                <td>
+                    <input type="text" name="text" value="{{ module.text }}">
+                </td>
+                <td>
+                    <input type="number" name="days" value="{{ module.days }}">
+                </td>
+                <td>
+                    <select name="client_type">
+                        {% for type in NOT_TYPES %}
+                            <option value="{{ type }}" {% if type == module.type %} selected="selected"{% endif %}>
+                                {{ NOT_TYPES_MAP[type] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="checkbox" value="{{ module.should_push }}" name="should_push">
+                </td>
+                <td>
+                    <input type="checkbox" value="{{ module.should_sms }}" name="should_sms">
+                </td>
+                <td>
+                    <input type="checkbox" value="{{ module.sms_if_has_points }}" name="sms_if_has_points">
+                </td>
+                <td>
+                    <input type="checkbox" value="{{ module.sms_if_has_cashback }}" name="sms_if_has_cashback">
+                </td>
+            </tr>
+        {% endfor %}
+
+        {#        <tr>#}
+        {#            <td>John Doe</td>#}
+        {#            <td>john.doe@example.com</td>#}
+        {#            <td>johndoe1</td>#}
+        {#        </tr>#}
+        </tbody>
+    </table>
+</div>
+<button id="create-module">Создать новый модуль</button>
+
+
+</body>
+</html>

@@ -5,6 +5,7 @@ from webapp2_extras.routes import PathPrefixRoute
 from handlers.api.user import admin
 from handlers import web_app
 from handlers import wizard, web_admin, ext_api
+from handlers.cron import NotificatingInactiveUsersHandler
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -239,6 +240,12 @@ app = WSGIApplication([
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
         PathPrefixRoute('/config_settings', [
+            PathPrefixRoute('/inactive_users_notifications', [
+                Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
+                Route('/add', AddNotifModuleHandler, 'add_notif_module'),
+                Route('/test_form', TestForm, 'test_form'),
+                Route('/send_notif', NotificatingInactiveUsersHandler, 'send_notif'),
+            ]),
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key')

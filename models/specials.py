@@ -5,7 +5,7 @@ from google.appengine.ext import ndb
 
 from methods.rendering import timestamp
 from models.client import Client
-from models.config.inactive_clients import CONDITIONS
+from models.config.inactive_clients import CONDITIONS, NOT_TYPES
 from methods.unique import VERSION, get_temporary_user
 
 COMPANY_CHANNEL = 'company'
@@ -63,13 +63,13 @@ class Notification(ndb.Model):
 class ClientSmsSending(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     client = ndb.KeyProperty(kind=Client, required=True)
-    sms_type = ndb.IntegerProperty(choices=CONDITIONS, required=True)
+    sms_type = ndb.IntegerProperty(choices=NOT_TYPES, required=True)
 
 
 class ClientPushSending(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
     client = ndb.KeyProperty(kind=Client, required=True)
-    type = ndb.IntegerProperty(choices=CONDITIONS, required=True)
+    type = ndb.IntegerProperty(choices=NOT_TYPES, required=True)
 
 
 class News(ndb.Model):

@@ -2,6 +2,7 @@ import logging
 
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods import branch_io
+from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
 from models.config.share import ShareInvitationModule
 from methods.auth import config_rights_required
 
@@ -102,3 +103,63 @@ class CreateBranchApiKeyHandler(CompanyBaseHandler):
             conf.put()
 
         self.redirect_to('create_branch_api_key')
+
+
+class TestForm(CompanyBaseHandler):
+    def get(self):
+        self.render("/config_settings/inactive_users_notifications/test_form.html")
+
+
+class ListNotifModuleHandler(CompanyBaseHandler):
+    def get(self):
+        types = []
+
+        for user_type in NOT_TYPES:
+            types.append({
+                'name': NOT_TYPES_MAP[user_type],
+                'value': user_type
+            })
+
+        self.render('/config_settings/inactive_users_notifications/notif_modules.html', types=types)
+        pass
+
+
+@config_rights_required
+def post(self):
+    pass
+
+
+class AddNotifModuleHandler(CompanyBaseHandler):
+    @config_rights_required
+    def get(self):
+        types = []
+        for user_type in NOT_TYPES:
+            types.append({
+                'name': NOT_TYPES_MAP[user_type],
+                'value': user_type
+            })
+
+        self.render('/config_settings/inactive_users_notifications/add_notif_modules.html', types=types)
+
+    @config_rights_required
+    def post(self):
+        client_type = self.request.get_range('client_type')
+        status = self.request.get('status') is not ''
+        header = self.request.get('header')
+        text = self.request.get('text')
+        days = self.request.get_range('days')
+        should_push = self.request.get('should_push') is not ''
+        should_sms = self.request.get('should_sms') is not ''
+        sms_if_has_points = self.request.get('sms_if_has_points') is not ''
+        sms_if_has_cashback = self.request.get('sms_if_has_cashback') is not ''
+
+        module = NotificatingInactiveUsersModule(status=status, header=header, type=client_type,
+                                                 text=text, days=days, should_push=should_push,
+                                                 should_sms=should_sms, sms_if_has_points=sms_if_has_points,
+                                                 sms_if_has_cashback=sms_if_has_cashback)
+
+
+        conf = config.Config.get()
+        conf.NOTIFICATING_INACTIVE_USERS_MODULE.append(module)
+        conf.put()
+        self.redirect_to('list_notif_modules')

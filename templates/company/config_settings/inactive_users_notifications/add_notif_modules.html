@@ -1,0 +1,59 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+<form method="post">
+    <label>
+        Выберите тип клиентов: <br>
+        <select name="client_type">
+            {% for type in types %}
+                <option value="{{ type['value'] }}">
+                    {{ type['name'] }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+    <br>
+    <label>
+        Доступен
+        <input type="checkbox" name="status">
+    </label><br>
+    <label>
+        Титулка:
+        <input type="text" name="header">
+    </label><br>
+
+    <label>
+        Текст
+        <input type="text" name="text">
+    </label><br>
+
+    <label>
+        Количество дней:
+        <input type="number" name="days">
+    </label><br>
+
+    <label>
+        Отправлять пуш
+        <input type="checkbox" name="should_push">
+    </label><br>
+    <label>
+        Отправлять СМС
+        <input type="checkbox" name="should_sms">
+    </label><br>
+
+    <label>
+        Отправлять СМС, если есть накопленные баллы
+        <input type="checkbox" name="sms_if_has_points">
+    </label><br>
+
+    <label>
+        Отправлять СМС, если есть кэшбэк
+        <input type="checkbox" name="sms_if_has_cashback">
+    </label><br>
+
+    <input type="submit" value="Добавить">
+</form>
+</body>
+</html>

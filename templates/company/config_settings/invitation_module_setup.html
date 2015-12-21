@@ -35,6 +35,14 @@
 
     <br><br>
 
+    <label for="invitation_text">Invitation text</label><br>
+    <textarea name="invitation_text" id="invitation_text" rows="4" cols="50">
+        {{- config.SHARE_INVITATION_MODULE.invitation_text -}}
+    </textarea>
+
+    <br><br>
+
+
     <label for="invitation_image">Invitation image</label><br>
     <input type="url" name="invitation_image" id="invitation_image"
            value="{{ config.SHARE_INVITATION_MODULE.invitation_image }}">

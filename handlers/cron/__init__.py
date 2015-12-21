@@ -4,7 +4,7 @@ from check_pings import CheckPingsHandler
 from handlers.cron.alfa_errors import CheckAlfaErrorsHandler
 from handlers.cron.build_square_table import BuildSquareTableHandler
 from handlers.cron.reporting import ReportSendHandler
-from inactive_clients import SendSmsInactiveClientsHandler
+from inactive_clients import NotificatingInactiveUsersHandler
 from clear_pings import ClearPingsHandler
 from creating_orders import CheckCreatingOrdersHandler
 from cancel_gifts import CancelGiftsHandler
@@ -22,7 +22,7 @@ app = webapp2.WSGIApplication([
     ('/cron/close_orders', CloseOpenedOrdersHandler),
     ('/cron/check_pings', CheckPingsHandler),
     ('/cron/alfa_errors', CheckAlfaErrorsHandler),
-    ('/cron/sms_notify', SendSmsInactiveClientsHandler),
+    ('/cron/inactive_notify', NotificatingInactiveUsersHandler),
     ('/cron/clear_pings', ClearPingsHandler),
     ('/cron/build_square_table', BuildSquareTableHandler),
     ('/cron/creating_orders', CheckCreatingOrdersHandler),
