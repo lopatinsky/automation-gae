@@ -18,6 +18,10 @@
             <input type="text" name="description" {% if promo %} value="{{ promo.description }}" {% endif %}>
         </label><br>
         <label>
+            Картинка (необязательно):
+            <input type="text" name="image" {% if promo %} value="{{ promo.image or '' }}"{% endif %}>
+        </label><br>
+        <label>
             Начало(необязательно):
             <input type="datetime-local" name="start">
         </label><br>

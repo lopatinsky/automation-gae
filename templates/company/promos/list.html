@@ -59,6 +59,7 @@
                 <th rowspan="2">Приоритет</th>
                 <th rowspan="2">Название</th>
                 <th rowspan="2">Описание</th>
+                <th rowspan="2">Картинка</th>
                 <th rowspan="2">Конфликты</th>
                 <th colspan="3">Условия</th>
                 <th colspan="3">Последствия</th>
@@ -99,6 +100,11 @@
                         </a>
                     </td>
                     <td rowspan="{{ height + 1 }}">{{ promo.description }}</td>
+                    <td rowspan="{{ height + 1 }}">
+                        {% if promo.image %}
+                            <img src="{{ promo.image }}">
+                        {% endif %}
+                    </td>
                     <td rowspan="{{ height + 1 }}">
                         <a href="/company/promos/conflicts?promo_id={{ promo.key.id() }}">Конфликты</a>
                     </td>

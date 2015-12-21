@@ -145,6 +145,8 @@ class Promo(ndb.Model):
     conditions = ndb.StructuredProperty(PromoCondition, repeated=True)
     outcomes = ndb.StructuredProperty(PromoOutcome, repeated=True)
 
+    image = ndb.StringProperty(indexed=False)
+
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
     priority = ndb.IntegerProperty()
     more_one = ndb.BooleanProperty(default=True)              # Not Implemented
@@ -195,7 +197,7 @@ class Promo(ndb.Model):
         else:
             return promos[index + 1]
 
-    def dict(self, hostname):
+    def _get_icon_url(self, hostname):
         icon = None
         if self.outcomes:
             outcome = self.outcomes[0]
@@ -210,11 +212,15 @@ class Promo(ndb.Model):
                 icon = self._get_url(hostname, self.DISCOUNT_ICON)
             elif outcome.method in [PromoOutcome.ORDER_GIFT, PromoOutcome.MARKED_ORDER_GIFT]:
                 icon = self._get_url(hostname, self.GIFT_ICON)
+        return icon
+
+    def dict(self, hostname):
         return {
             'id': self.key.id(),
             'title': self.title,
             'description': self.description,
-            'icon': icon
+            'icon': self.image or self._get_icon_url(hostname),
+            'is_icon': not self.image
         }
 
     def validation_dict(self):
