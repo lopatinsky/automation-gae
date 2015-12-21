@@ -6,6 +6,7 @@ from handlers.api.user import admin
 from handlers import web_app
 from handlers import wizard, web_admin, ext_api
 from handlers.cron import NotificatingInactiveUsersHandler
+from handlers.tasks.basket_notification import BasketNotificationHandler
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -249,7 +250,8 @@ app = WSGIApplication([
             ]),
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
-            Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key')
+            Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),
+            Route('/basket_notification_module_setup', BasketNotificationModuleHandler, 'basket_notification_module_setup')
         ]),
 
         PathPrefixRoute('/venues', [
@@ -443,9 +445,11 @@ app = WSGIApplication([
     PathPrefixRoute('/task', [
         Route('/counter_persist_incr', fastcounter.CounterPersistIncr),
         Route('/check_order_success', tasks.CheckOrderSuccessHandler),
+        Route('/basket_notification', BasketNotificationHandler, 'basket_notification'),
         PathPrefixRoute('/news', [
             Route('/start', tasks.StartNewsHandler),
         ]),
+
         PathPrefixRoute('/pushes', [
             Route('/start', tasks.StartPushesHandler),
             Route('/review', tasks.SendPushReviewHandler),

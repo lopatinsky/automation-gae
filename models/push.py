@@ -33,12 +33,10 @@ class Push(object):
         """
         self.text = text
         self.device_type = device_type
-        self.should_popup = None
-        self.push_type = None
-        self.header = None
-        self.channels = None
 
     def _send_push(self):
+        logging.debug("data:{}, dev_type: {}, parsekey: {}, parserest: {}".
+                      format(self.data, self.device_type, config.PARSE_APP_API_KEY, config.PARSE_REST_API_KEY))
         if not self.data or self.device_type not in DEVICE_CHOICES or not config.PARSE_APP_API_KEY or not config.PARSE_REST_API_KEY:
             logging.warning(u'Невозможно послать уведомление, data=%s, device_type=%s' % (self.data, self.device_type))
             return
@@ -167,6 +165,10 @@ class BaseSimplePush(Push):
             device_type = client.device_type
             client_channel = get_channels(namespace)[CLIENT_CHANNEL] % client.key.id()
             self.channels = [client_channel]
+            self.device_type = client.device_type
+
+            logging.debug('{}'.format(self.channels))
+
             super(BaseSimplePush, self).__init__(text, device_type)
 
         if channels is not None and device_type is not None:

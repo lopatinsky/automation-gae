@@ -83,6 +83,8 @@ class Client(ndb.Model):
     extra_data = ndb.JsonProperty()
     paypal_refresh_token = ndb.StringProperty(indexed=False)
     city = ndb.KeyProperty(kind=ProxyCity)
+    notif_id = ndb.StringProperty()
+
 
     @classmethod
     def create(cls, client_id=None):

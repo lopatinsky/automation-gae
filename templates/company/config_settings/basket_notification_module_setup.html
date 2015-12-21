@@ -1,0 +1,25 @@
+<html>
+<head></head>
+<body>
+{% include '/company/header.html' %}
+<form method="post">
+    <label>
+        Активен:
+        <input type="checkbox" {% if config.BASKET_NOTIFICATION_MODULE.status %}checked{% endif %} name="status">
+    </label><br>
+    <label>
+        Титулка: <br>
+        <input type="text" name="header" value="{{ config.BASKET_NOTIFICATION_MODULE.header }}">
+    </label><br>
+    <label>
+        Текст: <br>
+        <input type="text" name="text" value="{{ config.BASKET_NOTIFICATION_MODULE.text }}">
+    </label><br>
+    <label>
+        Время неактивности пользователя: <br>
+        <input type="number" name="inactivity_duration" value="{{ config.BASKET_NOTIFICATION_MODULE.inactivity_duration }}">
+    </label><br>
+    <input type="submit" value="Сохранить">
+</form>
+</body>
+</html>

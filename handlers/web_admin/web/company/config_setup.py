@@ -2,6 +2,7 @@ import logging
 
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods import branch_io
+from models.config.basket_notification import BasketNotificationModule
 from models.config.config import Config
 from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
 from models.config.share import ShareInvitationModule
@@ -106,6 +107,32 @@ class CreateBranchApiKeyHandler(CompanyBaseHandler):
         self.redirect_to('create_branch_api_key')
 
 
+class BasketNotificationModuleHandler(CompanyBaseHandler):
+    def get(self):
+        self.render('/config_settings/basket_notification_module_setup.html')
+
+    def post(self):
+        status = self.request.get('status') is not ''
+        header = self.request.get('header')
+        text = self.request.get('text')
+        inactivity_duration = self.request.get_range('inactivity_duration')
+
+        cnf = Config.get()
+
+        module = cnf.BASKET_NOTIFICATION_MODULE
+        if not module:
+            module = BasketNotificationModule()
+            cnf.BASKET_NOTIFICATION_MODULE = module
+
+        module.status = status
+        module.header = header
+        module.text = text
+        module.inactivity_duration = inactivity_duration
+
+        cnf.put()
+        self.redirect_to('company_main')
+
+
 class TestForm(CompanyBaseHandler):
     def get(self):
         self.render("/config_settings/inactive_users_notifications/test_form.html")
@@ -124,6 +151,7 @@ class ListNotifModuleHandler(CompanyBaseHandler):
         self.render('/config_settings/inactive_users_notifications/notif_modules.html', types=types)
         pass
 
+
 @config_rights_required
 def post(self):
     pass
@@ -136,7 +164,6 @@ class DeleteNotifModuleHandler(CompanyBaseHandler):
         cnf.NOTIFICATING_INACTIVE_USERS_MODULE.pop(module_num)
         cnf.put()
         self.redirect_to('list_notif_modules')
-
 
 
 class AddNotifModuleHandler(CompanyBaseHandler):
@@ -167,7 +194,6 @@ class AddNotifModuleHandler(CompanyBaseHandler):
                                                  text=text, days=days, should_push=should_push,
                                                  should_sms=should_sms, sms_if_has_points=sms_if_has_points,
                                                  sms_if_has_cashback=sms_if_has_cashback)
-
 
         conf = config.Config.get()
         conf.NOTIFICATING_INACTIVE_USERS_MODULE.append(module)
