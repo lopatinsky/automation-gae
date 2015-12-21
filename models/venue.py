@@ -227,6 +227,7 @@ class DeliveryType(ndb.Model):
     category_restrictions = ndb.KeyProperty(kind=MenuCategory, repeated=True)
     schedule_restriction = ndb.LocalStructuredProperty(Schedule)
     today_schedule = ndb.LocalStructuredProperty(DaySchedule)
+    default = ndb.BooleanProperty(default=False)
 
     @classmethod
     def create(cls, delivery_type):
@@ -256,6 +257,7 @@ class DeliveryType(ndb.Model):
             'slots': [slot.dict() for slot in sorted([slot.get() for slot in self.delivery_slots], key=lambda x: x.value)],
             'mode': mode,
             'time_required': mode in (self.MODE_EXACT_TIME, self.MODE_DATE_AND_SLOTS),
+            'default': self.default,
         }
 
 
