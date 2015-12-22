@@ -101,7 +101,12 @@ class AddingJSFileDeliveryZoneHandler(CompanyBaseHandler):
                 zone_decription = properties['description']
 
                 coordinates_array = geometry['coordinates']
-                delivery_coordinates = coordinates_array[0]
+                type = geometry['type']
+                if type == 'Polygon':
+                    delivery_coordinates = coordinates_array[0]
+                elif type == 'LineString':
+                    delivery_coordinates = coordinates_array
+
                 ribs_num = len(delivery_coordinates) - 1
 
                 delivery_zone = DeliveryZone()
@@ -121,6 +126,7 @@ class AddingJSFileDeliveryZoneHandler(CompanyBaseHandler):
                 start_point = delivery_coordinates[ribs_num - 1]
                 end_point = delivery_coordinates[0]
                 last_rib = GeoRib()
+                logging.debug('start_point: {}'.format(delivery_coordinates))
                 last_rib.point1 = GeoPt(lat=start_point[1], lon=start_point[0])
                 last_rib.point2 = GeoPt(lat=end_point[1], lon=end_point[0])
 
