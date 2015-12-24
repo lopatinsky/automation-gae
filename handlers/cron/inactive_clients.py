@@ -44,7 +44,6 @@ def filter_clients_by_module_logic(module, clients):
         if module.type == NEW_USERS_WITH_NO_ORDERS:
             if not check_registration_date(client, module.days) or get_orders_num(client) >= 1:
                 continue
-                # or get_first_order(client) is not None
         elif module.type == USERS_WITH_ONE_ORDER:
             if get_orders_num(client) != 1 and days_from_last_order(client) >= module.days:
                 continue

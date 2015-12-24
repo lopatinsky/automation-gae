@@ -2,6 +2,7 @@ import webapp2
 from close_orders import CloseOpenedOrdersHandler
 from check_pings import CheckPingsHandler
 from handlers.cron.alfa_errors import CheckAlfaErrorsHandler
+from handlers.cron.backup import LoadDataHandler
 from handlers.cron.build_square_table import BuildSquareTableHandler
 from handlers.cron.reporting import ReportSendHandler
 from inactive_clients import NotificatingInactiveUsersHandler
@@ -35,4 +36,5 @@ app = webapp2.WSGIApplication([
     ('/cron/update_rating', UpdateRatingHandler),
     ('/cron/update_hit', UpdateHitCategoryHandler),
     ('/cron/update_promos', UpdatePromosHandler),
+    ('/cron/load_backup', LoadDataHandler),
 ], debug=True)

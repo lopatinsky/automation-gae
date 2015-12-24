@@ -56,6 +56,19 @@ cron:
   schedule: every 1 hours from 00:10 to 23:59
   timezone: Europe/Moscow
 
+# Client, ClientSession, Order, Share, Venue, ClientPushSending, GeoPush
+- description: Daily Backup
+  url: /_ah/datastore_admin/backup.create?name=BackupToCloud&kind=Client&kind=ClientSession&kind=Order&kind=Share&kind=Venue&kind=ClientPushSending&kind=GeoPush&filesystem=gs&gs_bucket_name=automation-demo.appspot.com
+  schedule: every day 19:00
+  target: ah-builtin-python-bundle
+  timezone: Europe/Moscow
+
+
+- description: Send backup to bigquery
+  url: /cron/load_backup
+  schedule: every day 19:01
+  timezone: Europe/Moscow
+
 
 #- description: update rating
 #  url: /cron/update_rating

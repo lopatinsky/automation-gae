@@ -1,5 +1,8 @@
 import os
+from google.appengine.ext import vendor
 
+# Add any libraries installed in the "lib" folder.
+vendor.add('lib')
 
 def namespace_manager_default_namespace_for_request():
     host_parts = os.environ['SERVER_NAME'].split('.')

@@ -6,6 +6,7 @@ from handlers.api.user import admin
 from handlers import web_app
 from handlers import wizard, web_admin, ext_api
 from handlers.cron import NotificatingInactiveUsersHandler
+from handlers.cron.backup import LoadDataHandler
 from handlers.tasks.basket_notification import BasketNotificationHandler
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
@@ -38,7 +39,6 @@ app = WSGIApplication([
             Route('/confirm', email_api.ConfirmOrderHandler),
         ]),
     ]),
-
     PathPrefixRoute('/docs', [
         Route('/about.html', api.AboutHandler),
         Route('/licence_agreement.html', api.LicenceHandler),

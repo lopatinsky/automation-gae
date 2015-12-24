@@ -51,7 +51,7 @@ def check_registration_date(client, days):
     """Checks, if client registered some days ago"""
     today = datetime.today()
     days_num = (today - client.created).days
-    return days_num == days or days_num == days + 1
+    return days_num == days
 
 
 def check_first_order(client):
