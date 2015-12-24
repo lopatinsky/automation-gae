@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import time
 import uuid
 
 from googleapiclient import discovery
@@ -60,9 +59,6 @@ def load_table(bigquery, project_id, dataset_id, table_name,
             'load': {
                 'sourceFormat': 'DATASTORE_BACKUP',
                 'sourceUris': [source_path],
-                # 'schema': {
-                #     'fields': source_schema
-                # },
                 'destinationTable': {
                     'projectId': project_id,
                     'datasetId': dataset_id,
@@ -75,27 +71,6 @@ def load_table(bigquery, project_id, dataset_id, table_name,
     return bigquery.jobs().insert(
         projectId=project_id,
         body=job_data).execute(num_retries=num_retries)
-
-
-def poll_job(bigquery, job):
-    """Waits for a job to complete."""
-
-    print('Waiting for job to finish...')
-
-    request = bigquery.jobs().get(
-        projectId=job['jobReference']['projectId'],
-        jobId=job['jobReference']['jobId'])
-
-    while True:
-        result = request.execute(num_retries=2)
-
-        if result['status']['state'] == 'DONE':
-            if 'errorResult' in result['status']:
-                raise RuntimeError(result['status']['errorResult'])
-            print('Job complete.')
-            return
-
-        time.sleep(1)
 
 
 def get_service():
