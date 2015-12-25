@@ -3,6 +3,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
 from base import ApiHandler
+from methods.cities import get_company_cities
 from methods.fuckups import fuckup_ios_delivery_types
 from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
@@ -10,11 +11,31 @@ from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone, STATUS_AVAIL
 from models.config.menu import RemaindersModule
 from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
 from models.proxy.resto import RestoCompany
+from models.proxy.unified_app import AutomationCompany
 from models.venue import DELIVERY
 from models.specials import get_channels
 from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
 
 __author__ = 'dvpermyakov'
+
+
+class AppConfigurationHandler(ApiHandler):
+    def get(self):
+        has_cities = bool(get_company_cities())
+        has_companies = AutomationCompany.query().get(keys_only=True) is not None
+
+        self.render_json({
+            'has_cities': has_cities,
+            'has_companies': has_companies,
+
+            'keys': {
+                'branch': config.BRANCH_API_KEY,
+                'parse': {
+                    'app_key': config.PARSE_APP_API_KEY,
+                    'client_key': config.PARSE_CLIENT_API_KEY,
+                }
+            }
+        })
 
 
 class CompanyInfoHandler(ApiHandler):

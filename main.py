@@ -207,6 +207,10 @@ app = WSGIApplication([
             Route('/deposit', api.DepositToWalletHandler),
         ]),
 
+        PathPrefixRoute('/app', [
+            Route('/config', api.AppConfigurationHandler),
+        ]),
+
         PathPrefixRoute('/company', [
             Route('/info', api.CompanyInfoHandler),
             Route('/modules', api.CompanyModulesHandler),
