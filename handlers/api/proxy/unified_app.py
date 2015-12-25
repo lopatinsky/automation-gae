@@ -39,9 +39,16 @@ class MenuHandler(ApiHandler):
     def get(self):
         if not self.request.city:
             self.abort(400)
+        items = ProxyMenuItem.query().fetch()
+        result = []
+        for item in items:
+            real_items = item.get_items(self.request.city)
+            if not real_items:
+                continue
+            min_price = min(i.price for i in real_items) / 100.0
+            result.append(item.dict(min_price))
         self.render_json({
-            'items': [item.dict() for item in ProxyMenuItem.query(ProxyMenuItem.status == STATUS_AVAILABLE).fetch()
-                      if item.get_items(self.request.city)]
+            'items': result
         })
 
 

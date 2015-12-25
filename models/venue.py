@@ -354,6 +354,7 @@ class Venue(ndb.Model):
             distance = location.distance(user_location, self.coordinates)
         dct = {
             'id': str(self.key.id()),
+            'company_namespace': self.key.namespace(),
             'distance': distance,
             'title': self.title,
             'address': self.description,
@@ -368,7 +369,8 @@ class Venue(ndb.Model):
             'time_breaks': [time_break.dict() for time_break in self.time_break],
             'time_breaks_str': [time_break.get_days_str() for time_break in self.time_break],
             'called_phone': self.called_phone,
-            'extra_info': self.extra_info
+            'extra_info': self.extra_info,
+            'text_color': 'FFFFFF',  # for unified app
         }
         return dct
 

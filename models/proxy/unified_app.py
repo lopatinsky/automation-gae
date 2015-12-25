@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from models import STATUS_AVAILABLE, STATUS_CHOICES
@@ -76,7 +78,6 @@ class ProxyMenuItem(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     title = ndb.StringProperty(required=True)
     pic = ndb.StringProperty()
-    min_price = ndb.IntegerProperty(default=1000000)
 
     def compare(self, item):
         return self.title in item.title
@@ -101,12 +102,12 @@ class ProxyMenuItem(ndb.Model):
         namespace_manager.set_namespace(init_namespace)
         return items
 
-    def dict(self):
+    def dict(self, min_price):
         return {
             'id': str(self.key.id()),
             'title': self.title,
             'pic': self.pic,
-            'min_price': self.min_price
+            'min_price': min_price
         }
 
 
