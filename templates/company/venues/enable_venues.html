@@ -31,42 +31,41 @@
                 <th>Расписание</th>
             </tr>
             {% for venue in venues %}
-                {% set height = venue.days|length if venue.days else 1 %}
                 <tr>
-                    <td rowspan="{{ height }}">
+                    <td>
                         <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ venue.key.id() }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         <a href="/company/venues/{{ venue.key.id() }}">
                             {{ venue.title }}
                         </a>
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ venue.description }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {% set legal = venue.legal.get() if venue.legal else None %}
                         {{ (legal.person_ooo or legal.person_ip) if legal else '' }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ '+%s (%s)' % (venue.timezone_offset, venue.timezone_name) }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ venue.called_phone }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ ','.join(venue.phones) }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {{ ','.join(venue.emails) }}
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         <a href="{{ '/company/venues/choose_zones?venue_id=%s' % venue.key.id() }}">Выбрать зоны</a>
                     </td>
-                    <td rowspan="{{ height }}">
+                    <td>
                         {% if venue.time_break %}
                             {% for time_break in venue.time_break %}
                                 <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), loop.index0) }}">Выбрать</a>
@@ -74,24 +73,13 @@
                         {% endif %}
                         <a href="{{ '/company/venues/time_break?venue_id=%s&index=%s' % (venue.key.id(), venue.time_break|length) }}">Добавить</a>
                     </td>
-                    {% if venue.days %}
+                    <td>
                         {% for day in venue.days %}
-                            {% if loop.index0 == 0 %}
-                                <td>
-                                    <a href="{{ '/company/venues/schedule?venue_id=%s' % venue.key.id() }}">
-                                        {{ day.str() }}
-                                    </a>
-                                </td>
-                            {% else %}
-                                <td>{{ day.str() }}</td>
-                            {% endif %}
-                            </tr><tr>
+                            {{ day.short_str() }}<br>
                         {% endfor %}
-                    {% else %}
-                        <td>
-                            <a href="{{ '/company/venues/schedule?venue_id=%s' % venue.key.id() }}">Добавить</a>
-                        </td>
-                    {% endif %}
+                        <a href="{{ '/company/venues/schedule?venue_id=%s' % venue.key.id() }}">Настроить</a><br>
+                        <a href="{{ '/company/venues/holiday_schedule?venue_id=%s' % venue.key.id() }}">Праздники</a><br>
+                    </td>
                 </tr>
             {% endfor %}
         </table>

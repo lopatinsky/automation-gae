@@ -20,7 +20,8 @@ from promos import PromoListHandler, AddPromoHandler, ChangeApiKeysHandler, Choo
     UpPromoHandler, DownPromoHandler, AddHappyHoursHandler, PromoConflictsHandler
 from stop_lists import MainStopListHandler, StopListsHandler
 from venues import AddRestrictionHandler, CreateVenueHandler, EditVenueHandler, EnableVenuesHandler, MapVenuesHandler, \
-    VenueListHandler, ChooseDeliveryZonesHandler, EditVenueScheduleHandler, EditVenueTimeBreakHandler
+    VenueListHandler, ChooseDeliveryZonesHandler, EditVenueScheduleHandler, EditVenueTimeBreakHandler, \
+    EditVenueHolidayScheduleHandler
 from report import ClientsReportHandler, MenuItemsReportHandler, OrdersReportHandler, ReportHandler
 from barista import ListAdmins, ChangeLoginAdmins, ChangePasswordAdmin, AutoCreateAdmins, SignupHandler
 from docs import AboutCompanyHandler, SetAboutCompanyHandler, LegalListHandler, AddLegalListHandler, EditLegalHandler
