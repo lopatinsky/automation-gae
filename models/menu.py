@@ -400,12 +400,23 @@ class MenuCategory(ndb.Model):
         return category_dicts
 
 
+class PictureResizeMode(object):
+    CENTER_CROP = 0
+    CENTER_SHRINK = 1
+    CHOICES = (CENTER_CROP, CENTER_SHRINK)
+
+
 class MenuItem(ndb.Model):
     category = ndb.KeyProperty(kind=MenuCategory)
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty(indexed=False)
+
     picture = ndb.StringProperty(indexed=False)  # source
     cut_picture = ndb.StringProperty(indexed=False)
+    picture_resize_mode = ndb.IntegerProperty(choices=PictureResizeMode.CHOICES, default=PictureResizeMode.CENTER_CROP,
+                                              indexed=False)
+    picture_background = ndb.StringProperty(default="FFFFFF", indexed=False)
+
     icon = ndb.StringProperty(indexed=False)
     kal = ndb.IntegerProperty(indexed=False)
     weight = ndb.FloatProperty(indexed=False, default=0)
@@ -450,6 +461,8 @@ class MenuItem(ndb.Model):
             'price':  float(self.price) / 100.0,  # в рублях
             'kal': self.kal,
             'pic': self.picture if not self.cut_picture else self.cut_picture,
+            'pic_resize': self.picture_resize_mode,
+            'pic_background': self.picture_background,
             'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
