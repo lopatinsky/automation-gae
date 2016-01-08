@@ -262,7 +262,9 @@ class EditVenueHolidayScheduleHandler(CompanyBaseHandler):
              date(2016, 1, 7),
              date(2016, 1, 8),
              date(2016, 1, 9),
-             date(2016, 1, 10)]
+             date(2016, 1, 10),
+             date(2016, 1, 11),
+             date(2016, 1, 12)]
 
     def get(self):
         venue_id = self.request.get_range('venue_id')
