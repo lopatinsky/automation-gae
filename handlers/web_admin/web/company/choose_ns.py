@@ -2,7 +2,7 @@ from google.appengine.api import namespace_manager
 from google.appengine.ext.ndb import metadata
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods.auth import company_user_required
-from models.config.config import Config
+from models.config.config import config
 
 
 class ChooseNamespaceHandler(CompanyBaseHandler):
@@ -14,7 +14,6 @@ class ChooseNamespaceHandler(CompanyBaseHandler):
         real_namespaces = []
         for namespace in namespaces:
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             if config and config.APP_NAME:
                 real_namespaces.append((namespace, config.APP_NAME))
         namespace_manager.set_namespace(None)

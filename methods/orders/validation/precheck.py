@@ -6,7 +6,7 @@ from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 import time
 
-from models.config.config import Config
+from models.config.config import config
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates
 from methods.orders.validation.validation import get_first_error
@@ -47,7 +47,6 @@ def get_order_id(order_json):
 
 
 def set_extra_order_info(order, extra_info, num_people, cash_change):
-    config = Config.get()
     extra_json = {}
     if config.ORDER_MODULE and config.ORDER_MODULE.status == STATUS_AVAILABLE:
         for field in config.ORDER_MODULE.extra_fields:
@@ -86,7 +85,6 @@ def set_client_info(client_json, headers):
     if not client.device_type:
         client.device_type = get_device_type(client.user_agent)
     client.version = headers.get('Version', 0)
-    config = Config.get()
     extra_json = {}
     groups = client_json.get('groups') or {}
     if config.CLIENT_MODULE and config.CLIENT_MODULE.status == STATUS_AVAILABLE:

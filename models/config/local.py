@@ -22,3 +22,6 @@ class LocalConfigProxy(object):
 
     def __getattr__(self, item):
         return getattr(self._config_object, item)
+
+    def __nonzero__(self):
+        return bool(self._config_object)

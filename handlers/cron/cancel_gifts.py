@@ -4,7 +4,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 
-from models.config.config import Config
+from models.config.config import config
 from methods.emails import admins
 from models import SharedGift
 
@@ -17,7 +17,6 @@ class CancelGiftsHandler(RequestHandler):
         namespace_cancels = {}
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             unused_gifts = SharedGift.query(SharedGift.status == SharedGift.READY)
             old_gifts = [gift for gift in unused_gifts if gift.created < time]
             if old_gifts:

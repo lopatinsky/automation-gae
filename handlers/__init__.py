@@ -1,12 +1,11 @@
 import sys
 
-from models.config.config import Config, COMPANY_IN_PRODUCTION
+from models.config.config import config, COMPANY_IN_PRODUCTION
 from methods.emails import admins
 from models.config.version import CURRENT_APP_ID
 
 
 def handle_500(request, response, exception):
-    config = Config.get()
     if config and config.COMPANY_STATUS == COMPANY_IN_PRODUCTION:
         body = """URL: %s
 User-Agent: %s

@@ -5,8 +5,8 @@ from google.appengine.api.namespace_manager import namespace_manager
 
 from webapp2 import RequestHandler
 
-from models import Client, STATUS_AVAILABLE
-from models.config.config import Config
+from models import Client
+from models.config.config import config
 from models.geo_push import LeftBasketPromo
 from models.push import SimplePush
 
@@ -26,8 +26,7 @@ class BasketNotificationHandler(RequestHandler):
         existing = LeftBasketPromo.query(LeftBasketPromo.client == client.key,
                                          LeftBasketPromo.created >= today).get()
         if not existing:
-            conf = Config.get()
-            module = conf.BASKET_NOTIFICATION_MODULE
+            module = config.BASKET_NOTIFICATION_MODULE
 
             push = SimplePush(text=module.text, header=module.header, full_text=module.text, should_popup=False,
                               client=client, namespace=namespace)

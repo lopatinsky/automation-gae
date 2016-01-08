@@ -20,9 +20,9 @@ class SingleModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_single_modifier_by_id
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
@@ -107,10 +107,10 @@ class GroupModifier(ndb.Model):
 
     @classmethod
     def get(cls, modifier_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.menu import get_group_modifier_by_id as resto_get_group_modifier_by_id
         from methods.proxy.doubleb.menu import get_group_modifier_by_id as doubleb_get_group_modifier_by_id
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
@@ -119,8 +119,8 @@ class GroupModifier(ndb.Model):
             return doubleb_get_group_modifier_by_id(modifier_id)
 
     def get_choice_by_id(self, choice_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
-        app_kind = Config.get().APP_KIND
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             choice_id = int(choice_id)
             choices = self.choices
@@ -229,9 +229,9 @@ class MenuCategory(ndb.Model):
 
     @classmethod
     def get(cls, category_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.menu import get_category_by_id
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(category_id))
         elif app_kind == RESTO_APP:
@@ -246,10 +246,10 @@ class MenuCategory(ndb.Model):
         return category
 
     def get_categories(self, venue=None):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.menu import get_categories as resto_get_categories
         from methods.proxy.doubleb.menu import get_categories as doubleb_get_categories
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             categories = MenuCategory.query(MenuCategory.category == self.key).fetch()
             for category in categories[:]:
@@ -264,8 +264,8 @@ class MenuCategory(ndb.Model):
     def get_items(self, city=None, city_venues=None, only_available=False, venue=None):
         from methods.proxy.resto.menu import get_products as resto_get_products
         from methods.proxy.doubleb.menu import get_items as doubleb_get_products
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
-        app_kind = Config.get().APP_KIND
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             items = MenuItem.query(MenuItem.category == self.key).fetch()
         elif app_kind == RESTO_APP:
@@ -437,10 +437,10 @@ class MenuItem(ndb.Model):
 
     @classmethod
     def get(cls, product_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.menu import get_product_by_id as resto_get_product_by_id
         from methods.proxy.doubleb.menu import get_product_by_id as doubleb_get_product_by_id
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(product_id))
         elif app_kind == RESTO_APP:

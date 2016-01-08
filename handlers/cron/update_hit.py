@@ -5,7 +5,7 @@ from webapp2 import RequestHandler
 from methods.emails import admins
 from methods.hit import update_ratings, update_hit_category
 from models import STATUS_AVAILABLE
-from models.config.config import Config
+from models.config.config import config
 
 __author__ = 'dvpermyakov'
 
@@ -14,7 +14,6 @@ class UpdateRatingHandler(RequestHandler):
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             if config.HIT_MODULE and config.HIT_MODULE.status == STATUS_AVAILABLE:
                 deferred.defer(update_ratings)
 
@@ -24,7 +23,6 @@ class UpdateHitCategoryHandler(RequestHandler):
         namespace_hit = {}
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             if config.HIT_MODULE and config.HIT_MODULE.status == STATUS_AVAILABLE:
                 module = config.HIT_MODULE
                 update_hit_category()

@@ -7,7 +7,7 @@ from google.appengine.ext import ndb
 from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE, Promo, MenuCategory
-from models.config.config import Config
+from models.config.config import config
 from models.geo_push import GeoPush, LeftBasketPromo
 from models.order import Order
 from outcomes import get_item_dict
@@ -205,7 +205,6 @@ def check_geo_push(client, order):
     push = GeoPush.query(GeoPush.client == client.key, GeoPush.status == STATUS_AVAILABLE).get()
     success = False
     if push:
-        config = Config.get()
         last_day = datetime.utcnow() - timedelta(days=config.GEO_PUSH_MODULE.days_without_order)
         last_order = Order.query(Order.date_created > last_day,
                                  Order.client_id == client.key.id(),

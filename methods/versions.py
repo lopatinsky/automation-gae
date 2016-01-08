@@ -1,5 +1,7 @@
 from datetime import datetime
 import logging
+from distutils import config
+
 from google.appengine.api.namespace_manager import namespace_manager
 from models.config.version import TEST_VERSIONS, Version, CURRENT_VERSION, CURRENT_APP_ID, PRODUCTION_APP_ID, \
     DEMO_APP_ID
@@ -29,15 +31,15 @@ def is_test_version():
 def get_version(version, create=False):
     version = int(version)
     version_obj = None
-    config = Config.get()
-    for version_obj in config.VERSIONS:
+    cfg = Config.get()
+    for version_obj in cfg.VERSIONS:
         if version_obj.number == version:
             return version_obj
     if create:
         now = datetime.utcnow()
         version_obj = Version(created=now, updated=now, number=version)
-        config.VERSIONS.append(version_obj)
-        config.put()
+        cfg.VERSIONS.append(version_obj)
+        cfg.put()
     return version_obj
 
 
@@ -55,7 +57,6 @@ def update_company_versions(version):
 
 
 def update_namespace(namespace):
-    config = Config.get()
     init_namespace = None
 
     if CURRENT_APP_ID == PRODUCTION_APP_ID:

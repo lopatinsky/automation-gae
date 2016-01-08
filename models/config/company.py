@@ -15,8 +15,7 @@ class CompanyInfo(ndb.Model):
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
-        from models.config.config import Config
-        config = Config.get()
+        from models.config.config import config
         if config.APP_KIND == AUTO_APP:
             return {
                 'app_name': self.APP_NAME,

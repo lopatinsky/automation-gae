@@ -122,7 +122,6 @@ class CompanyBaseUrlsHandler(ApiHandler):
         companies = []
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             if config and config.APP_NAME:
                 companies.append({
                     'base_url': u'http://%s.%s.%s.appspot.com' % (namespace, CURRENT_VERSION, CURRENT_APP_ID),

@@ -14,8 +14,7 @@ class MenuFrameModule(ndb.Model):
 
     @classmethod
     def has_module(cls):
-        from models.config.config import Config
-        config = Config.get()
+        from models.config.config import config
         module = config.MENU_FRAME_MODULE
         return module and module.status == STATUS_AVAILABLE
 
@@ -48,8 +47,7 @@ class RemaindersModule(ndb.Model):
 
     @classmethod
     def has_module(cls):
-        from models.config.config import Config, RESTO_APP
-        config = Config.get()
+        from models.config.config import config, RESTO_APP
         module = config.REMAINDERS_MODULE
         return module and module.status == STATUS_AVAILABLE and config.APP_KIND == RESTO_APP
 

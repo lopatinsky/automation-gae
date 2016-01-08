@@ -124,9 +124,8 @@ class AutomationCompany(ndb.Model):
                 return company
 
     def dict(self):
-        from models.config.config import Config, COMPANY_PREVIEW
+        from models.config.config import config, COMPANY_PREVIEW
         namespace_manager.set_namespace(self.namespace)
-        config = Config.get()
         return {
             'name': config.APP_NAME,
             'namespace': self.namespace,
