@@ -8,16 +8,18 @@ __author__ = 'dvpermyakov'
 class LocalConfigProxy(object):
     _local = threading.local()
 
-    def __init__(self):
-        self._local.config = None
-
     @property
     def _config_object(self):
         from models.config.config import Config
-        if self._local.config:
-            if self._local.config.key.namespace() == namespace_manager.get_namespace():
-                return self._local.config
-        self._local.config = Config.get()
+
+        try:
+            self._local.config
+        except AttributeError:
+            self._local.config = Config.get()
+        else:
+            if not self._local.config or self._local.config.key.namespace != namespace_manager.get_namespace():
+                self._local.config = Config.get()
+
         return self._local.config
 
     def __getattr__(self, item):
