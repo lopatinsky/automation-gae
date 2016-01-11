@@ -1,4 +1,4 @@
-from methods.orders.promos.conditions import check_left_basket_promo
+from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited
 from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
@@ -120,6 +120,10 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_max_date(condition, delivery_time)
     elif condition.method == PromoCondition.CHECK_LEFT_BASKET_PROMO:
         return check_left_basket_promo(client, order)
+    elif condition.method == PromoCondition.CHECK_INVITED_USER:
+        return check_user_invited_another(client)
+    elif condition.method == PromoCondition.CHECK_USER_INVITED:
+        return check_user_is_invited(client)
     else:
         return True
 

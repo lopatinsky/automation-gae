@@ -4,12 +4,13 @@ from datetime import datetime, timedelta
 
 from google.appengine.ext import ndb
 
-from methods import working_hours
+from methods import working_hours, branch_io
 from methods.versions import CLIENT_VERSIONS
-from models import STATUS_AVAILABLE, Promo, MenuCategory
+from models import STATUS_AVAILABLE, Promo, MenuCategory, Share
 from models.config.config import Config
 from models.geo_push import GeoPush, LeftBasketPromo
 from models.order import Order
+from models.share import SharedPromo
 from outcomes import get_item_dict
 from models.order import NOT_CANCELED_STATUSES
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
@@ -262,3 +263,12 @@ def check_max_date(condition, delivery_time):
     if delivery_time.date() <= condition_date:
         return True
     return False
+
+
+def check_user_invited_another(client):
+    shared_promo = SharedPromo.query(SharedPromo.sender == client.key, SharedPromo.status == 1).get()
+    return shared_promo is not None
+
+def check_user_is_invited(client):
+    shared_promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
+    return shared_promo is not None
