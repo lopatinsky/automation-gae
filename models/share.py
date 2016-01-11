@@ -66,8 +66,7 @@ class SharedPromo(ndb.Model):
         from methods.push import send_client_push
         from methods.empatika_promos import register_order
         from methods.empatika_wallet import deposit
-        from models.config.config import Config
-        config = Config.get()
+        from models.config.config import config
         module = config.SHARE_INVITATION_MODULE
         if module.sender_accumulated_points or module.sender_wallet_points:
             sender_order_id = "sender_referral_%s" % self.recipient.id()
@@ -190,7 +189,7 @@ class SharedGift(ndb.Model):
 
     def dict(self):
         from models import Client
-        from models.config.config import Config
+        from models.config.config import config
         from methods.rendering import timestamp
         item_dicts = [si.get().dict() for si in self.share_items]
 
@@ -206,10 +205,9 @@ class SharedGift(ndb.Model):
         sender = Client.get(self.client_id)
         sender_dict = sender.dict()
 
-        cfg = Config.get()
         share = Share.get_by_id(self.share_id)
         text = u'Дарю тебе подарок в приложении %s! Установи его: %s или введи в нем промо-код %s' % \
-               (cfg.APP_NAME, share.channel_urls[0].url, self.promo_code.id())
+               (config.APP_NAME, share.channel_urls[0].url, self.promo_code.id())
 
         return {
             'items': item_dicts,

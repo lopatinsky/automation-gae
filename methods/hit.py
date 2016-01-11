@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
 from google.appengine.ext.deferred import deferred
 from models import STATUS_AVAILABLE, MenuCategory, Order, MenuItem, STATUS_UNAVAILABLE
-from models.config.config import Config
+from models.config.config import config, Config
 from models.config.menu import HIT_SEQUENCE_NUMBER
 
 __author__ = 'dvpermyakov'
 
 
 def include_hit_category(menu_dict):
-    config = Config.get()
     if config.HIT_MODULE and config.HIT_MODULE.status == STATUS_AVAILABLE:
         module = config.HIT_MODULE
         category_dict = MenuCategory(id='hit_category', title=module.title, picture=module.picture,
@@ -38,7 +37,6 @@ def _update_items_rating(orders):
 
 
 def update_ratings():
-    config = Config.get()
     if config.HIT_MODULE and config.HIT_MODULE.status == STATUS_AVAILABLE:
         module = config.HIT_MODULE
         last = datetime.utcnow() - timedelta(days=module.consider_days)
@@ -48,9 +46,9 @@ def update_ratings():
 
 
 def update_hit_category():
-    config = Config.get()
-    if config.HIT_MODULE and config.HIT_MODULE.status == STATUS_AVAILABLE:
-        module = config.HIT_MODULE
+    cfg = Config.get()
+    if cfg.HIT_MODULE and cfg.HIT_MODULE.status == STATUS_AVAILABLE:
+        module = cfg.HIT_MODULE
         items = []
         for item in MenuItem.query().order(-MenuItem.rating).fetch():
             if len(items) >= module.max_item_amount - len(module.cunning_items):
@@ -62,4 +60,4 @@ def update_hit_category():
             items.append(item.key)
         items.extend(module.cunning_items)
         module.items = items
-        config.put()
+        cfg.put()

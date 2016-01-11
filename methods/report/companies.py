@@ -1,6 +1,6 @@
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
-from models.config.config import Config, COMPANY_IN_PRODUCTION
+from models.config.config import config, COMPANY_IN_PRODUCTION
 from models import Order
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
 from models.payment_types import PAYMENT_TYPE_MAP
@@ -24,7 +24,6 @@ def get(start, end, chosen_object_type, chosen_namespaces):
     skip_companies = []
     for namespace in metadata.get_namespaces():
         namespace_manager.set_namespace(namespace)
-        config = Config.get()
         if not config or not config.APP_NAME:
             continue
         if (chosen_namespaces and namespace in chosen_namespaces) or \

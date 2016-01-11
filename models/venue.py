@@ -146,9 +146,9 @@ class DeliveryZone(ndb.Model):
 
     @classmethod
     def get(cls, zone_key):
-        from models.config.config import Config, AUTO_APP, RESTO_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP
         from methods.proxy.resto.company import get_delivery_zone
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(zone_key.id())
         elif app_kind == RESTO_APP:
@@ -290,8 +290,8 @@ class Venue(ndb.Model):
 
     @classmethod
     def get(cls, venue_id):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
-        app_kind = Config.get().APP_KIND
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.get_by_id(int(venue_id))
         elif app_kind in [RESTO_APP, DOUBLEB_APP]:
@@ -303,10 +303,10 @@ class Venue(ndb.Model):
 
     @classmethod
     def fetch_venues(cls, *args, **kwargs):
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.venues import get_venues as resto_get_venues
         from methods.proxy.doubleb.venues import get_venues as doubleb_get_venues
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             return cls.query(*args, **kwargs).fetch()
         elif app_kind in [RESTO_APP, DOUBLEB_APP]:
@@ -354,6 +354,7 @@ class Venue(ndb.Model):
             distance = location.distance(user_location, self.coordinates)
         dct = {
             'id': str(self.key.id()),
+            'company_namespace': self.key.namespace(),
             'distance': distance,
             'title': self.title,
             'address': self.description,
@@ -368,7 +369,8 @@ class Venue(ndb.Model):
             'time_breaks': [time_break.dict() for time_break in self.time_break],
             'time_breaks_str': [time_break.get_days_str() for time_break in self.time_break],
             'called_phone': self.called_phone,
-            'extra_info': self.extra_info
+            'extra_info': self.extra_info,
+            'text_color': 'FFFFFF',  # for unified app
         }
         return dct
 
@@ -398,10 +400,10 @@ class Venue(ndb.Model):
         if candidates:
             address = candidates[0]
             self.address = Address(**address['address'])
-            config = Config.get()
-            if self.address.country not in config.COUNTRIES:
-                config.COUNTRIES.append(self.address.country)
-                config.put()
+            cfg = Config.get()
+            if self.address.country not in cfg.COUNTRIES:
+                cfg.COUNTRIES.append(self.address.country)
+                cfg.put()
         self.update_timezone()
 
     def update_timezone(self):

@@ -12,8 +12,7 @@ def _check_day(date, day, time):
 
 def check(schedule, time):
     def check_day(date):
-        weekday = date.isoweekday()
-        day = schedule.get_day(weekday)
+        day = schedule.get_item_for_date(date)
         if not day:
             return False
         return _check_day(date, day, time)
@@ -27,9 +26,9 @@ def check_with_errors(schedule, time):
     valid = check(schedule, time)
     if valid:
         return True, None
-    day = schedule.get_day(time.isoweekday())
+    day = schedule.get_item_for_date(time.date())
     if not day:
-        return False, u'Заказы в этот день недели недоступны.'
+        return False, u'Заказы в этот день недоступны.'
     else:
         return False, day.get_valid_time_str()
 

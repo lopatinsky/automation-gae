@@ -6,7 +6,7 @@ from methods.emails.postmark import send_email
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
 from methods.rendering import get_phone
 from models import Client, STATUS_UNAVAILABLE
-from models.config.config import Config
+from models.config.config import config
 from models.mivako_gift import Recipient, MivakoGift
 from models.share import SharedGiftMenuItem
 
@@ -23,7 +23,6 @@ class MivakoGetUrlHandler(ApiHandler):
         })
 
     def post(self):
-        config = Config.get()
         module = config.MIVAKO_GIFT_MODULE
         if not module or not module.status:
             return self.send_error(u'Даннаая услуга отключена')

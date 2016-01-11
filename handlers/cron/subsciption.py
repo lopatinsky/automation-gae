@@ -13,14 +13,13 @@ class CloseSubscriptionHandler(RequestHandler):
         namespace_subscription = {}
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             now = datetime.utcnow()
             subscriptions = Subscription.query(Subscription.expiration < now,
                                                Subscription.status == STATUS_AVAILABLE).fetch()
             for subscription in subscriptions:
                 subscription.close()
             if len(subscriptions) > 0:
-                text = 'Subscription count = %s are expired. In company %s\n' % (len(subscriptions), config.APP_NAME)
+                text = 'Subscription count = %s are expired. In company %s\n' % (len(subscriptions), namespace)
                 namespace_subscription[namespace] = text
         if namespace_subscription:
             namespace_manager.set_namespace('')

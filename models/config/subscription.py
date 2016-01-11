@@ -15,8 +15,7 @@ class SubscriptionModule(ndb.Model):
 
     @classmethod
     def has_module(cls):
-        from models.config.config import Config
-        config = Config.get()
+        from models.config.config import config
         return config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status == STATUS_AVAILABLE
 
     def dict(self):

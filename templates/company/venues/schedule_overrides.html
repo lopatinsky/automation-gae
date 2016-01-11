@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Расписание на праздники</title>
+</head>
+<body>
+    <form action="" method="post">
+        {% for override in overrides %}
+            <b>{{ override.date }}</b><br>
+            <label>
+                <input type="radio" name="{{ override.date }}" value="normal" {% if override.closed is none %}checked{% endif %}>
+                Без изменений
+            </label><br>
+            <label>
+                <input type="radio" name="{{ override.date }}" value="closed" {% if override.closed %}checked{% endif %}>
+                Закрыто
+            </label><br>
+            <label>
+                <input type="radio" name="{{ override.date }}" value="override" {% if override.closed == false %}checked{% endif %}>
+                Особое расписание
+            </label>
+            с <input type="time" name="{{ override.date }}-start" {% if override.start %}value="{{ override.start.strftime("%H:%M") }}"{% endif %}>
+            до <input type="time" name="{{ override.date }}-end" {% if override.end %}value="{{ override.end.strftime("%H:%M") }}"{% endif %}>
+            <br>
+        {% endfor %}
+        <input type="submit" value="Сохранить">
+    </form>
+</body>
+</html>

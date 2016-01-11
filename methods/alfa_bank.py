@@ -4,7 +4,7 @@ import urllib
 
 from google.appengine.api import urlfetch
 
-from models.config.config import Config
+from models.config.config import config
 from models import PaymentErrorsStatistics
 
 ALPHA_CARD_LIMIT_CODES = [-20010, 902, 116, 123]
@@ -29,7 +29,6 @@ def _success(resp):
 
 
 def __post_request_alfa(api_path, params, deadline=30):
-    config = Config.get()
     url = '%s%s' % (config.ALFA_BASE_URL, api_path)
     payload = json.dumps(params)
     logging.info(payload)

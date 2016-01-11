@@ -163,9 +163,9 @@ class Promo(ndb.Model):
 
     @classmethod
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
-        from models.config.config import Config, AUTO_APP, RESTO_APP, DOUBLEB_APP
+        from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.promo import get_promos
-        app_kind = Config.get().APP_KIND
+        app_kind = config.APP_KIND
         if app_kind in [AUTO_APP, DOUBLEB_APP]:
             return cls.query(*args, **kwargs).fetch()
         elif app_kind == RESTO_APP:

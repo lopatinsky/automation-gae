@@ -60,18 +60,19 @@ class ApiHandler(RequestHandler):
 
         client_id = self.request.headers.get('Client-Id')
         city_id = self.request.headers.get('City-Id')
-        if city_id and client_id:
+        if city_id:
             company = AutomationCompany.query(AutomationCompany.status == STATUS_AVAILABLE).get()
             if company:
                 city = ProxyCity.get_by_id(int(city_id))
             else:
                 city = ProxyCity(city=base64.b64decode(city_id).decode('utf-8'))
-            client = Client.get_by_id(int(client_id))
-            if not city or not client_id:
+            if not city:
                 self.abort(400)
             self.request.city = city
-            if company:
-                save_city(client, city.key.id())
+            if client_id:
+                client = Client.get(int(client_id))
+                if company:
+                    save_city(client, city.key.id())
         else:
             self.request.city = None
 

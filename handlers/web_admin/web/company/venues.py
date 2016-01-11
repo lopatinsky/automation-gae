@@ -1,5 +1,5 @@
 # coding:utf-8
-from datetime import datetime
+from datetime import datetime, date, time
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
 from methods.auth import venue_rights_required
@@ -7,7 +7,7 @@ from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, DeliveryZone
 from methods import geocoder
 from models.legal import LegalInfo
-from models.schedule import DaySchedule, Schedule
+from models.schedule import DaySchedule, Schedule, DateSchedule
 from models.venue import DELIVERY
 
 
@@ -246,6 +246,57 @@ class EditVenueScheduleHandler(CompanyBaseHandler):
                 days.append(DaySchedule(weekday=day, start=start.time(), end=end.time()))
         schedule = Schedule(days=days)
         venue.schedule = schedule
+        venue.put()
+        self.redirect('/company/venues')
+
+
+class EditVenueHolidayScheduleHandler(CompanyBaseHandler):
+    DATES = [date(2015, 12, 30),
+             date(2015, 12, 31),
+             date(2016, 1, 1),
+             date(2016, 1, 2),
+             date(2016, 1, 3),
+             date(2016, 1, 4),
+             date(2016, 1, 5),
+             date(2016, 1, 6),
+             date(2016, 1, 7),
+             date(2016, 1, 8),
+             date(2016, 1, 9),
+             date(2016, 1, 10),
+             date(2016, 1, 11),
+             date(2016, 1, 12)]
+
+    def get(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        overrides = []
+        for date in self.DATES:
+            for override in venue.schedule.overrides:
+                if override.date == date:
+                    overrides.append(override)
+                    break
+            else:
+                overrides.append(DateSchedule(date=date))
+        self.render('/venues/schedule_overrides.html', venue=venue, overrides=overrides)
+
+    def post(self):
+        venue_id = self.request.get_range('venue_id')
+        venue = Venue.get_by_id(venue_id)
+        if not venue:
+            self.abort(400)
+        venue.schedule.overrides = []
+        for override_date in self.DATES:
+            option = self.request.get(str(override_date))
+            if option == 'normal':
+                continue
+            elif option == 'closed':
+                venue.schedule.overrides.append(DateSchedule(date=override_date, closed=True, start=time(0, 0), end=time(0, 0)))
+            else:
+                start = datetime.strptime(self.request.get("%s-start" % override_date), "%H:%M").time()
+                end = datetime.strptime(self.request.get("%s-end" % override_date), "%H:%M").time()
+                venue.schedule.overrides.append(DateSchedule(date=override_date, closed=False, start=start, end=end))
         venue.put()
         self.redirect('/company/venues')
 

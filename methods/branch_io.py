@@ -44,9 +44,8 @@ FEATURE_MAP = {
 
 
 def create_url(share_id, feature, channel, user_agent, custom_tags=None, recipient=None, alias=None):
-    from models.config.config import Config
+    from models.config.config import config
 
-    config = Config.get()
     params = {
         'branch_key': config.BRANCH_API_KEY,
         'data': {

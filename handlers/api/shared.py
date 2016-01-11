@@ -1,13 +1,10 @@
 # coding: utf-8
 import json
 
-from google.appengine.ext.deferred import deferred
 
 from methods.branch_io import SMS
-from models.config.config import EMAIL_FROM, Config
-from methods.emails.mandrill import send_email
+from models.config.config import config
 from methods.orders.validation.validation import set_modifiers, set_price_with_modifiers
-from methods.sms.sms_pilot import send_sms
 from models.legal import LegalInfo
 from models.promo_code import PromoCode, KIND_SHARE_GIFT, PromoCodeGroup, KIND_SHARE_INVITATION
 
@@ -25,7 +22,6 @@ import logging
 
 class GetInvitationInfoHandler(ApiHandler):
     def get(self):
-        config = Config.get()
         if not config.SHARE_INVITATION_ENABLED:
             self.abort(403)
         self.render_json({
@@ -43,7 +39,6 @@ class GetInvitationUrlHandler(ApiHandler):
         if not client:
             self.abort(400)
 
-        config = Config.get()
         if not config.SHARE_INVITATION_ENABLED:
             self.abort(403)
         share = Share.query(Share.sender == client.key, Share.status == Share.ACTIVE,
@@ -90,8 +85,6 @@ class GetGiftUrlHandler(ApiHandler):
         })
 
     def success(self, sender, gift, promo_code, sender_phone, sender_email, reciptient_name, recipient_phone):
-        cfg = Config.get()
-
         share = Share(share_type=branch_io.GIFT, sender=sender.key)
         share.put()
         if 'iOS' in self.request.headers["User-Agent"]:
@@ -110,7 +103,7 @@ class GetGiftUrlHandler(ApiHandler):
         gift.share_id = share.key.id()
         gift.put()
         text = u'Вам подарок от %s в приложении %s! Установите его: %s или введите в нем промо-код %s' % \
-               (sender_phone, cfg.APP_NAME, url, promo_code.key.id())
+               (sender_phone, config.APP_NAME, url, promo_code.key.id())
         self.render_json({
             'success': True,
             'sms_text': text

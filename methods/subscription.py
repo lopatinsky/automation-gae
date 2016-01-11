@@ -1,6 +1,6 @@
 from google.appengine.ext import ndb
 from models import STATUS_AVAILABLE, MenuItem
-from models.config.config import Config
+from models.config.config import config
 from models.subscription import Subscription, SubscriptionMenuItem
 
 __author__ = 'dvpermyakov'
@@ -29,7 +29,6 @@ def get_amount_of_subscription_items(item_dicts):
 
 
 def get_subscription_category_dict():
-    config = Config.get()
     module = config.SUBSCRIPTION_MODULE
     if module and module.status:
         return True, {

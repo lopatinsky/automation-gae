@@ -8,7 +8,7 @@ from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 from methods.rendering import latinize
 
-from models.config.config import Config
+from models.config.config import config
 from methods import excel
 from methods.report import orders
 from models.config.version import CURRENT_APP_ID
@@ -19,7 +19,6 @@ _EMAIL_SENDER = "reports@%s.appspotmail.com" % CURRENT_APP_ID
 
 def _send(namespace):
     namespace_manager.set_namespace(namespace)
-    config = Config.get()
     company_emails = config.REPORT_EMAILS.split(",") if config.REPORT_EMAILS else ()
 
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
@@ -63,7 +62,6 @@ class ReportSendHandler(RequestHandler):
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            config = Config.get()
             if not config:
                 continue
             deferred.defer(_send, namespace)

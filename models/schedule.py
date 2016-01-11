@@ -4,7 +4,29 @@ from google.appengine.ext import ndb
 __author__ = 'dvpermyakov'
 
 
-class DaySchedule(ndb.Model):
+class ScheduleItem(ndb.Model):
+    start = ndb.TimeProperty(required=True)
+    end = ndb.TimeProperty(required=True)
+
+    def start_str(self):
+        from methods.rendering import STR_TIME_FORMAT
+        return self.start.strftime(STR_TIME_FORMAT)
+
+    def end_str(self):
+        from methods.rendering import STR_TIME_FORMAT
+        return self.end.strftime(STR_TIME_FORMAT)
+
+    def get_valid_time_str(self):
+        return u'Заказы в этот день доступны c %s до %s.' % (self.start_str(), self.end_str())
+
+    def get_restriction_time_str(self, what):
+        return u'Заказы %s доступны c %s до %s.' % (what, self.start_str(), self.end_str())
+
+    def get_time_break_str(self):
+        return u'Перерыв c %s до %s.' % (self.start_str(), self.end_str())
+
+
+class DaySchedule(ScheduleItem):
     DAYS = (1, 2, 3, 4, 5, 6, 7)
     DAY_MAP = {
         1: u'Понедельник',
@@ -26,8 +48,6 @@ class DaySchedule(ndb.Model):
     }
 
     weekday = ndb.IntegerProperty(required=True, choices=DAYS)
-    start = ndb.TimeProperty(required=True)
-    end = ndb.TimeProperty(required=True)
 
     def compare(self, day, weekday_include=False):
         result = self.start == day.start and self.end == day.end
@@ -42,29 +62,21 @@ class DaySchedule(ndb.Model):
         else:
             return '%s-%s: %s' % (self.DAY_SHORT_MAP[self.weekday], day.DAY_SHORT_MAP[day.weekday], hours_interval_str)
 
-    def start_str(self):
-        from methods.rendering import STR_TIME_FORMAT
-        return self.start.strftime(STR_TIME_FORMAT)
-
-    def end_str(self):
-        from methods.rendering import STR_TIME_FORMAT
-        return self.end.strftime(STR_TIME_FORMAT)
-
-    def get_valid_time_str(self):
-        return u'Заказы в этот день доступны c %s до %s.' % (self.start_str(), self.end_str())
-
-    def get_restriction_time_str(self, what):
-        return u'Заказы %s доступны c %s до %s.' % (what, self.start_str(), self.end_str())
-
-    def get_time_break_str(self):
-        return u'Перерыв c %s до %s.' % (self.start_str(), self.end_str())
+    def short_str(self):
+        return u'%s, %s - %s' % (self.DAY_SHORT_MAP[self.weekday], self.start_str(), self.end_str())
 
     def str(self):
         return u'%s, %s - %s' % (self.DAY_MAP[self.weekday], self.start_str(), self.end_str())
 
 
+class DateSchedule(ScheduleItem):
+    date = ndb.DateProperty(required=True)
+    closed = ndb.BooleanProperty(required=True)
+
+
 class Schedule(ndb.Model):
     days = ndb.LocalStructuredProperty(DaySchedule, repeated=True)
+    overrides = ndb.LocalStructuredProperty(DateSchedule, repeated=True)
 
     def get_days(self, start, end):
         days = []
@@ -77,6 +89,14 @@ class Schedule(ndb.Model):
         for day in self.days:
             if day.weekday == weekday:
                 return day
+
+    def get_item_for_date(self, date):
+        for override in self.overrides:
+            if override.date == date:
+                if override.closed:
+                    return None
+                return override
+        return self.get_day(date.isoweekday())
 
     def get_days_str(self):
         def add_interval(result):

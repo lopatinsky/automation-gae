@@ -1,10 +1,11 @@
 # coding=utf-8
 from google.appengine.api.namespace_manager import namespace_manager
-from ..base import ApiHandler
+
+from methods.cities import get_company_cities
 from methods.rendering import get_location
-from models import STATUS_AVAILABLE, MenuItem, Venue
-from models.proxy.unified_app import AutomationCompany, ProxyCity, ProxyMenuItem
-import base64
+from models import STATUS_AVAILABLE
+from models.proxy.unified_app import AutomationCompany, ProxyMenuItem
+from ..base import ApiHandler
 
 
 class CompaniesHandler(ApiHandler):
@@ -19,26 +20,8 @@ class CompaniesHandler(ApiHandler):
 
 class CitiesHandler(ApiHandler):
     def get(self):
-        companies = AutomationCompany.query(AutomationCompany.status == STATUS_AVAILABLE).fetch()
-        if companies:
-            cities_dict = [city.dict() for city in ProxyCity.query(ProxyCity.status == STATUS_AVAILABLE).fetch()]
-        else:
-            found = False
-            for venue in Venue.query(Venue.active == True).fetch():
-                if MenuItem.query(MenuItem.restrictions.IN((venue.key,))).get():
-                    found = True
-            if not found:
-                return self.render_json({})
-            cities = Venue.get_cities()
-            if len(cities) > 1:
-                cities_dict = [{
-                    'city': city,
-                    'id': base64.b64encode(city.encode('utf-8'))
-                } for city in cities]
-            else:
-                return self.render_json({})
         self.render_json({
-            'cities': cities_dict
+            'cities': get_company_cities()
         })
 
 
@@ -56,9 +39,16 @@ class MenuHandler(ApiHandler):
     def get(self):
         if not self.request.city:
             self.abort(400)
+        items = ProxyMenuItem.query().fetch()
+        result = []
+        for item in items:
+            real_items = item.get_items(self.request.city)
+            if not real_items:
+                continue
+            min_price = min(i.price for i in real_items) / 100.0
+            result.append(item.dict(min_price))
         self.render_json({
-            'items': [item.dict() for item in ProxyMenuItem.query(ProxyMenuItem.status == STATUS_AVAILABLE).fetch()
-                      if item.get_items(self.request.city)]
+            'items': result
         })
 
 
