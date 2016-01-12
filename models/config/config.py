@@ -64,6 +64,17 @@ COMPANY_STATUS_NAMES = {
 }
 
 
+class CustomSection(ndb.Model):
+    title = ndb.StringProperty(required=True, indexed=False)
+    url = ndb.StringProperty(required=True, indexed=False)
+
+    def dict(self):
+        return {
+            'title': self.title,
+            'url': self.url
+        }
+
+
 class Config(ndb.Model):
     @cached_property
     def APP_KIND(self):
@@ -128,6 +139,8 @@ class Config(ndb.Model):
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
     ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
+
+    CUSTOM_SECTIONS = ndb.LocalStructuredProperty(CustomSection, repeated=True)
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict

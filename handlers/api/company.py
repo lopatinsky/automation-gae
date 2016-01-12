@@ -82,7 +82,8 @@ class CompanyInfoHandler(ApiHandler):
                 'version': version.dict() if version else None
             },
             'cancel_order': RestoCompany.get() is not None,
-            'back_end': config.APP_KIND
+            'back_end': config.APP_KIND,
+            'custom_sections': [section.dict() for section in config.CUSTOM_SECTIONS],
         }
         response.update(config.get_company_dict())
         self.render_json(response)
