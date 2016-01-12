@@ -274,7 +274,8 @@ def check_user_invited_another(client, order):
                                      SharedPromo.sender_promo_success == False).get()
     if shared_promo is not None:
         shared_promo.sender_promo_success = True
-        order.shared_promo = shared_promo
+        if order:
+            order.shared_promo = shared_promo
     return shared_promo is not None
 
 
@@ -283,5 +284,6 @@ def check_user_is_invited(client, order):
                                      SharedPromo.recipient_promo_success == False).get()
     if shared_promo is not None:
         shared_promo.recipient_promo_success = True
-        order.shared_promo = shared_promo
+        if order:
+            order.shared_promo = shared_promo
     return shared_promo is not None
