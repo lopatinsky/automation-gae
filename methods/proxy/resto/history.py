@@ -7,7 +7,7 @@ from methods.proxy.resto.venues import get_venues
 from methods.rendering import STR_DATETIME_FORMAT
 from models import Order, Address, MenuItem, GroupModifier, SingleModifier
 from models.order import OrderPositionDetails, READY_ORDER, ChosenGroupModifierDetails, NEW_ORDER, \
-    CANCELED_BY_BARISTA_ORDER
+    CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER
 from models.payment_types import CASH_PAYMENT_TYPE
 from models.proxy.resto import RestoCompany, RestoClient
 from models.venue import SELF, DELIVERY
@@ -16,12 +16,20 @@ from requests import get_resto_history
 __author__ = 'dvpermyakov'
 
 
-STATUS_MAP = {
-    1: NEW_ORDER,
-    2: NEW_ORDER,
-    3: READY_ORDER,
-    4: CANCELED_BY_BARISTA_ORDER
-}
+def _get_status_from_resto_status(resto_company, resto_status):
+    STATUS_MAP = {
+        1: NEW_ORDER,
+        3: READY_ORDER,
+        4: CANCELED_BY_BARISTA_ORDER
+    }
+
+    if resto_status == 2:
+        if resto_company.enable_delivery_confirmation:
+            return CONFIRM_ORDER
+        else:
+            return NEW_ORDER
+    else:
+        return STATUS_MAP[resto_status]
 
 
 def _get_address(resto_address):
@@ -67,7 +75,7 @@ def get_orders(client):
             order = Order(id=order_id)
             order.client_id = client.key.id()
             if resto_order['status'] is not None:
-                order.status = STATUS_MAP[resto_order['status']]
+                order.status = _get_status_from_resto_status(resto_company, resto_order['status'])
             else:
                 resto_order['status'] = READY_ORDER
             order.number = int(resto_order['number'])
