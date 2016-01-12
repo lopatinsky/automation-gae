@@ -72,6 +72,7 @@ def cancel_order(order, status, namespace, comment=None):
         if shared_promo:
             shared_promo.sender_promo_success = False
             shared_promo.recipient_promo_success = False
+            shared_promo.put()
 
         if status == CANCELED_BY_BARISTA_ORDER:
             client = Client.get(order.client_id)
