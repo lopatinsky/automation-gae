@@ -275,7 +275,7 @@ def check_user_invited_another(client, order):
     if shared_promo is not None:
         shared_promo.sender_promo_success = True
         if order:
-            order.shared_promo = shared_promo
+            order.shared_promo = shared_promo.key
             shared_promo.put()
     return shared_promo is not None
 
