@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 from google.appengine.ext import ndb
 
-from methods import working_hours, branch_io
+from methods import working_hours
 from methods.versions import CLIENT_VERSIONS
-from models import STATUS_AVAILABLE, Promo, MenuCategory, Share
+from models import STATUS_AVAILABLE, Promo, MenuCategory
 from models.config.config import Config
 from models.geo_push import GeoPush, LeftBasketPromo
 from models.order import Order
@@ -265,10 +265,23 @@ def check_max_date(condition, delivery_time):
     return False
 
 
-def check_user_invited_another(client):
-    shared_promo = SharedPromo.query(SharedPromo.sender == client.key, SharedPromo.status == 1).get()
+READY = 0
+DONE = 1
+
+
+def check_user_invited_another(client, order):
+    shared_promo = SharedPromo.query(SharedPromo.sender == client.key, SharedPromo.status == DONE,
+                                     SharedPromo.sender_promo_success == False).get()
+    if shared_promo is not None:
+        shared_promo.sender_promo_success = True
+        order.shared_promo = shared_promo
     return shared_promo is not None
 
-def check_user_is_invited(client):
-    shared_promo = SharedPromo.query(SharedPromo.recipient == client.key).get()
+
+def check_user_is_invited(client, order):
+    shared_promo = SharedPromo.query(SharedPromo.recipient == client.key, SharedPromo.status == READY,
+                                     SharedPromo.recipient_promo_success == False).get()
+    if shared_promo is not None:
+        shared_promo.recipient_promo_success = True
+        order.shared_promo = shared_promo
     return shared_promo is not None

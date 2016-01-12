@@ -1,5 +1,6 @@
 # coding=utf-8
 from google.appengine.ext import ndb
+
 from models import STATUS_CHOICES, STATUS_AVAILABLE
 from models.legal import LegalInfo
 from models.menu import MenuItem, SingleModifier
@@ -42,6 +43,7 @@ class Share(ndb.Model):
 
     def dict(self):
         from methods.rendering import timestamp
+
         return {
             'sender': self.sender.get().dict(),
             'created': timestamp(self.created),
@@ -62,11 +64,15 @@ class SharedPromo(ndb.Model):
     accumulated_points = ndb.IntegerProperty()
     wallet_points = ndb.IntegerProperty()
 
+    sender_promo_success = ndb.BooleanProperty(default=False)
+    recipient_promo_success = ndb.BooleanProperty(default=False)
+
     def deactivate(self, namespace):
         from methods.push import send_client_push
         from methods.empatika_promos import register_order
         from methods.empatika_wallet import deposit
         from models.config.config import config
+
         module = config.SHARE_INVITATION_MODULE
         if module.sender_accumulated_points or module.sender_wallet_points:
             sender_order_id = "sender_referral_%s" % self.recipient.id()
@@ -101,6 +107,7 @@ class SharedGiftMenuItem(ndb.Model):  # self.id() == item.key.id()
 
     def dict(self):
         from models.menu import MenuItem
+
         return MenuItem.get(product_id=self.item.id()).dict()
 
 
@@ -133,10 +140,10 @@ class SharedGift(ndb.Model):
     promo_code = ndb.KeyProperty(kind=PromoCode)
     share_id = ndb.IntegerProperty(required=True)
     share_items = ndb.KeyProperty(kind=ChosenSharedGiftMenuItem, repeated=True)
-    client_id = ndb.IntegerProperty(required=True)         # Who pays for cup
+    client_id = ndb.IntegerProperty(required=True)  # Who pays for cup
     recipient_name = ndb.StringProperty(required=True)
     recipient_phone = ndb.StringProperty(required=True)
-    recipient_id = ndb.IntegerProperty()                   # it is known after perform
+    recipient_id = ndb.IntegerProperty()  # it is known after perform
     total_sum = ndb.FloatProperty(required=True)
     order_id = ndb.StringProperty(required=True)
     payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
@@ -145,6 +152,7 @@ class SharedGift(ndb.Model):
 
     def perform(self, client, namespace):
         from methods.push import send_client_push
+
         share = Share.get_by_id(self.share_id)
         share.deactivate()
         self.status = self.PERFORMING
@@ -173,6 +181,7 @@ class SharedGift(ndb.Model):
     def cancel(self, namespace):
         from methods.alfa_bank import reverse
         from methods.push import send_client_push
+
         if self.status == self.READY:
             legal = LegalInfo.query().get()  # TODO find solution for multiple legals
             reverse(legal.alfa_login, legal.alfa_password, self.payment_id)
@@ -191,6 +200,7 @@ class SharedGift(ndb.Model):
         from models import Client
         from models.config.config import config
         from methods.rendering import timestamp
+
         item_dicts = [si.get().dict() for si in self.share_items]
 
         if self.recipient_id:

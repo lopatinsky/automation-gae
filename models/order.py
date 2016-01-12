@@ -6,7 +6,7 @@ from methods.rendering import timestamp, latinize
 from models import STATUS_AVAILABLE
 from models.geo_push import GeoPush, LeftBasketPromo
 from models.promo_code import PromoCodePerforming
-from models.share import SharedGift
+from models.share import SharedGift, SharedPromo
 from models.client import Client
 from models.menu import GroupModifier, MenuItem, SingleModifier
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, PAYMENT_TYPE_CHOICES
@@ -162,6 +162,8 @@ class Order(ndb.Model):
     unified_app_namespace = ndb.StringProperty()
     version = ndb.IntegerProperty(default=0)
     rate = ndb.LocalStructuredProperty(OrderRate)
+
+    shared_promo = ndb.KeyProperty(kind=SharedPromo)
 
     @classmethod
     def get(cls, client):
