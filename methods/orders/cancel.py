@@ -12,6 +12,7 @@ from methods.empatika_wallet import get_balance
 from methods.sms import sms_pilot
 from models import Client, Venue
 from models.order import CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
+from models.share import SharedPromo
 
 __author__ = 'dvpermyakov'
 
@@ -68,10 +69,15 @@ def cancel_order(order, status, namespace, comment=None):
         order.email_key_confirm = None
         order.put()
 
-        shared_promo = order.shared_promo
+        shared_promo = SharedPromo.get_by_id(order.shared_promo.id())
+        # shared_promo = order.shared_promo
         if shared_promo:
-            shared_promo.sender_promo_success = False
-            shared_promo.recipient_promo_success = False
+            if order.client_id == shared_promo.recipient.id():
+                shared_promo.recipient_promo_success = False
+                
+            elif order.client_id == shared_promo.sender.id():
+                shared_promo.sender_promo_success = False
+
             shared_promo.put()
 
         if status == CANCELED_BY_BARISTA_ORDER:
