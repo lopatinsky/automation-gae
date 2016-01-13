@@ -1,0 +1,74 @@
+<html>
+<head>
+    <title>Автоматизация</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+{#            $(".delete_tariff").click(function () {#}
+{##}
+{#                var tariff_id = $(this).val();#}
+{#                $.post("/company/subscription/delete_tariff?tariff_id=" + tariff_id, function () {#}
+{#                    $("#" + tariff_id).remove();#}
+{#                });#}
+{#            });#}
+            $(".status_checkbox").change(function() {
+                var tariff_id = $(this).val();
+                var post_url = "/company/subscription/change_status?tariff_id=" + tariff_id;
+                if ($(this).is(':checked')) {
+                    post_url += "&status=1"
+                }
+                $.post(post_url, function() {
+
+                });
+            });
+        })
+    </script>
+</head>
+<body>
+
+<a href="/company/subscription/add_tariff">Добавить тариф</a>
+
+
+<table style="border-collapse:collapse; width:100%" border="1">
+    <tr>
+        <th>Статус</th>
+        <th>Титул</th>
+        <th>Описание</th>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Длительность</th>
+    </tr>
+
+    {% for tariff in tariffs %}
+        <tr id="{{ tariff.key.id() }}">
+
+            <td>
+                <label>
+                    Доступен
+                    <input type="checkbox" class="status_checkbox" {% if tariff.status %} checked {% endif %} value="{{ tariff.key.id() }}">
+                </label>
+
+            </td>
+            <td>
+                <a href="{{ "/company/subscription/edit_tariff?tariff_id=%s" % tariff.key.id() }}">{{ tariff.title }}</a>
+            </td>
+            <td>
+                {{ tariff.description }}
+            </td>
+            <td>{{ tariff.price }}</td>
+            <td>{{ tariff.amount }}</td>
+            <td>{{ tariff.duration_seconds }}</td>
+{#            <td>#}
+                {#                <form action="{{ "/company/subscription/delete_tariff?tariff_id=%s" % tariff.key.id() }}" method="post">#}
+                {#                    <input type="submit" value="Удалить">#}
+                {#                </form>#}
+{#                <button class="delete_tariff" value="{{ tariff.key.id() }}">Удалить</button>#}
+{#            </td>#}
+        </tr>
+    {% endfor %}
+</table><br>
+<a href="/company/subscription/tariffs_list">Назад</a><br>
+</body>
+</html>

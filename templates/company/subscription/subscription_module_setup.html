@@ -1,0 +1,30 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post">
+    <label for="status">Статус</label>
+    <input type="checkbox" name="status" id="status" {% if config.SUBSCRIPTION_MODULE.status %}checked{% endif %}>
+    <br>
+
+    <label for="menu_title">Титулка меню</label><br>
+    <input type="text" name="menu_title" id="menu_title" value="{{ config.SUBSCRIPTION_MODULE.menu_title }}"><br>
+
+
+    <label for="menu_description">Описание меню</label><br>
+    <input type="text" name="menu_description" id="menu_description" value="{{ config.SUBSCRIPTION_MODULE.menu_description }}"><br>
+
+    <label for="screen_title">Титулка экрана</label><br>
+    <input type="text" name="screen_title" id="screen_title" value="{{ config.SUBSCRIPTION_MODULE.screen_title }}"><br>
+
+    <label for="screen_description">Описание экрана</label><br>
+    <input type="text" name="screen_description" id="screen_description" value="{{ config.SUBSCRIPTION_MODULE.screen_description }}"><br>
+
+    <input type="submit" value="Сохранить">
+
+</form>
+<a href="/company/subscription">Назад</a><br>
+</body>
+</html>

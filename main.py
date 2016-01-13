@@ -7,6 +7,9 @@ from handlers import web_app
 from handlers import wizard, web_admin, ext_api
 from handlers.cron import NotificatingInactiveUsersHandler
 from handlers.tasks.basket_notification import BasketNotificationHandler
+from handlers.web_admin.web.company.subscription import SubscriptionMain, SubscriptionModuleSetupHandler, \
+    ListSubscriptionTariffHandler, EditSubscriptionTariffHandler, AddSubscriptionTariffHandler, \
+    ChangeTariffStatusHandler
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -243,6 +246,16 @@ app = WSGIApplication([
         Route('/choose', company_admin.ChooseNamespaceHandler, 'company_choose_namespace'),
         Route('/payment_types', company_admin.PaymentTypesHandler),
 
+        PathPrefixRoute('/subscription', [
+            Route('', SubscriptionMain, 'subscription_main'),
+            Route('/subscription_module_setup', SubscriptionModuleSetupHandler, 'subscription_module_setup'),
+            Route('/add_tariff', AddSubscriptionTariffHandler, 'add_tariff'),
+            Route('/tariffs_list', ListSubscriptionTariffHandler, 'tariffs_list'),
+            Route('/edit_tariff', EditSubscriptionTariffHandler, 'edit_tariff'),
+            # Route('/delete_tariff', DeleteSubscriptionTariffHandler, 'delete_tariff'),
+            Route('/change_status', ChangeTariffStatusHandler, 'change_status')
+        ]),
+
         PathPrefixRoute('/config_settings', [
             PathPrefixRoute('/inactive_users_notifications', [
                 Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
@@ -254,7 +267,8 @@ app = WSGIApplication([
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),
-            Route('/basket_notification_module_setup', BasketNotificationModuleHandler, 'basket_notification_module_setup')
+            Route('/basket_notification_module_setup', BasketNotificationModuleHandler,
+                  'basket_notification_module_setup')
         ]),
 
         PathPrefixRoute('/venues', [

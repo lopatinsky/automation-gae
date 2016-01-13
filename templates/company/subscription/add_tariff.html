@@ -1,0 +1,41 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post">
+    <label for="status">Статус</label>
+    <input type="checkbox" name="status" id="status" {% if tariff and tariff.status %}checked{% endif %}>
+    <br>
+
+    <label for="title">Титулка</label><br>
+    <input type="text" name="title" id="title" {% if tariff %} value="{{ tariff.title }}" {% endif %}><br>
+
+
+    <label for="description">Описание</label><br>
+    <input type="text" name="description" id="description"
+           {% if tariff %}value="{{ tariff.description }}" {% endif %}><br>
+
+    <label for="price">Цена</label><br>
+    <input type="number" name="price" id="price" {% if tariff %}value="{{ tariff.price }}" {% endif %}><br>
+
+    <label for="amount">Количество</label><br>
+    <input type="number" name="amount" id="amount" {% if tariff %}value="{{ tariff.amount }}" {% endif %}><br>
+
+    <label for="duration_seconds">Продолжительность в секундах</label><br>
+    <input type="number" name="duration_seconds" id="duration_seconds"
+           {% if tariff %}value="{{ tariff.duration_seconds }}" {% endif %}><br>
+
+    {% if tariff %}
+        <input type="hidden" value="{{ tariff.key.id() }}" name="tariff_id">
+    {% endif %}
+
+
+    <input type="submit" value="Сохранить" name="edit_tariff">
+</form>
+<br>
+<a href="/company/subscription">Назад</a>
+
+</body>
+</html>
