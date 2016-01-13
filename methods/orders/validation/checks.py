@@ -7,7 +7,7 @@ from methods.rendering import latinize
 from models.config.config import config, VENUE, BAR
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
-from methods.subscription import get_subscription, get_amount_of_subscription_items
+from methods.subscription import get_subscription, get_amount_of_subscription_items, get_subscription_menu_item
 from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction, check_today_error
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
 from models.config.subscription import SubscriptionModule
@@ -387,6 +387,6 @@ def check_empty_order(item_dicts, gift_dicts, order_gift_dicts, shared_gift_dict
 
 def check_availability(item_dicts):
     for item_dict in item_dicts:
-        if item_dict['item'].status != STATUS_AVAILABLE:
+        if not get_subscription_menu_item(item_dict) and item_dict['item'].status != STATUS_AVAILABLE:
             return False, u'Позиция "%s" изъята из продажи. Пожалуйста, обновите меню' % item_dict['item'].title
     return True, None
