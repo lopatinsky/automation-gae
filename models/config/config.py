@@ -1,5 +1,4 @@
 # coding=utf-8
-from models.config.basket_notification import BasketNotificationModule
 
 SUBSCRIPTION = 0
 SHARE_GIFT = 1
@@ -15,9 +14,10 @@ REMAINDERS_MODULE = 10
 ORDER_INFO_MODULE = 11
 NUMBER_OF_PEOPLE_MODULE = 12
 CASH_CHANGE_MODULE = 13
+CUSTOM_SECTIONS_MODULE = 14
 MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, CLIENT_INFO_MODULE, HIT_MODULE, MIVAKO_GIFT_MODULE,
                 REVIEW_MODULE, MENU_FRAME_MODULE, REMAINDERS_MODULE, ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE,
-                CASH_CHANGE_MODULE)
+                CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE)
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
@@ -33,6 +33,8 @@ from models.config.inactive_clients import NotificatingInactiveUsersModule
 from models.config.menu import HitModule, MenuFrameModule, RemaindersModule
 from models.config.mivako import MivakoGiftModule
 from models.config.review import ReviewModule
+from models.config.basket_notification import BasketNotificationModule
+from models.config.custom_sections import CustomSectionsModule
 
 OTHER = -1
 VENUE = 0
@@ -62,17 +64,6 @@ COMPANY_STATUS_NAMES = {
     COMPANY_REMOVED: u"Отключена",
     COMPANY_PREVIEW: u"Предпросмотр в общем аппе",
 }
-
-
-class CustomSection(ndb.Model):
-    title = ndb.StringProperty(required=True, indexed=False)
-    url = ndb.StringProperty(required=True, indexed=False)
-
-    def dict(self):
-        return {
-            'title': self.title,
-            'url': self.url
-        }
 
 
 class Config(ndb.Model):
@@ -129,6 +120,7 @@ class Config(ndb.Model):
     REVIEW_MODULE = ndb.LocalStructuredProperty(ReviewModule)
     MENU_FRAME_MODULE = ndb.LocalStructuredProperty(MenuFrameModule)
     REMAINDERS_MODULE = ndb.LocalStructuredProperty(RemaindersModule)
+    CUSTOM_SECTIONS_MODULE = ndb.LocalStructuredProperty(CustomSectionsModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
@@ -139,8 +131,6 @@ class Config(ndb.Model):
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
     ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
-
-    CUSTOM_SECTIONS = ndb.LocalStructuredProperty(CustomSection, repeated=True)
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
