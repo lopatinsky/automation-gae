@@ -69,9 +69,9 @@ def cancel_order(order, status, namespace, comment=None):
         order.email_key_confirm = None
         order.put()
 
-        shared_promo = SharedPromo.get_by_id(order.shared_promo.id())
-        # shared_promo = order.shared_promo
-        if shared_promo:
+        if order.shared_promo:
+            shared_promo = order.shared_promo.get()
+            
             if order.client_id == shared_promo.recipient.id():
                 shared_promo.recipient_promo_success = False
                 
