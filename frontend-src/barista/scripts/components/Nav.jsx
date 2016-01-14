@@ -13,7 +13,7 @@ const NavItem = React.createClass({
                 height: 28,
                 lineHeight: '28px',
                 marginLeft: 8,
-                marginTop: -50,
+                marginTop: -36,
                 borderRadius: 14,
                 background: 'red',
                 color: 'white'
@@ -29,8 +29,7 @@ const NavItem = React.createClass({
             linkStyle = {
                 textAlign: 'center',
                 textDecoration: 'none',
-                color: isActive ? '#65A329' : '#666666',
-                position: 'relative'
+                color: isActive ? '#65A329' : '#666666'
             };
         if (this.props.horizontal) {
             style = {
@@ -52,11 +51,20 @@ const NavItem = React.createClass({
                 display: 'block'
             });
         }
+        let imgDivStyle = {
+            height: 60,
+            width: 60,
+            margin: '0 auto',
+            position: 'relative',
+            background: `url(${imageUrl})`,
+            backgroundSize: 'contain'
+        };
         return <div style={style}>
             <Link to={this.props.route} style={linkStyle}>
-                <img src={imageUrl} width={60}/>
+                <div style={imgDivStyle}>
+                    {this._renderLabel()}
+                </div>
                 <div>{this.props.text}</div>
-                {this._renderLabel()}
             </Link>
         </div>;
     }
