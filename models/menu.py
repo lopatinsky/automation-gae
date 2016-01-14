@@ -252,9 +252,10 @@ class MenuCategory(ndb.Model):
         app_kind = config.APP_KIND
         if app_kind == AUTO_APP:
             categories = MenuCategory.query(MenuCategory.category == self.key).fetch()
-            for category in categories[:]:
-                if not category.get_items(venue=venue) and category.get_items():
-                    categories.remove(category)
+            if venue:
+                for category in categories[:]:
+                    if not category.get_items(venue=venue) and category.get_items():
+                        categories.remove(category)
             return categories
         elif app_kind == RESTO_APP:
             return resto_get_categories(self)

@@ -56,9 +56,9 @@ def set_extra_order_info(order, extra_info, num_people, cash_change):
             value = group_dict.get(field_key) if group_dict else None
             extra_json[field_key] = value
         if config.ORDER_MODULE.enable_number_of_people:
-            extra_info['num_people'] = num_people
+            extra_json['num_people'] = num_people
         if config.ORDER_MODULE.enable_change:
-            extra_info['cash_change'] = cash_change
+            extra_json['cash_change'] = cash_change
     order.extra_data = extra_json
 
 

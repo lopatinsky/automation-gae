@@ -164,11 +164,21 @@ class ListSubscriptionMenuItemsListHandler(CompanyBaseHandler):
         dishes = MenuItem.query().fetch()
         subscription_menu_items = SubscriptionMenuItem.query().fetch()
         subscription_dishes = []
+
+        categories = {}
+
+        for dish in dishes:
+            categories[dish.category.get().title] = []
+
+        for dish in dishes:
+            categories[dish.category.get().title].append(dish)
+
+
         for menu_item in subscription_menu_items:
             subscription_dishes.append(menu_item.item.get())
 
-        self.render('/subscription/subscription_menu_items_list.html', dishes=dishes,
-                    subscription_dishes=subscription_dishes)
+        self.render('/subscription/subscription_menu_items_list.html',
+                    subscription_dishes=subscription_dishes, categories=categories)
 
 
 class AddSubscriptionMenuItemHandler(CompanyBaseHandler):

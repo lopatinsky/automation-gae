@@ -83,7 +83,6 @@ class CompanyInfoHandler(ApiHandler):
             },
             'cancel_order': RestoCompany.get() is not None,
             'back_end': config.APP_KIND,
-            'custom_sections': [section.dict() for section in config.CUSTOM_SECTIONS],
         }
         response.update(config.get_company_dict())
         self.render_json(response)
@@ -113,6 +112,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.MIVAKO_GIFT_MODULE.dict())
         if RemaindersModule.has_module():
             modules.append(config.REMAINDERS_MODULE.dict())
+        if config.CUSTOM_SECTIONS_MODULE and config.CUSTOM_SECTIONS_MODULE.status:
+            modules.append(config.CUSTOM_SECTIONS_MODULE.dict())
         self.render_json({
             'modules': modules
         })

@@ -33,14 +33,20 @@
         <th>Название</th>
     </tr>
 
-    {% for dish in dishes %}
-        <tr>
-            <td><input type="checkbox" class="avaibility_checkbox" {% if dish in subscription_dishes %}
-                       checked {% endif %}
-                       value="{{ dish.key.id() }}"></td>
-            <td>{{ dish.title }}</td>
-        </tr>
+    {% for category, dishes in categories.items() %}
+        <h4>{{ category }}</h4>
+        {% for dish in dishes %}
+            <tr>
+                <td><input type="checkbox" class="avaibility_checkbox" {% if dish in subscription_dishes %}
+                           checked {% endif %}
+                           value="{{ dish.key.id() }}"></td>
+                <td>{{ dish.title }}</td>
+            </tr>
+        {% endfor %}
+
     {% endfor %}
+
+
 </table>
 </body>
 </html>
