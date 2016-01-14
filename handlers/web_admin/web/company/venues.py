@@ -52,6 +52,7 @@ class EnableVenuesHandler(CompanyBaseHandler):
     @venue_rights_required
     def get(self):
         venues = Venue.query().fetch()
+        venues = sorted(venues, key=lambda v: (v.address.city, v.title))
         for venue in venues:
             venue.days = [day for day in venue.schedule.days] if venue.schedule else []
         self.render('/venues/enable_venues.html', venues=venues)
@@ -59,12 +60,14 @@ class EnableVenuesHandler(CompanyBaseHandler):
     @venue_rights_required
     def post(self):
         venues = Venue.query().fetch()
+        venues = sorted(venues, key=lambda v: (v.address.city, v.title))
         for v in venues:
             venue_id = str(v.key.id())
             new_active = bool(self.request.get(venue_id))
             if v.active != new_active:
                 v.active = new_active
                 v.put()
+            v.days = [day for day in v.schedule.days] if v.schedule else []
         self.render('/venues/enable_venues.html', venues=venues, success=True)
 
 
