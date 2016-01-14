@@ -72,12 +72,12 @@ class BuySubscriptionHandler(ApiHandler):
         order.payment_type_id = payment_json['type_id']
         order.venue_id = str(Venue.query(Venue.active == True).get().key.id())
         if order.payment_type_id == CARD_PAYMENT_TYPE:
-            success, error = card_payment_performing(payment_json, tariff.price, order,
+            success, error = card_payment_performing(payment_json, tariff.price * 100, order,
                                                      put_order=False)
             if not success:
                 return self.render_error(error)
         elif order.payment_type_id == order.payment_type_id == PAYPAL_PAYMENT_TYPE:
-            success, error = paypal_payment_performing(payment_json, tariff.price, order, client, put_order=False)
+            success, error = paypal_payment_performing(payment_json, tariff.price * 100, order, client, put_order=False)
             if not success:
                 return self.render_error(error)
         else:
