@@ -9,7 +9,8 @@ from handlers.cron import NotificatingInactiveUsersHandler
 from handlers.tasks.basket_notification import BasketNotificationHandler
 from handlers.web_admin.web.company.subscription import SubscriptionMain, SubscriptionModuleSetupHandler, \
     ListSubscriptionTariffHandler, EditSubscriptionTariffHandler, AddSubscriptionTariffHandler, \
-    ChangeTariffStatusHandler
+    ChangeTariffStatusHandler, AddSubscriptionMenuItemHandler, DeleteSubscriptionMenuItemHandler, \
+    ListSubscriptionMenuItemsListHandler
 from methods import fastcounter
 from handlers import api, maintenance, handle_500
 import handlers.web_admin.web.company as company_admin
@@ -253,7 +254,11 @@ app = WSGIApplication([
             Route('/tariffs_list', ListSubscriptionTariffHandler, 'tariffs_list'),
             Route('/edit_tariff', EditSubscriptionTariffHandler, 'edit_tariff'),
             # Route('/delete_tariff', DeleteSubscriptionTariffHandler, 'delete_tariff'),
-            Route('/change_status', ChangeTariffStatusHandler, 'change_status')
+            Route('/change_status', ChangeTariffStatusHandler, 'change_status'),
+            Route('/subscription_menu_items_list', ListSubscriptionMenuItemsListHandler,
+                  'subscription_menu_items_list'),
+            Route('/add_subscription_item', AddSubscriptionMenuItemHandler, 'add_subscription_item'),
+            Route('/delete_subscription_item', DeleteSubscriptionMenuItemHandler, 'delete_subscription_item')
         ]),
 
         PathPrefixRoute('/config_settings', [

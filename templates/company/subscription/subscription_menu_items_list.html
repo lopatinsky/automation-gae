@@ -1,0 +1,46 @@
+<html>
+<head>
+    <title>Автоматизация</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".avaibility_checkbox").change(function () {
+                var dish_id = $(this).val();
+                var post_url;
+                if ($(this).is(":checked")) {
+                    post_url = "/company/subscription/add_subscription_item?product_id=" + dish_id
+                } else {
+                    post_url = "/company/subscription/delete_subscription_item?product_id=" + dish_id
+                }
+
+                $.post(post_url, function () {
+
+                })
+            })
+        })
+
+    </script>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+<h1>Меню</h1>
+
+<table>
+    <tr>
+        <th>Доступно по подписке</th>
+        <th>Название</th>
+    </tr>
+
+    {% for dish in dishes %}
+        <tr>
+            <td><input type="checkbox" class="avaibility_checkbox" {% if dish in subscription_dishes %}
+                       checked {% endif %}
+                       value="{{ dish.key.id() }}"></td>
+            <td>{{ dish.title }}</td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

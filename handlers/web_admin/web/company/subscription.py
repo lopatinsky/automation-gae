@@ -1,19 +1,22 @@
 # coding=utf-8
 import logging
-from google.appengine.ext import db
+
 from handlers.web_admin.web.company import CompanyBaseHandler
-from methods.auth import config_rights_required
+from methods.auth import menu_rights_required, config_rights_required
+from models import MenuItem
 from models.config import config
 from models.config.subscription import SubscriptionModule
-from models.subscription import SubscriptionTariff
+from models.subscription import SubscriptionTariff, SubscriptionMenuItem
 
 __author__ = 'Artem'
 
 
 class AddSubscriptionTariffHandler(CompanyBaseHandler):
+    @menu_rights_required
     def get(self):
         self.render('/subscription/add_tariff.html')
 
+    @menu_rights_required
     def post(self):
         status = self.request.get('status') is not ''
         title = self.request.get('title')
@@ -34,7 +37,9 @@ class AddSubscriptionTariffHandler(CompanyBaseHandler):
 
         self.redirect_to('tariffs_list')
 
+
 class ChangeTariffStatusHandler(CompanyBaseHandler):
+    @menu_rights_required
     def post(self):
         tariff_id = self.request.get_range('tariff_id')
         tariff = SubscriptionTariff.get_by_id(tariff_id)
@@ -47,12 +52,14 @@ class ChangeTariffStatusHandler(CompanyBaseHandler):
 
 
 class ListSubscriptionTariffHandler(CompanyBaseHandler):
+    @menu_rights_required
     def get(self):
         tariffs = SubscriptionTariff.query().fetch()
         self.render('/subscription/tariffs_list.html', tariffs=tariffs)
 
 
 class EditSubscriptionTariffHandler(CompanyBaseHandler):
+    @menu_rights_required
     def get(self):
         tariff_id = self.request.get_range('tariff_id')
 
@@ -60,6 +67,7 @@ class EditSubscriptionTariffHandler(CompanyBaseHandler):
 
         self.render('/subscription/add_tariff.html', tariff=tariff)
 
+    @menu_rights_required
     def post(self):
         status = self.request.get('status') is not ''
         title = self.request.get('title')
@@ -90,9 +98,11 @@ class EditSubscriptionTariffHandler(CompanyBaseHandler):
 #         tariff.key.delete()
 
 class SubscriptionTariffSetupHandler(CompanyBaseHandler):
+    @menu_rights_required
     def get(self):
         self.render('/subscription/subscription_tariff_setup.html')
 
+    @menu_rights_required
     def post(self):
         status = self.request.get('status') is not ''
         title = self.request.get('title')
@@ -115,6 +125,7 @@ class SubscriptionTariffSetupHandler(CompanyBaseHandler):
 
 
 class SubscriptionModuleSetupHandler(CompanyBaseHandler):
+    @config_rights_required
     def get(self):
         self.render('/subscription/subscription_module_setup.html')
 
@@ -140,6 +151,46 @@ class SubscriptionModuleSetupHandler(CompanyBaseHandler):
         self.redirect_to('subscription_main')
 
 
+class ListSubscriptionMenuItemHandler(CompanyBaseHandler):
+    @menu_rights_required
+    def get(self):
+        self.render('/subscription/subscription_menu_items_list')
+        pass
+
+
+class ListSubscriptionMenuItemsListHandler(CompanyBaseHandler):
+    @menu_rights_required
+    def get(self):
+        dishes = MenuItem.query().fetch()
+        subscription_menu_items = SubscriptionMenuItem.query().fetch()
+        subscription_dishes = []
+        for menu_item in subscription_menu_items:
+            subscription_dishes.append(menu_item.item.get())
+
+        self.render('/subscription/subscription_menu_items_list.html', dishes=dishes,
+                    subscription_dishes=subscription_dishes)
+
+
+class AddSubscriptionMenuItemHandler(CompanyBaseHandler):
+    @menu_rights_required
+    def post(self):
+        subscription_menu_item = SubscriptionMenuItem()
+        product_id = self.request.get_range('product_id')
+        dish = MenuItem.get(product_id)
+        subscription_menu_item.item = dish.key
+        subscription_menu_item.put()
+
+
+class DeleteSubscriptionMenuItemHandler(CompanyBaseHandler):
+    @menu_rights_required
+    def post(self):
+        product_id = self.request.get_range('product_id')
+        dish = MenuItem.get(product_id)
+        subscription_menu_item = SubscriptionMenuItem.query(SubscriptionMenuItem.item == dish.key).get()
+        subscription_menu_item.key.delete()
+
+
 class SubscriptionMain(CompanyBaseHandler):
+    @menu_rights_required
     def get(self):
         self.render('/subscription/subscription_main.html')
