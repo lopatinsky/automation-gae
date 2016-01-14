@@ -4,8 +4,7 @@ from google.appengine.api import taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
-from methods.branch_io import INVITATION
-from models import Share, Order
+from models import Order
 
 from models.config.config import config, EMAIL_FROM
 from handlers.api.paypal import paypal
@@ -16,6 +15,7 @@ from methods.emails.admins import send_error
 from methods.emails.postmark import send_email
 from methods.sms.sms_pilot import send_sms
 from models.payment_types import PAYMENT_TYPE_MAP
+from models.share import SharedPromo
 from models.venue import DELIVERY_MAP, DELIVERY, Address, Venue
 
 __author__ = 'dvpermyakov'
@@ -125,9 +125,8 @@ def need_to_show_share_invitation(client):
         return False
     if not module.after_order:
         return False
-    for share in Share.query(Share.sender == client.key).fetch():
-        if share.share_type == INVITATION:
-            return False
+    if SharedPromo.query(SharedPromo.sender == client.key, SharedPromo.status == SharedPromo.DONE).get():
+        return False
     count = Order.query(Order.client_id == client.key.id()).count()
     if count % module.after_number_order != 0:
         return False
