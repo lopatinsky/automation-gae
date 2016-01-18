@@ -71,7 +71,7 @@ def _make_push_data(text, header, device_type, should_popup, push_type):
 
 
 def _make_order_push_data(order, text):
-    data = _make_push_data(text, u"Заказ %s" % order.key.id(), order.device_type, True, ORDER_TYPE)
+    data = _make_push_data(text, u"Заказ %s" % order.number, order.device_type, True, ORDER_TYPE)
     if data:
         data.update({
             'order_id': str(order.key.id()),
