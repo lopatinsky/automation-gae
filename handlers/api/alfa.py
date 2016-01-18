@@ -16,15 +16,19 @@ class UnbindCardHandler(ApiHandler):
 
 class PaymentRegisterHandler(ApiHandler):
     def post(self):
-        client_id = self.request.get("clientId")
+        alfa_client_id = self.request.get("clientId")
         order_number = self.request.get("orderNumber")
         amount = self.request.get("amount")
         return_url = self.request.get("returnUrl")
 
         alfa_response = alfa_bank.create(config.ALFA_LOGIN, config.ALFA_PASSWORD, amount, order_number, return_url,
-                                         client_id, 'MOBILE')
+                                         alfa_client_id, 'MOBILE')
         if str(alfa_response.get('errorCode', '0')) == '0':
-            CardBindingPayment(id=alfa_response['orderId'], client_id=int(client_id)).put()
+            try:
+                client_id = int(alfa_client_id)
+            except ValueError:  # apps transfered from iiko to auto have non-numeric alfa client_id -> use headers
+                client_id = int(self.request.headers['Client-Id'])
+            CardBindingPayment(id=alfa_response['orderId'], client_id=client_id).put()
         self.render_json(alfa_response)
 
 
