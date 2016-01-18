@@ -6,6 +6,8 @@
 <body>
     {% include '/company/header.html' %}
     <h3>Выберите продукты для {{ choice.title }}</h3>
+    <button id="select_all" type="button">Выбрать всех</button>
+    <button id="select_none" type="button">Снять все</button>
     <form method="post">
         <input type="text" name="choice_id" value="{{ choice.key.id() }}" hidden>
         <br>
@@ -18,5 +20,16 @@
         <label><input type="submit" value="Сохранить"></label>
     </form>
     <a href="{{ '/company/menu/modifiers/list' }}">Назад</a>
+
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script>
+        $("#select_all").click(function() {
+            $("input[type=checkbox]").prop("checked", true);
+        });
+
+        $("#select_none").click(function() {
+            $("input[type=checkbox]").prop("checked", false);
+        });
+    </script>
 </body>
 </html>
