@@ -9,6 +9,7 @@ from methods.subscription import get_subscription, get_subscription_category_dic
 from models import Order, Client, Venue, STATUS_AVAILABLE, STATUS_UNAVAILABLE
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 from models.subscription import SubscriptionMenuItem, SubscriptionTariff, Subscription
+from models.config.config import config
 
 __author__ = 'dvpermyakov'
 
@@ -42,8 +43,6 @@ class SubscriptionTariffsHandler(ApiHandler):
 
 
 class BuySubscriptionHandler(ApiHandler):
-    LAST_BUYING_SECONDS = 10
-
     def render_error(self, description):
         self.response.set_status(400)
         logging.warning('error: %s' % description)
@@ -64,33 +63,47 @@ class BuySubscriptionHandler(ApiHandler):
         if tariff.status == STATUS_UNAVAILABLE:
             return self.render_error(u'Тариф не доступен')
         subscription = get_subscription(client)
-        if subscription and (datetime.utcnow() - subscription.updated).seconds < self.LAST_BUYING_SECONDS:
-            return self.render_error(u'Вы уже совершили покупку')
+        if subscription:
+            if subscription.used_cups < subscription.initial_amount:
+                return self.render_error(u'Ваш текущий абонемент еще не использован')
+            else:
+                return self.render_error(u"Срок действия текущего абонемента еще не истек")
         payment_json = json.loads(self.request.get('payment'))
         order_id = 'subscription_%s_%s' % (client.key.id(), timestamp(datetime.utcnow()))
         order = Order(id=order_id)
         order.payment_type_id = payment_json['type_id']
-        order.venue_id = str(Venue.query(Venue.active == True).get().key.id())
+        if config.SUBSCRIPTION_MODULE.legal_for_payment:
+            legal = config.SUBSCRIPTION_MODULE.legal_for_payment
+            venue = Venue.query(Venue.legal == legal).get()
+        else:
+            venue = Venue.query().get()
+            legal = venue.legal
+        order.venue_id = str(venue.key.id())
         if order.payment_type_id == CARD_PAYMENT_TYPE:
-            success, error = card_payment_performing(payment_json, tariff.price * 100, order,
+            success, result = card_payment_performing(payment_json, tariff.price * 100, order,
                                                      put_order=False)
             if not success:
-                return self.render_error(error)
+                return self.render_error(result)
+            else:
+                payment_id = result
         elif order.payment_type_id == order.payment_type_id == PAYPAL_PAYMENT_TYPE:
-            success, error = paypal_payment_performing(payment_json, tariff.price * 100, order, client, put_order=False)
+            success, result = paypal_payment_performing(payment_json, tariff.price * 100, order, client, put_order=False)
             if not success:
-                return self.render_error(error)
+                return self.render_error(result)
+            else:
+                payment_id = result
         else:
             return self.render_error(u'Возможна оплата только картой')
+
+        seconds_to_return = min(7 * 24 * 3600, tariff.duration_seconds)
+        return_time = datetime.utcnow() + timedelta(seconds=seconds_to_return)
+
         expiration = datetime.utcnow() + timedelta(seconds=tariff.duration_seconds)
-        if subscription:
-            subscription.rest += tariff.amount
-            subscription.expiration = expiration
-            subscription.tariff = tariff.key
-            subscription.put()
-        else:
-            subscription = Subscription(client=client.key, tariff=tariff.key, rest=tariff.amount, expiration=expiration)
-            subscription.put()
+        subscription = Subscription(
+                client=client.key, tariff=tariff.key, initial_amount=tariff.amount,  expiration=expiration,
+                payment_id=payment_id, payment_type_id=order.payment_type_id, payment_amount=tariff.price,
+                payment_legal=legal, payment_return_time=return_time)
+        subscription.put()
         subscription_dict = subscription.dict()
         subscription_dict.update({
             'items': [item.dict()

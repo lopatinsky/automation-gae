@@ -1,9 +1,12 @@
 from datetime import datetime
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import transactional
+
 from models import STATUS_UNAVAILABLE, STATUS_AVAILABLE, STATUS_CHOICES
 from models.client import Client
+from models.legal import LegalInfo
 from models.menu import MenuItem
+from models.payment_types import PAYMENT_TYPE_CHOICES, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
 
 __author__ = 'dvpermyakov'
 
@@ -71,21 +74,53 @@ class Subscription(ndb.Model):
     status = ndb.IntegerProperty(default=STATUS_AVAILABLE, choices=STATUS_CHOICES)
     tariff = ndb.KeyProperty(kind=SubscriptionTariff, required=True)
     client = ndb.KeyProperty(kind=Client, required=True)
-    rest = ndb.IntegerProperty(required=True)
+    initial_amount = ndb.IntegerProperty(required=True)
+    used_cups = ndb.IntegerProperty(required=True, default=0)
+
+    payment_amount = ndb.IntegerProperty(required=True)
+    payment_type_id = ndb.IntegerProperty(required=True, choices=PAYMENT_TYPE_CHOICES)
+    payment_id = ndb.StringProperty(required=True)
+    payment_finalized = ndb.BooleanProperty(required=True, default=False)
+    payment_return_time = ndb.DateTimeProperty(required=True)
+    payment_legal = ndb.KeyProperty(LegalInfo, required=True)
 
     @transactional()
     def recover(self, amount):
-        self.rest += amount
+        self.used_cups -= amount
         self.put()
 
     @transactional()
     def deduct(self, amount):
-        if self.rest >= amount:
-            self.rest -= amount
+        if self.initial_amount - self.used_cups >= amount:
+            self.used_cups += amount
             self.put()
             return True
         else:
             return False
+
+    def finalize_payment_if_needed(self):
+        from methods import alfa_bank, paypal
+
+        if not self.payment_finalized:
+            if self.payment_type_id == CARD_PAYMENT_TYPE:
+                legal = self.payment_legal.get()
+                alfa_bank.deposit(legal.alfa_login, legal.alfa_password, self.payment_id, 0)
+            elif self.payment_type_id == PAYPAL_PAYMENT_TYPE:
+                paypal.capture(self.payment_id, self.payment_amount)
+            self.payment_finalized = True
+            self.put()
+
+    def revert_payment(self):
+        from methods import alfa_bank, paypal
+
+        assert self.used_cups == 0
+
+        if self.payment_type_id == CARD_PAYMENT_TYPE:
+            legal = self.payment_legal.get()
+            alfa_bank.reverse(legal.alfa_login, legal.alfa_password, self.payment_id)
+        elif self.payment_type_id == PAYPAL_PAYMENT_TYPE:
+            paypal.void(self.payment_id)
+        self.close()
 
     def close(self):
         self.status = STATUS_UNAVAILABLE
@@ -93,6 +128,6 @@ class Subscription(ndb.Model):
 
     def dict(self):
         return {
-            'amount': self.rest,
+            'amount': self.initial_amount - self.used_cups,
             'days': (self.expiration - datetime.utcnow()).days
         }

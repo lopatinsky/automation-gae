@@ -45,6 +45,10 @@ def done_order(order, namespace, with_push=True):
         if not promo_code.persist:
             performing.close()
 
+    if order.subscription_details:
+        subscription = order.subscription_details.subscription.get()
+        subscription.finalize_payment_if_needed()
+
     order.status = READY_ORDER
     order.email_key_done = None
     order.email_key_cancel = None

@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 from models import STATUS_AVAILABLE, STATUS_CHOICES
 from models.config.config import SUBSCRIPTION
+from models.legal import LegalInfo
 
 __author__ = 'dvpermyakov'
 
@@ -12,6 +13,8 @@ class SubscriptionModule(ndb.Model):
     menu_description = ndb.StringProperty(required=True)
     screen_title = ndb.StringProperty(required=True)
     screen_description = ndb.StringProperty(required=True)
+
+    legal_for_payment = ndb.KeyProperty(LegalInfo)
 
     @classmethod
     def has_module(cls):

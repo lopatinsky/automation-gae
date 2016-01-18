@@ -43,7 +43,7 @@ cron:
 
 - description: close subscription
   url: /cron/subscription
-  schedule: every day 07:00
+  schedule: every 4 hours synchronized
   timezone: Europe/Moscow
 
 - description: close geo push
