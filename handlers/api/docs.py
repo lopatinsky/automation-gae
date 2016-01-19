@@ -12,7 +12,7 @@ __author__ = 'dvpermyakov'
 def _get_values(legal):
     return {
         'company_name': legal.name,
-        'app_name': config.APP_NAME,
+        'app_name': "«%s»" % config.APP_NAME,
         'legal_person': legal.person_ooo if legal.person_ooo else legal.person_ip,
         'legal_person_ip': legal.person_ip,
         'site': legal.site,
