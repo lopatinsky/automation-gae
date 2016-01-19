@@ -16,6 +16,7 @@ class ChooseNamespaceHandler(CompanyBaseHandler):
             namespace_manager.set_namespace(namespace)
             if config and config.APP_NAME:
                 real_namespaces.append((namespace, config.APP_NAME))
+        real_namespaces = sorted(real_namespaces, key=lambda t: t[1])
         namespace_manager.set_namespace(None)
         self.render('/choose_namespace.html', namespaces=real_namespaces)
 
