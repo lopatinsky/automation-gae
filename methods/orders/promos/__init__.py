@@ -1,4 +1,5 @@
-from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited
+from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited, \
+    check_marked_dish_has_group_modifiers, check_marked_dish_has_not_group_modifiers
 from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest
 from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
@@ -53,6 +54,7 @@ def _get_promos(venue):
         if promo not in venue.promo_restrictions:
             promos.append(promo)
     return promos
+
 
 
 def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum, order):
@@ -124,6 +126,10 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_user_invited_another(client, order)
     elif condition.method == PromoCondition.CHECK_USER_INVITED:
         return check_user_is_invited(client, order)
+    elif condition.method == PromoCondition.CHECK_DISH_HAS_GROUP_MODIFIERS:
+        return check_marked_dish_has_group_modifiers(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS:
+        return check_marked_dish_has_not_group_modifiers(condition, item_dicts)
     else:
         return True
 

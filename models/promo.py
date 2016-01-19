@@ -1,8 +1,11 @@
 # coding=utf-8
 import random
+
 from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
+
 from google.appengine.ext import ndb
+
 from methods import fastcounter
 from models import STATUS_AVAILABLE, STATUS_UNAVAILABLE, GroupModifier, STATUS_CHOICES
 from models.menu import MenuItem, SingleModifier
@@ -11,7 +14,7 @@ from models.schedule import Schedule
 __author__ = 'dvpermyakov'
 
 
-class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
+class GiftMenuItem(ndb.Model):  # self.key.id() == item.key.id()
     item = ndb.KeyProperty(kind=MenuItem, required=True)
     status = ndb.IntegerProperty(choices=[STATUS_AVAILABLE, STATUS_UNAVAILABLE], default=STATUS_AVAILABLE)
     promo_id = ndb.IntegerProperty(required=True)  # it relates to empatika-promos
@@ -38,8 +41,11 @@ class GiftMenuItem(ndb.Model):   # self.key.id() == item.key.id()
                 if modifier['price'] > 0:
                     result['single_modifiers'].remove(modifier)
             if self.additional_group_choice_restrictions:
-                result['title'] = u'%s %s' % (item.title, u','.join([GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in self.additional_group_choice_restrictions]))
-            memcache.set('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()), result, time=24*3600)
+                result['title'] = u'%s %s' % (item.title, u','.join(
+                    [GroupModifier.get_modifier_by_choice(choice).get_choice_by_id(choice).title for choice in
+                     self.additional_group_choice_restrictions]))
+            memcache.set('gift_items_%s_%s' % (namespace_manager.get_namespace(), self.key.id()), result,
+                         time=24 * 3600)
         return result
 
 
@@ -120,6 +126,8 @@ class PromoCondition(ndb.Model):
     CHECK_LEFT_BASKET_PROMO = 31
     CHECK_INVITED_USER = 32
     CHECK_USER_INVITED = 33
+    CHECK_DISH_HAS_GROUP_MODIFIERS = 34
+    CHECK_DISH_HAS_NO_GROUP_MODIFIERS = 35
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
@@ -127,7 +135,8 @@ class PromoCondition(ndb.Model):
                MARK_ITEM_WITH_QUANTITY, CHECK_PROMO_CODE, CHECK_ORDER_NUMBER, CHECK_ITEM_NOT_IN_ORDER,
                CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH, CHECK_VENUE, CHECK_MARK,
                CHECK_REPEATED_ORDER_BEFORE, CHECK_MAX_USES, CHECK_MIN_DATE, CHECK_MAX_DATE, CHECK_LEFT_BASKET_PROMO,
-               CHECK_INVITED_USER, CHECK_USER_INVITED)
+               CHECK_INVITED_USER, CHECK_USER_INVITED, CHECK_DISH_HAS_GROUP_MODIFIERS,
+               CHECK_DISH_HAS_NO_GROUP_MODIFIERS)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -153,7 +162,7 @@ class Promo(ndb.Model):
 
     conflicts = ndb.KeyProperty(repeated=True)  # kind=Promo
     priority = ndb.IntegerProperty()
-    more_one = ndb.BooleanProperty(default=True)              # Not Implemented
+    more_one = ndb.BooleanProperty(default=True)  # Not Implemented
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     visible = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     hide_in_list = ndb.BooleanProperty(default=False)
@@ -165,6 +174,7 @@ class Promo(ndb.Model):
     def query_promos(cls, *args, **kwargs):  # AUTO_APP = 0
         from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.promo import get_promos
+
         app_kind = config.APP_KIND
         if app_kind in [AUTO_APP, DOUBLEB_APP]:
             return cls.query(*args, **kwargs).fetch()
@@ -210,7 +220,8 @@ class Promo(ndb.Model):
                 icon = self._get_url(hostname, self.BONUS_ICON)
             elif outcome.method in [PromoOutcome.CASH_BACK]:
                 icon = self._get_url(hostname, self.CASHBACK_ICON)
-            elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST, PromoOutcome.DISCOUNT_RICHEST,
+            elif outcome.method in [PromoOutcome.DISCOUNT, PromoOutcome.DISCOUNT_CHEAPEST,
+                                    PromoOutcome.DISCOUNT_RICHEST,
                                     PromoOutcome.FIX_DISCOUNT, PromoOutcome.DELIVERY_SUM_DISCOUNT,
                                     PromoOutcome.DELIVERY_FIX_SUM_DISCOUNT, PromoOutcome.MARKED_DISCOUNT_CHEAPEST]:
                 icon = self._get_url(hostname, self.DISCOUNT_ICON)
@@ -232,6 +243,7 @@ class Promo(ndb.Model):
             'id': self.key.id(),
             'text': self.title
         }
+
 
 CONDITION_MAP = {
     PromoCondition.CHECK_FIRST_ORDER: u"Первый заказ",
@@ -267,7 +279,9 @@ CONDITION_MAP = {
     PromoCondition.CHECK_MAX_DATE: u'Дата не позднее X',
     PromoCondition.CHECK_LEFT_BASKET_PROMO: u'Клиент ушел из корзины',
     PromoCondition.CHECK_USER_INVITED: u'Пользователь пригласил другого',
-    PromoCondition.CHECK_INVITED_USER: u'Пользователь был приглашен'
+    PromoCondition.CHECK_INVITED_USER: u'Пользователь был приглашен',
+    PromoCondition.CHECK_DISH_HAS_GROUP_MODIFIERS: u'У блюда есть групповые модификаторы',
+    PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS: u'У блюда нет групповых модификаторов'
 }
 
 OUTCOME_MAP = {

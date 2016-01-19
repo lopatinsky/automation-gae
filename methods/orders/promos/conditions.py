@@ -159,6 +159,7 @@ def check_marked_quantity(condition, item_dicts):
     for item_dict in item_dicts:
         if item_dict['persistent_mark']:
             amount += 1
+    print "check_marked_quantity, found %s" % amount
     return amount >= condition.value
 
 
@@ -238,6 +239,25 @@ def check_persist_mark(item_dicts):
     return False
 
 
+
+def check_marked_dish_has_not_group_modifiers(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict.get('group_modifier_keys'):
+            for modifier in item_dict['group_modifier_keys']:
+                if modifier[1] == condition.value:
+                    item_dict['temporary_mark'] = False
+    return True
+
+def check_marked_dish_has_group_modifiers(condition, item_dicts):
+    for item_dict in item_dicts:
+        if item_dict.get('group_modifier_keys'):
+            for modifier in item_dict['group_modifier_keys']:
+                if modifier[1] == condition.value:
+                    break
+            else:
+                item_dict['temporary_mark'] = False
+    return True
+
 def check_max_promo_uses(condition, client):
     promo_key = ndb.Key(Promo, condition.value)
     sum = 0
@@ -289,3 +309,4 @@ def check_user_is_invited(client, order):
             order.shared_promo = shared_promo.key
             shared_promo.put()
     return shared_promo is not None
+
