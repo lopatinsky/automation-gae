@@ -1,11 +1,10 @@
 from datetime import datetime
 import logging
-from distutils import config
 
 from google.appengine.api.namespace_manager import namespace_manager
 from models.config.version import TEST_VERSIONS, Version, CURRENT_VERSION, CURRENT_APP_ID, PRODUCTION_APP_ID, \
     DEMO_APP_ID
-from models.config.config import Config
+from models.config.config import Config, config
 from models.proxy.unified_app import AutomationCompany
 
 __author__ = 'dvpermyakov'
