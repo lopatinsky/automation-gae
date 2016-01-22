@@ -1,5 +1,4 @@
 import React from 'react';
-import { RouteHandler, Navigation, State } from 'react-router';
 import { OnResize } from 'react-window-mixins';
 import AppBar from 'material-ui/lib/app-bar';
 import Dialog from 'material-ui/lib/dialog';
@@ -13,12 +12,12 @@ import { AuthStore, AjaxStore, OrderStore, SystemStore, ConfigStore } from '../s
 import Actions from '../Actions';
 
 const MainView = React.createClass({
-    mixins: [OnResize, Navigation, State],
+    mixins: [OnResize],
 
     statics: {
-        willTransitionTo(transition) {
+        onEnter(nextState, replace) {
             if (!AuthStore.token) {
-                transition.redirect("login");
+                replace(null, '/login');
             }
         }
     },
@@ -56,6 +55,7 @@ const MainView = React.createClass({
             loadedOrders: OrderStore.loadedOrders,
             lastSuccessfulLoadTime: OrderStore.lastSuccessfulLoadTime,
             wasLastLoadSuccessful: OrderStore.wasLastLoadSuccessful,
+            pendingAction: null,
             pendingOrder: null,
             loggingOut: AjaxStore.sending.logout
         };
@@ -68,7 +68,7 @@ const MainView = React.createClass({
     },
     _onAuthStoreChange() {
         if (!AuthStore.token) {
-            this.transitionTo("login");
+            this.props.history.pushState(null, "/login");
         }
     },
     _onOrderStoreChange(data) {
@@ -101,10 +101,10 @@ const MainView = React.createClass({
     },
 
     _checkDeliveryType() {
-        if (!this.state.orderAheadEnabled && this.isActive("current")) {
-            this.transitionTo("delivery");
-        } else if (!this.state.deliveryEnabled && this.isActive("delivery")) {
-            this.transitionTo("current");
+        if (!this.state.orderAheadEnabled && this.props.history.isActive("current")) {
+            this.props.history.pushState(null, "/delivery");
+        } else if (!this.state.deliveryEnabled && this.props.history.isActive("delivery")) {
+            this.props.history.pushState(null, "/current");
         }
     },
 
@@ -117,7 +117,7 @@ const MainView = React.createClass({
         let actions = [
             <FlatButton key='cancel'
                         label='Отмена'
-                        onTouchTap={() => { this.refs.logoutDialog.dismiss() }}
+                        onTouchTap={this._clearPendingAction}
                         {...controlsProps}/>,
             <FlatButton key='logout'
                         label='Выйти'
@@ -128,7 +128,8 @@ const MainView = React.createClass({
         return <Dialog ref='logoutDialog'
                        title='Выход'
                        actions={actions}
-                       contentStyle={contentStyle}>
+                       contentStyle={contentStyle}
+                       open={this.state.pendingAction == 'logout'}>
             <SpinnerWrap show={this.state.loggingOut}>
                 <TextField ref='logoutPassword'
                            type='password'
@@ -145,7 +146,7 @@ const MainView = React.createClass({
         let actions = [
             <FlatButton key='back'
                         label='Назад'
-                        onTouchTap={() => { this.refs.cancelDialog.dismiss() }}/>,
+                        onTouchTap={this._clearPendingAction}/>,
             <FlatButton key='ok'
                         label='Отменить заказ'
                         secondary={true}
@@ -154,7 +155,8 @@ const MainView = React.createClass({
         return <Dialog ref='cancelDialog'
                        title='Отмена заказа'
                        actions={actions}
-                       contentStyle={{maxWidth: 600}}>
+                       contentStyle={{maxWidth: 600}}
+                       open={this.state.pendingAction == 'cancel'}>
             <TextField ref='returnComment'
                        type='text'
                        floatingLabelText='Введите комментарий'
@@ -166,7 +168,7 @@ const MainView = React.createClass({
         let actions = [
             <FlatButton key='back'
                         label='Назад'
-                        onTouchTap={() => { this.refs.postponeDialog.dismiss() }}/>,
+                        onTouchTap={this._clearPendingAction}/>,
             <FlatButton key='ok'
                         label='Перенести'
                         secondary={true}
@@ -181,7 +183,8 @@ const MainView = React.createClass({
         return <Dialog ref='postponeDialog'
                        title='Перенос заказа'
                        actions={actions}
-                       contentStyle={{maxWidth: 400}}>
+                       contentStyle={{maxWidth: 400}}
+                       open={this.state.pendingAction == 'postpone'}>
             <RadioButtonGroup name='postponeMinutes'
                               ref='postponeMinutes'
                               defaultSelected='10'>
@@ -212,17 +215,19 @@ const MainView = React.createClass({
                 }
             </Clock>
             <div style={contentStyle}>
-                <RouteHandler loadedOrders={this.state.loadedOrders}
-                              loadingOrders={this.state.loadingOrders}
-                              orderAhead={this.state.orderAhead}
-                              delivery={this.state.delivery}
-                              appKind={this.state.appKind}
-                              tryReload={this._tryReloadOrders}
-                              onTouchTapCancel={this._onTouchTapCancel}
-                              onTouchTapConfirm={this._onTouchTapConfirm}
-                              onTouchTapDone={this._onTouchTapDone}
-                              onTouchTapPostpone={this._onTouchTapPostpone}
-                              onTouchTapSync={this._onTouchTapSync}/>
+                {React.cloneElement(this.props.children, {
+                    loadedOrders: this.state.loadedOrders,
+                    loadingOrders: this.state.loadingOrders,
+                    orderAhead: this.state.orderAhead,
+                    delivery: this.state.delivery,
+                    appKind: this.state.appKind,
+                    tryReload: this._tryReloadOrders,
+                    onTouchTapCancel: this._onTouchTapCancel,
+                    onTouchTapConfirm: this._onTouchTapConfirm,
+                    onTouchTapDone: this._onTouchTapDone,
+                    onTouchTapPostpone: this._onTouchTapPostpone,
+                    onTouchTapSync: this._onTouchTapSync
+                })}
             </div>
             {this._renderLogoutDialog()}
             {this._renderCancelDialog()}
@@ -234,17 +239,27 @@ const MainView = React.createClass({
             Actions.loadCurrent();
         }
     },
+
+    _clearPendingAction() {
+        this.setState({
+            pendingAction: null,
+            pendingOrder: null
+        })
+    },
+
     _onLogoutClick() {
-        this.refs.logoutDialog.show();
+        this.setState({ pendingAction: 'logout' })
     },
 
     _onTouchTapCancel(order) {
-        this.setState({ pendingOrder: order });
-        this.refs.cancelDialog.show();
+        this.setState({
+            pendingAction: 'cancel',
+            pendingOrder: order
+        });
     },
     _cancelSubmit() {
-        this.refs.cancelDialog.dismiss();
         Actions.cancelOrder(this.state.pendingOrder, this.refs.returnComment.getValue());
+        this._clearPendingAction();
     },
 
     _onTouchTapConfirm(order) {
@@ -255,12 +270,14 @@ const MainView = React.createClass({
     },
 
     _onTouchTapPostpone(order) {
-        this.setState({ pendingOrder: order });
-        this.refs.postponeDialog.show();
+        this.setState({
+            pendingAction: 'postpone',
+            pendingOrder: order
+        });
     },
     _postponeSubmit() {
-        this.refs.postponeDialog.dismiss();
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
+        this._clearPendingAction();
     },
 
     _onTouchTapSync(order) {

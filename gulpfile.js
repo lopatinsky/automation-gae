@@ -72,10 +72,10 @@ function registerTasks(targetName) {
     gulp.task(scriptsTaskName, [manifestTaskName], function () {
         return browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify],
             extensions: ['.jsx'],
             debug: true
         })
+            .transform(babelify, { presets: ['es2015', 'stage-0', 'react'] })
             .bundle()
             .on('error', function (e) {
                 gutil.log('Build error: ' + e.message);
@@ -109,11 +109,11 @@ function registerTasks(targetName) {
 
         var watcher = watchify(browserify({
             entries: path.SCRIPT_MAIN,
-            transform: [babelify],
             extensions: ['.jsx'],
             debug: true,
             cache: {}, packageCache: {}, fullPaths: true
-        }));
+        }))
+            .transform(babelify, { presets: ['es2015', 'stage-0', 'react'] });
         watcher.on('update', function () {
             gutil.log("Starting rebuild");
             _rebundle(watcher);

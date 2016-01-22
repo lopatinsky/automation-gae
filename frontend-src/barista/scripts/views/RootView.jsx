@@ -1,5 +1,4 @@
 import React from 'react';
-import { RouteHandler } from 'react-router';
 import Actions from '../Actions';
 import theme from '../theme';
 
@@ -20,7 +19,7 @@ const RootView = React.createClass({
     },
 
     render() {
-        return <RouteHandler/>;
+        return this.props.children;
     }
 });
 export default RootView;
