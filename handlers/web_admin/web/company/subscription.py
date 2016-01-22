@@ -167,12 +167,18 @@ class ListSubscriptionMenuItemsListHandler(CompanyBaseHandler):
 
         categories = {}
 
+        print dishes
         for dish in dishes:
-            categories[dish.category.get().title] = []
+            if dish.category:
+                categories[dish.category.get().title] = []
+            else:
+                categories[u'Без категории'] = []
 
         for dish in dishes:
-            categories[dish.category.get().title].append(dish)
-
+            if dish.category:
+                categories[dish.category.get().title].append(dish)
+            else:
+                categories[u'Без категории'].append(dish)
 
         for menu_item in subscription_menu_items:
             subscription_dishes.append(menu_item.item.get())
