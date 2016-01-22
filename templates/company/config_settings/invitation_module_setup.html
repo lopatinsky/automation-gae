@@ -13,7 +13,7 @@
 
     <label for="after_order">After order</label><br>
     <input type="checkbox" name="after_order" id="after_order"
-           checked="{{ config.SHARE_INVITATION_MODULE.after_order }}">
+           {% if config.SHARE_INVITATION_MODULE.after_order %}checked{% endif %}>
 
     <br><br>
 
