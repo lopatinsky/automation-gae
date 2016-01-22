@@ -1,5 +1,4 @@
 import React from 'react';
-import { Navigation } from 'react-router';
 import Card from 'material-ui/lib/card/card';
 import CardTitle from 'material-ui/lib/card/card-title';
 import CardText from 'material-ui/lib/card/card-text';
@@ -13,14 +12,12 @@ import { AuthStore, AjaxStore } from '../stores';
 
 const LoginView = React.createClass({
     statics: {
-        willTransitionTo(transition) {
+        onEnter(nextState, replace) {
             if (AuthStore.token) {
-                transition.redirect('current');
+                replace(null, '/current');
             }
         }
     },
-
-    mixins: [Navigation],
 
     loginValidators: [required('Введите логин')],
     passwordValidators: [required('Введите пароль')],
@@ -45,6 +42,7 @@ const LoginView = React.createClass({
     getInitialState() {
         return {
             loggingIn: AuthStore.loggingIn,
+            errorShow: false,
             errorMessage: ''
         };
     },
@@ -58,7 +56,9 @@ const LoginView = React.createClass({
     },
     _onAuthStoreUpdate() {
         if (AuthStore.token) {
-            this.transitionTo('current');
+            setImmediate(() => {
+                this.props.history.pushState(null, "/current");
+            });
         }
     },
     _onAjaxStoreUpdate(data) {
@@ -70,8 +70,10 @@ const LoginView = React.createClass({
             } else {
                 errorMessage = 'Неизвестная ошибка, попробуйте еще раз';
             }
-            this.setState({ errorMessage });
-            this.refs.error.show();
+            this.setState({
+                errorShow: true,
+                errorMessage
+            });
         }
     },
     render() {
@@ -102,7 +104,11 @@ const LoginView = React.createClass({
                             </CardActions>
                         </SpinnerWrap>
                     </Card>
-                    <Snackbar ref='error' message={this.state.errorMessage} autoHideDuration={5000}/>
+                    <Snackbar ref='error'
+                              message={this.state.errorMessage}
+                              autoHideDuration={5000}
+                              open={this.state.errorShow}
+                              onRequestClose={() => { this.setState({ errorShow: false }); }}/>
                 </div>
             </div>
         </div>;
