@@ -7,7 +7,7 @@
 
 
     <label for="status">Status</label><br>
-    <input type="checkbox" name="status" id="status" checked="{{ config.SHARE_INVITATION_MODULE.status }}">
+    <input type="checkbox" name="status" id="status" {% if config.SHARE_INVITATION_MODULE.status %}checked {% endif %}>
 
     <br><br>
 
