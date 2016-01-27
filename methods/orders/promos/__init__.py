@@ -168,7 +168,7 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.EMPTY:
         return return_success(response)
     elif outcome.method == PromoOutcome.CASH_ACCUMULATE_GIFT_POINT:
-        return set_cash_gift_point(response, outcome, _get_final_total_sum(items), order)
+        return set_cash_gift_point(response, outcome, _get_final_total_sum(_get_initial_total_sum(items), items), order)
     elif outcome.method == PromoOutcome.FORBID_MENU_ITEM:
         return forbid_menu_item(response, outcome, items)
     elif outcome.method == PromoOutcome.MARKED_DISCOUNT_CHEAPEST:
