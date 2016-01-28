@@ -58,7 +58,7 @@ const NavItem = React.createClass({
             width: 60,
             margin: '0 auto',
             position: 'relative',
-            background: `url(${imageUrl})`,
+            backgroundImage: `url(${imageUrl})`,
             backgroundSize: 'contain'
         };
         return <div style={style}>

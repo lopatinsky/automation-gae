@@ -30,12 +30,14 @@ const ORDER_STATUS = {
     ORDER_PAYMENT_TYPE = {
         CASH: 0,
         CARD: 1,
-        PAYPAL: 4
+        PAYPAL: 4,
+        COURIER_CARD: 5
     },
     ORDER_PAYMENT_TYPE_NAMES = {
         [ORDER_PAYMENT_TYPE.CASH]: "Наличными",
         [ORDER_PAYMENT_TYPE.CARD]: "Картой",
-        [ORDER_PAYMENT_TYPE.PAYPAL]: "PayPal"
+        [ORDER_PAYMENT_TYPE.PAYPAL]: "PayPal",
+        [ORDER_PAYMENT_TYPE.COURIER_CARD]: "Картой курьеру"
     },
     ORDER_POSTPONE_OPTIONS = [5, 10, 15, 20, 25, 30];
 
