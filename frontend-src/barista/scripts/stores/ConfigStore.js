@@ -13,10 +13,14 @@ const ConfigStore = new BaseStore({
     orderAheadEnabled: true,
     deliveryEnabled: true,
     appKind: CONFIG_APP_KIND.AUTO_APP,
+    venues: [],
+    thisVenue: null,
     resetConfig() {
         this.orderAheadEnabled = true;
         this.deliveryEnabled = true;
         this.appKind = this.APP_KIND.AUTO_APP;
+        this.venues = [];
+        this.thisVenue = null;
         this._changed();
     },
     setConfig(config) {
@@ -30,6 +34,8 @@ const ConfigStore = new BaseStore({
                 this.deliveryEnabled = true;
             }
         }
+        this.venues = config.venues;
+        this.thisVenue = config.venue_id;
         this._changed();
     }
 }, action => {

@@ -193,6 +193,36 @@ const MainView = React.createClass({
         </Dialog>
     },
 
+    _renderMoveDialog() {
+        let actions = [
+            <FlatButton key='back'
+                        label='Назад'
+                        onTouchTap={this._clearPendingAction}/>,
+            <FlatButton key='ok'
+                        label='Перенести'
+                        secondary={true}
+                        onTouchTap={this._moveSubmit}/>
+        ], venues = ConfigStore.venues.filter(
+            venue => venue.id != ConfigStore.thisVenue
+        ).map(
+            venue => <RadioButton key={venue.id}
+                                  value={'' + venue.id}
+                                  label={venue.title}
+                                  style={{marginBottom: 8}}/>
+        );
+        return <Dialog ref='moveDialog'
+                       title='Перенос на другую точку'
+                       actions={actions}
+                       contentStyle={{maxWidth: 600}}
+                       open={this.state.pendingAction == 'move'}>
+            <RadioButtonGroup name='moveVenue'
+                              ref='moveVenue'
+                              defaultSelected={venues[0] && venues[0].props.value}>
+                {venues}
+            </RadioButtonGroup>
+        </Dialog>
+    },
+
     render() {
         let isHorizontal = this.state.window.width > this.state.window.height;
         let contentStyle = isHorizontal ? {paddingLeft: 100, paddingTop: 116} : {paddingTop: 216};
@@ -226,12 +256,14 @@ const MainView = React.createClass({
                     onTouchTapConfirm: this._onTouchTapConfirm,
                     onTouchTapDone: this._onTouchTapDone,
                     onTouchTapPostpone: this._onTouchTapPostpone,
+                    onTouchTapMove: this._onTouchTapMove,
                     onTouchTapSync: this._onTouchTapSync
                 })}
             </div>
             {this._renderLogoutDialog()}
             {this._renderCancelDialog()}
             {this._renderPostponeDialog()}
+            {this._renderMoveDialog()}
         </div>;
     },
     _tryReloadOrders() {
@@ -278,6 +310,19 @@ const MainView = React.createClass({
     _postponeSubmit() {
         Actions.postponeOrder(this.state.pendingOrder, this.refs.postponeMinutes.getSelectedValue());
         this._clearPendingAction();
+    },
+
+    _onTouchTapMove(order) {
+        this.setState({
+            pendingAction: 'move',
+            pendingOrder: order
+        });
+    },
+    _moveSubmit() {
+        if (this.refs.moveVenue.getSelectedValue()) {
+            Actions.moveToVenue(this.state.pendingOrder, this.refs.moveVenue.getSelectedValue());
+            this._clearPendingAction();
+        }
     },
 
     _onTouchTapSync(order) {

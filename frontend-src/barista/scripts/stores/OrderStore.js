@@ -2,6 +2,7 @@ import moment from 'moment';
 import _ from 'moment/locale/ru';
 import Actions from '../Actions';
 import BaseStore from './BaseStore';
+import ConfigStore from './ConfigStore';
 
 const ORDER_STATUS = {
         NEW: 0,
@@ -109,6 +110,9 @@ const OrderStore = new BaseStore({
             this._knownOrders.delete(order.id);
         }
     },
+    _removeOrder(orderID) {
+        this._knownOrders.delete(orderID);
+    },
     _addRawOrders(array) {
         for (let rawOrder of array) {
             this._addOrder(new Order(rawOrder));
@@ -172,6 +176,12 @@ const OrderStore = new BaseStore({
     },
     sync(order, { newData }) {
         this._saveAndChanged(new Order(newData));
+    },
+    move(order, { newVenue }) {
+        if (ConfigStore.thisVenue && ConfigStore.thisVenue != newVenue) {
+            this._removeOrder(order.id);
+            this._changed();
+        }
     },
 
     _getOrders(filter) {
