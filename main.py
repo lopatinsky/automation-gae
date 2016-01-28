@@ -114,7 +114,7 @@ app = WSGIApplication([
                     Route('/confirm', admin.ConfirmOrderHandler),
                     Route('/sync', admin.SyncRestoOrderHandler),
                     Route('/send_to_courier', admin.SendToCourierHandler),
-                    Route('/wrong_venue', admin.WrongVenueHandler),
+                    Route('/change_venue', admin.ChangeVenueHandler),
                 ])
             ]),
 
