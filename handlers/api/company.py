@@ -28,6 +28,10 @@ class AppConfigurationHandler(ApiHandler):
             'has_cities': has_cities,
             'has_companies': has_companies,
 
+            'colors': {
+                'main': config.ACTION_COLOR,
+            },
+
             'keys': {
                 'branch': config.BRANCH_API_KEY,
                 'parse': {
