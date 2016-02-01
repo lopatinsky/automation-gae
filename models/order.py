@@ -37,11 +37,29 @@ STATUS_MAP = {
     ON_THE_WAY: u'В пути'
 }
 
+
+DELIVERY_WITH_SELF = 0
+DELIVERY_IN_CAFE = 1
+DELIVERY_TO_HOUSE = 2
+DELIVERY_PICKUP = 3
+
+DELIVERY_TYPES = (DELIVERY_WITH_SELF, DELIVERY_IN_CAFE, DELIVERY_TO_HOUSE, DELIVERY_PICKUP)
+
+
+DELIVERY_MAP = {
+    DELIVERY_WITH_SELF: u"С собой",
+    DELIVERY_IN_CAFE: u"В кафе",
+    DELIVERY_TO_HOUSE: u"Доставка",
+    DELIVERY_PICKUP: u"Самовывоз"
+}
+
 CONFUSED_TIME = 0
 CONFUSED_VENUE = 1
 CONFUSED_SELF = 2
 CONFUSED_OTHER = 3
 CONFUSED_CHOICES = (CONFUSED_VENUE, CONFUSED_TIME, CONFUSED_SELF, CONFUSED_OTHER)
+
+
 
 
 class OrderRate(ndb.Model):
@@ -120,7 +138,7 @@ class Order(ndb.Model):
     status = ndb.IntegerProperty(required=True, choices=STATUSES, default=CREATING_ORDER)
     date_created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
-    delivery_type = ndb.IntegerProperty()
+    delivery_type = ndb.IntegerProperty(choices=DELIVERY_TYPES)
     delivery_time = ndb.DateTimeProperty()
     delivery_time_str = ndb.StringProperty()
     delivery_sum = ndb.IntegerProperty(default=0)

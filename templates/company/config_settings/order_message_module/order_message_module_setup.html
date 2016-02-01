@@ -1,0 +1,37 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post">
+    <label>
+        Доступен
+        <input type="checkbox" name="status" {% if config.ORDER_MESSAGE_MODULE.status %}checked {% endif %}>
+    </label>
+    <br>
+    <label>
+        Дефолтное сообщение<br>
+        <input type="text" name="default_message" value="{{ config.ORDER_MESSAGE_MODULE.default_message }}">
+    </label>
+    <br>
+    {% if config.ORDER_MESSAGE_MODULE.condition %}
+        <label>
+            Сообщение для доставки<br>
+            <input type="text" name="message_for_delivery"
+                   value="{{ config.ORDER_MESSAGE_MODULE.condition.get().messages[2] }}">
+        </label><br>
+
+        <label>
+            Сообщение для самовывоза<br>
+            <input type="text" name="message_for_pickup"
+                   value="{{ config.ORDER_MESSAGE_MODULE.condition.get().messages[0] }}">
+        </label><br>
+
+    {% endif %}
+
+    <input type="submit" value="Сохранить">
+</form>
+
+</body>
+</html>
