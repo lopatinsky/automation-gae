@@ -118,6 +118,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.REMAINDERS_MODULE.dict())
         if config.CUSTOM_SECTIONS_MODULE and config.CUSTOM_SECTIONS_MODULE.status:
             modules.append(config.CUSTOM_SECTIONS_MODULE.dict())
+        if config.PLATIUS_WHITE_LABEL_MODULE and config.PLATIUS_WHITE_LABEL_MODULE.status:
+            modules.append(config.PLATIUS_WHITE_LABEL_MODULE.dict())
         self.render_json({
             'modules': modules
         })

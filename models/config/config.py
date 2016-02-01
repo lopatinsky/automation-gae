@@ -16,9 +16,10 @@ ORDER_INFO_MODULE = 11
 NUMBER_OF_PEOPLE_MODULE = 12
 CASH_CHANGE_MODULE = 13
 CUSTOM_SECTIONS_MODULE = 14
+PLATIUS_WHITE_LABEL_MODULE = 15
 MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, CLIENT_INFO_MODULE, HIT_MODULE, MIVAKO_GIFT_MODULE,
                 REVIEW_MODULE, MENU_FRAME_MODULE, REMAINDERS_MODULE, ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE,
-                CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE)
+                CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE, PLATIUS_WHITE_LABEL_MODULE)
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
@@ -36,6 +37,7 @@ from models.config.mivako import MivakoGiftModule
 from models.config.review import ReviewModule
 from models.config.basket_notification import BasketNotificationModule
 from models.config.custom_sections import CustomSectionsModule
+from models.config.platius_wl import PlatiusWhiteLabelModule
 
 OTHER = -1
 VENUE = 0
@@ -125,6 +127,7 @@ class Config(ndb.Model):
     MENU_FRAME_MODULE = ndb.LocalStructuredProperty(MenuFrameModule)
     REMAINDERS_MODULE = ndb.LocalStructuredProperty(RemaindersModule)
     CUSTOM_SECTIONS_MODULE = ndb.LocalStructuredProperty(CustomSectionsModule)
+    PLATIUS_WHITE_LABEL_MODULE = ndb.LocalStructuredProperty(PlatiusWhiteLabelModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 
