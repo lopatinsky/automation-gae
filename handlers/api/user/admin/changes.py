@@ -4,6 +4,7 @@ from handlers.api.user.admin.base import AdminApiHandler
 from methods.emails.admins import send_error
 from methods.orders.cancel import cancel_order
 from methods.orders.done import done_order
+from methods.orders.move import move_order
 from methods.orders.postpone import postpone_order
 from methods.orders.confirm import confirm_order
 from methods.orders.courier import send_to_courier
@@ -12,7 +13,7 @@ from methods.rendering import timestamp
 from models.config.config import config, AUTO_APP
 from models.order import CANCELED_BY_BARISTA_ORDER, CONFIRM_ORDER, NEW_ORDER
 from models.user import Courier
-from models.venue import DELIVERY, PICKUP
+from models.venue import DELIVERY, PICKUP, Venue
 
 __author__ = 'ilyazorin'
 
@@ -94,12 +95,19 @@ class SendToCourierHandler(AdminApiHandler):
         self.render_json({})
 
 
-class WrongVenueHandler(AdminApiHandler):
+class ChangeVenueHandler(AdminApiHandler):
     @api_admin_required
     @write_access_required
     def post(self, order_id):
         order = self.user.order_by_id(int(order_id))
         if order.status != NEW_ORDER:
             self.abort(400)
-        # todo: set code here
+
+        new_venue_id = self.request.get_range('venue_id')
+        new_venue = Venue.get_by_id(new_venue_id)
+        if not new_venue:
+            self.abort(400)
+
+        move_order(order, new_venue)
+
         self.render_json({})

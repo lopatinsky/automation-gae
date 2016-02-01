@@ -137,6 +137,12 @@ const Actions = {
             .end(res => ({ order, action: 'sync', options: { newData: res.body.order }}));
     },
 
+    moveToVenue(order, venueID) {
+        doRequest.post(`order_action_${order.id}`, `admin/orders/${order.id}/change_venue`)
+            .query({venue_id: venueID})
+            .end(res => ({ order, action: 'move', options: { newVenue: venueID }}));
+    },
+
     INIT_APP: "INIT_APP",
     initApp() {
         AppDispatcher.dispatch({

@@ -76,9 +76,12 @@ def send_client_sms_task(order, namespace):
     }, countdown=SECONDS_WAITING_BEFORE_SMS)
 
 
-def send_venue_sms(venue, order):
+def send_venue_sms(venue, order, move=False):
     if venue.phones:
-        text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
+        if move:
+            text = u'Заказ №%s перенесен на эту точку приготовления' % order.key.id()
+        else:
+            text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         send_sms(venue.phones, text)
 
 
@@ -92,9 +95,12 @@ def send_demo_sms(client):
         send_error('sms_error', 'Send sms', error_text)
 
 
-def send_venue_email(venue, order, host_url, jinja2):
+def send_venue_email(venue, order, host_url, jinja2, move=False):
     if venue.emails:
-        text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
+        if move:
+            text = u'Заказ №%s перенесен на эту точку приготовления' % order.key.id()
+        else:
+            text = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
         item_values = order_items_values(order)
         item_values['venue'] = venue
         item_values['delivery_type_str'] = DELIVERY_MAP[order.delivery_type]

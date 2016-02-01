@@ -61,7 +61,8 @@ def check_first_order(client):
 
 def check_repeated_order(condition, client):
     if condition.value > 0:
-        min_time = datetime.utcnow() - timedelta(days=condition.value)
+        midnight = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)  # TODO timezone
+        min_time = midnight - timedelta(days=condition.value - 1)  # midnight N days ago
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES),
                             Order.date_created > min_time).get()
     else:

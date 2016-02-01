@@ -15,6 +15,7 @@ const OrderCard = React.createClass({
                 postpone: this._handleAction.bind(this, 'Postpone'),
                 confirm: this._handleAction.bind(this, 'Confirm'),
                 done: this._handleAction.bind(this, 'Done'),
+                move: this._handleAction.bind(this, 'Move'),
                 sync: this._handleAction.bind(this, 'Sync')
             }
         };
@@ -50,6 +51,7 @@ const OrderCard = React.createClass({
             }
             return <div style={style}>
                 <FlatButton label='Отменить' onTouchTap={this.state.handle.cancel} disabled={this.state.sendingRequest}/>
+                <FlatButton label='Сменить точку' onTouchTap={this.state.handle.move} disabled={this.state.sendingRequest}/>
                 <FlatButton label='Перенести' onTouchTap={this.state.handle.postpone} disabled={this.state.sendingRequest}/>
                 <FlatButton label={primaryActionLabel} onTouchTap={primaryActionHandler} disabled={this.state.sendingRequest} secondary={true}/>
             </div>;

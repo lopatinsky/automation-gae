@@ -20,12 +20,15 @@ def _get_delivery_types(venue):
 
 def _get_config(admin):
     venue = admin.venue.get() if admin.venue else None
+    active_venues = Venue.query(Venue.active == True).fetch()
     return {
         'venue': venue.dict() if venue else None,
         'login': admin.login,
         'app_name': config.APP_NAME,
         'app_kind': config.APP_KIND,
-        'delivery_types': _get_delivery_types(venue)
+        'delivery_types': _get_delivery_types(venue),
+        'venues': [v.dict() for v in active_venues],
+        'venue_id': admin.venue.id() if admin.venue else None,
     }
 
 

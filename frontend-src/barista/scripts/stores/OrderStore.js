@@ -2,6 +2,7 @@ import moment from 'moment';
 import _ from 'moment/locale/ru';
 import Actions from '../Actions';
 import BaseStore from './BaseStore';
+import ConfigStore from './ConfigStore';
 
 const ORDER_STATUS = {
         NEW: 0,
@@ -30,12 +31,14 @@ const ORDER_STATUS = {
     ORDER_PAYMENT_TYPE = {
         CASH: 0,
         CARD: 1,
-        PAYPAL: 4
+        PAYPAL: 4,
+        COURIER_CARD: 5
     },
     ORDER_PAYMENT_TYPE_NAMES = {
         [ORDER_PAYMENT_TYPE.CASH]: "Наличными",
         [ORDER_PAYMENT_TYPE.CARD]: "Картой",
-        [ORDER_PAYMENT_TYPE.PAYPAL]: "PayPal"
+        [ORDER_PAYMENT_TYPE.PAYPAL]: "PayPal",
+        [ORDER_PAYMENT_TYPE.COURIER_CARD]: "Картой курьеру"
     },
     ORDER_POSTPONE_OPTIONS = [5, 10, 15, 20, 25, 30];
 
@@ -107,6 +110,9 @@ const OrderStore = new BaseStore({
             this._knownOrders.delete(order.id);
         }
     },
+    _removeOrder(orderID) {
+        this._knownOrders.delete(orderID);
+    },
     _addRawOrders(array) {
         for (let rawOrder of array) {
             this._addOrder(new Order(rawOrder));
@@ -170,6 +176,12 @@ const OrderStore = new BaseStore({
     },
     sync(order, { newData }) {
         this._saveAndChanged(new Order(newData));
+    },
+    move(order, { newVenue }) {
+        if (ConfigStore.thisVenue && ConfigStore.thisVenue != newVenue) {
+            this._removeOrder(order.id);
+            this._changed();
+        }
     },
 
     _getOrders(filter) {
