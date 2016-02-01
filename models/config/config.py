@@ -1,4 +1,5 @@
 # coding=utf-8
+from models.config.order_message import OrderMessageModule
 
 SUBSCRIPTION = 0
 SHARE_GIFT = 1
@@ -58,6 +59,7 @@ COMPANY_IN_PRODUCTION = 1
 COMPANY_REMOVED = 2
 COMPANY_PREVIEW = 3
 COMPANY_STATUS_CHOICES = (COMPANY_IN_DEVELOPMENT, COMPANY_IN_PRODUCTION, COMPANY_REMOVED, COMPANY_PREVIEW)
+
 COMPANY_STATUS_NAMES = {
     COMPANY_IN_DEVELOPMENT: u"Не запущена",
     COMPANY_IN_PRODUCTION: u"Запущена",
@@ -115,6 +117,7 @@ class Config(ndb.Model):
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
     NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
     BASKET_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(BasketNotificationModule)
+    ORDER_MESSAGE_MODULE = ndb.LocalStructuredProperty(OrderMessageModule)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
     MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)
     REVIEW_MODULE = ndb.LocalStructuredProperty(ReviewModule)

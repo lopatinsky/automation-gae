@@ -2,26 +2,27 @@
 import copy
 import logging
 import json
-from google.appengine.api import memcache
 
+from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-from google.appengine.ext.ndb import GeoPt
-from methods.proxy.doubleb.place_order import doubleb_place_order
 
+from google.appengine.ext.ndb import GeoPt
+
+from methods.proxy.doubleb.place_order import doubleb_place_order
 from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj, send_demo_sms, need_to_show_share_invitation
 from methods.orders.validation.validation import validate_order
-from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address,\
+from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address, \
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_subscription
 from methods.subscription import get_amount_of_subscription_items
-from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
+from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
 from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
@@ -107,9 +108,9 @@ class OrderHandler(ApiHandler):
         else:
             delivery_slot = None
 
-        delivery_time_minutes = order_json.get('delivery_time')    # used for old versions todo: remove
-        if delivery_time_minutes:                                     # used for old versions todo: remove
-            delivery_time_minutes = int(delivery_time_minutes)        # used for old versions todo: remove
+        delivery_time_minutes = order_json.get('delivery_time')  # used for old versions todo: remove
+        if delivery_time_minutes:  # used for old versions todo: remove
+            delivery_time_minutes = int(delivery_time_minutes)  # used for old versions todo: remove
         delivery_time_picker = order_json.get('time_picker_value')
 
         self.order.delivery_time = get_delivery_time(delivery_time_picker, venue, delivery_slot, delivery_time_minutes)
@@ -234,7 +235,8 @@ class OrderHandler(ApiHandler):
         # it is used for creating db for promos
         validate_order(client, order_json['items'], gifts_copy, order_json.get('order_gifts', []),
                        order_json.get('cancelled_order_gifts', []), order_json['payment'],
-                       venue, address_json, self.order.delivery_time, delivery_slot, self.order.delivery_type, delivery_zone, False,
+                       venue, address_json, self.order.delivery_time, delivery_slot, self.order.delivery_type,
+                       delivery_zone, False,
                        self.order)
 
         self.order.status = NEW_ORDER
@@ -247,10 +249,17 @@ class OrderHandler(ApiHandler):
             send_demo_sms(client)
 
         self.response.status_int = 201
+        conf = config
+        if conf.ORDER_MESSAGE_MODULE:
+            message = conf.ORDER_MESSAGE_MODULE.get_message(self.order)
+        else:
+            message = u'Заказ оправлен'
+
         self.render_json({
             'order_id': self.order.key.id(),
             'number': self.order.number,
             'delivery_time': validation_result['delivery_time'],
             'delivery_slot_name': validation_result['delivery_slot_name'],
             'show_share': need_to_show_share_invitation(client),
+            'message': message
         })

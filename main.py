@@ -269,6 +269,7 @@ app = WSGIApplication([
                 Route('/send_notif', NotificatingInactiveUsersHandler, 'send_notif'),
                 Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
             ]),
+            Route('/order_message_module', SetupOrderMessageModuleHandler, 'order_message_module'),
             Route('', ConfigMainHandler),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),

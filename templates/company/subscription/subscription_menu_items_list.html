@@ -27,15 +27,15 @@
 
 <h1>Меню</h1>
 
-<table>
-    <tr>
-        <th>Доступно по подписке</th>
-        <th>Название</th>
-    </tr>
 
-    {% for category, dishes in categories.items() %}
-        <h4>{{ category }}</h4>
-        {% for dish in dishes %}
+{% for category in categories %}
+    <h2>{{ category }}</h2>
+    <table>
+        <tr>
+            <th>Доступно по подписке</th>
+            <th>Название</th>
+        </tr>
+        {% for dish in categories[category] %}
             <tr>
                 <td><input type="checkbox" class="avaibility_checkbox" {% if dish in subscription_dishes %}
                            checked {% endif %}
@@ -43,10 +43,7 @@
                 <td>{{ dish.title }}</td>
             </tr>
         {% endfor %}
-
-    {% endfor %}
-
-
-</table>
+    </table>
+{% endfor %}
 </body>
 </html>

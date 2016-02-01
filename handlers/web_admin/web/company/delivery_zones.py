@@ -102,6 +102,7 @@ class AddingJSFileDeliveryZoneHandler(CompanyBaseHandler):
 
                 coordinates_array = geometry['coordinates']
                 type = geometry['type']
+
                 if type == 'Polygon':
                     delivery_coordinates = coordinates_array[0]
                 elif type == 'LineString':

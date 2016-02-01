@@ -5,6 +5,7 @@ from methods import branch_io
 from models.config.basket_notification import BasketNotificationModule
 from models.config.config import Config
 from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
+from models.config.order_message import OrderMessageModule, Condition
 from models.config.share import ShareInvitationModule
 from methods.auth import config_rights_required
 
@@ -16,6 +17,66 @@ class ConfigMainHandler(CompanyBaseHandler):
     @config_rights_required
     def get(self):
         self.render('/config_settings/config_settings.html')
+
+
+class SetupOrderMessageModuleHandler(CompanyBaseHandler):
+    @config_rights_required
+    def get(self):
+        conf = config.Config.get()
+
+        if not conf.ORDER_MESSAGE_MODULE:
+            conf.ORDER_MESSAGE_MODULE = OrderMessageModule()
+            conf.ORDER_MESSAGE_MODULE.status = 0
+
+        cond = Condition.query(Condition.type == 0, Condition.status == 1).get()
+
+        if not cond:
+            cond = Condition()
+            cond.type = 0
+            cond.status = 1
+            cond.put()
+
+        conf.ORDER_MESSAGE_MODULE.condition = cond.key
+
+        conf.put()
+
+        self.render('/config_settings/order_message_module/order_message_module_setup.html')
+
+    @config_rights_required
+    def post(self):
+        status = self.request.get('status') is not ''
+        default_message = self.request.get('default_message')
+
+        conf = config.Config.get()
+
+        if not conf.ORDER_MESSAGE_MODULE:
+            conf.ORDER_MESSAGE_MODULE = OrderMessageModule()
+
+        order_message_module = conf.ORDER_MESSAGE_MODULE
+
+        order_message_module.default_message = default_message
+        order_message_module.status = status
+
+        conf.put()
+
+        message_for_delivery = self.request.get('message_for_delivery')
+        message_for_pickup = self.request.get('message_for_pickup')
+
+        cond = Condition.query(Condition.type == 0, Condition.status == 1).get()
+
+        if not cond:
+            cond = Condition()
+            cond.type = 0
+            cond.status = 1
+            pass
+
+        cond.set_messages(message_for_pickup, message_for_pickup, message_for_delivery, message_for_pickup)
+        cond.put()
+
+        order_message_module.condition = cond.key
+        conf.put()
+
+        self.redirect_to('order_message_module')
 
 
 class SetInvitationModuleHandler(CompanyBaseHandler):
@@ -150,11 +211,6 @@ class ListNotifModuleHandler(CompanyBaseHandler):
 
         self.render('/config_settings/inactive_users_notifications/notif_modules.html', types=types)
         pass
-
-
-@config_rights_required
-def post(self):
-    pass
 
 
 class DeleteNotifModuleHandler(CompanyBaseHandler):

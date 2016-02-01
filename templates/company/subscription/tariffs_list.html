@@ -61,12 +61,6 @@
             <td>{{ tariff.price }}</td>
             <td>{{ tariff.amount }}</td>
             <td>{{ tariff.duration_seconds }}</td>
-{#            <td>#}
-                {#                <form action="{{ "/company/subscription/delete_tariff?tariff_id=%s" % tariff.key.id() }}" method="post">#}
-                {#                    <input type="submit" value="Удалить">#}
-                {#                </form>#}
-{#                <button class="delete_tariff" value="{{ tariff.key.id() }}">Удалить</button>#}
-{#            </td>#}
         </tr>
     {% endfor %}
 </table><br>

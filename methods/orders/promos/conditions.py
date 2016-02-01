@@ -1,7 +1,6 @@
 # coding=utf-8
 from Queue import Queue
 from datetime import datetime, timedelta
-
 from google.appengine.ext import ndb
 
 from methods import working_hours
