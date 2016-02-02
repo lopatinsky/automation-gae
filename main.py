@@ -1,3 +1,6 @@
+import sys
+sys.path[0:0] = ['lib']
+
 from webapp2_extras import jinja2
 from webapp2 import Route, WSGIApplication
 from webapp2_extras.routes import PathPrefixRoute
@@ -21,7 +24,7 @@ import handlers.web_admin.web.company.excel as company_excel
 from handlers.api.proxy import unified_app
 from handlers import tasks
 from handlers import email_api
-from handlers.api import mivako
+from handlers.api import mivako, platius
 
 webapp2_config = {
     "webapp2_extras.sessions": {
@@ -237,6 +240,13 @@ app = WSGIApplication([
         PathPrefixRoute('/geo_push', [
             Route('/add', api.AddPushHandler),
         ]),
+
+        PathPrefixRoute('/platius', [
+            Route('/status', platius.PlatiusStatusHandler),
+            Route('/barcode', platius.PlatiusBarcodeImageHandler, name="platius_barcode"),
+            Route('/send_sms', platius.PlatiusSendSmsHandler),
+            Route('/check_sms', platius.PlatiusCheckSmsCodeHandler),
+        ])
     ]),
 
     PathPrefixRoute('/company', [

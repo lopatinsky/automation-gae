@@ -16,14 +16,14 @@ class PlatiusClient(ndb.Model):
     @classmethod
     def get_and_validate(cls, client):
         result = cls.get_for_client(client)
-        return result, result.phone == client.tel
+        valid = result is not None and result.phone == client.tel
+        return result, valid
 
     @classmethod
-    def create_or_overwrite(cls, client):
+    def create_or_overwrite(cls, client, user_id, token):
         result = cls.get_for_client(client)
-        if result:
-            result.phone = client.tel
-        else:
-            result = cls(client=client, phone=client.tel)
+        if not result:
+            result = cls(client=client.key)
+        result.populate(phone=client.tel, user_id=user_id, token=token)
         result.put()
         return result

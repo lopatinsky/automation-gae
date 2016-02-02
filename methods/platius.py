@@ -3,22 +3,30 @@ import json
 from hashlib import sha1
 from urllib import urlencode
 
-import requests
+import barcode
+from barcode.writer import ImageWriter
 from google.appengine.api import urlfetch
 
-from models.config import config
-from models.platius import PlatiusClient
+from models.config.config import config
 
 BASE_URL = 'https://iiko.net:9900/api/mobile/v2/'
 
 
+class PlatiusError(Exception):
+    status = None
+    body = None
+
+    def __init__(self, status, body):
+        self.status = status
+        self.body = body
+
+
 def _sign_request(secret_key, string):
-    hashed = hmac.new(secret_key, string, sha1)
+    hashed = hmac.new(secret_key.encode('utf-8'), string.encode('utf-8'), sha1)
     return hashed.hexdigest()
 
 
 def _request(endpoint, method, client, query=None, body=None):
-    assert isinstance(client, PlatiusClient)
     url = BASE_URL + endpoint
     if query:
         url = "%s?%s" % (url, urlencode(query))
@@ -33,19 +41,21 @@ def _request(endpoint, method, client, query=None, body=None):
 
     res = urlfetch.fetch(url, payload, method, headers)
     if res.status_code != 200:
-        raise Exception(res)
-    return json.loads(res.content)
+        raise PlatiusError(res.status_code, res.content)
+    if res.content:
+        return json.loads(res.content)
+    return None
 
 
 def send_sms(user_phone, culture_code='ru-RU'):
-    return _request('auth/sendSms', 'POST', None, {
+    return _request('auth/sendSms', 'POST', None, body={
         'userPhone': user_phone,
         'culture': culture_code
     })
 
 
 def check_sms(user_phone, sms_password, culture_code='ru-RU'):
-    return _request('auth/checkSms', 'POST', None, {
+    return _request('auth/checkSms', 'POST', None, body={
         'userPhone': user_phone,
         'password': sms_password,
         'culture': culture_code
@@ -63,9 +73,4 @@ def get_user_info(client):
 
 
 def generate_bar_code(number):
-    import barcode
-    EAN = barcode.get_barcode_class('ean13')
-
-    from barcode.writer import ImageWriter
-    ean = EAN(str(number), writer=ImageWriter())
-    ean.save('barcode')
+    return barcode.get('ean8', number, ImageWriter())
