@@ -68,9 +68,9 @@ const OrderInfo = React.createClass({
                     <div style={{textAlign: 'right'}}>
                         <div>
                             <span style={bolderStyle}>{order.paymentTypeName}: </span>
-                            <span style={boldStyle}>{order.paymentSum} р.</span>
+                            <span style={boldStyle}>{order.paymentSum.toFixed(2)} р.</span>
                         </div>
-                        {order.walletPayment > 0 && <div>Оплата баллами: {order.walletPayment} р.</div>}
+                        {order.walletPayment > 0 && <div>Оплата баллами: {order.walletPayment.toFixed(2)} р.</div>}
                     </div>
                 </div>
             </div>
