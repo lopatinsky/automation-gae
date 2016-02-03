@@ -52,6 +52,7 @@
                 <th>Тип поиска</th>
                 <th>Минимальная сумма</th>
                 <th>Стоимость доставки</th>
+                <th>Сумма для бесплатной доставки</th>
                 <th>Комментарий</th>
                 <th>Ограничения на карте</th>
             </tr>
@@ -78,6 +79,7 @@
                     <td>{{ ZONE_MAP[zone.search_type] }}</td>
                     <td>{{ zone.min_sum }}</td>
                     <td>{{ zone.price }}</td>
+                    <td>{{ zone.free_delivery_sum }}</td>
                     <td>{% if zone.comment %} {{ zone.comment }} {% endif %}</td>
                     <td>
                         <a href="{{ '/company/delivery/zone/map?zone_id=%s' % zone.key.id() }}">Карта зон</a>

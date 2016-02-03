@@ -141,6 +141,7 @@ class DeliveryZone(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     price = ndb.IntegerProperty(default=0)
     min_sum = ndb.IntegerProperty(default=0)
+    free_delivery_sum = ndb.IntegerProperty()
     comment = ndb.StringProperty()
     geo_ribs = ndb.LocalStructuredProperty(GeoRib, repeated=True)
 

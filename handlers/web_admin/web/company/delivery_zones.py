@@ -219,6 +219,7 @@ class EditDeliveryZoneHandler(CompanyBaseHandler):
         zone.min_sum = self.request.get_range('min_sum')
         zone.price = self.request.get_range('price')
         zone.comment = self.request.get('comment')
+        zone.free_delivery_sum = self.request.get_range('free_delivery_sum')
         zone.put()
         self.redirect('/company/delivery/zone/list')
 
