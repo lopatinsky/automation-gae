@@ -143,13 +143,13 @@ def set_address_obj(address_json, order):
     address_args = {
         'lat': float(address_json['coordinates']['lat']) if address_json['coordinates']['lat'] else None,
         'lon': float(address_json['coordinates']['lon']) if address_json['coordinates']['lon'] else None,
-        'country': address_json['address']['country'],
-        'city': address_json['address']['city'],
-        'street': address_json['address']['street'],
-        'area': address_json['address']['area'],
-        'home': address_json['address']['home'],
-        'flat': address_json['address']['flat'],
-        'comment': address_json['address']['comment'],
+        'country': address_json['address'].get('country'),
+        'city': address_json['address'].get('city'),
+        'street': address_json['address'].get('street'),
+        'area': address_json['address'].get('area'),
+        'home': address_json['address'].get('home'),
+        'flat': address_json['address'].get('flat'),
+        'comment': address_json['address'].get('comment'),
     }
     address_obj = Address(**address_args)
     address_obj.comment = address_json['comment'] if address_json.get('comment') else None
