@@ -1,6 +1,7 @@
+import json
+
 from .base import ApiHandler
 from methods.orders.validation.precheck import set_client_info
-import json
 
 
 class ClientHandler(ApiHandler):

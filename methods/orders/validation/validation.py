@@ -456,16 +456,12 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
 
-    logging.debug(delivery_zone)
-    logging.debug(total_sum)
-    if delivery_zone and delivery_zone.free_delivery_sum:
-        if total_sum >= delivery_zone.free_delivery_sum:
-            logging.debug('Delivery is free!')
-            delivery_sum = 0
 
-    print('delivery sum: {}'.format(delivery_sum))
+    if delivery_zone and delivery_zone.free_delivery_sum \
+            and total_sum >= delivery_zone.free_delivery_sum:
+        delivery_sum = 0
+
     if not item_dicts and not gift_dicts:
-        print('Something weird')
         delivery_sum = 0
         delivery_sum_str = u''
     else:

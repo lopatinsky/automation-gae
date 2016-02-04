@@ -1,6 +1,5 @@
 import json
 import logging
-import datetime
 
 from google.appengine.api import taskqueue
 
@@ -56,6 +55,8 @@ class CheckOrderHandler(ApiHandler):
                 address = validate_address(address)
             venue, delivery_zone = get_venue_and_zone_by_address(address)
 
+        logging.debug("venue: {0}, delivery zone: {1}".format(venue, delivery_zone))
+
         raw_payment_info = self.request.get('payment')
         payment_info = None
         if raw_payment_info:
@@ -109,7 +110,6 @@ class CheckOrderHandler(ApiHandler):
                                      'client_id': client_id,
                                      'namespace': namespace_manager.get_namespace()
                                  })
-            logging.debug(task)
             client.notif_id = task.name
             client.put()
 

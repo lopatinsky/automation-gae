@@ -18,6 +18,15 @@ class ConfigMainHandler(CompanyBaseHandler):
     def get(self):
         self.render('/config_settings/config_settings.html')
 
+    def post(self):
+        checked = self.request.get('reject_order_checkbox') is not ''
+        conf = config.Config.get()
+        conf.REJECT_IF_NOT_IN_ZONES = checked
+
+        conf.put()
+        self.redirect_to('config_main')
+
+
 
 class SetupOrderMessageModuleHandler(CompanyBaseHandler):
     @config_rights_required

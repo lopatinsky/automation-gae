@@ -152,15 +152,14 @@ def validate_address(address):
 
 def get_venue_and_zone_by_address(address):
     area = None
+    venues = Venue.fetch_venues(Venue.active == True)
+    delivery_zones = DeliveryZone.query(DeliveryZone.status == STATUS_AVAILABLE).fetch()
     if address:
         has_coords = False
         if address.get('coordinates'):
             if address['coordinates'].get('lat') and address['coordinates'].get('lon'):
                 has_coords = True
-        venues = Venue.fetch_venues(Venue.active == True)
         nearest_venues = []  # it is used for getting nearest venue if zone is not found
-
-        delivery_zones = DeliveryZone.query().fetch()
 
         ZONE_SEARCH_TYPES = (DeliveryZone.ZONE, DeliveryZone.RADIUS, DeliveryZone.NEAREST, DeliveryZone.DISTRICT,
                              DeliveryZone.CITY, DeliveryZone.DEFAULT)
@@ -175,8 +174,7 @@ def get_venue_and_zone_by_address(address):
                 current_zones = [zone for zone in delivery_zones
                                  if zone.key in delivery.delivery_zones and zone.search_type == zone_type]
                 for zone in sorted(current_zones, key=lambda zone: zone.sequence_number):
-                    if zone.status == STATUS_UNAVAILABLE:
-                        continue
+
                     # case 1: get venue by custom zone
                     if zone.search_type == DeliveryZone.ZONE:
                         if has_coords and zone.is_included(address):
@@ -232,34 +230,36 @@ def get_venue_and_zone_by_address(address):
             not address['coordinates'].get('lon') or \
             not area:
 
-        # case 6: get first venue with default flag
-        venues = Venue.fetch_venues(Venue.active == True, Venue.default == True)
+        default_venues = [venue for venue in venues if venue.default == True]
 
-        for venue in venues:
-            for delivery in venue.delivery_types:
-                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                    for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
-                                       key=lambda zone: zone.sequence_number):
-                        if zone.status == STATUS_UNAVAILABLE:
-                            continue
-                        zone.found = False  # it is used for mark precise address receipt
-                        if zone.status == STATUS_AVAILABLE:
-                            return venue, zone
+        # case 7: get first venue with default flag
+        for venue in default_venues:
+            delivery = venue.get_delivery_type(DELIVERY)
+            if not delivery or delivery.status == STATUS_UNAVAILABLE:
+                continue
+            zones = sorted([zone for zone in delivery_zones
+                     if zone.key in delivery.delivery_zones and zone.search_type == DeliveryZone.DEFAULT],
+                           key=lambda zone: zone.sequence_number)
+            if len(zones) > 0:
+                zones[0].found = False
+                return venue, zones[0]
+
+        # case 8: if company rejects orders not in zones
         if conf.Config.REJECT_IF_NOT_IN_ZONES:
             return None, None
 
-        # case 7: get first venue
-        venues = Venue.fetch_venues(Venue.active == True)
+        # case 9: get first venue
         for venue in venues:
-            for delivery in venue.delivery_types:
-                if delivery.delivery_type == DELIVERY and delivery.status == STATUS_AVAILABLE:
-                    for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
-                                       key=lambda zone: zone.sequence_number):
-                        if zone.status == STATUS_UNAVAILABLE:
-                            continue
-                        zone.found = False  # it is used for mark precise address receipt
-                        if zone.status == STATUS_AVAILABLE:
-                            return venue, zone
+            delivery = venue.get_delivery_type(DELIVERY)
+            if not delivery or delivery.status == STATUS_UNAVAILABLE:
+                continue
+            zones = sorted([zone for zone in delivery_zones
+                            if zone.key in delivery.delivery_zones],
+                           key=lambda zone: zone.sequence_number)
+            if len(zones) > 0:
+                zones[0].found = False
+                return venue, zones[0]
+
     return None, None
 
 
