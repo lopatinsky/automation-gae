@@ -348,8 +348,9 @@ class MenuCategory(ndb.Model):
             return items[index + 1]
 
     def dict(self, venue=None, city=None, city_venues=None, exclude_items=False):
+        subcategories = self.get_categories()
         items = []
-        if not exclude_items:
+        if not subcategories and not exclude_items:
             for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
                 if not venue:
                     items.append(item.dict())
@@ -368,7 +369,7 @@ class MenuCategory(ndb.Model):
                 'items_were_excluded': exclude_items
             },
             'items': items,
-            'categories': [category.dict(venue, exclude_items=exclude_items) for category in self.get_categories()]
+            'categories': [category.dict(venue, exclude_items=exclude_items) for category in subcategories]
         }
         if venue:
             del dct['info']['restrictions']
