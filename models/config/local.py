@@ -1,3 +1,4 @@
+import logging
 import threading
 
 from google.appengine.api import namespace_manager
@@ -17,7 +18,7 @@ class LocalConfigProxy(object):
         except AttributeError:
             self._local.config = Config.get()
         else:
-            if not self._local.config or self._local.config.key.namespace != namespace_manager.get_namespace():
+            if not self._local.config or self._local.config.key.namespace() != namespace_manager.get_namespace():
                 self._local.config = Config.get()
 
         return self._local.config
