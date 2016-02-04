@@ -280,7 +280,7 @@ app = WSGIApplication([
                 Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
             ]),
             Route('/order_message_module', SetupOrderMessageModuleHandler, 'order_message_module'),
-            Route('', ConfigMainHandler),
+            Route('', ConfigMainHandler, 'config_main'),
             Route('/invitation_module_setup', SetInvitationModuleHandler),
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),
             Route('/basket_notification_module_setup', BasketNotificationModuleHandler,

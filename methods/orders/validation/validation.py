@@ -2,8 +2,8 @@
 import copy
 from datetime import timedelta
 import logging
-from methods.unique import get_temporary_user, VERSION, USER_AGENT
 
+from methods.unique import get_temporary_user, VERSION, USER_AGENT
 from models.config.config import config
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
@@ -17,7 +17,7 @@ from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupM
     SharedGiftPositionDetails
 from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
     check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
-    check_client_info, check_subscription, check_empty_order, check_delivery_min_sum, check_availability
+    check_client_info, check_subscription, check_delivery_min_sum, check_availability
 from models.venue import DELIVERY
 
 
@@ -51,10 +51,13 @@ def is_equal(item_dict1, item_dict2, consider_single_modifiers=True):
     if len(item_dict1['group_modifier_keys']) != len(item_dict2['group_modifier_keys']):
         return False
     for i in xrange(len(item_dict1['group_modifier_keys'])):
-        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][0]:      # consider group modifier
+        if item_dict1['group_modifier_keys'][i][0] != item_dict2['group_modifier_keys'][i][
+            0]:  # consider group modifier
             return False
-        if item_dict1['group_modifier_keys'][i][1] and item_dict2['group_modifier_keys'][i][1]:     # group modifier choice can be None if not chosen
-            if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][1]:  # consider group modifier choice
+        if item_dict1['group_modifier_keys'][i][1] and item_dict2['group_modifier_keys'][i][
+            1]:  # group modifier choice can be None if not chosen
+            if item_dict1['group_modifier_keys'][i][1] != item_dict2['group_modifier_keys'][i][
+                1]:  # consider group modifier choice
                 return False
     if consider_single_modifiers:
         if len(item_dict1['single_modifier_keys']) != len(item_dict2['single_modifier_keys']):
@@ -214,7 +217,8 @@ def get_avail_gifts(points):
 def get_shared_gifts(client):
     if not ShareGiftModule.has_module():
         return []
-    shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(), SharedGift.status == SharedGift.PERFORMING).fetch()
+    shared_gifts = SharedGift.query(SharedGift.recipient_id == client.key.id(),
+                                    SharedGift.status == SharedGift.PERFORMING).fetch()
     shared_gift_dict = []
     for shared_gift in shared_gifts:
         for shared_item in shared_gift.share_items:
@@ -229,7 +233,8 @@ def get_shared_gifts(client):
             shared_gift_dict.append({
                 'item': item,
                 'image': item.picture,
-                'single_modifier_keys': sorted(shared_item.single_modifiers, key=lambda modifier_key: modifier_key.id()),
+                'single_modifier_keys': sorted(shared_item.single_modifiers,
+                                               key=lambda modifier_key: modifier_key.id()),
                 'group_modifier_keys': [(modifier.key, modifier.choice.choice_id) for modifier in
                                         sorted(chosen_group_modifiers, key=lambda modifier: modifier.key.id())],
                 'share_gift_obj': shared_gift
@@ -450,7 +455,17 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
+
+    logging.debug(delivery_zone)
+    logging.debug(total_sum)
+    if delivery_zone and delivery_zone.free_delivery_sum:
+        if total_sum >= delivery_zone.free_delivery_sum:
+            logging.debug('Delivery is free!')
+            delivery_sum = 0
+
+    print('delivery sum: {}'.format(delivery_sum))
     if not item_dicts and not gift_dicts:
+        print('Something weird')
         delivery_sum = 0
         delivery_sum_str = u''
     else:
