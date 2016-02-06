@@ -325,6 +325,11 @@ def after_validation_check(validation_result, order):
     delivery_sum = validation_result['delivery_sum']
     if order.total_sum and round(total_sum * 100) != round(order.total_sum * 100):
         return False, u"Сумма заказа была пересчитана"
+
+    # order.total_sum is here either correct or 0
+    # it can be 0 because of client-side bugs (we get it from json-object in request)
+    order.total_sum = total_sum
+
     if not order.delivery_sum:
         order.delivery_sum = delivery_sum
     if order.delivery_sum and round(delivery_sum * 100) != round(order.delivery_sum * 100):
