@@ -171,9 +171,11 @@ def get_venue_and_zone_by_address(address):
                 continue
 
             for zone_type in ZONE_SEARCH_TYPES:
-                current_zones = [zone for zone in delivery_zones
-                                 if zone.key in delivery.delivery_zones and zone.search_type == zone_type]
-                for zone in sorted(current_zones, key=lambda zone: zone.sequence_number):
+                for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                   key=lambda zone: zone.sequence_number):
+                # current_zones = [zone for zone in delivery_zones
+                #                  if zone.key in delivery.delivery_zones and zone.search_type == zone_type]
+                # for zone in sorted(current_zones, key=lambda zone: zone.sequence_number):
 
                     # case 1: get venue by custom zone
                     if zone.search_type == DeliveryZone.ZONE:
@@ -237,9 +239,8 @@ def get_venue_and_zone_by_address(address):
             delivery = venue.get_delivery_type(DELIVERY)
             if not delivery or delivery.status == STATUS_UNAVAILABLE:
                 continue
-            zones = sorted([zone for zone in delivery_zones
-                     if zone.key in delivery.delivery_zones and zone.search_type == DeliveryZone.DEFAULT],
-                           key=lambda zone: zone.sequence_number)
+            zones = sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                   key=lambda zone: zone.sequence_number)
             if len(zones) > 0:
                 zones[0].found = False
                 return venue, zones[0]
@@ -253,9 +254,8 @@ def get_venue_and_zone_by_address(address):
             delivery = venue.get_delivery_type(DELIVERY)
             if not delivery or delivery.status == STATUS_UNAVAILABLE:
                 continue
-            zones = sorted([zone for zone in delivery_zones
-                            if zone.key in delivery.delivery_zones],
-                           key=lambda zone: zone.sequence_number)
+            zones = sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
+                                   key=lambda zone: zone.sequence_number)
             if len(zones) > 0:
                 zones[0].found = False
                 return venue, zones[0]
