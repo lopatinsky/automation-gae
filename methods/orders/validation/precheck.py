@@ -8,7 +8,6 @@ from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 
 from models.config.config import config
-from models.config import config as conf
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates, get_streets_or_houses_by_address
 from methods.orders.validation.validation import get_first_error
@@ -246,7 +245,7 @@ def get_venue_and_zone_by_address(address):
                 return venue, zones[0]
 
         # case 8: if company rejects orders not in zones
-        if conf.Config.REJECT_IF_NOT_IN_ZONES:
+        if config.REJECT_IF_NOT_IN_ZONES:
             return None, None
 
         # case 9: get first venue
