@@ -150,6 +150,14 @@ const Actions = {
             data: null
         })
     },
+
+    SAVE_USER_SETTINGS: "SAVE_USER_SETTINGS",
+    saveUserSettings(settings) {
+        AppDispatcher.dispatch({
+            actionType: this.SAVE_USER_SETTINGS,
+            data: settings
+        })
+    }
 };
 
 export default Actions;

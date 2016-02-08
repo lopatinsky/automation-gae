@@ -37,6 +37,16 @@ const ConfigStore = new BaseStore({
         this.venues = config.venues;
         this.thisVenue = config.venue_id;
         this._changed();
+    },
+
+    userSettings: {
+        additionalSoundNotification: false
+    },
+    saveUserSettings(settings) {
+        for (let key in this.userSettings) if (this.userSettings.hasOwnProperty(key)) {
+            this.userSettings[key] = settings[key];
+        }
+        localStorage.userSettings = JSON.stringify(this.userSettings);
     }
 }, action => {
     switch (action.actionType) {
@@ -48,6 +58,14 @@ const ConfigStore = new BaseStore({
                 ConfigStore.resetConfig();
             }
             break;
+        case Actions.SAVE_USER_SETTINGS:
+            ConfigStore.saveUserSettings(action.data);
+            break;
     }
 });
+try {
+    let settings = JSON.parse(localStorage.userSettings);
+    ConfigStore.saveUserSettings(settings);
+} catch (e) {
+}
 export default ConfigStore;

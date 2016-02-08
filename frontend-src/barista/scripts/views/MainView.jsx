@@ -1,8 +1,13 @@
 import React from 'react';
 import { OnResize } from 'react-window-mixins';
 import AppBar from 'material-ui/lib/app-bar';
+import Checkbox from 'material-ui/lib/checkbox';
 import Dialog from 'material-ui/lib/dialog';
 import FlatButton from 'material-ui/lib/flat-button';
+import IconButton from 'material-ui/lib/icon-button';
+import IconMenu from 'material-ui/lib/menus/icon-menu';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import MoreVertIcon from 'material-ui/lib/svg-icons/navigation/more-vert';
 import TextField from 'material-ui/lib/text-field';
 import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 import RadioButton from 'material-ui/lib/radio-button';
@@ -82,7 +87,7 @@ const MainView = React.createClass({
         if (this._updateInterval == null && OrderStore.loadedOrders) {
             this._updateInterval = setInterval(() => Actions.loadUpdates(), 15000);
         }
-        if (data && data.hasNewOrders) {
+        if (data && data.notify) {
             SystemStore.playSound();
         }
         this._checkDeliveryType();
@@ -110,6 +115,41 @@ const MainView = React.createClass({
 
     _logoutSubmit() {
         Actions.logout(this.refs.logoutPassword.getValue());
+    },
+
+    _renderAppBar() {
+        let rightEl = <IconMenu iconButtonElement={<IconButton><MoreVertIcon/></IconButton>}
+                                targetOrigin={{horizontal: 'right', vertical: 'top'}}
+                                anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+            <MenuItem primaryText='Настройки'
+                      onTouchTap={this._onSettingsClick}/>
+            <MenuItem primaryText='Выйти'
+                      onTouchTap={this._onLogoutClick}/>
+        </IconMenu>;
+        return <AppBar title={AuthStore.login}
+                       showMenuIconButton={false}
+                       iconElementRight={rightEl}
+                       style={{position:'fixed',top:0}}/>
+    },
+
+    _renderSettingsDialog() {
+        let actions = [
+            <FlatButton key='cancel'
+                        label='Отмена'
+                        onTouchTap={this._clearPendingAction}/>,
+            <FlatButton key='save'
+                        label='Сохранить'
+                        onTouchTap={this._settingsSave}
+                        secondary={true}/>
+        ];
+        return <Dialog ref='settingsDialog'
+                       title='Настройки'
+                       actions={actions}
+                       open={this.state.pendingAction == 'settings'}>
+            <Checkbox label="Повторное оповещение через 5 минут"
+                      ref="additionalSoundNotification"
+                      defaultChecked={ConfigStore.userSettings.additionalSoundNotification}/>
+        </Dialog>;
     },
 
     _renderLogoutDialog() {
@@ -227,10 +267,7 @@ const MainView = React.createClass({
         let isHorizontal = this.state.window.width > this.state.window.height;
         let contentStyle = isHorizontal ? {paddingLeft: 100, paddingTop: 116} : {paddingTop: 216};
         return <div>
-            <AppBar title={AuthStore.login}
-                    showMenuIconButton={false}
-                    iconElementRight={<FlatButton label='Выйти' onTouchTap={this._onLogoutClick}/>}
-                    style={{position:'fixed',top:0}}/>
+            {this._renderAppBar()}
             <Nav horizontal={isHorizontal}
                  showCurrent={this.state.orderAheadEnabled}
                  orderCount={this.state.orderAhead.length}
@@ -260,6 +297,7 @@ const MainView = React.createClass({
                     onTouchTapSync: this._onTouchTapSync
                 })}
             </div>
+            {this._renderSettingsDialog()}
             {this._renderLogoutDialog()}
             {this._renderCancelDialog()}
             {this._renderPostponeDialog()}
@@ -277,6 +315,17 @@ const MainView = React.createClass({
             pendingAction: null,
             pendingOrder: null
         })
+    },
+
+    _onSettingsClick() {
+        this.setState({ pendingAction: 'settings' })
+    },
+
+    _settingsSave() {
+        Actions.saveUserSettings({
+            additionalSoundNotification: this.refs.additionalSoundNotification.isChecked()
+        });
+        this._clearPendingAction();
     },
 
     _onLogoutClick() {
