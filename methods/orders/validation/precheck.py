@@ -223,6 +223,7 @@ def get_venue_and_zone_by_address(address):
 
         if nearest_venues:
             venue = sorted(nearest_venues, key=lambda venue: venue.distance)[0]
+            venue.zone.found = True
             return venue, venue.zone
 
     if not address or \
