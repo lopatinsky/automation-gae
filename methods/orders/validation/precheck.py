@@ -131,7 +131,7 @@ def validate_address(address):
                     address['coordinates']['lon'] = candidate['coordinates']['lon']
 
 
-    # if yandex maps did not found required address in the query, but there is suggested address
+    # if yandex maps did not find required address in the query, but there is suggested address
     # with same street, assign its coordinates to our address
     if not address['coordinates']['lat'] or not address['coordinates']['lon']:
         if len(candidates) > 0:

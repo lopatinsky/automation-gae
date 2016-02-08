@@ -74,7 +74,8 @@ class PromoCode(ndb.Model):
         if not title:
             title = DEFAULT_TITLE_MAP[kind]
         while True:
-            key = security.generate_random_string(length=7).lower() if not promo_code_key else promo_code_key
+            key = security.generate_random_string(length=7).lower() if not promo_code_key else promo_code_key.lower()
+
             if not cls.get_by_id(key):
                 if not message:
                     message = DEFAULT_MESSAGE_MAP[kind]

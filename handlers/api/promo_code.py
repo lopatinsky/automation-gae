@@ -31,7 +31,10 @@ class EnterPromoCode(ApiHandler):
         key = self.request.get('key')
         if not key:
             return self.send_error(u'Введите ключ')
+
+        key = key.replace(' ', '')
         promo_code = PromoCode.get_by_id(key)
+
         if promo_code:
             success, description = promo_code.check(client)
             if success:
@@ -40,6 +43,14 @@ class EnterPromoCode(ApiHandler):
             else:
                 return self.send_error(description)
         else:
+            promo_code = PromoCode.get_by_id(key.lower())
+            if promo_code:
+                success, description = promo_code.check(client)
+                if success:
+                    promo_code.perform(client)
+                    return self.send_success(promo_code)
+                else:
+                    return self.send_error(description)
             return self.send_error(u'Промо код не найден')
 
 
