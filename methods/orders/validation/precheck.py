@@ -8,7 +8,6 @@ from google.appengine.api import memcache
 from google.appengine.ext.ndb import GeoPt
 
 from models.config.config import config
-from models.config import config as conf
 from methods import location
 from methods.geocoder import get_houses_by_address, get_areas_by_coordinates, get_streets_or_houses_by_address
 from methods.orders.validation.validation import get_first_error
@@ -224,6 +223,7 @@ def get_venue_and_zone_by_address(address):
 
         if nearest_venues:
             venue = sorted(nearest_venues, key=lambda venue: venue.distance)[0]
+            venue.zone.found = True
             return venue, venue.zone
 
     if not address or \
@@ -246,7 +246,7 @@ def get_venue_and_zone_by_address(address):
                 return venue, zones[0]
 
         # case 8: if company rejects orders not in zones
-        if conf.Config.REJECT_IF_NOT_IN_ZONES:
+        if config.REJECT_IF_NOT_IN_ZONES:
             return None, None
 
         # case 9: get first venue
@@ -325,6 +325,11 @@ def after_validation_check(validation_result, order):
     delivery_sum = validation_result['delivery_sum']
     if order.total_sum and round(total_sum * 100) != round(order.total_sum * 100):
         return False, u"Сумма заказа была пересчитана"
+
+    # order.total_sum is here either correct or 0
+    # it can be 0 because of client-side bugs (we get it from json-object in request)
+    order.total_sum = total_sum
+
     if not order.delivery_sum:
         order.delivery_sum = delivery_sum
     if order.delivery_sum and round(delivery_sum * 100) != round(order.delivery_sum * 100):
