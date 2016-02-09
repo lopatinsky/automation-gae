@@ -62,7 +62,10 @@ def _refresh_client_info(request, response, android_id, device_phone, client_id=
 def _perform_registration(request):
     response = {}
 
-    client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
+    try:
+        client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
+    except ValueError:
+        client_id = 0
     android_id = request.get('android_id')
     device_phone = request.get('device_phone')
     location = get_location(request.get("ll"))
