@@ -123,9 +123,9 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
     elif condition.method == PromoCondition.CHECK_LEFT_BASKET_PROMO:
         return check_left_basket_promo(client, order)
     elif condition.method == PromoCondition.CHECK_INVITED_USER:
-        return check_user_invited_another(client, order)
-    elif condition.method == PromoCondition.CHECK_USER_INVITED:
         return check_user_is_invited(client, order)
+    elif condition.method == PromoCondition.CHECK_USER_INVITED:
+        return check_user_invited_another(client, order)
     elif condition.method == PromoCondition.CHECK_DISH_HAS_GROUP_MODIFIERS:
         return check_marked_dish_has_group_modifiers(condition, item_dicts)
     elif condition.method == PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS:
