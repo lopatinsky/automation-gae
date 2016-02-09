@@ -50,8 +50,10 @@ class ShareGiftModule(ndb.Model):
     @classmethod
     def has_module(cls):
         from models.config.config import config
-        return config.SHARE_GIFT_MODULE is not None and\
-            config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE
+        return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE \
+            if config.SHARE_GIFT_MODULE \
+            and config.BRANCH_API_KEY and config.BRANCH_SECRET_KEY \
+            else False
 
     def dict(self):
         return {

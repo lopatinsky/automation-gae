@@ -102,7 +102,7 @@ class CompanyModulesHandler(ApiHandler):
         modules = []
         if config.SUBSCRIPTION_MODULE and config.SUBSCRIPTION_MODULE.status:
             modules.append(config.SUBSCRIPTION_MODULE.dict())
-        if config.SHARE_GIFT_MODULE and config.SHARE_GIFT_MODULE.status:
+        if config.SHARE_GIFT_ENABLED:
             modules.append(config.SHARE_GIFT_MODULE.dict())
         if config.SHARE_INVITATION_ENABLED:
             modules.append(config.SHARE_INVITATION_MODULE.dict())

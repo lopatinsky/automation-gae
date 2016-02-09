@@ -173,12 +173,7 @@ class Config(ndb.Model):
 
     @property
     def SHARE_GIFT_ENABLED(self):
-        from models import STATUS_AVAILABLE
-
-        return config.SHARE_GIFT_MODULE.status == STATUS_AVAILABLE if config.SHARE_GIFT_MODULE \
-                                                                      and config.BRANCH_API_KEY \
-                                                                      and config.BRANCH_SECRET_KEY \
-            else False
+        return ShareGiftModule.has_module()
 
     @property
     def SHARE_INVITATION_ENABLED(self):
