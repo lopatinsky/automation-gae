@@ -147,11 +147,18 @@ class OrderHandler(ApiHandler):
         if check_after_error(order_json, client):
             return self.render_error(u"Этот заказ уже зарегистрирован в системе, проверьте историю заказов.")
 
+        conf = config
+        if conf.ORDER_MESSAGE_MODULE:
+            message = conf.ORDER_MESSAGE_MODULE.get_message(self.order)
+        else:
+            message = u'Заказ оправлен'
+
         if config.APP_KIND == RESTO_APP:
             success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'],
                                                   order_json.get('order_gifts', []),
                                                   order_json.get('cancelled_order_gifts', []))
             if success:
+                response['message'] = message
                 return self.render_json(response)
             else:
                 return self.render_error(response['description'])
@@ -160,6 +167,7 @@ class OrderHandler(ApiHandler):
             success, response = doubleb_place_order(self.order, client, venue, order_json['items'],
                                                     order_json['payment'])
             if success:
+                response['message'] = message
                 return self.render_json(response)
             else:
                 return self.render_error(response['description'])
@@ -249,11 +257,7 @@ class OrderHandler(ApiHandler):
             send_demo_sms(client)
 
         self.response.status_int = 201
-        conf = config
-        if conf.ORDER_MESSAGE_MODULE:
-            message = conf.ORDER_MESSAGE_MODULE.get_message(self.order)
-        else:
-            message = u'Заказ оправлен'
+
 
         self.render_json({
             'order_id': self.order.key.id(),
