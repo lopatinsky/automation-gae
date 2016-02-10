@@ -1,9 +1,13 @@
+# coding=utf-8
 import json
 import logging
 import urllib
 from google.appengine.api import urlfetch
 from methods.rendering import timestamp
 from methods.unique import get_temporary_user, USER_AGENT
+from models.venue import IN_CAFE
+from models.venue import PICKUP
+from models.venue import SELF
 
 __author__ = 'dvpermyakov'
 
@@ -106,7 +110,9 @@ def post_resto_register(resto_company, resto_customer):
 def post_resto_check_order(resto_company, venue, resto_item_dicts, auto_client, resto_client, total_sum, delivery_time,
                            delivery_type):
     from methods.proxy.resto.company import REVERSE_DELIVERY_TYPE_MAP
+
     path = '/api/get_order_promo'
+
     payload = {
         'venue_id': venue.key.id(),
         'phone': auto_client.tel,

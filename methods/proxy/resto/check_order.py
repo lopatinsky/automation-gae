@@ -1,3 +1,4 @@
+# coding=utf-8
 import logging
 from methods.orders.validation.validation import get_response_dict, set_modifiers, set_price_with_modifiers, \
     set_item_dicts, group_item_dicts, is_equal
@@ -98,8 +99,20 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gi
     total_sum = get_init_total_sum(items)
     resto_client = RestoClient.get(client)
     resto_item_dicts = get_resto_item_dicts(init_item_dicts)
-    resto_validation = post_resto_check_order(resto_company, venue, resto_item_dicts, client, resto_client, total_sum,
+    if not delivery_time:
+        resto_validation = {
+            'error': True,
+            'description': u'Не указано время доставки'
+        }
+    elif not venue:
+        resto_validation = {
+            'error': True,
+            'description': u'Не указана кофейня'
+        }
+    else:
+        resto_validation = post_resto_check_order(resto_company, venue, resto_item_dicts, client, resto_client, total_sum,
                                               delivery_time, delivery_type)
+
     order_gifts_from_resto = get_item_dicts_by_resto(resto_validation.get('gifts', []))
     new_order_gifts, unavail_order_gifts = get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts,
                                                                     cancelled_order_gifts)
