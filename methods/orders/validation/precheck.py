@@ -152,7 +152,6 @@ def validate_address(address):
 def get_venue_and_zone_by_address(address):
     area = None
     venues = Venue.fetch_venues(Venue.active == True)
-    delivery_zones = DeliveryZone.query(DeliveryZone.status == STATUS_AVAILABLE).fetch()
     if address:
         has_coords = False
         if address.get('coordinates'):
@@ -163,18 +162,18 @@ def get_venue_and_zone_by_address(address):
         ZONE_SEARCH_TYPES = (DeliveryZone.ZONE, DeliveryZone.RADIUS, DeliveryZone.NEAREST, DeliveryZone.DISTRICT,
                              DeliveryZone.CITY, DeliveryZone.DEFAULT)
 
-        for venue in venues:
-            delivery = venue.get_delivery_type(DELIVERY)
+        for zone_type in ZONE_SEARCH_TYPES:
+            for venue in venues:
+                delivery = venue.get_delivery_type(DELIVERY)
+                delivery_zones = [DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones]
+                delivery_zones = sorted([zone for zone in delivery_zones if zone.status == STATUS_AVAILABLE],
+                                         key=lambda zone: zone.sequence_number)
 
-            if not delivery or delivery.status == STATUS_UNAVAILABLE:
-                continue
+                if not delivery or delivery.status == STATUS_UNAVAILABLE:
+                    continue
 
-            for zone_type in ZONE_SEARCH_TYPES:
-                for zone in sorted([DeliveryZone.get(zone_key) for zone_key in delivery.delivery_zones],
-                                   key=lambda zone: zone.sequence_number):
-                # current_zones = [zone for zone in delivery_zones
-                #                  if zone.key in delivery.delivery_zones and zone.search_type == zone_type]
-                # for zone in sorted(current_zones, key=lambda zone: zone.sequence_number):
+                current_zones = [zone for zone in delivery_zones if zone.search_type == zone_type]
+                for zone in sorted(current_zones, key=lambda zone: zone.sequence_number):
 
                     # case 1: get venue by custom zone
                     if zone.search_type == DeliveryZone.ZONE:
