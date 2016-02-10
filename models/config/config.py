@@ -101,6 +101,10 @@ class Config(ndb.Model):
     PARSE_REST_API_KEY = ndb.StringProperty(indexed=False)  # todo: rewrite pushes, delete field
     PARSE_CLIENT_API_KEY = ndb.StringProperty(indexed=False)
 
+
+    GOOGLE_ANALYTICS_API_KEY_IOS = ndb.StringProperty(indexed=False)
+    GOOGLE_ANALYTICS_API_KEY_ANDROID = ndb.StringProperty(indexed=False)
+
     EMAIL_REQUESTS = ndb.BooleanProperty(default=False)
 
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)

@@ -1,0 +1,26 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post">
+    <label>
+        API ключ для Google Analytics для IOS
+        <input type="text" name="google_analytics_api_key_ios" {% if config.GOOGLE_ANALYTICS_API_KEY_IOS %}
+               value="{{ config.GOOGLE_ANALYTICS_API_KEY_IOS }}" {% endif %}>
+    </label> <br>
+    <label>
+        API ключ для Google Analytics для Android
+        <input type="text" name="google_analytics_api_key_android" {% if config.GOOGLE_ANALYTICS_API_KEY_ANDROID %}
+                value="{{ config.GOOGLE_ANALYTICS_API_KEY_ANDROID }}"{% endif %}>
+    </label><br>
+
+    <input type="submit" value="Сохранить">
+
+</form>
+
+
+<a href="/company/main">Back</a>
+</body>
+</html>

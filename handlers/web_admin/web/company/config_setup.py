@@ -26,7 +26,23 @@ class ConfigMainHandler(CompanyBaseHandler):
         conf.put()
         self.redirect_to('config_main')
 
+class GoogleAnalyticsApiKeysHandler(CompanyBaseHandler):
+    @config_rights_required
+    def get(self):
+        self.render('/config_settings/google_analytics_api_keys.html')
 
+    def post(self):
+        ios_key = self.request.get('google_analytics_api_key_ios')
+        android_key = self.request.get('google_analytics_api_key_android')
+
+        conf = config.Config.get()
+
+        conf.GOOGLE_ANALYTICS_API_KEY_IOS = ios_key
+        conf.GOOGLE_ANALYTICS_API_KEY_ANDROID = android_key
+
+        conf.put()
+        self.redirect_to('config_google_analytics')
+        pass
 
 class SetupOrderMessageModuleHandler(CompanyBaseHandler):
     @config_rights_required

@@ -284,7 +284,8 @@ app = WSGIApplication([
             Route('/invitation_module_setup', SetInvitationModuleHandler),
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),
             Route('/basket_notification_module_setup', BasketNotificationModuleHandler,
-                  'basket_notification_module_setup')
+                  'basket_notification_module_setup'),
+            Route('/config_google_analytics', GoogleAnalyticsApiKeysHandler, 'config_google_analytics')
         ]),
 
         PathPrefixRoute('/venues', [

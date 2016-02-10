@@ -29,6 +29,8 @@ def _get_config(admin):
         'delivery_types': _get_delivery_types(venue),
         'venues': [v.dict() for v in active_venues],
         'venue_id': admin.venue.id() if admin.venue else None,
+        'google_analytics_api_key_ios': config.GOOGLE_ANALYTICS_API_KEY_IOS,
+        'google_analytics_api_key_android': config.GOOGLE_ANALYTICS_API_KEY_ANDROID
     }
 
 
