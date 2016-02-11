@@ -235,7 +235,7 @@ class AddMenuItemHandler(CompanyBaseHandler):
 
         if self.request.get('price'):
             price = float(self.request.get('price'))
-            item.price = int(price * 100)
+            item.price = int(round(price * 100))
 
         item.kal = self.request.get_range('kal')
         if self.request.get('volume'):
@@ -290,7 +290,7 @@ class EditMenuItemHandler(CompanyBaseHandler):
         item.description = self.request.get('description')
         if self.request.get('price'):
             price = float(self.request.get('price'))
-            item.price = int(price * 100)
+            item.price = int(round(price * 100))
         else:
             item.price = 0
         item.kal = self.request.get_range('kal')
@@ -533,7 +533,7 @@ class AddSingleModifierHandler(CompanyBaseHandler):
         name = self.request.get('name')
         if self.request.get('price'):
             price = float(self.request.get('price'))
-            price = int(price * 100)
+            price = int(round(price * 100))
         else:
             price = 0
         min_amount = self.request.get_range('min')
@@ -567,7 +567,7 @@ class EditSingleModifierHandler(CompanyBaseHandler):
         single_modifier.title = self.request.get('name')
         if self.request.get('price'):
             price = float(self.request.get('price'))
-            single_modifier.price = int(price * 100)
+            single_modifier.price = int(round(price * 100))
         else:
             single_modifier.price = 0
         single_modifier.min_amount = self.request.get_range('min')
@@ -670,7 +670,7 @@ class AddGroupModifierItemHandler(CompanyBaseHandler):
             if not len(price):
                 continue
             price = float(price)
-            price = int(price * 100)
+            price = int(round(price * 100))
             choice = GroupModifierChoice.create(title=name, price=price)
             choice.sequence_number = group_modifier.generate_choice_sequence_number()
             group_modifier.choices.append(choice)
@@ -699,7 +699,7 @@ class EditGroupModifierItemHandler(CompanyBaseHandler):
         choice.title = self.request.get('name')
         if self.request.get('price'):
             price = float(self.request.get('price'))
-            choice.price = int(price * 100)
+            choice.price = int(round(price * 100))
         else:
             choice.price = 0
         choice.put()
