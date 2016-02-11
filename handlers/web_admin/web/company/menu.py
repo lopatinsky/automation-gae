@@ -13,6 +13,13 @@ from models import MenuCategory, MenuItem, STATUS_AVAILABLE, STATUS_UNAVAILABLE,
 import logging
 
 
+def _swap_sequence_numbers(first, second):
+    if first.sequence_number == second.sequence_number:
+        first.sequence_number += 1
+    else:
+        first.sequence_number, second.sequence_number = second.sequence_number, first.sequence_number
+
+
 class NoneHandler(CompanyBaseHandler):  # use to erase 404 error
     @menu_rights_required
     def get(self):
@@ -53,9 +60,7 @@ class UpCategoryHandler(CompanyBaseHandler):
         previous = category.get_previous_category()
         if not previous:
             self.abort(400)
-        number = previous.sequence_number
-        previous.sequence_number = category.sequence_number
-        category.sequence_number = number
+        _swap_sequence_numbers(previous, category)
         category.put()
         previous.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -76,9 +81,7 @@ class DownCategoryHandler(CompanyBaseHandler):
         next_ = category.get_next_category()
         if not next_:
             self.abort(400)
-        number = next_.sequence_number
-        next_.sequence_number = category.sequence_number
-        category.sequence_number = number
+        _swap_sequence_numbers(category, next_)
         category.put()
         next_.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -581,9 +584,7 @@ class UpSingleModifierHandler(CompanyBaseHandler):
         previous = modifier.get_previous_modifier()
         if not previous:
             self.abort(400)
-        number = previous.sequence_number
-        previous.sequence_number = modifier.sequence_number
-        modifier.sequence_number = number
+        _swap_sequence_numbers(previous, modifier)
         modifier.put()
         previous.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -604,9 +605,7 @@ class DownSingleModifierHandler(CompanyBaseHandler):
         next_ = modifier.get_next_modifier()
         if not next_:
             self.abort(400)
-        number = next_.sequence_number
-        next_.sequence_number = modifier.sequence_number
-        modifier.sequence_number = number
+        _swap_sequence_numbers(modifier, next_)
         modifier.put()
         next_.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -727,9 +726,7 @@ class UpProductHandler(CompanyBaseHandler):
         previous = category.get_previous(product)
         if not previous:
             self.abort(400)
-        number = previous.sequence_number
-        previous.sequence_number = product.sequence_number
-        product.sequence_number = number
+        _swap_sequence_numbers(previous, product)
         product.put()
         previous.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -754,9 +751,7 @@ class DownProductHandler(CompanyBaseHandler):
         next_ = category.get_next(product)
         if not next_:
             self.abort(400)
-        number = next_.sequence_number
-        next_.sequence_number = product.sequence_number
-        product.sequence_number = number
+        _swap_sequence_numbers(product, next_)
         product.put()
         next_.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -775,9 +770,7 @@ class UpGroupModifierHandler(CompanyBaseHandler):
         previous = modifier.get_previous_modifier()
         if not previous:
             self.abort(400)
-        number = previous.sequence_number
-        previous.sequence_number = modifier.sequence_number
-        modifier.sequence_number = number
+        _swap_sequence_numbers(previous, modifier)
         modifier.put()
         previous.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -798,9 +791,7 @@ class DownGroupModifierHandler(CompanyBaseHandler):
         next_ = modifier.get_next_modifier()
         if not next_:
             self.abort(400)
-        number = next_.sequence_number
-        next_.sequence_number = modifier.sequence_number
-        modifier.sequence_number = number
+        _swap_sequence_numbers(modifier, next_)
         modifier.put()
         next_.put()
         self.response.headers["Content-Type"] = "application/json"
@@ -826,9 +817,7 @@ class UpGroupModifierChoiceHandler(CompanyBaseHandler):
         previous = modifier.get_previous_choice(choice)
         if not previous:
             self.abort(400)
-        number = previous.sequence_number
-        previous.sequence_number = choice.sequence_number
-        choice.sequence_number = number
+        _swap_sequence_numbers(previous, choice)
         modifier.put()
         self.response.headers["Content-Type"] = "application/json"
         self.response.write(json.dumps({
@@ -851,9 +840,7 @@ class DownGroupModifierChoiceHandler(CompanyBaseHandler):
         next_ = modifier.get_next_choice(choice)
         if not next_:
             self.abort(400)
-        number = next_.sequence_number
-        next_.sequence_number = choice.sequence_number
-        choice.sequence_number = number
+        _swap_sequence_numbers(choice, next_)
         modifier.put()
         self.response.headers["Content-Type"] = "application/json"
         self.response.write(json.dumps({
