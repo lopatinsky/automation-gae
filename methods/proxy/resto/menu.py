@@ -143,7 +143,7 @@ def get_category_by_id(category_id):
 
 def get_group_modifier_by_id(modifier_id):
     modifier_key = ndb.Key(GroupModifier, modifier_id)
-    return _get_menu()[2][modifier_key]
+    return _get_menu()[2].get(modifier_key)
 
 
 def get_single_modifier_by_id(modifier_id):

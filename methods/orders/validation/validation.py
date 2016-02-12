@@ -92,6 +92,8 @@ def _group_group_modifiers(modifiers):
             result[key]['quantity'] += 1
         else:
             modifier_obj = GroupModifier.get(modifier[0].id())
+            if not modifier_obj:
+                continue
             choice = modifier_obj.get_choice_by_id(modifier[1])
             if modifier_obj and choice:
                 result[key] = {
