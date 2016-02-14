@@ -8,7 +8,7 @@ from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 from methods.rendering import latinize
 
-from models.config.config import config
+from models.config.config import config, COMPANY_IN_PRODUCTION
 from methods import excel
 from methods.report import orders
 from models.config.version import CURRENT_APP_ID
@@ -62,6 +62,6 @@ class ReportSendHandler(RequestHandler):
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
-            if not config:
+            if not config or config.COMPANY_STATUS != COMPANY_IN_PRODUCTION:
                 continue
             deferred.defer(_send, namespace)
