@@ -8,7 +8,7 @@ from webapp2_extras.routes import PathPrefixRoute
 from handlers.api.user import admin
 from handlers import web_app
 from handlers import wizard, web_admin, ext_api
-from handlers.cron import NotificatingInactiveUsersHandler
+from handlers.cron import InactiveUsersNotificationHandler
 from handlers.tasks.basket_notification import BasketNotificationHandler
 from handlers.web_admin.web.company.subscription import SubscriptionMain, SubscriptionModuleSetupHandler, \
     ListSubscriptionTariffHandler, EditSubscriptionTariffHandler, AddSubscriptionTariffHandler, \
@@ -273,11 +273,13 @@ app = WSGIApplication([
 
         PathPrefixRoute('/config_settings', [
             PathPrefixRoute('/inactive_users_notifications', [
-                Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
-                Route('/add', AddNotifModuleHandler, 'add_notif_module'),
-                Route('/test_form', TestForm, 'test_form'),
-                Route('/send_notif', NotificatingInactiveUsersHandler, 'send_notif'),
-                Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
+                Route('/', NotificationModulesHandler, 'notification_modules_list'),
+                Route('/add', AddNotificationModuleHandler, 'add_notification_module'),
+                Route('/delete', DeleteNotificationModuleHandler, 'delete_module')
+                # Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
+                # Route('/add', AddNotifModuleHandler, 'add_notif_module'),
+                # Route('/send_notif', InactiveUsersNotificationHandler, 'send_notif'),
+                # Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
             ]),
             Route('/order_message_module', SetupOrderMessageModuleHandler, 'order_message_module'),
             Route('', ConfigMainHandler, 'config_main'),

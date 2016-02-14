@@ -1,0 +1,67 @@
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+{% include '/company/header.html' %}
+<a href="/company/config_settings/inactive_users_notifications/add">Добавить новый модуль</a><br>
+
+<table style="border-collapse:collapse; width:100%" border="1" id="modules_table">
+    <tr>
+        <th>Активен</th>
+        <th>Титулка</th>
+        <th>Тип</th>
+        <th>Значения</th>
+        <th>Получает пуши</th>
+        <th>Получает СМС</th>
+        <th>Получает СМС если есть баллы</th>
+        <th>Получает СМС если есть кэшбек</th>
+    </tr>
+
+    {% for module in config.INACTIVE_NOTIFICATION_MODULE %}
+        <tr>
+            <td>
+                {% if module.status %}Да{% else %}Нет{% endif %}
+            </td>
+            <td>
+                {{ module.header }}
+            </td>
+            <td>
+                {% for type in types %}
+                    {% if type['value'] == module.type %}
+                        {{ type['name'] }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for value, text in module.conditions.items() %}
+                    {{ value }}: {{ text }}<br>
+                {% endfor %}
+            </td>
+            <td>
+                {% if module.should_push %}ДА {% else %}НЕТ{% endif %}
+            </td>
+            <td>
+
+                {% if module.should_sms %}ДА {% else %}НЕТ{% endif %}
+
+            </td>
+            <td>
+                {% if module.sms_if_has_points %}ДА {% else %}НЕТ{% endif %}
+            </td>
+            <td>
+                {% if module.sms_if_has_cashback %}ДА {% else %}НЕТ{% endif %}
+            </td>
+
+            <td>
+                <form action="/company/config_settings/inactive_users_notifications/delete" method="post">
+                    <input value="{{ config.INACTIVE_NOTIFICATION_MODULE.index(module) }}" type="hidden"
+                           name="module_num">
+                    <input type="submit" value="Удалить">
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+</html>

@@ -31,7 +31,7 @@ from models.config.field import ClientModule, OrderModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
-from models.config.inactive_clients import NotificatingInactiveUsersModule
+from models.config.inactive_clients import InactiveNotificationModule
 from models.config.menu import HitModule, MenuFrameModule, RemaindersModule
 from models.config.mivako import MivakoGiftModule
 from models.config.review import ReviewModule
@@ -69,7 +69,6 @@ COMPANY_STATUS_NAMES = {
     COMPANY_REMOVED: u"Отключена",
     COMPANY_PREVIEW: u"Предпросмотр в общем аппе",
 }
-
 
 class Config(ndb.Model):
     @cached_property
@@ -122,8 +121,13 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
-    NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
+
+    # NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
+
+    INACTIVE_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(InactiveNotificationModule, repeated=True)
+
     BASKET_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(BasketNotificationModule)
+
     ORDER_MESSAGE_MODULE = ndb.LocalStructuredProperty(OrderMessageModule)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)
     MIVAKO_GIFT_MODULE = ndb.LocalStructuredProperty(MivakoGiftModule)

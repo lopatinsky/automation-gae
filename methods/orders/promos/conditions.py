@@ -47,11 +47,10 @@ def check_condition_min_by_value(condition, value):
     return condition.value <= int(value)
 
 
-def check_registration_date(client, days):
+def get_registration_days(client):
     """Checks, if client registered some days ago"""
     today = datetime.today()
-    days_num = (today - client.created).days
-    return days_num == days
+    return (today - client.created).days
 
 
 def check_first_order(client):

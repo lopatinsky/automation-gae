@@ -21,10 +21,11 @@ NEWS_TYPE = 4
 PUSH_TYPES = (ORDER_TYPE, SIMPLE_TYPE, REVIEW_TYPE, NEWS_TYPE)
 
 
+
 class Push(object):
     """Base abstract class for notifications"""
 
-    def __init__(self, text, device_type):
+    def __init__(self, text, device_type, push_id=None):
         """
         Initializer for Push class. Keeps two base parameters text and device_type and sets
         other required parameters to None
@@ -33,6 +34,7 @@ class Push(object):
         """
         self.text = text
         self.device_type = device_type
+        self.push_id = push_id
 
     def _send_push(self):
         logging.debug("data:{}, dev_type: {}, parsekey: {}, parserest: {}".
@@ -44,7 +46,8 @@ class Push(object):
             'channels': self.channels,
             'type': DEVICE_TYPE_MAP[self.device_type],
             'expiry': timestamp(datetime.datetime.utcnow() + datetime.timedelta(days=365)),
-            'data': self.data
+            'data': self.data,
+            'push_id': self.push_id
         }
         headers = {
             'Content-Type': 'application/json',
@@ -90,36 +93,20 @@ class Push(object):
                 'type': self.push_type
             }
 
-            # def _make_push_data(self):
-            #     if self.device_type == IOS_DEVICE:
-            #         self.data = {
-            #             'alert': self.text,
-            #             'sound': 'push.caf',
-            #             'should_popup': self.should_popup,
-            #             'type': self.push_type
-            #         }
-            #     elif self.device_type == ANDROID_DEVICE:
-            #         self.data = {
-            #             'text': self.text,
-            #             'head': self.header,
-            #             'action': 'com.empatika.doubleb.push',
-            #             'should_popup': self.should_popup,
-            #             'type': self.push_type
-            #         }
 
 
 class OrderPush(Push):
     """Class for notification that are displayed after user have ordered something
     """
 
-    def __init__(self, text, device_type, order, namespace):
+    def __init__(self, text, device_type, order, namespace, push_id=None):
         """
         Initializes OrderPush
         :param text: text to put in notification
         :param device_type: int parameter, defined in constants IOS_DEVICE = 0, ANDROID_DEVICE = 1
         :param order: order which info have to be pushed
         """
-        super(OrderPush, self).__init__(text, device_type)
+        super(OrderPush, self).__init__(text, device_type, push_id)
         self.order = order
         self.should_popup = True
         self.push_type = ORDER_TYPE
@@ -156,7 +143,7 @@ class OrderPush(Push):
 
 class BaseSimplePush(Push):
     def __init__(self, text, should_popup, header,
-                 client=None, namespace=None, channels=None, device_type=None):
+                 client=None, namespace=None, channels=None, device_type=None, push_id=None):
 
         logging.debug(u"client: {}, namespace: {}, channels: {}, device_type: {}"
                       .format(client, namespace, channels, device_type))
@@ -169,10 +156,10 @@ class BaseSimplePush(Push):
 
             logging.debug('{}'.format(self.channels))
 
-            super(BaseSimplePush, self).__init__(text, device_type)
+            super(BaseSimplePush, self).__init__(text, device_type, push_id)
 
         if channels is not None and device_type is not None:
-            super(BaseSimplePush, self).__init__(text, device_type)
+            super(BaseSimplePush, self).__init__(text, device_type, push_id)
             self.channels = channels
             self.device_type = device_type
 
@@ -194,10 +181,10 @@ class SimplePush(BaseSimplePush):
     """
 
     def __init__(self, text, should_popup, full_text, header,
-                 client=None, namespace=None, channels=None, device_type=None):
+                 client=None, namespace=None, channels=None, device_type=None, push_id=None):
         super(SimplePush, self).__init__(text=text, should_popup=should_popup, header=header,
                                          client=client, namespace=namespace,
-                                         channels=channels, device_type=device_type)
+                                         channels=channels, device_type=device_type, push_id=push_id)
 
         self.full_text = full_text
         self.push_type = SIMPLE_TYPE
@@ -213,12 +200,12 @@ class SimplePush(BaseSimplePush):
 
 
 class ReviewPush(Push):
-    def __init__(self, order):
+    def __init__(self, order, push_id):
         client = Client.get(order.client_id)
         device_type = client.device_type
         self.order = order
         text = u'Оставьте отзыв о вашем заказе'
-        super(ReviewPush, self).__init__(text, device_type)
+        super(ReviewPush, self).__init__(text, device_type, push_id)
         self.header = u'Оцените заказ'
         self.should_popup = False
         client_channel = get_channels(order.key.namespace())[CLIENT_CHANNEL] % client.key.id()
@@ -240,11 +227,11 @@ class ReviewPush(Push):
 
 
 class NewsPush(BaseSimplePush):
-    def __init__(self, news, client=None, namespace=None, channels=None, device_type=None):
+    def __init__(self, news, client=None, namespace=None, channels=None, device_type=None, push_id=None):
         text = news.text
         head = news.title
 
-        super(NewsPush, self).__init__(text, False, head, client, namespace, channels, device_type)
+        super(NewsPush, self).__init__(text, False, head, client, namespace, channels, device_type, push_id=push_id)
 
         self.news = news
         self.push_type = NEWS_TYPE

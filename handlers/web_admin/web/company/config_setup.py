@@ -1,10 +1,14 @@
+import json
 import logging
+from collections import defaultdict
 
 from handlers.web_admin.web.company.base import CompanyBaseHandler
 from methods import branch_io
 from models.config.basket_notification import BasketNotificationModule
 from models.config.config import Config
-from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
+
+# from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
+from models.config.inactive_clients import NOTIFICATION_TYPES_MAP, CONDITIONS_MAP, InactiveNotificationModule
 from models.config.order_message import OrderMessageModule, Condition
 from models.config.share import ShareInvitationModule
 from methods.auth import config_rights_required
@@ -26,6 +30,7 @@ class ConfigMainHandler(CompanyBaseHandler):
         conf.put()
         self.redirect_to('config_main')
 
+
 class GoogleAnalyticsApiKeysHandler(CompanyBaseHandler):
     @config_rights_required
     def get(self):
@@ -43,6 +48,7 @@ class GoogleAnalyticsApiKeysHandler(CompanyBaseHandler):
         conf.put()
         self.redirect_to('config_google_analytics')
         pass
+
 
 class SetupOrderMessageModuleHandler(CompanyBaseHandler):
     @config_rights_required
@@ -219,64 +225,85 @@ class BasketNotificationModuleHandler(CompanyBaseHandler):
         self.redirect_to('company_main')
 
 
-class TestForm(CompanyBaseHandler):
-    def get(self):
-        self.render("/config_settings/inactive_users_notifications/test_form.html")
-
-
-class ListNotifModuleHandler(CompanyBaseHandler):
+class NotificationModulesHandler(CompanyBaseHandler):
     def get(self):
         types = []
+        conditions = []
 
-        for user_type in NOT_TYPES:
+        for user_type in NOTIFICATION_TYPES_MAP:
             types.append({
-                'name': NOT_TYPES_MAP[user_type],
+                'name': NOTIFICATION_TYPES_MAP[user_type],
                 'value': user_type
             })
 
-        self.render('/config_settings/inactive_users_notifications/notif_modules.html', types=types)
-        pass
+            conditions.append({
+                'name': CONDITIONS_MAP[user_type],
+                'value': user_type
+            })
+        self.render('/config_settings/inactive_users_notifications/notification_modules.html',
+                    types=types, conditions=conditions)
 
 
-class DeleteNotifModuleHandler(CompanyBaseHandler):
-    def post(self):
-        module_num = self.request.get_range('module_num')
-        cnf = Config.get()
-        cnf.NOTIFICATING_INACTIVE_USERS_MODULE.pop(module_num)
-        cnf.put()
-        self.redirect_to('list_notif_modules')
-
-
-class AddNotifModuleHandler(CompanyBaseHandler):
+class AddNotificationModuleHandler(CompanyBaseHandler):
     @config_rights_required
     def get(self):
         types = []
-        for user_type in NOT_TYPES:
+        # conditions = []
+
+        for user_type in NOTIFICATION_TYPES_MAP:
             types.append({
-                'name': NOT_TYPES_MAP[user_type],
+                'name': NOTIFICATION_TYPES_MAP[user_type],
                 'value': user_type
             })
 
-        self.render('/config_settings/inactive_users_notifications/add_notif_modules.html', types=types)
+        self.render('/config_settings/inactive_users_notifications/add_notification_module.html',
+                    types=types, conditions=json.dumps(CONDITIONS_MAP))
 
     @config_rights_required
     def post(self):
-        client_type = self.request.get_range('client_type')
-        status = self.request.get('status') is not ''
+        conditions_num = self.request.get_range('conditions_num')
+        conditions_dict = defaultdict()
+        for i in range(1, conditions_num + 1):
+            value = self.request.get('value_{0}'.format(i))
+            text = self.request.get('text_{0}'.format(i))
+            conditions_dict[value] = text
+
+        conditions = dict(conditions_dict)
+
         header = self.request.get('header')
-        text = self.request.get('text')
-        days = self.request.get_range('days')
+
+        client_type = self.request.get_range('client_types') + 1
+
+        status = self.request.get('status') is not ''
         should_push = self.request.get('should_push') is not ''
         should_sms = self.request.get('should_sms') is not ''
         sms_if_has_points = self.request.get('sms_if_has_points') is not ''
         sms_if_has_cashback = self.request.get('sms_if_has_cashback') is not ''
 
-        module = NotificatingInactiveUsersModule(status=status, header=header, type=client_type,
-                                                 text=text, days=days, should_push=should_push,
-                                                 should_sms=should_sms, sms_if_has_points=sms_if_has_points,
-                                                 sms_if_has_cashback=sms_if_has_cashback)
+        module = InactiveNotificationModule()
+
+        module.type = client_type
+        module.conditions = conditions
+        module.status = status
+        module.should_push = should_push
+        module.should_sms = should_sms
+        module.sms_if_has_points = sms_if_has_points
+        module.sms_if_has_cashback = sms_if_has_cashback
+        module.header = header
 
         conf = config.Config.get()
-        conf.NOTIFICATING_INACTIVE_USERS_MODULE.append(module)
+
+        conf.INACTIVE_NOTIFICATION_MODULE.append(module)
         conf.put()
-        self.redirect_to('list_notif_modules')
+        self.redirect_to('notification_modules_list')
+
+
+class DeleteNotificationModuleHandler(CompanyBaseHandler):
+    def post(self):
+        module_num = self.request.get_range('module_num')
+
+        conf = config.Config.get()
+        conf.INACTIVE_NOTIFICATION_MODULE.pop(module_num)
+        conf.put()
+
+        self.redirect_to('notification_modules_list')

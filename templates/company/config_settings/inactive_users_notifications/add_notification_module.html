@@ -1,0 +1,90 @@
+<html>
+<head>
+</head>
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script>
+
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                        ? args[number]
+                        : match
+                        ;
+            });
+        };
+    }
+
+    $(document).ready(function () {
+
+        var index = 0;
+
+        $('.add_condition').click(function (e) {
+            var conditionsString = $("#conditions").val();
+            var conds = JSON.parse(conditionsString);
+            var client_type = $("#client_type").val();
+
+            ++index;
+            $("#conditions_num").val(index);
+
+            $('.conditions').append(
+                    "<label>{0}<input type=\"number\" name=\"value_{1}\"></label><br>".format(conds["{0}".format(client_type)], index) +
+                    "<label>Текст<input type=\"text\" name=\"text_{0}\"></label><br>".format(index)
+            )
+        })
+    })
+</script>
+<body>
+{% include '/company/header.html' %}
+<form method="post">
+    <label>
+        Статус
+        <input type="checkbox" name="status">
+    </label><br>
+    <label>
+        Титулка
+        <input type="text" name="header">
+    </label><br>
+    <label>
+        Выберите тип клиентов: <br>
+        <select name="client_type" id="client_type">
+            {% for type in types %}
+                <option value="{{ type['value'] }}">
+                    {{ type['name'] }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+    <br><br>
+    <div class="conditions">
+        <button class="add_condition" type="button">Добавить</button>
+        <br>
+    </div>
+    <br>
+
+    <label>
+        Отправлять пуш
+        <input type="checkbox" name="should_push">
+    </label><br>
+    <label>
+        Отправлять СМС
+        <input type="checkbox" name="should_sms">
+    </label><br>
+
+    <label>
+        Отправлять СМС, если есть накопленные баллы
+        <input type="checkbox" name="sms_if_has_points">
+    </label><br>
+
+    <label>
+        Отправлять СМС, если есть кэшбэк
+        <input type="checkbox" name="sms_if_has_cashback">
+    </label><br>
+
+    <input type="submit" value="Сохранить">
+    <input type="hidden" name="conditions_num" id="conditions_num">
+    <input type="hidden" value="{{ conditions }}" id="conditions">
+</form>
+</body>
+</html>

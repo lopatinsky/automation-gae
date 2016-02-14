@@ -3,40 +3,38 @@ from google.appengine.ext import ndb
 
 from models import STATUS_AVAILABLE, STATUS_CHOICES
 
-__author__ = 'dvpermyakov'
+__author__ = 'aryabukha'
 
-WITHOUT_CONDITIONS = 0
-REPEATED_ORDER_CONDITIONS = 1  # если один раз заказал, а потом не заказывал
-REPEATED_ORDER_ONE_USE_CONDITION = 2  # если один раз заказал, а потом не заказывал
-ORDER_IN_ONE_DAY = 3  # достает клиентов, которые заказывали последний раз N дней назад
+CALENDAR = 0
+WITH_CASHBACK = 1
+N_POINTS_LEFT = 2
+NO_ORDERS = 3
+LEFT_BASKET = 4
+NEW_USER = 5
 
+NOTIFICATION_TYPES = (WITH_CASHBACK, N_POINTS_LEFT, NO_ORDERS, NEW_USER)
 
-
-# новым юзерам, если они не делали в течении N дней заказ
-# которые заказали один раз и n дней не делали заказ
-
-
-
-NEW_USERS_WITH_NO_ORDERS = 0
-USERS_WITH_ONE_ORDER = 1
-NOT_TYPES = (NEW_USERS_WITH_NO_ORDERS, USERS_WITH_ONE_ORDER)
-
-NOT_TYPES_MAP = {
-    NEW_USERS_WITH_NO_ORDERS: u'Новые неактивные клиенты',
-    USERS_WITH_ONE_ORDER: u'Неактивные клиенты с одним заказом',
+NOTIFICATION_TYPES_MAP = {
+    WITH_CASHBACK: u'Есть накопленные баллы по кэшбеку',
+    N_POINTS_LEFT: u'Осталось N баллов до подарка',
+    NO_ORDERS: u'Не делавшие заказ N дней',
+    NEW_USER: u'Новый пользователь без заказа N дней'
 }
 
-CONDITIONS = (WITHOUT_CONDITIONS, REPEATED_ORDER_CONDITIONS, REPEATED_ORDER_ONE_USE_CONDITION, ORDER_IN_ONE_DAY)
+CONDITIONS_MAP = {
+    WITH_CASHBACK: u'Баллы по кэшбеку',
+    N_POINTS_LEFT: u'Баллов до подарка',
+    NO_ORDERS: u'Дней без заказа',
+    NEW_USER: u'Дней без заказа'
+}
 
 
-class NotificatingInactiveUsersModule(ndb.Model):
+class InactiveNotificationModule(ndb.Model):
     status = ndb.IntegerProperty(default=STATUS_AVAILABLE, choices=STATUS_CHOICES)
     header = ndb.StringProperty(required=True)
-    text = ndb.StringProperty(required=True)
-    type = ndb.IntegerProperty(required=True, choices=NOT_TYPES)
-    days = ndb.IntegerProperty(required=True)
+    conditions = ndb.JsonProperty()
+    type = ndb.IntegerProperty(required=True, choices=NOTIFICATION_TYPES)
     should_push = ndb.BooleanProperty(default=False)
     should_sms = ndb.BooleanProperty(default=False)
     sms_if_has_points = ndb.BooleanProperty(default=False)
     sms_if_has_cashback = ndb.BooleanProperty(default=False)
-    max_times_sending = ndb.IntegerProperty(default=1)

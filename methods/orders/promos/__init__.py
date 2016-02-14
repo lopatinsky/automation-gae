@@ -8,7 +8,7 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
     check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity, check_version, check_geo_push, \
     check_persist_mark, check_repeated_order_before, check_max_promo_uses, check_min_date, check_max_date, \
-    check_registration_date
+    get_registration_days
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
