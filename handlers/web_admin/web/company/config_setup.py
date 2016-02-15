@@ -226,6 +226,7 @@ class BasketNotificationModuleHandler(CompanyBaseHandler):
 
 
 class NotificationModulesHandler(CompanyBaseHandler):
+    @config_rights_required
     def get(self):
         types = []
         conditions = []
@@ -299,6 +300,7 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
 
 
 class DeleteNotificationModuleHandler(CompanyBaseHandler):
+    @config_rights_required
     def post(self):
         module_num = self.request.get_range('module_num')
 
