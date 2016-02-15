@@ -31,6 +31,7 @@ def get_item_and_item_dicts(items):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items)
+
     return items, item_dicts
 
 

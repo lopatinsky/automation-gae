@@ -27,6 +27,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
     resto_place_result = post_resto_place_order(resto_company, venue, resto_client, client, order, resto_item_dicts,
                                                 resto_gift_dicts,
                                                 payment_json, resto_address_dict)
+
     if resto_place_result.get('error') == True or resto_place_result.get('code') == '100':
         success = False
         response = {
@@ -43,6 +44,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
         order.delivery_time_str = local_delivery_time.strftime(STR_DATETIME_FORMAT)
         order.put()
         success = True
+
         response = {
             'order_id': order.key.id(),
             'number': order.number,
