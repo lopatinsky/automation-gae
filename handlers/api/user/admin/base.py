@@ -28,7 +28,4 @@ class AdminApiHandler(UserApiHandler):
 
     @property
     def venue_or_error(self):
-        venue = None
-        if self.user.venue:
-            venue = self.user.venue.get()
-        return venue
+        return self.user.venue_entity
