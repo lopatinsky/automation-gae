@@ -17,6 +17,7 @@ def _get_values():
         'site': config.SUPPORT_SITE if config.SUPPORT_SITE else '',
         'emails': u','.join(config.SUPPORT_EMAILS),
         'report_emails': config.REPORT_EMAILS or '',
+        'report_weekly': config.REPORT_WEEKLY,
         'color': config.ACTION_COLOR,
         'email_buttons': config.EMAIL_REQUESTS,
         'company_status': config.COMPANY_STATUS,
@@ -112,6 +113,7 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.SUPPORT_SITE = self.request.get('site')
         config.SUPPORT_EMAILS = self.request.get('emails').split(',')
         config.REPORT_EMAILS = self.request.get('report_emails')
+        config.REPORT_WEEKLY = self.request.get('report_weekly') == '1'
         config.ACTION_COLOR = "FF%s" % self.request.get('color')[1:]
         config.EMAIL_REQUESTS = bool(self.request.get('email_buttons'))
         config.COMPANY_STATUS = int(self.request.get('company_status'))
