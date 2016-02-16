@@ -163,6 +163,8 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
         menu_item.chosen_group_modifiers = []
         for group_modifier in item['group_modifiers']:
             group_modifier_obj = copy.copy(GroupModifier.get(group_modifier['group_modifier_id']))
+            if not group_modifier_obj:
+                continue
             group_modifier_obj.choice = group_modifier_obj.get_choice_by_id(group_modifier['choice'])
             if group_modifier_obj.choice:
                 for i in xrange(group_modifier['quantity']):
