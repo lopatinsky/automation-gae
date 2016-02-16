@@ -2,6 +2,7 @@
 from webapp2 import uri_for
 
 from methods import platius
+from methods.rendering import get_phone
 from models.client import Client
 from models.platius import PlatiusClient
 from .base import ApiHandler
@@ -58,17 +59,24 @@ class PlatiusSendSmsHandler(ApiHandler):
         if not client_id:
             self.abort(400)
         client = Client.get(client_id)
-        if not client_id:
+        if not client:
             self.abort(400)
 
+        phone = get_phone(self.request.get('client_phone'))
+        if not phone:
+            phone = client.tel
+
         try:
-            platius.send_sms(client.tel)
+            platius.send_sms(phone)
         except platius.PlatiusError:
             self.render_json({
                 "success": False,
                 "description": u'Ошибка при отправке сообщения. Проверьте Ваш номер телефона и попробуйте еще раз'
             })
         else:
+            client.tel = phone
+            client.put()
+
             self.render_json({
                 "success": True,
                 "description": u"СМС-подтверждение успешно отправлено на номер %s" % client.tel
