@@ -82,6 +82,16 @@
         <input type="checkbox" name="sms_if_has_cashback">
     </label><br>
 
+    <label>
+        Кэшбек<br>
+        <input type="number" name="needed_cashback" value="0">
+    </label><br>
+
+    <label>
+        Баллов до подарка (-1 для отключения)<br>
+        <input type="number" name="needed_points_left" value="-1">
+    </label>
+
     <input type="submit" value="Сохранить">
     <input type="hidden" name="conditions_num" id="conditions_num">
     <input type="hidden" value="{{ conditions }}" id="conditions">

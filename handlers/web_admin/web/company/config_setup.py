@@ -281,6 +281,9 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
         sms_if_has_points = self.request.get('sms_if_has_points') is not ''
         sms_if_has_cashback = self.request.get('sms_if_has_cashback') is not ''
 
+        needed_cashback = self.request.get_range('needed_cashback')
+        needed_points_left = self.request.get_range('needed_points_left')
+
         module = InactiveNotificationModule()
 
         module.type = client_type
@@ -291,6 +294,11 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
         module.sms_if_has_points = sms_if_has_points
         module.sms_if_has_cashback = sms_if_has_cashback
         module.header = header
+
+        if needed_cashback >= 0:
+            module.needed_cashback = needed_cashback
+        if needed_points_left >= 0:
+            module.needed_points_left = needed_points_left
 
         conf = config.Config.get()
 

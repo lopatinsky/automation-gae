@@ -16,8 +16,7 @@ from google.appengine.ext.deferred import deferred
 from google.appengine.ext.ndb import metadata
 from methods.orders.promos import get_registration_days
 from methods.sms.sms_pilot import send_sms
-from models.config.inactive_clients import WITH_CASHBACK, \
-    N_POINTS_LEFT, NO_ORDERS, NEW_USER
+from models.config.inactive_clients import NO_ORDERS, NEW_USER
 from models.specials import ClientSmsSending, ClientPushSending
 from models.order import NOT_CANCELED_STATUSES
 
@@ -44,36 +43,36 @@ def get_clients_and_texts_by_module_logic(module, clients):
     texts = []
 
     for client in clients:
-        if module.type == WITH_CASHBACK:
-            # if client has no orders – no purpose to check his points wallet balance
-            if not get_orders_num(client):
-                continue
+        # if module.type == WITH_CASHBACK:
+        #     # if client has no orders – no purpose to check his points wallet balance
+        #     if not get_orders_num(client):
+        #         continue
+        #
+        #     client_wallet_balance = get_wallet_balance(client)
+        #
+        #     # getting first (and only) value for cashback amount
+        #     module_value = module.conditions.keys()[0]
+        #     if client_wallet_balance < module_value:
+        #         # if client's cashback is not enough – skipping him
+        #         continue
+        #     texts.append(module.conditions[module_value])
+        #
+        # elif module.type == N_POINTS_LEFT:
+        #     # if client has no orders – no purpose to check his points balance
+        #     if not get_orders_num(client):
+        #         continue
+        #
+        #     client_points_balance = get_points_balance(client)
+        #     cheapest_gift = get_cheapest_gift()
+        #     points_delta = cheapest_gift.points - client_points_balance
+        #
+        #     text = module.conditions.get(points_delta)
+        #     if not text:
+        #         # there is no condition for client's points balance
+        #         continue
+        #     texts.append(text)
 
-            client_wallet_balance = get_wallet_balance(client)
-
-            # getting first (and only) value for cashback amount
-            module_value = module.conditions.keys()[0]
-            if client_wallet_balance < module_value:
-                # if client's cashback is not enough – skipping him
-                continue
-            texts.append(module.conditions[module_value])
-
-        elif module.type == N_POINTS_LEFT:
-            # if client has no orders – no purpose to check his points balance
-            if not get_orders_num(client):
-                continue
-
-            client_points_balance = get_points_balance(client)
-            cheapest_gift = get_cheapest_gift()
-            points_delta = cheapest_gift.points - client_points_balance
-
-            text = module.conditions.get(points_delta)
-            if not text:
-                # there is no condition for client's points balance
-                continue
-            texts.append(text)
-
-        elif module.type == NO_ORDERS:
+        if module.type == NO_ORDERS:
             # last order was N days ago
             order_days = days_from_last_order(client)
 
@@ -81,6 +80,20 @@ def get_clients_and_texts_by_module_logic(module, clients):
             if not text:
                 # there is no condition for client's registration date
                 continue
+            needed_cashback = module.needed_cashback
+
+            if needed_cashback and needed_cashback >= get_wallet_balance(client):
+                continue
+
+            needed_points_left = module.needed_points_left
+
+            if needed_points_left:
+                client_points_balance = get_points_balance(client)
+                cheapest_gift = get_cheapest_gift()
+                points_delta = cheapest_gift.points - client_points_balance
+
+                if needed_points_left > points_delta:
+                    continue
 
             texts.append(text)
 
