@@ -117,6 +117,8 @@ def update_status(order):
 def find_lost_order(uuid):
     resto_company = RestoCompany.get()
     resto_info = get_resto_order_info(resto_company, uuid)
+    if not resto_info:
+        return None
     return {
         'status': _convert_resto_status(resto_info['status']),
         'resto_id': resto_info['restoId'],
