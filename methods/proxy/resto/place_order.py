@@ -48,10 +48,12 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
     else:
         resto_client.resto_customer_id = resto_place_result['customer_id']
         resto_client.put()
+        old_key = order.key
         order.key = ndb.Key(Order, resto_place_result['order']['resto_id'])
         order.number = int(resto_place_result['order']['number'])
         order.status = NEW_ORDER
         order.put()
+        old_key.delete()
         success = True
 
         response = {
