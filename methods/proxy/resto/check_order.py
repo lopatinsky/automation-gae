@@ -31,6 +31,7 @@ def get_item_and_item_dicts(items):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items)
     item_dicts = set_item_dicts(items)
+
     return items, item_dicts
 
 
@@ -67,6 +68,14 @@ def get_item_dicts_by_resto(resto_item_dicts):
     } for resto_item_dict in resto_item_dicts]
     items, item_dicts = get_item_and_item_dicts(items)
     return item_dicts
+
+
+def set_errors_from_resto(item_dicts, resto_items):
+    resto_items_expanded = [item
+                            for item in resto_items
+                            for _ in range(int(round(item['amount'])))]
+    for item_dict, resto_item in zip(item_dicts, resto_items_expanded):
+        item_dict['errors'].extend(resto_item.get('errors'))
 
 
 def get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts, cancelled_order_gifts):
@@ -111,11 +120,13 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gi
         }
     else:
         resto_validation = post_resto_check_order(resto_company, venue, resto_item_dicts, client, resto_client, total_sum,
-                                              delivery_time, delivery_type)
+                                                  delivery_time, delivery_type)
 
     order_gifts_from_resto = get_item_dicts_by_resto(resto_validation.get('gifts', []))
     new_order_gifts, unavail_order_gifts = get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts,
                                                                     cancelled_order_gifts)
+    if resto_validation.get('items') is not None:
+        set_errors_from_resto(item_dicts, resto_validation['items'])
     required_value = {
         'valid': not resto_validation['error'],
         'error': resto_validation['description'] if resto_validation['error'] else None,

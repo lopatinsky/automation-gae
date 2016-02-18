@@ -20,6 +20,8 @@ class CompaniesHandler(ApiHandler):
 
 class CitiesHandler(ApiHandler):
     def get(self):
+        if self.request.init_namespace:
+            namespace_manager.set_namespace(self.request.init_namespace)
         self.render_json({
             'cities': get_company_cities()
         })
@@ -27,6 +29,8 @@ class CitiesHandler(ApiHandler):
 
 class VenuesHandler(ApiHandler):
     def get(self):
+        if self.request.init_namespace:
+            namespace_manager.set_namespace(self.request.init_namespace)
         if not self.request.city:
             self.abort(400)
         location = get_location(self.request.get("ll"))
@@ -37,6 +41,8 @@ class VenuesHandler(ApiHandler):
 
 class MenuHandler(ApiHandler):
     def get(self):
+        if self.request.init_namespace:
+            namespace_manager.set_namespace(self.request.init_namespace)
         if not self.request.city:
             self.abort(400)
         items = ProxyMenuItem.query().fetch()
@@ -54,6 +60,8 @@ class MenuHandler(ApiHandler):
 
 class ProductHandler(ApiHandler):
     def get(self):
+        if self.request.init_namespace:
+            namespace_manager.set_namespace(self.request.init_namespace)
         if not self.request.city:
             self.abort(400)
         product_id = self.request.get_range('product_id')
@@ -63,10 +71,9 @@ class ProductHandler(ApiHandler):
         location = get_location(self.request.get("ll"))
         available_venues = self.request.city.get_venues(location)
         venues_dict = {}
-        init_namespace = namespace_manager.get_namespace()
         for item in product.get_items(self.request.city, available_venues):
             for venue in item.venues:
-                namespace_manager.set_namespace(init_namespace)
+                namespace_manager.set_namespace(self.request.init_namespace)
                 company = AutomationCompany.get_by_namespace(item.key.namespace())
                 namespace_manager.set_namespace(item.key.namespace())
                 dct = venues_dict.get(venue.key.id())

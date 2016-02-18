@@ -11,7 +11,7 @@ from methods.rendering import latinize
 from models.config.config import config, COMPANY_IN_PRODUCTION
 from methods import excel
 from methods.report import orders
-from models.config.version import CURRENT_APP_ID
+from models.config.version import CURRENT_APP_ID, PRODUCTION_APP_ID
 from models.legal import LegalInfo
 
 _EMAIL_SENDER = "reports@%s.appspotmail.com" % CURRENT_APP_ID
@@ -19,11 +19,17 @@ _EMAIL_SENDER = "reports@%s.appspotmail.com" % CURRENT_APP_ID
 
 def _send(namespace):
     namespace_manager.set_namespace(namespace)
+    if config.REPORT_WEEKLY and datetime.datetime.now().isoweekday() != 1:
+        return
+
     company_emails = config.REPORT_EMAILS.split(",") if config.REPORT_EMAILS else ()
 
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
-    yesterday = today - datetime.timedelta(days=1)
-    yesterday_end = today - datetime.timedelta(microseconds=1)
+    if config.REPORT_WEEKLY:
+        start = today - datetime.timedelta(days=7)
+    else:
+        start = today - datetime.timedelta(days=1)
+    end = today - datetime.timedelta(microseconds=1)
 
     all_reports = []
 
@@ -36,30 +42,33 @@ def _send(namespace):
         if not venue_ids:
             continue
 
-        report_data = orders.get(None, yesterday, yesterday_end, venue_ids=legal.get_venue_ids())
+        report_data = orders.get(None, start, end, venue_ids=legal.get_venue_ids())
         excel_file = excel.send_excel_file(None, 'orders', 'orders.html', **report_data)
         io = StringIO()
         excel_file.save(io)
 
         legal_name = legal.person_ooo or legal.person_ip
-        filename = u"report-%s-%s-%s.xls" % (namespace, latinize(legal_name), yesterday.strftime("%d-%m-%Y"))
+        filename = u"report-%s-%s-%s.xls" % (namespace, latinize(legal_name), start.strftime("%d-%m-%Y"))
         filename = filename.encode('utf-8')
         attachment = mail.Attachment(filename, io.getvalue())
         all_reports.append(attachment)
 
         if legal_emails:
             subject = u"Приложение %s - отчет для %s" % (config.APP_NAME, legal_name)
-            body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
+            body = u"Отчет за период: %s - %s" % (start.strftime("%d.%m.%Y"), end.strftime("%d.%m.%Y"))
             mail.send_mail(_EMAIL_SENDER, legal_emails, subject, body, attachments=[attachment])
 
     if company_emails and all_reports:
         subject = u"Приложение %s - отчет" % config.APP_NAME
-        body = u"Отчет за дату: %s" % yesterday.strftime("%d.%m.%Y")
+        body = u"Отчет за период: %s - %s" % (start.strftime("%d.%m.%Y"), end.strftime("%d.%m.%Y"))
         mail.send_mail(_EMAIL_SENDER, company_emails, subject, body, attachments=all_reports)
 
 
 class ReportSendHandler(RequestHandler):
     def get(self):
+        if CURRENT_APP_ID != PRODUCTION_APP_ID:
+            return
+
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             if not config or config.COMPANY_STATUS != COMPANY_IN_PRODUCTION:

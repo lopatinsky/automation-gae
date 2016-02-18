@@ -168,6 +168,7 @@ class Config(ndb.Model):
     COMPULSORY_DELIVERY_EMAIL_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)
 
     REPORT_EMAILS = ndb.StringProperty(indexed=False)
+    REPORT_WEEKLY = ndb.BooleanProperty(default=False)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
 

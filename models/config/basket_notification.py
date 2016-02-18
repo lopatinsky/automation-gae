@@ -9,3 +9,4 @@ class BasketNotificationModule(ndb.Model):
     header = ndb.TextProperty()
     text = ndb.TextProperty()
     inactivity_duration = ndb.IntegerProperty(default=1800)  # duration in seconds
+    days_since_order = ndb.IntegerProperty(default=0)
