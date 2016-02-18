@@ -8,7 +8,8 @@ from models.config.basket_notification import BasketNotificationModule
 from models.config.config import Config
 
 # from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
-from models.config.inactive_clients import NOTIFICATION_TYPES_MAP, CONDITIONS_MAP, InactiveNotificationModule
+from models.config.inactive_clients import NOTIFICATION_TYPES_MAP, CONDITIONS_MAP, InactiveNotificationModule, \
+    WITH_CASHBACK, N_POINTS_LEFT
 from models.config.order_message import OrderMessageModule, Condition
 from models.config.share import ShareInvitationModule
 from methods.auth import config_rights_required
@@ -297,7 +298,9 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
 
         if needed_cashback >= 0:
             module.needed_cashback = needed_cashback
+            module.type = WITH_CASHBACK
         if needed_points_left >= 0:
+            module.type = N_POINTS_LEFT
             module.needed_points_left = needed_points_left
 
         conf = config.Config.get()
