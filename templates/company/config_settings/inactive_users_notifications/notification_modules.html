@@ -15,6 +15,8 @@
         <th>Получает СМС</th>
         <th>Получает СМС если есть баллы</th>
         <th>Получает СМС если есть кэшбек</th>
+        <th>Требуемый кэшбек</th>
+        <th>Требуемое число баллов до подарка</th>
     </tr>
 
     {% for module in config.INACTIVE_NOTIFICATION_MODULE %}
@@ -23,7 +25,10 @@
                 {% if module.status %}Да{% else %}Нет{% endif %}
             </td>
             <td>
-                {{ module.header }}
+                <a href={{ "/company/config_settings/inactive_users_notifications/edit?module_num={0}".format(
+                config.INACTIVE_NOTIFICATION_MODULE.index(module)) }}>
+                    {{ module.header }}
+                </a>
             </td>
             <td>
                 {% for type in types %}
@@ -51,7 +56,12 @@
             <td>
                 {% if module.sms_if_has_cashback %}ДА {% else %}НЕТ{% endif %}
             </td>
-
+            <td>
+                {% if module.needed_cashback %}{{ module.needed_cashback }} {% else %}Нет{% endif %}
+            </td>
+            <td>
+                {% if module.needed_cashback %}{{ module.needed_points_left }} {% else %}Нет{% endif %}
+            </td>
             <td>
                 <form action="/company/config_settings/inactive_users_notifications/delete" method="post">
                     <input value="{{ config.INACTIVE_NOTIFICATION_MODULE.index(module) }}" type="hidden"
