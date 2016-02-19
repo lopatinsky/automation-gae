@@ -57,7 +57,7 @@ const LoginView = React.createClass({
     _onAuthStoreUpdate() {
         if (AuthStore.token) {
             setImmediate(() => {
-                this.props.history.pushState(null, "/current");
+                this.props.router.push("/current");
             });
         }
     },

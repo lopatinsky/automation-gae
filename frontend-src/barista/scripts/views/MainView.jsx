@@ -73,7 +73,7 @@ const MainView = React.createClass({
     },
     _onAuthStoreChange() {
         if (!AuthStore.token) {
-            this.props.history.pushState(null, "/login");
+            this.props.router.push("/login");
         }
     },
     _onOrderStoreChange(data) {
@@ -106,10 +106,10 @@ const MainView = React.createClass({
     },
 
     _checkDeliveryType() {
-        if (!this.state.orderAheadEnabled && this.props.history.isActive("current")) {
-            this.props.history.pushState(null, "/delivery");
-        } else if (!this.state.deliveryEnabled && this.props.history.isActive("delivery")) {
-            this.props.history.pushState(null, "/current");
+        if (!this.state.orderAheadEnabled && this.props.router.isActive("current")) {
+            this.props.router.push("/delivery");
+        } else if (!this.state.deliveryEnabled && this.props.router.isActive("delivery")) {
+            this.props.router.push("/current");
         }
     },
 

@@ -2,9 +2,9 @@ import React from 'react';
 import Card from 'material-ui/lib/card/card';
 import CardText from 'material-ui/lib/card/card-text';
 import FlatButton from 'material-ui/lib/flat-button';
-import AutoPrefix from 'material-ui/lib/styles/auto-prefix';
 import { AjaxStore, OrderStore, ConfigStore } from '../stores';
 import { SpinnerWrap, OrderInfo } from '../components';
+import theme from '../theme';
 
 const OrderCard = React.createClass({
     getInitialState() {
@@ -62,7 +62,7 @@ const OrderCard = React.createClass({
         } else return null;
     },
     render() {
-        let contentStyle = AutoPrefix.all({
+        let contentStyle = theme.prefix({
             transition: "background-color 0.2s ease-in-out",
             backgroundColor: this.props.highlightColor
         });

@@ -1,6 +1,6 @@
 import React from 'react';
 import CircularProgress from 'material-ui/lib/circular-progress';
-import AutoPrefix from 'material-ui/lib/styles/auto-prefix';
+import theme from '../theme';
 
 const SpinnerWrap = React.createClass({
     getDefaultProps() {
@@ -9,7 +9,7 @@ const SpinnerWrap = React.createClass({
         };
     },
     render() {
-        const progressStyles = AutoPrefix.all({
+        const progressStyles = theme.prefix({
                 transition: 'opacity 0.2s linear',
                 visibility: this.props.show ? 'visible' : 'hidden',
                 opacity: this.props.show ? 1 : 0,
@@ -19,7 +19,7 @@ const SpinnerWrap = React.createClass({
                 marginLeft: -25,
                 marginTop: -25
             }),
-            contentStyles = AutoPrefix.all({
+            contentStyles = theme.prefix({
                 transition: 'opacity 0.2s linear',
                 opacity: this.props.show ? 0 : 1
             });

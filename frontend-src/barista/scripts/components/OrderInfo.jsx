@@ -62,8 +62,10 @@ const OrderInfo = React.createClass({
                 </div>
                 <div style={{width: '65%', ...cellStyle}}>
                     <table style={{borderSpacing: 0, width: '100%'}}>
-                        {items}
-                        {gifts}
+                        <tbody>
+                            {items}
+                            {gifts}
+                        </tbody>
                     </table>
                     <div style={{textAlign: 'right'}}>
                         <div>
