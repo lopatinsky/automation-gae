@@ -27,7 +27,7 @@ def get_init_total_sum(items):
     return total_sum
 
 
-def get_item_and_item_dicts(items, venue):
+def get_item_and_item_dicts(items, venue=None):
     items = set_modifiers(items)
     items = set_price_with_modifiers(items, venue)
     item_dicts = set_item_dicts(items)
