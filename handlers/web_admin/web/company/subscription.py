@@ -155,7 +155,6 @@ class ListSubscriptionMenuItemHandler(CompanyBaseHandler):
     @menu_rights_required
     def get(self):
         self.render('/subscription/subscription_menu_items_list')
-        pass
 
 
 class ListSubscriptionMenuItemsListHandler(CompanyBaseHandler):
@@ -167,15 +166,14 @@ class ListSubscriptionMenuItemsListHandler(CompanyBaseHandler):
 
         categories = {}
 
-        print dishes
         for dish in dishes:
-            if dish.category:
+            if dish.category and dish.category.get():
                 categories[dish.category.get().title] = []
             else:
                 categories[u'Без категории'] = []
 
         for dish in dishes:
-            if dish.category:
+            if dish.category and dish.category.get():
                 categories[dish.category.get().title].append(dish)
             else:
                 categories[u'Без категории'].append(dish)
