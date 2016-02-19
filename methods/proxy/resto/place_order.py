@@ -21,7 +21,7 @@ def resto_place_order(client, venue, order, payment_json, items_json, order_gift
         resto_address_dict = get_resto_address_dict(order.address)
     else:
         resto_address_dict = {}
-    items, item_dicts = get_item_and_item_dicts(items_json)
+    items, item_dicts = get_item_and_item_dicts(items_json, venue)
     resto_item_dicts = get_resto_item_dicts(items_json)
     resto_gift_dicts = get_resto_item_dicts(order_gifts)
     order.init_total_sum = get_init_total_sum(items)

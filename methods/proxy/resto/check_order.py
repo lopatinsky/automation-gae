@@ -27,9 +27,9 @@ def get_init_total_sum(items):
     return total_sum
 
 
-def get_item_and_item_dicts(items):
+def get_item_and_item_dicts(items, venue):
     items = set_modifiers(items)
-    items = set_price_with_modifiers(items)
+    items = set_price_with_modifiers(items, venue)
     item_dicts = set_item_dicts(items)
 
     return items, item_dicts
@@ -102,7 +102,7 @@ def get_new_and_unaval_gifts(order_gifts_from_resto, order_gift_dicts, cancelled
 def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gifts, cancelled_order_gifts,
                          delivery_type):
     resto_company = RestoCompany.get()
-    items, item_dicts = get_item_and_item_dicts(init_item_dicts)
+    items, item_dicts = get_item_and_item_dicts(init_item_dicts, venue)
     order_gifts, order_gift_dicts = get_item_and_item_dicts(order_gifts)
     cancelled_order_gifts, cancelled_order_gift_dicts = get_item_and_item_dicts(cancelled_order_gifts)
     total_sum = get_init_total_sum(items)

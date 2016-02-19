@@ -174,13 +174,14 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
     return mod_items
 
 
-def set_price_with_modifiers(items):
+def set_price_with_modifiers(items, venue=None):
+    venue_id = venue.key.id() if venue else None
     for item in items:
-        price = item.float_price
+        price = item.float_price_for_venue(venue_id)
         for single_modifier in item.chosen_single_modifiers:
-            price += single_modifier.float_price
+            price += single_modifier.float_price_for_venue(venue_id)
         for group_modifier in item.chosen_group_modifiers:
-            price += group_modifier.choice.float_price
+            price += group_modifier.choice.float_price_for_venue(venue_id)
         item.total_price = price
     return items
 
@@ -336,7 +337,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                                  cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
     items = set_modifiers(items)
-    items = set_price_with_modifiers(items)
+    items = set_price_with_modifiers(items, venue)
     item_dicts = set_item_dicts(items)
 
     total_sum_without_promos = 0
