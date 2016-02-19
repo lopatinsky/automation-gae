@@ -18,7 +18,8 @@
 
     $(document).ready(function () {
 
-        var index = 0;
+        var index = $("#conditions_num").val();
+        alert(index);
 
         $('.add_condition').click(function (e) {
             var conditionsString = $("#conditions").val();
@@ -40,11 +41,11 @@
 <form method="post">
     <label>
         Статус
-        <input type="checkbox" name="status">
+        <input type="checkbox" name="status" {% if module.status %} checked {% endif %}>
     </label><br>
     <label>
         Титулка
-        <input type="text" name="header">
+        <input type="text" name="header" value="{{ module.header }}">
     </label><br>
     <label>
         Выберите тип клиентов: <br>
@@ -60,40 +61,60 @@
     <div class="conditions">
         <button class="add_condition" type="button">Добавить</button>
         <br>
+        {% for condition in module.conditions.items() %}
+            <label>
+                Дней без заказа
+                <input type="number" value="{{ condition[0] }}" name="{{ 'value_{0}'.format(loop.index0) }}">
+            </label><br>
+
+            <label>
+                Текст
+                <input type="text" value="{{ condition[1] }}" name="{{ 'text_{0}'.format(loop.index0) }}">
+            </label><br>
+        {% endfor %}
     </div>
     <br>
 
     <label>
         Отправлять пуш
-        <input type="checkbox" name="should_push">
+        <input type="checkbox" name="should_push" {% if module.should_push %}checked{% endif %}>
     </label><br>
     <label>
         Отправлять СМС
-        <input type="checkbox" name="should_sms">
+        <input type="checkbox" name="should_sms" {% if module.should_sms %}checked{% endif %}>
     </label><br>
 
     <label>
         Отправлять СМС, если есть накопленные баллы
-        <input type="checkbox" name="sms_if_has_points">
+        <input type="checkbox" name="sms_if_has_points" {% if module.sms_if_has_points %}checked{% endif %}>
     </label><br>
 
     <label>
         Отправлять СМС, если есть кэшбэк
-        <input type="checkbox" name="sms_if_has_cashback">
+        <input type="checkbox" name="sms_if_has_cashback" {% if module.sms_if_has_cashback %}checked{% endif %}>
     </label><br>
 
     <label>
         Кэшбек (-1 для отключения)<br>
-        <input type="number" name="needed_cashback" value="-1">
+        <input type="number" name="needed_cashback"
+               {% if module.needed_cashback %}value="{{ module.needed_cashback }}"{% else %}
+               value="-1"
+               {% endif %}
+        >
     </label><br>
 
     <label>
         Баллов до подарка (-1 для отключения)<br>
-        <input type="number" name="needed_points_left" value="-1">
+        <input type="number" name="needed_points_left"
+               {% if module.needed_points_left %}value="{{ module.needed_points_left }}"{% else %}
+               value="-1"
+               {% endif %}
+        >
     </label><br>
 
     <input type="submit" value="Сохранить">
-    <input type="hidden" name="conditions_num" id="conditions_num">
+    <input type="hidden" name="conditions_num" id="conditions_num" value="{{ module.conditions|length }}">
+    <input type="hidden" name="module_idx" value="{{ config.INACTIVE_NOTIFICATION_MODULE.index(module) }}">
     <input type="hidden" value="{{ conditions }}" id="conditions">
 </form>
 </body>

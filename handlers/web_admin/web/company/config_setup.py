@@ -310,6 +310,72 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
         self.redirect_to('notification_modules_list')
 
 
+class EditNotificationModuleHandler(CompanyBaseHandler):
+    def get(self):
+        types = []
+        conf = config.Config.get()
+
+        module_num = self.request.get_range('module_num')
+
+        module = conf.INACTIVE_NOTIFICATION_MODULE[module_num]
+
+        for user_type in NOTIFICATION_TYPES_MAP:
+            types.append({
+                'name': NOTIFICATION_TYPES_MAP[user_type],
+                'value': user_type
+            })
+
+        self.render('/config_settings/inactive_users_notifications/edit_notification_module.html',
+                    types=types, conditions=json.dumps(CONDITIONS_MAP), module=module)
+
+    def post(self):
+        module_idx = self.request.get_range('module_idx')
+        conf = config.Config.get()
+        module = conf.INACTIVE_NOTIFICATION_MODULE[module_idx]
+
+        conditions_num = self.request.get_range('conditions_num')
+        conditions_dict = defaultdict()
+        for i in range(1, conditions_num + 1):
+            value = self.request.get('value_{0}'.format(i))
+            text = self.request.get('text_{0}'.format(i))
+            conditions_dict[value] = text
+
+        conditions = dict(conditions_dict)
+
+        header = self.request.get('header')
+
+        client_type = self.request.get_range('client_types') + 1
+
+        status = self.request.get('status') is not ''
+        should_push = self.request.get('should_push') is not ''
+        should_sms = self.request.get('should_sms') is not ''
+        sms_if_has_points = self.request.get('sms_if_has_points') is not ''
+        sms_if_has_cashback = self.request.get('sms_if_has_cashback') is not ''
+
+        needed_cashback = self.request.get_range('needed_cashback')
+        needed_points_left = self.request.get_range('needed_points_left')
+
+        module.type = client_type
+        module.conditions = conditions
+        module.status = status
+        module.should_push = should_push
+        module.should_sms = should_sms
+        module.sms_if_has_points = sms_if_has_points
+        module.sms_if_has_cashback = sms_if_has_cashback
+        module.header = header
+
+        if needed_cashback >= 0:
+            module.needed_cashback = needed_cashback
+            module.type = WITH_CASHBACK
+        if needed_points_left >= 0:
+            module.type = N_POINTS_LEFT
+            module.needed_points_left = needed_points_left
+
+        conf.put()
+
+        self.redirect_to('notification_modules_list')
+
+
 class DeleteNotificationModuleHandler(CompanyBaseHandler):
     @config_rights_required
     def post(self):
