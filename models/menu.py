@@ -9,11 +9,32 @@ SINGLE_MODIFIER = 0
 GROUP_MODIFIER = 1
 
 
-class SingleModifier(ndb.Model):
+class PriceBase(ndb.Model):
+    price = ndb.IntegerProperty(default=0)
+    venue_prices = ndb.JsonProperty(default={})
+
+    @property
+    def float_price(self):  # в рублях
+        return float(self.price) / 100.0
+
+    def price_for_venue(self, venue_id):
+        return self.venue_prices.get(str(venue_id), self.price)
+
+    def float_price_for_venue(self, venue_id):
+        return float(self.price_for_venue(venue_id)) / 100.0
+
+    @property
+    def venue_price_dicts(self):
+        return [
+            {'venue': venue_id, 'price': price / 100.0}
+            for venue_id, price in self.venue_prices.iteritems()
+        ]
+
+
+class SingleModifier(PriceBase):
     INFINITY = 1000
 
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(default=0)  # в копейках
     min_amount = ndb.IntegerProperty(default=0)
     max_amount = ndb.IntegerProperty(default=0)
     sequence_number = ndb.IntegerProperty(default=0)
@@ -27,10 +48,6 @@ class SingleModifier(ndb.Model):
             return cls.get_by_id(int(modifier_id))
         elif app_kind == RESTO_APP:
             return get_single_modifier_by_id(modifier_id)
-
-    @property
-    def float_price(self):  # в рублях
-        return float(self.price) / 100.0
 
     @staticmethod
     def generate_sequence_number():
@@ -57,28 +74,26 @@ class SingleModifier(ndb.Model):
         else:
             return modifiers[index + 1]
 
-    def dict(self):
-        return {
+    def dict(self, venue=None):
+        dct = {
             'modifier_id': str(self.key.id()),
             'title': self.title,
-            'price': float(self.price) / 100.0,  # в рублях
+            'price': self.float_price_for_venue(venue.key.id()) if venue else self.float_price,
             'min': self.min_amount,
             'max': self.max_amount,
             'order': self.sequence_number
         }
+        if not venue:
+            dct['prices'] = self.venue_price_dicts
+        return dct
 
 
-class GroupModifierChoice(ndb.Model):
+class GroupModifierChoice(PriceBase):
     choice_id = ndb.IntegerProperty()
     choice_id_str = ndb.StringProperty()  # todo: set choice_id to str
     title = ndb.StringProperty(required=True)
-    price = ndb.IntegerProperty(default=0)  # в копейках
     default = ndb.BooleanProperty(default=False)
     sequence_number = ndb.IntegerProperty()
-
-    @property
-    def float_price(self):  # в рублях
-        return float(self.price) / 100.0
 
     @staticmethod
     def generate_id():
@@ -190,7 +205,7 @@ class GroupModifier(ndb.Model):
         else:
             return modifiers[index + 1]
 
-    def dict(self, product=None):
+    def dict(self, venue=None, product=None):
         choices = [choice for choice in self.choices
                    if product is None or choice.choice_id not in product.group_choice_restrictions]
         if self.required and choices:
@@ -203,20 +218,24 @@ class GroupModifier(ndb.Model):
                     suit_choice = choice
             if not found:
                 suit_choice.default = True
+        choices_dicts = []
+        for choice in choices:
+            choice_dct = {
+                'default': choice.default if choice.default else None,
+                'title': choice.title,
+                'price': choice.float_price_for_venue(venue.key.id()) if venue else choice.float_price,
+                'id': str(choice.choice_id) if choice.choice_id else choice.choice_id_str,
+                'order': choice.sequence_number
+            }
+            if venue:
+                choice_dct['prices'] = choice.venue_price_dicts
+            choices_dicts.append(choice_dct)
         return {
             'modifier_id': str(self.key.id()),
             'title': self.title,
             'required': self.required,
             'order': self.sequence_number,
-            'choices': [
-                {
-                    'default': choice.default if choice.default else None,
-                    'title': choice.title,
-                    'price': float(choice.price) / 100.0,  # в рублях
-                    'id': str(choice.choice_id) if choice.choice_id else choice.choice_id_str,
-                    'order': choice.sequence_number
-                } for choice in choices
-            ]
+            'choices': choices_dicts
         }
 
 
@@ -356,7 +375,7 @@ class MenuCategory(ndb.Model):
                     items.append(item.dict())
                 else:
                     if venue.key not in item.restrictions:
-                        items.append(item.dict(without_restrictions=True))
+                        items.append(item.dict(venue=venue, without_restrictions=True))
         dct = {
             'info': {
                 'category_id': str(self.key.id()),
@@ -408,7 +427,7 @@ class PictureResizeMode(object):
     CHOICES = (CENTER_CROP, CENTER_SHRINK)
 
 
-class MenuItem(ndb.Model):
+class MenuItem(PriceBase):
     category = ndb.KeyProperty(kind=MenuCategory)
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty(indexed=False)
@@ -423,7 +442,6 @@ class MenuItem(ndb.Model):
     kal = ndb.IntegerProperty(indexed=False)
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
-    price = ndb.IntegerProperty(default=0, indexed=False)  # в копейках
 
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
@@ -450,17 +468,13 @@ class MenuItem(ndb.Model):
         elif app_kind == DOUBLEB_APP:
             return doubleb_get_product_by_id(int(product_id))
 
-    @property
-    def float_price(self):  # в рублях
-        return float(self.price) / 100.0
-
-    def dict(self, without_restrictions=False):
+    def dict(self, venue=None, without_restrictions=False):
         dct = {
             'id': str(self.key.id()),
             'order': self.sequence_number,
             'title': self.title,
             'description': self.description,
-            'price':  float(self.price) / 100.0,  # в рублях
+            'price': self.float_price_for_venue(venue.key.id()) if venue else self.float_price,
             'kal': self.kal,
             'pic': self.picture if not self.cut_picture else self.cut_picture,
             'pic_resize': self.picture_resize_mode,
@@ -468,12 +482,14 @@ class MenuItem(ndb.Model):
             'icon': self.icon,
             'weight': self.weight,
             'volume': self.volume,
-            'single_modifiers': [SingleModifier.get(modifier.id()).dict() for modifier in self.single_modifiers],
-            'group_modifiers': [GroupModifier.get(modifier.id()).dict(self) for modifier in self.group_modifiers],
+            'single_modifiers': [SingleModifier.get(modifier.id()).dict(venue) for modifier in self.single_modifiers],
+            'group_modifiers': [GroupModifier.get(modifier.id()).dict(self, venue) for modifier in self.group_modifiers],
             'restrictions': {
                 'venues': [str(restrict.id()) for restrict in self.restrictions]
             }
         }
         if without_restrictions:
             del dct['restrictions']
+        if not venue:
+            dct['prices'] = self.venue_price_dicts
         return dct

@@ -99,7 +99,6 @@ const OrderStore = new BaseStore({
     POSTPONE_OPTIONS: ORDER_POSTPONE_OPTIONS,
 
     _knownOrders: new Map(),
-    _orderReceivedAt: new Map(),
     loadedOrders: false,
     lastSuccessfulLoadTime: null,
     wasLastLoadSuccessful: false,
@@ -107,9 +106,6 @@ const OrderStore = new BaseStore({
     _addOrder(order) {
         if (order.status == this.STATUS.NEW || order.status == this.STATUS.CONFIRMED) {
             this._knownOrders.set(order.id, order);
-            if (! this._orderReceivedAt.has(order.id)) {
-                this._orderReceivedAt.set(order.id, moment());
-            }
         } else {
             this._knownOrders.delete(order.id);
         }
@@ -132,9 +128,8 @@ const OrderStore = new BaseStore({
             return false;
         }
         let now = moment();
-        for (let order_id of this._knownOrders.keys()) {
-            let recvTime = this._orderReceivedAt.get(order_id),
-                notifTime = moment(recvTime).add(5, 'minutes');
+        for (let order of this._knownOrders.values()) {
+            let notifTime = moment(order.deliveryTime).subtract(5, 'minutes');
             if (notifTime.isBetween(this.lastSuccessfulLoadTime, now)) {
                 return true;
             }
@@ -163,7 +158,6 @@ const OrderStore = new BaseStore({
 
     _clearOrders() {
         this._knownOrders.clear();
-        this._orderReceivedAt.clear();
         this.loadedOrders = false;
         this.lastSuccessfulLoadTime = null;
         this.wasLastLoadSuccessful = false;
