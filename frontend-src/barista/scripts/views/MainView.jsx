@@ -146,7 +146,7 @@ const MainView = React.createClass({
                        title='Настройки'
                        actions={actions}
                        open={this.state.pendingAction == 'settings'}>
-            <Checkbox label="Повторное оповещение через 5 минут"
+            <Checkbox label="Повторное оповещение за 5 минут до заказа"
                       ref="additionalSoundNotification"
                       defaultChecked={ConfigStore.userSettings.additionalSoundNotification}/>
         </Dialog>;
