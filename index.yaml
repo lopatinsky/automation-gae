@@ -122,3 +122,9 @@ indexes:
   properties:
   - name: status
   - name: expiration
+
+- kind: Subscription
+  properties:
+  - name: status
+  - name: used_cups
+  - name: payment_return_time
