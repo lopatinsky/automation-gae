@@ -328,21 +328,25 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
             })
 
         self.render('/config_settings/inactive_users_notifications/edit_notification_module.html',
-                    types=types, conditions=json.dumps(CONDITIONS_MAP), module=module)
+                    types=types, conditions=json.dumps(module.conditions), module=module)
 
     def post(self):
         module_idx = self.request.get_range('module_idx')
+
         conf = config.Config.get()
         module = conf.INACTIVE_NOTIFICATION_MODULE[module_idx]
 
         conditions_num = self.request.get_range('conditions_num')
+
+
         conditions_dict = defaultdict()
-        for i in range(1, conditions_num + 1):
+        for i in range(0, conditions_num):
             value = self.request.get('value_{0}'.format(i))
             text = self.request.get('text_{0}'.format(i))
             conditions_dict[value] = text
 
         conditions = dict(conditions_dict)
+
 
         header = self.request.get('header')
 
@@ -356,6 +360,7 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
 
         needed_cashback = self.request.get_range('needed_cashback')
         needed_points_left = self.request.get_range('needed_points_left')
+
 
         module.type = client_type
         module.conditions = conditions

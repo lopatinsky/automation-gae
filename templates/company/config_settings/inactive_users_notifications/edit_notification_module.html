@@ -2,6 +2,11 @@
 <head>
 </head>
 <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<style>
+    .condition {
+        border: 2px;
+    }
+</style>
 <script>
 
     if (!String.prototype.format) {
@@ -19,21 +24,48 @@
     $(document).ready(function () {
 
         var index = $("#conditions_num").val();
-        alert(index);
+
+        var conditionsString = $("#conditions").val();
+        var conds = JSON.parse(conditionsString);
+        var conditions = $('.conditions');
+        updateConditions();
 
         $('.add_condition').click(function (e) {
-            var conditionsString = $("#conditions").val();
-            var conds = JSON.parse(conditionsString);
-            var client_type = $("#client_type").val();
+            var days = prompt("Число дней: ", "");
+            var text = prompt("Текст: ", "");
 
-            ++index;
-            $("#conditions_num").val(index);
+            conds[days] = text;
+            updateConditions();
+        });
+        function updateConditions() {
+            console.log(conds);
 
-            $('.conditions').append(
-                    "<label>{0}<input type=\"number\" name=\"value_{1}\"></label><br>".format(conds["{0}".format(client_type)], index) +
-                    "<label>Текст<input type=\"text\" name=\"text_{0}\"></label><br>".format(index)
-            )
-        })
+
+            conditions.empty();
+
+            var idx = 0;
+
+            for (var key in conds) {
+                conditions.append(
+                        "<div id=\"condition{0}\" class=\"condition\">".format(idx) +
+                        "<label>Дней без заказа" +
+                        "<input type=\"number\" name=\"value_{0}\" value=\"{1}\">".format(idx, key) +
+                        "</label><br>" +
+                        "<label>Текст:" +
+                        "<input type=\"text\" name=\"text_{0}\" value=\"{1}\"".format(idx, conds[key]) +
+                        "</label><br>" +
+                        "<button class=\"remove_condition\" value=\"{0}\" type=\"button\">Удалить</button></div><br><br>".format(key)
+                );
+                ++idx;
+            }
+        }
+        conditions.on("click", ".remove_condition", function (e) {
+            var valueToDelete = $(this).val();
+            console.log(valueToDelete);
+            console.log(conds);
+            delete conds[valueToDelete];
+            updateConditions();
+        });
     })
 </script>
 <body>
@@ -58,20 +90,9 @@
         </select>
     </label>
     <br><br>
+    <button class="add_condition" type="button">Добавить</button>
     <div class="conditions">
-        <button class="add_condition" type="button">Добавить</button>
         <br>
-        {% for condition in module.conditions.items() %}
-            <label>
-                Дней без заказа
-                <input type="number" value="{{ condition[0] }}" name="{{ 'value_{0}'.format(loop.index0) }}">
-            </label><br>
-
-            <label>
-                Текст
-                <input type="text" value="{{ condition[1] }}" name="{{ 'text_{0}'.format(loop.index0) }}">
-            </label><br>
-        {% endfor %}
     </div>
     <br>
 
