@@ -21,7 +21,7 @@
         <b>Support Emails: </b>{{ emails }}
     </p>
     <p>
-        <b>Email для ежедневных отчетов: </b>{{ report_emails }}
+        <b>Email для отчетов: </b>{{ report_emails }} ({% if report_weekly %}еженедельно{% else %}ежедневно{% endif %})
     </p>
     <p>
         <b>Цвет приложения: </b><span style="background-color: #{{ color[2:] }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>

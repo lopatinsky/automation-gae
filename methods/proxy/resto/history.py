@@ -95,17 +95,32 @@ def get_orders(client):
     return orders
 
 
+def _convert_resto_status(resto_status):
+    if resto_status in (1, 2):
+        return NEW_ORDER
+    elif resto_status == 3:
+        return READY_ORDER
+    elif resto_status == 4:
+        return CANCELED_BY_BARISTA_ORDER
+    return None
+
+
 def update_status(order):
     resto_company = RestoCompany.get()
     resto_info = get_resto_order_info(resto_company, order.key.id())
-    resto_status = resto_info['status']
-    new_status = None
-    if resto_status in (1, 2):
-        new_status = NEW_ORDER
-    elif resto_status == 3:
-        new_status = READY_ORDER
-    elif resto_status == 4:
-        new_status = CANCELED_BY_BARISTA_ORDER
+    new_status = _convert_resto_status(resto_info['status'])
     if new_status is not None and order.status != new_status:
         order.status = new_status
         order.put()
+
+
+def find_lost_order(uuid):
+    resto_company = RestoCompany.get()
+    resto_info = get_resto_order_info(resto_company, uuid)
+    if not resto_info:
+        return None
+    return {
+        'status': _convert_resto_status(resto_info['status']),
+        'resto_id': resto_info['restoId'],
+        'number': int(resto_info['number'])
+    }

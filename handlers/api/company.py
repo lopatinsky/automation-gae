@@ -1,20 +1,22 @@
 # coding=utf-8
+import logging
+
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 
 from base import ApiHandler
 from methods.cities import get_company_cities
 from methods.fuckups import fuckup_ios_delivery_types
-from models.config.config import config, Config
 from methods.versions import is_available_version, get_version
 from models import Venue, Client, STATUS_UNAVAILABLE, DeliveryZone, STATUS_AVAILABLE
+from models.config.config import config
 from models.config.menu import RemaindersModule
 from models.config.version import CURRENT_APP_ID, CURRENT_VERSION
+from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
 from models.proxy.resto import RestoCompany
 from models.proxy.unified_app import AutomationCompany
-from models.venue import DELIVERY
 from models.specials import get_channels
-from models.promo_code import PromoCode, PROMO_CODE_ACTIVE_STATUS_CHOICES
+from models.venue import DELIVERY
 
 __author__ = 'dvpermyakov'
 
@@ -46,7 +48,18 @@ class CompanyInfoHandler(ApiHandler):
     def get(self):
         zones = set()
         deliveries = {}
-        for venue in Venue.fetch_venues(Venue.active == True):
+
+        city_obj = self.request.city
+
+        if city_obj:
+            conditions = Venue.active == True, Venue.address.city == city_obj.city
+        else:
+            conditions = Venue.active == True,
+
+        logging.debug(city_obj)
+
+        for venue in Venue.fetch_venues(*conditions):
+            logging.debug(venue)
             for venue_delivery in venue.delivery_types:
                 if venue_delivery.status == STATUS_UNAVAILABLE:
                     continue
@@ -54,6 +67,8 @@ class CompanyInfoHandler(ApiHandler):
                     deliveries[venue_delivery.delivery_type] = venue_delivery.dict()
                 if venue_delivery.delivery_type == DELIVERY:
                     zones.update(venue_delivery.delivery_zones)
+
+
         deliveries = fuckup_ios_delivery_types(deliveries.values())
         cities = []
         for zone in sorted([DeliveryZone.get(zone) for zone in list(zones)], key=lambda zone: zone.sequence_number):
@@ -63,7 +78,8 @@ class CompanyInfoHandler(ApiHandler):
             cities.append(u'Другой город')
         version = get_version(self.request.headers.get('Version', 0))
         response = {
-            'promo_code_active': PromoCode.query(PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
+            'promo_code_active': PromoCode.query(
+                PromoCode.status.IN(PROMO_CODE_ACTIVE_STATUS_CHOICES)).get() is not None,
             'delivery_types': deliveries,
             'cities': cities,
             'screen_logic_type': config.SCREEN_LOGIC,

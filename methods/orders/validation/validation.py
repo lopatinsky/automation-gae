@@ -1,23 +1,23 @@
 # coding=utf-8
 import copy
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
-from methods.unique import get_temporary_user, VERSION, USER_AGENT
-from models.config.config import config
+from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
+    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
+    check_client_info, check_subscription, check_delivery_min_sum, check_availability
 from methods import empatika_wallet
 from methods.orders.promos import apply_promos
 from methods.rendering import STR_DATETIME_FORMAT
 from methods.subscription import get_subscription_menu_item
+from methods.unique import get_temporary_user, VERSION, USER_AGENT
 from models import MenuItem, SingleModifier, GroupModifier, \
     GiftMenuItem, STATUS_AVAILABLE, DeliverySlot, SharedGift
+from models.config.config import config
 from models.config.share import ShareGiftModule
 from models.config.subscription import SubscriptionModule
 from models.order import OrderPositionDetails, GiftPositionDetails, ChosenGroupModifierDetails, \
     SharedGiftPositionDetails
-from checks import check_delivery_time, check_delivery_type, check_gifts, check_modifier_consistency, \
-    check_payment, check_restrictions, check_stop_list, check_venue, check_wallet_payment, check_address, \
-    check_client_info, check_subscription, check_delivery_min_sum, check_availability
 from models.venue import DELIVERY
 
 
@@ -163,6 +163,8 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
         menu_item.chosen_group_modifiers = []
         for group_modifier in item['group_modifiers']:
             group_modifier_obj = copy.copy(GroupModifier.get(group_modifier['group_modifier_id']))
+            if not group_modifier_obj:
+                continue
             group_modifier_obj.choice = group_modifier_obj.get_choice_by_id(group_modifier['choice'])
             if group_modifier_obj.choice:
                 for i in xrange(group_modifier['quantity']):
@@ -196,7 +198,9 @@ def set_item_dicts(items, is_gift=False):
             'group_modifiers': item.chosen_group_modifiers,
             'single_modifier_keys': [modifier.key for modifier in
                                      sorted(item.chosen_single_modifiers, key=lambda modifier: modifier.key.id())],
-            'group_modifier_keys': [(modifier.key, modifier.choice.choice_id)
+            'group_modifier_keys': [(modifier.key,
+                                     modifier.choice.choice_id if modifier.choice.choice_id
+                                     else modifier.choice.choice_id_str)
                                     for modifier in sorted(item.chosen_group_modifiers,
                                                            key=lambda modifier: modifier.key.id())],
             'price': item.total_price if not is_gift else 0,
@@ -273,6 +277,8 @@ def get_delivery_text(delivery_sum, delivery_type, delivery_zone):
 
 def get_order_position_details(item_dicts):
     details = []
+    logging.debug('items_dicts: {0}'.format(item_dicts))
+
     for item_dict in item_dicts:
         details_item = OrderPositionDetails(
             item=item_dict['item'].key,
@@ -281,6 +287,7 @@ def get_order_position_details(item_dicts):
             promos=[promo.key for promo in item_dict['promos']],
             single_modifiers=[modifier.key for modifier in item_dict['single_modifiers']],
             group_modifiers=[ChosenGroupModifierDetails(group_choice_id=modifier.choice.choice_id,
+                                                        group_choice_id_str=modifier.choice.choice_id_str,
                                                         group_modifier=modifier.key)
                              for modifier in item_dict['group_modifiers']]
         )
@@ -457,7 +464,6 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
     grouped_new_order_gift_dicts.extend(grouped_shared_gift_dicts)
 
     delivery_sum = delivery_zone.price if delivery_zone else 0
-
 
     if delivery_zone and delivery_zone.free_delivery_sum \
             and total_sum >= delivery_zone.free_delivery_sum:

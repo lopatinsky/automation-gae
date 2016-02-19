@@ -27,8 +27,15 @@
             <input type="text" value="{{ emails }}" name="emails">
         </label><br>
         <label>
-            Email для ежедневных отчетов (разделяя запятыми):
+            Email для отчетов (разделяя запятыми):
             <input type="text" name="report_emails" value="{{ report_emails }}"/>
+        </label><br>
+        <label>
+            Присылать отчеты:
+            <select name="report_weekly">
+                <option value="0" {% if not report_weekly %}selected{% endif %}>Ежедневно</option>
+                <option value="1" {% if report_weekly %}selected{% endif %}>Еженедельно</option>
+            </select>
         </label><br>
         <label>
             Цвет:

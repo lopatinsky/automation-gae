@@ -102,10 +102,16 @@ class Admin(User):
         ids = ["%s.auth_id:%s" % (class_name, i) for i in self.auth_ids]
         self.unique_model.delete_multi(ids)
 
+    @property
+    def venue_entity(self):
+        if self.venue:
+            return Venue.get(self.venue.id())
+        return None
+
     def dict(self):
         result = super(Admin, self).dict()
         result.update({
-            'venue': self.venue.get().dict()
+            'venue': self.venue_entity.dict()
         })
         return result
 

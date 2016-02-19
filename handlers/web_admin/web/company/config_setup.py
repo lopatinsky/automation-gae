@@ -205,10 +205,11 @@ class BasketNotificationModuleHandler(CompanyBaseHandler):
         self.render('/config_settings/basket_notification_module_setup.html')
 
     def post(self):
-        status = self.request.get('status') is not ''
+        status = bool(self.request.get('status'))
         header = self.request.get('header')
         text = self.request.get('text')
         inactivity_duration = self.request.get_range('inactivity_duration')
+        days_since_order = self.request.get_range('days_since_order')
 
         cnf = Config.get()
 
@@ -221,6 +222,7 @@ class BasketNotificationModuleHandler(CompanyBaseHandler):
         module.header = header
         module.text = text
         module.inactivity_duration = inactivity_duration
+        module.days_since_order = days_since_order
 
         cnf.put()
         self.redirect_to('company_main')

@@ -14,8 +14,9 @@
             <th>Смена пароля(0000-по умолчанию)</th>
         </tr>
         {% for admin in admins %}
+            {% set venue = admin.venue_entity %}
             <tr>
-                <td>{% if admin.venue %}{{ admin.venue.get().title }}{% else %} Вся сеть {% endif %}</td>
+                <td>{% if venue %}{{ venue.title }}{% else %} Вся сеть {% endif %}</td>
                 <td>
                     <div>{{ admin.login }}
                         <form>

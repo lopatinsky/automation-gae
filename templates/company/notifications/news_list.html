@@ -33,6 +33,7 @@
     <a href="/company/notifications/news/add">Добавить</a>
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
+            <th>Заголовок</th>
             <th>Текст</th>
             <th>Картинка</th>
             <th>Время создания</th>
@@ -42,6 +43,7 @@
         </tr>
         {% for new in news %}
             <tr>
+                <td>{{ new.title }}</td>
                 <td>{{ new.text }}</td>
                 <td>
                     <img src="{{ new.image_url }}" height="120">

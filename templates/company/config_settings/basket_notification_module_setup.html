@@ -8,7 +8,7 @@
         <input type="checkbox" {% if config.BASKET_NOTIFICATION_MODULE.status %}checked{% endif %} name="status">
     </label><br>
     <label>
-        Титулка: <br>
+        Заголовок: <br>
         <input type="text" name="header" value="{{ config.BASKET_NOTIFICATION_MODULE.header }}">
     </label><br>
     <label>
@@ -18,6 +18,10 @@
     <label>
         Время неактивности пользователя: <br>
         <input type="number" name="inactivity_duration" value="{{ config.BASKET_NOTIFICATION_MODULE.inactivity_duration }}">
+    </label><br>
+    <label>
+        Количество дней с заказа: <br>
+        <input type="number" name="days_since_order" value="{{ config.BASKET_NOTIFICATION_MODULE.days_since_order }}"/>
     </label><br>
     <input type="submit" value="Сохранить">
 </form>
