@@ -163,31 +163,38 @@ def should_push(module):
     return module.should_push
 
 
+def apply_module(module, all_clients):
+    if not module or not module.status:
+        return
+
+    clients, texts = get_clients_and_texts_by_module_logic(module, all_clients)
+
+    for client, text in izip(clients, texts):
+
+        if should_sms(module, client):
+            deferred.defer(send_sms, [client.tel], text)
+            ClientSmsSending(client=client.key, sms_type=module.type).put()
+
+        if should_push(module):
+            push = SimplePush(text=module.text, header=module.header, full_text=text, client=client,
+                              namespace=namespace_manager.get_namespace(), should_popup=True, push_id=module.type)
+
+            deferred.defer(push.send)
+            ClientPushSending(client=client.key, type=module.type).put()
+
+
+def defer_apply_module():
+    all_clients = get_clients()
+
+    for module in config.INACTIVE_NOTIFICATION_MODULE:
+        apply_module(module, all_clients)
+
+
 class InactiveUsersNotificationHandler(RequestHandler):
-    def apply_module(self, module):
-        if not module or not module.status:
-            return
-
-        all_clients = get_clients()
-        clients, texts = get_clients_and_texts_by_module_logic(module, all_clients)
-
-        for client, text in izip(clients, texts):
-
-            if should_sms(module, client):
-                deferred.defer(send_sms, [client.tel], text)
-                ClientSmsSending(client=client.key, sms_type=module.type).put()
-
-            if should_push(module):
-                push = SimplePush(text=module.text, header=module.header, full_text=text, client=client,
-                                  namespace=namespace_manager.get_namespace(), should_popup=True, push_id=module.type)
-
-                deferred.defer(push.send)
-                ClientPushSending(client=client.key, type=module.type).put()
-
     def get(self):
         for namespace in metadata.get_namespaces():
             namespace_manager.set_namespace(namespace)
             if not config:
                 continue
-            for module in config.INACTIVE_NOTIFICATION_MODULE:
-                self.apply_module(module)
+
+            deferred.defer(defer_apply_module)
