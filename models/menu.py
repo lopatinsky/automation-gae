@@ -205,7 +205,7 @@ class GroupModifier(ndb.Model):
         else:
             return modifiers[index + 1]
 
-    def dict(self, venue=None, product=None):
+    def dict(self, product=None, venue=None):
         choices = [choice for choice in self.choices
                    if product is None or choice.choice_id not in product.group_choice_restrictions]
         if self.required and choices:
