@@ -74,22 +74,24 @@ def _handle_resto(order):
     iiko_uuid = order.extra_data.get("iiko_uuid")
     info.append(("iiko id", iiko_uuid))
 
-    search_result = find_lost_order(iiko_uuid)
-    info.append(("search result", search_result))
-    if not search_result:
-        info.append(("deleted", True))
-        order.key.delete()
-        return info
+    try:
+        search_result = find_lost_order(iiko_uuid)
+        info.append(("search result", search_result))
+        if not search_result:
+            info.append(("deleted", True))
+            order.key.delete()
+            return info
 
-    order.number = search_result['number']
-    order.status = search_result['status'] or NEW_ORDER
+        order.number = search_result['number']
+        order.status = search_result['status'] or NEW_ORDER
 
-    old_key = order.key
-    order.key = ndb.Key(Order, search_result['number'])
-    order.put()
-    old_key.delete()
-    info.append(("found", True))
-
+        old_key = order.key
+        order.key = ndb.Key(Order, search_result['number'])
+        order.put()
+        old_key.delete()
+        info.append(("found", True))
+    except Exception as e:
+        info.append(("exception", repr(e)))
     return info
 
 
