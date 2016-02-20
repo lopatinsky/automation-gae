@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 const NavItem = React.createClass({
     contextTypes: {
-        router: React.PropTypes.object
+        router: React.PropTypes.object.isRequired
     },
     _renderLabel() {
         if (this.props.label) {
