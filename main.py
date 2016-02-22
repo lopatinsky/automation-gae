@@ -275,7 +275,8 @@ app = WSGIApplication([
             PathPrefixRoute('/inactive_users_notifications', [
                 Route('/', NotificationModulesHandler, 'notification_modules_list'),
                 Route('/add', AddNotificationModuleHandler, 'add_notification_module'),
-                Route('/delete', DeleteNotificationModuleHandler, 'delete_module')
+                Route('/delete', DeleteNotificationModuleHandler, 'delete_module'),
+                Route('/edit' , EditNotificationModuleHandler, 'edit_module')
                 # Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
                 # Route('/add', AddNotifModuleHandler, 'add_notif_module'),
                 # Route('/send_notif', InactiveUsersNotificationHandler, 'send_notif'),
