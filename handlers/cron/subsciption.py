@@ -21,7 +21,7 @@ class CloseSubscriptionHandler(RequestHandler):
 
             unused = Subscription.query(Subscription.status == STATUS_AVAILABLE,
                                         Subscription.used_cups == 0,
-                                        Subscription.payment_return_time < now)
+                                        Subscription.payment_return_time < now).fetch()
             for subscription in unused:
                 subscription.revert_payment()
                 push.send_client_push(

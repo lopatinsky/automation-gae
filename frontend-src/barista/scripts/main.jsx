@@ -1,7 +1,7 @@
 import _ from './inject';
 import React from 'react';
 import ReactDOM from 'react-dom'
-import { Router, Route, IndexRoute, Redirect } from 'react-router';
+import { Router, Route, IndexRoute, Redirect, hashHistory } from 'react-router';
 import { RootView, LoginView, MainView, CurrentView, DeliveryView, ReturnsView, HistoryView, StopListView }
     from './views';
 
@@ -17,4 +17,4 @@ const routes = <Route component={RootView}>
     <Redirect from='*' to='/current' />
 </Route>;
 
-ReactDOM.render(<Router routes={routes}/>, document.getElementById("app-container"));
+ReactDOM.render(<Router routes={routes} history={hashHistory}/>, document.getElementById("app-container"));

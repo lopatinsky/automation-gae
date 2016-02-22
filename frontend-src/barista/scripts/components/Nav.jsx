@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 const NavItem = React.createClass({
     contextTypes: {
-        history: React.PropTypes.object
+        router: React.PropTypes.object.isRequired
     },
     _renderLabel() {
         if (this.props.label) {
@@ -25,7 +25,7 @@ const NavItem = React.createClass({
         return null;
     },
     render() {
-        let isActive = this.context.history.isActive(this.props.route);
+        let isActive = this.context.router.isActive(this.props.route);
         let imageUrl = `/static/barista/img/sections${isActive ? '-active' : ''}/${this.props.route}.png`;
         let style,
             linkStyle = {

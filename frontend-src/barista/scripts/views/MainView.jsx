@@ -22,9 +22,13 @@ const MainView = React.createClass({
     statics: {
         onEnter(nextState, replace) {
             if (!AuthStore.token) {
-                replace(null, '/login');
+                replace('/login');
             }
         }
+    },
+
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
     },
 
     _updateInterval: null,
@@ -73,7 +77,7 @@ const MainView = React.createClass({
     },
     _onAuthStoreChange() {
         if (!AuthStore.token) {
-            this.props.history.pushState(null, "/login");
+            this.context.router.push("/login");
         }
     },
     _onOrderStoreChange(data) {
@@ -106,10 +110,10 @@ const MainView = React.createClass({
     },
 
     _checkDeliveryType() {
-        if (!this.state.orderAheadEnabled && this.props.history.isActive("current")) {
-            this.props.history.pushState(null, "/delivery");
-        } else if (!this.state.deliveryEnabled && this.props.history.isActive("delivery")) {
-            this.props.history.pushState(null, "/current");
+        if (!this.state.orderAheadEnabled && this.context.router.isActive("current")) {
+            this.context.router.push("/delivery");
+        } else if (!this.state.deliveryEnabled && this.context.router.isActive("delivery")) {
+            this.context.router.push("/current");
         }
     },
 

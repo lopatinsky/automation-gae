@@ -14,9 +14,13 @@ const LoginView = React.createClass({
     statics: {
         onEnter(nextState, replace) {
             if (AuthStore.token) {
-                replace(null, '/current');
+                replace('/current');
             }
         }
+    },
+
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
     },
 
     loginValidators: [required('Введите логин')],
@@ -57,7 +61,7 @@ const LoginView = React.createClass({
     _onAuthStoreUpdate() {
         if (AuthStore.token) {
             setImmediate(() => {
-                this.props.history.pushState(null, "/current");
+                this.context.router.push("/current");
             });
         }
     },
