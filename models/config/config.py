@@ -38,6 +38,7 @@ from models.config.review import ReviewModule
 from models.config.basket_notification import BasketNotificationModule
 from models.config.custom_sections import CustomSectionsModule
 from models.config.platius_wl import PlatiusWhiteLabelModule
+from models.config.app_appearance import AppAppearanceIos, AppAppearanceAndroid
 
 OTHER = -1
 VENUE = 0
@@ -171,6 +172,8 @@ class Config(ndb.Model):
     REPORT_WEEKLY = ndb.BooleanProperty(default=False)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
+    APP_APPEARANCE_IOS = ndb.LocalStructuredProperty(AppAppearanceIos)
+    APP_APPEARANCE_ANDROID = ndb.LocalStructuredProperty(AppAppearanceAndroid)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:

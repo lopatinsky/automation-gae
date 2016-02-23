@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <form method="post">
+        <label>
+            Базовый цвет:
+            <input type="color" name="base_color" value="#{{ base_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет текста:
+            <input type="color" name="base_text_color" value="#{{ base_text_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет доп. текста:
+            <input type="color" name="additional_text_color" value="#{{ additional_text_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет ошибок:
+            <input type="color" name="error_color" value="#{{ error_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет top bar:
+            <input type="color" name="topbar_color" value="#{{ topbar_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет элементов в top bar:
+            <input type="color" name="topbar_text_color" value="#{{ topbar_text_color[2:] }}"/>
+        </label><br>
+        <label>
+            Цвет toolbar:
+            <input type="color" name="toolbar_color" value="#{{ toolbar_color[2:] }}"/>
+        </label><br>
+        <input type="submit">
+    </form>
+    <a href="/company/app_appearance/list">Назад</a></br>
+</body>
+</html>
