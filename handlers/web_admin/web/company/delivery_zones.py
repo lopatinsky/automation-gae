@@ -167,7 +167,8 @@ def get_mean_coordinate(geo_ribs):
 
 
 def get_json_from_js(js_text):
-    json_text = "{" + re.search(r'\"maps\":\[\{.*\}{2}\]}{2}\]\}', js_text).group()
+    json_text = "{" + re.search(r'\"maps\"\s*:\s*\[\{([\s\S]*)\}\s*\}\s*\]\s*\}', js_text).group()
+
     return json.loads(json_text)
 
 
