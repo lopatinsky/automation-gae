@@ -1,0 +1,29 @@
+<html>
+<head>
+</head>
+<body>
+{% include '/company/header.html' %}
+<form method="post">
+    <label for="status">Статус</label><br>
+    <input type="checkbox" name="status" id="status" {% if config.ORDER_MODULE.status %}checked {% endif %}>
+
+    <br><br>
+
+    <label for="enable_number_of_people"></label>
+
+    <input type="checkbox" name="enable_number_of_people" id="enable_number_of_people"
+           {% if config.ORDER_MODULE.enable_number_of_people %}checked {% endif %}>
+
+    <br><br>
+
+    <label for="enable_change">Включить "сдача с"</label>
+    <input type="checkbox" name="enable_change" id="enable_change"
+           {% if config.ORDER_MODULE.enable_change %}checked {% endif %}>
+
+    <br>
+
+    <input type="submit" value="Сохранить">
+
+</form>
+</body>
+</html>

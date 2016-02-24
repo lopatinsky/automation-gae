@@ -277,10 +277,6 @@ app = WSGIApplication([
                 Route('/add', AddNotificationModuleHandler, 'add_notification_module'),
                 Route('/delete', DeleteNotificationModuleHandler, 'delete_module'),
                 Route('/edit' , EditNotificationModuleHandler, 'edit_module')
-                # Route('/list', ListNotifModuleHandler, 'list_notif_modules'),
-                # Route('/add', AddNotifModuleHandler, 'add_notif_module'),
-                # Route('/send_notif', InactiveUsersNotificationHandler, 'send_notif'),
-                # Route('/delete_module', DeleteNotifModuleHandler, 'delete_module')
             ]),
             Route('/order_message_module', SetupOrderMessageModuleHandler, 'order_message_module'),
             Route('', ConfigMainHandler, 'config_main'),
@@ -288,7 +284,8 @@ app = WSGIApplication([
             Route('/create_branch_api_key', CreateBranchApiKeyHandler, 'create_branch_api_key'),
             Route('/basket_notification_module_setup', BasketNotificationModuleHandler,
                   'basket_notification_module_setup'),
-            Route('/config_google_analytics', GoogleAnalyticsApiKeysHandler, 'config_google_analytics')
+            Route('/config_google_analytics', GoogleAnalyticsApiKeysHandler, 'config_google_analytics'),
+            Route('/order_module_setup', OrderModuleSetupHandler, 'order_module_setup')
         ]),
 
         PathPrefixRoute('/venues', [

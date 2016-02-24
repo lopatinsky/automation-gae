@@ -8,6 +8,7 @@ from models.config.basket_notification import BasketNotificationModule
 from models.config.config import Config
 
 # from models.config.inactive_clients import NOT_TYPES_MAP, NOT_TYPES, NotificatingInactiveUsersModule
+from models.config.field import OrderModule
 from models.config.inactive_clients import NOTIFICATION_TYPES_MAP, CONDITIONS_MAP, InactiveNotificationModule, \
     WITH_CASHBACK, N_POINTS_LEFT
 from models.config.order_message import OrderMessageModule, Condition
@@ -338,7 +339,6 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
 
         conditions_num = self.request.get_range('conditions_num')
 
-
         conditions_dict = defaultdict()
         for i in range(0, conditions_num):
             value = self.request.get('value_{0}'.format(i))
@@ -346,7 +346,6 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
             conditions_dict[value] = text
 
         conditions = dict(conditions_dict)
-
 
         header = self.request.get('header')
 
@@ -360,7 +359,6 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
 
         needed_cashback = self.request.get_range('needed_cashback')
         needed_points_left = self.request.get_range('needed_points_left')
-
 
         module.type = client_type
         module.conditions = conditions
@@ -393,3 +391,31 @@ class DeleteNotificationModuleHandler(CompanyBaseHandler):
         conf.put()
 
         self.redirect_to('notification_modules_list')
+
+
+class OrderModuleSetupHandler(CompanyBaseHandler):
+    @config_rights_required
+    def get(self):
+        conf = config.Config.get()
+        if not conf.ORDER_MODULE:
+            conf.ORDER_MODULE = OrderModule()
+            conf.ORDER_MODULE.status = 0
+
+        self.render('/config_settings/order_module_setup.html')
+
+    @config_rights_required
+    def post(self):
+        status = bool(self.request.get('status'))
+        enable_number_of_people = bool(self.request.get('enable_number_of_people'))
+        enable_change = bool(self.request.get('enable_change'))
+
+        conf = config.Config.get()
+
+        conf.ORDER_MODULE.status = status
+        conf.ORDER_MODULE.enable_number_of_people = enable_number_of_people
+        conf.ORDER_MODULE.enable_change = enable_change
+
+        conf.put()
+
+        self.redirect_to('company_main')
+
