@@ -101,7 +101,6 @@ class Config(ndb.Model):
     PARSE_REST_API_KEY = ndb.StringProperty(indexed=False)  # todo: rewrite pushes, delete field
     PARSE_CLIENT_API_KEY = ndb.StringProperty(indexed=False)
 
-
     GOOGLE_ANALYTICS_API_KEY_IOS = ndb.StringProperty(indexed=False)
     GOOGLE_ANALYTICS_API_KEY_ANDROID = ndb.StringProperty(indexed=False)
 
@@ -111,6 +110,7 @@ class Config(ndb.Model):
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES, default=OTHER)
     SCREEN_LOGIC = ndb.IntegerProperty(choices=SCREEN_LOGICS, default=OTHER)
+    PICK_VENUE_AT_STARTUP = ndb.BooleanProperty(indexed=False, default=False)
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
@@ -122,8 +122,6 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
-
-    # NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
 
     INACTIVE_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(InactiveNotificationModule, repeated=True)
 

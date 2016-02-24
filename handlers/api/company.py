@@ -48,6 +48,10 @@ class AppConfigurationHandler(ApiHandler):
 
             'keys': {
                 'branch': config.BRANCH_API_KEY,
+                'ga': {
+                    'ios': config.GOOGLE_ANALYTICS_API_KEY_IOS,
+                    'android': config.GOOGLE_ANALYTICS_API_KEY_ANDROID
+                },
                 'parse': {
                     'app_key': config.PARSE_APP_API_KEY,
                     'client_key': config.PARSE_CLIENT_API_KEY,
@@ -115,6 +119,8 @@ class CompanyInfoHandler(ApiHandler):
             },
             'cancel_order': RestoCompany.get() is not None,
             'back_end': config.APP_KIND,
+
+            'pick_venue_at_startup': config.PICK_VENUE_AT_STARTUP,
         }
         response.update(config.get_company_dict())
         self.render_json(response)
