@@ -30,10 +30,7 @@ const OrderScreen = React.createClass({
                 OrderStore.setSlotId(slots[0].id);
             }
         }
-        if (OrderStore.getOrderError() != null) {
-            this.refs.orderSnackBar.show();
-        }
-        this.setState({});
+        this.setState({error: OrderStore.getOrderError()});
     },
 
     _getServerInfo() {
@@ -119,7 +116,7 @@ const OrderScreen = React.createClass({
     },
 
     _onMenuTap() {
-        this.context.router.push('menu');
+        this.context.router.push('/');
     },
 
     _onClientInfoTap() {
@@ -352,10 +349,10 @@ const OrderScreen = React.createClass({
             <Snackbar
                 ref='orderSnackBar'
                 style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
-                message={OrderStore.getOrderError()}
+                message={this.state.error}
                 autoHideDuration={5000}
-                onShow={ServerRequests.checkOrder}
-                onDismiss={() => {OrderStore.setOrderError(null)}}/>
+                open={!! this.state.error}
+                onRequestClose={() => {this.setState({error: null}); OrderStore.setOrderError(null)}}/>
         </div>;
     }
 });

@@ -3,6 +3,12 @@ import { Dialog, List, ListItem, ListDivider } from 'material-ui';
 import { PaymentsStore } from '../../stores';
 
 const PaymentTypesDialog = React.createClass({
+    getInitialState() {
+        return {
+            open: false
+        };
+    },
+
     _getPaymentTypes() {
         var payment_types = PaymentsStore.getPaymentTypes();
         return payment_types.map(payment_type => {
@@ -18,18 +24,23 @@ const PaymentTypesDialog = React.createClass({
     },
 
     show() {
-        this.refs.paymentTypesDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(payment_type) {
         PaymentsStore.setChosenPaymentType(payment_type);
-        this.refs.paymentTypesDialog.dismiss();
+        this.setState({
+            open: false
+        });
     },
 
     render() {
         return (
             <Dialog
                 bodyStyle={{padding: '12px'}}
+                open={this.state.open}
                 ref="paymentTypesDialog">
                 <List>
                     {this._getPaymentTypes()}

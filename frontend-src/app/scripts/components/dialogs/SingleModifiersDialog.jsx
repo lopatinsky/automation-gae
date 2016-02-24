@@ -21,26 +21,32 @@ const SingleModifiersDialog = React.createClass({
 
     getInitialState: function() {
         return {
+            open: false,
             modifiers: []
         }
     },
 
     show() {
         this._refresh();
-        this.refs.modifierDialog.show();
+        this.setState({
+            open: true
+        })
     },
 
     dismiss() {
-         this.refs.modifierDialog.dismiss();
+        this.setState({
+            open: false
+        })
     },
 
     render() {
         return (
             <Dialog
-                autoScrollBodyContent="true"
+                autoScrollBodyContent={true}
                 contentStyle={{width: '90%'}}
                 ref="modifierDialog"
                 title='Добавки'
+                open={this.state.open}
                 actions={[{text: 'Ок', onTouchTap: this.dismiss}]}>
                 {this._getModifiers()}
             </Dialog>

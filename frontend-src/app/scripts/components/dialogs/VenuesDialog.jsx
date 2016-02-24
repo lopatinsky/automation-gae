@@ -4,6 +4,12 @@ import { List, ListItem, ListDivider } from 'material-ui';
 import { VenuesStore } from '../../stores';
 
 const VenuesDialog = React.createClass({
+    getInitialState() {
+        return {
+            open: false
+        };
+    },
+
     _getVenues() {
         var venues = VenuesStore.getVenues();
         return venues.map(venue => {
@@ -24,12 +30,16 @@ const VenuesDialog = React.createClass({
     },
 
     show() {
-        this.refs.venuesDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(venue) {
         VenuesStore.setChosenVenue(venue);
-        this.refs.venuesDialog.dismiss();
+        this.setState({
+            open: false
+        });
     },
 
     render() {
@@ -38,6 +48,7 @@ const VenuesDialog = React.createClass({
                 contentStyle={{width: '90%'}}
                 bodyStyle={{padding: '12px', overflowY: 'auto', maxHeight: '487px'}}
                 autoScrollBodyContent={true}
+                open={this.state.open}
                 ref="venuesDialog">
                 <List>
                     {this._getVenues()}

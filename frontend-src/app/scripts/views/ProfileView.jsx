@@ -9,7 +9,7 @@ const ProfileView = React.createClass({
 
     toolbarLeftTap() {
         this.refs.profileScreen.saveProfile();
-        this.router.goBack();
+        this.context.router.goBack();
     },
 
     render() {

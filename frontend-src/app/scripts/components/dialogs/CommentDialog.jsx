@@ -15,27 +15,35 @@ const CommentDialog = React.createClass({
     },
 
     show() {
-        this.refs.commentDialog.show();
         this.setState({
+            open: true,
             comment: OrderStore.getComment()
         });
     },
 
     dismiss() {
-        this.refs.commentDialog.dismiss();
+        this.setState({
+            open: false
+        })
     },
 
     getInitialState() {
         return {
+            open: false,
             comment: OrderStore.getComment()
         }
     },
 
     render() {
+        const actions = [
+            <FlatButton label="OK" key="ok" secondary={true} onTouchTap={this._submit}/>,
+            <FlatButton label="Отмена" key="cancel" onTouchTap={this.dismiss}/>
+        ];
         return (
             <Dialog
                 bodyStyle={{padding: '12px 24px'}}
-                actions={[{text: 'Ок', onTouchTap: this._submit}, {text: 'Отмена', onTouchTap: this.dismiss}]}
+                actions={actions}
+                open={this.state.open}
                 ref="commentDialog">
                 <TextField
                     style={{width: '100%'}}

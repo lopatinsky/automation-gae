@@ -3,6 +3,12 @@ import { Dialog, List, ListItem, ListDivider } from 'material-ui';
 import { OrderStore, VenuesStore } from '../../stores';
 
 const TimeSlotsDialog = React.createClass({
+    getInitialState() {
+        return {
+            open: false
+        };
+    },
+
     _getSlots() {
         var delivery = VenuesStore.getChosenDelivery();
         if (!delivery) {
@@ -21,19 +27,24 @@ const TimeSlotsDialog = React.createClass({
     },
 
     show() {
-        this.refs.timeSlotsDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(slot) {
         OrderStore.setSlotId(slot.id);
-        this.refs.timeSlotsDialog.dismiss();
+        this.setState({
+            open: false
+        })
     },
 
     render() {
         return (
             <Dialog
                 bodyStyle={{padding: '12px'}}
-                autoScrollBodyContent="true"
+                autoScrollBodyContent={true}
+                open={this.state.open}
                 ref="timeSlotsDialog">
                 <List>
                     {this._getSlots()}

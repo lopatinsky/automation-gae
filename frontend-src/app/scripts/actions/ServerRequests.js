@@ -2,20 +2,50 @@ import request from 'superagent';
 import AppDispatcher from "./../AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from '../stores';
 
-const base_url = '';
+const BASE_URL = 'http://chikarabar.m-test.doubleb-automation-production.appspot.com';
+const base_url = BASE_URL;
+
+function doRequest(id, method, url) {
+    const req = request(method, BASE_URL + url);
+    const _end = req.end.bind(req);
+    req.end = function(makeData) {
+        AppDispatcher.dispatch({
+            actionType: ServerRequests.AJAX_SENDING,
+            data: { request: id }
+        });
+        _end((err, res) => {
+            if (err) {
+                AppDispatcher.dispatch({
+                    actionType: ServerRequests.AJAX_FAILURE,
+                    data: {
+                        request: id,
+                        err
+                    }
+                })
+            } else {
+                AppDispatcher.dispatch({
+                    actionType: ServerRequests.AJAX_SUCCESS,
+                    data: Object.assign({ request: id }, makeData(res))
+                })
+            }
+        });
+    };
+    return req;
+}
+doRequest.get = function get(id, url) {
+    return doRequest(id, 'GET', url);
+};
+doRequest.post = function post(id, url) {
+    return doRequest(id, 'POST', url);
+};
 
 const ServerRequests = {
-    INIT: "INIT",
-    UPDATE: "UPDATE",
-    ERROR: "ERROR",
-    CANCEL: "CANCEL",
     AJAX_SENDING: "AJAX_SENDING",
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
 
     sendClientInfo() {
-        request
-            .post(base_url + '/api/client')
+        doRequest.post('client', '/api/client')
             .type('form')
             .send({
                 client_id: ClientStore.getClientId(),
@@ -23,106 +53,27 @@ const ServerRequests = {
                 client_phone: ClientStore.getPhone(),
                 client_email: ClientStore.getEmail()
             })
-            .end((err, res) => {});
+            .end(res => ({}));
     },
 
     _loadMenu() {
-        request
-            .get(base_url + '/api/menu')
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "menu",
-                            menu: res.body.menu
-                        }
-                    })
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "menu"
-                        }
-                    })
-                }
-            });
+        doRequest.get('menu', '/api/menu')
+            .end(res => ({menu: res.body.menu}));
     },
 
     _loadVenues() {
-        request
-            .get(base_url + '/api/venues')
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "venues",
-                            venues: res.body.venues
-                        }
-                    })
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "venues"
-                        }
-                    })
-                }
-            });
+        doRequest.get('venues', '/api/venues')
+            .end(res => ({venues: res.body.venues}));
     },
 
     _loadPaymentTypes() {
-        request
-            .get(base_url + '/api/payment/payment_types')
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "payment_types",
-                            payment_types: res.body.payment_types
-                        }
-                    })
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "payment_types"
-                        }
-                    });
-                }
-            });
+        doRequest.get('payment_types', '/api/payment/payment_types')
+            .end(res => ({payment_types: res.body.payment_types}));
     },
 
     _loadCompanyInfo() {
-        request
-            .get(base_url + '/api/company/info')
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "address",
-                            cities: res.body.cities
-                        }
-                    });
-                    AppDispatcher.dispatch({
-                        actionType: this.INIT,
-                        data: {
-                            request: "company",
-                            info: res.body
-                        }
-                    });
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "address"
-                        }
-                    })
-                }
-            });
+        doRequest.get('company', '/api/company/info')
+            .end(res => ({info: res.body}));
     },
 
     _registerClient() {
@@ -296,29 +247,11 @@ const ServerRequests = {
     },
 
     loadPromos() {
-        request
-            .get(base_url + '/api/promo/list')
+        doRequest.get('promos', '/api/promo/list')
             .query({
                 client_id: ClientStore.getClientId()
             })
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "promos",
-                            promos: res.body.promos
-                        }
-                    });
-                } else {
-                     AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "promos"
-                        }
-                     });
-                }
-            });
+            .end(res => ({promos: res.body.promos}));
     }
 
 };

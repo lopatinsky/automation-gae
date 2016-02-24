@@ -12,6 +12,7 @@ const ModifierDialog = React.createClass({
 
     getInitialState: function() {
         return {
+            open: false,
             modifier: {
                 title: 'Не загружено'
             }
@@ -27,18 +28,23 @@ const ModifierDialog = React.createClass({
     },
 
     show() {
-        this.refs.modifierDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss() {
-         this.refs.modifierDialog.dismiss();
+        this.setState({
+            open: false
+        });
     },
 
     render() {
         return (
             <Dialog
-                autoScrollBodyContent="true"
+                autoScrollBodyContent={true}
                 ref="modifierDialog"
+                open={this.state.open}
                 title={this.state.modifier.title}>
                 <ChoicesFragment dialog={this}/>
             </Dialog>
