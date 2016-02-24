@@ -1,14 +1,15 @@
 import React from 'react';
 import { AppBar, IconButton, FlatButton, Icons, FontIcon } from 'material-ui';
-import Router from 'react-router';
-import { Navigation } from 'react-router';
 import { OrderStore, MenuStore } from '../stores';
 import Colors from 'material-ui/lib/styles/colors';
 
 const Toolbar = React.createClass({
-    ORDER_BUTTON: 'order',
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+        location: React.PropTypes.object.isRequired
+    },
 
-    mixins: [Navigation, Router.State],
+    ORDER_BUTTON: 'order',
 
     _refresh() {
         this.setState({});
@@ -20,7 +21,7 @@ const Toolbar = React.createClass({
 
     rightTap() {
         if (this.props.right == this.ORDER_BUTTON) {
-            this.transitionTo('order');
+            this.context.router.push('order');
         }
     },
 
@@ -56,7 +57,7 @@ const Toolbar = React.createClass({
         }
         var leftElement;
         var nestedCategory = false;
-        if (this.getPathname() == '/' && MenuStore.canUndoCategories()) {
+        if (this.context.location.pathname == '/' && MenuStore.canUndoCategories()) {
             nestedCategory = true;
         }
         if (this.props.back == true || nestedCategory) {

@@ -1,24 +1,21 @@
+import _ from './inject';
 import React from 'react';
-import Router, { Route, DefaultRoute } from 'react-router';
+import ReactDOM from 'react-dom';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import { AppView, MenuView, MenuItemView, OrderView, VenuesView, HistoryView, AddressView, PromosView, HistoryOrderView, SettingsView, ProfileView }
     from './views';
-import injectTapEventPlugin from "react-tap-event-plugin";
 
-injectTapEventPlugin();
-
-const routes = <Route path='/' handler={AppView}>
-    <DefaultRoute name='menu' handler={MenuView}/>
-    <Route path='/item/:category_id/:item_id/' name='menu_item' handler={MenuItemView}/>
-    <Route path='/order' name='order' handler={OrderView}/>
-    <Route path='/venues' name='venues' handler={VenuesView}/>
-    <Route path='/history' name='history' handler={HistoryView}/>
-    <Route path='/address' name='address' handler={AddressView}/>
-    <Route path='/profile/:settings?' name='profile' handler={ProfileView}/>
-    <Route path='/promos' name='promos' handler={PromosView}/>
-    <Route path='/order/:order_id' name='historyOrder' handler={HistoryOrderView}/>
-    <Route path='/settings' name='settings' handler={SettingsView}/>
+const routes = <Route path='/' component={AppView}>
+    <IndexRoute name='menu' component={MenuView}/>
+    <Route path='/item/:category_id/:item_id/' name='menu_item' component={MenuItemView}/>
+    <Route path='/order' name='order' component={OrderView}/>
+    <Route path='/venues' name='venues' component={VenuesView}/>
+    <Route path='/history' name='history' component={HistoryView}/>
+    <Route path='/address' name='address' component={AddressView}/>
+    <Route path='/profile/:settings?' name='profile' component={ProfileView}/>
+    <Route path='/promos' name='promos' component={PromosView}/>
+    <Route path='/order/:order_id' name='historyOrder' component={HistoryOrderView}/>
+    <Route path='/settings' name='settings' component={SettingsView}/>
 </Route>;
 
-Router.run(routes, (Handler) => {
-    React.render(<Handler/>, document.body);
-});
+ReactDOM.render(<Router routes={routes} history={hashHistory}/>, document.getElementById("app-container"));

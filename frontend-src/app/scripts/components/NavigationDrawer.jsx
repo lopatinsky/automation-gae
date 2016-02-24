@@ -1,7 +1,5 @@
 import React from 'react';
-import { LeftNav, FontIcon } from 'material-ui';
-import { Navigation } from 'react-router';
-import Router from 'react-router';
+import { LeftNav, FontIcon, MenuItem } from 'material-ui';
 import settings from '../settings';
 import Colors from 'material-ui/lib/styles/colors';
 
@@ -15,58 +13,39 @@ var INDEXES = {
 };
 
 const NavigationDrawer = React.createClass({
-    mixins: [Navigation, Router.State],
-
-    _selectMenuItem(e, selectedIndex, menuItem) {
-        this.transitionTo(menuItem.route);
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+        location: React.PropTypes.object.isRequired
     },
 
     toggle() {
         this.setState({
-            index: INDEXES[this.getPathname()]
+            index: INDEXES[this.context.location.pathname],
+            open: ! this.state.open
         });
-        this.refs.leftNav.toggle();
     },
 
-    _getItem(title, icon_name, index) {
-        return <div style={{display: 'table'}}>
-            <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '20px'}}
-                      color={index == this.state.index ? settings.primaryColor : Colors.grey500}
-                      className="material-icons">
-                {icon_name}
-            </FontIcon>
-            <div style={{display: 'table-cell', paddingLeft: '12px'}}>
-                {title}
-            </div>
-        </div>;
+    _getItem(title, route, icon_name, index) {
+        let icon = <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '20px'}}
+                             color={index == this.state.index ? settings.primaryColor : Colors.grey500}
+                             className="material-icons">
+            {icon_name}
+        </FontIcon>;
+        return <MenuItem key={index}
+                         leftIcon={icon}
+                         onTouchTap={() => this.context.router.push(route)}>
+            {title}
+        </MenuItem>;
     },
 
     _leftNavItems() {
-        return [{
-                index: 0,
-                route: 'menu',
-                text: this._getItem('Меню', 'restaurant_menu', 0)
-            }, {
-                index: 1,
-                route: 'order',
-                text: this._getItem('Заказ', 'shopping_basket', 1)
-            }, {
-                index: 2,
-                route: 'venues',
-                text: this._getItem('Адреса', 'place', 2)
-            }, {
-                index: 3,
-                route: 'history',
-                text: this._getItem('История', 'history', 3)
-            }, {
-                index: 4,
-                route: 'promos',
-                text: this._getItem('Акции', 'loyalty', 4)
-            }, {
-                index: 5,
-                route: 'settings',
-                text: this._getItem('Настройки', 'settings', 5)
-            }
+        return [
+            this._getItem('Меню', '/', 'restaurant_menu', 0),
+            this._getItem('Заказ', '/order', 'shopping_basket', 1),
+            this._getItem('Адреса', '/venues', 'place', 2),
+            this._getItem('История', '/history', 'history', 3),
+            this._getItem('Акции', '/promos', 'loyalty', 4),
+            this._getItem('Настройки', '/settings', 'settings', 5)
         ];
     },
 
@@ -77,13 +56,12 @@ const NavigationDrawer = React.createClass({
     },
 
     render() {
-        return <LeftNav
-            disableSwipeToOpen={true}
-            docked={false}
-            selectedIndex={this.state.index}
-            ref="leftNav"
-            menuItems={this._leftNavItems()}
-            onChange={this._selectMenuItem}/>;
+        return <LeftNav open={this.state.open}
+                        disableSwipeToOpen={true}
+                        docked={false}
+                        ref="leftNav">
+            {this._leftNavItems()}
+        </LeftNav>;
     }
 });
 export default NavigationDrawer;

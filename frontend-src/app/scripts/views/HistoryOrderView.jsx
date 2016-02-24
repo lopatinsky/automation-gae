@@ -2,11 +2,12 @@ import React from 'react';
 import { HistoryStore } from '../stores';
 import { Toolbar, NavigationDrawer } from '../components';
 import { HistoryOrderScreen } from '../components/screens';
-import { Navigation } from 'react-router';
 import { ServerRequests } from '../actions';
 
 const HistoryOrderView = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     _refresh() {
         this.setState({});
@@ -23,7 +24,7 @@ const HistoryOrderView = React.createClass({
     },
 
     toolbarLeftTap() {
-        this.transitionTo('history');
+        this.context.router.push('history');
     },
 
     render() {

@@ -2,19 +2,20 @@ import React from 'react';
 import { Toolbar } from '../components';
 import { MenuItemScreen } from '../components/screens';
 import { MenuStore, MenuItemStore } from '../stores';
-import { Navigation } from 'react-router';
 
 const MenuItemView = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     toolbarLeftTap() {
-        this.transitionTo('menu');
+        this.context.router.goBack();
     },
 
     componentDidMount() {
         var item = MenuStore.getItem(this.props.params.category_id, this.props.params.item_id);
         if (item == null) {
-            this.transitionTo('menu');
+            this.context.router.goBack();
         }
     },
 

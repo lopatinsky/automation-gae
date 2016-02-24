@@ -1,18 +1,22 @@
 import React from 'react';
 import { Card, CardText, RaisedButton, CardMedia, FontIcon } from 'material-ui';
 import { OrderStore } from '../../stores';
-import { Navigation } from 'react-router';
 import { AppActions } from '../../actions';
 import Colors from 'material-ui/lib/styles/colors';
 
 const MenuItem = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+    },
 
     _onMenuItemTap() {
         AppActions.setMenuItem(this.props.item);
-        this.transitionTo('menu_item', {
-            category_id: this.props.category.info.category_id,
-            item_id: this.props.item.id
+        this.context.router.push({
+            pathname: 'menu_item',
+            query: {
+                category_id: this.props.category.info.category_id,
+                item_id: this.props.item.id
+            }
         });
     },
 

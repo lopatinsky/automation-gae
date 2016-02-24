@@ -5,7 +5,6 @@ import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
 import MenuItemStore from './MenuItemStore';
 import AddressStore from './AddressStore';
-import assign from 'object-assign';
 
 const OrderStore = new BaseStore({
     orderId: null,
@@ -216,23 +215,15 @@ const OrderStore = new BaseStore({
             comment: ''
         };
         if (delivery.id == 2) {
-            assign(dict, {
-                delivery_sum: this.getDeliverySum(),
-                address: AddressStore.getAddressDict()
-            });
+            dict.delivery_sum = this.getDeliverySum();
+            dict.address = AddressStore.getAddressDict();
         } else {
-            assign(dict, {
-                venue_id: VenuesStore.getChosenVenue().id
-            });
+            dict.venue_id = VenuesStore.getChosenVenue().id;
         }
         if (delivery.slots.length > 0) {
-            assign(dict, {
-                delivery_slot_id: this.getSlotId()
-            });
+            dict.delivery_slot_id = this.getSlotId();
         } else {
-            assign(dict, {
-                time_picker_value: this.getFullTimeStr()
-            });
+            dict.time_picker_value = this.getFullTimeStr();
         }
         return dict;
     },
@@ -250,22 +241,14 @@ const OrderStore = new BaseStore({
             items: JSON.stringify(this.getItemsDict())
         };
         if (delivery.id == 2) {
-            assign(dict, {
-                address: JSON.stringify(AddressStore.getAddressDict())
-            });
+            dict.address = JSON.stringify(AddressStore.getAddressDict());
         } else {
-            assign(dict, {
-                venue_id: VenuesStore.getChosenVenue().id
-            });
+            dict.venue_id = VenuesStore.getChosenVenue().id;
         }
         if (delivery.slots.length > 0) {
-            assign(dict, {
-                delivery_slot_id: this.getSlotId()
-            });
+            dict.delivery_slot_id = this.getSlotId();
         } else {
-            assign(dict, {
-                time_picker_value: this.getFullTimeStr()
-            });
+            dict.time_picker_value = this.getFullTimeStr();
         }
         return dict;
     },

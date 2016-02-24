@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card, CardText, FontIcon } from 'material-ui';
 import { HistoryStore, VenuesStore } from '../../stores';
-import { Navigation } from 'react-router';
 import { ServerRequests } from '../../actions';
 import { LoadingDialog } from '../dialogs'
 import settings from '../../settings';
 
 const HistoryScreen = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     _refresh() {
         if (HistoryStore.isLoading() && !HistoryStore.isOrderLoaded()) {
@@ -19,8 +20,11 @@ const HistoryScreen = React.createClass({
     },
 
     _onOrderTap(order) {
-        this.transitionTo('historyOrder', {
-            order_id: order.order_id
+        this.context.router.push({
+            pathname: 'historyOrder',
+            query: {
+                order_id: order.order_id
+            }
         });
     },
 

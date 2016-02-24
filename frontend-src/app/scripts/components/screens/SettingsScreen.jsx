@@ -1,16 +1,15 @@
 import React from 'react';
-import { Navigation } from 'react-router';
 import { ClientStore, CompanyStore } from '../../stores';
 import { List, ListItem, ListDivider, FontIcon } from 'material-ui';
 import settings from '../../settings';
 
 const SettingsScreen = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     _onClientInfoTap() {
-        this.transitionTo('profile', {
-            settings: true
-        });
+        this.context.router.push({pathname: 'profile', query: { settings: true }});
     },
 
     _onFeedback() {

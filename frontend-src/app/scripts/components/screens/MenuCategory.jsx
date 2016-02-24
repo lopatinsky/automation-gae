@@ -1,11 +1,8 @@
 import React from 'react';
 import { Card, CardText, FlatButton, CardMedia } from 'material-ui';
 import { MenuStore } from '../../stores';
-import { Navigation } from 'react-router';
 
 const MenuCategory = React.createClass({
-    mixins: [Navigation],
-
     _onMenuCategoryTap() {
         MenuStore.nextCategories(this.props.categories);
         MenuStore.setSelected(this.props.category.info.category_id);

@@ -1,5 +1,4 @@
 import React from 'react';
-import { RouteHandler } from 'react-router';
 import mui from 'material-ui';
 import { LoadingDialog } from '../components/dialogs'
 import theme from '../theme';
@@ -8,11 +7,13 @@ import { MenuStore } from '../stores';
 
 const AppView = React.createClass({
     childContextTypes: {
+        location: React.PropTypes.object,
         muiTheme: React.PropTypes.object
     },
 
     getChildContext() {
         return {
+            location: this.props.location,
             muiTheme: theme
         };
     },
@@ -40,7 +41,7 @@ const AppView = React.createClass({
 
     render() {
         return <div>
-            <RouteHandler/>
+            {this.props.children}
             <LoadingDialog
                 ref='processingDialog'
                 title='Загрузка'/>

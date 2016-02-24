@@ -1,6 +1,5 @@
 import BaseStore from './BaseStore';
 import { ServerRequests } from '../actions';
-import assign from 'object-assign';
 
 const PaymentsStore = new BaseStore({
     payment_types: [],
@@ -39,9 +38,7 @@ const PaymentsStore = new BaseStore({
         var paymentType = this.getChosenPaymentType();
         var dict = {};
         if (paymentType != null) {
-            assign(dict, {
-                type_id: paymentType.id
-            });
+            dict.type_id = paymentType.id;
         }
         return dict;
     }

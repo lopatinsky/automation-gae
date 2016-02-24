@@ -1,12 +1,10 @@
 import React from 'react';
 import { Tabs, Tab, RefreshIndicator, DropDownMenu, Card, Paper } from 'material-ui';
-import { Navigation } from 'react-router';
 import { MenuStore } from '../../stores';
 import MenuItem from './MenuItem';
 import MenuCategory from './MenuCategory';
 
 const MenuScreen = React.createClass({
-    mixins: [Navigation],
     value: null,
 
     _getItems(category) {
@@ -32,7 +30,7 @@ const MenuScreen = React.createClass({
     _getCategoryList() {
         var menuCategories = MenuStore.getCategories();
         var categories = menuCategories.map((category) => {
-           return <MenuCategory category={category} categories={[category]} />;
+           return <MenuCategory key={category.info.category_id} category={category} categories={[category]} />;
         });
         return <div style={{paddingTop: '76px'}}>
             {categories}

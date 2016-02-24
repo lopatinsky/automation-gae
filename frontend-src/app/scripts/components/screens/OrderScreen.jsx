@@ -2,16 +2,17 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
 import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
-import { Navigation } from 'react-router';
 import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider, FontIcon }
     from 'material-ui';
-import TimePickerDialog from '../../../../../node_modules/material-ui/lib/time-picker/time-picker-dialog';
-import DatePickerDialog from '../../../../../node_modules/material-ui/lib/date-picker/date-picker-dialog';
-import { ServerRequests } from '../../actions/';
+import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
+import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
+import { ServerRequests } from '../../actions';
 import settings from '../../settings';
 
 const OrderScreen = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     _order() {
         ServerRequests.order();
@@ -20,9 +21,7 @@ const OrderScreen = React.createClass({
     _refresh() {
         var orderId = OrderStore.getOrderId();
         if (orderId != null) {
-            this.transitionTo('historyOrder', {
-                order_id: orderId
-            });
+            this.context.router.push({pathname: 'historyOrder', query: {order_id: orderId}});
         }
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery) {
@@ -120,11 +119,11 @@ const OrderScreen = React.createClass({
     },
 
     _onMenuTap() {
-        this.transitionTo('menu');
+        this.context.router.push('menu');
     },
 
     _onClientInfoTap() {
-        this.transitionTo('profile');
+        this.context.router.push('profile');
     },
 
     _onPaymentTypeTap() {
@@ -140,7 +139,7 @@ const OrderScreen = React.createClass({
     },
 
     _onAddressTap() {
-        this.transitionTo('address');
+        this.context.router.push('address');
     },
 
     _onDeliveryTap(delivery) {
@@ -354,7 +353,7 @@ const OrderScreen = React.createClass({
                 ref='orderSnackBar'
                 style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
                 message={OrderStore.getOrderError()}
-                autoHideDuration='5000'
+                autoHideDuration={5000}
                 onShow={ServerRequests.checkOrder}
                 onDismiss={() => {OrderStore.setOrderError(null)}}/>
         </div>;
