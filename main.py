@@ -340,6 +340,14 @@ app = WSGIApplication([
             Route('/about', company_admin.AboutCompanyHandler),
         ]),
 
+        PathPrefixRoute('/app_appearance', [
+            PathPrefixRoute('/appearance', [
+                Route('/ios', company_admin.SetAppIosAppearanceHandler),
+                Route('/android', company_admin.SetAppAndroidAppearanceHandler),
+            ]),
+            Route('/list', company_admin.MainAppAppearanceHandler),
+        ]),
+
         PathPrefixRoute('/excel', [
             Route('/menu', company_excel.ParseMenuHandler),
         ]),

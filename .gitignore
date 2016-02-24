@@ -6,3 +6,4 @@
 *.pyc
 node_modules/
 *.map
+ivan_helper.py

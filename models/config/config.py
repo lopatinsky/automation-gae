@@ -38,6 +38,7 @@ from models.config.review import ReviewModule
 from models.config.basket_notification import BasketNotificationModule
 from models.config.custom_sections import CustomSectionsModule
 from models.config.platius_wl import PlatiusWhiteLabelModule
+from models.config.app_appearance import AppAppearanceIos, AppAppearanceAndroid
 
 OTHER = -1
 VENUE = 0
@@ -100,7 +101,6 @@ class Config(ndb.Model):
     PARSE_REST_API_KEY = ndb.StringProperty(indexed=False)  # todo: rewrite pushes, delete field
     PARSE_CLIENT_API_KEY = ndb.StringProperty(indexed=False)
 
-
     GOOGLE_ANALYTICS_API_KEY_IOS = ndb.StringProperty(indexed=False)
     GOOGLE_ANALYTICS_API_KEY_ANDROID = ndb.StringProperty(indexed=False)
 
@@ -110,6 +110,7 @@ class Config(ndb.Model):
 
     PLACE_TYPE = ndb.IntegerProperty(choices=PLACE_TYPES, default=OTHER)
     SCREEN_LOGIC = ndb.IntegerProperty(choices=SCREEN_LOGICS, default=OTHER)
+    PICK_VENUE_AT_STARTUP = ndb.BooleanProperty(indexed=False, default=False)
 
     WALLET_API_KEY = ndb.StringProperty(indexed=False)
     WALLET_MAX_PERCENT = ndb.IntegerProperty(default=100)
@@ -121,8 +122,6 @@ class Config(ndb.Model):
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
-
-    # NOTIFICATING_INACTIVE_USERS_MODULE = ndb.LocalStructuredProperty(NotificatingInactiveUsersModule, repeated=True)
 
     INACTIVE_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(InactiveNotificationModule, repeated=True)
 
@@ -171,6 +170,8 @@ class Config(ndb.Model):
     REPORT_WEEKLY = ndb.BooleanProperty(default=False)
 
     ACTION_COLOR = ndb.StringProperty(indexed=False, default='FF000000')
+    APP_APPEARANCE_IOS = ndb.LocalStructuredProperty(AppAppearanceIos)
+    APP_APPEARANCE_ANDROID = ndb.LocalStructuredProperty(AppAppearanceAndroid)
 
     def get_place_str(self):
         if self.PLACE_TYPE == VENUE:
@@ -179,6 +180,20 @@ class Config(ndb.Model):
             return u'Бар'
         else:
             return u'Заведение'
+
+    @property
+    def GET_APP_APPEARANCE_IOS(self):
+        if not self.APP_APPEARANCE_IOS:
+            self.APP_APPEARANCE_IOS = AppAppearanceIos()
+            config.put()
+        return self.APP_APPEARANCE_IOS
+
+    @property
+    def GET_APP_APPEARANCE_ANDROID(self):
+        if not self.APP_APPEARANCE_ANDROID:
+            self.APP_APPEARANCE_ANDROID = AppAppearanceAndroid()
+            config.put()
+        return self.APP_APPEARANCE_ANDROID
 
     @property
     def SHARE_GIFT_ENABLED(self):
