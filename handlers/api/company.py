@@ -23,6 +23,9 @@ __author__ = 'dvpermyakov'
 
 class AppConfigurationHandler(ApiHandler):
     def get(self):
+        if self.request.init_namespace:  # we want app config, not company config
+            namespace_manager.set_namespace(self.request.init_namespace)
+
         has_cities = bool(get_company_cities())
         has_companies = AutomationCompany.query().get(keys_only=True) is not None
 
