@@ -37,6 +37,15 @@ class AppConfigurationHandler(ApiHandler):
                 'main': config.ACTION_COLOR,
             },
 
+            'appearance': {
+                'ios': {
+                    'color': config.APP_APPEARANCE_IOS.dict()
+                },
+                'android': {
+                    'color': config.APP_APPEARANCE_ANDROID.dict()
+                }
+            },
+
             'keys': {
                 'branch': config.BRANCH_API_KEY,
                 'parse': {

@@ -38,6 +38,10 @@
     <a href="/company/docs/about">О компании</a><br>
 {% endif %}
 
+{% if user.has_rights((user.RIGHTS_BIT_COMPANY_INFO,)) %}
+    <a href="/company/app_appearance/list">Настройки клиентских приложений</a><br>
+{% endif %}
+
 {% if user.has_rights((user.RIGHTS_BIT_LEGAL,)) %}
     <a href="/company/docs/legal/list">Список юр. лиц</a><br>
 {% endif %}
