@@ -184,6 +184,20 @@ class Config(ndb.Model):
             return u'Заведение'
 
     @property
+    def GET_APP_APPEARANCE_IOS(self):
+        if not self.APP_APPEARANCE_IOS:
+            self.APP_APPEARANCE_IOS = AppAppearanceIos()
+            config.put()
+        return self.APP_APPEARANCE_IOS
+
+    @property
+    def GET_APP_APPEARANCE_ANDROID(self):
+        if not self.APP_APPEARANCE_ANDROID:
+            self.APP_APPEARANCE_ANDROID = AppAppearanceAndroid()
+            config.put()
+        return self.APP_APPEARANCE_ANDROID
+
+    @property
     def SHARE_GIFT_ENABLED(self):
         return ShareGiftModule.has_module()
 
