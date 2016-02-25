@@ -21,7 +21,7 @@ REVERSE_DELIVERY_TYPE_MAP = {
 }
 
 
-def __get_company_schedule(resto_schedule):
+def parse_resto_schedule(resto_schedule):
     schedule = Schedule()
     for resto_schedule in resto_schedule:
         resto_start_hour = int(resto_schedule['hours'].split('-')[0]) % 24
@@ -71,7 +71,7 @@ def _get_company_info():
     resto_company = RestoCompany.get()
     resto_company_info = get_resto_company_info(resto_company)
     resto_delivery_types = get_resto_delivery_types(resto_company)
-    schedule = __get_company_schedule(resto_company_info['schedule'])
+    schedule = parse_resto_schedule(resto_company_info['schedule'])
     delivery_types, delivery_zones = __get_delivery_types(resto_delivery_types['types'],
                                                           resto_company_info['cities'],
                                                           resto_company_info['min_order_sum'])
