@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, ListDivider } from 'material-ui';
+import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, Divider } from 'material-ui';
 import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { SuccessPlaceOrderDialog, LoadingDialog } from '../dialogs';
@@ -70,23 +70,23 @@ const HistoryOrderScreen = React.createClass({
                         <b>{HistoryStore.getStatus(order.status)}</b>
                     </div>
                 </div>
-                <ListDivider/>
+                <Divider/>
                 <div>
                     {order.items.map(item => {
                         return <HistoryOrderItem item={item} />;
                     })}
                 </div>
-                <ListDivider/>
+                <Divider/>
                 <div style={{padding: '12px', height: '48px'}}>
                     <div style={{float: 'right'}}>
                         {'Итого: ' + order.total}
                     </div>
                 </div>
-                <ListDivider/>
+                <Divider/>
                 <div style={{padding: '12px'}}>
                     {'Готов к ' + order.delivery_time_str}
                 </div>
-                <ListDivider/>
+                <Divider/>
                 {this._getVenueOutput(order)}
             </Card>;
         } else {

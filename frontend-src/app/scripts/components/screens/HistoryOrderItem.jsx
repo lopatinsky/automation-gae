@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardMedia, ListDivider } from 'material-ui';
+import { CardMedia, Divider } from 'material-ui';
 
 
 const HistoryOrderItem = React.createClass({
@@ -54,7 +54,7 @@ const HistoryOrderItem = React.createClass({
                         <b>{'x' + item.quantity}</b>
                     </div>
                 </div>
-                <ListDivider/>
+                <Divider/>
             </div>
         );
     }

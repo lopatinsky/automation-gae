@@ -43,6 +43,18 @@ const AppActions = {
                 modifier: modifier
             }
         })
+    },
+
+    SET_ADDRESS: "SET_ADDRESS",
+    setAddress({city, street, home, flat}) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_ADDRESS,
+            data: {
+                address: {
+                    city, street, home, flat
+                }
+            }
+        });
     }
 };
 

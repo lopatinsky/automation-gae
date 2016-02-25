@@ -1,5 +1,5 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer } from '../components';
+import { Toolbar } from '../components';
 import { MenuScreen } from '../components/screens';
 import { MenuStore } from '../stores';
 
@@ -8,7 +8,7 @@ const MenuView = React.createClass({
         if (MenuStore.canUndoCategories()) {
             MenuStore.undoCategories()
         } else {
-            this.refs.navigationDrawer.toggle();
+            this.props.getDrawer().toggle();
         }
     },
     render() {
@@ -19,7 +19,6 @@ const MenuView = React.createClass({
                     view={this}
                     right='order'/>
                 <MenuScreen />
-                <NavigationDrawer ref="navigationDrawer"/>
             </div>
         );
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton, ListDivider } from 'material-ui';
+import { Card, CardText, FlatButton, Divider } from 'material-ui';
 import { MenuItemStore } from '../../stores';
 
 const SingleModifier = React.createClass({
@@ -73,7 +73,7 @@ const SingleModifier = React.createClass({
                         </div>
                     </div>
                 </div>
-                <ListDivider/>
+                <Divider/>
             </div>
         );
     }

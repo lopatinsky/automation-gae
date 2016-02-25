@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, ListDivider, Icons, IconButton, FontIcon }
+import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, Divider, Icons, IconButton, FontIcon }
     from 'material-ui';
 import { MenuItemStore, ModifierStore, OrderStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
@@ -56,7 +56,7 @@ const MenuItemScreen = React.createClass({
                     </div>;
                 })}
             </CardText>
-            <ListDivider/>
+            <Divider/>
         </div>;
         if (count > 0) {
             return result;
@@ -110,7 +110,7 @@ const MenuItemScreen = React.createClass({
         </div>;
         var descriptionCard = <div style={{lineHeight: '120%'}}>
             <CardText>{item.description}</CardText>
-            <ListDivider/>
+            <Divider/>
         </div>;
         if (item.description == '') {
             descriptionCard = <div/>;
@@ -122,13 +122,13 @@ const MenuItemScreen = React.createClass({
         if (item.weight > 0) {
             grCard = <div>
                 <CardText>{item.weight + ' г'}</CardText>
-                <ListDivider/>
+                <Divider/>
             </div>;
         }
         if (item.volume > 0) {
             grCard = <div>
                 <CardText>{item.volume + ' мл'}</CardText>
-                <ListDivider/>
+                <Divider/>
             </div>;
         }
         return (
@@ -137,7 +137,7 @@ const MenuItemScreen = React.createClass({
                     style={{margin: '0 12px 12px 12px'}}>
                     {picCard}
                     <CardText>{item.title}</CardText>
-                    <ListDivider/>
+                    <Divider/>
                     {descriptionCard}
                     {grCard}
                     {this._getModifiersTitles()}

@@ -2,7 +2,7 @@ import React from 'react';
 import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
 import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
-import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, ListDivider, FontIcon }
+import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
@@ -21,7 +21,7 @@ const OrderScreen = React.createClass({
     _refresh() {
         var orderId = OrderStore.getOrderId();
         if (orderId != null) {
-            this.context.router.push({pathname: 'historyOrder', query: {order_id: orderId}});
+            this.context.router.push(`/order/${orderId}`);
         }
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery) {
@@ -99,18 +99,18 @@ const OrderScreen = React.createClass({
 
     _getItems() {
         var items = OrderStore.getItems();
-        return items.map(item => {
+        return items.map((item, i) => {
             return (
-                <OrderMenuItem item={item} />
+                <OrderMenuItem key={i} item={item} />
             );
         });
     },
 
     _getOrderGifts() {
         var items = OrderStore.getOrderGifts();
-        return items.map(item => {
+        return items.map((item, i) => {
             return (
-                <OrderMenuItem item={item} gift={true} />
+                <OrderMenuItem key={i} item={item} gift={true} />
             );
         });
     },
@@ -120,7 +120,7 @@ const OrderScreen = React.createClass({
     },
 
     _onClientInfoTap() {
-        this.context.router.push('profile');
+        this.context.router.push('/profile');
     },
 
     _onPaymentTypeTap() {
@@ -136,7 +136,7 @@ const OrderScreen = React.createClass({
     },
 
     _onAddressTap() {
-        this.context.router.push('address');
+        this.context.router.push('/address');
     },
 
     _onDeliveryTap(delivery) {
@@ -321,16 +321,16 @@ const OrderScreen = React.createClass({
                         valueSelected={delivery ? delivery.name : null}>
                         {this._getDeliveryTypes()}
                     </RadioButtonGroup>
-                    <ListDivider/>
+                    <Divider/>
                     <List style={{paddingBottom: '0', paddingTop: '0'}}>
                         {this._getVenueInput()}
-                        <ListDivider/>
+                        <Divider/>
                         {this._getTimeInput()}
-                        <ListDivider/>
+                        <Divider/>
                         {this._getClientInfo()}
-                        <ListDivider/>
+                        <Divider/>
                         {this._getPaymentType()}
-                        <ListDivider/>
+                        <Divider/>
                         {this._getComment()}
                     </List>
                 </Card>
@@ -339,12 +339,12 @@ const OrderScreen = React.createClass({
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog"/>
             <TimeSlotsDialog ref="timeSlotsDialog"/>
-            <div style={{padding: '12px', position: 'fixed', bottom: '0px', width: '100%'}}>
+            <div style={{width: '100%', position: 'fixed', bottom: '0px' }}>
                 <RaisedButton
                     primary={true}
                     label='Заказать'
                     onClick={this._order}
-                    style={{width: '100%'}} />
+                    style={{display: 'block', margin: '0 12px 12px'}} />
             </div>
             <Snackbar
                 ref='orderSnackBar'

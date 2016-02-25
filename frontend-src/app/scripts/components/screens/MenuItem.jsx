@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, RaisedButton, CardMedia, FontIcon } from 'material-ui';
+import { Paper, RaisedButton, FontIcon } from 'material-ui';
 import { OrderStore } from '../../stores';
 import { AppActions } from '../../actions';
 import Colors from 'material-ui/lib/styles/colors';
@@ -11,13 +11,9 @@ const MenuItem = React.createClass({
 
     _onMenuItemTap() {
         AppActions.setMenuItem(this.props.item);
-        this.context.router.push({
-            pathname: 'menu_item',
-            query: {
-                category_id: this.props.category.info.category_id,
-                item_id: this.props.item.id
-            }
-        });
+        const category_id = this.props.category.info.category_id,
+            item_id = this.props.item.id;
+        this.context.router.push(`/item/${category_id}/${item_id}`);
     },
 
     _addItem(e) {
@@ -25,12 +21,10 @@ const MenuItem = React.createClass({
         OrderStore.addItem(this.props.item);
     },
 
-    _getButton(tableCell) {
+    _getButton() {
         var item = this.props.item;
-        var style = {position: 'absolute', right: 12, bottom: 12};
         return <RaisedButton
             primary={true}
-            style={style}
             label={item.price}
             onClick={this._addItem}>
             <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
@@ -42,51 +36,33 @@ const MenuItem = React.createClass({
     },
 
     render() {
-        var item = this.props.item;
-        var picCard = <div style={{display: 'table-cell', width: '50%'}}>
-            <CardMedia>
-                <img src={item.pic}/>
-            </CardMedia>
-        </div>;
-        if (item.pic == null || item.pic == '') {
-            picCard = '';
+        const item = this.props.item;
+        let picCard = null;
+        if (item.pic) {
+            const picCardStyle = {
+                backgroundImage: `url(${item.pic})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundSize: 'contain',
+                width: 140,
+                flexShrink: 0
+            };
+            picCard = <div style={picCardStyle}/>;
         }
-        var descriptionCard = <div style={{maxHeight: '64px', overflow: 'hidden', lineHeight: '120%', padding: '6px 0 0 0'}}>
-            {item.description}
-        </div>;
-        if (item.description == '') {
-            descriptionCard = <div/>;
-        }
-        var grCard = <div/>;
-        if (item.weight > 0) {
-            grCard = <div style={{padding: '6px 0 0 0'}}>
-                {item.weight + ' г'}
-            </div>;
-        }
-        if (item.volume > 0) {
-            grCard = <div style={{padding: '6px 0 0 0'}}>
-                {item.volume + ' мл'}
-            </div>;
-        }
-        return (
-            <div style={{width: '100%', display: 'table'}}>
-                <Card
-                    style={{margin:'0 12px 12px', position: 'relative', minHeight: '64px'}}
-                    onClick={this._onMenuItemTap}>
-                    {picCard}
-                    <div style={{display: 'table-cell', padding: '12px 12px 0 12px'}}>
-                        <div style={{lineHeight: '120%'}}>
-                            <b>{item.title}</b>
-                        </div>
-                        {descriptionCard}
-                        {grCard}
-                        {picCard != '' ? <div style={{height:60}}/> : ''}
-                        {picCard != '' ? this._getButton(false) : ''}
-                    </div>
-                    {picCard == '' ? this._getButton(true) : ''}
-                </Card>
+        const content = <div style={{padding: 12, flexGrow: 1}}>
+            <div style={{marginBottom: 4}}>{item.title}</div>
+            {item.description && <div style={{fontSize: 12, marginBottom: 4}}>{item.description}</div>}
+            {item.weight > 0 && <div style={{fontSize: 12, marginBottom: 4}}>{item.weight} г</div>}
+            {item.volume > 0 && <div style={{fontSize: 12, marginBottom: 4}}>{item.volume} мл</div>}
+            <div style={{textAlign: 'right'}}>
+                {this._getButton()}
             </div>
-        );
+        </div>;
+        return <Paper style={{margin:'0 12px 12px', display: 'flex'}}
+                      onClick={this._onMenuItemTap}>
+            {picCard}
+            {content}
+        </Paper>
     }
 });
 

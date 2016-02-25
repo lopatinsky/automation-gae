@@ -7,7 +7,7 @@ import { AppView, MenuView, MenuItemView, OrderView, VenuesView, HistoryView, Ad
 
 const routes = <Route path='/' component={AppView}>
     <IndexRoute name='menu' component={MenuView}/>
-    <Route path='/item/:category_id/:item_id/' component={MenuItemView}/>
+    <Route path='/item/:category_id/:item_id' component={MenuItemView}/>
     <Route path='/order' component={OrderView}/>
     <Route path='/venues' component={VenuesView}/>
     <Route path='/history' component={HistoryView}/>

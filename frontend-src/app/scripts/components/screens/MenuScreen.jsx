@@ -11,13 +11,13 @@ const MenuScreen = React.createClass({
         if (category.categories.length > 0) {
             return category.categories.map(inner_category => {
                 return (
-                    <MenuCategory category={inner_category} categories={category.categories} />
+                    <MenuCategory key={category.info.category_id} category={inner_category} categories={category.categories} />
                 );
             });
         } else {
             return category.items.map(item => {
                 return (
-                    <MenuItem item={item} category={category} />
+                    <MenuItem key={item.id} item={item} category={category} />
                 );
             });
         }
@@ -66,9 +66,9 @@ const MenuScreen = React.createClass({
     _getTabs() {
         var categories = MenuStore.getCategories().map((category) => {
             return (
-                <Tab
-                    value={category.info.category_id}
-                    label={<div style={{padding: '0 6px 0 6px', maxHeight: '32px', verticalAlign: 'middle'}}><div style={{lineHeight: '120%'}}>{category.info.title}</div></div>}>
+                <Tab key={category.info.category_id}
+                     value={category.info.category_id}
+                     label={<div style={{padding: '0 6px 0 6px'}}>{category.info.title}</div>}>
                     {this._getItems(category)}
                 </Tab>
             );
@@ -77,7 +77,7 @@ const MenuScreen = React.createClass({
             <Tabs
                 value={this.state.value}
                 onChange={this._changeTab}
-                tabItemContainerStyle={{position: 'fixed', overflow: 'auto', height: '32px', zIndex: '3', padding: '64px 0 0 0'}}
+                tabItemContainerStyle={{position: 'fixed', overflow: 'auto', zIndex: '3', padding: '64px 0 0 0'}}
                 contentContainerStyle={{padding: '120px 0 0 0'}}>
                 {categories}
             </Tabs>

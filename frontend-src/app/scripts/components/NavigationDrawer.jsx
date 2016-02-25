@@ -25,6 +25,11 @@ const NavigationDrawer = React.createClass({
         });
     },
 
+    _onItemTouchTap(route) {
+        this.context.router.replace(route);
+        setImmediate(() => this.toggle());
+    },
+
     _getItem(title, route, icon_name, index) {
         let icon = <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '20px'}}
                              color={index == this.state.index ? settings.primaryColor : Colors.grey500}
@@ -33,7 +38,7 @@ const NavigationDrawer = React.createClass({
         </FontIcon>;
         return <MenuItem key={index}
                          leftIcon={icon}
-                         onTouchTap={() => this.context.router.push(route)}>
+                         onTouchTap={() => this._onItemTouchTap(route)}>
             {title}
         </MenuItem>;
     },
@@ -51,14 +56,22 @@ const NavigationDrawer = React.createClass({
 
     getInitialState() {
         return {
-            index: 0
+            index: 0,
+            open: false
         };
+    },
+
+    _onRequestChange(wantedState) {
+        this.setState({
+            open: wantedState
+        })
     },
 
     render() {
         return <LeftNav open={this.state.open}
                         disableSwipeToOpen={true}
                         docked={false}
+                        onRequestChange={this._onRequestChange}
                         ref="leftNav">
             {this._leftNavItems()}
         </LeftNav>;

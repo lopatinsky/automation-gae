@@ -1,5 +1,6 @@
 import React from 'react';
 import mui from 'material-ui';
+import { NavigationDrawer } from '../components';
 import { LoadingDialog } from '../components/dialogs'
 import theme from '../theme';
 import { AppActions } from '../actions';
@@ -39,9 +40,15 @@ const AppView = React.createClass({
         this.refs.processingDialog.dismiss();
     },
 
+    getDrawer() {
+        return this.refs.drawer;
+    },
+
     render() {
+        let children = React.cloneElement(this.props.children, {getDrawer: this.getDrawer});
         return <div>
-            {this.props.children}
+            <NavigationDrawer ref="drawer"/>
+            {children}
             <LoadingDialog
                 ref='processingDialog'
                 title='Загрузка'/>

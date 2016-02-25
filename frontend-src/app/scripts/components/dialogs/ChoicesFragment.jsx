@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, ListDivider, FontIcon } from 'material-ui';
+import { List, ListItem, Divider, FontIcon } from 'material-ui';
 import { ModifierStore, MenuItemStore } from '../../stores';
 import settings from '../../settings';
 
@@ -55,7 +55,7 @@ const ChoicesFragment = React.createClass({
                     <ListItem
                         primaryText={title}
                         onClick={() => this._onChoiceTap(choice)}/>
-                    <ListDivider/>
+                    <Divider/>
                 </div>;
 
         });

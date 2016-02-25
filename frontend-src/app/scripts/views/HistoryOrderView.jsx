@@ -1,6 +1,6 @@
 import React from 'react';
 import { HistoryStore } from '../stores';
-import { Toolbar, NavigationDrawer } from '../components';
+import { Toolbar } from '../components';
 import { HistoryOrderScreen } from '../components/screens';
 import { ServerRequests } from '../actions';
 
@@ -24,7 +24,7 @@ const HistoryOrderView = React.createClass({
     },
 
     toolbarLeftTap() {
-        this.context.router.push('history');
+        this.context.router.goBack();
     },
 
     render() {
@@ -33,7 +33,6 @@ const HistoryOrderView = React.createClass({
             <div>
                 <Toolbar title='Заказ' view={this} back={true} />
                 <HistoryOrderScreen order={order} ref="historyOrderScreen" />
-                <NavigationDrawer ref="navigationDrawer" />
             </div>
         );
     }

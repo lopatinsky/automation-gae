@@ -37,7 +37,7 @@ const ClientStore = new BaseStore({
     getRenderedInfo() {
         var name = this.getName();
         if (name == '' || name == null) {
-            return 'Представтесь, пожалуйста';
+            return 'Представьтесь, пожалуйста';
         } else {
             return name;
         }

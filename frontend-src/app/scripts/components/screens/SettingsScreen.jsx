@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClientStore, CompanyStore } from '../../stores';
-import { List, ListItem, ListDivider, FontIcon } from 'material-ui';
+import { List, ListItem, Divider, FontIcon } from 'material-ui';
 import settings from '../../settings';
 
 const SettingsScreen = React.createClass({
@@ -9,7 +9,7 @@ const SettingsScreen = React.createClass({
     },
 
     _onClientInfoTap() {
-        this.context.router.push({pathname: 'profile', query: { settings: true }});
+        this.context.router.push('/profile');
     },
 
     _onFeedback() {
@@ -45,11 +45,11 @@ const SettingsScreen = React.createClass({
                 <b>{'Ваш ID: ' + ClientStore.getClientId()}</b> 
             </div>
             <List style={{paddingBottom: '0', paddingTop: '0'}}>
-                <ListDivider/>
+                <Divider/>
                 {this._getClientInfo()}
-                <ListDivider/>
+                <Divider/>
                 {this._getFeedback()}
-                <ListDivider/>
+                <Divider/>
             </List>
         </div>;
     }

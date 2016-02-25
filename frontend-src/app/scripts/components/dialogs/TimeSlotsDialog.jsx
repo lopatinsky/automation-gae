@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, List, ListItem, ListDivider } from 'material-ui';
+import { Dialog, List, ListItem, Divider } from 'material-ui';
 import { OrderStore, VenuesStore } from '../../stores';
 
 const TimeSlotsDialog = React.createClass({
@@ -12,18 +12,19 @@ const TimeSlotsDialog = React.createClass({
     _getSlots() {
         var delivery = VenuesStore.getChosenDelivery();
         if (!delivery) {
-            return <div/>;
+            return null;
         }
-        return delivery.slots.map(slot => {
-            return (
-                <div>
-                    <ListItem
-                        primaryText={slot.name}
-                        onClick={() => this.dismiss(slot)}/>
-                    <ListDivider/>
-                </div>
+        const result = [];
+        for (let slot of delivery.slots) {
+            result.push(
+                <ListItem key={slot.id}
+                          primaryText={slot.name}
+                          onClick={() => this.dismiss(slot)}/>
             );
-        });
+            result.push(<Divider key={`divider_${slot.id}`}/>);
+        }
+        result.pop();
+        return result;
     },
 
     show() {

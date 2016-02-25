@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton, CardMedia } from 'material-ui';
+import { Paper, FlatButton } from 'material-ui';
 import { MenuStore } from '../../stores';
 
 const MenuCategory = React.createClass({
@@ -10,24 +10,23 @@ const MenuCategory = React.createClass({
 
     render() {
         var category = this.props.category;
-        var picCard = <div style={{display: 'table-cell', width: '40%'}}>
-            <CardMedia>
-                <img src={category.info.pic}/>
-            </CardMedia>
+        const picCardStyle = {
+            backgroundImage: `url(${category.info.pic})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            width: 140,
+            flexShrink: 0
+        },
+            picCard = <div style={picCardStyle}/>;
+        const content = <div style={{padding: 12, flexGrow: 1}}>
+            {category.info.title}
         </div>;
-        return (
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin:'0 12px 12px'}}
+        return <Paper style={{margin:'0 12px 12px', display: 'flex', minHeight: 105}}
                       onClick={this._onMenuCategoryTap}>
-                    {category.info.pic ? picCard: null}
-                    <div style={{display: 'table-cell', verticalAlign: 'middle'}}>
-                        <CardText>
-                            {category.info.title}
-                        </CardText>
-                    </div>
-                </Card>
-            </div>
-        );
+            {picCard}
+            {content}
+        </Paper>;
     }
 });
 

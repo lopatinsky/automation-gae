@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, List, ListItem, ListDivider } from 'material-ui';
+import { Dialog, List, ListItem, Divider } from 'material-ui';
 import { PaymentsStore } from '../../stores';
 
 const PaymentTypesDialog = React.createClass({
@@ -11,16 +11,15 @@ const PaymentTypesDialog = React.createClass({
 
     _getPaymentTypes() {
         var payment_types = PaymentsStore.getPaymentTypes();
-        return payment_types.map(payment_type => {
-            return (
-                <div>
-                    <ListItem
-                        primaryText={payment_type.really_title}
-                        onClick={() => this.dismiss(payment_type)}/>
-                    <ListDivider/>
-                </div>
-            );
-        });
+        const result = [];
+        for (let pt of payment_types) {
+            result.push(<ListItem key={pt.id}
+                                  primaryText={pt.really_title}
+                                  onClick={() => this.dismiss(pt)}/>);
+            result.push(<Divider key={`divider_${pt.id}`}/>)
+        }
+        result.pop();
+        return result;
     },
 
     show() {

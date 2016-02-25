@@ -30,7 +30,7 @@ const PromosScreen = React.createClass({
             if (promo.description == '') {
                 descriptionCard = <div/>;
             }
-            return <Card style={{margin: '0 12px 12px 12px'}}>
+            return <Card key={promo.id} style={{margin: '0 12px 12px 12px'}}>
                 {picCard}
                 <div style={{display: 'table-cell', padding: '12px 12px 0 6px'}}>
                     <div style={{lineHeight: '120%'}}>

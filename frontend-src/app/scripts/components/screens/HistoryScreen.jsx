@@ -20,12 +20,7 @@ const HistoryScreen = React.createClass({
     },
 
     _onOrderTap(order) {
-        this.context.router.push({
-            pathname: 'historyOrder',
-            query: {
-                order_id: order.order_id
-            }
-        });
+        this.context.router.push(`/order/${order.id}`);
     },
 
     getOrders() {
