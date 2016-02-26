@@ -38,7 +38,7 @@ const Toolbar = React.createClass({
     render() {
         var rightElement;
         if (this.props.right == this.ORDER_BUTTON) {
-            let icon = <FontIcon style={{fontSize: 18}} className="material-icons">shopping_basket</FontIcon>;
+            let icon = <FontIcon className="material-icons">shopping_basket</FontIcon>;
             var label = OrderStore.getTotalSum() + " руб.";
             rightElement = <FlatButton onClick={this.rightTap} label={label} icon={icon}/>;
         }

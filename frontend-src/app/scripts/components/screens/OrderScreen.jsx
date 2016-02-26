@@ -26,15 +26,15 @@ const OrderScreen = React.createClass({
         var delivery = VenuesStore.getChosenDelivery();
         if (delivery) {
             var slots = delivery.slots;
-            if (slots.length > 0 && OrderStore.getSlotId() == null) {
+            if (slots.length > 0 && OrderStore.slotId == null) {
                 OrderStore.setSlotId(slots[0].id);
             }
         }
-        this.setState({error: OrderStore.getOrderError()});
+        this.setState({error: OrderStore.orderError});
     },
 
     _getServerInfo() {
-        if (OrderStore.getErrors().length > 0) {
+        if (OrderStore.errors.length) {
             return <div style={{padding: '12px 48px 0 36px', color: 'red'}}>
                 {this._getErrors()}
             </div>
@@ -47,59 +47,53 @@ const OrderScreen = React.createClass({
     },
 
     _getPromos() {
-        if (OrderStore.getPromos().length > 0) {
+        if (OrderStore.promos.length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
-                {OrderStore.getPromos().map(promo => {
-                    return <div>{promo.text + '\n'}</div>
+                {OrderStore.promos.map((promo, i) => {
+                    return <div key={i}>{promo.text + '\n'}</div>
                 })}
             </div>;
         } else {
-            return <div/>;
+            return null;
         }
     },
 
     _getDeliveryDescription() {
         var delivery = VenuesStore.getChosenDelivery();
-        if (delivery && delivery.id == 2 && OrderStore.getDeliverySumStr().length > 0) {
+        if (delivery && delivery.id == 2 && OrderStore.deliverySumStr.length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
-                {OrderStore.getDeliverySumStr()}
+                {OrderStore.deliverySumStr}
             </div>;
         } else {
-            return '';
+            return null;
         }
     },
 
     _getErrors() {
-        return OrderStore.getErrors().map(error => {
-            return <div>{error + '\n'}</div>;
+        return OrderStore.errors.map((error, i) => {
+            return <div key={i}>{error + '\n'}</div>;
         });
     },
 
     _getTotalSum() {
         var menuTotalSum = OrderStore.getTotalSum();
-        var validationTotalSum = OrderStore.getValidationTotalSum();
-        var deliverySum = OrderStore.getDeliverySum();
-        if (menuTotalSum != validationTotalSum + deliverySum) {
-            return <div style={{textAlign: 'right', fontSize: '14px'}}>
-                <b>
-                    {'Итого: '}
-                    <strike>{menuTotalSum + ' '}</strike>
-                    {validationTotalSum + deliverySum}
-                </b>
+        const style = {textAlign: 'right'};
+        if (menuTotalSum != OrderStore.validationSum + OrderStore.deliverySum) {
+            return <div style={style}>
+                Итого:{' '}
+                <strike>{menuTotalSum}</strike>{' '}
+                {OrderStore.validationSum + OrderStore.deliverySum}
             </div>;
         } else {
-            return <div style={{textAlign: 'right'}}>
-                <b>
-                    {'Итого: '}
-                    {validationTotalSum + deliverySum}
-                </b>
+            return <div style={style}>
+                Итого:{' '}
+                {OrderStore.validationSum + OrderStore.deliverySum}
             </div>;
         }
     },
 
     _getItems() {
-        var items = OrderStore.getItems();
-        return items.map((item, i) => {
+        return OrderStore.items.map((item, i) => {
             return (
                 <OrderMenuItem key={i} item={item} />
             );
@@ -107,8 +101,7 @@ const OrderScreen = React.createClass({
     },
 
     _getOrderGifts() {
-        var items = OrderStore.getOrderGifts();
-        return items.map((item, i) => {
+        return OrderStore.orderGifts.map((item, i) => {
             return (
                 <OrderMenuItem key={i} item={item} gift={true} />
             );
@@ -116,7 +109,7 @@ const OrderScreen = React.createClass({
     },
 
     _onMenuTap() {
-        this.context.router.push('/');
+        this.context.router.replace('/menu');
     },
 
     _onClientInfoTap() {
@@ -155,8 +148,7 @@ const OrderScreen = React.createClass({
         if (delivery.id == '2') {
             return <ListItem
                         primaryText={AddressStore.getAddressStr()}
-                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                            color={settings.primaryColor}
+                        leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
@@ -165,8 +157,7 @@ const OrderScreen = React.createClass({
         } else {
             return <ListItem
                         primaryText={VenuesStore.getChosenVenue().title}
-                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                            color={settings.primaryColor}
+                        leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
@@ -187,10 +178,10 @@ const OrderScreen = React.createClass({
     _getTimeInput() {
         var delivery = VenuesStore.getChosenDelivery();
         if (!delivery) {
-            return <div/>;
+            return null;
         }
         if (delivery.slots.length > 0) {
-            var slot = VenuesStore.getSlot(OrderStore.getSlotId());
+            var slot = VenuesStore.getSlot(OrderStore.slotId);
             if (slot == null) {
                 slot = {
                     name: 'Загружается...'
@@ -198,8 +189,7 @@ const OrderScreen = React.createClass({
             }
             return <ListItem
                         primaryText={slot.name}
-                        leftIcon={<FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '18px'}}
-                                            color={settings.primaryColor}
+                        leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
@@ -208,8 +198,7 @@ const OrderScreen = React.createClass({
             return <div>
                 <ListItem
                         primaryText={OrderStore.getFullTimeStr()}
-                        leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                            color={settings.primaryColor}
+                        leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
@@ -222,7 +211,7 @@ const OrderScreen = React.createClass({
                 <TimePickerDialog
                     ref='timePicker'
                     onAccept={this._setTime}
-                    hintText="Выберитее время"
+                    hintText="Выберите время"
                     format="24hr" />
             </div>;
         }
@@ -233,23 +222,22 @@ const OrderScreen = React.createClass({
         if (venue) {
             return venue.deliveries.map(delivery => {
                 return (
-                    <RadioButton
-                        label={delivery.name}
-                        name={delivery.name}
-                        value={delivery.name}
-                        onClick={() => this._onDeliveryTap(delivery)}/>
+                    <RadioButton key={delivery.id}
+                                 label={delivery.name}
+                                 name={delivery.name}
+                                 value={delivery.id}
+                                 onTouchTap={() => this._onDeliveryTap(delivery)}/>
                 );
             });
         } else {
-            return <div/>;
+            return null;
         }
     },
 
     _getClientInfo() {
         return <ListItem
                     primaryText={ClientStore.getRenderedInfo()}
-                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                        color={settings.primaryColor}
+                    leftIcon={<FontIcon color={settings.primaryColor}
                                         className="material-icons">
                                   perm_identity
                               </FontIcon>}
@@ -257,10 +245,11 @@ const OrderScreen = React.createClass({
     },
 
     _getPaymentType() {
+        let pt = OrderStore.chosenPaymentType,
+            title = pt ? pt.really_title : 'Выберите способ оплаты';
         return <ListItem
-                    primaryText={PaymentsStore.getChosenPaymentTypeTitle()}
-                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                        color={settings.primaryColor}
+                    primaryText={title}
+                    leftIcon={<FontIcon color={settings.primaryColor}
                                         className="material-icons">
                                   account_balance_wallet
                               </FontIcon>}
@@ -268,10 +257,12 @@ const OrderScreen = React.createClass({
     },
 
     _getComment() {
+        const comment = OrderStore.comment,
+            style = comment ? {} : {color: '#bbbbbb'};
         return <ListItem
-                    primaryText={OrderStore.getRenderedComment()}
-                    leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                        color={settings.primaryColor}
+                    primaryText={comment ? comment : 'Комментарий'}
+                    style={style}
+                    leftIcon={<FontIcon color={settings.primaryColor}
                                         className="material-icons">
                                 comment
                               </FontIcon>}
@@ -279,6 +270,8 @@ const OrderScreen = React.createClass({
     },
 
     componentDidMount() {
+        this._refresh();
+        ServerRequests.checkOrder();
         VenuesStore.addChangeListener(this._refresh);
         OrderStore.addChangeListener(this._refresh);
         ClientStore.addChangeListener(this._refresh);
@@ -293,8 +286,9 @@ const OrderScreen = React.createClass({
     },
 
     getInitialState() {
-        this._refresh();
-        return {};
+        return {
+            error: null
+        };
     },
 
     render() {
@@ -315,10 +309,9 @@ const OrderScreen = React.createClass({
             {this._getServerInfo()}
             <div style={{width: '100%'}}>
                 <Card style={{margin: '12px 12px 60px 12px'}}>
-                    <RadioButtonGroup
-                        style={{margin: '12px'}}
-                        name='group'
-                        valueSelected={delivery ? delivery.name : null}>
+                    <RadioButtonGroup style={{margin: '12px'}}
+                                      name='group'
+                                      valueSelected={delivery ? delivery.id : null}>
                         {this._getDeliveryTypes()}
                     </RadioButtonGroup>
                     <Divider/>
@@ -349,7 +342,7 @@ const OrderScreen = React.createClass({
             <Snackbar
                 ref='orderSnackBar'
                 style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
-                message={this.state.error}
+                message={this.state.error || ''}
                 autoHideDuration={5000}
                 open={!! this.state.error}
                 onRequestClose={() => {this.setState({error: null}); OrderStore.setOrderError(null)}}/>

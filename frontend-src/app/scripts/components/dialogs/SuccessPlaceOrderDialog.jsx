@@ -17,7 +17,7 @@ const SuccessPlaceOrderDialog = React.createClass({
             <Dialog ref="successDialog"
                     bodyStyle={{padding: '12px'}}>
                 <div style={{display: 'table', width: '100%'}}>
-                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
                               color={settings.primaryColor}
                               className="material-icons">
                       check_circle

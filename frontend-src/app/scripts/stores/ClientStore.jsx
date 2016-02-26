@@ -76,10 +76,8 @@ const ClientStore = new BaseStore({
             break;
         case ServerRequests.AJAX_FAILURE:
             break;
-        case ServerRequests.INIT:
-            if (action.data.request == "client") {
-                ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
-            }
+        case ServerRequests.SET_CLIENT_INFO:
+            ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
             break;
     }
 });

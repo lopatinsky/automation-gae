@@ -20,8 +20,7 @@ const SettingsScreen = React.createClass({
     _getClientInfo() {
         return <ListItem
                 primaryText={ClientStore.getRenderedInfo()}
-                leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                    color={settings.primaryColor}
+                leftIcon={<FontIcon color={settings.primaryColor}
                                     className="material-icons">
                               perm_identity
                           </FontIcon>}
@@ -31,8 +30,7 @@ const SettingsScreen = React.createClass({
     _getFeedback() {
         return <ListItem
                 primaryText='Написать нам'
-                leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                    color={settings.primaryColor}
+                leftIcon={<FontIcon color={settings.primaryColor}
                                     className="material-icons">
                               feedback
                           </FontIcon>}
@@ -41,8 +39,8 @@ const SettingsScreen = React.createClass({
 
     render() {
         return <div style={{padding: '64px 0 0 0'}}>
-            <div style={{padding: '12px', width: '100%', textAlign: 'center'}}>
-                <b>{'Ваш ID: ' + ClientStore.getClientId()}</b> 
+            <div style={{padding: '12px 0', textAlign: 'center'}}>
+                <b>Ваш ID: {ClientStore.getClientId()}</b>
             </div>
             <List style={{paddingBottom: '0', paddingTop: '0'}}>
                 <Divider/>

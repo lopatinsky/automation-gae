@@ -1,12 +1,14 @@
+import AppDispatcher from '../AppDispatcher';
 import BaseStore from './BaseStore';
-import { ServerRequests } from '../actions';
+import { AppActions, ServerRequests } from '../actions';
 import ClientStore from './ClientStore';
 import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
-import MenuItemStore from './MenuItemStore';
+import MenuStore from './MenuStore';
 import AddressStore from './AddressStore';
 
 const OrderStore = new BaseStore({
+    chosenPaymentType: null,
     orderId: null,
     validationSum: 0,
     deliverySum: 0,
@@ -23,48 +25,39 @@ const OrderStore = new BaseStore({
     cancelProcessing: false,
     cancelDescription: null,
 
-    getSlotId() {
-        return this.slotId;
+    onPaymentTypesLoaded() {
+        if (!this.chosenPaymentType && PaymentsStore.payment_types) {
+            this.setChosenPaymentType(PaymentsStore.payment_types[0]);
+        }
+    },
+
+    setChosenPaymentType(paymentType) {
+        this.chosenPaymentType = paymentType;
+        this._changed();
+    },
+
+    getPaymentDict() {
+        var paymentType = this.chosenPaymentType;
+        var dict = {};
+        if (paymentType != null) {
+            dict.type_id = paymentType.id;
+        }
+        return dict;
     },
 
     getTotalSum() {
         var totalSum = 0;
-        for (var i = 0; i < this.items.length; i++) {
-            totalSum += this.items[i].price * this.items[i].quantity;
-            for (var j = 0; j < this.items[i].single_modifiers.length; j++) {
-                if (this.items[i].single_modifiers[j].quantity > 0) {
-                    totalSum += this.items[i].single_modifiers[j].price * this.items[i].single_modifiers[j].quantity * this.items[i].quantity;
-                }
-            }
-            for (j = 0; j < this.items[i].group_modifiers.length; j++) {
-                totalSum += this.items[i].group_modifiers[j].chosen_choice.price *  this.items[i].quantity;
-            }
+        for (let orderItem of this.items) {
+            totalSum += orderItem.quantity * MenuStore.getItemPrice(
+                orderItem.item,
+                orderItem.groupModifiers,
+                orderItem.singleModifiers);
         }
         return totalSum;
     },
 
-    getValidationTotalSum() {
-        return this.validationSum;
-    },
-
-    getDeliverySum() {
-        return this.deliverySum;
-    },
-
-    getDeliverySumStr() {
-        return this.deliverySumStr;
-    },
-
-    getItems() {
-        return this.items;
-    },
-
-    getOrderGifts() {
-        return this.orderGifts;
-    },
-
     getOrderGiftsDict() {
-        return this.getOrderGifts().map(item => {
+        return this.orderGifts.map(item => {
             return {
                 quantity: item.quantity,
                 item_id: item.id,
@@ -80,49 +73,29 @@ const OrderStore = new BaseStore({
         });
     },
 
-    getPromos() {
-        return this.promos;
-    },
-
-    getErrors() {
-        return this.errors;
-    },
-
-    getOrderError() {
-        return this.orderError;
-    },
-
-    getCancelDescription() {
-        return this.cancelDescription;
-    },
-
-    getCancelProcessing() {
-        return this.cancelProcessing;
-    },
-
-    getGroupModifierDict(item) {
-        return item.group_modifiers.map(modifier => {
-            var choice_id;
-            if (modifier.chosen_choice != null) {
-                choice_id = modifier.chosen_choice.id
-            } else {
-                choice_id = MenuItemStore.getDefaultModifierChoice(modifier).id;
-            }
-            return {
-                quantity: 1,
-                group_modifier_id: modifier.modifier_id,
-                choice: choice_id
-            };
-        });
-    },
-
-    getSingleModifierDict(item) {
+    getGroupModifierDict(orderItem) {
         var modifiers = [];
-        for (var i = 0; i < item.single_modifiers.length; i++) {
-            if (item.single_modifiers[i].quantity > 0) {
+        for (const gm of orderItem.item.group_modifiers) {
+            const choice = orderItem.groupModifiers[gm.modifier_id];
+            if (choice) {
+                modifiers.append({
+                    quantity: 1,
+                    group_modifier_id: gm.modifier_id,
+                    choice: choice.id
+                });
+            }
+        }
+        return modifiers;
+    },
+
+    getSingleModifierDict(orderItem) {
+        var modifiers = [];
+        for (const sm of orderItem.item.single_modifiers) {
+            const quantity = orderItem.singleModifiers[sm.modifier_id];
+            if (quantity) {
                 modifiers.push({
-                    single_modifier_id: item.single_modifiers[i].modifier_id,
-                    quantity: item.single_modifiers[i].quantity
+                    single_modifier_id: sm.modifier_id,
+                    quantity: quantity
                 })
             }
         }
@@ -130,72 +103,65 @@ const OrderStore = new BaseStore({
     },
 
     getItemsDict() {
-        return this.getItems().map(item => {
+        return this.items.map(orderItem => {
             return {
-                quantity: item.quantity,
-                item_id: item.id,
-                single_modifiers: this.getSingleModifierDict(item),
-                group_modifiers: this.getGroupModifierDict(item)
+                quantity: orderItem.quantity,
+                item_id: orderItem.item.id,
+                single_modifiers: this.getSingleModifierDict(orderItem),
+                group_modifiers: this.getGroupModifierDict(orderItem)
             }
         });
     },
 
     setSlotId(slotId) {
         this.slotId = slotId;
-        ServerRequests.checkOrder();
         this._changed();
     },
 
-    addItem(item) {
-        for (i = 0; i < item.group_modifiers.length; i++) {
-            if (item.group_modifiers[i].chosen_choice == null) {
-                item.group_modifiers[i].chosen_choice = MenuItemStore.getDefaultModifierChoice(item.group_modifiers[i]);
-            }
+    addItem(itemId, groupModifiers, singleModifiers) {
+        const item = MenuStore.itemsById[itemId],
+            orderItem = {
+                item,
+                groupModifiers,
+                singleModifiers
+            };
+        if (!groupModifiers) {
+            [groupModifiers, singleModifiers] = MenuStore.getDefaultModifiers(item);
         }
+
         var found = false;
-        for (var i = 0; i < this.items.length; i++) {
-            if (this.compareItems(item, this.items[i])) {
-                this.items[i].quantity += 1;
+        for (let existingItem of this.items) {
+            if (this.compareItems(orderItem, existingItem)) {
+                existingItem.quantity += 1;
                 found = true;
             }
         }
-        if (found == false) {
-            item.quantity = 1;
-            this.items.push(JSON.parse(JSON.stringify(item)));
+        if (!found) {
+            orderItem.quantity = 1;
+            this.items.push(orderItem);
         }
         this.validationSum = this.getTotalSum();
-        ServerRequests.checkOrder();
         this._changed();
     },
 
     removeItem(item) {
         this.items.splice(this.items.indexOf(item), 1);
         this.validationSum = this.getTotalSum();
-        ServerRequests.checkOrder();
         this._changed();
     },
 
-    compareItems(item1, item2) {
-        if (item1.id != item2.id) {
+    compareItems(orderItem1, orderItem2) {
+        if (orderItem1.item.id != orderItem2.item.id) {
             return false;
         }
-        var modifiers1 = item1.group_modifiers;
-        var modifiers2 = item2.group_modifiers;
-        if (modifiers1.length != modifiers2.length) {
-            return false;
-        }
-        for (var i = 0; i < modifiers1.length; i++) {
-            if (modifiers1[i].chosen_choice.id != modifiers2[i].chosen_choice.id) {
+        let item = orderItem1.item;
+        for (let gm of item.group_modifiers) {
+            if (orderItem1.groupModifiers[gm.modifier_id] != orderItem2.groupModifiers[gm.modifier_id]) {
                 return false;
             }
         }
-        modifiers1 = item1.single_modifiers;
-        modifiers2 = item2.single_modifiers;
-        if (modifiers1.length != modifiers2.length) {
-            return false;
-        }
-        for (i = 0; i < modifiers1.length; i++) {
-            if (modifiers1[i].quantity != modifiers2[i].quantity) {
+        for (let sm of item.single_modifiers) {
+            if (orderItem1.singleModifiers[sm.modifier_id] != orderItem2.singleModifiers[sm.modifier_id]) {
                 return false;
             }
         }
@@ -207,21 +173,21 @@ const OrderStore = new BaseStore({
         var dict = {
             delivery_type: delivery.id,
             client: ClientStore.getClientDict(),
-            payment: PaymentsStore.getPaymentDict(),
+            payment: this.getPaymentDict(),
             device_type: 2,
-            total_sum: this.getValidationTotalSum(),
+            total_sum: this.validationSum,
             items: this.getItemsDict(),
             order_gifts: this.getOrderGiftsDict(),
             comment: ''
         };
         if (delivery.id == 2) {
-            dict.delivery_sum = this.getDeliverySum();
+            dict.delivery_sum = this.deliverySum;
             dict.address = AddressStore.getAddressDict();
         } else {
             dict.venue_id = VenuesStore.getChosenVenue().id;
         }
         if (delivery.slots.length > 0) {
-            dict.delivery_slot_id = this.getSlotId();
+            dict.delivery_slot_id = this.slotId;
         } else {
             dict.time_picker_value = this.getFullTimeStr();
         }
@@ -237,7 +203,7 @@ const OrderStore = new BaseStore({
         var dict = {
             client_id: client_id,
             delivery_type: delivery.id,
-            payment: JSON.stringify(PaymentsStore.getPaymentDict()),
+            payment: JSON.stringify(this.getPaymentDict()),
             items: JSON.stringify(this.getItemsDict())
         };
         if (delivery.id == 2) {
@@ -246,7 +212,7 @@ const OrderStore = new BaseStore({
             dict.venue_id = VenuesStore.getChosenVenue().id;
         }
         if (delivery.slots.length > 0) {
-            dict.delivery_slot_id = this.getSlotId();
+            dict.delivery_slot_id = this.slotId;
         } else {
             dict.time_picker_value = this.getFullTimeStr();
         }
@@ -255,7 +221,12 @@ const OrderStore = new BaseStore({
 
     setValidationInfo(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors) {
         this.validationSum = validationSum;
-        this.orderGifts = orderGifts;
+        this.orderGifts = orderGifts.map(og => ({
+            item: og,
+            groupModifiers: {},
+            singleModifiers: {},
+            quantity: og.quantity
+        }));
         this.deliverySum = deliverySum;
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
@@ -300,18 +271,6 @@ const OrderStore = new BaseStore({
         this._changed();
     },
 
-    getComment() {
-        return this.comment;
-    },
-
-    getRenderedComment() {
-        if (this.comment == null || this.comment == '') {
-            return 'Комментарий';
-        } else {
-            return this.comment;
-        }
-    },
-
     getOrderId() {
         return this.orderId;
     },
@@ -322,7 +281,6 @@ const OrderStore = new BaseStore({
 
     setTime(date) {
         this.timeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -341,8 +299,8 @@ const OrderStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case ServerRequests.UPDATE:
-            if (action.data.request == "order") {
+        case ServerRequests.AJAX_SUCCESS:
+            if (action.data.request == "checkOrder") {
                 OrderStore.setValidationInfo(
                     action.data.total_sum,
                     action.data.orderGifts,
@@ -352,13 +310,15 @@ const OrderStore = new BaseStore({
                     action.data.errors
                 );
             }
-            break;
-        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "order") {
                 OrderStore.setOrderId(action.data.orderId);
             }
+            if (action.data.request == "payment_types") {
+                AppDispatcher.waitFor([PaymentsStore.dispatchToken]);
+                OrderStore.onPaymentTypesLoaded();
+            }
             break;
-        case ServerRequests.ERROR:
+        case ServerRequests.AJAX_FAILURE:
             if (action.data.request == "order") {
                 OrderStore.setOrderError(action.data.error);
             }
@@ -369,7 +329,12 @@ const OrderStore = new BaseStore({
                 OrderStore.clearCancelProcessing();
             }
             break;
-
+        case AppActions.SET_COMMENT:
+            OrderStore.setComment(action.data.comment);
+            break;
+        case AppActions.SET_PAYMENT_TYPE:
+            OrderStore.setChosenPaymentType(action.data.paymentType);
+            break;
     }
 });
 

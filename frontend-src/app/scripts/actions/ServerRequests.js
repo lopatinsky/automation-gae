@@ -3,7 +3,6 @@ import AppDispatcher from "./../AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from '../stores';
 
 const BASE_URL = 'http://chikarabar.m-test.doubleb-automation-production.appspot.com';
-const base_url = BASE_URL;
 
 function doRequest(id, method, url) {
     const req = request(method, BASE_URL + url);
@@ -44,14 +43,14 @@ const ServerRequests = {
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
 
-    sendClientInfo() {
+    sendClientInfo(name, phone, email) {
         doRequest.post('client', '/api/client')
             .type('form')
             .send({
                 client_id: ClientStore.getClientId(),
-                client_name: ClientStore.getName(),
-                client_phone: ClientStore.getPhone(),
-                client_email: ClientStore.getEmail()
+                client_name: name,
+                client_phone: phone,
+                client_email: email
             })
             .end(res => ({}));
     },
@@ -77,88 +76,39 @@ const ServerRequests = {
     },
 
     _registerClient() {
-        request
-            .post(base_url + '/api/register')
+        doRequest.post('register', '/api/register')
             .query({ client_id: ClientStore.getClientId() })
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "register",
-                            client_id: res.body.client_id
-                        }
-                    })
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_FAILURE,
-                        data: {
-                            request: "register"
-                        }
-                    })
-                }
-            });
+            .end(res => ({
+                client_id: res.body.client_id
+            }));
     },
 
     checkOrder() {
         var dict = OrderStore.getCheckOrderDict();
         if (dict) {
-            request
-                .post(base_url + '/api/check_order')
+            doRequest.post('checkOrder', '/api/check_order')
                 .type('form')
                 .send(dict)
-                .end((err, res) => {
-                    if (res.status == 200) {
-                        AppDispatcher.dispatch({
-                            actionType: this.UPDATE,
-                            data: {
-                                request: "order",
-                                total_sum: res.body.total_sum,
-                                delivery_sum: res.body.delivery_sum,
-                                delivery_sum_str: res.body.delivery_sum_str,
-                                promos: res.body.promos,
-                                errors: res.body.errors,
-                                orderGifts: res.body.new_order_gifts
-                            }
-                        });
-                    } else {
-                        AppDispatcher.dispatch({
-                            actionType: this.AJAX_FAILURE,
-                            data: {
-                                request: "order"
-                            }
-                        });
-                    }
-                });
+                .end(res => ({
+                    total_sum: res.body.total_sum,
+                    delivery_sum: res.body.delivery_sum,
+                    delivery_sum_str: res.body.delivery_sum_str,
+                    promos: res.body.promos,
+                    errors: res.body.errors,
+                    orderGifts: res.body.new_order_gifts
+                }));
         }
     },
 
     order() {
-        request
-            .post(base_url + '/api/order')
+        doRequest.post('order', '/api/order')
             .type('form')
             .send({
                 order: JSON.stringify(OrderStore.getOrderDict())
             })
-            .end((err, res) => {
-                if (res.status == 201) {
-                    AppDispatcher.dispatch({
-                        actionType: this.AJAX_SUCCESS,
-                        data: {
-                            request: "order",
-                            orderId: res.body.order_id
-                        }
-                    });
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.ERROR,
-                        data: {
-                            request: "order",
-                            error: res.body.description
-                        }
-                    });
-                }
-            });
+            .end(res => ({
+                orderId: res.body.order_id
+            }));
     },
 
     cancelOrder(order_id) {
@@ -205,45 +155,20 @@ const ServerRequests = {
     },
 
     setOrderSuccess(orderId) {
-        request
-            .post(base_url + '/api/set_order_success')
+        doRequest.post('', '/api/set_order_success')
             .type('form')
             .send({
                 order_id: orderId
             })
-            .end((err, res) => {});
+            .end(res => ({}));
     },
 
     loadHistory() {
-        AppDispatcher.dispatch({
-            actionType: this.AJAX_SENDING,
-            data: {
-                request: "history"
-            }
-        });
-        request
-            .get(base_url + '/api/history')
+        doRequest.get('history', '/api/history')
             .query({
                 client_id: ClientStore.getClientId()
             })
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.INIT,
-                        data: {
-                            request: "history",
-                            orders: res.body.orders
-                        }
-                    });
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.ERROR,
-                        data: {
-                            request: "history"
-                        }
-                    });
-                }
-            });
+            .end(res => ({orders: res.body.orders}));
     },
 
     loadPromos() {

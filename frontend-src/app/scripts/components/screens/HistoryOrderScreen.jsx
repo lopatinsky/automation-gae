@@ -49,7 +49,7 @@ const HistoryOrderScreen = React.createClass({
             }
         }
         return <div style={{display: 'table', padding: '12px'}}>
-            <FontIcon style={{display: 'table-cell', fontSize: '18px', verticalAlign: 'middle'}}
+            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
                       color={settings.primaryColor}
                       className="material-icons">
                 location_on

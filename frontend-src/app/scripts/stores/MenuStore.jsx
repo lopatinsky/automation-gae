@@ -81,9 +81,27 @@ const MenuStore = new BaseStore({
         }
         for (let sm of item.single_modifiers) {
             const quantity = singleModifierQuantities[sm.modifier_id];
-            price += sm.price * quantity;
+            if (quantity) {
+                price += sm.price * quantity;
+            }
         }
         return price;
+    },
+
+    getDefaultModifiers(item) {
+        let gmChoices = {}, smQuantities = {};
+        for (let gm of item.group_modifiers) {
+            gmChoices[gm.modifier_id] = this.getDefaultModifierChoice(gm);
+        }
+        for (let sm of item.single_modifiers) {
+            smQuantities[sm.modifier_id] = 0;
+        }
+        return [gmChoices, smQuantities];
+    },
+
+    getDefaultItemPrice(item) {
+        let [gmChoices, smQuantities] = getDefaultModifiers(item);
+        return getItemPrice(item, gmChoices, smQuantities);
     },
 
     getDefaultModifierChoice(modifier) {

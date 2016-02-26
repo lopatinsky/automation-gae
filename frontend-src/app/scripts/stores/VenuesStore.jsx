@@ -24,7 +24,6 @@ const VenuesStore = new BaseStore({
             this.chosenDelivery = venue.deliveries[0];
         }
         this.chosenVenue = venue;
-        ServerRequests.checkOrder();
         this._changed();
     },
 
@@ -34,7 +33,6 @@ const VenuesStore = new BaseStore({
 
     setChosenDelivery(delivery) {
         this.chosenDelivery = delivery;
-        ServerRequests.checkOrder();
         this._changed();
     },
 

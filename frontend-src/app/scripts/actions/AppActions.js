@@ -13,34 +13,15 @@ const AppActions = {
         ServerRequests.loadPromos();
     },
 
+    SET_CLIENT_INFO: "SET_CLIENT_INFO",
     setClientInfo(name, phone, email) {
+        ServerRequests.sendClientInfo(name, phone, email);
         AppDispatcher.dispatch({
-            actionType: this.INIT,
+            actionType: this.SET_CLIENT_INFO,
             data: {
-                request: 'client',
-                name: name,
-                phone: phone,
-                email: email
-            }
-        })
-    },
-
-    setMenuItem(item) {
-        AppDispatcher.dispatch({
-            actionType: this.INIT,
-            data: {
-                request: "menu_item",
-                item: item
-            }
-        })
-    },
-
-    setModifier(modifier) {
-        AppDispatcher.dispatch({
-            actionType: this.INIT,
-            data: {
-                request: "modifier",
-                modifier: modifier
+                name,
+                phone,
+                email
             }
         })
     },
@@ -55,6 +36,26 @@ const AppActions = {
                 }
             }
         });
+    },
+
+    SET_COMMENT: "SET_COMMENT",
+    setComment(comment) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_COMMENT,
+            data: {
+                comment
+            }
+        })
+    },
+
+    SET_PAYMENT_TYPE: "SET_PAYMENT_TYPE",
+    setPaymentType(paymentType) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_PAYMENT_TYPE,
+            data: {
+                paymentType
+            }
+        })
     }
 };
 

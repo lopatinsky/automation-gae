@@ -10,7 +10,6 @@ const MenuItem = React.createClass({
     },
 
     _onMenuItemTap() {
-        AppActions.setMenuItem(this.props.item);
         const category_id = this.props.category.info.category_id,
             item_id = this.props.item.id;
         this.context.router.push(`/item/${category_id}/${item_id}`);
@@ -18,7 +17,7 @@ const MenuItem = React.createClass({
 
     _addItem(e) {
         e.stopPropagation();
-        OrderStore.addItem(this.props.item);
+        OrderStore.addItem(this.props.item.id);
     },
 
     _getButton() {
@@ -30,7 +29,7 @@ const MenuItem = React.createClass({
             primary={true}
             label={item.price}
             icon={icon}
-            onClick={this._addItem}/>
+            onTouchTap={this._addItem}/>
     },
 
     render() {

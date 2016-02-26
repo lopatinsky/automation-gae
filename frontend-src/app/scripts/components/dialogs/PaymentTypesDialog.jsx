@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, List, ListItem, Divider } from 'material-ui';
 import { PaymentsStore } from '../../stores';
+import { AppActions } from '../../actions';
 
 const PaymentTypesDialog = React.createClass({
     getInitialState() {
@@ -10,7 +11,7 @@ const PaymentTypesDialog = React.createClass({
     },
 
     _getPaymentTypes() {
-        var payment_types = PaymentsStore.getPaymentTypes();
+        var payment_types = PaymentsStore.payment_types;
         const result = [];
         for (let pt of payment_types) {
             result.push(<ListItem key={pt.id}
@@ -29,7 +30,7 @@ const PaymentTypesDialog = React.createClass({
     },
 
     dismiss(payment_type) {
-        PaymentsStore.setChosenPaymentType(payment_type);
+        AppActions.setPaymentType(payment_type);
         this.setState({
             open: false
         });

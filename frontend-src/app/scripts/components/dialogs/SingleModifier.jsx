@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardText, FlatButton, Divider } from 'material-ui';
-import { MenuItemStore } from '../../stores';
 
 const SingleModifier = React.createClass({
     _add() {
@@ -17,7 +16,7 @@ const SingleModifier = React.createClass({
         var modifier = this.props.modifier;
         return (
             <div style={{display: 'table', width: '100%', padding: '3px 0'}}>
-                 <div style={{display: 'table-cell', width: '15%', verticalAlign: 'middle'}}>
+                <div style={{display: 'table-cell', width: '15%', verticalAlign: 'middle'}}>
                     <b>{modifier.price  + 'p.'}</b>
                 </div>
                 <div style={{display: 'table-cell', padding: '0 0 0 12px', verticalAlign: 'middle'}}>

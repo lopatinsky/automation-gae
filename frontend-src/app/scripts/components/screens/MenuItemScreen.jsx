@@ -33,7 +33,7 @@ const MenuItemScreen = React.createClass({
     },
 
     _addItem() {
-        OrderStore.addItem(MenuItemStore.getItem());
+        OrderStore.addItem(this.props.item.id, this.state.groupModifiers, this.state.singleModifiers);
     },
 
     _getModifiersTitles() {
