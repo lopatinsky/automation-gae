@@ -3,15 +3,6 @@ import { LeftNav, FontIcon, MenuItem } from 'material-ui';
 import settings from '../settings';
 import Colors from 'material-ui/lib/styles/colors';
 
-var INDEXES = {
-    '/': 0, // menu
-    '/order': 1,
-    '/venues': 2,
-    '/history': 3,
-    '/promos':4,
-    '/settings': 5
-};
-
 const NavigationDrawer = React.createClass({
     contextTypes: {
         router: React.PropTypes.object.isRequired,
@@ -20,24 +11,25 @@ const NavigationDrawer = React.createClass({
 
     toggle() {
         this.setState({
-            index: INDEXES[this.context.location.pathname],
             open: ! this.state.open
         });
     },
 
     _onItemTouchTap(route) {
         this.context.router.replace(route);
-        setImmediate(() => this.toggle());
+        this.toggle()
     },
 
-    _getItem(title, route, icon_name, index) {
-        let icon = <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', fontSize: '20px'}}
-                             color={index == this.state.index ? settings.primaryColor : Colors.grey500}
+    _getItem(title, route, icon_name) {
+        const active = this.context.router.isActive(route),
+            style = active ? {color: settings.primaryColor} : {};
+        let icon = <FontIcon style={{display: 'table-cell', width: '10%', verticalAlign: 'middle', ...style}}
                              className="material-icons">
             {icon_name}
         </FontIcon>;
-        return <MenuItem key={index}
+        return <MenuItem key={route}
                          leftIcon={icon}
+                         style={style}
                          onTouchTap={() => this._onItemTouchTap(route)}>
             {title}
         </MenuItem>;
@@ -45,18 +37,17 @@ const NavigationDrawer = React.createClass({
 
     _leftNavItems() {
         return [
-            this._getItem('Меню', '/', 'restaurant_menu', 0),
-            this._getItem('Заказ', '/order', 'shopping_basket', 1),
-            this._getItem('Адреса', '/venues', 'place', 2),
-            this._getItem('История', '/history', 'history', 3),
-            this._getItem('Акции', '/promos', 'loyalty', 4),
-            this._getItem('Настройки', '/settings', 'settings', 5)
+            this._getItem('Меню', '/menu', 'restaurant_menu'),
+            this._getItem('Заказ', '/order', 'shopping_basket'),
+            this._getItem('Адреса', '/venues', 'place'),
+            this._getItem('История', '/history', 'history'),
+            this._getItem('Акции', '/promos', 'loyalty'),
+            this._getItem('Настройки', '/settings', 'settings')
         ];
     },
 
     getInitialState() {
         return {
-            index: 0,
             open: false
         };
     },
@@ -69,7 +60,6 @@ const NavigationDrawer = React.createClass({
 
     render() {
         return <LeftNav open={this.state.open}
-                        disableSwipeToOpen={true}
                         docked={false}
                         onRequestChange={this._onRequestChange}
                         ref="leftNav">

@@ -38,28 +38,12 @@ const Toolbar = React.createClass({
     render() {
         var rightElement;
         if (this.props.right == this.ORDER_BUTTON) {
+            let icon = <FontIcon style={{fontSize: 18}} className="material-icons">shopping_basket</FontIcon>;
             var label = OrderStore.getTotalSum() + " руб.";
-            rightElement = <FlatButton
-                onClick={this.rightTap}>
-                <div style={{display: 'table'}}>
-                    <div style={{display: 'table-cell', padding: '0 6px 0 6px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={Colors.white}
-                                  className="material-icons">
-                            shopping_basket
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell'}}>
-                        {label}
-                    </div>
-                </div>
-            </FlatButton>;
+            rightElement = <FlatButton onClick={this.rightTap} label={label} icon={icon}/>;
         }
         var leftElement;
         var nestedCategory = false;
-        if (this.context.location.pathname == '/' && MenuStore.canUndoCategories()) {
-            nestedCategory = true;
-        }
         if (this.props.back == true || nestedCategory) {
             leftElement = <IconButton onClick={this.leftTap}>
                 <Icons.NavigationChevronLeft/>

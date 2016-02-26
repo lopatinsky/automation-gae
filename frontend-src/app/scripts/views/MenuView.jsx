@@ -1,12 +1,15 @@
 import React from 'react';
 import { Toolbar } from '../components';
 import { MenuScreen } from '../components/screens';
-import { MenuStore } from '../stores';
 
 const MenuView = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
+
     toolbarLeftTap() {
-        if (MenuStore.canUndoCategories()) {
-            MenuStore.undoCategories()
+        if (this.props.params.category_id) {
+            this.context.router.goBack();
         } else {
             this.props.getDrawer().toggle();
         }
@@ -17,8 +20,9 @@ const MenuView = React.createClass({
                 <Toolbar
                     title='Меню'
                     view={this}
+                    back={!!this.props.params.category_id}
                     right='order'/>
-                <MenuScreen />
+                <MenuScreen category={this.props.params.category_id} />
             </div>
         );
     }

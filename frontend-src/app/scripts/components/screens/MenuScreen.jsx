@@ -5,13 +5,11 @@ import MenuItem from './MenuItem';
 import MenuCategory from './MenuCategory';
 
 const MenuScreen = React.createClass({
-    value: null,
-
     _getItems(category) {
         if (category.categories.length > 0) {
             return category.categories.map(inner_category => {
                 return (
-                    <MenuCategory key={category.info.category_id} category={inner_category} categories={category.categories} />
+                    <MenuCategory key={inner_category.info.category_id} category={inner_category}/>
                 );
             });
         } else {
@@ -27,9 +25,8 @@ const MenuScreen = React.createClass({
         MenuStore.setSelected(menuItem.category_id);
     },
 
-    _getCategoryList() {
-        var menuCategories = MenuStore.getCategories();
-        var categories = menuCategories.map((category) => {
+    _getCategoryList(categories) {
+        var categories = categories.map((category) => {
            return <MenuCategory key={category.info.category_id} category={category} categories={[category]} />;
         });
         return <div style={{paddingTop: '76px'}}>
@@ -37,15 +34,15 @@ const MenuScreen = React.createClass({
         </div>;
     },
 
-    _getCategoryPicker() {
-        var menuItems = MenuStore.getCategories().map(category => {
+    _getCategoryPicker(categories) {
+        var menuItems = categories.map(category => {
             return {category_id: category.info.category_id, text: category.info.title};
         });
-        var categoryId = MenuStore.getSelected();
+        var categoryId = this.props.category;
         if (categoryId == null) {
             categoryId = MenuStore.getCategories()[0].info.category_id;
         }
-        var category = MenuStore.getCategory(categoryId);
+        var category = MenuStore.categoriesById[categoryId];
         return <div>
             <div style={{position: 'fixed', marginTop: '64px', zIndex: '9', width: '100%'}}>
                 <Paper>
@@ -63,8 +60,8 @@ const MenuScreen = React.createClass({
         </div>;
     },
 
-    _getTabs() {
-        var categories = MenuStore.getCategories().map((category) => {
+    _getTabs(categories) {
+        var categories = categories.map((category) => {
             return (
                 <Tab key={category.info.category_id}
                      value={category.info.category_id}
@@ -75,8 +72,7 @@ const MenuScreen = React.createClass({
         });
         return (
             <Tabs
-                value={this.state.value}
-                onChange={this._changeTab}
+                value={this.props.category_id}
                 tabItemContainerStyle={{position: 'fixed', overflow: 'auto', zIndex: '3', padding: '64px 0 0 0'}}
                 contentContainerStyle={{padding: '120px 0 0 0'}}>
                 {categories}
@@ -84,17 +80,9 @@ const MenuScreen = React.createClass({
         );
     },
 
-    _changeTab(value, e, tab) {
-        this.value = value;
-        MenuStore.setSelected(value);
-    },
-
     _refresh() {
         window.scrollTo(0, 0);
-        this.value = MenuStore.getSelected();
-        this.setState({
-            value: this.value
-        });
+        this.setState({});
     },
 
     componentDidMount() {
@@ -106,25 +94,27 @@ const MenuScreen = React.createClass({
         MenuStore.removeChangeListener(this._refresh);
     },
 
-    getInitialState() {
-        this.value = MenuStore.getSelected();
-        return {
-            value: this.value
-        }
-    },
-
     render() {
-        var menu;
-        if (MenuStore.getCategories() != null) {
-            if (MenuStore.getCategories().length < 5) {
-                menu = this._getTabs();
-            } else if (MenuStore.getCategories().length < 9) {
-                menu = this._getCategoryPicker();
+        let menu;
+        let categories;
+        if (MenuStore.rootCategories.length && this.props.category) {
+            const cat = MenuStore.categoriesById[this.props.category];
+            if (cat.categories.length) {
+                categories = cat.categories;
             } else {
-                menu = this._getCategoryList();
+                categories = [cat];
             }
         } else {
-            menu = '';
+            categories = MenuStore.rootCategories;
+        }
+        if (categories.length) {
+            if (categories.length < 5) {
+                menu = this._getTabs(categories);
+            } else if (categories.length < 9) {
+                menu = this._getCategoryPicker(categories);
+            } else {
+                menu = this._getCategoryList(categories);
+            }
         }
         return <div>
             {menu}

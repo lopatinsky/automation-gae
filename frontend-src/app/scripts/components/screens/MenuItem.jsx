@@ -23,16 +23,14 @@ const MenuItem = React.createClass({
 
     _getButton() {
         var item = this.props.item;
+        let icon = <FontIcon className="material-icons">
+            add_shopping_cart
+        </FontIcon>;
         return <RaisedButton
             primary={true}
             label={item.price}
-            onClick={this._addItem}>
-            <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                      color={Colors.white}
-                      className="material-icons">
-                add_shopping_cart
-            </FontIcon>
-        </RaisedButton>;
+            icon={icon}
+            onClick={this._addItem}/>
     },
 
     render() {
@@ -47,22 +45,24 @@ const MenuItem = React.createClass({
                 width: 140,
                 flexShrink: 0
             };
-            picCard = <div style={picCardStyle}/>;
+            picCard = <div style={picCardStyle}></div>;
         }
-        const content = <div style={{padding: 12, flexGrow: 1}}>
+        const content = <div style={{padding: 12, flexGrow: 1, display: 'flex', flexDirection: 'column'}}>
             <div style={{marginBottom: 4}}>{item.title}</div>
             {item.description && <div style={{fontSize: 12, marginBottom: 4}}>{item.description}</div>}
             {item.weight > 0 && <div style={{fontSize: 12, marginBottom: 4}}>{item.weight} г</div>}
             {item.volume > 0 && <div style={{fontSize: 12, marginBottom: 4}}>{item.volume} мл</div>}
+            <div style={{flexGrow: 1}}></div>
             <div style={{textAlign: 'right'}}>
                 {this._getButton()}
             </div>
         </div>;
-        return <Paper style={{margin:'0 12px 12px', display: 'flex'}}
-                      onClick={this._onMenuItemTap}>
+        const minHeight = picCard ? 105 : null;
+        return <Paper style={{margin:'0 12px 12px', display: 'flex', minHeight}}
+                      onTouchTap={this._onMenuItemTap}>
             {picCard}
             {content}
-        </Paper>
+        </Paper>;
     }
 });
 

@@ -154,7 +154,7 @@ const OrderStore = new BaseStore({
         }
         var found = false;
         for (var i = 0; i < this.items.length; i++) {
-            if (this.compareItems(item, this.items[i]) == true) {
+            if (this.compareItems(item, this.items[i])) {
                 this.items[i].quantity += 1;
                 found = true;
             }

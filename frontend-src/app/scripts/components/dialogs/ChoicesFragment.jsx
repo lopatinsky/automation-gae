@@ -1,39 +1,21 @@
 import React from 'react';
 import { List, ListItem, Divider, FontIcon } from 'material-ui';
-import { ModifierStore, MenuItemStore } from '../../stores';
 import settings from '../../settings';
 
 const ChoicesFragment = React.createClass({
-    _refresh() {
-        this.setState({
-            modifier: ModifierStore.getModifier()
-        });
-    },
-
     _onChoiceTap(choice) {
-        MenuItemStore.setChoice(ModifierStore.getModifier(), choice);
-        this.props.dialog.dismiss();
-    },
-
-    getInitialState: function() {
-        return {
-            modifier: ModifierStore.getModifier()
-        }
-    },
-
-    componentDidMount() {
-        ModifierStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        ModifierStore.removeChangeListener(this._refresh);
+        this.props.onChange(this.props.modifier.modifier_id, choice);
+        this.props.requestClose();
     },
 
     getChoices() {
-        var choices = this.state.modifier.choices;
-        return choices.map(choice => {
-            var title = <div style={{display: 'table', width: '100%', tableLayout: 'fixed'}}>
-                {this.state.modifier.with_price ?
+        if (!this.props.modifier) {
+            return null;
+        }
+        const result = [];
+        for (let choice of this.props.modifier.choices) {
+            let title = <div style={{display: 'table', width: '100%', tableLayout: 'fixed'}}>
+                {choice.price ?
                     <div style={{display: 'table-cell', padding: '0 6px 0 0', width: '30%', verticalAlign: 'middle'}}>
                         <b>{choice.price + 'р.'}</b>
                     </div>
@@ -42,23 +24,22 @@ const ChoicesFragment = React.createClass({
                     {choice.title}
                 </div>
                 <div style={{display: 'table-cell', textAlign: 'right'}}>
-                    {this.state.modifier.chosen_choice == choice ?
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '32px'}}
+                    {choice == this.props.chosen ?
+                        <FontIcon style={{verticalAlign: 'middle'}}
                                   color={settings.primaryColor}
                                   className="material-icons">
                             done
                         </FontIcon>
-                    : <div/>}
+                    : null}
                 </div>
             </div>;
-            return <div>
-                    <ListItem
-                        primaryText={title}
-                        onClick={() => this._onChoiceTap(choice)}/>
-                    <Divider/>
-                </div>;
-
-        });
+            result.push(<ListItem key={choice.id}
+                                  primaryText={title}
+                                  onClick={() => this._onChoiceTap(choice)}/>);
+            result.push(<Divider key={`divider_${choice.id}`}/>);
+        }
+        result.pop();
+        return result;
     },
 
     render() {

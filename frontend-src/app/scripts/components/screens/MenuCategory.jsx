@@ -3,9 +3,12 @@ import { Paper, FlatButton } from 'material-ui';
 import { MenuStore } from '../../stores';
 
 const MenuCategory = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+    },
+
     _onMenuCategoryTap() {
-        MenuStore.nextCategories(this.props.categories);
-        MenuStore.setSelected(this.props.category.info.category_id);
+        this.context.router.push(`/menu/${this.props.category.info.category_id}`);
     },
 
     render() {
@@ -19,7 +22,7 @@ const MenuCategory = React.createClass({
             flexShrink: 0
         },
             picCard = <div style={picCardStyle}/>;
-        const content = <div style={{padding: 12, flexGrow: 1}}>
+        const content = <div style={{padding: 12, flexGrow: 1, alignSelf: 'center'}}>
             {category.info.title}
         </div>;
         return <Paper style={{margin:'0 12px 12px', display: 'flex', minHeight: 105}}
