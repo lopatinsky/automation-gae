@@ -6,7 +6,7 @@ import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGr
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
-import { ServerRequests } from '../../actions';
+import { AppActions, ServerRequests } from '../../actions';
 import settings from '../../settings';
 
 const OrderScreen = React.createClass({
@@ -18,23 +18,53 @@ const OrderScreen = React.createClass({
         ServerRequests.order();
     },
 
-    _refresh() {
-        var orderId = OrderStore.getOrderId();
+    _stateFromOrderStore() {
+        return {
+            chosenDeliveryType: OrderStore.chosenDeliveryType,
+            chosenVenue: OrderStore.chosenVenue,
+            chosenPaymentType: OrderStore.chosenPaymentType,
+            slotId: OrderStore.slotId,
+            comment: OrderStore.comment,
+
+            items: OrderStore.items,
+            orderGifts: OrderStore.orderGifts,
+
+            menuTotalSum: OrderStore.getTotalSum(),
+            validationSum: OrderStore.validationSum,
+            deliverySum: OrderStore.deliverySum,
+            deliverySumStr: OrderStore.deliverySumStr,
+
+            errors: OrderStore.errors,
+            promos: OrderStore.promos
+        };
+    },
+
+    _onOrderStoreChanged(data) {
+        data = data || {};
+        var orderId = data.orderId;
         if (orderId != null) {
             this.context.router.push(`/order/${orderId}`);
         }
-        var delivery = OrderStore.chosenDeliveryType;
-        if (delivery) {
-            var slots = delivery.slots;
-            if (slots.length > 0 && OrderStore.slotId == null) {
-                OrderStore.setSlotId(slots[0].id);
-            }
+        if (data.orderError) {
+            this.setState({
+                orderError: data.orderError
+            })
         }
-        this.setState({error: OrderStore.orderError});
+        this.setState(this._stateFromOrderStore());
+        if (data.checkOrder) {
+            setImmediate(ServerRequests.checkOrder);
+        }
+    },
+
+    getInitialState() {
+        return {
+            orderError: null,
+            ...this._stateFromOrderStore()
+        };
     },
 
     _getServerInfo() {
-        if (OrderStore.errors.length) {
+        if (this.state.errors.length) {
             return <div style={{padding: '12px 48px 0 36px', color: 'red'}}>
                 {this._getErrors()}
             </div>
@@ -47,9 +77,9 @@ const OrderScreen = React.createClass({
     },
 
     _getPromos() {
-        if (OrderStore.promos.length > 0) {
+        if (this.state.promos.length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
-                {OrderStore.promos.map((promo, i) => {
+                {this.state.promos.map((promo, i) => {
                     return <div key={i}>{promo.text + '\n'}</div>
                 })}
             </div>;
@@ -59,10 +89,10 @@ const OrderScreen = React.createClass({
     },
 
     _getDeliveryDescription() {
-        var delivery = OrderStore.chosenDeliveryType;
-        if (delivery && delivery.id == 2 && OrderStore.deliverySumStr.length > 0) {
+        var delivery = this.state.chosenDeliveryType;
+        if (delivery && delivery.id == 2 && this.state.deliverySumStr) {
             return <div style={{padding: '12px 48px 0 36px'}}>
-                {OrderStore.deliverySumStr}
+                {this.state.deliverySumStr}
             </div>;
         } else {
             return null;
@@ -70,30 +100,28 @@ const OrderScreen = React.createClass({
     },
 
     _getErrors() {
-        return OrderStore.errors.map((error, i) => {
+        return this.state.errors.map((error, i) => {
             return <div key={i}>{error + '\n'}</div>;
         });
     },
 
     _getTotalSum() {
-        var menuTotalSum = OrderStore.getTotalSum();
         const style = {textAlign: 'right'};
-        if (menuTotalSum != OrderStore.validationSum + OrderStore.deliverySum) {
+        if (this.state.menuTotalSum != this.state.validationSum + this.state.deliverySum) {
             return <div style={style}>
                 Итого:{' '}
-                <strike>{menuTotalSum}</strike>{' '}
-                {OrderStore.validationSum + OrderStore.deliverySum}
+                <strike>{this.state.menuTotalSum}</strike>{' '}
+                {this.state.validationSum + this.state.deliverySum}
             </div>;
         } else {
             return <div style={style}>
-                Итого:{' '}
-                {OrderStore.validationSum + OrderStore.deliverySum}
+                Итого: {this.state.menuTotalSum}
             </div>;
         }
     },
 
     _getItems() {
-        return OrderStore.items.map((item, i) => {
+        return this.state.items.map((item, i) => {
             return (
                 <OrderMenuItem key={i} item={item} />
             );
@@ -101,7 +129,7 @@ const OrderScreen = React.createClass({
     },
 
     _getOrderGifts() {
-        return OrderStore.orderGifts.map((item, i) => {
+        return this.state.orderGifts.map((item, i) => {
             return (
                 <OrderMenuItem key={i} item={item} gift={true} />
             );
@@ -133,7 +161,7 @@ const OrderScreen = React.createClass({
     },
 
     _onDeliveryTap(delivery) {
-        VenuesStore.setChosenDelivery(delivery);
+        AppActions.setDeliveryType(delivery);
     },
 
     _onSlotTap() {
@@ -141,7 +169,7 @@ const OrderScreen = React.createClass({
     },
 
     _getVenueInput() {
-        var delivery = OrderStore.chosenDeliveryType;
+        var delivery = this.state.chosenDeliveryType;
         if (!delivery) {
             return null;
         }
@@ -156,7 +184,7 @@ const OrderScreen = React.createClass({
             </ListItem>;
         } else {
             return <ListItem
-                        primaryText={OrderStore.chosenVenue.title}
+                        primaryText={this.state.chosenVenue.title}
                         leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
@@ -176,12 +204,12 @@ const OrderScreen = React.createClass({
     },
 
     _getTimeInput() {
-        var delivery = OrderStore.chosenDeliveryType;
+        var delivery = this.state.chosenDeliveryType;
         if (!delivery) {
             return null;
         }
         if (delivery.slots.length > 0) {
-            var slot = VenuesStore.getSlot(OrderStore.chosenDeliveryType, OrderStore.slotId);
+            var slot = VenuesStore.getSlot(this.state.chosenDeliveryType, this.state.slotId);
             if (slot == null) {
                 slot = {
                     name: 'Загружается...'
@@ -218,7 +246,7 @@ const OrderScreen = React.createClass({
     },
 
     _getDeliveryTypes() {
-        var venue = OrderStore.chosenVenue;
+        var venue = this.state.chosenVenue;
         if (venue) {
             return venue.deliveries.map(delivery => {
                 return (
@@ -245,7 +273,7 @@ const OrderScreen = React.createClass({
     },
 
     _getPaymentType() {
-        let pt = OrderStore.chosenPaymentType,
+        let pt = this.state.chosenPaymentType,
             title = pt ? pt.really_title : 'Выберите способ оплаты';
         return <ListItem
                     primaryText={title}
@@ -257,7 +285,7 @@ const OrderScreen = React.createClass({
     },
 
     _getComment() {
-        const comment = OrderStore.comment,
+        const comment = this.state.comment,
             style = comment ? {} : {color: '#bbbbbb'};
         return <ListItem
                     primaryText={comment ? comment : 'Комментарий'}
@@ -270,29 +298,16 @@ const OrderScreen = React.createClass({
     },
 
     componentDidMount() {
-        this._refresh();
-        ServerRequests.checkOrder();
-        VenuesStore.addChangeListener(this._refresh);
-        OrderStore.addChangeListener(this._refresh);
-        ClientStore.addChangeListener(this._refresh);
-        PaymentsStore.addChangeListener(this._refresh);
+        ServerRequests.checkOrder()
+        OrderStore.addChangeListener(this._onOrderStoreChanged);
     },
 
     componentWillUnmount() {
-        VenuesStore.removeChangeListener(this._refresh);
-        OrderStore.removeChangeListener(this._refresh);
-        ClientStore.removeChangeListener(this._refresh);
-        PaymentsStore.removeChangeListener(this._refresh);
-    },
-
-    getInitialState() {
-        return {
-            error: null
-        };
+        OrderStore.removeChangeListener(this._onOrderStoreChanged);
     },
 
     render() {
-        var delivery = OrderStore.chosenDeliveryType;
+        var delivery = this.state.chosenDeliveryType;
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
@@ -342,9 +357,9 @@ const OrderScreen = React.createClass({
             <Snackbar
                 ref='orderSnackBar'
                 style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
-                message={this.state.error || ''}
+                message={this.state.orderError || ''}
                 autoHideDuration={5000}
-                open={!! this.state.error}
+                open={!! this.state.orderError}
                 onRequestClose={() => {this.setState({error: null}); OrderStore.setOrderError(null)}}/>
         </div>;
     }

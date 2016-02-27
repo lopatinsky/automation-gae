@@ -6,14 +6,28 @@ import { AppActions } from '../../actions';
 const PaymentTypesDialog = React.createClass({
     getInitialState() {
         return {
+            paymentTypes: PaymentsStore.payment_types,
             open: false
         };
     },
 
+    _onPaymentsStoreChange() {
+        this.setState({
+            paymentTypes: PaymentsStore.payment_types
+        });
+    },
+
+    componentDidMount() {
+        PaymentsStore.addChangeListener(this._onPaymentsStoreChange);
+    },
+
+    componentWillUnmount() {
+        PaymentsStore.removeChangeListener(this._onPaymentsStoreChange);
+    },
+
     _getPaymentTypes() {
-        var payment_types = PaymentsStore.payment_types;
         const result = [];
-        for (let pt of payment_types) {
+        for (let pt of this.state.paymentTypes) {
             result.push(<ListItem key={pt.id}
                                   primaryText={pt.really_title}
                                   onTouchTap={() => this.dismiss(pt)}/>);

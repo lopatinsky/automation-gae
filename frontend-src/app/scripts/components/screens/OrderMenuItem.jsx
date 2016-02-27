@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card, CardText, FlatButton, CardMedia, IconButton } from 'material-ui';
-import { MenuStore, OrderStore } from '../../stores';
 import settings from '../../settings';
+import { AppActions } from '../../actions';
 
 const OrderMenuItem = React.createClass({
     _removeItem() {
-        OrderStore.removeItem(this.props.item);
+        AppActions.removeItem(this.props.item);
     },
 
     _getGroupModifiers(orderItem) {

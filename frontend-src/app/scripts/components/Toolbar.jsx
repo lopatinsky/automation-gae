@@ -11,8 +11,16 @@ const Toolbar = React.createClass({
 
     ORDER_BUTTON: 'order',
 
-    _refresh() {
-        this.setState({});
+    getInitialState() {
+        return {
+            orderTotal: OrderStore.getTotalSum()
+        };
+    },
+
+    _onOrderChangeListener() {
+        this.setState({
+            orderTotal: OrderStore.getTotalSum()
+        });
     },
 
     leftTap() {
@@ -26,20 +34,18 @@ const Toolbar = React.createClass({
     },
 
     componentDidMount() {
-        OrderStore.addChangeListener(this._refresh);
-        MenuStore.addChangeListener(this._refresh);
+        OrderStore.addChangeListener(this._onOrderChangeListener);
     },
 
     componentWillUnmount() {
-        OrderStore.removeChangeListener(this._refresh);
-        MenuStore.removeChangeListener(this._refresh);
+        OrderStore.removeChangeListener(this._onOrderChangeListener);
     },
 
     render() {
         var rightElement;
         if (this.props.right == this.ORDER_BUTTON) {
             let icon = <FontIcon className="material-icons">shopping_basket</FontIcon>;
-            var label = OrderStore.getTotalSum() + " руб.";
+            var label = this.state.orderTotal + " руб.";
             rightElement = <FlatButton onTouchTap={this.rightTap} label={label} icon={icon}/>;
         }
         var leftElement;

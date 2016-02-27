@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, Divider, Icons, IconButton, FontIcon }
     from 'material-ui';
-import { MenuStore, OrderStore } from '../../stores';
+import { MenuStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
 import { AppActions } from '../../actions';
 import Colors from 'material-ui/lib/styles/colors';
@@ -33,7 +33,7 @@ const MenuItemScreen = React.createClass({
     },
 
     _addItem() {
-        OrderStore.addItem(this.props.item.id, this.state.groupModifiers, this.state.singleModifiers);
+        AppActions.addItem(this.props.item.id, this.state.groupModifiers, this.state.singleModifiers);
     },
 
     _getModifiersTitles() {

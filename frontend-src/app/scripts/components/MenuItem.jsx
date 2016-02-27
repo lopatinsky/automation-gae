@@ -1,7 +1,6 @@
 import React from 'react';
 import { Paper, RaisedButton, FontIcon } from 'material-ui';
-import { OrderStore } from '../../stores';
-import { AppActions } from '../../actions';
+import { AppActions } from '../actions';
 import Colors from 'material-ui/lib/styles/colors';
 
 const MenuItem = React.createClass({
@@ -17,7 +16,7 @@ const MenuItem = React.createClass({
 
     _addItem(e) {
         e.stopPropagation();
-        OrderStore.addItem(this.props.item.id);
+        AppActions.addItem(this.props.item.id);
     },
 
     _getButton() {

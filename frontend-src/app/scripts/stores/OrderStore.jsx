@@ -11,7 +11,6 @@ const OrderStore = new BaseStore({
     chosenPaymentType: null,
     chosenVenue: null,
     chosenDeliveryType: null,
-    orderId: null,
     validationSum: 0,
     deliverySum: 0,
     deliverySumStr: '',
@@ -23,7 +22,6 @@ const OrderStore = new BaseStore({
     timeStr: null,
     promos: [],
     errors: [],
-    orderError: null,
     cancelProcessing: false,
     cancelDescription: null,
 
@@ -35,7 +33,7 @@ const OrderStore = new BaseStore({
 
     setChosenPaymentType(paymentType) {
         this.chosenPaymentType = paymentType;
-        this._changed();
+        this._changed({checkOrder: true});
     },
 
     onVenuesLoaded() {
@@ -44,26 +42,43 @@ const OrderStore = new BaseStore({
         }
     },
 
-    setChosenDeliveryType(deliveryType) {
+    setChosenDeliveryType(deliveryType, silent) {
         this.chosenDeliveryType = deliveryType;
-        this._changed();
+        if (deliveryType.slots.length) {
+            let found = false;
+            if (this.slotId != null) {
+                for (let slot of deliveryType.slots) {
+                    if (slot.id == this.slotId) {
+                        found = true;
+                    }
+                }
+            }
+            if (!found && deliveryType.slots.length) {
+                this.slotId = deliveryType.slots[0].id;
+            }
+        } else {
+            this.slotId = null;
+        }
+        if (!silent) {
+            this._changed({checkOrder: true});
+        }
     },
 
     setChosenVenue(venue) {
         var found = false;
         if (this.chosenDeliveryType != null) {
-            for (var i = 0; i < venue.deliveries.length; i++) {
-                if (this.chosenDeliveryType.id == venue.deliveries[i].id) {
+            for (let delivery of venue.deliveries) {
+                if (this.chosenDeliveryType.id == delivery.id) {
                     found = true;
-                    this.chosenDeliveryType = venue.deliveries[i];
+                    this.setChosenDeliveryType(delivery, true);
                 }
             }
         }
         if (found == false && venue.deliveries.length > 0) {
-            this.chosenDeliveryType = venue.deliveries[0];
+            this.setChosenDeliveryType(venue.deliveries[0], true);
         }
         this.chosenVenue = venue;
-        this._changed();
+        this._changed({checkOrder: true});
     },
 
     getPaymentDict() {
@@ -145,7 +160,7 @@ const OrderStore = new BaseStore({
 
     setSlotId(slotId) {
         this.slotId = slotId;
-        this._changed();
+        this._changed({checkOrder: true});
     },
 
     addItem(itemId, groupModifiers, singleModifiers) {
@@ -171,13 +186,13 @@ const OrderStore = new BaseStore({
             this.items.push(orderItem);
         }
         this.validationSum = this.getTotalSum();
-        this._changed();
+        this._changed({checkOrder: true});
     },
 
     removeItem(item) {
         this.items.splice(this.items.indexOf(item), 1);
         this.validationSum = this.getTotalSum();
-        this._changed();
+        this._changed({checkOrder: true});
     },
 
     compareItems(orderItem1, orderItem2) {
@@ -261,13 +276,11 @@ const OrderStore = new BaseStore({
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
         this.errors = errors;
-        this.orderError = null;
         this._changed();
     },
 
     setOrderError(error) {
-        this.orderError = error;
-        this._changed();
+        this._changed({orderError: error});
     },
 
     setCancelDescription(description) {
@@ -286,23 +299,13 @@ const OrderStore = new BaseStore({
     },
 
     setOrderId(orderId) {
-        this.orderId = orderId;
-        this.orderError = null;
-        this._changed();
+        this._changed({orderId});
         ServerRequests.setOrderSuccess(orderId);
-    },
-
-    clearOrderId() {
-        this.orderId = null;
     },
 
     setComment(comment) {
         this.comment = comment;
         this._changed();
-    },
-
-    getOrderId() {
-        return this.orderId;
     },
 
     setDay(date) {
@@ -377,6 +380,12 @@ const OrderStore = new BaseStore({
             break;
         case AppActions.SET_SLOT_ID:
             OrderStore.setSlotId(action.data.slotId);
+            break;
+        case AppActions.ADD_ITEM:
+            OrderStore.addItem(action.data.itemId, action.data.groupModifierChoices, action.data.singleModifierQuantities);
+            break;
+        case AppActions.REMOVE_ITEM:
+            OrderStore.removeItem(action.data.item);
             break;
     }
 });

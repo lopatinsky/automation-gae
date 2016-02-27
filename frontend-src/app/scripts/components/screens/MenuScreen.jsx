@@ -1,8 +1,8 @@
 import React from 'react';
 import { Tabs, Tab, RefreshIndicator, DropDownMenu, Card, Paper } from 'material-ui';
 import { MenuStore } from '../../stores';
-import MenuItem from './MenuItem';
-import MenuCategory from './MenuCategory';
+import MenuItem from '../MenuItem';
+import MenuCategory from '../MenuCategory';
 
 const MenuScreen = React.createClass({
     _getItems(category) {
@@ -87,7 +87,6 @@ const MenuScreen = React.createClass({
 
     componentDidMount() {
         MenuStore.addChangeListener(this._refresh);
-        this._refresh();
     },
 
     componentWillUnmount() {

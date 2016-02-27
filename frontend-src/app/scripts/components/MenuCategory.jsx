@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, FlatButton } from 'material-ui';
-import { MenuStore } from '../../stores';
+import { MenuStore } from '../stores';
 
 const MenuCategory = React.createClass({
     contextTypes: {

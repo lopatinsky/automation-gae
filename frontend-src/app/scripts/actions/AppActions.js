@@ -23,7 +23,7 @@ const AppActions = {
                 phone,
                 email
             }
-        })
+        });
     },
 
     SET_ADDRESS: "SET_ADDRESS",
@@ -45,7 +45,7 @@ const AppActions = {
             data: {
                 comment
             }
-        })
+        });
     },
 
     SET_PAYMENT_TYPE: "SET_PAYMENT_TYPE",
@@ -55,7 +55,7 @@ const AppActions = {
             data: {
                 paymentType
             }
-        })
+        });
     },
 
     SET_DELIVERY_TYPE: "SET_DELIVERY_TYPES",
@@ -65,7 +65,7 @@ const AppActions = {
             data: {
                 deliveryType
             }
-        })
+        });
     },
 
     SET_VENUE: "SET_VENUE",
@@ -75,15 +75,37 @@ const AppActions = {
             data: {
                 venue
             }
-        })
+        });
     },
 
     SET_SLOT_ID: "SET_SLOT_ID",
     setSlotId(slotId) {
         AppDispatcher.dispatch({
-            actionType: this.SET_SLOT,
+            actionType: this.SET_SLOT_ID,
             data: {
                 slotId
+            }
+        });
+    },
+
+    ADD_ITEM: "ADD_ITEM",
+    addItem(itemId, groupModifierChoices, singleModifierQuantities) {
+        AppDispatcher.dispatch({
+            actionType: this.ADD_ITEM,
+            data: {
+                itemId,
+                groupModifierChoices,
+                singleModifierQuantities
+            }
+        });
+    },
+
+    REMOVE_ITEM: "REMOVE_ITEM",
+    removeItem(orderItem) {
+        AppDispatcher.dispatch({
+            actionType: this.REMOVE_ITEM,
+            data: {
+                item: orderItem
             }
         })
     }
