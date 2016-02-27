@@ -70,7 +70,7 @@ const ClientInfoDialog = React.createClass({
                         onChange={this._refresh}/>
                 </Card>
                 <div>
-                    <FlatButton label="Ок" onClick={this._submit} />
+                    <FlatButton label="Ок" onTouchTap={this._submit} />
                 </div>
             </Dialog>
         );

@@ -22,7 +22,7 @@ const MenuItemView = React.createClass({
     render() {
         var item = MenuStore.itemsById[this.props.params.item_id];
         if (item == null) {
-            return <div/>;
+            return null;
         }
         return (
             <div>

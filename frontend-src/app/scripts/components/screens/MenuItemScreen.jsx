@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, Divider, Icons, IconButton, FontIcon }
     from 'material-ui';
-import { MenuStore, ModifierStore, OrderStore } from '../../stores';
+import { MenuStore, OrderStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
 import { AppActions } from '../../actions';
 import Colors from 'material-ui/lib/styles/colors';
@@ -85,7 +85,7 @@ const MenuItemScreen = React.createClass({
                 <ListItem key={modifier.modifier_id}
                     rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
                     primaryText={chosenChoice ? chosenChoice.title : 'Не выбрано'}
-                    onClick={() => this._onModifierTap(modifier)}/>
+                    onTouchTap={() => this._onModifierTap(modifier)}/>
             );
         });
     },
@@ -96,7 +96,7 @@ const MenuItemScreen = React.createClass({
             return <ListItem
                         rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
                         primaryText={'Добавки'}
-                        onClick={() => this._onSingleModifierTap()}/>;
+                        onTouchTap={() => this._onSingleModifierTap()}/>;
         }
     },
 
@@ -159,7 +159,7 @@ const MenuItemScreen = React.createClass({
                         style={{margin: '12px', float: 'right'}}
                         label={MenuStore.getItemPrice(this.props.item, this.state.groupModifiers, this.state.singleModifiers)}
                         icon={btnIcon}
-                        onClick={this._addItem}/>
+                        onTouchTap={this._addItem}/>
                 </Card>
                 <ModifierDialog ref="modifierDialog"
                                 modifier={this.state.openedGroupModifier}

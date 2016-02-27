@@ -23,7 +23,7 @@ const OrderScreen = React.createClass({
         if (orderId != null) {
             this.context.router.push(`/order/${orderId}`);
         }
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = OrderStore.chosenDeliveryType;
         if (delivery) {
             var slots = delivery.slots;
             if (slots.length > 0 && OrderStore.slotId == null) {
@@ -59,7 +59,7 @@ const OrderScreen = React.createClass({
     },
 
     _getDeliveryDescription() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = OrderStore.chosenDeliveryType;
         if (delivery && delivery.id == 2 && OrderStore.deliverySumStr.length > 0) {
             return <div style={{padding: '12px 48px 0 36px'}}>
                 {OrderStore.deliverySumStr}
@@ -141,9 +141,9 @@ const OrderScreen = React.createClass({
     },
 
     _getVenueInput() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = OrderStore.chosenDeliveryType;
         if (!delivery) {
-            return <div/>;
+            return null;
         }
         if (delivery.id == '2') {
             return <ListItem
@@ -152,16 +152,16 @@ const OrderScreen = React.createClass({
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
-                        onClick={this._onAddressTap}>
+                        onTouchTap={this._onAddressTap}>
             </ListItem>;
         } else {
             return <ListItem
-                        primaryText={VenuesStore.getChosenVenue().title}
+                        primaryText={OrderStore.chosenVenue.title}
                         leftIcon={<FontIcon color={settings.primaryColor}
                                             className="material-icons">
                                       location_on
                                   </FontIcon>}
-                        onClick={this._onVenueTap}>
+                        onTouchTap={this._onVenueTap}>
             </ListItem>;
         }
     },
@@ -176,12 +176,12 @@ const OrderScreen = React.createClass({
     },
 
     _getTimeInput() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = OrderStore.chosenDeliveryType;
         if (!delivery) {
             return null;
         }
         if (delivery.slots.length > 0) {
-            var slot = VenuesStore.getSlot(OrderStore.slotId);
+            var slot = VenuesStore.getSlot(OrderStore.chosenDeliveryType, OrderStore.slotId);
             if (slot == null) {
                 slot = {
                     name: 'Загружается...'
@@ -193,7 +193,7 @@ const OrderScreen = React.createClass({
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
-                        onClick={this._onSlotTap}/>;
+                        onTouchTap={this._onSlotTap}/>;
         } else {
             return <div>
                 <ListItem
@@ -202,7 +202,7 @@ const OrderScreen = React.createClass({
                                             className="material-icons">
                                       schedule
                                   </FontIcon>}
-                        onClick={() => this.refs.datePicker.show()}>
+                        onTouchTap={() => this.refs.datePicker.show()}>
                 </ListItem>
                 <DatePickerDialog
                     ref='datePicker'
@@ -218,7 +218,7 @@ const OrderScreen = React.createClass({
     },
 
     _getDeliveryTypes() {
-        var venue = VenuesStore.getChosenVenue();
+        var venue = OrderStore.chosenVenue;
         if (venue) {
             return venue.deliveries.map(delivery => {
                 return (
@@ -241,7 +241,7 @@ const OrderScreen = React.createClass({
                                         className="material-icons">
                                   perm_identity
                               </FontIcon>}
-                    onClick={this._onClientInfoTap}/>;
+                    onTouchTap={this._onClientInfoTap}/>;
     },
 
     _getPaymentType() {
@@ -253,7 +253,7 @@ const OrderScreen = React.createClass({
                                         className="material-icons">
                                   account_balance_wallet
                               </FontIcon>}
-                    onClick={this._onPaymentTypeTap}/>;
+                    onTouchTap={this._onPaymentTypeTap}/>;
     },
 
     _getComment() {
@@ -266,7 +266,7 @@ const OrderScreen = React.createClass({
                                         className="material-icons">
                                 comment
                               </FontIcon>}
-                    onClick={this._onCommentTap}/>;
+                    onTouchTap={this._onCommentTap}/>;
     },
 
     componentDidMount() {
@@ -292,7 +292,7 @@ const OrderScreen = React.createClass({
     },
 
     render() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = OrderStore.chosenDeliveryType;
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
@@ -300,7 +300,7 @@ const OrderScreen = React.createClass({
                 <RaisedButton
                     labelStyle={{color: settings.primaryColor}}
                     label='Меню'
-                    onClick={this._onMenuTap}
+                    onTouchTap={this._onMenuTap}
                     style={{width: '100%'}} />
             </div>
             <div style={{padding: '12px 24px 0 12px'}}>
@@ -336,7 +336,7 @@ const OrderScreen = React.createClass({
                 <RaisedButton
                     primary={true}
                     label='Заказать'
-                    onClick={this._order}
+                    onTouchTap={this._order}
                     style={{display: 'block', margin: '0 12px 12px'}} />
             </div>
             <Snackbar

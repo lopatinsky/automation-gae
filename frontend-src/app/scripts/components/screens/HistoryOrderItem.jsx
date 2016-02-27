@@ -35,7 +35,7 @@ const HistoryOrderItem = React.createClass({
             </div>;
         } else {
             width = '85%';
-            picCard = <div/>;
+            picCard = null;
         }
         return (
             <div>

@@ -1,54 +1,61 @@
 import React from 'react';
-import { Card, CardText, CardMedia } from 'material-ui';
+import { Paper } from 'material-ui';
 import { PromosStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 
 const PromosScreen = React.createClass({
-    _refresh() {
-        this.setState({});
+    getInitialState() {
+        return {
+            promos: PromosStore.promos
+        };
     },
 
-    getPromos() {
-        var promos = PromosStore.getPromos();
-        if (promos.length == 0) {
-            return <div style={{textAlign: 'center'}}>
-                Нет подходящих акций
-            </div>;
-        }
-        return promos.map(promo => {
-            var picCard = <div style={{display: 'table-cell', width: '25%', padding: '0 12px 12px 12px'}}>
-                <CardMedia>
-                    <img src={promo.icon}/>
-                </CardMedia>
-            </div>;
-            if (promo.icon == null || promo.icon == '') {
-                picCard = <div/>;
-            }
-            var descriptionCard = <div style={{lineHeight: '120%', padding: '6px 0 12px 0'}}>
-                {promo.description}
-            </div>;
-            if (promo.description == '') {
-                descriptionCard = <div/>;
-            }
-            return <Card key={promo.id} style={{margin: '0 12px 12px 12px'}}>
-                {picCard}
-                <div style={{display: 'table-cell', padding: '12px 12px 0 6px'}}>
-                    <div style={{lineHeight: '120%'}}>
-                        <b>{promo.title}</b>
-                    </div>
-                    {descriptionCard}
-                </div>
-            </Card>;
+    _onPromosStoreChanged() {
+        this.setState({
+            promos: PromosStore.promos
         });
     },
 
     componentDidMount() {
-        ServerRequests.loadPromos();
-        PromosStore.addChangeListener(this._refresh);
+        PromosStore.addChangeListener(this._onPromosStoreChanged);
     },
 
     componentWillUnmount() {
-        PromosStore.removeChangeListener(this._refresh);
+        PromosStore.removeChangeListener(this._onPromosStoreChanged);
+    },
+
+    getPromos() {
+        if (this.state.promos.length == 0) {
+            return <div style={{textAlign: 'center'}}>
+                Нет подходящих акций
+            </div>;
+        }
+        return this.state.promos.map(promo => {
+            let picCard = null;
+            if (promo.icon) {
+                const picCardStyle = {
+                    backgroundImage: `url(${promo.icon})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: 'contain',
+                    width: 76,
+                    flexShrink: 0,
+                    margin: 12
+                };
+                picCard = <div style={picCardStyle}></div>;
+            }
+            const content = <div style={{padding: 12, flexGrow: 1}}>
+                <div style={{marginBottom: 4}}>{promo.title}</div>
+                {promo.description && <div style={{fontSize: 12, marginBottom: 4}}>{promo.description}</div>}
+            </div>;
+            const minHeight = picCard ? 100 : null;
+            return <Paper key={promo.id}
+                          style={{margin:'0 12px 12px', display: 'flex', minHeight}}
+                          onTouchTap={this._onMenuItemTap}>
+                {picCard}
+                {content}
+            </Paper>;
+        });
     },
 
     render() {

@@ -24,7 +24,7 @@ const SettingsScreen = React.createClass({
                                     className="material-icons">
                               perm_identity
                           </FontIcon>}
-                onClick={this._onClientInfoTap}/>;
+                onTouchTap={this._onClientInfoTap}/>;
     },
 
     _getFeedback() {
@@ -34,7 +34,7 @@ const SettingsScreen = React.createClass({
                                     className="material-icons">
                               feedback
                           </FontIcon>}
-                onClick={this._onFeedback}/>;
+                onTouchTap={this._onFeedback}/>;
     },
 
     render() {

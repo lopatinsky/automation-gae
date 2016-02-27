@@ -35,7 +35,7 @@ const ChoicesFragment = React.createClass({
             </div>;
             result.push(<ListItem key={choice.id}
                                   primaryText={title}
-                                  onClick={() => this._onChoiceTap(choice)}/>);
+                                  onTouchTap={() => this._onChoiceTap(choice)}/>);
             result.push(<Divider key={`divider_${choice.id}`}/>);
         }
         result.pop();

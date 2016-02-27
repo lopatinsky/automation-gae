@@ -56,6 +56,36 @@ const AppActions = {
                 paymentType
             }
         })
+    },
+
+    SET_DELIVERY_TYPE: "SET_DELIVERY_TYPES",
+    setDeliveryType(deliveryType) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_DELIVERY_TYPE,
+            data: {
+                deliveryType
+            }
+        })
+    },
+
+    SET_VENUE: "SET_VENUE",
+    setVenue(venue) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_VENUE,
+            data: {
+                venue
+            }
+        })
+    },
+
+    SET_SLOT_ID: "SET_SLOT_ID",
+    setSlotId(slotId) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_SLOT,
+            data: {
+                slotId
+            }
+        })
     }
 };
 

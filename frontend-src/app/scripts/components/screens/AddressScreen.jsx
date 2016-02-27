@@ -37,7 +37,6 @@ const AddressScreen = React.createClass({
     },
 
     render() {
-        console.log('rendering address screen', AddressStore.getChosenCity());
         var cities = AddressStore.getCities().map((city, i) => {
             return <MenuItem key={city} value={city} primaryText={city}/>
         });

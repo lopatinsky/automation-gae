@@ -26,7 +26,7 @@ const MenuCategory = React.createClass({
             {category.info.title}
         </div>;
         return <Paper style={{margin:'0 12px 12px', display: 'flex', minHeight: 105}}
-                      onClick={this._onMenuCategoryTap}>
+                      onTouchTap={this._onMenuCategoryTap}>
             {picCard}
             {content}
         </Paper>;

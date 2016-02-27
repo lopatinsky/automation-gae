@@ -44,7 +44,7 @@ const HistoryScreen = React.createClass({
             return <div style={{width: '100%'}}>
                 <Card
                     style={{margin: '0 12px 12px 12px'}}
-                    onClick={() => this._onOrderTap(order)}>
+                    onTouchTap={() => this._onOrderTap(order)}>
                     <div>
                         <div style={{padding: '12px 12px 0 12px'}}>
                                 <b>

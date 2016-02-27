@@ -31,7 +31,7 @@ const SingleModifier = React.createClass({
                                 <FlatButton
                                     style={{width: '40px', minWidth: null}}
                                     label="-"
-                                    onClick={this._deduct} />
+                                    onTouchTap={this._deduct} />
                             </div>
                         : null}
                         {this.props.quantity > 0 ?
@@ -43,7 +43,7 @@ const SingleModifier = React.createClass({
                             <FlatButton
                                 style={{width: '40px', minWidth: null}}
                                 label="+"
-                                onClick={this._add} />
+                                onTouchTap={this._add} />
                         </div>
                     </div>
                 </div>

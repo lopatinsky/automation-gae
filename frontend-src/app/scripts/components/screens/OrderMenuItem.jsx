@@ -36,7 +36,7 @@ const OrderMenuItem = React.createClass({
 
     _getDeleteButton() {
         return <IconButton
-                    onClick={this._removeItem}
+                    onTouchTap={this._removeItem}
                     iconClassName="material-icons"
                     iconStyle={{color: settings.primaryColor}}>
             delete

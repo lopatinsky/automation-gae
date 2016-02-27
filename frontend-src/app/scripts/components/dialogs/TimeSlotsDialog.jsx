@@ -1,25 +1,42 @@
 import React from 'react';
 import { Dialog, List, ListItem, Divider } from 'material-ui';
-import { OrderStore, VenuesStore } from '../../stores';
+import { OrderStore } from '../../stores';
+import { AppActions } from '../../actions';
 
 const TimeSlotsDialog = React.createClass({
     getInitialState() {
         return {
-            open: false
+            open: false,
+            slots: OrderStore.chosenDeliveryType ? OrderStore.chosenDeliveryType.slots : [],
+            chosenSlot: OrderStore.slotId
         };
     },
 
+    _onOrderStoreChange() {
+        this.setState({
+            slots: OrderStore.chosenDeliveryType ? OrderStore.chosenDeliveryType.slots : [],
+            chosenSlot: OrderStore.slotId
+        });
+    },
+
+    componentDidMount() {
+        OrderStore.addChangeListener(this._onOrderStoreChange);
+    },
+
+    componentWillUnmount() {
+        OrderStore.removeChangeListener(this._onOrderStoreChange);
+    },
+
     _getSlots() {
-        var delivery = VenuesStore.getChosenDelivery();
-        if (!delivery) {
+        if (!this.state.slots) {
             return null;
         }
         const result = [];
-        for (let slot of delivery.slots) {
+        for (let slot of this.state.slots) {
             result.push(
                 <ListItem key={slot.id}
                           primaryText={slot.name}
-                          onClick={() => this.dismiss(slot)}/>
+                          onTouchTap={() => this.dismiss(slot)}/>
             );
             result.push(<Divider key={`divider_${slot.id}`}/>);
         }
@@ -34,7 +51,7 @@ const TimeSlotsDialog = React.createClass({
     },
 
     dismiss(slot) {
-        OrderStore.setSlotId(slot.id);
+        AppActions.setSlotId(slot.id);
         this.setState({
             open: false
         })

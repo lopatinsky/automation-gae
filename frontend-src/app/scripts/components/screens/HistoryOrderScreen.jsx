@@ -100,10 +100,10 @@ const HistoryOrderScreen = React.createClass({
             return <div style={{float: 'right', padding: '12px'}}>
                 <RaisedButton label='Отмена'
                               primary={true}
-                              onClick={this.cancel} />
+                              onTouchTap={this.cancel} />
             </div>;
         } else {
-            return <div/>;
+            return null;
         }
     },
 

@@ -9,6 +9,8 @@ import AddressStore from './AddressStore';
 
 const OrderStore = new BaseStore({
     chosenPaymentType: null,
+    chosenVenue: null,
+    chosenDeliveryType: null,
     orderId: null,
     validationSum: 0,
     deliverySum: 0,
@@ -33,6 +35,34 @@ const OrderStore = new BaseStore({
 
     setChosenPaymentType(paymentType) {
         this.chosenPaymentType = paymentType;
+        this._changed();
+    },
+
+    onVenuesLoaded() {
+        if (!this.chosenVenue && VenuesStore.venues.length) {
+            this.setChosenVenue(VenuesStore.venues[0]);
+        }
+    },
+
+    setChosenDeliveryType(deliveryType) {
+        this.chosenDeliveryType = deliveryType;
+        this._changed();
+    },
+
+    setChosenVenue(venue) {
+        var found = false;
+        if (this.chosenDeliveryType != null) {
+            for (var i = 0; i < venue.deliveries.length; i++) {
+                if (this.chosenDeliveryType.id == venue.deliveries[i].id) {
+                    found = true;
+                    this.chosenDeliveryType = venue.deliveries[i];
+                }
+            }
+        }
+        if (found == false && venue.deliveries.length > 0) {
+            this.chosenDeliveryType = venue.deliveries[0];
+        }
+        this.chosenVenue = venue;
         this._changed();
     },
 
@@ -169,7 +199,7 @@ const OrderStore = new BaseStore({
     },
 
     getOrderDict() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = this.chosenDeliveryType;
         var dict = {
             delivery_type: delivery.id,
             client: ClientStore.getClientDict(),
@@ -184,7 +214,7 @@ const OrderStore = new BaseStore({
             dict.delivery_sum = this.deliverySum;
             dict.address = AddressStore.getAddressDict();
         } else {
-            dict.venue_id = VenuesStore.getChosenVenue().id;
+            dict.venue_id = this.chosenVenue.id;
         }
         if (delivery.slots.length > 0) {
             dict.delivery_slot_id = this.slotId;
@@ -195,7 +225,7 @@ const OrderStore = new BaseStore({
     },
 
     getCheckOrderDict() {
-        var delivery = VenuesStore.getChosenDelivery();
+        var delivery = this.chosenDeliveryType;
         var client_id = ClientStore.getClientId();
         if (!delivery || !client_id) {
             return null;
@@ -209,7 +239,7 @@ const OrderStore = new BaseStore({
         if (delivery.id == 2) {
             dict.address = JSON.stringify(AddressStore.getAddressDict());
         } else {
-            dict.venue_id = VenuesStore.getChosenVenue().id;
+            dict.venue_id = this.chosenVenue.id;
         }
         if (delivery.slots.length > 0) {
             dict.delivery_slot_id = this.slotId;
@@ -290,7 +320,7 @@ const OrderStore = new BaseStore({
         }
         if (this.timeStr == null) {
             var now = new Date();
-            var delivery = VenuesStore.getChosenDelivery();
+            var delivery = this.chosenDeliveryType;
             now.setTime(now.getTime() + (delivery.time_picker_min * 1000));
             this.setTime(now);
         }
@@ -317,6 +347,10 @@ const OrderStore = new BaseStore({
                 AppDispatcher.waitFor([PaymentsStore.dispatchToken]);
                 OrderStore.onPaymentTypesLoaded();
             }
+            if (action.data.request == "venues") {
+                AppDispatcher.waitFor([VenuesStore.dispatchToken]);
+                OrderStore.onVenuesLoaded();
+            }
             break;
         case ServerRequests.AJAX_FAILURE:
             if (action.data.request == "order") {
@@ -334,6 +368,15 @@ const OrderStore = new BaseStore({
             break;
         case AppActions.SET_PAYMENT_TYPE:
             OrderStore.setChosenPaymentType(action.data.paymentType);
+            break;
+        case AppActions.SET_DELIVERY_TYPE:
+            OrderStore.setChosenDeliveryType(action.data.deliveryType);
+            break;
+        case AppActions.SET_VENUE:
+            OrderStore.setChosenVenue(action.data.venue);
+            break;
+        case AppActions.SET_SLOT_ID:
+            OrderStore.setSlotId(action.data.slotId);
             break;
     }
 });
