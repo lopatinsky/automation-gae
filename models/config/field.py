@@ -37,13 +37,15 @@ class Field(ndb.Model):
     group_title = ndb.StringProperty()  # todo: should be required
     type = ndb.IntegerProperty(required=True, choices=TYPE_CHOICES)
     order = ndb.IntegerProperty(required=True)
+    options = ndb.JsonProperty()
 
     def dict(self):
         return {
             'title': self.title,
             'field': latinize(self.title),
             'type': self.type,
-            'order': self.order
+            'order': self.order,
+            'options': self.options,
         }
 
 
