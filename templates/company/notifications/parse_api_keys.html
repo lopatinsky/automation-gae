@@ -11,6 +11,10 @@
             <input type="text" name="app_key" value="{% if config.PARSE_APP_API_KEY %} {{ config.PARSE_APP_API_KEY }} {% endif %}">
         </label><br>
         <label>
+            PARSE CLIENT API KEY:
+            <input type="text" name="client_key" value="{% if config.PARSE_CLIENT_API_KEY %} {{ config.PARSE_CLIENT_API_KEY }} {% endif %}">
+        </label><br>
+        <label>
             PARSE REST API KEY:
             <input type="text" name="rest_key" value="{% if config.PARSE_REST_API_KEY %} {{ config.PARSE_REST_API_KEY }} {% endif %}">
         </label><br>

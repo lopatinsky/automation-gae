@@ -214,6 +214,7 @@ class ChangeParseApiKeys(CompanyBaseHandler):
     def post(self):
         config = Config.get()
         config.PARSE_APP_API_KEY = self.request.get('app_key')
+        config.PARSE_CLIENT_API_KEY = self.request.get('client_key')
         config.PARSE_REST_API_KEY = self.request.get('rest_key')
         config.put()
         self.redirect('/company/notifications/pushes/list')
