@@ -82,7 +82,8 @@ class Push(object):
                 'alert': self.text,
                 'sound': 'push.caf',
                 'should_popup': self.should_popup,
-                'type': self.push_type
+                'type': self.push_type,
+                'analytics_id': self.push_id,
             }
         elif self.device_type == ANDROID_DEVICE:
             return {
@@ -90,7 +91,8 @@ class Push(object):
                 'head': self.header,
                 'action': 'com.empatika.doubleb.push',
                 'should_popup': self.should_popup,
-                'type': self.push_type
+                'type': self.push_type,
+                'analytics_id': self.push_id,
             }
 
 
