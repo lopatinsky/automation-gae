@@ -9,6 +9,8 @@ import AddressStore from './AddressStore';
 import CompanyStore from './CompanyStore';
 
 const OrderStore = new BaseStore({
+    sendingCheckOrder: null,
+
     chosenPaymentType: null,
     chosenVenue: null,
     chosenDeliveryType: null,
@@ -36,7 +38,6 @@ const OrderStore = new BaseStore({
     },
 
     onVenuesLoaded() {
-        console.log('onVenuesLoaded', VenuesStore);
         if (!this.chosenVenue && VenuesStore.venues.length) {
             this.setChosenVenue(VenuesStore.venues[0]);
         }
@@ -258,7 +259,15 @@ const OrderStore = new BaseStore({
         return dict;
     },
 
-    setValidationInfo(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors) {
+    checkOrderStarted(requestObject) {
+        if (this.sendingCheckOrder) {
+            this.sendingCheckOrder.abort();
+        }
+        this.sendingCheckOrder = requestObject;
+        this._changed();
+    },
+
+    _setValidationInfo(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors) {
         this.validationSum = validationSum;
         this.orderGifts = orderGifts.map(og => ({
             item: og,
@@ -270,6 +279,13 @@ const OrderStore = new BaseStore({
         this.deliverySumStr = deliverySumStr;
         this.promos = promos;
         this.errors = errors;
+    },
+
+    checkOrderFinished(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors) {
+        this.sendingCheckOrder = null;
+        if (validationSum != null) {
+            this._setValidationInfo(validationSum, orderGifts, deliverySum, deliverySumStr, promos, errors);
+        }
         this._changed();
     },
 
@@ -308,9 +324,14 @@ const OrderStore = new BaseStore({
     }
 }, action => {
     switch (action.actionType) {
+        case ServerRequests.AJAX_SENDING:
+            if (action.data.request == "checkOrder") {
+                OrderStore.checkOrderStarted(action.data.requestObject);
+            }
+            break;
         case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "checkOrder") {
-                OrderStore.setValidationInfo(
+                OrderStore.checkOrderFinished(
                     action.data.total_sum,
                     action.data.orderGifts,
                     action.data.delivery_sum,
@@ -336,6 +357,9 @@ const OrderStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_FAILURE:
+            if (action.data.request == "checkOrder") {
+                OrderStore.checkOrderFinished();
+            }
             if (action.data.request == "order") {
                 OrderStore.setOrderError(action.data.error);
             }

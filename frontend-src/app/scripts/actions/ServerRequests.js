@@ -10,7 +10,10 @@ function doRequest(id, method, url) {
     req.end = function(makeData) {
         AppDispatcher.dispatch({
             actionType: ServerRequests.AJAX_SENDING,
-            data: { request: id }
+            data: {
+                request: id,
+                requestObject: req
+            }
         });
         _end((err, res) => {
             if (err) {

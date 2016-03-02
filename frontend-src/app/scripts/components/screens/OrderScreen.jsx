@@ -3,7 +3,7 @@ import moment from 'moment';
 import { OrderStore, ClientStore, PaymentsStore, AddressStore, CompanyStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
 import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
-import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
+import { CircularProgress, List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
 import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
@@ -31,6 +31,8 @@ const OrderScreen = React.createClass({
 
             items: OrderStore.items,
             orderGifts: OrderStore.orderGifts,
+
+            sendingCheckOrder: OrderStore.sendingCheckOrder,
 
             menuTotalSum: OrderStore.getTotalSum(),
             validationSum: OrderStore.validationSum,
@@ -109,15 +111,21 @@ const OrderScreen = React.createClass({
     },
 
     _getTotalSum() {
+        let progress = null;
+        if (this.state.sendingCheckOrder) {
+            progress = <CircularProgress size={0.3} style={{verticalAlign: 'middle', margin: '-20px -5px -15px'}}/>
+        }
         const style = {textAlign: 'right'};
         if (this.state.menuTotalSum != this.state.validationSum + this.state.deliverySum) {
             return <div style={style}>
+                {progress}
                 Итого:{' '}
                 <strike>{this.state.menuTotalSum}</strike>{' '}
                 {this.state.validationSum + this.state.deliverySum}
             </div>;
         } else {
             return <div style={style}>
+                {progress}
                 Итого: {this.state.menuTotalSum}
             </div>;
         }
