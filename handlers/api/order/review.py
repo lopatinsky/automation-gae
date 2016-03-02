@@ -1,5 +1,11 @@
+# coding=utf-8
+import logging
+
 from handlers.api.base import ApiHandler
+from methods.emails import mandrill
+from models import Venue
 from models.client import Client
+from models.config import config
 from models.order import OrderRate, Order
 
 __author__ = 'dvpermyakov'
@@ -21,4 +27,28 @@ class OrderReviewHandler(ApiHandler):
         rate = OrderRate(meal_rate=meal_rate, service_rate=service_rate, comment=comment)
         order.rate = rate
         order.put()
+
+        is_negative = 0 < meal_rate < 4 or 0 < service_rate < 4
+
+        if is_negative or rate.comment:
+            conf = config.Config.get()
+
+            venue = Venue.get(order.venue_id)
+
+            emails = conf.SUPPORT_EMAILS
+            body = u"Клиент: {0} {1}<br>" \
+                   u"Заказ: {2}<br>" \
+                   u"Точка: {3}<br>" \
+                   u"Оценка еды: {4} из 5<br>" \
+                   u"Оценка обслуживания: {5} из 5<br>" \
+                   .format(client.tel, client.name, order.number, venue.title, meal_rate, service_rate)
+
+            if comment:
+                body += u"Комментарий: %s" % comment
+            logging.info(body)
+            to = emails
+            cc = ['mdburshteyn@gmail.com', 'isparfenov@gmail.com']
+            subject = u'Негативный отзыв о заказе' if is_negative else u'Отзыв о заказе с комментарием'
+            mandrill.send_email('noreply-rating@ru-beacon.ru', to, cc, subject, body)
+
         self.render_json({})
