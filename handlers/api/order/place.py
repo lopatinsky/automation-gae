@@ -1,29 +1,31 @@
 # coding=utf-8
 import copy
-import logging
 import json
+import logging
+import random
 
 from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-
+from google.appengine.ext.deferred import deferred
 from google.appengine.ext.ndb import GeoPt
 
-from methods.proxy.doubleb.place_order import doubleb_place_order
-from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj, send_demo_sms, need_to_show_share_invitation
-from methods.orders.validation.validation import validate_order
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address, \
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
+from methods.orders.validation.validation import validate_order
+from methods.proxy.doubleb.place_order import doubleb_place_order
 from methods.proxy.resto.place_order import resto_place_order
-from methods.subscription import get_subscription
+from methods.sms.confirmation import send_confirmation
 from methods.subscription import get_amount_of_subscription_items
+from methods.subscription import get_subscription
 from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
 from models.client import IOS_DEVICE
+from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
 from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
 from models.order import NEW_ORDER, CREATING_ORDER, SubscriptionDetails
 from models.payment_types import CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
@@ -96,6 +98,14 @@ class OrderHandler(ApiHandler):
 
         self.order.comment = order_json['comment']
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
+
+        confirm_by_sms = bool(order_json['confirm_by_sms'])
+
+        send_confirmation_sms = False
+
+        if confirm_by_sms:
+            self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
+            send_confirmation_sms = True
 
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
@@ -257,6 +267,10 @@ class OrderHandler(ApiHandler):
             send_demo_sms(client)
 
         self.response.status_int = 201
+
+        # if send_confirmation_sms:
+        #     countdown = random.randint(120, 420)  # make it realistic
+        #     deferred.defer(send_confirmation, self.order.key, _countdown=countdown)
 
 
         self.render_json({

@@ -1,4 +1,5 @@
 # coding=utf-8
+from models.config.confirmation import SmsConfirmationModule
 from models.config.order_message import OrderMessageModule
 
 SUBSCRIPTION = 0
@@ -126,6 +127,7 @@ class Config(ndb.Model):
 
     INACTIVE_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(InactiveNotificationModule, repeated=True)
     BASKET_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(BasketNotificationModule)
+    SMS_CONFIRMATION_MODULE = ndb.LocalStructuredProperty(SmsConfirmationModule)
 
     ORDER_MESSAGE_MODULE = ndb.LocalStructuredProperty(OrderMessageModule)
     HIT_MODULE = ndb.LocalStructuredProperty(HitModule)

@@ -3,7 +3,6 @@ import json
 import logging
 
 from google.appengine.api import taskqueue
-
 from google.appengine.api.namespace_manager import namespace_manager
 
 from handlers.api.base import ApiHandler
@@ -14,10 +13,11 @@ from methods.proxy.doubleb.check_order import doubleb_validate_order
 from methods.proxy.resto.check_order import resto_validate_order
 from models import Client, Venue, DeliverySlot
 from models.config.config import AUTO_APP, RESTO_APP, config, DOUBLEB_APP
-from models.venue import SELF, PICKUP, DELIVERY
 from models.venue import IN_CAFE
+from models.venue import SELF, PICKUP, DELIVERY
 
 __author__ = 'dvpermyakov'
+
 
 #  all required fields should invoke 400
 #  all errors should be catch in validate_order
@@ -116,9 +116,16 @@ class CheckOrderHandler(ApiHandler):
 
         extra_fields = json.loads(self.request.get('extra_order_fields', '{}'))  # todo: it can be checked in validation
 
+        if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status:
+            confirm_by_sms = bool(self.request.get('confirm_by_sms'))
+        else:
+            confirm_by_sms = False
+
         if config.APP_KIND == AUTO_APP:
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone)
+                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone,
+                                    confirm_by_sms=confirm_by_sms)
+
         elif config.APP_KIND == RESTO_APP:
             result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts,
                                           delivery_type)

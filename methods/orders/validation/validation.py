@@ -323,7 +323,8 @@ def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(
 
 
 def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue, address,
-                   delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None):
+                   delivery_time, delivery_slot, delivery_type, delivery_zone, with_details=False, order=None,
+                   confirm_by_sms = False):
     def send_error(error, override_total_sum_with_promos=False):
         logging.warning('Sending error: %s' % error)
         if client:
@@ -494,6 +495,7 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         'max_wallet_payment': max_wallet_payment,
         'wallet_balance': wallet_balance,
         'wallet_cash_back': cash_back,
+        'confirm_by_sms': confirm_by_sms,
         'delivery_time': delivery_time.strftime(STR_DATETIME_FORMAT)
         if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS
         else (delivery_time + timedelta(hours=venue.timezone_offset)).strftime(STR_DATETIME_FORMAT),
