@@ -206,6 +206,7 @@ class ReviewPush(Push):
         client = Client.get(order.client_id)
         device_type = client.device_type
         self.order = order
+        self.push_type = REVIEW_TYPE
         text = u'Оставьте отзыв о вашем заказе'
         super(ReviewPush, self).__init__(text, device_type, push_id)
         self.header = u'Оцените заказ'
