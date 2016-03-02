@@ -5,6 +5,7 @@ from base import ApiHandler
 from models.config.config import config
 from models import STATUS_AVAILABLE
 from models.legal import LegalInfo
+from models.payment_types import PaymentType, CARD_PAYMENT_TYPE
 
 __author__ = 'dvpermyakov'
 
@@ -28,8 +29,16 @@ def _get_values(legal):
 
 class AboutHandler(ApiHandler):
     def get(self):
+        cards_enabled = False
+        cpt = PaymentType.get(CARD_PAYMENT_TYPE)
+        if cpt and cpt.status == STATUS_AVAILABLE:
+            cards_enabled = True
+
+        info = config.get_company_dict()
         self.render_doc('about.html', **{
-            'info': config.COMPANY_DESCRIPTION
+            'info': info['description'],
+            'phone': info['phone'],
+            'cards_enabled': cards_enabled,
         })
 
 

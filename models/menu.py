@@ -227,7 +227,7 @@ class GroupModifier(ndb.Model):
                 'id': str(choice.choice_id) if choice.choice_id else choice.choice_id_str,
                 'order': choice.sequence_number
             }
-            if venue:
+            if not venue:
                 choice_dct['prices'] = choice.venue_price_dicts
             choices_dicts.append(choice_dct)
         return {

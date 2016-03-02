@@ -50,6 +50,11 @@
                 {% endfor %}
             </select>
         </label><br>
+        <br>
+        <label>
+            Проблема:
+            <input type="text" name="problem" {% if venue %}value="{{ venue.problem }}"{% endif %}>
+        </label><br>
         <input type="submit"/>
         <a href="/company/venues">Назад к списку</a>
     </form>

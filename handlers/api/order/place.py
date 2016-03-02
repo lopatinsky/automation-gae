@@ -169,6 +169,7 @@ class OrderHandler(ApiHandler):
                                                   order_json.get('cancelled_order_gifts', []))
             if success:
                 response['message'] = message
+                send_client_sms_task(self.order, namespace_manager.get_namespace())
                 return self.render_json(response)
             else:
                 return self.render_error(response['description'])
@@ -178,6 +179,7 @@ class OrderHandler(ApiHandler):
                                                     order_json['payment'])
             if success:
                 response['message'] = message
+                send_client_sms_task(self.order, namespace_manager.get_namespace())
                 return self.render_json(response)
             else:
                 return self.render_error(response['description'])

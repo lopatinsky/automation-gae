@@ -31,7 +31,12 @@
                 <th>Расписание</th>
             </tr>
             {% for venue in venues %}
-                <tr>
+                {% if venue.active %}
+                    {% set color = '#ffaaaa' if venue.problem else '#ffffff' %}
+                {% else %}
+                    {% set color = '#cccccc' %}
+                {% endif %}
+                <tr style="background-color: {{ color }}">
                     <td>
                         <input type="checkbox" name="{{ venue.key.id() }}" {% if venue.active %}checked{% endif %}/>
                     </td>
@@ -42,6 +47,9 @@
                         <a href="/company/venues/{{ venue.key.id() }}">
                             {{ venue.title }}
                         </a>
+                        {% if venue.problem %}
+                        <br><b style="color:red">{{ venue.problem }}</b>
+                        {% endif %}
                     </td>
                     <td>
                         {{ venue.description }}
