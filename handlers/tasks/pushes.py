@@ -2,7 +2,8 @@ from datetime import datetime
 from webapp2 import RequestHandler
 from models import Notification
 from models.push import *
-from models.specials import STATUS_CREATED, ReviewPush
+from models.specials import STATUS_CREATED
+from models.push import ReviewPush
 from methods.push import send_multichannel_push, send_review_push
 from models.client import IOS_DEVICE, ANDROID_DEVICE
 import logging
@@ -42,6 +43,10 @@ class SendPushReviewHandler(RequestHandler):
         if not review:
             self.abort(400)
         order = review.order.get()
+
+        push = ReviewPush(order, 0)
+        push.send()
+
         send_review_push(order)
         review.sent = datetime.datetime.utcnow()
         review.put()
