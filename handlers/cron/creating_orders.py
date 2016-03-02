@@ -86,7 +86,7 @@ def _handle_resto(order):
         order.status = search_result['status'] or NEW_ORDER
 
         old_key = order.key
-        order.key = ndb.Key(Order, search_result['number'])
+        order.key = ndb.Key(Order, search_result['resto_id'])
         order.put()
         old_key.delete()
         info.append(("found", True))
