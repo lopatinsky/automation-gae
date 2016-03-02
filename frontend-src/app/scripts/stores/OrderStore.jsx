@@ -204,7 +204,7 @@ const OrderStore = new BaseStore({
             total_sum: this.validationSum,
             items: this.getItemsDict(),
             order_gifts: this.getOrderGiftsDict(),
-            comment: ''
+            comment: this.comment
         };
         if (delivery.id == 2) {
             dict.delivery_sum = this.deliverySum;
@@ -212,10 +212,15 @@ const OrderStore = new BaseStore({
         } else {
             dict.venue_id = this.chosenVenue.id;
         }
-        if (delivery.slots.length > 0) {
-            dict.delivery_slot_id = this.slotId;
-        } else {
-            dict.time_picker_value = this.getFullTimeStr();
+        if (this.chosenTime) {
+            if (delivery.mode == 0 || delivery.mode == 2 || delivery.mode == 3) {
+                dict.delivery_slot_id = this.chosenTime.slotId;
+            }
+            if (delivery.mode == 2) {
+                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD");
+            } else if (delivery.mode == 1) {
+                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD HH:mm:ss");
+            }
         }
         return dict;
     },

@@ -327,8 +327,21 @@ const OrderScreen = React.createClass({
     },
 
     _getClientInfo() {
+        let text, style = {},
+            name = ClientStore.getName(),
+            phone = ClientStore.getPhone();
+        if (!name) {
+            text = 'Представьтесь, пожалуйста';
+            style = {color: settings.errorColor};
+        } else if (!phone) {
+            text = 'Введите номер телефона';
+            style = {color: settings.errorColor};
+        } else {
+            text = name;
+        }
         return <ListItem
-                    primaryText={ClientStore.getRenderedInfo()}
+                    primaryText={text}
+                    style={style}
                     leftIcon={<FontIcon color={settings.primaryColor}
                                         className="material-icons">
                                   perm_identity
