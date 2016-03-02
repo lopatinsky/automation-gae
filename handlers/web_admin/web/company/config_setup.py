@@ -401,6 +401,8 @@ class OrderModuleSetupHandler(CompanyBaseHandler):
             conf.ORDER_MODULE = OrderModule()
             conf.ORDER_MODULE.status = 0
 
+        conf.put()
+
         self.render('/config_settings/order_module_setup.html')
 
     @config_rights_required
