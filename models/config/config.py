@@ -71,6 +71,7 @@ COMPANY_STATUS_NAMES = {
     COMPANY_PREVIEW: u"Предпросмотр в общем аппе",
 }
 
+
 class Config(ndb.Model):
     @cached_property
     def APP_KIND(self):
@@ -124,7 +125,6 @@ class Config(ndb.Model):
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
 
     INACTIVE_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(InactiveNotificationModule, repeated=True)
-
     BASKET_NOTIFICATION_MODULE = ndb.LocalStructuredProperty(BasketNotificationModule)
 
     ORDER_MESSAGE_MODULE = ndb.LocalStructuredProperty(OrderMessageModule)
@@ -145,7 +145,6 @@ class Config(ndb.Model):
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
     ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
-
     REJECT_IF_NOT_IN_ZONES = ndb.BooleanProperty(default=False)
 
     def get_company_dict(self):
