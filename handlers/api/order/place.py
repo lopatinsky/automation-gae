@@ -23,7 +23,7 @@ from methods.proxy.resto.place_order import resto_place_order
 from methods.sms.confirmation import send_confirmation
 from methods.subscription import get_amount_of_subscription_items
 from methods.subscription import get_subscription
-from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE
+from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from models.client import IOS_DEVICE
 from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
 from models.config.version import CURRENT_APP_ID, DEMO_APP_ID
@@ -99,16 +99,10 @@ class OrderHandler(ApiHandler):
         self.order.comment = order_json['comment']
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
 
-        if 'confirm_by_sms' in order_json:
-            confirm_by_sms = bool(order_json['confirm_by_sms'])
-        else:
-            confirm_by_sms = False
-
-        send_confirmation_sms = False
-
-        if confirm_by_sms:
-            self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
-            send_confirmation_sms = True
+        if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status == STATUS_AVAILABLE:
+            confirm_by_sms = order_json.get('confirm_by_sms', False)
+            if confirm_by_sms:
+                self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
 
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
@@ -272,11 +266,6 @@ class OrderHandler(ApiHandler):
             send_demo_sms(client)
 
         self.response.status_int = 201
-
-        # if send_confirmation_sms:
-        #     countdown = random.randint(120, 420)  # make it realistic
-        #     deferred.defer(send_confirmation, self.order.key, _countdown=countdown)
-
 
         self.render_json({
             'order_id': self.order.key.id(),

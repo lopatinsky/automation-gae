@@ -116,15 +116,9 @@ class CheckOrderHandler(ApiHandler):
 
         extra_fields = json.loads(self.request.get('extra_order_fields', '{}'))  # todo: it can be checked in validation
 
-        if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status:
-            confirm_by_sms = bool(self.request.get('confirm_by_sms'))
-        else:
-            confirm_by_sms = False
-
         if config.APP_KIND == AUTO_APP:
             result = validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, payment_info, venue,
-                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone,
-                                    confirm_by_sms=confirm_by_sms)
+                                    address, delivery_time, delivery_slot, delivery_type, delivery_zone)
 
         elif config.APP_KIND == RESTO_APP:
             result = resto_validate_order(client, items, venue, delivery_time, order_gifts, cancelled_order_gifts,

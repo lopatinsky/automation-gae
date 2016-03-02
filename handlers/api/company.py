@@ -154,6 +154,8 @@ class CompanyModulesHandler(ApiHandler):
             modules.append(config.CUSTOM_SECTIONS_MODULE.dict())
         if config.PLATIUS_WHITE_LABEL_MODULE and config.PLATIUS_WHITE_LABEL_MODULE.status:
             modules.append(config.PLATIUS_WHITE_LABEL_MODULE.dict())
+        if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status:
+            modules.append(config.SMS_CONFIRMATION_MODULE.dict())
         self.render_json({
             'modules': modules
         })
