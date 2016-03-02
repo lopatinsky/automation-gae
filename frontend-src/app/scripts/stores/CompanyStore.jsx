@@ -5,6 +5,21 @@ import { ServerRequests } from '../actions';
 const CompanyStore = new BaseStore({
     info: null,
 
+    getDeliveryTypes() {
+        if (this.info) {
+            return this.info.delivery_types;
+        }
+        return [];
+    },
+
+    getSlot(deliveryType, slotId) {
+        for (var i = 0; i < deliveryType.slots.length; i++) {
+            if (slotId == deliveryType.slots[i].id) {
+                return deliveryType.slots[i];
+            }
+        }
+    },
+
     getEmails() {
         var emails = '';
         if (this.info != null) {
@@ -26,11 +41,12 @@ const CompanyStore = new BaseStore({
 
     setInfo(info) {
         this.info = info;
+        this._changed();
     }
 
 }, action => {
     switch (action.actionType) {
-        case ServerRequests.INIT:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "company") {
                 CompanyStore.setInfo(action.data.info);
             }

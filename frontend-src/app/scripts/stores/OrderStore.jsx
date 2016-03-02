@@ -6,6 +6,7 @@ import VenuesStore from './VenuesStore';
 import PaymentsStore from './PaymentsStore';
 import MenuStore from './MenuStore';
 import AddressStore from './AddressStore';
+import CompanyStore from './CompanyStore';
 
 const OrderStore = new BaseStore({
     chosenPaymentType: null,
@@ -17,9 +18,7 @@ const OrderStore = new BaseStore({
     items: [],
     comment: '',
     orderGifts: [],
-    slotId: null,
-    dayStr: null,
-    timeStr: null,
+    chosenTime: null,
     promos: [],
     errors: [],
     cancelProcessing: false,
@@ -37,46 +36,28 @@ const OrderStore = new BaseStore({
     },
 
     onVenuesLoaded() {
+        console.log('onVenuesLoaded', VenuesStore);
         if (!this.chosenVenue && VenuesStore.venues.length) {
             this.setChosenVenue(VenuesStore.venues[0]);
         }
+        console.log(this.chosenVenue);
     },
 
-    setChosenDeliveryType(deliveryType, silent) {
-        this.chosenDeliveryType = deliveryType;
-        if (deliveryType.slots.length) {
-            let found = false;
-            if (this.slotId != null) {
-                for (let slot of deliveryType.slots) {
-                    if (slot.id == this.slotId) {
-                        found = true;
-                    }
-                }
-            }
-            if (!found && deliveryType.slots.length) {
-                this.slotId = deliveryType.slots[0].id;
-            }
-        } else {
-            this.slotId = null;
+    onCompanyLoaded() {
+        const deliveryTypes = CompanyStore.getDeliveryTypes();
+        if (!this.chosenDeliveryType && deliveryTypes.length) {
+            this.setChosenDeliveryType(deliveryTypes[0]);
         }
-        if (!silent) {
-            this._changed({checkOrder: true});
+    },
+
+    setChosenDeliveryType(deliveryType) {
+        if (!this.chosenDeliveryType || this.chosenDeliveryType.id != deliveryType.id) {
+            this.chosenDeliveryType = deliveryType;
+            this.setTime(null);
         }
     },
 
     setChosenVenue(venue) {
-        var found = false;
-        if (this.chosenDeliveryType != null) {
-            for (let delivery of venue.deliveries) {
-                if (this.chosenDeliveryType.id == delivery.id) {
-                    found = true;
-                    this.setChosenDeliveryType(delivery, true);
-                }
-            }
-        }
-        if (found == false && venue.deliveries.length > 0) {
-            this.setChosenDeliveryType(venue.deliveries[0], true);
-        }
         this.chosenVenue = venue;
         this._changed({checkOrder: true});
     },
@@ -123,7 +104,7 @@ const OrderStore = new BaseStore({
         for (const gm of orderItem.item.group_modifiers) {
             const choice = orderItem.groupModifiers[gm.modifier_id];
             if (choice) {
-                modifiers.append({
+                modifiers.push({
                     quantity: 1,
                     group_modifier_id: gm.modifier_id,
                     choice: choice.id
@@ -164,15 +145,15 @@ const OrderStore = new BaseStore({
     },
 
     addItem(itemId, groupModifiers, singleModifiers) {
-        const item = MenuStore.itemsById[itemId],
-            orderItem = {
+        const item = MenuStore.itemsById[itemId];
+        if (!groupModifiers) {
+            [groupModifiers, singleModifiers] = MenuStore.getDefaultModifiers(item);
+        }
+        const orderItem = {
                 item,
                 groupModifiers,
                 singleModifiers
             };
-        if (!groupModifiers) {
-            [groupModifiers, singleModifiers] = MenuStore.getDefaultModifiers(item);
-        }
 
         var found = false;
         for (let existingItem of this.items) {
@@ -254,12 +235,20 @@ const OrderStore = new BaseStore({
         if (delivery.id == 2) {
             dict.address = JSON.stringify(AddressStore.getAddressDict());
         } else {
+            if (!this.chosenVenue) {
+                return null;
+            }
             dict.venue_id = this.chosenVenue.id;
         }
-        if (delivery.slots.length > 0) {
-            dict.delivery_slot_id = this.slotId;
-        } else {
-            dict.time_picker_value = this.getFullTimeStr();
+        if (this.chosenTime) {
+            if (delivery.mode == 0 || delivery.mode == 2 || delivery.mode == 3) {
+                dict.delivery_slot_id = this.chosenTime.slotId;
+            }
+            if (delivery.mode == 2) {
+                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD");
+            } else if (delivery.mode == 1) {
+                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD HH:mm:ss");
+            }
         }
         return dict;
     },
@@ -308,28 +297,10 @@ const OrderStore = new BaseStore({
         this._changed();
     },
 
-    setDay(date) {
-        this.dayStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    },
-
-    setTime(date) {
-        this.timeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-        this._changed();
-    },
-
-    getFullTimeStr() {
-        if (this.dayStr == null) {
-            this.setDay(new Date());
-        }
-        if (this.timeStr == null) {
-            var now = new Date();
-            var delivery = this.chosenDeliveryType;
-            now.setTime(now.getTime() + (delivery.time_picker_min * 1000));
-            this.setTime(now);
-        }
-        return `${this.dayStr} ${this.timeStr}`;
+    setTime(timeObj) {
+        this.chosenTime = timeObj;
+        this._changed({checkOrder: true});
     }
-
 }, action => {
     switch (action.actionType) {
         case ServerRequests.AJAX_SUCCESS:
@@ -353,6 +324,10 @@ const OrderStore = new BaseStore({
             if (action.data.request == "venues") {
                 AppDispatcher.waitFor([VenuesStore.dispatchToken]);
                 OrderStore.onVenuesLoaded();
+            }
+            if (action.data.request == "company") {
+                AppDispatcher.waitFor([CompanyStore.dispatchToken]);
+                OrderStore.onCompanyLoaded();
             }
             break;
         case ServerRequests.AJAX_FAILURE:
@@ -378,8 +353,8 @@ const OrderStore = new BaseStore({
         case AppActions.SET_VENUE:
             OrderStore.setChosenVenue(action.data.venue);
             break;
-        case AppActions.SET_SLOT_ID:
-            OrderStore.setSlotId(action.data.slotId);
+        case AppActions.SET_TIME:
+            OrderStore.setTime(action.data);
             break;
         case AppActions.ADD_ITEM:
             OrderStore.addItem(action.data.itemId, action.data.groupModifierChoices, action.data.singleModifierQuantities);

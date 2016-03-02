@@ -78,13 +78,11 @@ const AppActions = {
         });
     },
 
-    SET_SLOT_ID: "SET_SLOT_ID",
-    setSlotId(slotId) {
+    SET_TIME: "SET_TIME",
+    setTime(timeObj) {
         AppDispatcher.dispatch({
-            actionType: this.SET_SLOT_ID,
-            data: {
-                slotId
-            }
+            actionType: this.SET_TIME,
+            data: timeObj
         });
     },
 

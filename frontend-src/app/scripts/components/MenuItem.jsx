@@ -26,7 +26,7 @@ const MenuItem = React.createClass({
         </FontIcon>;
         return <RaisedButton
             primary={true}
-            label={item.price}
+            label={item.price.toFixed(0)}
             icon={icon}
             onTouchTap={this._addItem}/>
     },

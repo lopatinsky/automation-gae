@@ -1,10 +1,11 @@
 import React from 'react';
 import { DropDownMenu, TextField, Paper, Card, FontIcon, MenuItem } from 'material-ui';
 import { AddressStore } from '../../stores';
+import { AppActions } from '../../actions';
 import settings from '../../settings';
 
 const AddressScreen = React.createClass({
-     _onAddressStoreChange() {
+    _onInputChange() {
         this.setState({
             street: this.refs.street.getValue(),
             home: this.refs.home.getValue(),
@@ -13,27 +14,25 @@ const AddressScreen = React.createClass({
     },
 
     _onCityTap(e, selectedIndex, city) {
-        AddressStore.setChosenCity(city);
+        this.setState({ city });
     },
 
     saveAddress() {
-        AddressStore.setAddress(this.refs.street.getValue(), this.refs.home.getValue(), this.refs.flat.getValue());
+        AppActions.setAddress({
+            city: this.state.city,
+            street: this.state.street,
+            home: this.state.home,
+            flat: this.state.flat
+        });
     },
 
     getInitialState() {
         return {
+            city: AddressStore.getChosenCity(),
             street: AddressStore.getStreet(),
             home: AddressStore.getHome(),
             flat: AddressStore.getFlat()
         }
-    },
-
-    componentDidMount() {
-        AddressStore.addChangeListener(this._onAddressStoreChange);
-    },
-
-    componentWillUnmount() {
-        AddressStore.removeChangeListener(this._onAddressStoreChange);
     },
 
     render() {
@@ -64,7 +63,7 @@ const AddressScreen = React.createClass({
                                floatingLabelText="Улица"
                                ref="street"
                                value={this.state.street}
-                               onChange={this._refresh}/>
+                               onChange={this._onInputChange}/>
                 </div>
                 <div style={{display: 'flex', alignItems: 'baseline'}}>
                     <FontIcon style={{flexBasis: 36}}
@@ -76,7 +75,7 @@ const AddressScreen = React.createClass({
                                floatingLabelText="Дом"
                                ref="home"
                                value={this.state.home}
-                               onChange={this._refresh}/>
+                               onChange={this._onInputChange}/>
                 </div>
                 <div style={{display: 'flex', alignItems: 'baseline'}}>
                     <FontIcon style={{flexBasis: 36}}
@@ -88,7 +87,7 @@ const AddressScreen = React.createClass({
                                floatingLabelText="Квартира"
                                ref="flat"
                                value={this.state.flat}
-                               onChange={this._refresh}/>
+                               onChange={this._onInputChange}/>
                 </div>
             </Paper>
         </div>;

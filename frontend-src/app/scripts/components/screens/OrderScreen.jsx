@@ -1,5 +1,6 @@
 import React from 'react';
-import { OrderStore, VenuesStore, ClientStore, PaymentsStore, AddressStore } from '../../stores';
+import moment from 'moment';
+import { OrderStore, ClientStore, PaymentsStore, AddressStore, CompanyStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
 import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
 import { List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
@@ -10,6 +11,8 @@ import { AppActions, ServerRequests } from '../../actions';
 import settings from '../../settings';
 
 const OrderScreen = React.createClass({
+    _pendingDate: null,
+
     contextTypes: {
         router: React.PropTypes.object.isRequired
     },
@@ -23,7 +26,7 @@ const OrderScreen = React.createClass({
             chosenDeliveryType: OrderStore.chosenDeliveryType,
             chosenVenue: OrderStore.chosenVenue,
             chosenPaymentType: OrderStore.chosenPaymentType,
-            slotId: OrderStore.slotId,
+            chosenTime: OrderStore.chosenTime,
             comment: OrderStore.comment,
 
             items: OrderStore.items,
@@ -168,6 +171,20 @@ const OrderScreen = React.createClass({
         this.refs.timeSlotsDialog.show();
     },
 
+    _onSlotChosen(slotId) {
+        const timeObj = {slotId};
+        if (this.state.chosenDeliveryType.mode == 2) {
+            timeObj.picker = moment(this._pendingDate)
+                .set({
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0
+                });
+        }
+        AppActions.setTime(timeObj)
+    },
+
     _getVenueInput() {
         var delivery = this.state.chosenDeliveryType;
         if (!delivery) {
@@ -183,6 +200,9 @@ const OrderScreen = React.createClass({
                         onTouchTap={this._onAddressTap}>
             </ListItem>;
         } else {
+            if (!this.state.chosenVenue) {
+                return null;
+            }
             return <ListItem
                         primaryText={this.state.chosenVenue.title}
                         leftIcon={<FontIcon color={settings.primaryColor}
@@ -195,12 +215,25 @@ const OrderScreen = React.createClass({
     },
 
     _setTime(time) {
-        OrderStore.setTime(time);
+        const deliveryTime = moment(this._pendingDate)
+            .set({
+                hour: time.getHours(),
+                minute: time.getMinutes(),
+                second: 0,
+                millisecond: 0
+            });
+        AppActions.setTime({
+            picker: deliveryTime
+        });
     },
 
     _setDate(date) {
-        OrderStore.setDay(date);
-        this.refs.timePicker.show();
+        this._pendingDate = date;
+        if (this.state.chosenDeliveryType.mode == 1) {
+            this.refs.timePicker.show();
+        } else {
+            this.refs.timeSlotsDialog.show();
+        }
     },
 
     _getTimeInput() {
@@ -208,29 +241,39 @@ const OrderScreen = React.createClass({
         if (!delivery) {
             return null;
         }
-        if (delivery.slots.length > 0) {
-            var slot = VenuesStore.getSlot(this.state.chosenDeliveryType, this.state.slotId);
-            if (slot == null) {
-                slot = {
-                    name: 'Загружается...'
-                }
+        if (delivery.mode == 0 || delivery.mode == 3) {
+            let text, style = {};
+            if (this.state.chosenTime) {
+                text = CompanyStore.getSlot(delivery, this.state.chosenTime.slotId).name;
+            } else {
+                text = 'Выберите время';
+                style = {color: settings.errorColor};
             }
-            return <ListItem
-                        primaryText={slot.name}
-                        leftIcon={<FontIcon color={settings.primaryColor}
-                                            className="material-icons">
-                                      schedule
-                                  </FontIcon>}
-                        onTouchTap={this._onSlotTap}/>;
-        } else {
+            return <ListItem style={style}
+                             primaryText={text}
+                             leftIcon={<FontIcon color={settings.primaryColor}
+                                                 className="material-icons">
+                                           schedule
+                                       </FontIcon>}
+                             onTouchTap={this._onSlotTap}/>;
+        } else if (delivery.mode == 1) {
+            let timeStr, style = {};
+            if (this.state.chosenTime) {
+                timeStr = this.state.chosenTime.picker.format("D.MM, H:mm");
+            } else {
+                timeStr = 'Выберите время';
+                style = {
+                    color: settings.errorColor
+                };
+            }
             return <div>
-                <ListItem
-                        primaryText={OrderStore.getFullTimeStr()}
-                        leftIcon={<FontIcon color={settings.primaryColor}
-                                            className="material-icons">
-                                      schedule
-                                  </FontIcon>}
-                        onTouchTap={() => this.refs.datePicker.show()}>
+                <ListItem style={style}
+                          primaryText={timeStr}
+                          leftIcon={<FontIcon color={settings.primaryColor}
+                                              className="material-icons">
+                                        schedule
+                                    </FontIcon>}
+                          onTouchTap={() => this.refs.datePicker.show()}>
                 </ListItem>
                 <DatePickerDialog
                     ref='datePicker'
@@ -242,13 +285,34 @@ const OrderScreen = React.createClass({
                     hintText="Выберите время"
                     format="24hr" />
             </div>;
+        } else if (delivery.mode == 2) {
+            const {picker, slotId} = this.state.chosenTime,
+                slot = CompanyStore.getSlot(delivery, slotId);
+            let timeStr, style = {};
+            if (picker && slot) {
+                timeStr = `${time.format("D.MM")} ${slot.name}`;
+                return <div>
+                <ListItem style={style}
+                          primaryText={timeStr}
+                          leftIcon={<FontIcon color={settings.primaryColor}
+                                              className="material-icons">
+                                        schedule
+                                    </FontIcon>}
+                          onTouchTap={() => this.refs.datePicker.show()}>
+                </ListItem>
+                <DatePickerDialog
+                    ref='datePicker'
+                    onAccept={this._setDate}
+                    hintText="Выберите дату" />
+            </div>;
+            }
         }
     },
 
     _getDeliveryTypes() {
-        var venue = this.state.chosenVenue;
-        if (venue) {
-            return venue.deliveries.map(delivery => {
+        const deliveryTypes = CompanyStore.getDeliveryTypes();
+        if (deliveryTypes.length) {
+            return deliveryTypes.map(delivery => {
                 return (
                     <RadioButton key={delivery.id}
                                  label={delivery.name}
@@ -346,7 +410,7 @@ const OrderScreen = React.createClass({
             <VenuesDialog ref="venuesDialog"/>
             <PaymentTypesDialog ref="paymentTypesDialog"/>
             <CommentDialog ref="commentDialog"/>
-            <TimeSlotsDialog ref="timeSlotsDialog"/>
+            <TimeSlotsDialog ref="timeSlotsDialog" onSlotChosen={this._onSlotChosen}/>
             <div style={{width: '100%', position: 'fixed', bottom: '0px' }}>
                 <RaisedButton
                     primary={true}

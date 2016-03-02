@@ -5,7 +5,7 @@ import { Router, Route, IndexRoute, Redirect, hashHistory } from 'react-router';
 import { AppView, MenuView, MenuItemView, OrderView, VenuesView, HistoryView, AddressView, PromosView, HistoryOrderView, SettingsView, ProfileView }
     from './views';
 
-const routes = <Route path='/' component={AppView}>
+const routes = <Route component={AppView}>
     <Route path='/menu' component={MenuView}/>
     <Route path='/menu/:category_id' component={MenuView}/>
     <Route path='/item/:category_id/:item_id' component={MenuItemView}/>

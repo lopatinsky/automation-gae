@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dialog, List, ListItem, Divider } from 'material-ui';
 import { OrderStore } from '../../stores';
-import { AppActions } from '../../actions';
 
 const TimeSlotsDialog = React.createClass({
     getInitialState() {
@@ -51,7 +50,7 @@ const TimeSlotsDialog = React.createClass({
     },
 
     dismiss(slot) {
-        AppActions.setSlotId(slot.id);
+        this.props.onSlotChosen(slot.id);
         this.setState({
             open: false
         })
