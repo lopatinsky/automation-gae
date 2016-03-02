@@ -99,7 +99,10 @@ class OrderHandler(ApiHandler):
         self.order.comment = order_json['comment']
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
 
-        confirm_by_sms = bool(order_json['confirm_by_sms'])
+        if 'confirm_by_sms' in order_json:
+            confirm_by_sms = bool(order_json['confirm_by_sms'])
+        else:
+            confirm_by_sms = False
 
         send_confirmation_sms = False
 
