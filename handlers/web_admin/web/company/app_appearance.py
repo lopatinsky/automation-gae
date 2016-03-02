@@ -31,6 +31,7 @@ def _get_android_values():
         'additional_text_color': appearance.additional_text_color,
         'error_color': appearance.error_color,
         'statusbar_color': appearance.statusbar_color,
+        'navigation_bar_color': appearance.navigation_bar_color,
         'toolbar_color': appearance.toolbar_color,
         'toolbar_text_color': appearance.toolbar_text_color,
     }
@@ -76,6 +77,7 @@ class SetAppAndroidAppearanceHandler(CompanyBaseHandler):
         appearance.additional_text_color = "FF%s" % self.request.get('additional_text_color')[1:]
         appearance.error_color = "FF%s" % self.request.get('error_color')[1:]
         appearance.statusbar_color = "FF%s" % self.request.get('statusbar_color')[1:]
+        appearance.navigation_bar_color = "FF%s" % self.request.get('navigation_bar_color')[1:]
         appearance.toolbar_color = "FF%s" % self.request.get('toolbar_color')[1:]
         appearance.toolbar_text_color = "FF%s" % self.request.get('toolbar_text_color')[1:]
         config.put()

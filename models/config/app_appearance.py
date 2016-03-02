@@ -36,6 +36,7 @@ class AppAppearanceAndroid(ndb.Model):
     error_color = ndb.StringProperty(indexed=False, default='FF000000')
 
     statusbar_color = ndb.StringProperty(indexed=False, default='FF000000')
+    navigation_bar_color = ndb.StringProperty(indexed=False, default='FF000000')
     toolbar_color = ndb.StringProperty(indexed=False, default='FF000000')
     toolbar_text_color = ndb.StringProperty(indexed=False, default='FF000000')
 
@@ -47,6 +48,7 @@ class AppAppearanceAndroid(ndb.Model):
             "additional_text_color": self.additional_text_color,
             "error_color": self.error_color,
             "statusbar_color": self.statusbar_color,
+            "navigation_bar_color": self.navigation_bar_color,
             "toolbar_color": self.toolbar_color,
             "toolbar_text_color": self.toolbar_text_color
         }
