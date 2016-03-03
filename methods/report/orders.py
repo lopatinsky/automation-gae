@@ -2,7 +2,8 @@
 from datetime import timedelta
 from models.config.config import config
 from models.order import STATUS_MAP, READY_ORDER, CANCELED_BY_CLIENT_ORDER, CANCELED_BY_BARISTA_ORDER
-from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE
+from models.payment_types import PAYMENT_TYPE_MAP, CASH_PAYMENT_TYPE, CARD_PAYMENT_TYPE, PAYPAL_PAYMENT_TYPE, \
+    CARD_COURIER_PAYMENT_TYPE
 from models.venue import DELIVERY_MAP
 from models import Order, Client, Venue
 
@@ -90,6 +91,7 @@ def get(venue_id, start, end, venue_ids=(), lite=False):
         _total(orders, READY_ORDER, CASH_PAYMENT_TYPE),
         _total(orders, READY_ORDER, CARD_PAYMENT_TYPE),
         _total(orders, READY_ORDER, PAYPAL_PAYMENT_TYPE) if config.PAYPAL_CLIENT_ID else None,
+        _total(orders, READY_ORDER, CARD_COURIER_PAYMENT_TYPE),
         _total(orders, CANCELED_BY_CLIENT_ORDER, None),
         _total(orders, CANCELED_BY_BARISTA_ORDER, None)
     ]
