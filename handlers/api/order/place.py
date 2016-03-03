@@ -106,9 +106,7 @@ class OrderHandler(ApiHandler):
 
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
-        if self.order.delivery_slot_id == -1:
-            return self.render_error(u'Неверно выбран слот времени')
-        if self.order.delivery_slot_id:
+        if self.order.delivery_slot_id > 0:
             delivery_slot = DeliverySlot.get_by_id(self.order.delivery_slot_id)
             if not delivery_slot:
                 return self.render_error(u'Неправильный формат времени')
