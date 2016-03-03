@@ -1,6 +1,7 @@
 # coding=utf-8
 from models.config.confirmation import SmsConfirmationModule
 from models.config.order_message import OrderMessageModule
+from models.config.sushinson import SushinSonEmailModule
 
 SUBSCRIPTION = 0
 SHARE_GIFT = 1
@@ -138,6 +139,7 @@ class Config(ndb.Model):
     REMAINDERS_MODULE = ndb.LocalStructuredProperty(RemaindersModule)
     CUSTOM_SECTIONS_MODULE = ndb.LocalStructuredProperty(CustomSectionsModule)
     PLATIUS_WHITE_LABEL_MODULE = ndb.LocalStructuredProperty(PlatiusWhiteLabelModule)
+    SUSHINSON_EMAIL_MODULE = ndb.LocalStructuredProperty(SushinSonEmailModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 

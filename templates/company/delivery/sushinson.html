@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    Комментарий:
+        Номер в приложении {{ order.number }},
+        {% if order.delivery_type != 2 %}Заберем сами,{% endif %}
+        {{ order.comment.replace(';', ',') }};
+    <br>
+    Курьер: ;<br>
+    Отправлять смс при смене статуса: 0;<br>
+    Скидка (руб): ;<br>
+    Оплачен: {{ 1 if order.payment_type_id == 1 else 0 }};<br>
+    Количество персон: ;<br>
+    Вид оплаты: {{ order.payment_type_id }};<br>
+    Заказано:<br>
+    {% for item in items %}
+        Название: {{ item.title }},
+        Количество: {{ item.amount }},
+        Цена: {{ item.float_price }},
+        Скидка (%): ,
+        Сумма: {{ item.float_price * item.amount }};<br>
+    {% endfor %}
+    Информация о клиенте:<br>
+    ---------------------<br>
+    Телефон: {{ client.tel }};<br>
+    Мобильный: ;<br>
+    Город: {{ order.address.city if order.address else '' }};<br>
+    Улица: {{ order.address.street if order.address else '' }};<br>
+    Дом: {{ order.address.home if order.address else '' }};<br>
+    Квартира: {{ order.address.flat if order.address else '' }};<br>
+    Карта: ;<br>
+    ФИО: {{ client.name }} {{ client.surname }};<br>
+    Email: {{ client.email }};<br>
+    Итого, с доставкой:
+        {{ order.total_sum }} руб. + {{ order.delivery_sum }} руб. =
+        {{ order.total_sum + order.delivery_sum }} руб.
+</body>
+</html>
