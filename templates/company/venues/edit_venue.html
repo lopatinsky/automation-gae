@@ -24,7 +24,16 @@
                     {% if venue %} value="{{ venue.description }}"
                     {% else %} value="{{ address }}"
                     {% endif %}>
+        </label><br><br>
+
+        <label>
+            Изображение url: <input type="text" name="image_url"
+                {% if venue %} value="{{ venue.pic or '' }}" {% endif %}>
         </label><br>
+        <label>
+            Изображение файл: <input type="file" name="image_file">
+        </label><br><br>
+
         <label>
             Телефон для клиентов:
             <input type="text" name="called_phone"

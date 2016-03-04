@@ -111,7 +111,7 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gi
     if not delivery_time:
         resto_validation = {
             'error': True,
-            'description': u'Не указано время доставки'
+            'description': u'Пожалуйста, укажите время заказа'
         }
     elif not venue:
         resto_validation = {

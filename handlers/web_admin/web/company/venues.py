@@ -3,6 +3,7 @@ from datetime import datetime, date, time
 from google.appengine.ext import ndb
 from base import CompanyBaseHandler
 from methods.auth import venue_rights_required
+from methods.images import get_new_image_url
 from methods.rendering import STR_TIME_FORMAT
 from models import Venue, MenuItem, MenuCategory, DeliveryZone
 from methods import geocoder
@@ -88,6 +89,17 @@ class EditVenueHandler(CompanyBaseHandler):
         venue.title = self.request.get('title')
         venue.description = self.request.get('description')
         venue.called_phone = self.request.get('called_phone')
+
+        if self.request.get('image_file') or self.request.get('image_url'):
+            if self.request.get('image_file'):
+                new_url = get_new_image_url('Venue', venue.key.id(), image_data=str(self.request.get('image_file')))
+            elif self.request.get('image_url') and self.request.get('image_url') != venue.pic:
+                new_url = get_new_image_url('Venue', venue.key.id(), url=self.request.get('image_url'))
+            else:
+                new_url = None
+            if new_url:
+                venue.pic = new_url
+
         venue.phones = self.request.get('phones').split(',')
         venue.emails = self.request.get('emails').split(',')
         venue.legal = LegalInfo.get_by_id(int(self.request.get('legal'))).key

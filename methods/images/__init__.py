@@ -54,6 +54,7 @@ def _get_filename(model_name, id, uniq):
 def get_new_image_url(model_name, id, image_data=None, url=None, size=MAX_SIZE):
     if url:
         image_data = urlfetch.fetch(url, deadline=30).content
+
     if image_data:
         image = Image.open(StringIO.StringIO(image_data))
         if image.mode == 'CMYK':
