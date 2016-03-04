@@ -259,6 +259,8 @@ class OrderHandler(ApiHandler):
 
         send_venue_sms(venue, self.order)
         send_venue_email(venue, self.order, self.request.host_url, self.jinja2)
+        if config.SUSHINSON_EMAIL_MODULE and config.SUSHINSON_EMAIL_MODULE.status == STATUS_AVAILABLE:
+            config.SUSHINSON_EMAIL_MODULE.send(self.order, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())
         if CURRENT_APP_ID == DEMO_APP_ID:
             send_demo_sms(client)

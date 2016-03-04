@@ -149,6 +149,9 @@ def check_modifier_consistency(item_dicts, gift_dicts, order_gift_dicts):
                 if not choice_confirmed:
                     description = u'%s нет для %s' % (group_modifier.choice.title, group_modifier.title)
                     item_dict['errors'].append(description)
+                if group_modifier.choice.choice_id in item.group_choice_restrictions:
+                    description = u'%s нет для %s' % (group_modifier.choice.title, item.title)
+                    item_dict['errors'].append(description)
         return description
 
     items_description = check(item_dicts)

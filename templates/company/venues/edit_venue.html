@@ -62,7 +62,7 @@
         <br>
         <label>
             Проблема:
-            <input type="text" name="problem" {% if venue %}value="{{ venue.problem }}"{% endif %}>
+            <input type="text" name="problem" {% if venue %}value="{{ venue.problem or '' }}"{% endif %}>
         </label><br>
         <input type="submit"/>
         <a href="/company/venues">Назад к списку</a>
