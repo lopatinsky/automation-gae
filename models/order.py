@@ -130,7 +130,7 @@ class GiftPointsDetails(ndb.Model):
 
 class Order(ndb.Model):
     from models.client import DEVICE_CHOICES
-    number = ndb.IntegerProperty(required=True)
+    number = ndb.IntegerProperty()
     client_id = ndb.IntegerProperty(required=True)
     user_agent = ndb.StringProperty()
     total_sum = ndb.FloatProperty(indexed=False)

@@ -111,3 +111,18 @@ class ChangeVenueHandler(AdminApiHandler):
         move_order(order, new_venue)
 
         self.render_json({})
+
+
+class AddNumberHandler(AdminApiHandler):
+    @api_admin_required
+    @write_access_required
+    def post(self, order_id):
+        order = self.user.order_by_id(int(order_id))
+        if order.number:
+            self.abort(400)
+
+        number = self.request.get_range('number')
+        if number != 0:
+            order.number = number
+            order.put()
+        self.render_json({})

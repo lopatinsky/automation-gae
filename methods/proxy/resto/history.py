@@ -78,7 +78,7 @@ def get_orders(client):
                 order.status = _get_status_from_resto_status(resto_company, resto_order['status'])
             else:
                 resto_order['status'] = READY_ORDER
-            order.number = int(resto_order['number'])
+            order.number = int(resto_order['number']) if resto_order['number'] else None
             order.address = _get_address(resto_order['address'])
             order.venue_id = resto_order['venue_id']
             order.total_sum = resto_order['sum']
@@ -122,5 +122,5 @@ def find_lost_order(uuid):
     return {
         'status': _convert_resto_status(resto_info['status']),
         'resto_id': resto_info['restoId'],
-        'number': int(resto_info['number'])
+        'number': int(resto_info['number']) if resto_info['number'] else None,
     }
