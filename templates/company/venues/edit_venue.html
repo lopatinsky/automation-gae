@@ -10,7 +10,7 @@
             Изменения сохранены
         </div>
     {% endif %}
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <input type="text" name="lat" value="{{ lat }}" hidden>
         <input type="text" name="lon" value="{{ lon }}" hidden>
         <label>

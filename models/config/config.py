@@ -151,20 +151,26 @@ class Config(ndb.Model):
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
     ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
     REJECT_IF_NOT_IN_ZONES = ndb.BooleanProperty(default=False)
+    COMPANY_LOGO_URL = ndb.StringProperty(indexed=False)
 
     def get_company_dict(self):
         from methods.proxy.resto.company import get_company_info_dict
 
+        company_dict = {
+            'logo_url': self.COMPANY_LOGO_URL
+        }
         if self.APP_KIND in [AUTO_APP, DOUBLEB_APP]:
-            return {
+            company_dict.update({
                 'app_name': self.APP_NAME,
                 'description': self.COMPANY_DESCRIPTION,
                 'phone': self.SUPPORT_PHONE,
                 'site': self.SUPPORT_SITE,
                 'emails': self.SUPPORT_EMAILS
-            }
+            })
         elif self.APP_KIND == RESTO_APP:
-            return get_company_info_dict()
+            company_dict.update(get_company_info_dict())
+
+        return company_dict
 
     COUNTRIES = ndb.StringProperty(indexed=False, repeated=True)
     COMPULSORY_ADDRESS_VALIDATES = ndb.BooleanProperty(indexed=False, default=False)

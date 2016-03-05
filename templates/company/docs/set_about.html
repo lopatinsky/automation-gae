@@ -5,7 +5,7 @@
 </head>
 <body>
     {% include '/company/header.html' %}
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <label>
             Наименование приложения:
             <input type="text" value="{{ name }}" name="name">
@@ -37,10 +37,19 @@
                 <option value="1" {% if report_weekly %}selected{% endif %}>Еженедельно</option>
             </select>
         </label><br>
+
+        <br>
         <label>
             Цвет:
             <input type="color" name="color" value="#{{ color[2:] }}"/>
         </label><br>
+        <label>
+            Лого компании url: <input type="text" name="image_url" value="{{ image_url }}"/>
+        </label><br>
+        <label>
+            Лого компании файл: <input type="file" name="image_file">
+        </label><br><br>
+
         <label>
             Кнопки выдачи заказа в письмах:
             <input type="checkbox" name="email_buttons" {% if email_buttons %}checked{% endif %}>

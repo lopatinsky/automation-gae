@@ -2,6 +2,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 
 from base import CompanyBaseHandler
 from methods.auth import legal_rights_required, company_info_rights_required
+from methods.images import get_new_image_url
 from models.config.config import config, Config
 from models.config.version import CURRENT_VERSION, CURRENT_APP_ID
 from models.legal import LegalInfo
@@ -21,6 +22,7 @@ def _get_values():
         'color': config.ACTION_COLOR,
         'email_buttons': config.EMAIL_REQUESTS,
         'company_status': config.COMPANY_STATUS,
+        'image_url': config.COMPANY_LOGO_URL,
     }
 
 
@@ -117,5 +119,16 @@ class SetAboutCompanyHandler(CompanyBaseHandler):
         config.ACTION_COLOR = "FF%s" % self.request.get('color')[1:]
         config.EMAIL_REQUESTS = bool(self.request.get('email_buttons'))
         config.COMPANY_STATUS = int(self.request.get('company_status'))
+
+        if self.request.get('image_file') or self.request.get('image_url'):
+            if self.request.get('image_file'):
+                new_url = get_new_image_url('Company', config.key.id(), image_data=str(self.request.get('image_file')), size=250.0)
+            elif self.request.get('image_url') and self.request.get('image_url') != config.COMPANY_LOGO_URL:
+                new_url = get_new_image_url('Company', config.key.id(), url=self.request.get('image_url'), size=250.0)
+            else:
+                new_url = None
+            if new_url:
+                config.COMPANY_LOGO_URL = new_url
+
         config.put()
         self.redirect('/company/docs/about')
