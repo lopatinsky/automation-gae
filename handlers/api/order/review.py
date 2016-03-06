@@ -2,7 +2,7 @@
 import logging
 
 from handlers.api.base import ApiHandler
-from methods.emails import mandrill
+from methods.emails import postmark
 from models import Venue
 from models.client import Client
 from models.config import config
@@ -47,8 +47,8 @@ class OrderReviewHandler(ApiHandler):
                 body += u"Комментарий: %s" % comment
             logging.info(body)
             to = emails
-            cc = ['mdburshteyn@gmail.com', 'isparfenov@gmail.com']
+            cc = ['mdburshteyn@gmail.com', 'elenamarchenko.lm@gmail.com']
             subject = u'Негативный отзыв о заказе' if is_negative else u'Отзыв о заказе с комментарием'
-            mandrill.send_email('noreply-rating@ru-beacon.ru', to, cc, subject, body)
+            postmark.send_email('noreply-rating@ru-beacon.ru', to, subject, body, cc_email=cc)
 
         self.render_json({})

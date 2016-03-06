@@ -7,7 +7,9 @@ __author__ = 'dvpermyakov'
 URL = 'https://api.postmarkapp.com/email'
 
 
-def send_email(from_email, to_email, subject, body):
+def send_email(from_email, to_email, subject, body, cc_email=None):
+    if isinstance(to_email, list):
+        to_email = ','.join(to_email)
     payloads = {
         'From': 'noreply-order@ru-beacon.ru',
         'To': to_email,
@@ -15,6 +17,10 @@ def send_email(from_email, to_email, subject, body):
         'HtmlBody': body,
         'TrackOpens': False
     }
+    if cc_email:
+        if isinstance(cc_email, list):
+            cc_email = ','.join(cc_email)
+        payloads['Cc'] = cc_email
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
