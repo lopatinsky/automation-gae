@@ -10,6 +10,7 @@ import CompanyStore from './CompanyStore';
 
 const OrderStore = new BaseStore({
     sendingCheckOrder: null,
+    sendingOrder: null,
 
     chosenPaymentType: null,
     chosenVenue: null,
@@ -23,8 +24,6 @@ const OrderStore = new BaseStore({
     chosenTime: null,
     promos: [],
     errors: [],
-    cancelProcessing: false,
-    cancelDescription: null,
 
     onPaymentTypesLoaded() {
         if (!this.chosenPaymentType && PaymentsStore.payment_types) {
@@ -41,7 +40,6 @@ const OrderStore = new BaseStore({
         if (!this.chosenVenue && VenuesStore.venues.length) {
             this.setChosenVenue(VenuesStore.venues[0]);
         }
-        console.log(this.chosenVenue);
     },
 
     onCompanyLoaded() {
@@ -197,6 +195,11 @@ const OrderStore = new BaseStore({
 
     getOrderDict() {
         var delivery = this.chosenDeliveryType;
+        if (! ClientStore.getName()) {
+            return [false, 'Введите Ваше имя'];
+        } else if (! ClientStore.getPhone()) {
+            return [false, 'Введите номер телефона'];
+        }
         var dict = {
             delivery_type: delivery.id,
             client: ClientStore.getClientDict(),
@@ -217,20 +220,20 @@ const OrderStore = new BaseStore({
             if (delivery.mode == 0 || delivery.mode == 2 || delivery.mode == 3) {
                 dict.delivery_slot_id = this.chosenTime.slotId;
             }
-            if (delivery.mode == 2) {
-                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD");
-            } else if (delivery.mode == 1) {
+            if (delivery.mode == 1 || delivery.mode == 2) {
                 dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD HH:mm:ss");
             }
+        } else {
+            return [false, 'Выберите время заказа'];
         }
-        return dict;
+        return [true, dict];
     },
 
     getCheckOrderDict() {
         var delivery = this.chosenDeliveryType;
         var client_id = ClientStore.getClientId();
         if (!delivery || !client_id) {
-            return null;
+            return [false, 'Загружается...'];
         }
         var dict = {
             client_id: client_id,
@@ -242,7 +245,7 @@ const OrderStore = new BaseStore({
             dict.address = JSON.stringify(AddressStore.getAddressDict());
         } else {
             if (!this.chosenVenue) {
-                return null;
+                return [false, 'Загружается...'];
             }
             dict.venue_id = this.chosenVenue.id;
         }
@@ -250,13 +253,13 @@ const OrderStore = new BaseStore({
             if (delivery.mode == 0 || delivery.mode == 2 || delivery.mode == 3) {
                 dict.delivery_slot_id = this.chosenTime.slotId;
             }
-            if (delivery.mode == 2) {
-                dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD");
-            } else if (delivery.mode == 1) {
+            if (delivery.mode == 1 || delivery.mode == 2) {
                 dict.time_picker_value = this.chosenTime.picker.format("YYYY-MM-DD HH:mm:ss");
             }
+        } else {
+            return [false, 'Выберите время заказа'];
         }
-        return dict;
+        return [true, dict];
     },
 
     checkOrderStarted(requestObject) {
@@ -289,28 +292,38 @@ const OrderStore = new BaseStore({
         this._changed();
     },
 
-    setOrderError(error) {
+    orderStarted(requestObject) {
+        if (this.sendingOrder) {
+            this.sendingOrder.abort();
+        }
+        this.sendingOrder = requestObject;
+        this._changed();
+    },
+
+    orderFinished(orderId) {
+        this.sendingOrder = null;
+        this.items = [];
+        this._changed({orderId});
+        setImmediate(() => ServerRequests.setOrderSuccess(orderId));
+    },
+
+    orderFailed(error) {
+        this.sendingOrder = null;
         this._changed({orderError: error});
     },
 
-    setCancelDescription(description) {
-        this.cancelDescription = description;
+    checkOrderNotReady(message) {
+        if (this.sendingCheckOrder) {
+            this.sendingCheckOrder.abort();
+            this.sendingCheckOrder = null;
+        }
+        this._setValidationInfo(
+            this.getTotalSum(),
+            [],
+            0, '',
+            [], [message]
+        );
         this._changed();
-    },
-
-    setCancelProcessing() {
-        this.cancelProcessing = true;
-        this._changed();
-    },
-
-    clearCancelProcessing() {
-        this.cancelProcessing = false;
-        this._changed();
-    },
-
-    setOrderId(orderId) {
-        this._changed({orderId});
-        ServerRequests.setOrderSuccess(orderId);
     },
 
     setComment(comment) {
@@ -324,9 +337,20 @@ const OrderStore = new BaseStore({
     }
 }, action => {
     switch (action.actionType) {
+        case ServerRequests.AJAX_DATA_NOT_READY:
+            if (action.data.request == "checkOrder") {
+                OrderStore.checkOrderNotReady(action.data.message);
+            }
+            if (action.data.request == "order") {
+                OrderStore.orderFailed(action.data.message);
+            }
+            break;
         case ServerRequests.AJAX_SENDING:
             if (action.data.request == "checkOrder") {
                 OrderStore.checkOrderStarted(action.data.requestObject);
+            }
+            if (action.data.request == "order") {
+                OrderStore.orderStarted(action.data.requestObject);
             }
             break;
         case ServerRequests.AJAX_SUCCESS:
@@ -341,7 +365,7 @@ const OrderStore = new BaseStore({
                 );
             }
             if (action.data.request == "order") {
-                OrderStore.setOrderId(action.data.orderId);
+                OrderStore.orderFinished(action.data.orderId);
             }
             if (action.data.request == "payment_types") {
                 AppDispatcher.waitFor([PaymentsStore.dispatchToken]);
@@ -361,13 +385,17 @@ const OrderStore = new BaseStore({
                 OrderStore.checkOrderFinished();
             }
             if (action.data.request == "order") {
-                OrderStore.setOrderError(action.data.error);
-            }
-            break;
-        case ServerRequests.CANCEL:
-            if (action.data.request == "order") {
-                OrderStore.setCancelDescription(action.data.description);
-                OrderStore.clearCancelProcessing();
+                console.log(action.data);
+                let error = null;
+                if (action.data.err &&
+                    action.data.err.response &&
+                    action.data.err.response.body &&
+                    action.data.err.response.body.description) {
+                    error = action.data.err.response.body.description;
+                } else {
+                    error = 'Неизвестная ошибка при размещении заказа';
+                }
+                OrderStore.orderFailed(error);
             }
             break;
         case AppActions.SET_COMMENT:

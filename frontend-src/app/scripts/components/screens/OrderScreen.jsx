@@ -2,7 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import { OrderStore, ClientStore, PaymentsStore, AddressStore, CompanyStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
-import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog } from '../dialogs';
+import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog, LoadingDialog } from '../dialogs';
 import { CircularProgress, List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
     from 'material-ui';
 import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
@@ -33,6 +33,7 @@ const OrderScreen = React.createClass({
             orderGifts: OrderStore.orderGifts,
 
             sendingCheckOrder: OrderStore.sendingCheckOrder,
+            sendingOrder: OrderStore.sendingOrder,
 
             menuTotalSum: OrderStore.getTotalSum(),
             validationSum: OrderStore.validationSum,
@@ -48,7 +49,7 @@ const OrderScreen = React.createClass({
         data = data || {};
         var orderId = data.orderId;
         if (orderId != null) {
-            this.context.router.push(`/order/${orderId}`);
+            setImmediate(() => this.context.router.replace(`/order/${orderId}`));
         }
         if (data.orderError) {
             this.setState({
@@ -57,7 +58,7 @@ const OrderScreen = React.createClass({
         }
         this.setState(this._stateFromOrderStore());
         if (data.checkOrder) {
-            setImmediate(ServerRequests.checkOrder);
+            setImmediate(() => ServerRequests.checkOrder());
         }
     },
 
@@ -70,22 +71,22 @@ const OrderScreen = React.createClass({
 
     _getServerInfo() {
         if (this.state.errors.length) {
-            return <div style={{padding: '12px 48px 0 36px', color: 'red'}}>
+            return <div style={{padding: '12px 24px 0', color: settings.errorColor, fontSize: 14}}>
                 {this._getErrors()}
             </div>
         } else {
-            return <div>
-                {this._getPromos()}
+            return <div style={{fontSize: 14}}>
                 {this._getDeliveryDescription()}
+                {this._getPromos()}
             </div>;
         }
     },
 
     _getPromos() {
         if (this.state.promos.length > 0) {
-            return <div style={{padding: '12px 48px 0 36px'}}>
+            return <div style={{padding: '12px 24px 0'}}>
                 {this.state.promos.map((promo, i) => {
-                    return <div key={i}>{promo.text + '\n'}</div>
+                    return <div key={i}>{promo.text}</div>
                 })}
             </div>;
         } else {
@@ -96,7 +97,7 @@ const OrderScreen = React.createClass({
     _getDeliveryDescription() {
         var delivery = this.state.chosenDeliveryType;
         if (delivery && delivery.id == 2 && this.state.deliverySumStr) {
-            return <div style={{padding: '12px 48px 0 36px'}}>
+            return <div style={{padding: '12px 24px 0'}}>
                 {this.state.deliverySumStr}
             </div>;
         } else {
@@ -120,13 +121,13 @@ const OrderScreen = React.createClass({
             return <div style={style}>
                 {progress}
                 Итого:{' '}
-                <strike>{this.state.menuTotalSum}</strike>{' '}
-                {this.state.validationSum + this.state.deliverySum}
+                <strike>{this.state.menuTotalSum}р.</strike>{' '}
+                {this.state.validationSum + this.state.deliverySum}р.
             </div>;
         } else {
             return <div style={style}>
                 {progress}
-                Итого: {this.state.menuTotalSum}
+                Итого: {this.state.menuTotalSum}р.
             </div>;
         }
     },
@@ -294,12 +295,23 @@ const OrderScreen = React.createClass({
                     format="24hr" />
             </div>;
         } else if (delivery.mode == 2) {
-            const {picker, slotId} = this.state.chosenTime,
-                slot = CompanyStore.getSlot(delivery, slotId);
+            let time = this.state.chosenTime,
+                picker = null,
+                slot = null;
+            if (time) {
+                picker = time.picker;
+                slot = CompanyStore.getSlot(delivery, time.slotId);
+            }
             let timeStr, style = {};
             if (picker && slot) {
-                timeStr = `${time.format("D.MM")} ${slot.name}`;
-                return <div>
+                timeStr = `${picker.format("D.MM")} ${slot.name}`;
+            } else {
+                timeStr = 'Выберите время';
+                style = {
+                    color: settings.errorColor
+                };
+            }
+            return <div>
                 <ListItem style={style}
                           primaryText={timeStr}
                           leftIcon={<FontIcon color={settings.primaryColor}
@@ -313,14 +325,12 @@ const OrderScreen = React.createClass({
                     onAccept={this._setDate}
                     hintText="Выберите дату" />
             </div>;
-            }
         }
     },
 
-    _getDeliveryTypes() {
-        const deliveryTypes = CompanyStore.getDeliveryTypes();
-        if (deliveryTypes.length) {
-            return deliveryTypes.map(delivery => {
+    _getDeliveryTypesRadioGroup() {
+        const deliveryTypes = CompanyStore.getDeliveryTypes(),
+            deliveryTypeElements = deliveryTypes.map(delivery => {
                 return (
                     <RadioButton key={delivery.id}
                                  label={delivery.name}
@@ -328,10 +338,19 @@ const OrderScreen = React.createClass({
                                  value={delivery.id}
                                  onTouchTap={() => this._onDeliveryTap(delivery)}/>
                 );
-            });
-        } else {
+            }),
+            chosenDelivery = this.state.chosenDeliveryType;
+        if (deliveryTypes.length <= 1) {
             return null;
         }
+        return [
+            <RadioButtonGroup key='theGroup' style={{margin: '12px'}}
+                              name='group'
+                              valueSelected={chosenDelivery ? chosenDelivery.id : null}>
+                {deliveryTypeElements}
+            </RadioButtonGroup>,
+            <Divider key='theDivider'/>
+        ]
     },
 
     _getClientInfo() {
@@ -359,7 +378,7 @@ const OrderScreen = React.createClass({
 
     _getPaymentType() {
         let pt = this.state.chosenPaymentType,
-            title = pt ? pt.really_title : 'Выберите способ оплаты';
+            title = pt ? PaymentsStore.getTitle(pt.id) : 'Выберите способ оплаты';
         return <ListItem
                     primaryText={title}
                     leftIcon={<FontIcon color={settings.primaryColor}
@@ -383,8 +402,8 @@ const OrderScreen = React.createClass({
     },
 
     componentDidMount() {
-        ServerRequests.checkOrder()
         OrderStore.addChangeListener(this._onOrderStoreChanged);
+        ServerRequests.checkOrder();
     },
 
     componentWillUnmount() {
@@ -392,7 +411,6 @@ const OrderScreen = React.createClass({
     },
 
     render() {
-        var delivery = this.state.chosenDeliveryType;
         return <div style={{padding: '64px 0 0 0'}}>
             {this._getItems()}
             {this._getOrderGifts()}
@@ -409,12 +427,7 @@ const OrderScreen = React.createClass({
             {this._getServerInfo()}
             <div style={{width: '100%'}}>
                 <Card style={{margin: '12px 12px 60px 12px'}}>
-                    <RadioButtonGroup style={{margin: '12px'}}
-                                      name='group'
-                                      valueSelected={delivery ? delivery.id : null}>
-                        {this._getDeliveryTypes()}
-                    </RadioButtonGroup>
-                    <Divider/>
+                    {this._getDeliveryTypesRadioGroup()}
                     <List style={{paddingBottom: '0', paddingTop: '0'}}>
                         {this._getVenueInput()}
                         <Divider/>
@@ -439,13 +452,15 @@ const OrderScreen = React.createClass({
                     onTouchTap={this._order}
                     style={{display: 'block', margin: '0 12px 12px'}} />
             </div>
+            <LoadingDialog title="Размещение заказа..."
+                           open={!!this.state.sendingOrder}/>
             <Snackbar
                 ref='orderSnackBar'
-                style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
+                style={{padding: '6px 0', width: '100%', maxHeight: '128px', height: null, lineHeight: '175%'}}
                 message={this.state.orderError || ''}
                 autoHideDuration={5000}
                 open={!! this.state.orderError}
-                onRequestClose={() => {this.setState({error: null}); OrderStore.setOrderError(null)}}/>
+                onRequestClose={() => {this.setState({orderError: null})}}/>
         </div>;
     }
 });

@@ -3,19 +3,11 @@ import { Dialog, FontIcon } from 'material-ui';
 import settings from '../../settings';
 
 const SuccessPlaceOrderDialog = React.createClass({
-
-    show() {
-        this.refs.successDialog.show();
-    },
-
-    dismiss() {
-        this.refs.successDialog.dismiss();
-    },
-
     render() {
         return (
             <Dialog ref="successDialog"
-                    bodyStyle={{padding: '12px'}}>
+                    bodyStyle={{padding: '12px'}}
+                    open={this.props.open}>
                 <div style={{display: 'table', width: '100%'}}>
                     <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
                               color={settings.primaryColor}

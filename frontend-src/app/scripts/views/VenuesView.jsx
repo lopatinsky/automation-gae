@@ -10,7 +10,7 @@ const VenuesView = React.createClass({
     render() {
         return (
             <div>
-                <Toolbar title='Кофейни' view={this} />
+                <Toolbar title='Заведения' view={this} />
                 <VenuesScreen />
             </div>
         );

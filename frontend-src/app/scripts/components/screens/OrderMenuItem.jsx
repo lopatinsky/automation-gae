@@ -27,7 +27,7 @@ const OrderMenuItem = React.createClass({
             const quantity = orderItem.singleModifiers[sm.modifier_id];
             if (quantity) {
                 result.push(<div key={sm.modifier_id}>
-                    {modifier.title} x{modifier.quantity}
+                    {sm.title} x{quantity}
                 </div>);
             }
         }
@@ -67,7 +67,7 @@ const OrderMenuItem = React.createClass({
                         <div style={{lineHeight: '120%'}}>
                             {item.title + (this.props.gift ? ' (подарок)' : '')}
                         </div>
-                        <div style={{lineHeight: '120%'}}>
+                        <div style={{lineHeight: '120%', fontSize: 12}}>
                             {this._getGroupModifiers(orderItem)}
                             {this._getSingleModifiers(orderItem)}
                         </div>

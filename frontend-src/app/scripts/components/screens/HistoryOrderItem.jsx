@@ -3,20 +3,19 @@ import { CardMedia, Divider } from 'material-ui';
 
 
 const HistoryOrderItem = React.createClass({
-
     _getGroupModifiers(item) {
-        return item.group_modifiers.map(modifier => {
-            return <div>
+        return item.group_modifiers.map((modifier, i) => {
+            return <div key={i}>
                 {modifier.name}
             </div>;
         });
     },
 
     _getSingleModifiers(item) {
-        return item.single_modifiers.map(modifier => {
+        return item.single_modifiers.map((modifier, i) => {
             if (modifier.quantity > 0) {
-                return <div>
-                    {modifier.name + ' x ' + modifier.quantity}
+                return <div key={i}>
+                    {modifier.name + ' x' + modifier.quantity}
                 </div>;
             }
         });
@@ -43,15 +42,15 @@ const HistoryOrderItem = React.createClass({
                     {picCard}
                     <div style={{display: 'table-cell', padding: '12px', width: width, verticalAlign: 'middle'}}>
                         <div style={{lineHeight: '120%'}}>
-                            <b>{item.title}</b>
+                            {item.title}
                         </div>
-                        <div style={{lineHeight: '120%'}}>
+                        <div style={{fontSize: 12, lineHeight: '120%'}}>
                             {this._getGroupModifiers(item)}
                             {this._getSingleModifiers(item)}
                         </div>
                     </div>
                     <div style={{display: 'table-cell', width: '15%', verticalAlign: 'middle', textAlign: 'right', paddingRight: '12px'}}>
-                        <b>{'x' + item.quantity}</b>
+                        x{item.quantity}
                     </div>
                 </div>
                 <Divider/>

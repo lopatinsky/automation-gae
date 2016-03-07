@@ -3,10 +3,25 @@ import OrderStore from './OrderStore';
 import { ServerRequests } from '../actions';
 
 const PaymentsStore = new BaseStore({
+    SUPPORTED_PAYMENT_TYPES: {
+        0: 'Наличными',
+        5: 'Картой курьеру'
+    },
+
     payment_types: [],
 
+    getTitle(paymentTypeId) {
+        return this.SUPPORTED_PAYMENT_TYPES[paymentTypeId]
+    },
+
     _setPaymentTypes(payment_types) {
-        this.payment_types = payment_types;
+        const filteredPaymentTypes = [];
+        for (let paymentType of payment_types) {
+            if (paymentType.id in this.SUPPORTED_PAYMENT_TYPES) {
+                filteredPaymentTypes.push(paymentType);
+            }
+        }
+        this.payment_types = filteredPaymentTypes;
         this._changed();
     }
 }, action => {

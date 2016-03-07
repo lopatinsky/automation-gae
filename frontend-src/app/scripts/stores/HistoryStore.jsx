@@ -68,9 +68,6 @@ const HistoryStore = new BaseStore({
             if (action.data.request == "history") {
                 HistoryStore._setOrders(action.data.orders);
                 HistoryStore.unsetLoading();
-            } else if (action.data.request == "cancel") {
-                HistoryStore._setStatus(action.data.order_id, 2);
-                HistoryStore.unsetLoading();
             }
             break;
         case ServerRequests.AJAX_FAILURE:
@@ -79,7 +76,7 @@ const HistoryStore = new BaseStore({
             }
             break;
         case ServerRequests.AJAX_SENDING:
-            if (action.data.request == "history" || action.data.request == "cancel") {
+            if (action.data.request == "history") {
                 HistoryStore.setLoading();
             }
             break;

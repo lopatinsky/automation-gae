@@ -19,22 +19,25 @@ const AppView = React.createClass({
         };
     },
 
-    refresh() {
-        if (MenuStore.rootCategories.length == 0) {
-            this.refs.processingDialog.show();
-        } else {
-            this.refs.processingDialog.dismiss();
-        }
+    getInitialState() {
+        return {
+            loading: MenuStore.rootCategories.length == 0
+        };
+    },
+
+    _onMenuStoreChanged() {
+        this.setState({
+            loading: MenuStore.rootCategories.length == 0
+        });
     },
 
     componentDidMount() {
-        MenuStore.addChangeListener(this.refresh);
+        MenuStore.addChangeListener(this._onMenuStoreChanged);
         AppActions.load();
-        this.refresh();
     },
 
     componentWillUnmount() {
-        MenuStore.removeChangeListener(this.refresh);
+        MenuStore.removeChangeListener(this._onMenuStoreChanged);
     },
 
     getDrawer() {
@@ -46,9 +49,9 @@ const AppView = React.createClass({
         return <div>
             <NavigationDrawer ref="drawer"/>
             {children}
-            <LoadingDialog
-                ref='processingDialog'
-                title='Загрузка'/>
+            <LoadingDialog ref='processingDialog'
+                           title='Загрузка'
+                           open={this.state.loading}/>
         </div>;
     }
 });

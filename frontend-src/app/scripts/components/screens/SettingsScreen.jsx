@@ -17,27 +17,43 @@ const SettingsScreen = React.createClass({
         window.open(mailto);
     },
 
+    _onFullSiteTap() {
+        window.open(CompanyStore.getSite());
+    },
+
     _getClientInfo() {
-        return <ListItem
-                primaryText={ClientStore.getRenderedInfo()}
-                leftIcon={<FontIcon color={settings.primaryColor}
-                                    className="material-icons">
-                              perm_identity
-                          </FontIcon>}
-                onTouchTap={this._onClientInfoTap}/>;
+        return <ListItem primaryText='Ваш профиль'
+                         leftIcon={<FontIcon color={settings.primaryColor}
+                                             className="material-icons">
+                                       perm_identity
+                                   </FontIcon>}
+                         onTouchTap={this._onClientInfoTap}/>;
     },
 
     _getFeedback() {
-        return <ListItem
-                primaryText='Написать нам'
-                leftIcon={<FontIcon color={settings.primaryColor}
-                                    className="material-icons">
-                              feedback
-                          </FontIcon>}
-                onTouchTap={this._onFeedback}/>;
+        return <ListItem primaryText='Написать нам'
+                         leftIcon={<FontIcon color={settings.primaryColor}
+                                             className="material-icons">
+                                       feedback
+                                   </FontIcon>}
+                         onTouchTap={this._onFeedback}/>;
+    },
+
+    _getFullSite() {
+        const site = CompanyStore.getSite();
+        if (site) {
+            return <ListItem primaryText='Полная версия сайта'
+                             leftIcon={<FontIcon color={settings.primaryColor}
+                                                 className="material-icons">
+                                           open_in_new
+                                       </FontIcon>}
+                             onTouchTap={this._onFullSiteTap}/>;
+        }
+        return null;
     },
 
     render() {
+        let site = this._getFullSite();
         return <div style={{padding: '64px 0 0 0'}}>
             <div style={{padding: '12px 0', textAlign: 'center'}}>
                 <b>Ваш ID: {ClientStore.getClientId()}</b>
@@ -48,6 +64,8 @@ const SettingsScreen = React.createClass({
                 <Divider/>
                 {this._getFeedback()}
                 <Divider/>
+                {site}
+                {site && <Divider/>}
             </List>
         </div>;
     }

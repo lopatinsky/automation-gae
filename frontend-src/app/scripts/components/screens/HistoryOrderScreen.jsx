@@ -1,39 +1,22 @@
 import React from 'react';
-import { Card, CardText, RefreshIndicator, Dialog, FlatButton, RaisedButton, Snackbar, FontIcon, Divider } from 'material-ui';
-import { OrderStore, HistoryStore, VenuesStore } from '../../stores';
+import { Paper, CircularProgress, FontIcon, Divider } from 'material-ui';
+import { HistoryStore, VenuesStore, PaymentsStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { SuccessPlaceOrderDialog, LoadingDialog } from '../dialogs';
 import HistoryOrderItem from './HistoryOrderItem';
 import settings from '../../settings';
 
 const HistoryOrderScreen = React.createClass({
-    refresh() {
-        var order = this.props.order;
-        if (OrderStore.getOrderId() != null) {
-            if (order != null && OrderStore.getOrderId() == order.order_id) {
-                this.refs.doneProcessingDialog.dismiss();
-                this.refs.successDialog.show();
-                 OrderStore.clearOrderId();
-            } else {
-                this.refs.doneProcessingDialog.show();
-            }
-
-        }
-        if (OrderStore.getCancelProcessing()) {
-            this.refs.cancelProcessingDialog.show();
-        } else {
-            this.refs.cancelProcessingDialog.dismiss();
-        }
-        if (OrderStore.getCancelDescription()) {
-            this.refs.cancelSnackBar.show();
-        }
-        this.setState({});
+    getInitialState() {
+        return {
+            order: HistoryStore.getOrder(this.props.orderId)
+        };
     },
 
-    cancel() {
-        OrderStore.setCancelProcessing();
-        var order = this.props.order;
-        ServerRequests.cancelOrder(order.order_id);
+    _onHistoryStoreChange() {
+        this.setState({
+            order: HistoryStore.getOrder(this.props.orderId)
+        });
     },
 
     _getVenueOutput(order) {
@@ -41,7 +24,10 @@ const HistoryOrderScreen = React.createClass({
         if (order.address == null && order.venue_id != '' && order.venue_id != null) {
             var venue = VenuesStore.getVenue(order.venue_id);
             if (venue != null) {
-               address = venue.address;
+                address = <div>
+                    <div>{venue.title}</div>
+                    <div style={{fontSize: 12}}>{venue.address}</div>
+                </div>;
             }
         } else {
             if (order.address != null) {
@@ -61,78 +47,51 @@ const HistoryOrderScreen = React.createClass({
     },
 
     getOrder() {
-        var order = this.props.order;
+        var order = this.state.order;
         if (order != null) {
-            return <Card>
+            return <Paper>
                 <div style={{padding: '12px'}}>
-                    Заказ <b style={{color: settings.primaryColor}}>#{order.number}</b>
+                    Заказ <span style={{color: settings.primaryColor, fontWeight: 500}}>#{order.number}</span>
                     <div style={{float: 'right'}}>
-                        <b>{HistoryStore.getStatus(order.status)}</b>
+                        <span style={{fontWeight: 500}}>{HistoryStore.getStatus(order.status)}</span>
                     </div>
                 </div>
                 <Divider/>
                 <div>
-                    {order.items.map(item => {
-                        return <HistoryOrderItem item={item} />;
+                    {order.items.map((item, i) => {
+                        return <HistoryOrderItem key={i} item={item} />;
                     })}
                 </div>
                 <Divider/>
-                <div style={{padding: '12px', height: '48px'}}>
-                    <div style={{float: 'right'}}>
-                        {'Итого: ' + order.total}
-                    </div>
+                <div style={{padding: '12px', textAlign: 'right'}}>
+                    <div>Итого: {order.total}р.</div>
+                    <div style={{fontSize: 12}}>{PaymentsStore.getTitle(order.payment_type_id)}</div>
                 </div>
                 <Divider/>
                 <div style={{padding: '12px'}}>
-                    {'Готов к ' + order.delivery_time_str}
+                    Готов к {order.delivery_time_str}
                 </div>
                 <Divider/>
                 {this._getVenueOutput(order)}
-            </Card>;
+            </Paper>;
         } else {
-             return <RefreshIndicator size={40} left={80} top={5} status="loading" />
-        }
-    },
-
-    getCancelButton() {
-        var order = this.props.order;
-        if (order && order.status == 0) {
-            return <div style={{float: 'right', padding: '12px'}}>
-                <RaisedButton label='Отмена'
-                              primary={true}
-                              onTouchTap={this.cancel} />
+            return <div style={{textAlign: 'center', paddingTop: 12}}>
+                <CircularProgress/>
             </div>;
-        } else {
-            return null;
         }
     },
 
     componentDidMount() {
-        OrderStore.addChangeListener(this.refresh);
-        this.refresh();
+        HistoryStore.addChangeListener(this._onHistoryStoreChange);
     },
 
     componentWillUnmount() {
-        OrderStore.removeChangeListener(this.refresh);
+        HistoryStore.removeChangeListener(this._onHistoryStoreChange);
     },
-
 
     render() {
         return <div style={{padding: '64px 0 0 0'}}>
             {this.getOrder()}
-            {this.getCancelButton()}
-            <SuccessPlaceOrderDialog ref="successDialog" />
-            <LoadingDialog
-                ref="doneProcessingDialog"
-                title="Загрузка заказа"/>
-            <LoadingDialog
-                ref="cancelProcessingDialog"
-                title="Отмена заказа"/>
-            <Snackbar
-                ref='cancelSnackBar'
-                style={{padding: '6px', width: '100%', marginLeft: '0', bottom: '0', textAlign: 'center', maxHeight: '128px', height: null, lineHeight: '175%'}}
-                message={OrderStore.getCancelDescription()}
-                onDismiss={() => {OrderStore.setCancelDescription(null)}}/>
         </div>;
     }
 });

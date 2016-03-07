@@ -2,6 +2,7 @@ import React from 'react';
 import { LeftNav, FontIcon, MenuItem } from 'material-ui';
 import settings from '../settings';
 import Colors from 'material-ui/lib/styles/colors';
+import { VenuesStore, PromosStore } from '../stores';
 
 const NavigationDrawer = React.createClass({
     contextTypes: {
@@ -39,9 +40,9 @@ const NavigationDrawer = React.createClass({
         return [
             this._getItem('Меню', '/menu', 'restaurant_menu'),
             this._getItem('Заказ', '/order', 'shopping_basket'),
-            this._getItem('Адреса', '/venues', 'place'),
+            VenuesStore.venues.length ? this._getItem('Заведения', '/venues', 'place') : null,
             this._getItem('История', '/history', 'history'),
-            this._getItem('Акции', '/promos', 'loyalty'),
+            PromosStore.promos.length ? this._getItem('Акции', '/promos', 'loyalty') : null,
             this._getItem('Настройки', '/settings', 'settings')
         ];
     },

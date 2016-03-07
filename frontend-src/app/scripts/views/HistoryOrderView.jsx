@@ -9,18 +9,10 @@ const HistoryOrderView = React.createClass({
         router: React.PropTypes.object.isRequired
     },
 
-    _refresh() {
-        this.setState({});
-        this.refs.historyOrderScreen.refresh();
-    },
-
     componentDidMount() {
-        ServerRequests.loadHistory();
-        HistoryStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        HistoryStore.removeChangeListener(this._refresh);
+        if (!HistoryStore.isOrderLoaded() || !HistoryStore.getOrder()) {
+            ServerRequests.loadHistory();
+        }
     },
 
     toolbarLeftTap() {
@@ -28,11 +20,10 @@ const HistoryOrderView = React.createClass({
     },
 
     render() {
-        var order = HistoryStore.getOrder(this.props.params.order_id);
         return (
             <div>
                 <Toolbar title='Заказ' view={this} back={true} />
-                <HistoryOrderScreen order={order} ref="historyOrderScreen" />
+                <HistoryOrderScreen orderId={this.props.params.order_id}/>
             </div>
         );
     }

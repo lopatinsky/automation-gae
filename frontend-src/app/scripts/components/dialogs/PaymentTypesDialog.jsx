@@ -29,7 +29,7 @@ const PaymentTypesDialog = React.createClass({
         const result = [];
         for (let pt of this.state.paymentTypes) {
             result.push(<ListItem key={pt.id}
-                                  primaryText={pt.really_title}
+                                  primaryText={PaymentsStore.getTitle(pt.id)}
                                   onTouchTap={() => this.dismiss(pt)}/>);
             result.push(<Divider key={`divider_${pt.id}`}/>)
         }

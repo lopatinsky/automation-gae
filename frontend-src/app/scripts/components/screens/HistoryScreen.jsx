@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FontIcon } from 'material-ui';
+import { Paper, FontIcon } from 'material-ui';
 import { HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { LoadingDialog } from '../dialogs'
@@ -10,17 +10,8 @@ const HistoryScreen = React.createClass({
         router: React.PropTypes.object.isRequired
     },
 
-    _refresh() {
-        if (HistoryStore.isLoading() && !HistoryStore.isOrderLoaded()) {
-            this.refs.processingDialog.show();
-        } else {
-            this.refs.processingDialog.dismiss();
-        }
-        this.setState({});
-    },
-
     _onOrderTap(order) {
-        this.context.router.push(`/order/${order.id}`);
+        this.context.router.push(`/order/${order.order_id}`);
     },
 
     getOrders() {
@@ -41,61 +32,63 @@ const HistoryScreen = React.createClass({
                 }
             }
 
-            return <div style={{width: '100%'}}>
-                <Card
-                    style={{margin: '0 12px 12px 12px'}}
-                    onTouchTap={() => this._onOrderTap(order)}>
-                    <div>
-                        <div style={{padding: '12px 12px 0 12px'}}>
-                                <b>
-                                    {'Мой заказ '}
-                                    <b style={{color: settings.primaryColor}}>
-                                        {'#' + order.number}
-                                    </b>
-                                </b>
-                            <div style={{float: 'right'}}>
-                                <b>{order.total} руб.</b>
-                            </div>
-                        </div>
-                        <div style={{padding: '6px 12px 0 12px'}}>
-                            {order.delivery_time_str}
-                            <div style={{float: 'right'}}>
-                                {HistoryStore.getStatus(order.status)}
-                            </div>
-                        </div>
-                        <div style={{display: 'table', padding: '6px 12px 12px 12px'}}>
-                            <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
-                                      color={settings.primaryColor}
-                                      className="material-icons">
-                                location_on
-                            </FontIcon>
-                            <div style={{display: 'table-cell', padding: '0 0 0 6px'}}>
-                                {from_title}
-                            </div>
-                        </div>
+            return <Paper key={order.order_id}
+                          style={{margin: '0 12px 12px', padding: 12}} onTouchTap={() => this._onOrderTap(order)}>
+                <div>
+                    Мой заказ{' '}
+                    <span style={{color: settings.primaryColor, fontWeight: 500}}>#{order.number}</span>
+                    <div style={{float: 'right', fontWeight: 500}}>
+                        {order.total} руб.
                     </div>
-                </Card>
-            </div>
+                </div>
+                <div style={{paddingTop: 6}}>
+                    {order.delivery_time_str}
+                    <div style={{float: 'right'}}>
+                        {HistoryStore.getStatus(order.status)}
+                    </div>
+                </div>
+                <div style={{paddingTop: 6}}>
+                    <FontIcon color={settings.primaryColor}
+                              style={{verticalAlign: 'middle'}}
+                              className="material-icons">
+                        location_on
+                    </FontIcon>
+                    <span style={{paddingLeft: 6, verticalAlign: 'middle'}}>
+                        {from_title}
+                    </span>
+                </div>
+            </Paper>
         })
+    },
+
+    getInitialState() {
+        let loading = HistoryStore.isLoading() && !HistoryStore.isOrderLoaded();
+        return {
+            loading
+        };
+    },
+
+    _onHistoryStoreChanged() {
+        let loading = HistoryStore.isLoading() && !HistoryStore.isOrderLoaded();
+        this.setState({
+            loading
+        });
     },
 
     componentDidMount() {
         ServerRequests.loadHistory();
-        HistoryStore.addChangeListener(this._refresh);
-        this._refresh();
+        HistoryStore.addChangeListener(this._onHistoryStoreChanged);
     },
 
     componentWillUnmount() {
-        HistoryStore.removeChangeListener(this._refresh);
-        this.refs.processingDialog.dismiss();
+        HistoryStore.removeChangeListener(this._onHistoryStoreChanged);
     },
 
     render() {
         return <div style={{padding: '76px 0 0 0'}}>
             {this.getOrders()}
-            <LoadingDialog
-                ref='processingDialog'
-                title='Загрузка истории'/>
+            <LoadingDialog open={this.state.loading}
+                           title='Загрузка истории'/>
         </div>;
     }
 });

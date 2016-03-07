@@ -2,7 +2,7 @@ import request from 'superagent';
 import AppDispatcher from "./../AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from '../stores';
 
-const BASE_URL = 'http://mycompany.m-test.doubleb-automation-production.appspot.com';
+const BASE_URL = 'http://vodaonline.m-test.doubleb-automation-production.appspot.com';
 
 function doRequest(id, method, url) {
     const req = request(method, BASE_URL + url);
@@ -42,6 +42,7 @@ doRequest.post = function post(id, url) {
 };
 
 const ServerRequests = {
+    AJAX_DATA_NOT_READY: "AJAX_DATA_NOT_READY",
     AJAX_SENDING: "AJAX_SENDING",
     AJAX_SUCCESS: "AJAX_SUCCESS",
     AJAX_FAILURE: "AJAX_FAILURE",
@@ -87,11 +88,19 @@ const ServerRequests = {
     },
 
     checkOrder() {
-        var dict = OrderStore.getCheckOrderDict();
-        if (dict) {
+        let [ready, data] = OrderStore.getCheckOrderDict();
+        if (!ready) { // data contains message
+            AppDispatcher.dispatch({
+                actionType: this.AJAX_DATA_NOT_READY,
+                data: {
+                    request: 'checkOrder',
+                    message: data
+                }
+            });
+        } else {
             doRequest.post('checkOrder', '/api/check_order')
                 .type('form')
-                .send(dict)
+                .send(data)
                 .end(res => ({
                     total_sum: res.body.total_sum,
                     delivery_sum: res.body.delivery_sum,
@@ -104,57 +113,25 @@ const ServerRequests = {
     },
 
     order() {
-        doRequest.post('order', '/api/order')
-            .type('form')
-            .send({
-                order: JSON.stringify(OrderStore.getOrderDict())
-            })
-            .end(res => ({
-                orderId: res.body.order_id
-            }));
-    },
-
-    cancelOrder(order_id) {
-        request
-            .post(base_url + '/api/return')
-            .type('form')
-            .send({
-                order_id: order_id
-            })
-            .end((err, res) => {
-                if (res.status == 200) {
-                    AppDispatcher.dispatch({
-                        actionType: this.CANCEL,
-                        data: {
-                            request: "history",
-                            order_id: order_id
-                        }
-                    });
-                    AppDispatcher.dispatch({
-                        actionType: this.CANCEL,
-                        data: {
-                            request: "order",
-                            description: "Ваш заказ был успешно отменен"
-                        }
-                    });
-                } else if (res.status == 412 || res.status == 422) {
-                    AppDispatcher.dispatch({
-                        actionType: this.CANCEL,
-                        data: {
-                            request: "order",
-                            description: res.body.description
-                        }
-                    });
-                } else {
-                    AppDispatcher.dispatch({
-                        actionType: this.CANCEL,
-                        data: {
-                            request: "order",
-                            description: "Непредвиденная ошибка"
-                        }
-                    });
+        let [ready, data] = OrderStore.getOrderDict();
+        if (!ready) {
+            AppDispatcher.dispatch({
+                actionType: this.AJAX_DATA_NOT_READY,
+                data: {
+                    request: 'order',
+                    message: data
                 }
             });
+        } else {
+            doRequest.post('order', '/api/order')
+                .type('form')
+                .send({
+                    order: JSON.stringify(data)
+                })
+                .end(res => ({
+                    orderId: res.body.order_id
+                }));
+        }
     },
 
     setOrderSuccess(orderId) {

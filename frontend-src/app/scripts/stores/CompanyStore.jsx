@@ -39,6 +39,10 @@ const CompanyStore = new BaseStore({
         return '';
     },
 
+    getSite() {
+        return this.info ? this.info.site : '';
+    },
+
     setInfo(info) {
         this.info = info;
         this._changed();
