@@ -44,7 +44,8 @@
             <input type="color" name="color" value="#{{ color[2:] }}"/>
         </label><br>
         <label>
-            Лого компании url: <input type="text" name="image_url" value="{{ image_url }}"/>
+            Лого компании url: <input type="text" name="image_url"
+                {% if image_url %} value="{{ image_url }}" {% endif %}/>
         </label><br>
         <label>
             Лого компании файл: <input type="file" name="image_file">
