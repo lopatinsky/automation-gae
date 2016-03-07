@@ -13,6 +13,7 @@ const ModifierDialog = React.createClass({
             <Dialog autoScrollBodyContent={true}
                     ref="modifierDialog"
                     open={this.props.open}
+                    onRequestClose={this.props.requestClose}
                     title={title}>
                 <ChoicesFragment modifier={this.props.modifier}
                                  chosen={chosenChoice}

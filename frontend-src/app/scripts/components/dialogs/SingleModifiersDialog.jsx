@@ -27,6 +27,7 @@ const SingleModifiersDialog = React.createClass({
                     ref="modifierDialog"
                     title='Добавки'
                     open={this.props.open}
+                    onRequestClose={this.props.requestClose}
                     actions={actions}>
                 {this._getModifiers()}
             </Dialog>

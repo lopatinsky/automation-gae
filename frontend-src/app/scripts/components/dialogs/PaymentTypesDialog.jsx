@@ -55,6 +55,7 @@ const PaymentTypesDialog = React.createClass({
             <Dialog
                 bodyStyle={{padding: '12px'}}
                 open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="paymentTypesDialog">
                 <List>
                     {this._getPaymentTypes()}

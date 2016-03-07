@@ -50,8 +50,8 @@ const CommentDialog = React.createClass({
 
     render() {
         const actions = [
-            <FlatButton label="OK" key="ok" secondary={true} onTouchTap={this._submit}/>,
-            <FlatButton label="Отмена" key="cancel" onTouchTap={this.dismiss}/>
+            <FlatButton label="Отмена" key="cancel" onTouchTap={this.dismiss}/>,
+            <FlatButton label="OK" key="ok" secondary={true} onTouchTap={this._submit}/>
         ];
         return (
             <Dialog
@@ -62,6 +62,7 @@ const CommentDialog = React.createClass({
                 <TextField style={{width: '100%'}}
                            hintText="Комментарий"
                            ref="comment"
+                           onRequestClose={this.dismiss}
                            value={this.state.comment}
                            onChange={this._onChange}/>
             </Dialog>

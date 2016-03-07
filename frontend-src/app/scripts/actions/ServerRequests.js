@@ -2,7 +2,7 @@ import request from 'superagent';
 import AppDispatcher from "./../AppDispatcher";
 import { ClientStore, VenuesStore, AddressStore, PaymentsStore, OrderStore } from '../stores';
 
-const BASE_URL = 'http://vodaonline.m-test.doubleb-automation-production.appspot.com';
+const BASE_URL = '';
 
 function doRequest(id, method, url) {
     const req = request(method, BASE_URL + url);

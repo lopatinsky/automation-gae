@@ -50,8 +50,7 @@ const PromosScreen = React.createClass({
             </div>;
             const minHeight = picCard ? 100 : null;
             return <Paper key={promo.id}
-                          style={{margin:'0 12px 12px', display: 'flex', minHeight}}
-                          onTouchTap={this._onMenuItemTap}>
+                          style={{margin:'0 12px 12px', display: 'flex', minHeight}}>
                 {picCard}
                 {content}
             </Paper>;

@@ -63,6 +63,7 @@ const VenuesDialog = React.createClass({
                 bodyStyle={{padding: '12px', overflowY: 'auto', maxHeight: '487px'}}
                 autoScrollBodyContent={true}
                 open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="venuesDialog">
                 <List>
                     {this._getVenues()}

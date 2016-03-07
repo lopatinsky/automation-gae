@@ -62,6 +62,7 @@ const TimeSlotsDialog = React.createClass({
                 bodyStyle={{padding: '12px'}}
                 autoScrollBodyContent={true}
                 open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="timeSlotsDialog">
                 <List>
                     {this._getSlots()}

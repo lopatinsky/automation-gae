@@ -91,7 +91,7 @@ const MenuItemScreen = React.createClass({
     },
 
     _getSingleModifiers() {
-        var modifiers = this.props.item.group_modifiers;
+        var modifiers = this.props.item.single_modifiers;
         if (modifiers.length > 0) {
             return <ListItem
                         rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}

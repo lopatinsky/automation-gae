@@ -40,7 +40,14 @@ const CompanyStore = new BaseStore({
     },
 
     getSite() {
-        return this.info ? this.info.site : '';
+        if (this.info != null) {
+            let site = this.info.site;
+            if (site && site.substr(0, 4) != 'http') {
+                site = 'http://' + site;
+            }
+            return site;
+        }
+        return '';
     },
 
     setInfo(info) {

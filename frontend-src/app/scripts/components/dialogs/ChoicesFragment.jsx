@@ -17,7 +17,7 @@ const ChoicesFragment = React.createClass({
             let title = <div style={{display: 'table', width: '100%', tableLayout: 'fixed'}}>
                 {choice.price ?
                     <div style={{display: 'table-cell', padding: '0 6px 0 0', width: '30%', verticalAlign: 'middle'}}>
-                        <b>{choice.price + 'р.'}</b>
+                        <b>+ {choice.price}р.</b>
                     </div>
                 : null}
                 <div style={{display: 'table-cell', verticalAlign: 'middle'}}>
