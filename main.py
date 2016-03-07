@@ -173,6 +173,10 @@ app = WSGIApplication([
         Route('/history', api.HistoryHandler),
         Route('/news', api.NewsHandler),
 
+        PathPrefixRoute('/client', [
+            Route('recovery_from_other', api.ClientIdRecoveryHandler),
+        ]),
+
         PathPrefixRoute('/proxy', [
             PathPrefixRoute('/unified_app', [
                 Route('/companies', unified_app.CompaniesHandler),
