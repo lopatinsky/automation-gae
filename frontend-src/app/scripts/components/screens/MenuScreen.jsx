@@ -34,32 +34,6 @@ const MenuScreen = React.createClass({
         </div>;
     },
 
-    _getCategoryPicker(categories) {
-        var menuItems = categories.map(category => {
-            return {category_id: category.info.category_id, text: category.info.title};
-        });
-        var categoryId = this.props.category;
-        if (categoryId == null) {
-            categoryId = MenuStore.getCategories()[0].info.category_id;
-        }
-        var category = MenuStore.categoriesById[categoryId];
-        return <div>
-            <div style={{position: 'fixed', marginTop: '64px', zIndex: '9', width: '100%'}}>
-                <Paper>
-                    <DropDownMenu
-                        style={{zIndex: '10', width: '100%'}}
-                        underlineStyle={{display: 'none'}}
-                        menuItems={menuItems}
-                        selectedIndex={MenuStore.getSelectedIndex()}
-                        onChange={this._onCategoryTap}/>
-                </Paper>
-            </div>
-            <div style={{padding: '132px 0 0 0'}}>
-                {this._getItems(category)}
-            </div>
-        </div>;
-    },
-
     _getTabs(categories) {
         var categories = categories.map((category) => {
             return (
@@ -97,20 +71,13 @@ const MenuScreen = React.createClass({
         let menu;
         let categories;
         if (MenuStore.rootCategories.length && this.props.category) {
-            const cat = MenuStore.categoriesById[this.props.category];
-            if (cat.categories.length) {
-                categories = cat.categories;
-            } else {
-                categories = [cat];
-            }
+            categories = [MenuStore.categoriesById[this.props.category]];
         } else {
             categories = MenuStore.rootCategories;
         }
         if (categories.length) {
-            if (categories.length < 5) {
+            if (categories.length == 1) {
                 menu = this._getTabs(categories);
-            } else if (categories.length < 9) {
-                menu = this._getCategoryPicker(categories);
             } else {
                 menu = this._getCategoryList(categories);
             }
