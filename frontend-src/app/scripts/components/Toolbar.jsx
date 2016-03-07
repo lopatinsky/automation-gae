@@ -1,7 +1,11 @@
 import React from 'react';
-import { AppBar, IconButton, FlatButton, Icons, FontIcon } from 'material-ui';
-import { OrderStore, MenuStore } from '../stores';
+import AppBar from 'material-ui/lib/app-bar';
 import Colors from 'material-ui/lib/styles/colors';
+import FlatButton from 'material-ui/lib/flat-button';
+import FontIcon from 'material-ui/lib/font-icon';
+import IconButton from 'material-ui/lib/icon-button';
+import NavigationChevronLeft from 'material-ui/lib/svg-icons/navigation/chevron-left';
+import { OrderStore, MenuStore } from '../stores';
 
 const Toolbar = React.createClass({
     contextTypes: {
@@ -51,7 +55,7 @@ const Toolbar = React.createClass({
         var leftElement;
         if (this.props.back == true) {
             leftElement = <IconButton onTouchTap={this.leftTap}>
-                <Icons.NavigationChevronLeft/>
+                <NavigationChevronLeft/>
             </IconButton>;
         }
         return (

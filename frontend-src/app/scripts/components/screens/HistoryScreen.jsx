@@ -1,5 +1,6 @@
 import React from 'react';
-import { Paper, FontIcon } from 'material-ui';
+import FontIcon from 'material-ui/lib/font-icon';
+import Paper from 'material-ui/lib/paper';
 import { HistoryStore, VenuesStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { LoadingDialog } from '../dialogs'

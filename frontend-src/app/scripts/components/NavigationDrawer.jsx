@@ -1,7 +1,9 @@
 import React from 'react';
-import { LeftNav, FontIcon, MenuItem } from 'material-ui';
-import settings from '../settings';
+import LeftNav from 'material-ui/lib/left-nav';
+import FontIcon from 'material-ui/lib/font-icon';
+import MenuItem from 'material-ui/lib/menus/menu-item';
 import Colors from 'material-ui/lib/styles/colors';
+import settings from '../settings';
 import { VenuesStore, PromosStore } from '../stores';
 
 const NavigationDrawer = React.createClass({

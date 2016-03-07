@@ -1,5 +1,9 @@
 import React from 'react';
-import { DropDownMenu, TextField, Paper, Card, FontIcon, MenuItem } from 'material-ui';
+import DropDownMenu from 'material-ui/lib/drop-down-menu';
+import FontIcon from 'material-ui/lib/font-icon';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import Paper from 'material-ui/lib/paper';
+import TextField from 'material-ui/lib/text-field';
 import { AddressStore } from '../../stores';
 import { AppActions } from '../../actions';
 import settings from '../../settings';

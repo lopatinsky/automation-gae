@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, FontIcon } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import FontIcon from 'material-ui/lib/font-icon';
 import settings from '../../settings';
 
 const SuccessPlaceOrderDialog = React.createClass({

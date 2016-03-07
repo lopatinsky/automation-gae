@@ -1,5 +1,7 @@
 import React from 'react';
-import { Dialog, TextField, FlatButton } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import FlatButton from 'material-ui/lib/flat-button';
+import TextField from 'material-ui/lib/text-field';
 import { OrderStore } from '../../stores';
 import { AppActions } from '../../actions';
 

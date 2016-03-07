@@ -1,5 +1,8 @@
 import React from 'react';
-import { List, ListItem, Divider, FontIcon } from 'material-ui';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 import settings from '../../settings';
 
 const ChoicesFragment = React.createClass({

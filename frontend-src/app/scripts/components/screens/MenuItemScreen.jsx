@@ -1,6 +1,15 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, Divider, Icons, IconButton, FontIcon }
-    from 'material-ui';
+import Card from 'material-ui/lib/card/card';
+import CardMedia from 'material-ui/lib/card/card-media';
+import CardText from 'material-ui/lib/card/card-text';
+import CardTitle from 'material-ui/lib/card/card-title';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import IconButton from 'material-ui/lib/icon-button';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+import NavigationChevronRight from 'material-ui/lib/svg-icons/navigation/chevron-right';
+import RaisedButton from 'material-ui/lib/raised-button';
 import { MenuStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
 import { AppActions } from '../../actions';
@@ -83,7 +92,7 @@ const MenuItemScreen = React.createClass({
             let chosenChoice = this.state.groupModifiers[modifier.modifier_id];
             return (
                 <ListItem key={modifier.modifier_id}
-                    rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
+                    rightIconButton={<IconButton><NavigationChevronRight/></IconButton>}
                     primaryText={chosenChoice ? chosenChoice.title : 'Не выбрано'}
                     onTouchTap={() => this._onModifierTap(modifier)}/>
             );
@@ -94,7 +103,7 @@ const MenuItemScreen = React.createClass({
         var modifiers = this.props.item.single_modifiers;
         if (modifiers.length > 0) {
             return <ListItem
-                        rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
+                        rightIconButton={<IconButton><NavigationChevronRight/></IconButton>}
                         primaryText={'Добавки'}
                         onTouchTap={() => this._onSingleModifierTap()}/>;
         }

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Paper, RaisedButton, FontIcon } from 'material-ui';
+import Paper from 'material-ui/lib/paper';
+import RaisedButton from 'material-ui/lib/raised-button';
+import FontIcon from 'material-ui/lib/font-icon';
 import { AppActions } from '../actions';
 import Colors from 'material-ui/lib/styles/colors';
 

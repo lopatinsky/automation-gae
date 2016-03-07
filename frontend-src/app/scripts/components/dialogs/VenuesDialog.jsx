@@ -1,5 +1,8 @@
 import React from 'react';
-import { Dialog, List, ListItem, Divider } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import Divider from 'material-ui/lib/divider';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 import { VenuesStore } from '../../stores';
 import { AppActions } from '../../actions';
 

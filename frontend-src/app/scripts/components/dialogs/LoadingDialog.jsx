@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, CircularProgress } from 'material-ui';
+import CircularProgress from 'material-ui/lib/circular-progress';
+import Dialog from 'material-ui/lib/dialog';
 
 const LoadingDialog = React.createClass({
     render() {

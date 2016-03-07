@@ -1,5 +1,8 @@
 import React from 'react';
-import { Card, CardText, FlatButton, CardMedia, IconButton } from 'material-ui';
+import Card from 'material-ui/lib/card/card';
+import CardMedia from 'material-ui/lib/card/card-media';
+import FlatButton from 'material-ui/lib/flat-button';
+import IconButton from 'material-ui/lib/icon-button';
 import settings from '../../settings';
 import { AppActions } from '../../actions';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog} from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
 import ChoicesFragment from './ChoicesFragment';
 
 const ModifierDialog = React.createClass({

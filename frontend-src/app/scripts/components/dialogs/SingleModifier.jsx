@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardText, FlatButton, Divider } from 'material-ui';
+import FlatButton from 'material-ui/lib/flat-button';
 
 const SingleModifier = React.createClass({
     _add() {

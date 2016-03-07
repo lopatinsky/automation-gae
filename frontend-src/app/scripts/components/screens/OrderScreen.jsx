@@ -1,12 +1,22 @@
 import React from 'react';
 import moment from 'moment';
+
+import Card from 'material-ui/lib/card/card';
+import CircularProgress from 'material-ui/lib/circular-progress';
+import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+import RadioButton from 'material-ui/lib/radio-button';
+import RadioButtonGroup from 'material-ui/lib/radio-button-group';
+import RaisedButton from 'material-ui/lib/raised-button';
+import Snackbar from 'material-ui/lib/snackbar';
+import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
+
 import { OrderStore, ClientStore, PaymentsStore, AddressStore, CompanyStore } from '../../stores';
 import OrderMenuItem from './OrderMenuItem'
 import { VenuesDialog, PaymentTypesDialog, CommentDialog, TimeSlotsDialog, LoadingDialog } from '../dialogs';
-import { CircularProgress, List, ListItem, Card, CardText, RaisedButton, DatePicker, RadioButtonGroup, RadioButton, DropDownMenu, Snackbar, Divider, FontIcon }
-    from 'material-ui';
-import TimePickerDialog from 'material-ui/lib/time-picker/time-picker-dialog';
-import DatePickerDialog from 'material-ui/lib/date-picker/date-picker-dialog';
 import { AppActions, ServerRequests } from '../../actions';
 import settings from '../../settings';
 

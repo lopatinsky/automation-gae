@@ -1,6 +1,6 @@
 import React from 'react';
-import { CardMedia, Divider } from 'material-ui';
-
+import CardMedia from 'material-ui/lib/card/card-media';
+import Divider from 'material-ui/lib/divider';
 
 const HistoryOrderItem = React.createClass({
     _getGroupModifiers(item) {

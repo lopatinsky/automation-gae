@@ -1,5 +1,8 @@
 import React from 'react';
-import { Paper, CircularProgress, FontIcon, Divider } from 'material-ui';
+import CircularProgress from 'material-ui/lib/circular-progress';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import Paper from 'material-ui/lib/paper';
 import { HistoryStore, VenuesStore, PaymentsStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { SuccessPlaceOrderDialog, LoadingDialog } from '../dialogs';

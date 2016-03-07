@@ -1,5 +1,7 @@
 import React from 'react';
-import { Tabs, Tab, RefreshIndicator, DropDownMenu, Card, Paper } from 'material-ui';
+import Paper from 'material-ui/lib/paper';
+import Tab from 'material-ui/lib/tabs/tab';
+import Tabs from 'material-ui/lib/tabs/tabs';
 import { MenuStore } from '../../stores';
 import MenuItem from '../MenuItem';
 import MenuCategory from '../MenuCategory';

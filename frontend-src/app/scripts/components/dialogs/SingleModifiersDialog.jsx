@@ -1,5 +1,7 @@
 import React from 'react';
-import { Dialog, FlatButton, Divider } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import Divider from 'material-ui/lib/divider';
+import FlatButton from 'material-ui/lib/flat-button';
 import SingleModifier from './SingleModifier';
 
 const SingleModifiersDialog = React.createClass({

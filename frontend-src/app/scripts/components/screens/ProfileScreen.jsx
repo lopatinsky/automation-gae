@@ -1,5 +1,7 @@
 import React from 'react';
-import { TextField, Card, FlatButton, FontIcon } from 'material-ui';
+import Card from 'material-ui/lib/card/card';
+import FontIcon from 'material-ui/lib/font-icon';
+import TextField from 'material-ui/lib/text-field';
 import { ClientStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { AppActions } from '../../actions';

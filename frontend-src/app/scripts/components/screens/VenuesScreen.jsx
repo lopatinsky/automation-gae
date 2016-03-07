@@ -1,6 +1,6 @@
 import React from 'react';
+import Card from 'material-ui/lib/card/card';
 import { VenuesStore } from '../../stores';
-import { Card, CardText } from 'material-ui';
 
 const VenuesScreen = React.createClass({
     getInitialState() {

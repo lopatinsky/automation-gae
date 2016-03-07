@@ -1,5 +1,4 @@
 import React from 'react';
-import mui from 'material-ui';
 import { NavigationDrawer } from '../components';
 import { LoadingDialog } from '../components/dialogs'
 import theme from '../theme';
