@@ -22,4 +22,7 @@ class WebAppHandler(RequestHandler):
             primary_color = config.ACTION_COLOR
         if not primary_color:
             primary_color = 'FFf44336'
-        self.render('/app/index.html', primary_color=primary_color, namespace=config.key.namespace())
+        self.render('/app/index.html',
+                    primary_color=primary_color,
+                    namespace=config.key.namespace(),
+                    title=config.APP_NAME)
