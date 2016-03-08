@@ -1,6 +1,5 @@
 import React from 'react';
-import { RouteHandler } from 'react-router';
-import mui from 'material-ui';
+import { NavigationDrawer } from '../components';
 import { LoadingDialog } from '../components/dialogs'
 import theme from '../theme';
 import { AppActions } from '../actions';
@@ -8,42 +7,50 @@ import { MenuStore } from '../stores';
 
 const AppView = React.createClass({
     childContextTypes: {
+        location: React.PropTypes.object,
         muiTheme: React.PropTypes.object
     },
 
     getChildContext() {
         return {
+            location: this.props.location,
             muiTheme: theme
         };
     },
 
-    refresh() {
-        if (MenuStore.getCategories().length == 0) {
-            this.refs.processingDialog.show();
-        } else {
-            this.refs.processingDialog.dismiss();
-        }
+    getInitialState() {
+        return {
+            loading: MenuStore.rootCategories.length == 0
+        };
+    },
+
+    _onMenuStoreChanged() {
+        this.setState({
+            loading: MenuStore.rootCategories.length == 0
+        });
     },
 
     componentDidMount() {
-        MenuStore.addChangeListener(this.refresh);
-        if (MenuStore.getCategories().length == 0) {
-            AppActions.load();
-        }
-        this.refresh();
+        MenuStore.addChangeListener(this._onMenuStoreChanged);
+        AppActions.load();
     },
 
     componentWillUnmount() {
-        MenuStore.removeChangeListener(this.refresh);
-        this.refs.processingDialog.dismiss();
+        MenuStore.removeChangeListener(this._onMenuStoreChanged);
+    },
+
+    getDrawer() {
+        return this.refs.drawer;
     },
 
     render() {
+        let children = React.cloneElement(this.props.children, {getDrawer: this.getDrawer});
         return <div>
-            <RouteHandler/>
-            <LoadingDialog
-                ref='processingDialog'
-                title='Загрузка'/>
+            <NavigationDrawer ref="drawer"/>
+            {children}
+            <LoadingDialog ref='processingDialog'
+                           title='Загрузка'
+                           open={this.state.loading}/>
         </div>;
     }
 });

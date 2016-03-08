@@ -1,17 +1,30 @@
 import React from 'react';
-import { AppBar, IconButton, FlatButton, Icons, FontIcon } from 'material-ui';
-import Router from 'react-router';
-import { Navigation } from 'react-router';
-import { OrderStore, MenuStore } from '../stores';
+import AppBar from 'material-ui/lib/app-bar';
 import Colors from 'material-ui/lib/styles/colors';
+import FlatButton from 'material-ui/lib/flat-button';
+import FontIcon from 'material-ui/lib/font-icon';
+import IconButton from 'material-ui/lib/icon-button';
+import NavigationChevronLeft from 'material-ui/lib/svg-icons/navigation/chevron-left';
+import { OrderStore, MenuStore } from '../stores';
 
 const Toolbar = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+        location: React.PropTypes.object.isRequired
+    },
+
     ORDER_BUTTON: 'order',
 
-    mixins: [Navigation, Router.State],
+    getInitialState() {
+        return {
+            orderTotal: OrderStore.getTotalSum()
+        };
+    },
 
-    _refresh() {
-        this.setState({});
+    _onOrderChangeListener() {
+        this.setState({
+            orderTotal: OrderStore.getTotalSum()
+        });
     },
 
     leftTap() {
@@ -20,48 +33,29 @@ const Toolbar = React.createClass({
 
     rightTap() {
         if (this.props.right == this.ORDER_BUTTON) {
-            this.transitionTo('order');
+            this.context.router.push('order');
         }
     },
 
     componentDidMount() {
-        OrderStore.addChangeListener(this._refresh);
-        MenuStore.addChangeListener(this._refresh);
+        OrderStore.addChangeListener(this._onOrderChangeListener);
     },
 
     componentWillUnmount() {
-        OrderStore.removeChangeListener(this._refresh);
-        MenuStore.removeChangeListener(this._refresh);
+        OrderStore.removeChangeListener(this._onOrderChangeListener);
     },
 
     render() {
         var rightElement;
         if (this.props.right == this.ORDER_BUTTON) {
-            var label = OrderStore.getTotalSum() + " руб.";
-            rightElement = <FlatButton
-                onClick={this.rightTap}>
-                <div style={{display: 'table'}}>
-                    <div style={{display: 'table-cell', padding: '0 6px 0 6px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={Colors.white}
-                                  className="material-icons">
-                            shopping_basket
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell'}}>
-                        {label}
-                    </div>
-                </div>
-            </FlatButton>;
+            let icon = <FontIcon className="material-icons">shopping_basket</FontIcon>;
+            var label = this.state.orderTotal + " руб.";
+            rightElement = <FlatButton onTouchTap={this.rightTap} label={label} icon={icon}/>;
         }
         var leftElement;
-        var nestedCategory = false;
-        if (this.getPathname() == '/' && MenuStore.canUndoCategories()) {
-            nestedCategory = true;
-        }
-        if (this.props.back == true || nestedCategory) {
-            leftElement = <IconButton onClick={this.leftTap}>
-                <Icons.NavigationChevronLeft/>
+        if (this.props.back == true) {
+            leftElement = <IconButton onTouchTap={this.leftTap}>
+                <NavigationChevronLeft/>
             </IconButton>;
         }
         return (

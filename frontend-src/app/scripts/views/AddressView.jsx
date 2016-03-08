@@ -1,14 +1,15 @@
 import React from 'react';
 import { Toolbar } from '../components';
 import { AddressScreen } from '../components/screens'
-import { Navigation } from 'react-router';
 
 const AddressView = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired,
+    },
 
     toolbarLeftTap() {
         this.refs.addressScreen.saveAddress();
-        this.transitionTo('order');
+        this.context.router.goBack();
     },
 
     render() {

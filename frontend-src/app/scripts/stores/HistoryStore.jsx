@@ -64,24 +64,18 @@ const HistoryStore = new BaseStore({
 
 }, action => {
     switch (action.actionType) {
-        case ServerRequests.INIT:
+        case ServerRequests.AJAX_SUCCESS:
             if (action.data.request == "history") {
                 HistoryStore._setOrders(action.data.orders);
-                HistoryStore. unsetLoading();
+                HistoryStore.unsetLoading();
             }
             break;
-        case ServerRequests.CANCEL:
-            if (action.data.request == "history") {
-                HistoryStore._setStatus(action.data.order_id, 2);
-                HistoryStore. unsetLoading();
-            }
-            break;
-        case ServerRequests.ERROR:
+        case ServerRequests.AJAX_FAILURE:
             if (action.data.request == "history") {
                 HistoryStore.unsetLoading();
             }
             break;
-         case ServerRequests.AJAX_SENDING:
+        case ServerRequests.AJAX_SENDING:
             if (action.data.request == "history") {
                 HistoryStore.setLoading();
             }

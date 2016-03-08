@@ -1,51 +1,29 @@
 import BaseStore from './BaseStore';
+import OrderStore from './OrderStore';
 import { ServerRequests } from '../actions';
-import assign from 'object-assign';
 
 const PaymentsStore = new BaseStore({
+    SUPPORTED_PAYMENT_TYPES: {
+        0: 'Наличными',
+        5: 'Картой курьеру'
+    },
+
     payment_types: [],
-    chosen_payment_type: null,
+
+    getTitle(paymentTypeId) {
+        return this.SUPPORTED_PAYMENT_TYPES[paymentTypeId]
+    },
 
     _setPaymentTypes(payment_types) {
-        this.payment_types = payment_types;
-        if (payment_types.length > 0) {
-            this.setChosenPaymentType(payment_types[0]);
+        const filteredPaymentTypes = [];
+        for (let paymentType of payment_types) {
+            if (paymentType.id in this.SUPPORTED_PAYMENT_TYPES) {
+                filteredPaymentTypes.push(paymentType);
+            }
         }
-    },
-
-    getPaymentTypes() {
-        return this.payment_types;
-    },
-
-    getChosenPaymentTypeTitle() {
-        if (this.chosen_payment_type) {
-           return this.chosen_payment_type.really_title;
-        } else {
-            return 'Выберите тип оплаты'
-        }
-    },
-
-    getChosenPaymentType() {
-        return this.chosen_payment_type;
-    },
-
-    setChosenPaymentType(payment_type) {
-        this.chosen_payment_type = payment_type;
-        ServerRequests.checkOrder();
+        this.payment_types = filteredPaymentTypes;
         this._changed();
-    },
-
-    getPaymentDict() {
-        var paymentType = this.getChosenPaymentType();
-        var dict = {};
-        if (paymentType != null) {
-            assign(dict, {
-                type_id: paymentType.id
-            });
-        }
-        return dict;
     }
-
 }, action => {
     switch (action.actionType) {
         case ServerRequests.AJAX_SUCCESS:

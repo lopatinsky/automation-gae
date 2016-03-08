@@ -1,39 +1,71 @@
 import React from 'react';
-import { Dialog, List, ListItem, ListDivider } from 'material-ui';
-import { OrderStore, VenuesStore } from '../../stores';
+import Dialog from 'material-ui/lib/dialog';
+import Divider from 'material-ui/lib/divider';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+import { OrderStore } from '../../stores';
 
 const TimeSlotsDialog = React.createClass({
-    _getSlots() {
-        var delivery = VenuesStore.getChosenDelivery();
-        if (!delivery) {
-            return <div/>;
-        }
-        return delivery.slots.map(slot => {
-            return (
-                <div>
-                    <ListItem
-                        primaryText={slot.name}
-                        onClick={() => this.dismiss(slot)}/>
-                    <ListDivider/>
-                </div>
-            );
+    getInitialState() {
+        return {
+            open: false,
+            slots: OrderStore.chosenDeliveryType ? OrderStore.chosenDeliveryType.slots : [],
+            chosenSlot: OrderStore.slotId
+        };
+    },
+
+    _onOrderStoreChange() {
+        this.setState({
+            slots: OrderStore.chosenDeliveryType ? OrderStore.chosenDeliveryType.slots : [],
+            chosenSlot: OrderStore.slotId
         });
     },
 
+    componentDidMount() {
+        OrderStore.addChangeListener(this._onOrderStoreChange);
+    },
+
+    componentWillUnmount() {
+        OrderStore.removeChangeListener(this._onOrderStoreChange);
+    },
+
+    _getSlots() {
+        if (!this.state.slots) {
+            return null;
+        }
+        const result = [];
+        for (let slot of this.state.slots) {
+            result.push(
+                <ListItem key={slot.id}
+                          primaryText={slot.name}
+                          onTouchTap={() => this.dismiss(slot)}/>
+            );
+            result.push(<Divider key={`divider_${slot.id}`}/>);
+        }
+        result.pop();
+        return result;
+    },
+
     show() {
-        this.refs.timeSlotsDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(slot) {
-        OrderStore.setSlotId(slot.id);
-        this.refs.timeSlotsDialog.dismiss();
+        this.props.onSlotChosen(slot.id);
+        this.setState({
+            open: false
+        })
     },
 
     render() {
         return (
             <Dialog
                 bodyStyle={{padding: '12px'}}
-                autoScrollBodyContent="true"
+                autoScrollBodyContent={true}
+                open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="timeSlotsDialog">
                 <List>
                     {this._getSlots()}

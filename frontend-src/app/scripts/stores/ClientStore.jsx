@@ -1,6 +1,6 @@
 import request from 'superagent';
 import BaseStore from './BaseStore';
-import { ServerRequests } from '../actions';
+import { AppActions, ServerRequests } from '../actions';
 
 const ClientStore = new BaseStore({
     getName() {
@@ -34,15 +34,6 @@ const ClientStore = new BaseStore({
         return localStorage.getItem('client_id');
     },
 
-    getRenderedInfo() {
-        var name = this.getName();
-        if (name == '' || name == null) {
-            return 'Представтесь, пожалуйста';
-        } else {
-            return name;
-        }
-    },
-
     setInfo(name, phone, email) {
         localStorage.setItem('name', name);
         localStorage.setItem('phone', phone);
@@ -74,12 +65,8 @@ const ClientStore = new BaseStore({
                 ClientStore.setClientId(action.data.client_id);
             }
             break;
-        case ServerRequests.AJAX_FAILURE:
-            break;
-        case ServerRequests.INIT:
-            if (action.data.request == "client") {
-                ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
-            }
+        case AppActions.SET_CLIENT_INFO:
+            ClientStore.setInfo(action.data.name, action.data.phone, action.data.email);
             break;
     }
 });
