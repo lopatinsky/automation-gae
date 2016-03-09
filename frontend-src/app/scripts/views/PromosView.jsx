@@ -1,17 +1,16 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer } from '../components';
+import { Toolbar } from '../components';
 import { PromosScreen } from '../components/screens';
 
 const PromosView = React.createClass({
     toolbarLeftTap() {
-        this.refs.navigationDrawer.toggle();
+        this.props.getDrawer().toggle();
     },
     render() {
         return (
             <div>
                 <Toolbar title='Акции' view={this} />
                 <PromosScreen />
-                <NavigationDrawer ref="navigationDrawer" />
             </div>
         );
     }

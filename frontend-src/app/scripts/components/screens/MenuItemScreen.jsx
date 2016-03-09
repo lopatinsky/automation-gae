@@ -1,62 +1,83 @@
 import React from 'react';
-import { List, ListItem, Card, CardMedia, CardText, CardActions, RaisedButton, CardTitle, ListDivider, Icons, IconButton, FontIcon }
-    from 'material-ui';
-import { MenuItemStore, ModifierStore, OrderStore } from '../../stores';
+import Card from 'material-ui/lib/card/card';
+import CardMedia from 'material-ui/lib/card/card-media';
+import CardText from 'material-ui/lib/card/card-text';
+import CardTitle from 'material-ui/lib/card/card-title';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import IconButton from 'material-ui/lib/icon-button';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
+import NavigationChevronRight from 'material-ui/lib/svg-icons/navigation/chevron-right';
+import RaisedButton from 'material-ui/lib/raised-button';
+import { MenuStore } from '../../stores';
 import { ModifierDialog, SingleModifiersDialog } from '../dialogs';
 import { AppActions } from '../../actions';
 import Colors from 'material-ui/lib/styles/colors';
 
 const MenuItemScreen = React.createClass({
-    _refresh() {
-        this.setState({
-            item: MenuItemStore.getItem()
-        });
+    getInitialState() {
+        const groupModifiers = {},
+            singleModifiers = {};
+        for (let mod of this.props.item.group_modifiers) {
+            groupModifiers[mod.modifier_id] = MenuStore.getDefaultModifierChoice(mod);
+        }
+        for (let mod of this.props.item.single_modifiers) {
+            singleModifiers[mod.modifier_id] = 0;
+        }
+        return {
+            groupModifiers,
+            singleModifiers,
+            openSingleModifiers: false,
+            openedGroupModifier: null
+        };
     },
 
     _onModifierTap(modifier) {
-        AppActions.setModifier(modifier);
-        this.refs.modifierDialog.show();
+        this.setState({openedGroupModifier: modifier});
     },
 
     _onSingleModifierTap() {
-        this.refs.singleModifiersDialog.show();
+        this.setState({openSingleModifiers: true});
     },
 
     _addItem() {
-        OrderStore.addItem(MenuItemStore.getItem());
+        AppActions.addItem(this.props.item.id, this.state.groupModifiers, this.state.singleModifiers);
     },
 
     _getModifiersTitles() {
-        var modifiers = MenuItemStore.getModifiers();
-        var sModifiers = MenuItemStore.getSingleModifiers();
+        var modifiers = this.props.item.group_modifiers;
+        var sModifiers = this.props.item.single_modifiers;
         var count = 0;
         var result = <div>
             <CardText>
                 {modifiers.map(modifier => {
                     count += 1;
-                    return <div style={{lineHeight: '120%'}}>
-                        {modifier.chosen_choice.title}
-                        {modifier.chosen_choice.price > 0 ?
+                    let chosenChoice = this.state.groupModifiers[modifier.modifier_id];
+                    return <div key={modifier.modifier_id} style={{lineHeight: '120%'}}>
+                        {chosenChoice ? chosenChoice.title : 'Не выбрано'}
+                        {chosenChoice && chosenChoice.price > 0 ?
                             <div style={{float: 'right'}}>
-                                {'+ ' + modifier.chosen_choice.price + ' р.'}
+                                {'+ ' + chosenChoice.price + ' р.'}
                             </div>
                         : null}
                     </div>;
                 })}
                 {sModifiers.map(modifier => {
-                    if (modifier.quantity == 0) {
+                    const quantity = this.state.singleModifiers[modifier.modifier_id];
+                    if (!quantity) {
                         return null;
                     }
                     count += 1;
-                    return <div style={{lineHeight: '120%'}}>
-                        {modifier.title + ' x' + modifier.quantity}
+                    return <div key={modifier.modifier_id} style={{lineHeight: '120%'}}>
+                        {modifier.title + ' x' + quantity}
                         <div style={{float: 'right'}}>
-                            {'+ ' + (modifier.price * modifier.quantity) + ' р.'}
+                            {'+ ' + (modifier.price * quantity) + ' р.'}
                         </div>
                     </div>;
                 })}
             </CardText>
-            <ListDivider/>
+            <Divider/>
         </div>;
         if (count > 0) {
             return result;
@@ -66,80 +87,77 @@ const MenuItemScreen = React.createClass({
     },
 
     _getModifiers() {
-        var modifiers = MenuItemStore.getModifiers();
+        var modifiers = this.props.item.group_modifiers;
         return modifiers.map(modifier => {
+            let chosenChoice = this.state.groupModifiers[modifier.modifier_id];
             return (
-                <ListItem
-                    rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
-                    primaryText={modifier.chosen_choice.title}
-                    onClick={() => this._onModifierTap(modifier)}/>
+                <ListItem key={modifier.modifier_id}
+                    rightIconButton={<IconButton><NavigationChevronRight/></IconButton>}
+                    primaryText={chosenChoice ? chosenChoice.title : 'Не выбрано'}
+                    onTouchTap={() => this._onModifierTap(modifier)}/>
             );
         });
     },
 
     _getSingleModifiers() {
-        var modifiers = MenuItemStore.getSingleModifiers();
+        var modifiers = this.props.item.single_modifiers;
         if (modifiers.length > 0) {
             return <ListItem
-                        rightIconButton={<IconButton><Icons.NavigationChevronRight/></IconButton>}
+                        rightIconButton={<IconButton><NavigationChevronRight/></IconButton>}
                         primaryText={'Добавки'}
-                        onClick={() => this._onSingleModifierTap()}/>;
+                        onTouchTap={() => this._onSingleModifierTap()}/>;
         }
     },
 
-    getInitialState: function() {
-        return {
-            item: MenuItemStore.getItem()
-        }
+    _onSingleModifierChange(id, newQuantity) {
+        this.setState({
+            singleModifiers: {
+                ...this.state.singleModifiers,
+                [id]: newQuantity
+            }
+        });
     },
 
-    componentDidMount() {
-        MenuItemStore.addChangeListener(this._refresh);
+    _onGroupModifierChange(id, newChoice) {
+        this.setState({
+            groupModifiers: {
+                ...this.state.groupModifiers,
+                [id]: newChoice
+            }
+        });
     },
 
-    componentWillUnmount() {
-        MenuItemStore.removeChangeListener(this._refresh);
+    _onModifierClose() {
+        this.setState({
+            openSingleModifiers: false,
+            openedGroupModifier: null
+        });
     },
 
     render() {
-        var item = this.state.item;
-        var picCard = <div style={{lineHeight: '120%'}}>
-            <CardMedia>
-                <img src={item.pic}/>
-            </CardMedia>
-        </div>;
-        var descriptionCard = <div style={{lineHeight: '120%'}}>
-            <CardText>{item.description}</CardText>
-            <ListDivider/>
-        </div>;
-        if (item.description == '') {
-            descriptionCard = <div/>;
-        }
-        if (item.pic == null || item.pic == '') {
-            picCard = <div/>;
-        }
-        var grCard = <div/>;
+        var item = this.props.item;
+        var nameAndPic = item.pic ? <CardMedia overlay={<CardTitle title={item.title}/>}>
+            <img src={item.pic}/>
+        </CardMedia> : <CardTitle title={item.title}/>;
+        var descriptionCard = item.description ? <CardText>{item.description}</CardText> : null;
+        var grCard = null;
         if (item.weight > 0) {
-            grCard = <div>
-                <CardText>{item.weight + ' г'}</CardText>
-                <ListDivider/>
-            </div>;
+            grCard = <CardText>{item.weight + ' г'}</CardText>;
+        } else if (item.volume > 0) {
+            grCard = <CardText>{item.volume + ' мл'}</CardText>;
         }
-        if (item.volume > 0) {
-            grCard = <div>
-                <CardText>{item.volume + ' мл'}</CardText>
-                <ListDivider/>
-            </div>;
-        }
+        const btnIcon = <FontIcon className="material-icons">
+            add_shopping_cart
+        </FontIcon>;
         return (
             <div style={{padding: '76px 0 0 0'}}>
                 <Card
                     style={{margin: '0 12px 12px 12px'}}>
-                    {picCard}
-                    <CardText>{item.title}</CardText>
-                    <ListDivider/>
+                    {nameAndPic}
                     {descriptionCard}
+                    {descriptionCard && <Divider/>}
                     {grCard}
+                    {grCard && <Divider/>}
                     {this._getModifiersTitles()}
                     <List style={{paddingTop: '0', paddingBottom: '0'}}>
                         {this._getModifiers()}
@@ -148,17 +166,22 @@ const MenuItemScreen = React.createClass({
                     <RaisedButton
                         primary={true}
                         style={{margin: '12px', float: 'right'}}
-                        label={MenuItemStore.getPrice()}
-                        onClick={this._addItem}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={Colors.white}
-                                  className="material-icons">
-                            add_shopping_cart
-                        </FontIcon>
-                    </RaisedButton>
+                        label={MenuStore.getItemPrice(this.props.item, this.state.groupModifiers, this.state.singleModifiers)}
+                        icon={btnIcon}
+                        onTouchTap={this._addItem}/>
                 </Card>
-                <ModifierDialog ref="modifierDialog" />
-                <SingleModifiersDialog ref="singleModifiersDialog" />
+                <ModifierDialog ref="modifierDialog"
+                                modifier={this.state.openedGroupModifier}
+                                chosenChoices={this.state.groupModifiers}
+                                onChange={this._onGroupModifierChange}
+                                open={!!this.state.openedGroupModifier}
+                                requestClose={this._onModifierClose}/>
+                <SingleModifiersDialog ref="singleModifiersDialog"
+                                       modifiers={item.single_modifiers}
+                                       quantities={this.state.singleModifiers}
+                                       onChange={this._onSingleModifierChange}
+                                       open={this.state.openSingleModifiers}
+                                       requestClose={this._onModifierClose}/>
             </div>
         );
     }

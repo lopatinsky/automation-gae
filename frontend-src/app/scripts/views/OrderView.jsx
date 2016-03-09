@@ -1,10 +1,10 @@
 import React from 'react';
-import { Toolbar, NavigationDrawer } from '../components';
+import { Toolbar } from '../components';
 import { OrderScreen } from '../components/screens';
 
 const OrderView = React.createClass({
     toolbarLeftTap() {
-        this.refs.navigationDrawer.toggle();
+        this.props.getDrawer().toggle();
     },
 
     render() {
@@ -12,7 +12,6 @@ const OrderView = React.createClass({
             <div>
                 <Toolbar title='Мой заказ' view={this} />
                 <OrderScreen />
-                <NavigationDrawer ref="navigationDrawer" />
             </div>
         );
     }

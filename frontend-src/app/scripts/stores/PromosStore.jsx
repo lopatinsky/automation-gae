@@ -4,10 +4,6 @@ import { ServerRequests } from '../actions';
 const PromosStore = new BaseStore({
     promos: [],
 
-    getPromos() {
-        return this.promos;
-    },
-
     _setPromos(promos) {
         this.promos = promos;
         this._changed();

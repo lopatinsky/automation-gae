@@ -1,23 +1,16 @@
 import React from 'react';
-import { Dialog, FontIcon } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import FontIcon from 'material-ui/lib/font-icon';
 import settings from '../../settings';
 
 const SuccessPlaceOrderDialog = React.createClass({
-
-    show() {
-        this.refs.successDialog.show();
-    },
-
-    dismiss() {
-        this.refs.successDialog.dismiss();
-    },
-
     render() {
         return (
             <Dialog ref="successDialog"
-                    bodyStyle={{padding: '12px'}}>
+                    bodyStyle={{padding: '12px'}}
+                    open={this.props.open}>
                 <div style={{display: 'table', width: '100%'}}>
-                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
+                    <FontIcon style={{display: 'table-cell', verticalAlign: 'middle'}}
                               color={settings.primaryColor}
                               className="material-icons">
                       check_circle

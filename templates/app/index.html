@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html style="width: 100%">
+<html>
 <head lang="en">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title></title>
+    <meta name="theme-color" content="#{{ primary_color[2:] }}">
+    <title>{{ title }}</title>
+
     <link rel="stylesheet" href="/static/app/styles/bundle.css"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body style="width: 100%">
+<body>
+<div id="app-container"></div>
+<script>
+    var $$_GLOBAL_SETTINGS = {
+        primaryColor: "#{{ primary_color[2:] }}",
+        namespace: "{{ namespace }}"
+    };
+</script>
 <script src="/static/app/scripts/bundle.js"></script>
 </body>
 </html>

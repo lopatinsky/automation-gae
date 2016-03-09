@@ -1,12 +1,11 @@
 import { EventEmitter } from 'events';
-import assign from 'object-assign';
 import AppDispatcher from '../AppDispatcher';
 
 class BaseStore extends EventEmitter {
     constructor(obj, dispatchFn) {
         super();
 
-        assign(this, obj);
+        Object.assign(this, obj);
         this.dispatchToken = AppDispatcher.register(dispatchFn);
     }
 

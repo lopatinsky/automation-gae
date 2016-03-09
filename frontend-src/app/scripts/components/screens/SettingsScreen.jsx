@@ -1,16 +1,18 @@
 import React from 'react';
-import { Navigation } from 'react-router';
 import { ClientStore, CompanyStore } from '../../stores';
-import { List, ListItem, ListDivider, FontIcon } from 'material-ui';
+import Divider from 'material-ui/lib/divider';
+import FontIcon from 'material-ui/lib/font-icon';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 import settings from '../../settings';
 
 const SettingsScreen = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     _onClientInfoTap() {
-        this.transitionTo('profile', {
-            settings: true
-        });
+        this.context.router.push('/profile');
     },
 
     _onFeedback() {
@@ -18,39 +20,55 @@ const SettingsScreen = React.createClass({
         window.open(mailto);
     },
 
+    _onFullSiteTap() {
+        window.open(CompanyStore.getSite());
+    },
+
     _getClientInfo() {
-        return <ListItem
-                primaryText={ClientStore.getRenderedInfo()}
-                leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                    color={settings.primaryColor}
-                                    className="material-icons">
-                              perm_identity
-                          </FontIcon>}
-                onClick={this._onClientInfoTap}/>;
+        return <ListItem primaryText='Ваш профиль'
+                         leftIcon={<FontIcon color={settings.primaryColor}
+                                             className="material-icons">
+                                       perm_identity
+                                   </FontIcon>}
+                         onTouchTap={this._onClientInfoTap}/>;
     },
 
     _getFeedback() {
-        return <ListItem
-                primaryText='Написать нам'
-                leftIcon={<FontIcon style={{display: 'table-cell', verticalAlign: 'middle', fontSize: '18px'}}
-                                    color={settings.primaryColor}
-                                    className="material-icons">
-                              feedback
-                          </FontIcon>}
-                onClick={this._onFeedback}/>;
+        return <ListItem primaryText='Написать нам'
+                         leftIcon={<FontIcon color={settings.primaryColor}
+                                             className="material-icons">
+                                       feedback
+                                   </FontIcon>}
+                         onTouchTap={this._onFeedback}/>;
+    },
+
+    _getFullSite() {
+        const site = CompanyStore.getSite();
+        if (site) {
+            return <ListItem primaryText='Полная версия сайта'
+                             leftIcon={<FontIcon color={settings.primaryColor}
+                                                 className="material-icons">
+                                           open_in_new
+                                       </FontIcon>}
+                             onTouchTap={this._onFullSiteTap}/>;
+        }
+        return null;
     },
 
     render() {
+        let site = this._getFullSite();
         return <div style={{padding: '64px 0 0 0'}}>
-            <div style={{padding: '12px', width: '100%', textAlign: 'center'}}>
-                <b>{'Ваш ID: ' + ClientStore.getClientId()}</b> 
+            <div style={{padding: '12px 0', textAlign: 'center'}}>
+                <b>Ваш ID: {ClientStore.getClientId()}</b>
             </div>
             <List style={{paddingBottom: '0', paddingTop: '0'}}>
-                <ListDivider/>
+                <Divider/>
                 {this._getClientInfo()}
-                <ListDivider/>
+                <Divider/>
                 {this._getFeedback()}
-                <ListDivider/>
+                <Divider/>
+                {site}
+                {site && <Divider/>}
             </List>
         </div>;
     }

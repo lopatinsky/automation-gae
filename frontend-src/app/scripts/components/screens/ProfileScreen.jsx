@@ -1,12 +1,14 @@
 import React from 'react';
-import { TextField, Card, FlatButton, FontIcon } from 'material-ui';
+import Card from 'material-ui/lib/card/card';
+import FontIcon from 'material-ui/lib/font-icon';
+import TextField from 'material-ui/lib/text-field';
 import { ClientStore } from '../../stores';
 import { ServerRequests } from '../../actions';
 import { AppActions } from '../../actions';
 import settings from '../../settings';
 
 const ProfileScreen = React.createClass({
-     _refresh() {
+    _refresh() {
         this.setState({
             name: this.refs.name.getValue(),
             phone: this.refs.phone.getValue(),
@@ -15,8 +17,7 @@ const ProfileScreen = React.createClass({
     },
 
     saveProfile() {
-        ServerRequests.sendClientInfo();
-        AppActions.setClientInfo(this.refs.name.getValue(), this.refs.phone.getValue(), this.refs.email.getValue());
+        AppActions.setClientInfo(this.state.name, this.state.phone, this.state.email);
     },
 
     getInitialState() {
@@ -29,66 +30,47 @@ const ProfileScreen = React.createClass({
 
     render() {
         return <div style={{padding: '76px 0 0 0'}}>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '0 12px 12px 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            face
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Имя"
-                            floatingLabelText="Имя"
-                            ref="name"
-                            value={this.state.name}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '0 12px 12px 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            stay_primary_portrait
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Номер телефона"
-                            floatingLabelText="Номер телефона"
-                            ref="phone"
-                            value={this.state.phone}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '0 12px 12px 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '18px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            mail
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Email"
-                            floatingLabelText="Email"
-                            ref="email"
-                            value={this.state.email}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
+            <Card style={{margin: '0 12px', padding: '0 9px'}}>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        face
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               hintText="Иван Иванов"
+                               floatingLabelText="Имя"
+                               ref="name"
+                               value={this.state.name}
+                               onChange={this._refresh}/>
+                </div>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        stay_primary_portrait
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               hintText="+7 999 111-22-33"
+                               floatingLabelText="Номер телефона"
+                               ref="phone"
+                               value={this.state.phone}
+                               onChange={this._refresh}/>
+                </div>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        mail
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               hintText="name@example.com"
+                               floatingLabelText="Email"
+                               ref="email"
+                               value={this.state.email}
+                               onChange={this._refresh}/>
+                </div>
+            </Card>
         </div>;
     }
 });

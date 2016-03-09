@@ -13,34 +13,97 @@ const AppActions = {
         ServerRequests.loadPromos();
     },
 
+    SET_CLIENT_INFO: "SET_CLIENT_INFO",
     setClientInfo(name, phone, email) {
+        ServerRequests.sendClientInfo(name, phone, email);
         AppDispatcher.dispatch({
-            actionType: this.INIT,
+            actionType: this.SET_CLIENT_INFO,
             data: {
-                request: 'client',
-                name: name,
-                phone: phone,
-                email: email
+                name,
+                phone,
+                email
             }
-        })
+        });
     },
 
-    setMenuItem(item) {
+    SET_ADDRESS: "SET_ADDRESS",
+    setAddress({city, street, home, flat}) {
         AppDispatcher.dispatch({
-            actionType: this.INIT,
+            actionType: this.SET_ADDRESS,
             data: {
-                request: "menu_item",
-                item: item
+                address: {
+                    city, street, home, flat
+                }
             }
-        })
+        });
     },
 
-    setModifier(modifier) {
+    SET_COMMENT: "SET_COMMENT",
+    setComment(comment) {
         AppDispatcher.dispatch({
-            actionType: this.INIT,
+            actionType: this.SET_COMMENT,
             data: {
-                request: "modifier",
-                modifier: modifier
+                comment
+            }
+        });
+    },
+
+    SET_PAYMENT_TYPE: "SET_PAYMENT_TYPE",
+    setPaymentType(paymentType) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_PAYMENT_TYPE,
+            data: {
+                paymentType
+            }
+        });
+    },
+
+    SET_DELIVERY_TYPE: "SET_DELIVERY_TYPES",
+    setDeliveryType(deliveryType) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_DELIVERY_TYPE,
+            data: {
+                deliveryType
+            }
+        });
+    },
+
+    SET_VENUE: "SET_VENUE",
+    setVenue(venue) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_VENUE,
+            data: {
+                venue
+            }
+        });
+    },
+
+    SET_TIME: "SET_TIME",
+    setTime(timeObj) {
+        AppDispatcher.dispatch({
+            actionType: this.SET_TIME,
+            data: timeObj
+        });
+    },
+
+    ADD_ITEM: "ADD_ITEM",
+    addItem(itemId, groupModifierChoices, singleModifierQuantities) {
+        AppDispatcher.dispatch({
+            actionType: this.ADD_ITEM,
+            data: {
+                itemId,
+                groupModifierChoices,
+                singleModifierQuantities
+            }
+        });
+    },
+
+    REMOVE_ITEM: "REMOVE_ITEM",
+    removeItem(orderItem) {
+        AppDispatcher.dispatch({
+            actionType: this.REMOVE_ITEM,
+            data: {
+                item: orderItem
             }
         })
     }

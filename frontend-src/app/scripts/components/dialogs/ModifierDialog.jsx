@@ -1,46 +1,24 @@
 import React from 'react';
-import { Dialog} from 'material-ui';
-import { ModifierStore } from '../../stores';
+import Dialog from 'material-ui/lib/dialog';
 import ChoicesFragment from './ChoicesFragment';
 
 const ModifierDialog = React.createClass({
-    _refresh() {
-        this.setState({
-            modifier: ModifierStore.getModifier()
-        });
-    },
-
-    getInitialState: function() {
-        return {
-            modifier: {
-                title: 'Не загружено'
-            }
-        }
-    },
-
-    componentDidMount() {
-        ModifierStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        ModifierStore.removeChangeListener(this._refresh);
-    },
-
-    show() {
-        this.refs.modifierDialog.show();
-    },
-
-    dismiss() {
-         this.refs.modifierDialog.dismiss();
-    },
-
     render() {
+        let chosenChoice = null, title = '';
+        if (this.props.modifier) {
+            chosenChoice = this.props.chosenChoices[this.props.modifier.modifier_id];
+            title = this.props.modifier.title;
+        }
         return (
-            <Dialog
-                autoScrollBodyContent="true"
-                ref="modifierDialog"
-                title={this.state.modifier.title}>
-                <ChoicesFragment dialog={this}/>
+            <Dialog autoScrollBodyContent={true}
+                    ref="modifierDialog"
+                    open={this.props.open}
+                    onRequestClose={this.props.requestClose}
+                    title={title}>
+                <ChoicesFragment modifier={this.props.modifier}
+                                 chosen={chosenChoice}
+                                 onChange={this.props.onChange}
+                                 requestClose={this.props.requestClose}/>
             </Dialog>
         );
     }

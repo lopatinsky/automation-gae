@@ -1,10 +1,15 @@
 import React from 'react';
-import { DropDownMenu, TextField, Paper, Card, FontIcon } from 'material-ui';
+import DropDownMenu from 'material-ui/lib/drop-down-menu';
+import FontIcon from 'material-ui/lib/font-icon';
+import MenuItem from 'material-ui/lib/menus/menu-item';
+import Paper from 'material-ui/lib/paper';
+import TextField from 'material-ui/lib/text-field';
 import { AddressStore } from '../../stores';
+import { AppActions } from '../../actions';
 import settings from '../../settings';
 
 const AddressScreen = React.createClass({
-     _refresh() {
+    _onInputChange() {
         this.setState({
             street: this.refs.street.getValue(),
             home: this.refs.home.getValue(),
@@ -12,118 +17,83 @@ const AddressScreen = React.createClass({
         });
     },
 
-    _onCityTap(e, selectedIndex, menuItem) {
-        AddressStore.setChosenCity(menuItem.id);
+    _onCityTap(e, selectedIndex, city) {
+        this.setState({ city });
     },
 
     saveAddress() {
-        AddressStore.setAddress(this.refs.street.getValue(), this.refs.home.getValue(), this.refs.flat.getValue());
+        AppActions.setAddress({
+            city: this.state.city,
+            street: this.state.street,
+            home: this.state.home,
+            flat: this.state.flat
+        });
     },
 
     getInitialState() {
         return {
+            city: AddressStore.getChosenCity(),
             street: AddressStore.getStreet(),
             home: AddressStore.getHome(),
             flat: AddressStore.getFlat()
         }
     },
 
-    componentDidMount() {
-        AddressStore.addChangeListener(this._refresh);
-    },
-
-    componentWillUnmount() {
-        AddressStore.removeChangeListener(this._refresh);
-    },
-
     render() {
-        var cities = AddressStore.getCities().map(city => {
-                return {
-                    text: city,
-                    id: city
-                }
-            }
-        );
-        return <div style={{padding: '76px 0 0 0'}}>
-            <div style={{width: '100%', display: 'table'}}>
-                <Paper style={{margin: '0 12px 0 12px', zIndex: '9'}}>
-                    <div style={{display: 'table-cell', verticalAlign: 'middle', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '20px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            location_city
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <DropDownMenu
-                            style={{zIndex: '10', width: '100%'}}
-                            underlineStyle={{display: 'none'}}
-                            menuItems={cities}
-                            selectedIndex={AddressStore.getCityIndex(AddressStore.getChosenCity())}
-                            onChange={this._onCityTap}/>
-                    </div>
-                </Paper>
-            </div>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '12px 12px 0 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '20px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            traffic
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Улица"
-                            floatingLabelText="Улица"
-                            ref="street"
-                            value={this.state.street}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '12px 12px 0 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '20px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            domain
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Дом"
-                            floatingLabelText="Дом"
-                            ref="home"
-                            value={this.state.home}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
-            <div style={{width: '100%', display: 'table'}}>
-                <Card style={{margin: '12px 12px 0 12px'}}>
-                    <div style={{display: 'table-cell', padding: '0 9px 0 9px'}}>
-                        <FontIcon style={{verticalAlign: 'middle', fontSize: '20px'}}
-                                  color={settings.primaryColor}
-                                  className="material-icons">
-                            store_mall_directory
-                        </FontIcon>
-                    </div>
-                    <div style={{display: 'table-cell', width: '95%'}}>
-                        <TextField
-                            style={{width: '100%'}}
-                            hintText="Квартира"
-                            floatingLabelText="Квартира"
-                            ref="flat"
-                            value={this.state.flat}
-                            onChange={this._refresh}/>
-                    </div>
-                </Card>
-            </div>
+        var cities = AddressStore.getCities().map((city, i) => {
+            return <MenuItem key={city} value={city} primaryText={city}/>
+        });
+        return <div style={{paddingTop: 76}}>
+            <Paper style={{margin: '0 12px 0 12px', padding: '0 9px 0 9px'}}>
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                    <FontIcon style={{flexBasis: 36, flexShrink: 0}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        location_city
+                    </FontIcon>
+                    <DropDownMenu style={{flexGrow: 1, flexShrink: 0, margin: '0 -24px'}}
+                                  value={AddressStore.getChosenCity()}
+                                  onChange={this._onCityTap}>
+                        {cities}
+                    </DropDownMenu>
+                </div>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        traffic
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               floatingLabelText="Улица"
+                               ref="street"
+                               value={this.state.street}
+                               onChange={this._onInputChange}/>
+                </div>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        domain
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               floatingLabelText="Дом"
+                               ref="home"
+                               value={this.state.home}
+                               onChange={this._onInputChange}/>
+                </div>
+                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                    <FontIcon style={{flexBasis: 36}}
+                              color={settings.primaryColor}
+                              className="material-icons">
+                        store_mall_directory
+                    </FontIcon>
+                    <TextField style={{flexGrow: 1}}
+                               floatingLabelText="Квартира"
+                               ref="flat"
+                               value={this.state.flat}
+                               onChange={this._onInputChange}/>
+                </div>
+            </Paper>
         </div>;
     }
 });

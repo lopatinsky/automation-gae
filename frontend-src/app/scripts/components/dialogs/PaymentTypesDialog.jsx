@@ -1,35 +1,64 @@
 import React from 'react';
-import { Dialog, List, ListItem, ListDivider } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import Divider from 'material-ui/lib/divider';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 import { PaymentsStore } from '../../stores';
+import { AppActions } from '../../actions';
 
 const PaymentTypesDialog = React.createClass({
-    _getPaymentTypes() {
-        var payment_types = PaymentsStore.getPaymentTypes();
-        return payment_types.map(payment_type => {
-            return (
-                <div>
-                    <ListItem
-                        primaryText={payment_type.really_title}
-                        onClick={() => this.dismiss(payment_type)}/>
-                    <ListDivider/>
-                </div>
-            );
+    getInitialState() {
+        return {
+            paymentTypes: PaymentsStore.payment_types,
+            open: false
+        };
+    },
+
+    _onPaymentsStoreChange() {
+        this.setState({
+            paymentTypes: PaymentsStore.payment_types
         });
     },
 
+    componentDidMount() {
+        PaymentsStore.addChangeListener(this._onPaymentsStoreChange);
+    },
+
+    componentWillUnmount() {
+        PaymentsStore.removeChangeListener(this._onPaymentsStoreChange);
+    },
+
+    _getPaymentTypes() {
+        const result = [];
+        for (let pt of this.state.paymentTypes) {
+            result.push(<ListItem key={pt.id}
+                                  primaryText={PaymentsStore.getTitle(pt.id)}
+                                  onTouchTap={() => this.dismiss(pt)}/>);
+            result.push(<Divider key={`divider_${pt.id}`}/>)
+        }
+        result.pop();
+        return result;
+    },
+
     show() {
-        this.refs.paymentTypesDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(payment_type) {
-        PaymentsStore.setChosenPaymentType(payment_type);
-        this.refs.paymentTypesDialog.dismiss();
+        AppActions.setPaymentType(payment_type);
+        this.setState({
+            open: false
+        });
     },
 
     render() {
         return (
             <Dialog
                 bodyStyle={{padding: '12px'}}
+                open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="paymentTypesDialog">
                 <List>
                     {this._getPaymentTypes()}

@@ -1,19 +1,15 @@
 import React from 'react';
 import { Toolbar } from '../components';
 import { ProfileScreen } from '../components/screens'
-import { Navigation } from 'react-router';
 
 const ProfileView = React.createClass({
-    mixins: [Navigation],
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
 
     toolbarLeftTap() {
         this.refs.profileScreen.saveProfile();
-        var settings = this.props.params.settings;
-        if (settings) {
-            this.transitionTo('settings');
-        } else {
-            this.transitionTo('order');
-        }
+        this.context.router.goBack();
     },
 
     render() {

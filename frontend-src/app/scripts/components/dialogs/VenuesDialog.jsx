@@ -1,35 +1,62 @@
 import React from 'react';
-import { Dialog} from 'material-ui';
-import { List, ListItem, ListDivider } from 'material-ui';
+import Dialog from 'material-ui/lib/dialog';
+import Divider from 'material-ui/lib/divider';
+import List from 'material-ui/lib/lists/list';
+import ListItem from 'material-ui/lib/lists/list-item';
 import { VenuesStore } from '../../stores';
+import { AppActions } from '../../actions';
 
 const VenuesDialog = React.createClass({
-    _getVenues() {
-        var venues = VenuesStore.getVenues();
-        return venues.map(venue => {
-            return (
-                <div>
-                    <ListItem
-                        onClick={() => this.dismiss(venue)}>
-                        <div>
-                            <div style={{fontSize: '14px', lineHeight: '120%'}}><b>{venue.title}</b></div>
-                            <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.address}</div>
-                            <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.schedule_str}</div>
-                        </div>
-                    </ListItem>
-                    <ListDivider/>
-                </div>
-            );
+    getInitialState() {
+        return {
+            venues: VenuesStore.venues,
+            open: false
+        };
+    },
+
+    _onVenuesStoreChange() {
+        this.setState({
+            venues: VenuesStore.venues
         });
     },
 
+    componentDidMount() {
+        VenuesStore.addChangeListener(this._onVenuesStoreChange);
+    },
+
+    componentWillUnmount() {
+        VenuesStore.removeChangeListener(this._onVenuesStoreChange)
+    },
+
+    _getVenues() {
+        const result = [];
+        for (let venue of this.state.venues) {
+            result.push(
+                <ListItem key={venue.id} onTouchTap={() => this.dismiss(venue)}>
+                    <div>
+                        <div style={{fontSize: '14px', lineHeight: '120%'}}><b>{venue.title}</b></div>
+                        <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.address}</div>
+                        <div style={{padding: '4px 0 0 0', fontSize: '14px', lineHeight: '120%'}}>{venue.schedule_str}</div>
+                    </div>
+                </ListItem>
+            );
+            result.push(<Divider key={`divider_${venue.id}`}/>);
+        }
+        result.pop();
+        return result;
+    },
+
     show() {
-        this.refs.venuesDialog.show();
+        this.setState({
+            open: true
+        });
     },
 
     dismiss(venue) {
-        VenuesStore.setChosenVenue(venue);
-        this.refs.venuesDialog.dismiss();
+        AppActions.setVenue(venue);
+        this.setState({
+            open: false
+        });
     },
 
     render() {
@@ -38,6 +65,8 @@ const VenuesDialog = React.createClass({
                 contentStyle={{width: '90%'}}
                 bodyStyle={{padding: '12px', overflowY: 'auto', maxHeight: '487px'}}
                 autoScrollBodyContent={true}
+                open={this.state.open}
+                onRequestClose={() => this.setState({open: false})}
                 ref="venuesDialog">
                 <List>
                     {this._getVenues()}

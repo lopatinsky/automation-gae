@@ -1,34 +1,45 @@
 import React from 'react';
-import { Card, CardText, FlatButton, CardMedia, IconButton } from 'material-ui';
-import { OrderStore } from '../../stores';
+import Card from 'material-ui/lib/card/card';
+import CardMedia from 'material-ui/lib/card/card-media';
+import FlatButton from 'material-ui/lib/flat-button';
+import IconButton from 'material-ui/lib/icon-button';
 import settings from '../../settings';
+import { AppActions } from '../../actions';
 
 const OrderMenuItem = React.createClass({
     _removeItem() {
-        OrderStore.removeItem(this.props.item);
+        AppActions.removeItem(this.props.item);
     },
 
-    _getGroupModifiers(item) {
-        return item.group_modifiers.map(modifier => {
-            return <div>
-                {modifier.chosen_choice.title}
-            </div>;
-        });
-    },
-
-    _getSingleModifiers(item) {
-        return item.single_modifiers.map(modifier => {
-            if (modifier.quantity > 0) {
-                return <div>
-                    {modifier.title + ' x' + modifier.quantity}
-                </div>;
+    _getGroupModifiers(orderItem) {
+        const result = [];
+        for (const gm of orderItem.item.group_modifiers) {
+            const choice = orderItem.groupModifiers[gm.modifier_id];
+            if (choice) {
+                result.push(<div key={gm.modifier_id}>
+                    {choice.title}
+                </div>);
             }
-        });
+        }
+        return result;
+    },
+
+    _getSingleModifiers(orderItem) {
+        const result = [];
+        for (const sm of orderItem.item.single_modifiers) {
+            const quantity = orderItem.singleModifiers[sm.modifier_id];
+            if (quantity) {
+                result.push(<div key={sm.modifier_id}>
+                    {sm.title} x{quantity}
+                </div>);
+            }
+        }
+        return result;
     },
 
     _getDeleteButton() {
         return <IconButton
-                    onClick={this._removeItem}
+                    onTouchTap={this._removeItem}
                     iconClassName="material-icons"
                     iconStyle={{color: settings.primaryColor}}>
             delete
@@ -36,7 +47,8 @@ const OrderMenuItem = React.createClass({
     },
 
     render() {
-        var item = this.props.item;
+        var orderItem = this.props.item,
+            item = orderItem.item;
         var width;
         var picCard;
         if (item.pic != null && item.pic != '') {
@@ -48,7 +60,7 @@ const OrderMenuItem = React.createClass({
             </div>;
         } else {
             width = '85%';
-            picCard = <div/>;
+            picCard = null;
         }
         return (
             <div style={{width: '100%', display: 'table'}}>
@@ -56,17 +68,17 @@ const OrderMenuItem = React.createClass({
                     {picCard}
                     <div style={{display: 'table-cell', padding: '12px', width: width, verticalAlign: 'middle'}}>
                         <div style={{lineHeight: '120%'}}>
-                            <b>{item.title + (this.props.gift ? ' В подарок!' : '')}</b>
+                            {item.title + (this.props.gift ? ' (подарок)' : '')}
                         </div>
-                        <div style={{lineHeight: '120%'}}>
-                            {this._getGroupModifiers(item)}
-                            {this._getSingleModifiers(item)}
+                        <div style={{lineHeight: '120%', fontSize: 12}}>
+                            {this._getGroupModifiers(orderItem)}
+                            {this._getSingleModifiers(orderItem)}
                         </div>
                     </div>
                     <div style={{display: 'table-cell', width: '15%', verticalAlign: 'middle'}}>
                         <div style={{display: 'table'}}>
                             <div style={{display: 'table-cell', verticalAlign: 'middle'}}>
-                                <b>{'x' + item.quantity}</b>
+                                {'x' + orderItem.quantity}
                             </div>
                             <div style={{display: 'table-cell', verticalAlign: 'middle'}}>
                                 {this.props.gift ? '' : this._getDeleteButton()}
