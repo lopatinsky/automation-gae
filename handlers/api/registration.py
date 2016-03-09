@@ -3,11 +3,11 @@ import json
 from google.appengine.api.namespace_manager import namespace_manager
 
 from .base import ApiHandler
-from methods import empatika_wallet
+from methods import empatika_wallet, empatika_promos
 from methods.client import save_city
 from methods.geocoder import get_cities_by_coordinates
 from methods.rendering import get_location
-from models.config.config import config, RESTO_APP, DOUBLEB_APP
+from models.config.config import Config, config, RESTO_APP, DOUBLEB_APP
 from methods.proxy.resto.registration import resto_registration
 from methods.proxy.doubleb.registration import doubleb_registration
 from models import STATUS_AVAILABLE
@@ -135,47 +135,50 @@ class RegistrationHandler(ApiHandler):
         self.render_json(response)
 
 
-def _perform_client_id_recovery(request):
-    response = {}
-
-    try:
-        client_id = request.get_range('client_id') or int(request.headers.get('Client-Id') or 0)
-    except ValueError:
-        client_id = 0
-
-    client = None
-    if client_id:
-        if request.init_namespace:
-            namespace_manager.set_namespace(request.init_namespace)
-        client = Client.get(client_id)
-    if not client:
-        response['success'] = False
-        return response
-
-    outdated_client = None
-    outdated_client_id = request.get('old_client_id')
-    if outdated_client_id:
-        outdated_client = Client.get(outdated_client_id)
-
-    if outdated_client:
-        wallet_balance = empatika_wallet.get_balance(outdated_client.key.id())
-        empatika_wallet.deposit(outdated_client.key.id(), wallet_balance, "0")
-        empatika_wallet.pay(outdated_client.key.id(), "0", wallet_balance)
-
-        history = Order.get(client)
-        for order in history:
-            order.client_id = outdated_client.key.id()
-            order.user_agent = outdated_client.user_agent
-            # order.first_for_client = False
-
-        response['success'] = True
-    else:
-        response['success'] = False
-
-    return response
-
-
 class ClientIdRecoveryHandler(ApiHandler):
     def post(self):
-        response = _perform_client_id_recovery(self.request)
+        response = {}
+
+        try:
+            client_id = self.request.get_range('client_id') or int(self.request.headers.get('Client-Id') or 0)
+        except ValueError:
+            client_id = 0
+
+        client = None
+        if client_id:
+            if self.request.init_namespace:
+                namespace_manager.set_namespace(self.request.init_namespace)
+            client = Client.get(client_id)
+        if not client:
+            response['success'] = False
+            return response
+
+        outdated_client = None
+        outdated_client_id = self.request.get('old_client_id')
+        if outdated_client_id:
+            outdated_client = Client.get(outdated_client_id)
+
+        if outdated_client:
+            if Config.get().WALLET_ENABLED:
+                wallet_balance = empatika_wallet.get_balance(outdated_client.key.id())
+                if wallet_balance > 0:
+                    source = "transfer from (%s) to (%s)" % (outdated_client.key.id(), client.key.id())
+                    empatika_wallet.deposit(client.key.id(), wallet_balance, source)
+                    empatika_wallet.pay(outdated_client.key.id(), source, wallet_balance)
+
+            if config.PROMOS_API_KEY:
+                accum_points = empatika_promos.get_user_points(outdated_client.key.id())
+
+                if accum_points > 0:
+                    empatika_promos.move_user_points(outdated_client.key.id(), client.key.id(), accum_points)
+
+            history = Order.get(client)
+            for order in history:
+                order.client_id = outdated_client.key.id()
+                # order.first_for_client = False
+
+            response['success'] = True
+        else:
+            response['success'] = False
+
         self.render_json(response)

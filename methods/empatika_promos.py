@@ -59,3 +59,13 @@ def activate_promo(user_id, promo_id, count):
 def cancel_activation(activation_id):
     api_path = "/activations/%s/cancel" % activation_id
     return _post(api_path, {})
+
+
+def move_user_points(from_user_id, to_user_id, points):
+    api_path = "/users/move_points"
+    params = {
+        "from_user_id": from_user_id,
+        "to_user_id": to_user_id,
+        "points": points
+    }
+    return _post(api_path, params)
