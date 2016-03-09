@@ -172,10 +172,9 @@ class ClientIdRecoveryHandler(ApiHandler):
                 if accum_points > 0:
                     empatika_promos.move_user_points(outdated_client.key.id(), client.key.id(), accum_points)
 
-            history = Order.get(client)
+            history = Order.get(outdated_client)
             for order in history:
-                order.client_id = outdated_client.key.id()
-                # order.first_for_client = False
+                order.client_id = client.key.id()
 
             response['success'] = True
         else:
