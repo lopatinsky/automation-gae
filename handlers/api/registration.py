@@ -2,6 +2,7 @@ import json
 
 from google.appengine.api.namespace_manager import namespace_manager
 
+import logging
 from .base import ApiHandler
 from methods import empatika_wallet, empatika_promos
 from methods.client import save_city
@@ -151,10 +152,10 @@ class ClientIdRecoveryHandler(ApiHandler):
             client = Client.get(client_id)
         if not client:
             response['success'] = False
-            return response
+            self.render_json(response)
 
         outdated_client = None
-        outdated_client_id = self.request.get('old_client_id')
+        outdated_client_id = self.request.get_range('old_client_id')
         if outdated_client_id:
             outdated_client = Client.get(outdated_client_id)
 
@@ -175,6 +176,7 @@ class ClientIdRecoveryHandler(ApiHandler):
             history = Order.get(outdated_client)
             for order in history:
                 order.client_id = client.key.id()
+                order.put()
 
             response['success'] = True
         else:
