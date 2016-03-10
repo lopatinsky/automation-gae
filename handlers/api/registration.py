@@ -8,7 +8,7 @@ from methods import empatika_wallet, empatika_promos
 from methods.client import save_city
 from methods.geocoder import get_cities_by_coordinates
 from methods.rendering import get_location
-from models.config.config import Config, config, RESTO_APP, DOUBLEB_APP
+from models.config.config import config, RESTO_APP, DOUBLEB_APP, AUTO_APP
 from methods.proxy.resto.registration import resto_registration
 from methods.proxy.doubleb.registration import doubleb_registration
 from models import STATUS_AVAILABLE
@@ -160,23 +160,24 @@ class ClientIdRecoveryHandler(ApiHandler):
             outdated_client = Client.get(outdated_client_id)
 
         if outdated_client:
-            if Config.get().WALLET_ENABLED:
-                wallet_balance = empatika_wallet.get_balance(outdated_client.key.id())
-                if wallet_balance > 0:
-                    source = "transfer from (%s) to (%s)" % (outdated_client.key.id(), client.key.id())
-                    empatika_wallet.deposit(client.key.id(), wallet_balance, source)
-                    empatika_wallet.pay(outdated_client.key.id(), source, wallet_balance)
+            if config.APP_KIND == AUTO_APP:
+                if config.WALLET_ENABLED:
+                    wallet_balance = empatika_wallet.get_balance(outdated_client.key.id())
+                    if wallet_balance > 0:
+                        source = "transfer from (%s) to (%s)" % (outdated_client.key.id(), client.key.id())
+                        empatika_wallet.deposit(client.key.id(), wallet_balance, source)
+                        empatika_wallet.pay(outdated_client.key.id(), source, wallet_balance)
 
-            if config.PROMOS_API_KEY:
-                accum_points = empatika_promos.get_user_points(outdated_client.key.id())
+                if config.PROMOS_API_KEY:
+                    accum_points = empatika_promos.get_user_points(outdated_client.key.id())
 
-                if accum_points > 0:
-                    empatika_promos.move_user_points(outdated_client.key.id(), client.key.id(), accum_points)
+                    if accum_points > 0:
+                        empatika_promos.move_user_points(outdated_client.key.id(), client.key.id(), accum_points)
 
-            history = Order.get(outdated_client)
-            for order in history:
-                order.client_id = client.key.id()
-                order.put()
+                history = Order.get(outdated_client)
+                for order in history:
+                    order.client_id = client.key.id()
+                    order.put()
 
             response['success'] = True
         else:
