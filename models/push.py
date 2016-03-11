@@ -99,14 +99,13 @@ class OrderPush(Push):
     """Class for notification that are displayed after user have ordered something
     """
 
-    def __init__(self, text, device_type, order, namespace, push_id=None):
+    def __init__(self, text, order, namespace, push_id=None):
         """
         Initializes OrderPush
         :param text: text to put in notification
-        :param device_type: int parameter, defined in constants IOS_DEVICE = 0, ANDROID_DEVICE = 1
         :param order: order which info have to be pushed
         """
-        super(OrderPush, self).__init__(text, device_type, push_id)
+        super(OrderPush, self).__init__(text, order.device_type, push_id)
         self.order = order
         self.should_popup = True
         self.push_type = ORDER_TYPE
