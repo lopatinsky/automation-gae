@@ -1,7 +1,7 @@
 # coding=utf-8
-from methods import push
 from models import Client
 from models.order import ON_THE_WAY
+from models.push import OrderPush
 
 __author__ = 'dvpermyakov'
 
@@ -13,4 +13,4 @@ def send_to_courier(order, namespace, courier):
 
     client = Client.get(order.client_id)
     text = u"%s, заказ №%s был послан курьеру." % (client.name, order.number)
-    push.send_order_push(order, text, namespace)
+    OrderPush(text, order, namespace).send()

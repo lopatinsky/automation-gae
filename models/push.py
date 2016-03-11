@@ -12,14 +12,12 @@ from methods.fuckups import fuckup_order_channel
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES, Client
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
-from models.config.config import config
 
 ORDER_TYPE = 1
 SIMPLE_TYPE = 2
 REVIEW_TYPE = 3
 NEWS_TYPE = 4
 PUSH_TYPES = (ORDER_TYPE, SIMPLE_TYPE, REVIEW_TYPE, NEWS_TYPE)
-
 
 
 class Push(object):
@@ -37,6 +35,8 @@ class Push(object):
         self.push_id = push_id
 
     def _send_push(self):
+        from models.config.config import config
+
         logging.debug("data:{}, dev_type: {}, parsekey: {}, parserest: {}".
                       format(self.data, self.device_type, config.PARSE_APP_API_KEY, config.PARSE_REST_API_KEY))
         if not self.data or self.device_type not in DEVICE_CHOICES or not config.PARSE_APP_API_KEY or not config.PARSE_REST_API_KEY:
@@ -47,7 +47,6 @@ class Push(object):
             'type': DEVICE_TYPE_MAP[self.device_type],
             'expiry': timestamp(datetime.datetime.utcnow() + datetime.timedelta(days=365)),
             'data': self.data,
-            'push_id': self.push_id
         }
         headers = {
             'Content-Type': 'application/json',
@@ -94,7 +93,6 @@ class Push(object):
                 'type': self.push_type,
                 'analytics_id': self.push_id,
             }
-
 
 
 class OrderPush(Push):

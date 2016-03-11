@@ -5,14 +5,14 @@ from datetime import datetime
 from google.appengine.ext import deferred
 
 from models.config.config import config, EMAIL_FROM, AUTO_APP
-from methods import empatika_wallet, push, paypal
+from methods import empatika_wallet, paypal
 from methods.emails import admins, postmark
 from methods import alfa_bank, empatika_promos
 from methods.empatika_wallet import get_balance
 from methods.sms import sms_pilot
 from models import Client, Venue
 from models.order import CANCELED_BY_BARISTA_ORDER, CANCELED_BY_CLIENT_ORDER
-from models.share import SharedPromo
+from models.push import OrderPush
 
 __author__ = 'dvpermyakov'
 
@@ -89,7 +89,7 @@ def cancel_order(order, status, namespace, comment=None):
                 push_text += u" Бонусные баллы были возвращены на Ваш счет.\n"
             if comment:
                 push_text += " " + comment
-            push.send_order_push(order, push_text, namespace)
+            OrderPush(push_text, order, namespace).send()
         elif status == CANCELED_BY_CLIENT_ORDER:
             message = u"Заказ из мобильного приложения №%s отменен клиентом" % order.key.id()
             venue = Venue.get(order.venue_id)

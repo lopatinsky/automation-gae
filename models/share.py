@@ -7,6 +7,7 @@ from models.menu import MenuItem, SingleModifier
 from models.client import Client
 from models.payment_types import PAYMENT_TYPE_CHOICES
 from models.promo_code import PromoCode
+from models.push import SimplePush
 
 __author__ = 'dvpermyakov'
 
@@ -68,7 +69,6 @@ class SharedPromo(ndb.Model):
     recipient_promo_success = ndb.BooleanProperty(default=False)
 
     def deactivate(self, namespace):
-        from methods.push import send_client_push
         from methods.empatika_promos import register_order
         from methods.empatika_wallet import deposit
         from models.config.config import config
@@ -84,7 +84,7 @@ class SharedPromo(ndb.Model):
             sender = self.sender.get()
             text = u'Приглашенный Вами друг сделал заказ. Вам начислены бонусы!'
             header = u'Бонусы!'
-            send_client_push(sender, text, header, namespace)
+            SimplePush(text, False, text, header, sender, namespace).send()
         if module.recipient_accumulated_points or module.recipient_wallet_points:
             recipient_order_id = "recipient_referral_%s" % self.recipient.id()
             if module.recipient_accumulated_points:
@@ -96,7 +96,7 @@ class SharedPromo(ndb.Model):
             recipient = self.recipient.get()
             text = u'Вы сделали заказ по приглашению. Вам начислены бонусы!'
             header = u'Бонусы!'
-            send_client_push(recipient, text, header, namespace)
+            SimplePush(text, False, text, header, recipient, namespace).send()
         self.status = self.DONE
         self.put()
 
@@ -151,8 +151,6 @@ class SharedGift(ndb.Model):
     status = ndb.IntegerProperty(choices=CHOICES, default=READY)
 
     def perform(self, client, namespace):
-        from methods.push import send_client_push
-
         share = Share.get_by_id(self.share_id)
         share.deactivate()
         self.status = self.PERFORMING
@@ -161,7 +159,7 @@ class SharedGift(ndb.Model):
         sender = Client.get(self.client_id)
         text = u'%s %s прислал Вам подарок!' % (sender.name, sender.surname)
         header = u'Подарок'
-        send_client_push(client, text, header, namespace)
+        SimplePush(text, False, text, header, sender, namespace).send()
 
     def put_in_order(self):
         if self.status == self.PERFORMING:
@@ -180,7 +178,6 @@ class SharedGift(ndb.Model):
 
     def cancel(self, namespace):
         from methods.alfa_bank import reverse
-        from methods.push import send_client_push
 
         if self.status == self.READY:
             legal = LegalInfo.query().get()  # TODO find solution for multiple legals
@@ -194,7 +191,7 @@ class SharedGift(ndb.Model):
             sender = Client.get(self.client_id)
             text = u'Ваш подарок не был получен. Ссылка более не будет активна, а деньги вернутся в ближайшее время.'
             header = u'Отмена подарка'
-            send_client_push(sender, text, header, namespace)
+            SimplePush(text, False, text, header, sender, namespace).send()
 
     def dict(self):
         from models import Client

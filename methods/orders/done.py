@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.api.taskqueue import taskqueue
-from google.appengine.ext import ndb
 
 from models.config.config import config
-from methods import alfa_bank, push, paypal
+from methods import alfa_bank, paypal
 from models import Client
+from models.push import OrderPush
 from models.share import SharedPromo
 from models.order import READY_ORDER
 from models.specials import ReviewPush
@@ -75,6 +75,6 @@ def done_order(order, namespace, with_push=True):
             text += u" Начислены баллы в размере %s." % point_sum
         if total_cash_back:
             text += u" Начислены бонусы на Ваш счет в размере %s." % (total_cash_back / 100.0)
-        push.send_order_push(order, text, namespace, silent=True)
+        OrderPush(text, order, namespace).send(silent=True)
         if order.version >= 4:
             send_review_push(order)

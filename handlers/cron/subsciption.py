@@ -5,10 +5,10 @@ from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext.ndb import metadata
 from webapp2 import RequestHandler
 
-from methods import push
 from models import STATUS_AVAILABLE
 from models.config.config import config
 from methods.emails import admins
+from models.push import SimplePush
 from models.subscription import Subscription
 
 
@@ -24,12 +24,14 @@ class CloseSubscriptionHandler(RequestHandler):
                                         Subscription.payment_return_time < now).fetch()
             for subscription in unused:
                 subscription.revert_payment()
-                push.send_client_push(
-                        subscription.client.get(),
-                        u"Вы не начали использовать Ваш абонемент. Денежные средства будут возвращены Вам на карту.",
-                        config.APP_NAME,
-                        namespace
-                )
+                text = u"Вы не начали использовать Ваш абонемент. Денежные средства будут возвращены Вам на карту."
+                SimplePush(text,
+                           should_popup=False,
+                           full_text=text,
+                           header=config.APP_NAME,
+                           client=subscription.client.get(),
+                           namespace=namespace,
+                           ).send()
 
             expired = Subscription.query(Subscription.expiration < now,
                                          Subscription.status == STATUS_AVAILABLE).fetch()

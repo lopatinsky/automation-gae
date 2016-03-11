@@ -1,8 +1,8 @@
 # coding=utf-8
 from datetime import timedelta
-from methods import push
 from methods.rendering import STR_DATETIME_FORMAT, STR_DATE_FORMAT
 from models import Venue, Client, DeliverySlot
+from models.push import OrderPush
 
 __author__ = 'dvpermyakov'
 
@@ -27,4 +27,4 @@ def postpone_order(order, minutes, namespace):
     time_str = local_delivery_time.strftime("%H:%M")
     client = Client.get(order.client_id)
     push_text = u"%s, готовность заказа №%s была изменена на %s" % (client.name, order.number, time_str)
-    push.send_order_push(order, push_text, namespace, new_time=order.delivery_time)
+    OrderPush(push_text, order, namespace).send(new_time=order.delivery_time)

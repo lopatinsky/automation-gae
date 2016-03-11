@@ -2,9 +2,7 @@ from datetime import datetime
 
 from webapp2 import RequestHandler
 
-from methods.push import send_review_push
 from models import Notification
-# from models.push import *
 from models.push import SimplePush
 from models.specials import STATUS_CREATED, ReviewPush
 from models.push import ReviewPush as RP
