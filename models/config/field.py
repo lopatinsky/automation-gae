@@ -2,8 +2,9 @@ from collections import defaultdict
 
 from google.appengine.ext import ndb
 from methods.rendering import latinize
-from models import STATUS_CHOICES, STATUS_AVAILABLE
-from models.config.config import ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE, CASH_CHANGE_MODULE, CLIENT_INFO_MODULE
+from models import STATUS_CHOICES, STATUS_AVAILABLE, STATUS_UNAVAILABLE
+from models.config.config import ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE, CASH_CHANGE_MODULE, CLIENT_INFO_MODULE, \
+    CLIENT_INFO_TIP_MODULE
 
 __author__ = 'dvpermyakov'
 
@@ -49,6 +50,17 @@ class Field(ndb.Model):
         }
 
 
+class ClientTipModule(ndb.Model):
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default = STATUS_UNAVAILABLE)
+    text = ndb.TextProperty()
+
+    def dict(self):
+        return {
+            'type': CLIENT_INFO_TIP_MODULE,
+            'text': self.text
+        }
+
+
 class ClientModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
@@ -74,7 +86,7 @@ class OrderModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
     restrictions = ndb.StructuredProperty(Restriction, repeated=True)
-    enable_number_of_people = ndb.BooleanProperty(default=False)
+    enable_number_of_people =  ndb.BooleanProperty(default=False)
     enable_change = ndb.BooleanProperty(default=False)
 
     def _main_dict(self):

@@ -20,9 +20,11 @@ CASH_CHANGE_MODULE = 13
 CUSTOM_SECTIONS_MODULE = 14
 PLATIUS_WHITE_LABEL_MODULE = 15
 SMS_CONFIRMATION_MODULE = 16
+CLIENT_INFO_TIP_MODULE = 17
 MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, CLIENT_INFO_MODULE, HIT_MODULE, MIVAKO_GIFT_MODULE,
                 REVIEW_MODULE, MENU_FRAME_MODULE, REMAINDERS_MODULE, ORDER_INFO_MODULE, NUMBER_OF_PEOPLE_MODULE,
-                CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE, PLATIUS_WHITE_LABEL_MODULE, SMS_CONFIRMATION_MODULE)
+                CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE, PLATIUS_WHITE_LABEL_MODULE, SMS_CONFIRMATION_MODULE,
+                CLIENT_INFO_TIP_MODULE)
 
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
@@ -30,7 +32,7 @@ from webapp2 import cached_property
 
 from models.config.local import LocalConfigProxy
 from models.config.share import ShareInvitationModule, ShareGiftModule
-from models.config.field import ClientModule, OrderModule
+from models.config.field import ClientModule, OrderModule, ClientTipModule
 from models.config.subscription import SubscriptionModule
 from models.config.version import Version
 from models.config.geo_push import GeoPushModule
@@ -124,6 +126,7 @@ class Config(ndb.Model):
     SHARE_INVITATION_MODULE = ndb.LocalStructuredProperty(ShareInvitationModule)
     SUBSCRIPTION_MODULE = ndb.LocalStructuredProperty(SubscriptionModule)
     CLIENT_MODULE = ndb.LocalStructuredProperty(ClientModule)
+    CLIENT_TIP_MODULE = ndb.LocalStructuredProperty(ClientTipModule)
     ORDER_MODULE = ndb.LocalStructuredProperty(OrderModule)
     GEO_PUSH_MODULE = ndb.LocalStructuredProperty(GeoPushModule)
 
