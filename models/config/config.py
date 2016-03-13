@@ -44,6 +44,7 @@ from models.config.basket_notification import BasketNotificationModule
 from models.config.custom_sections import CustomSectionsModule
 from models.config.platius_wl import PlatiusWhiteLabelModule
 from models.config.app_appearance import AppAppearanceIos, AppAppearanceAndroid
+from models.config.bitrix import BitrixExtApiModule
 
 OTHER = -1
 VENUE = 0
@@ -143,6 +144,7 @@ class Config(ndb.Model):
     CUSTOM_SECTIONS_MODULE = ndb.LocalStructuredProperty(CustomSectionsModule)
     PLATIUS_WHITE_LABEL_MODULE = ndb.LocalStructuredProperty(PlatiusWhiteLabelModule)
     SUSHINSON_EMAIL_MODULE = ndb.LocalStructuredProperty(SushinSonEmailModule)
+    BITRIX_EXT_API_MODULE = ndb.LocalStructuredProperty(BitrixExtApiModule)
 
     RBCN_MOBI = ndb.StringProperty(indexed=False)
 

@@ -20,3 +20,6 @@ class ExportLegalsHandler(GAEAuthBaseHandler):
                     'production': config.COMPANY_STATUS == COMPANY_IN_PRODUCTION,
                 })
         self.render_json({"legals": result})
+
+
+from .bitrix import BitrixOrderInfoHandler

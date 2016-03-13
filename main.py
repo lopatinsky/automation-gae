@@ -8,7 +8,6 @@ from webapp2_extras.routes import PathPrefixRoute
 from handlers.api.user import admin
 from handlers import web_app
 from handlers import wizard, web_admin, ext_api
-from handlers.cron import InactiveUsersNotificationHandler
 from handlers.tasks.basket_notification import BasketNotificationHandler
 from handlers.web_admin.web.company.subscription import SubscriptionMain, SubscriptionModuleSetupHandler, \
     ListSubscriptionTariffHandler, EditSubscriptionTariffHandler, AddSubscriptionTariffHandler, \
@@ -506,6 +505,9 @@ app = WSGIApplication([
 
     PathPrefixRoute('/ext', [
         Route('/export_legals', ext_api.ExportLegalsHandler),
+        PathPrefixRoute('/bitrix/<namespace:[a-z0-9]+>/<order_id:\d+>', [
+            Route('/info', ext_api.BitrixOrderInfoHandler),
+        ])
     ]),
 
     Route('/twilio/sms/get', api.ReceiveSms),
