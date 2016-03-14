@@ -153,9 +153,13 @@ class EditPromoHandler(CompanyBaseHandler):
         start = self.request.get('start')
         if start:
             promo.start = datetime.strptime(start, HTML_STR_TIME_FORMAT)
+        else:
+            promo.start = None
         end = self.request.get('end')
         if end:
             promo.end = datetime.strptime(end, HTML_STR_TIME_FORMAT)
+        else:
+            promo.end = None
         promo.put()
         self.redirect('/company/promos/list')
 
