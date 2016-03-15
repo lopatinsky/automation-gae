@@ -60,7 +60,7 @@
                 {% if module.needed_cashback %}{{ module.needed_cashback }} {% else %}Нет{% endif %}
             </td>
             <td>
-                {% if module.needed_cashback %}{{ module.needed_points_left }} {% else %}Нет{% endif %}
+                {% if module.needed_points_left %}{{ module.needed_points_left }} {% else %}Нет{% endif %}
             </td>
             <td>
                 <form action="/company/config_settings/inactive_users_notifications/delete" method="post">
