@@ -226,7 +226,7 @@ class BasketNotificationModuleHandler(CompanyBaseHandler):
         module.days_since_order = days_since_order
 
         cnf.put()
-        self.redirect_to('company_main')
+        self.redirect_to('config_main')
 
 
 class NotificationModulesHandler(CompanyBaseHandler):
