@@ -277,7 +277,7 @@ class AddNotificationModuleHandler(CompanyBaseHandler):
 
         header = self.request.get('header')
 
-        client_type = self.request.get_range('client_types') + 1
+        client_type = self.request.get_range('client_type')
 
         status = self.request.get('status') is not ''
         should_push = self.request.get('should_push') is not ''
@@ -349,7 +349,7 @@ class EditNotificationModuleHandler(CompanyBaseHandler):
 
         header = self.request.get('header')
 
-        client_type = self.request.get_range('client_types') + 1
+        client_type = self.request.get_range('client_type')
 
         status = self.request.get('status') is not ''
         should_push = self.request.get('should_push') is not ''
