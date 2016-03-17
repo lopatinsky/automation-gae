@@ -1,12 +1,13 @@
 from google.appengine.api import memcache
 from methods.proxy.doubleb.requests import get_doubleb_payment_types
 from models import PaymentType, STATUS_AVAILABLE
-from models.payment_types import CARD_PAYMENT_TYPE
+from models.payment_types import CARD_PAYMENT_TYPE, CASH_PAYMENT_TYPE
 from models.proxy.doubleb import DoublebCompany
 
 __author__ = 'dvpermyakov'
 
 PAYMENT_TYPE_MAP = {
+    0: str(CASH_PAYMENT_TYPE),
     1: str(CARD_PAYMENT_TYPE)
 }
 
