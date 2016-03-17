@@ -156,7 +156,7 @@ class OrderHandler(ApiHandler):
         if conf.ORDER_MESSAGE_MODULE:
             message = conf.ORDER_MESSAGE_MODULE.get_message(self.order)
         else:
-            message = u'Заказ оправлен'
+            message = u'Заказ отправлен'
 
         if config.APP_KIND == RESTO_APP:
             success, response = resto_place_order(client, venue, self.order, order_json['payment'], order_json['items'],

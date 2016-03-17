@@ -81,7 +81,7 @@ class Push(object):
                 'alert': self.text,
                 'sound': 'push.caf',
                 'should_popup': self.should_popup,
-                'type': self.push_type,
+                'type': self.push_type if self.push_type != SIMPLE_TYPE else 999999,  # todo ios v6 fuckup
                 'analytics_id': self.push_id,
             }
         elif self.device_type == ANDROID_DEVICE:

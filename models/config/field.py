@@ -57,7 +57,9 @@ class ClientTipModule(ndb.Model):
     def dict(self):
         return {
             'type': CLIENT_INFO_TIP_MODULE,
-            'text': self.text
+            'info': {
+                'text': self.text
+            }
         }
 
 
