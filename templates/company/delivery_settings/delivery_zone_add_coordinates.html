@@ -1,0 +1,26 @@
+у<html>
+<head></head>
+<body>
+{% include '/company/header.html' %}
+
+<form method="post">
+    <label for="coordinates">
+        Введите координаты зоны
+    </label><br>
+    <input type="text" id="coordinates" name="coordinates"><br>
+
+
+    <label for="delivery_sum">
+        Сумма доставки
+    </label><br>
+    <input type="number" id="delivery_sum" name="delivery_sum"><br>
+
+    <label for="free_delivery_sum">
+        Сумма для бесплатной доставки
+    </label><br>
+    <input type="number" id="free_delivery_sum" name="free_delivery_sum"><br>
+
+    <input type="submit" value="Загрузить">
+</form>
+</body>
+</html>
