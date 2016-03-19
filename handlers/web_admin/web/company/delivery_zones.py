@@ -1,16 +1,18 @@
+import ast
 import json
 import logging
 import re
 
-from google.appengine.ext.ndb import GeoPt
-
 from google.appengine.api import urlfetch
+from google.appengine.ext.ndb import GeoPt
 
 from handlers.web_admin.web.company import CompanyBaseHandler
 from methods.auth import zones_rights_required
 from methods.geocoder import get_cities_by_coordinates, get_areas_by_coordinates
 from models import DeliveryZone, STATUS_AVAILABLE, STATUS_UNAVAILABLE, Venue, Address
 from models.venue import DELIVERY, GeoRib
+
+ZONE = 2
 
 __author__ = 'dvpermyakov'
 
@@ -63,6 +65,63 @@ class AddingMapDeliveryZoneHandler(CompanyBaseHandler):
     @zones_rights_required
     def get(self):
         self.render('/delivery_settings/map.html')
+
+
+class AddingCoordinatesDeliveryZoneHandler(CompanyBaseHandler):
+    def get(self):
+        self.render('/delivery_settings/delivery_zone_add_coordinates.html')
+
+    def post(self):
+        coordinates_str = self.request.get('coordinates')
+        delivery_sum = self.request.get_range('delivery_sum')
+        free_delivery_sum = self.request.get_range('free_delivery_sum')
+
+        coordinates = ast.literal_eval(coordinates_str)
+
+        ribs_num = len(coordinates) - 1
+
+        delivery_zone = DeliveryZone()
+        delivery_zone.sequence_number = DeliveryZone.generate_sequence_number()
+
+        geo_ribs = []
+        for i in range(0, ribs_num - 1):
+            start_point = coordinates[i]
+            end_point = coordinates[i + 1]
+
+            geo_rib = GeoRib()
+            geo_rib.point1 = GeoPt(lat=start_point[1], lon=start_point[0])
+            geo_rib.point2 = GeoPt(lat=end_point[1], lon=end_point[0])
+            geo_ribs.append(geo_rib)
+
+        start_point = coordinates[ribs_num - 1]
+        end_point = coordinates[0]
+        last_rib = GeoRib()
+        logging.debug('start_point: {}'.format(coordinates))
+        last_rib.point1 = GeoPt(lat=start_point[1], lon=start_point[0])
+        last_rib.point2 = GeoPt(lat=end_point[1], lon=end_point[0])
+
+        delivery_zone.geo_ribs = geo_ribs
+
+        lat, lon = get_mean_coordinate(geo_ribs)
+        candidates = get_cities_by_coordinates(lat, lon)
+        if candidates:
+            logging.critical('CANDIDATES')
+            address = candidates[0]['address']
+            address_obj = Address(**address)
+            address_obj.lat = lat
+            address_obj.lon = lon
+            candidates = get_areas_by_coordinates(lat, lon)
+            if candidates:
+                address_obj.area = candidates[0]['address']['area']
+            delivery_zone.address = address_obj
+
+        delivery_zone.search_type = ZONE
+        delivery_zone.price = delivery_sum
+        delivery_zone.free_delivery_sum = free_delivery_sum
+        delivery_zone.put()
+
+        self.redirect('/company/delivery/zone/list')
+
 
 
 class AddingJSFileDeliveryZoneHandler(CompanyBaseHandler):

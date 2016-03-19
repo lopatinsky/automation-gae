@@ -32,7 +32,7 @@ from notifications import ListNewsHandler, AddNewsHandler, PushesListHandler, Ad
     CancelPushHandler, CancelNewsHandler
 from delivery_zones import ListDeliveryZonesHandler, EditDeliveryZoneHandler, MapDeliveryZoneHandler, \
     AddDeliveryZoneHandler, AddingMapDeliveryZoneHandler, UpDeliveryZoneHandler, DownDeliveryZoneHandler, \
-    AddingJSFileDeliveryZoneHandler
+    AddingJSFileDeliveryZoneHandler, AddingCoordinatesDeliveryZoneHandler
 from promo_code import ListPromoCodeHandler, AddPromoCodeHandler, ActivationsPromoCodeHandler
 from alfa_settings import AlfaSettingsHandler
 from choose_ns import ChooseNamespaceHandler

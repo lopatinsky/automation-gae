@@ -311,6 +311,7 @@ app = WSGIApplication([
                 Route('/edit', company_admin.EditDeliveryZoneHandler),
                 Route('/add_by_map', company_admin.AddingMapDeliveryZoneHandler),
                 Route('/add_by_js_file', company_admin.AddingJSFileDeliveryZoneHandler),
+                Route('/add_by_coordinates', company_admin.AddingCoordinatesDeliveryZoneHandler),
                 Route('/map', company_admin.MapDeliveryZoneHandler),
                 Route('/up', company_admin.UpDeliveryZoneHandler),
                 Route('/down', company_admin.DownDeliveryZoneHandler),
