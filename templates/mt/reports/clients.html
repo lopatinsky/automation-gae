@@ -23,6 +23,7 @@
          <tr>
              <th>Id</th>
              <th>Имя</th>
+             <th>Email</th>
              <th>Телефон</th>
              <th>Платформа</th>
              <th>Всего заказов</th>
@@ -38,6 +39,7 @@
              <tr>
                  <td>{{ client.client_id }}</td>
                  <td>{{ client.name }}</td>
+                 <td>{{ client.email }}</td>
                  <td>{{ client.tel }}</td>
                  <td>{{ "Android" if client.device_type else "iOS" }}</td>
                  <td>{{ client.amount_orders }}</td>

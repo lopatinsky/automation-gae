@@ -7,10 +7,11 @@ from google.appengine.ext import ndb
 
 
 class ReportedClient:
-    def __init__(self, client_id, name, tel, venue_sum, order_sum, payment, is_cancel, device_type):
+    def __init__(self, client_id, name, tel, email, venue_sum, order_sum, payment, is_cancel, device_type):
         self.client_id = client_id
         self.name = name
         self.tel = tel
+        self.email = email
         self.amount_orders = 0
         self.device_type = device_type
         self.cancel_number = 0
@@ -31,7 +32,7 @@ class ReportedClient:
         else:
             self.cancel_number += 1
             self.cancel_sum += venue_sum
-        self.average_order_cost = (self.venue_sum+ self.cancel_sum) / self.amount_orders
+        self.average_order_cost = (self.venue_sum + self.cancel_sum) / self.amount_orders
 
 
 def clients_table(start, end, venue_id):
@@ -52,15 +53,16 @@ def clients_table(start, end, venue_id):
                                          order.status != READY_ORDER)
         else:
             client = Client.get(client_id)
-            clients[client_id] = ReportedClient(client_id, '%s %s' % (client.name, client.surname), client.tel, venue_sum, total_sum, payment,
+            clients[client_id] = ReportedClient(client_id, '%s %s' % (client.name, client.surname), client.tel,
+                                                client.email, venue_sum, total_sum, payment,
                                                 order.status != READY_ORDER, order.device_type)
     return clients, \
-        sum(client.amount_orders for client in clients.values()), \
-        sum(client.venue_sum for client in clients.values()), \
-        sum(client.menu_sum for client in clients.values()), \
-        sum(client.payment for client in clients.values()), \
-        sum(client.cancel_number for client in clients.values()), \
-        sum(client.cancel_sum for client in clients.values())
+           sum(client.amount_orders for client in clients.values()), \
+           sum(client.venue_sum for client in clients.values()), \
+           sum(client.menu_sum for client in clients.values()), \
+           sum(client.payment for client in clients.values()), \
+           sum(client.cancel_number for client in clients.values()), \
+           sum(client.cancel_sum for client in clients.values())
 
 
 def get(venue_id, start, end):
