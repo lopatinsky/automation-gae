@@ -103,6 +103,9 @@ class OrderHandler(ApiHandler):
             confirm_by_sms = order_json.get('confirm_by_sms', False)
             if confirm_by_sms:
                 self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
+            else:
+                self.order.comment = u"Клиент просит перезвонить. " + self.order.comment
+
 
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
