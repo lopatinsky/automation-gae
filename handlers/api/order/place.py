@@ -101,7 +101,7 @@ class OrderHandler(ApiHandler):
 
         if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status == STATUS_AVAILABLE:
             confirm_by_sms = order_json.get('confirm_by_sms', False)
-            if confirm_by_sms:
+            if confirm_by_sms == '1':
                 self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
             else:
                 self.order.comment = u"Клиент просит перезвонить. " + self.order.comment
