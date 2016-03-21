@@ -12,7 +12,8 @@ STRING = 0
 NUMBER = 1
 # NUMBER_PLUS_MINUS = 2  # deprecated
 DATE = 3
-TYPE_CHOICES = (STRING, NUMBER, DATE)
+CHOICES = 4
+TYPE_CHOICES = (STRING, NUMBER, DATE, CHOICES)
 
 PAYMENT_RESTRICTION = 0
 DELIVERY_TYPE_RESTRICTION = 1
@@ -32,6 +33,28 @@ class Restriction(ndb.Model):
         }
 
 
+class TimeOptions(ndb.Model):
+    min_date = ndb.DateTimeProperty()
+    max_date = ndb.DateTimeProperty()
+
+    def dict(self):
+        return {
+            'min_date': self.min_date.strftime("%Y-%m-%d"),
+            'max_date': self.max_date.strftime("%Y-%m-%d")
+        }
+
+
+class ChoiceVariantsOptions(ndb.Model):
+    variants = ndb.StringProperty(repeated=True)
+    default_variant = ndb.IntegerProperty(default=0)
+
+    def dict(self):
+        return {
+            'variants': self.variants,
+            'default_variant': self.default_variant
+        }
+
+
 class Field(ndb.Model):
     required = ndb.BooleanProperty(default=False)
     title = ndb.StringProperty(required=True)
@@ -40,13 +63,28 @@ class Field(ndb.Model):
     order = ndb.IntegerProperty(required=True)
     options = ndb.JsonProperty()
 
+    time_options = ndb.LocalStructuredProperty(TimeOptions, required=False)
+    choice_variants_options = ndb.LocalStructuredProperty(ChoiceVariantsOptions, required=False)
+
+
     def dict(self):
+        options = self.options if self.options else {}
+
+        print self.options
+        print options
+        if self.type == DATE:
+            options.update(self.time_options.dict())
+
+        if self.type == CHOICES:
+            options.update(self.choice_variants_options.dict())
+
+        print options
         return {
             'title': self.title,
             'field': latinize(self.title),
             'type': self.type,
             'order': self.order,
-            'options': self.options,
+            'options': options,
         }
 
 
