@@ -294,11 +294,11 @@ class EditMenuItemHandler(CompanyBaseHandler):
         else:
             item.price = 0
         item.kal = self.request.get_range('kal')
-        if self.request.get('volume'):
+        if self.request.get('volume') and self.request.get('volume') != 'None':
             item.volume = float(self.request.get('volume'))
         else:
             item.volume = 0
-        if self.request.get('weight'):
+        if self.request.get('weight') and self.request.get('weight') != 'None':
             item.weight = float(self.request.get('weight'))
         else:
             item.weight = 0
