@@ -2,7 +2,7 @@
 Время заказа: {{ order.date_str[11:16] }};<br/>
 Дата доставки: {{ order.delivery_time_str[:10] }};<br/>
 Время доставки: {{ order.delivery_time_str[11:16] }};<br/>
-Комментарий: Номер заказа {{ order.number }}, {% if order.delivery_type != 2 %}Заберем сами,{% endif %} {{ order.comment.replace(';', ',') }};<br/>
+Комментарий: Номер в приложении {{ order.number }}, {% if order.delivery_type != 2 %}Заберем сами,{% endif %} {{ order.comment.replace(';', ',') }};<br/>
 Курьер: ;<br/>
 Выписывать чек: ;<br/>
 Отправлять смс при смене статуса: ;<br/>
@@ -19,7 +19,7 @@
 <br/>
 Информация о клиенте:<br/>
 ---------------------<br/>
-Телефон: {{ client.tel }};<br/>
+Телефон: +{{ client.tel }};<br/>
 Мобильный: ;<br/>
 Город: {{ order.address.city if order.address else '' }};<br/>
 Улица: {{ order.address.street if order.address else '' }};<br/>

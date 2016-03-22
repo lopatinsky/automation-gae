@@ -18,7 +18,7 @@ class SushinSonEmailModule(ndb.Model):
         client = Client.get(order.client_id)
 
         item_values = order_items_values(order)
-        subject = u'Поступил заказ №%s' % order.key.id()
+        subject = u'Поступил заказ из приложения'
 
         rendered_body = jinja2.render_template('/company/delivery/sushinson.html', client=client,
                                                PAYMENT_TYPE_MAP=PAYMENT_TYPE_MAP, **item_values)
