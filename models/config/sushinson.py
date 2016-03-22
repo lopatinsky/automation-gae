@@ -1,9 +1,10 @@
 # coding=utf-8
 from google.appengine.ext import ndb, deferred
 
-from methods.emails.postmark import send_email
+from methods.emails.postmark import send_by_smtp
 from models import STATUS_CHOICES, STATUS_AVAILABLE
 from models.client import Client
+from models.payment_types import PAYMENT_TYPE_MAP
 
 
 class SushinSonEmailModule(ndb.Model):
@@ -17,8 +18,9 @@ class SushinSonEmailModule(ndb.Model):
         client = Client.get(order.client_id)
 
         item_values = order_items_values(order)
-        subject = u'Новый заказ №%s поступил в систему из мобильного приложения' % order.key.id()
+        subject = u'Поступил заказ №%s' % order.key.id()
 
-        rendered_body = jinja2.render_template('/company/delivery/sushinson.html', client=client, **item_values)
+        rendered_body = jinja2.render_template('/company/delivery/sushinson.html', client=client,
+                                               PAYMENT_TYPE_MAP=PAYMENT_TYPE_MAP, **item_values)
         for email in self.emails:
-            deferred.defer(send_email, EMAIL_FROM, email, subject, rendered_body)
+            deferred.defer(send_by_smtp, EMAIL_FROM, email, subject, rendered_body)

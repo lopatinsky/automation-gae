@@ -1,34 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body style="white-space: pre-wrap;">
-Комментарий: Номер в приложении {{ order.number }}, {% if order.delivery_type != 2 %}Заберем сами,{% endif %} {{ order.comment.replace(';', ',') }};
-Курьер: ;
-Выписывать чек: 0;
-Отправлять смс при смене статуса: 0;
-Скидка (руб): ;
-Оплачен: {{ 1 if order.payment_type_id == 1 else 0 }};
-Количество персон: ;
-Вид оплаты: {{ order.payment_type_id }};
-
-Заказано:{% for item in items %}
-Название: {{ item.title }}, Количество: {{ item.amount }}, Цена: {{ item.float_price|int }}, Скидка (%): , Сумма: {{ item.float_price|int * item.amount }};{% endfor %}
-
-Информация о клиенте:
----------------------
-Телефон:  +{{ client.tel }} ;
-Мобильный: ;
-Город: {{ order.address.city if order.address else '' }};
-Улица: {{ order.address.street if order.address else '' }};
-Дом: {{ order.address.home if order.address else '' }};
-Квартира: {{ order.address.flat if order.address else '' }};
-Карта: ;
-ФИО: {{ client.name }} {{ client.surname }};
-Email: {{ client.email }};
-
-Итого, с доставкой: {{ order.total_sum|int }} руб. + {{ order.delivery_sum|int }} руб. = {{ (order.total_sum + order.delivery_sum)|int }} руб.
-</body>
-</html>
+Дата заказа: {{ order.date_str[:10] }};<br/>
+Время заказа: {{ order.date_str[11:16] }};<br/>
+Дата доставки: {{ order.delivery_time_str[:10] }};<br/>
+Время доставки: {{ order.delivery_time_str[11:16] }};<br/>
+Комментарий: Номер заказа {{ order.number }}, {% if order.delivery_type != 2 %}Заберем сами,{% endif %} {{ order.comment.replace(';', ',') }};<br/>
+Курьер: ;<br/>
+Выписывать чек: ;<br/>
+Отправлять смс при смене статуса: ;<br/>
+Скидка (руб): ;<br/>
+Оплачен: {{ 1 if order.payment_type_id == 1 else 0 }};<br/>
+Количество персон: ;<br/>
+Вид оплаты: {{ PAYMENT_TYPE_MAP[order.payment_type_id] }};<br/>
+<br/>
+Продукты меню:<br/>
+--------------------<br/>{% for item in items %}
+Название: {{ item.title }}, Количество: {{ item.amount }}, Цена: {{ item.float_price|int }}, Скидка (%): , Сумма: {{ item.float_price|int * item.amount }};<br/>{% endfor %}
+{% if order.delivery_sum %}Название: Доставка, Количество: 1, Цена: {{ order.delivery_sum|int }}, Скидка(%): , Сумма: {{ order.delivery_sum|int }};<br/>
+{% endif %}---------------------<br/>
+<br/>
+Информация о клиенте:<br/>
+---------------------<br/>
+Телефон: {{ client.tel }};<br/>
+Мобильный: ;<br/>
+Город: {{ order.address.city if order.address else '' }};<br/>
+Улица: {{ order.address.street if order.address else '' }};<br/>
+Дом: {{ order.address.home if order.address else '' }};<br/>
+Квартира: {{ order.address.flat if order.address else '' }};<br/>
+Подъезд: ;<br/>
+Этаж: ;<br/>
+Домофон: ;<br/>
+Карта: ;<br/>
+ФИО: {{ client.name }} {{ client.surname }};<br/>
+Организация: ;<br/>
+Метро: ;<br/>
+Email: {{ client.email }};<br/>
+Дополнительно: ;
