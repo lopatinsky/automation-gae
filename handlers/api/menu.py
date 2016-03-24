@@ -1,3 +1,5 @@
+from google.appengine.api import memcache
+
 from handlers.api.base import ApiHandler
 from methods.hit import include_hit_category
 from methods.proxy.resto.menu import get_remainders
@@ -13,14 +15,22 @@ class MenuHandler(ApiHandler):
         venue_id = self.request.get('venue_id')
         dynamic = "dynamic" in self.request.params
         venue = None
+        menu = None
         city = self.request.city if self.request.city else None
         if venue_id:
             venue = Venue.get_by_id(int(venue_id))
             if not venue:
                 self.abort(400)
-        menu = MenuCategory.get_menu_dict(venue=venue, city=city,
-                                          subscription_include=subscription_include,
-                                          menu_frame_include=menu_frame_include)
+
+        if not venue:
+            menu = memcache.get('menu_' + '' if not city else str(city))
+        if not menu:
+            menu = MenuCategory.get_menu_dict(venue=venue, city=city,
+                                              subscription_include=subscription_include,
+                                              menu_frame_include=menu_frame_include)
+            if not venue:
+                memcache.add('menu_' + '' if not city else str(city), menu, 60*5)
+
         include_hit_category(menu)
         response = {
             "menu": menu,
