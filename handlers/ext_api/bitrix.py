@@ -49,11 +49,17 @@ class BitrixOrderInfoHandler(BitrixBaseHandler):
             E.phone(client.tel[4:]),
             E.city(order.address.city),
             E.address(order.address.str()),
+            E.subway(),
             E.street(order.address.street),
             E.building(order.address.home),
+            E.block(),
             E.apt(order.address.flat),
+            E.entrance(),
+            E.floor(),
+            E.doorcode(),
             E.change(change),
             E.payment_method(payment_method),
+            E.is_corporate('0')
         )
 
     @staticmethod
@@ -71,6 +77,8 @@ class BitrixOrderInfoHandler(BitrixBaseHandler):
     def get(self, namespace, order_id):
         order_id = int(order_id)
         order = Order.get_by_id(order_id)
+        if not order:
+            self.abort(404)
         venue = Venue.get(order.venue_id)
         order_created_local = order.date_created + timedelta(hours=venue.timezone_offset)
         xml = E.order(
