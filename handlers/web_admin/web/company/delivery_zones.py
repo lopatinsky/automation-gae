@@ -73,6 +73,7 @@ class AddingCoordinatesDeliveryZoneHandler(CompanyBaseHandler):
 
     def post(self):
         coordinates_str = self.request.get('coordinates')
+        min_sum = self.request.get_range('min_sum')
         delivery_sum = self.request.get_range('delivery_sum')
         free_delivery_sum = self.request.get_range('free_delivery_sum')
 
@@ -117,6 +118,7 @@ class AddingCoordinatesDeliveryZoneHandler(CompanyBaseHandler):
 
         delivery_zone.search_type = ZONE
         delivery_zone.price = delivery_sum
+        delivery_zone.min_sum = min_sum
         delivery_zone.free_delivery_sum = free_delivery_sum
         delivery_zone.put()
 
