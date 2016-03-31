@@ -1,4 +1,6 @@
 # coding=utf-8
+import logging
+
 from models.menu import GroupModifier, GroupModifierChoice
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY
@@ -215,7 +217,8 @@ def set_order_gift_points(response, outcome, order):
 
 
 def add_order_gift(response, outcome, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
-    _add_order_gift(get_item_dict(outcome.item_details), new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
+    _add_order_gift(get_item_dict(outcome.item_details), new_order_gift_dicts, order_gift_dicts,
+                    cancelled_order_gift_dicts)
     response.success = True
     return response
 
@@ -335,11 +338,19 @@ def forbid_menu_category(response, outcome, item_dicts):
     return response
 
 
+def forbid_order(response):
+    response.error = u'Заказ недоступен в данное время. Вы можете сделать заказ с 13:30!'
+    response.success = True
+    logging.debug(response)
+    return response
+
+
 def set_discount_marked_cheapest(response, outcome, item_dicts, promo):
     cheapest_item_dict = None
     if item_dicts:
         for item_dict in item_dicts:
-            if item_dict['persistent_mark'] and (not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
+            if item_dict['persistent_mark'] and (
+                        not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
                 cheapest_item_dict = item_dict
     if cheapest_item_dict:
         discount = int(cheapest_item_dict['price'] * float(outcome.value / 100.0))
@@ -353,7 +364,8 @@ def set_fix_discount_marked_cheapest(response, outcome, item_dicts, promo):
     cheapest_item_dict = None
     if item_dicts:
         for item_dict in item_dicts:
-            if item_dict['persistent_mark'] and (not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
+            if item_dict['persistent_mark'] and (
+                        not cheapest_item_dict or item_dict['price'] < cheapest_item_dict['price']):
                 cheapest_item_dict = item_dict
     if cheapest_item_dict:
         if _apply_discounts(cheapest_item_dict, promo, outcome.value, percent=False):

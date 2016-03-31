@@ -1,14 +1,16 @@
-from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited, \
-    check_marked_dish_has_group_modifiers, check_marked_dish_has_not_group_modifiers
-from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest
-from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
+import logging
+
 from conditions import check_condition_by_value, check_first_order, check_condition_max_by_value, \
     check_condition_min_by_value, check_item_in_order, check_repeated_order, check_happy_hours_delivery_time, \
     check_group_modifier_choice, check_payment_type, check_happy_hours_created_time, mark_item_with_category, \
     mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
     check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity, check_version, check_geo_push, \
     check_persist_mark, check_repeated_order_before, check_max_promo_uses, check_min_date, check_max_date, \
-    get_registration_days
+    get_registration_days, check_is_not_delivery_zone, check_is_delivery_zone
+from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited, \
+    check_marked_dish_has_group_modifiers, check_marked_dish_has_not_group_modifiers
+from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest, forbid_order
+from models import Promo, PromoCondition, PromoOutcome, STATUS_AVAILABLE
 from outcomes import set_discounts, set_cash_back, set_discount_cheapest, set_discount_richest, set_gift_points, \
     add_order_gift, set_order_gift_points, set_fix_discount, set_delivery_sum_discount, set_delivery_fix_sum_discount, \
     set_percent_gift_points, set_promo_mark_for_marked_items, remove_persistent_mark, add_marked_order_gift, \
@@ -56,8 +58,8 @@ def _get_promos(venue):
     return promos
 
 
-
-def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum, order):
+def _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type, total_sum,
+                     order, delivery_zone):
     if condition.method == PromoCondition.CHECK_TYPE_DELIVERY:
         return check_condition_by_value(condition, delivery_type)
     elif condition.method == PromoCondition.CHECK_FIRST_ORDER:
@@ -130,6 +132,10 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_marked_dish_has_group_modifiers(condition, item_dicts)
     elif condition.method == PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS:
         return check_marked_dish_has_not_group_modifiers(condition, item_dicts)
+    elif condition.method == PromoCondition.CHECK_IS_DELIVERY_ZONE:
+        return check_is_delivery_zone(condition, delivery_zone)
+    elif condition.method == PromoCondition.CHECK_IS_NOT_DELIVERY_ZONE:
+        return check_is_not_delivery_zone(condition, delivery_zone)
     else:
         return True
 
@@ -164,7 +170,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.REMOVE_PERSISTENT_MARK:
         return remove_persistent_mark(response, items, promo)
     elif outcome.method == PromoOutcome.MARKED_ORDER_GIFT:
-        return add_marked_order_gift(response, items, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts)
+        return add_marked_order_gift(response, items, new_order_gift_dicts, order_gift_dicts,
+                                     cancelled_order_gift_dicts)
     elif outcome.method == PromoOutcome.EMPTY:
         return return_success(response)
     elif outcome.method == PromoOutcome.CASH_ACCUMULATE_GIFT_POINT:
@@ -185,6 +192,8 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
         return set_marked_gift_points(response, outcome, items, promo, order)
     elif outcome.method == PromoOutcome.MARKED_FIX_DISCOUNT_CHEAPEST:
         return set_fix_discount_marked_cheapest(response, outcome, items, promo)
+    elif outcome.method == PromoOutcome.FORBID_ORDER:
+        return forbid_order(response)
     else:
         response.success = True
         return response
@@ -206,16 +215,21 @@ def apply_promos(venue, client, item_dicts, payment_info, wallet_payment_sum, de
             if conflict in (promo.key for promo in promos):
                 apply_promo = False
         for condition in promo.conditions:
+            logging.debug(condition)
+
             if not _check_condition(condition, venue, client, item_dicts, payment_info, delivery_time, delivery_type,
-                                    total_sum, order):
+                                    total_sum, order, delivery_zone):
                 apply_promo = False
                 break
+
+
         if apply_promo:
             for outcome in promo.outcomes:
                 outcome_response = _set_outcome(outcome, item_dicts, promo, wallet_payment_sum, delivery_type,
                                                 delivery_zone, new_order_gift_dicts, order_gift_dicts,
                                                 cancelled_order_gift_dicts, order)
                 if outcome_response.success:
+                    logging.debug(outcome_response.error)
                     if promo not in promos:
                         promos.append(promo)
                     if outcome_response.discount:

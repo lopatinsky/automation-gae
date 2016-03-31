@@ -3,7 +3,6 @@ import random
 
 from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
-
 from google.appengine.ext import ndb
 
 from methods import fastcounter
@@ -80,11 +79,13 @@ class PromoOutcome(ndb.Model):
     MARKED_DISCOUNT = 21
     MARKED_ACCUMULATE_GIFT_POINT = 22
     MARKED_FIX_DISCOUNT_CHEAPEST = 23
+    FORBID_ORDER = 24
     CHOICES = (DISCOUNT, CASH_BACK, DISCOUNT_CHEAPEST, DISCOUNT_RICHEST, ACCUMULATE_GIFT_POINT, ORDER_GIFT,
                ORDER_ACCUMULATE_GIFT_POINT, FIX_DISCOUNT, DELIVERY_SUM_DISCOUNT, DELIVERY_FIX_SUM_DISCOUNT,
                PERCENT_GIFT_POINT, SET_PERSISTENT_MARK, REMOVE_PERSISTENT_MARK, MARKED_ORDER_GIFT, EMPTY,
                CASH_ACCUMULATE_GIFT_POINT, FORBID_MENU_ITEM, MARKED_DISCOUNT_CHEAPEST, DELIVERY_MESSAGE, FIX_CASH_BACK,
-               FORBID_MENU_CATEGORY, MARKED_DISCOUNT, MARKED_ACCUMULATE_GIFT_POINT, MARKED_FIX_DISCOUNT_CHEAPEST)
+               FORBID_MENU_CATEGORY, MARKED_DISCOUNT, MARKED_ACCUMULATE_GIFT_POINT, MARKED_FIX_DISCOUNT_CHEAPEST,
+               FORBID_ORDER)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -128,6 +129,8 @@ class PromoCondition(ndb.Model):
     CHECK_USER_INVITED = 33
     CHECK_DISH_HAS_GROUP_MODIFIERS = 34
     CHECK_DISH_HAS_NO_GROUP_MODIFIERS = 35
+    CHECK_IS_DELIVERY_ZONE = 36
+    CHECK_IS_NOT_DELIVERY_ZONE = 37
     CHOICES = (CHECK_TYPE_DELIVERY, CHECK_FIRST_ORDER, CHECK_MAX_ORDER_SUM, CHECK_ITEM_IN_ORDER, CHECK_REPEATED_ORDERS,
                CHECK_MIN_ORDER_SUM, CHECK_HAPPY_HOURS, CHECK_MIN_ORDER_SUM_WITH_PROMOS, CHECK_GROUP_MODIFIER_CHOICE,
                CHECK_NOT_GROUP_MODIFIER_CHOICE, CHECK_PAYMENT_TYPE, CHECK_HAPPY_HOURS_CREATED_TIME,
@@ -136,7 +139,7 @@ class PromoCondition(ndb.Model):
                CHECK_MARKED_QUANTITY, CHECK_DEVICE_TYPE, CHECK_VERSION, CHECK_GEO_PUSH, CHECK_VENUE, CHECK_MARK,
                CHECK_REPEATED_ORDER_BEFORE, CHECK_MAX_USES, CHECK_MIN_DATE, CHECK_MAX_DATE, CHECK_LEFT_BASKET_PROMO,
                CHECK_INVITED_USER, CHECK_USER_INVITED, CHECK_DISH_HAS_GROUP_MODIFIERS,
-               CHECK_DISH_HAS_NO_GROUP_MODIFIERS)
+               CHECK_DISH_HAS_NO_GROUP_MODIFIERS, CHECK_IS_DELIVERY_ZONE, CHECK_IS_NOT_DELIVERY_ZONE)
 
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
@@ -281,7 +284,9 @@ CONDITION_MAP = {
     PromoCondition.CHECK_USER_INVITED: u'Пользователь пригласил другого',
     PromoCondition.CHECK_INVITED_USER: u'Пользователь был приглашен',
     PromoCondition.CHECK_DISH_HAS_GROUP_MODIFIERS: u'(метка) Пометить блюда с данным модификатором',
-    PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS: u'(метка) Пометить блюда без данного модификатора'
+    PromoCondition.CHECK_DISH_HAS_NO_GROUP_MODIFIERS: u'(метка) Пометить блюда без данного модификатора',
+    PromoCondition.CHECK_IS_NOT_DELIVERY_ZONE: u'Не зона доставки',
+    PromoCondition.CHECK_IS_DELIVERY_ZONE: u'Зона доставки'
 }
 
 OUTCOME_MAP = {
@@ -309,4 +314,5 @@ OUTCOME_MAP = {
     PromoOutcome.MARKED_DISCOUNT: u'(метка) Скидка на все помеченные продукты',
     PromoOutcome.MARKED_ACCUMULATE_GIFT_POINT: u'(метка) Баллы за каждый помеченный продукт',
     PromoOutcome.MARKED_FIX_DISCOUNT_CHEAPEST: u'(метка) Фиксированная скидка на самый дешевый помеченный продукт',
+    PromoOutcome.FORBID_ORDER: u'Запрет на заказ'
 }

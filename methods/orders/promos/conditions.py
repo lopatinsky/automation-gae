@@ -1,6 +1,7 @@
 # coding=utf-8
 from Queue import Queue
 from datetime import datetime, timedelta
+
 from google.appengine.ext import ndb
 
 from methods import working_hours
@@ -8,11 +9,11 @@ from methods.versions import CLIENT_VERSIONS
 from models import STATUS_AVAILABLE, Promo, MenuCategory
 from models.config.config import Config
 from models.geo_push import GeoPush, LeftBasketPromo
+from models.order import NOT_CANCELED_STATUSES
 from models.order import Order
+from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 from models.share import SharedPromo
 from outcomes import get_item_dict
-from models.order import NOT_CANCELED_STATUSES
-from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 
 
 def _get_category_ids(current_id):
@@ -64,6 +65,7 @@ def check_repeated_order(condition, client):
         min_time = midnight - timedelta(days=condition.value - 1)  # midnight N days ago
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES),
                             Order.date_created > min_time).get()
+
     else:
         order = Order.query(Order.client_id == client.key.id(), Order.status.IN(NOT_CANCELED_STATUSES)).get()
     return order is not None
@@ -238,6 +240,13 @@ def check_persist_mark(item_dicts):
     return False
 
 
+def check_is_delivery_zone(condition, delivery_zone):
+    return condition.value == delivery_zone.key.id()
+
+
+def check_is_not_delivery_zone(condition, delivery_zone):
+    return condition.value != delivery_zone.key.id()
+
 
 def check_marked_dish_has_not_group_modifiers(condition, item_dicts):
     for item_dict in item_dicts:
@@ -246,6 +255,7 @@ def check_marked_dish_has_not_group_modifiers(condition, item_dicts):
                 if modifier[1] == condition.value:
                     item_dict['temporary_mark'] = False
     return True
+
 
 def check_marked_dish_has_group_modifiers(condition, item_dicts):
     for item_dict in item_dicts:
@@ -256,6 +266,7 @@ def check_marked_dish_has_group_modifiers(condition, item_dicts):
             else:
                 item_dict['temporary_mark'] = False
     return True
+
 
 def check_max_promo_uses(condition, client):
     promo_key = ndb.Key(Promo, condition.value)
@@ -308,4 +319,3 @@ def check_user_is_invited(client, order):
             order.shared_promo = shared_promo.key
             shared_promo.put()
     return shared_promo is not None
-
