@@ -70,15 +70,12 @@ class Field(ndb.Model):
     def dict(self):
         options = self.options if self.options else {}
 
-        print self.options
-        print options
         if self.type == DATE:
             options.update(self.time_options.dict())
 
         if self.type == CHOICES:
             options.update(self.choice_variants_options.dict())
 
-        print options
         return {
             'title': self.title,
             'field': latinize(self.title),
