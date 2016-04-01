@@ -19,6 +19,7 @@ class CreateVenueHandler(CompanyBaseHandler):
         lon = self.request.get('lon')
         address = geocoder.get_houses_by_coordinates(lat, lon)
         address_str = ''
+
         if len(address):
             if address[0].get('address'):
                 address = address[0].get('address')
