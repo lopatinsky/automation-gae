@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 
+
 from models.menu import GroupModifier, GroupModifierChoice
 from models.order import CashBack, GiftPointsDetails
 from models.venue import DELIVERY

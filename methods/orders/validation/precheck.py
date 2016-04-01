@@ -263,6 +263,7 @@ def get_venue_and_zone_by_address(address):
 
 
 def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_time_minutes=None):
+    logging.debug('DELIVERY_TIME_PICKER: {0}'.format(delivery_time_picker))
     if delivery_time_picker:
         delivery_time_picker = parse_time_picker_value(delivery_time_picker)
         if venue and (not delivery_slot or delivery_slot.slot_type == DeliverySlot.MINUTES):
@@ -293,7 +294,6 @@ def get_delivery_time(delivery_time_picker, venue, delivery_slot=None, delivery_
         if not delivery_time:
             delivery_time = datetime.utcnow()
         delivery_time += timedelta(minutes=delivery_time_minutes)
-    logging.info(delivery_time)
     return delivery_time
 
 

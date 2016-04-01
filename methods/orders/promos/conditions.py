@@ -245,7 +245,10 @@ def check_is_delivery_zone(condition, delivery_zone):
 
 
 def check_is_not_delivery_zone(condition, delivery_zone):
-    return condition.value != delivery_zone.key.id()
+    if delivery_zone:
+        return condition.value != delivery_zone.key.id()
+    else:
+        return False
 
 
 def check_marked_dish_has_not_group_modifiers(condition, item_dicts):

@@ -1,18 +1,19 @@
 # coding=utf-8
-from datetime import timedelta, datetime
 import logging
-from google.appengine.api.namespace_manager import namespace_manager
-from methods.rendering import latinize
+from datetime import timedelta, datetime
 
-from models.config.config import config, VENUE, BAR
+from google.appengine.api.namespace_manager import namespace_manager
+
 from methods import empatika_promos
 from methods.geocoder import get_houses_by_address, get_streets_by_address
+from methods.rendering import latinize
 from methods.subscription import get_subscription, get_amount_of_subscription_items, get_subscription_menu_item
 from methods.working_hours import check_with_errors, check_in_with_errors, check_restriction, check_today_error
 from models import STATUS_AVAILABLE, DeliverySlot, DAY_SECONDS, HOUR_SECONDS, MINUTE_SECONDS, MenuItem
+from models.config.config import config, VENUE, BAR
 from models.config.subscription import SubscriptionModule
-from models.venue import DELIVERY, DELIVERY_MAP, DELIVERY_WHAT_MAP
 from models.promo_code import PromoCodePerforming, KIND_ALL_TIME_HACK
+from models.venue import DELIVERY, DELIVERY_MAP, DELIVERY_WHAT_MAP
 
 __author__ = 'dvpermyakov'
 
@@ -96,7 +97,12 @@ def check_delivery_type(venue, delivery_type, delivery_time, delivery_slot):
                                              DELIVERY_WHAT_MAP[delivery.delivery_type])
             if not valid:
                 return False, error
-            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS):
+
+            logging.debug(
+                'DELIVERY TIME: {0}, _get_now(delivery_slot)={1}, timedelta(seconds=delivery.min_time-MAX_SECONDS_LOSS)={2}'
+                    .format(delivery_time, _get_now(delivery_slot), timedelta(seconds=delivery.min_time - MAX_SECONDS_LOSS)))
+
+            if delivery_time < _get_now(delivery_slot) + timedelta(seconds=delivery.min_time - MAX_SECONDS_LOSS):
                 description = u'Выберите время больше текущего'
                 if delivery_slot and delivery_slot.slot_type == DeliverySlot.STRINGS:
                     description += u' дня'
@@ -215,7 +221,8 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
         for item_dict in item_dicts:
             item = item_dict['item']
             if item.time_restriction and delivery_time <= datetime.utcnow() + timedelta(minutes=item.time_restriction):
-                return u'Чтобы заказать "%s" выберите время %s больше текущего времени' % (item.title, _parse_time(item.time_restriction * 60))
+                return u'Чтобы заказать "%s" выберите время %s больше текущего времени' % (
+                item.title, _parse_time(item.time_restriction * 60))
             if venue.key in item.restrictions:
                 if delivery_type == DELIVERY:
                     description = u'При заказе на доставку нет %s.' % item.title
@@ -231,7 +238,8 @@ def check_restrictions(venue, item_dicts, gift_dicts, order_gift_dicts, delivery
             if item.key in delivery_items:
                 description = u'Невозможно выбрать "%s" для типа "%s"' % (item.title, DELIVERY_MAP[delivery_type])
             if item.category in delivery_categories:
-                description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (item.category.get().title, DELIVERY_MAP[delivery_type])
+                description = u'Невозможно выбрать продукт из категории "%s" для типа "%s"' % (
+                item.category.get().title, DELIVERY_MAP[delivery_type])
         return description
 
     items_description = check(item_dicts)
