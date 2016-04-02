@@ -336,6 +336,15 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
         return get_response_dict(False, response_total_sum, item_dicts, gift_dicts, order_gift_dicts,
                                  cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
+    # todo убрать через ~2 месяца - в июне
+    for item in items[:]:
+        menu_item = MenuItem.get(item['item_id'])
+        if not menu_item:
+            gift_menu_item = GiftMenuItem.get_by_id(int(item['item_id']))
+            if gift_menu_item:
+                gifts.append(item)
+                items = [temp_item for temp_item in items if temp_item['item_id'] != item['item_id']]
+
     items = set_modifiers(items)
     items = set_price_with_modifiers(items, venue)
     item_dicts = set_item_dicts(items)
