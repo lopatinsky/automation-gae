@@ -157,6 +157,16 @@ class Client(ndb.Model):
                                namespace='').get()
         return client
 
+    @classmethod
+    def find_first_by_phone(cls, phone):
+        client = cls.query(cls.tel == phone).get()
+        if not client:
+            client = cls.query(cls.tel == phone,
+                               cls.namespace_created == namespace_manager.get_namespace(),
+                               namespace='').get()
+        return client
+
+
 
 class CardBindingPayment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)

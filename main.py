@@ -174,6 +174,7 @@ app = WSGIApplication([
 
         PathPrefixRoute('/client', [
             Route('/recovery_from_other', api.ClientIdRecoveryHandler),
+            Route('/search', api.ClientSearchHandler),
         ]),
 
         PathPrefixRoute('/proxy', [

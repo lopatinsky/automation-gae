@@ -9,7 +9,7 @@ from menu import MenuHandler, DynamicInfoHandler, ModifiersHandler, CategoryHand
 from registration import RegistrationHandler, ClientIdRecoveryHandler
 from order import OrderHandler, RegisterOrderHandler, ReturnOrderHandler, CheckOrderHandler, OrderReviewHandler
 from promo_info import PromoInfoHandler, GiftListHandler, NewsHandler, SharedGiftListHandler
-from client import ClientHandler
+from client import ClientHandler, ClientSearchHandler
 from history import HistoryHandler, SharedGiftHistoryHandler, SharedInvitationHistoryHandler
 from wallet import DepositToWalletHandler, WalletBalanceHandler
 from shared import GetInvitationUrlHandler, GetGiftUrlHandler, GetInvitationInfoHandler
