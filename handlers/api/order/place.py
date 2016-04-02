@@ -17,12 +17,13 @@ from methods.orders.create import send_venue_sms, send_venue_email, send_client_
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address, \
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
-from methods.orders.validation.validation import validate_order
+from methods.orders.validation.validation import validate_order, bugfix_move_items_to_gifts
 from methods.proxy.doubleb.place_order import doubleb_place_order
 from methods.proxy.resto.place_order import resto_place_order
 from methods.sms.confirmation import send_confirmation
 from methods.subscription import get_amount_of_subscription_items
 from methods.subscription import get_subscription
+from methods.unique import get_temporary_user, VERSION, USER_AGENT
 from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from models.client import IOS_DEVICE
 from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
@@ -182,12 +183,20 @@ class OrderHandler(ApiHandler):
             else:
                 return self.render_error(response['description'])
 
+        items = order_json['items']
+        gifts = order_json.get('gifts', [])
+
+        # todo убрать через ~2 месяца - в июне
+        user_info = get_temporary_user()
+        if user_info.get(VERSION) < 7 and 'iOS' in user_info.get(USER_AGENT):
+            items, gifts = bugfix_move_items_to_gifts(items, gifts)
+
         # it is need, because item_id and gift_id are swapping
-        gifts_copy = copy.deepcopy(order_json.get('gifts', []))
+        gifts_copy = copy.deepcopy(gifts)
 
         validation_result = validate_order(client,
-                                           order_json['items'],
-                                           order_json.get('gifts', []),
+                                           items,
+                                           gifts,
                                            order_json.get('order_gifts', []),
                                            order_json.get('cancelled_order_gifts', []),
                                            order_json['payment'],
@@ -224,7 +233,7 @@ class OrderHandler(ApiHandler):
 
         subscription = get_subscription(client)
         if subscription:
-            amount = get_amount_of_subscription_items(order_json['items'])
+            amount = get_amount_of_subscription_items(items)
         else:
             amount = 0
         if subscription and amount:
@@ -251,7 +260,7 @@ class OrderHandler(ApiHandler):
 
         # use only gifts_copy, not response_json.get('gifts', [])
         # it is used for creating db for promos
-        validate_order(client, order_json['items'], gifts_copy, order_json.get('order_gifts', []),
+        validate_order(client, items, gifts_copy, order_json.get('order_gifts', []),
                        order_json.get('cancelled_order_gifts', []), order_json['payment'],
                        venue, address_json, self.order.delivery_time, delivery_slot, self.order.delivery_type,
                        delivery_zone, False,

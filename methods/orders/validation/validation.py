@@ -337,13 +337,9 @@ def validate_order(client, items, gifts, order_gifts, cancelled_order_gifts, pay
                                  cancelled_order_gift_dicts, shared_gift_dicts, error, full_points, rest_points)
 
     # todo убрать через ~2 месяца - в июне
-    for item in items[:]:
-        menu_item = MenuItem.get(item['item_id'])
-        if not menu_item:
-            gift_menu_item = GiftMenuItem.get_by_id(int(item['item_id']))
-            if gift_menu_item:
-                gifts.append(item)
-                items = [temp_item for temp_item in items if temp_item['item_id'] != item['item_id']]
+    user_info = get_temporary_user()
+    if user_info.get(VERSION) < 7 and 'iOS' in user_info.get(USER_AGENT):
+        items, gifts = bugfix_move_items_to_gifts(items, gifts)
 
     items = set_modifiers(items)
     items = set_price_with_modifiers(items, venue)
@@ -543,3 +539,14 @@ def get_first_error(validation_result):
         if item.errors:
             return item.errors[0]
     return None
+
+
+def bugfix_move_items_to_gifts(items, gifts):
+    for item in items[:]:
+        menu_item = MenuItem.get(item['item_id'])
+        if not menu_item:
+            gift_menu_item = GiftMenuItem.get_by_id(int(item['item_id']))
+            if gift_menu_item:
+                gifts.append(item)
+                items = [temp_item for temp_item in items if temp_item['item_id'] != item['item_id']]
+    return items, gifts
