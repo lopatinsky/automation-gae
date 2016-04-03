@@ -1,7 +1,9 @@
+# coding=utf-8
 import logging
 from google.appengine.api.namespace_manager import namespace_manager
 from methods.emails import admins
 from methods.unique import get_temporary_user, USER_AGENT, VERSION, is_ios_user, is_android_user
+from models import MenuItem, GiftMenuItem
 from models.venue import DELIVERY, SELF, IN_CAFE
 
 __author__ = 'dvpermyakov'
@@ -62,3 +64,16 @@ def fuckup_order_channel(channel, order):
             if fuckup in order.user_agent:
                 channel = 'order_%s' % order.key.id()
     return channel
+
+
+# March-April 2016
+def fuckup_move_items_to_gifts(items, gifts):
+    if get_temporary_user().get(VERSION) < 7 and is_ios_user():
+        for item in items[:]:  # iterating over copy so we can remove()
+            menu_item = MenuItem.get(item['item_id'])
+            if not menu_item:
+                gift_menu_item = GiftMenuItem.get_by_id(int(item['item_id']))
+                if gift_menu_item:
+                    gifts.append(item)
+                    items.remove(item)
+    return items, gifts

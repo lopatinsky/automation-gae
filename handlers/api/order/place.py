@@ -2,12 +2,10 @@
 import copy
 import json
 import logging
-import random
 
 from google.appengine.api import memcache
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
-from google.appengine.ext.deferred import deferred
 from google.appengine.ext.ndb import GeoPt
 
 from handlers.api.base import ApiHandler
@@ -17,13 +15,12 @@ from methods.orders.create import send_venue_sms, send_venue_email, send_client_
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address, \
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
-from methods.orders.validation.validation import validate_order, bugfix_move_items_to_gifts
+from methods.orders.validation.validation import validate_order
+from methods.fuckups import fuckup_move_items_to_gifts
 from methods.proxy.doubleb.place_order import doubleb_place_order
 from methods.proxy.resto.place_order import resto_place_order
-from methods.sms.confirmation import send_confirmation
 from methods.subscription import get_amount_of_subscription_items
 from methods.subscription import get_subscription
-from methods.unique import get_temporary_user, VERSION, USER_AGENT
 from models import DeliverySlot, PaymentType, Order, Venue, STATUS_UNAVAILABLE, STATUS_AVAILABLE
 from models.client import IOS_DEVICE
 from models.config.config import config, RESTO_APP, COMPANY_REMOVED, COMPANY_PREVIEW, DOUBLEB_APP
@@ -187,9 +184,7 @@ class OrderHandler(ApiHandler):
         gifts = order_json.get('gifts', [])
 
         # todo убрать через ~2 месяца - в июне
-        user_info = get_temporary_user()
-        if user_info.get(VERSION) < 7 and 'iOS' in user_info.get(USER_AGENT):
-            items, gifts = bugfix_move_items_to_gifts(items, gifts)
+        items, gifts = fuckup_move_items_to_gifts(items, gifts)
 
         # it is need, because item_id and gift_id are swapping
         gifts_copy = copy.deepcopy(gifts)

@@ -7,6 +7,7 @@ from google.appengine.api.namespace_manager import namespace_manager
 
 from handlers.api.base import ApiHandler
 from methods.emails.admins import send_error
+from methods.fuckups import fuckup_move_items_to_gifts
 from methods.orders.validation.precheck import validate_address, get_venue_and_zone_by_address, get_delivery_time
 from methods.orders.validation.validation import validate_order
 from methods.proxy.doubleb.check_order import doubleb_validate_order
@@ -99,6 +100,9 @@ class CheckOrderHandler(ApiHandler):
             cancelled_order_gifts = json.loads(self.request.get('cancelled_order_gifts'))
         else:
             cancelled_order_gifts = []
+
+        # todo убрать через ~2 месяца - в июне
+        items, gifts = fuckup_move_items_to_gifts(items, gifts)
 
         client.save_session(True, bool(items or gifts or order_gifts))
 
