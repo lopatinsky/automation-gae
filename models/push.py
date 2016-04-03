@@ -8,7 +8,6 @@ from google.appengine.api import urlfetch
 from google.appengine.api.namespace_manager import namespace_manager
 
 from methods.emails.admins import send_error
-from methods.fuckups import fuckup_order_channel
 from methods.rendering import timestamp
 from models.client import DEVICE_TYPE_MAP, IOS_DEVICE, ANDROID_DEVICE, DEVICE_CHOICES, Client
 from models.specials import get_channels, ORDER_CHANNEL, CLIENT_CHANNEL
@@ -105,6 +104,8 @@ class OrderPush(Push):
         :param text: text to put in notification
         :param order: order which info have to be pushed
         """
+        from methods.fuckups import fuckup_order_channel
+
         super(OrderPush, self).__init__(text, order.device_type, push_id)
         self.order = order
         self.should_popup = True
