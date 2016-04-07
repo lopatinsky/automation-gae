@@ -279,6 +279,9 @@ class Order(ndb.Model):
             delivery_slot = None
         gifts = self.grouped_item_dict(self.gift_details, gift=True)
         gifts.extend(self.grouped_item_dict(self.order_gift_details))
+
+        venue = Venue.get(self.venue_id)
+
         dct.update({
             "delivery_type": self.delivery_type,
             "address": self.address.dict() if self.address else None,
@@ -293,7 +296,7 @@ class Order(ndb.Model):
             "wallet_payment": self.wallet_payment,
             "delivery_sum": self.delivery_sum,
             "venue_id": str(self.venue_id),
-            "venue": Venue.get(self.venue_id).admin_dict(),
+            "venue": None if not venue else venue.admin_dict(),
             "items": self.grouped_item_dict(self.item_details),
             "gifts": gifts
         })
