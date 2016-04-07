@@ -243,6 +243,7 @@ class MenuCategory(ndb.Model):
     category = ndb.KeyProperty()  # kind=self, if it is None, that is initial category
     title = ndb.StringProperty(required=True, indexed=False)
     picture = ndb.StringProperty(indexed=False)
+    status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     icon = ndb.StringProperty(indexed=False)
     sequence_number = ndb.IntegerProperty()
 
@@ -264,7 +265,7 @@ class MenuCategory(ndb.Model):
             category.put()
         return category
 
-    def get_categories(self, venue=None):
+    def get_categories(self, venue=None, only_available=False):
         from models.config.config import config, AUTO_APP, RESTO_APP, DOUBLEB_APP
         from methods.proxy.resto.menu import get_categories as resto_get_categories
         from methods.proxy.doubleb.menu import get_categories as doubleb_get_categories
@@ -275,11 +276,20 @@ class MenuCategory(ndb.Model):
                 for category in categories[:]:
                     if not category.get_items(venue=venue) and category.get_items():
                         categories.remove(category)
-            return categories
         elif app_kind == RESTO_APP:
-            return resto_get_categories(self)
+            categories = resto_get_categories(self)
         elif app_kind == DOUBLEB_APP:
-            return doubleb_get_categories(self)
+            categories = doubleb_get_categories(self)
+        else:
+            categories = []
+
+        if only_available:
+            for category in categories[:]:
+                if category.status != STATUS_AVAILABLE:
+                    categories.remove(category)
+                    continue
+
+        return categories
 
     def get_items(self, city=None, city_venues=None, only_available=False, venue=None):
         from methods.proxy.resto.menu import get_products as resto_get_products
@@ -367,7 +377,7 @@ class MenuCategory(ndb.Model):
             return items[index + 1]
 
     def dict(self, venue=None, city=None, city_venues=None, exclude_items=False):
-        subcategories = self.get_categories()
+        subcategories = self.get_categories(only_available=True)
         items = []
         if not subcategories and not exclude_items:
             for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
@@ -409,7 +419,7 @@ class MenuCategory(ndb.Model):
             exclude_items = MenuFrameModule.has_module()
         else:
             exclude_items = False
-        for category in init_category.get_categories():
+        for category in init_category.get_categories(only_available=True):
             category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys, exclude_items=exclude_items)
             if category_dict['items'] or category_dict['categories'] or exclude_items:
                 category_dicts.append(category_dict)

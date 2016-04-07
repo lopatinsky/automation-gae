@@ -49,6 +49,19 @@ class ListCategoriesHandler(CompanyBaseHandler):
         self.render('/menu/categories.html', categories=categories, main_category=category,
                     venues=Venue.query().fetch(), chosen_venue=venue)
 
+    @menu_rights_required
+    def post(self):
+        logging.info(self.request.POST)
+        category_id = self.request.get_range('category_id')
+        category = MenuCategory.get_by_id(category_id)
+        if not category:
+            self.abort(400)
+        for subcategory in category.get_categories():
+            subcategory.status = bool(self.request.get(str(subcategory.key.id())))
+            subcategory.put()
+
+        self.redirect('/company/menu/category/list?%s' % self.request.query_string)
+
 
 class UpCategoryHandler(CompanyBaseHandler):
     @menu_rights_required

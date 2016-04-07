@@ -58,57 +58,64 @@
             Добавить категорию
         </a>
     </div>
-    <table style="border-collapse:collapse; width:100%" border="1">
-        <tr>
-            <th>Изменить порядок</th>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Картинка</th>
-            <th>Категории</th>
-            <th>Продукты</th>
-            <th>Удалить</th>
-        </tr>
-        {% for category in categories %}
-            <tr id="{{ 'tr_%s' % category.key.id() }}">
-                <td>
-                    <button class="up_button" id="{{ category.key.id() }}">
-                        Вверх
-                    </button>
-                    <br>
-                    <button class="down_button" id="{{ category.key.id() }}">
-                        Вниз
-                    </button>
-                </td>
-                <td>{{ category.key.id() }}</td>
-                <td>
-                    <a href="{{ '/company/menu/category/edit?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
-                </td>
-                <td>
-                    <img src="{{ category.icon }}" height="75">
-                </td>
-                <td>
-                    <a href="{{ '/company/menu/category/list?category_id=%s' % category.key.id() }}">Вложенные категории</a>
-                </td>
-                <td>
-                    <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">Продукты</a>
-                </td>
-                <td>
-                    <form method="post" action="{{ '/company/menu/category/delete?category_id=%s' % category.key.id() }}">
-                        <button>
-                            Удалить
-                        </button>
-                    </form>
-                </td>
+    <form method="post">
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Статус</th>
+                <th>Изменить порядок</th>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Картинка</th>
+                <th>Категории</th>
+                <th>Продукты</th>
+                <th>Удалить</th>
             </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <div>
-        {% if not main_category.category %}
-            <a href="{{ '/company/menu/main' }}">Назад</a>
-        {% else %}
-            <a href="{{ '/company/menu/category/list?category_id=%s' % main_category.category.id() }}">Назад</a>
-        {% endif %}
-    </div>
+            {% for category in categories %}
+                <tr id="{{ 'tr_%s' % category.key.id() }}">
+                    <td>
+                        <input type="checkbox" name={{ category.key.id() }} {% if category.status %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <button class="up_button" id="{{ category.key.id() }}">
+                            Вверх
+                        </button>
+                        <br>
+                        <button class="down_button" id="{{ category.key.id() }}">
+                            Вниз
+                        </button>
+                    </td>
+                    <td>{{ category.key.id() }}</td>
+                    <td>
+                        <a href="{{ '/company/menu/category/edit?category_id=%s' % category.key.id() }}">{{ category.title }}</a>
+                    </td>
+                    <td>
+                        <img src="{{ category.icon }}" height="75">
+                    </td>
+                    <td>
+                        <a href="{{ '/company/menu/category/list?category_id=%s' % category.key.id() }}">Вложенные категории</a>
+                    </td>
+                    <td>
+                        <a href="{{ '/company/menu/item/list?category_id=%s' % category.key.id() }}">Продукты</a>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ '/company/menu/category/delete?category_id=%s' % category.key.id() }}">
+                            <button>
+                                Удалить
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit">
+        <br>
+        <div>
+            {% if not main_category.category %}
+                <a href="{{ '/company/menu/main' }}">Назад</a>
+            {% else %}
+                <a href="{{ '/company/menu/category/list?category_id=%s' % main_category.category.id() }}">Назад</a>
+            {% endif %}
+        </div>
+    </form>
 </body>
 </html>
