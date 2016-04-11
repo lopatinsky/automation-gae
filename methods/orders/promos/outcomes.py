@@ -71,6 +71,22 @@ def _apply_total_cash_back(response, sum_without_wallet, cash_back, order=None):
     return True
 
 
+def _apply_item_fix_cash_back(response, item_dict, promo, amount, order=None):
+    if promo not in item_dict['promos']:
+        response.cash_back = amount
+        if order:
+            order.cash_backs.append(CashBack(amount=int(amount*100)))
+        return True
+    return False
+
+
+def _apply_order_fix_cash_back(response, amount, order=None):
+    response.cash_back = amount
+    if order:
+        order.cash_backs.append(CashBack(amount=int(amount*100)))
+    return True
+
+
 def _add_order_gift(item_dict, new_order_gift_dicts, order_gift_dicts, cancelled_order_gift_dicts):
     from methods.orders.validation.validation import is_equal
     found = False
@@ -141,11 +157,19 @@ def set_cash_back(response, outcome, item_dicts, promo, init_total_sum, wallet_p
     return response
 
 
-def set_fix_cash_back(response, outcome, order):
-    _apply_total_cash_back(response, outcome.value, 1.0, order)
+def set_fix_cash_back(response, outcome, item_dicts, promo, order):
+    promo_applied = False
+
+    if outcome.item_details.item:
+        for item_dict in _get_promo_item_dicts(outcome.item_details, item_dicts):
+            if _apply_item_fix_cash_back(response, item_dict, promo, outcome.value, order):
+                promo_applied = True
+    else:
+        _apply_order_fix_cash_back(response, outcome.value, order)
+        promo_applied = True
     if order:
         order.put()
-    response.success = True
+    response.success = promo_applied
     return response
 
 

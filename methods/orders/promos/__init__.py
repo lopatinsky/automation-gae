@@ -183,7 +183,7 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.DELIVERY_MESSAGE:
         return set_delivery_message(response, promo, delivery_type, delivery_zone)
     elif outcome.method == PromoOutcome.FIX_CASH_BACK:
-        return set_fix_cash_back(response, outcome, order)
+        return set_fix_cash_back(response, outcome, items, promo, order)
     elif outcome.method == PromoOutcome.FORBID_MENU_CATEGORY:
         return forbid_menu_category(response, outcome, items)
     elif outcome.method == PromoOutcome.MARKED_DISCOUNT:
