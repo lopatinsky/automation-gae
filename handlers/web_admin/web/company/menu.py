@@ -1,5 +1,6 @@
 # coding=utf-8
 import json
+from google.appengine.api import memcache
 from methods.auth import menu_rights_required
 from methods.images import get_new_image_url, ICON_SIZE
 from methods.unique import unique
@@ -31,6 +32,9 @@ class MainMenuHandler(CompanyBaseHandler):
     def get(self):
         self.render('/menu/main.html')
 
+    def post(self):
+        menu = memcache.get('menu_' + '' if not city else str(city))
+
 
 class ListCategoriesHandler(CompanyBaseHandler):
     @menu_rights_required
@@ -53,9 +57,14 @@ class ListCategoriesHandler(CompanyBaseHandler):
     def post(self):
         logging.info(self.request.POST)
         category_id = self.request.get_range('category_id')
-        category = MenuCategory.get_by_id(category_id)
+        if category_id:
+            category = MenuCategory.get_by_id(category_id)
+        else:
+            category = MenuCategory.get_initial_category()
+
         if not category:
             self.abort(400)
+            
         for subcategory in category.get_categories():
             subcategory.status = bool(self.request.get(str(subcategory.key.id())))
             subcategory.put()
