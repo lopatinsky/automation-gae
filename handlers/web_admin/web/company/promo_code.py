@@ -2,7 +2,7 @@
 from methods.auth import promo_code_rights_required
 from base import CompanyBaseHandler
 from models.promo_code import PromoCode, PROMO_CODE_KIND_MAP, PROMO_CODE_KIND_ADMIN, PromoCodeGroup, \
-    PROMO_CODE_STATUS_MAP, PromoCodePerforming
+    PROMO_CODE_STATUS_MAP, PromoCodePerforming, KIND_SHARE_INVITATION
 
 __author__ = 'dvpermyakov'
 
@@ -10,7 +10,7 @@ __author__ = 'dvpermyakov'
 class ListPromoCodeHandler(CompanyBaseHandler):
     @promo_code_rights_required
     def get(self):
-        codes = PromoCode.query().fetch()
+        codes = PromoCode.query(PromoCode.kind != KIND_SHARE_INVITATION).fetch()
         for code in codes:
             code.promo_code_key = code.key.id().decode('utf-8')
         self.render('/promo_code/list.html', promo_codes=codes, PROMO_CODE_KIND_MAP=PROMO_CODE_KIND_MAP,
