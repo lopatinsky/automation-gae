@@ -66,7 +66,7 @@ class ApiHandler(RequestHandler):
             if company:
                 city = ProxyCity.get_by_id(int(city_id), namespace=init_namespace)
             else:
-                city = ProxyCity(city=base64.b64decode(city_id).decode('utf-8'))
+                city = ProxyCity(id=city_id, city=base64.b64decode(city_id).decode('utf-8'))
             if not city:
                 self.abort(400)
             self.request.city = city

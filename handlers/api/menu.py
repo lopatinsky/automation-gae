@@ -24,14 +24,13 @@ class MenuHandler(ApiHandler):
                 self.abort(400)
 
         if not venue:
-            menu = memcache.get('menu_' + '' if not city else str(city))
+            menu = memcache.get('menu_%s' % ('' if not city else str(city.key.id())))
         if not menu:
-            logging.info('No memcache')
             menu = MenuCategory.get_menu_dict(venue=venue, city=city,
                                               subscription_include=subscription_include,
                                               menu_frame_include=menu_frame_include)
             if not venue:
-                memcache.add('menu_' + '' if not city else str(city), menu, 60*5)
+                memcache.add('menu_%s' % ('' if not city else str(city.key.id())), menu, 60*5)
 
         include_hit_category(menu)
         response = {
