@@ -1,10 +1,14 @@
 # coding=utf-8
 import json
 from google.appengine.api import memcache
+from google.appengine.api.namespace_manager import namespace_manager
 from methods.auth import menu_rights_required
+from methods.cities import get_company_cities
 from methods.images import get_new_image_url, ICON_SIZE
+from methods.proxy.resto.menu import reload_menu
 from methods.unique import unique
 from base import CompanyBaseHandler
+from models.config.config import config, RESTO_APP
 from models.menu import SINGLE_MODIFIER, GROUP_MODIFIER
 
 __author__ = 'dvpermyakov'
@@ -33,7 +37,18 @@ class MainMenuHandler(CompanyBaseHandler):
         self.render('/menu/main.html')
 
     def post(self):
-        menu = memcache.get('menu_' + '' if not city else str(city))
+        app_kind = config.APP_KIND
+        if app_kind == RESTO_APP:
+            reload_menu()
+
+        cities = get_company_cities()
+
+        memcache.delete('menu_')
+        for city in cities:
+            logging.info('menu_%s' % str(city))
+            memcache.delete('menu_%s' % str(city))
+
+        self.render('/menu/main.html')
 
 
 class ListCategoriesHandler(CompanyBaseHandler):
