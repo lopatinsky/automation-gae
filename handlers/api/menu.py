@@ -1,3 +1,4 @@
+import logging
 from google.appengine.api import memcache
 
 from handlers.api.base import ApiHandler
@@ -25,6 +26,7 @@ class MenuHandler(ApiHandler):
         if not venue:
             menu = memcache.get('menu_' + '' if not city else str(city))
         if not menu:
+            logging.info('No memcache')
             menu = MenuCategory.get_menu_dict(venue=venue, city=city,
                                               subscription_include=subscription_include,
                                               menu_frame_include=menu_frame_include)

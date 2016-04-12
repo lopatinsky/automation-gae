@@ -45,8 +45,8 @@ class MainMenuHandler(CompanyBaseHandler):
 
         memcache.delete('menu_')
         for city in cities:
-            logging.info('menu_%s' % str(city))
-            memcache.delete('menu_%s' % str(city))
+            logging.info('menu_%s' % str(city.key.id()))
+            memcache.delete('menu_%s' % str(city.key.id()))
 
         self.render('/menu/main.html')
 
