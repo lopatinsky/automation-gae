@@ -86,7 +86,7 @@ class PromoListHandler(CompanyBaseHandler):
             else:
                 promo.visible = STATUS_UNAVAILABLE
             promo.put()
-        self.redirect('/company/main')
+        self.redirect('/company/promos/list')
 
 
 class ChangeApiKeysHandler(CompanyBaseHandler):
