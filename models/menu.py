@@ -95,6 +95,7 @@ class GroupModifierChoice(PriceBase):
     default = ndb.BooleanProperty(default=False)
     sequence_number = ndb.IntegerProperty()
 
+
     @staticmethod
     def generate_id():
         fastcounter.incr("group_choice_id", delta=100, update_interval=1)
@@ -119,6 +120,9 @@ class GroupModifier(ndb.Model):
     choices = ndb.StructuredProperty(GroupModifierChoice, repeated=True)
     required = ndb.BooleanProperty(default=True)
     sequence_number = ndb.IntegerProperty()
+
+    min_value = ndb.IntegerProperty(default=1)
+    max_value = ndb.IntegerProperty(default=1)
 
     @classmethod
     def get(cls, modifier_id):
@@ -235,7 +239,10 @@ class GroupModifier(ndb.Model):
             'title': self.title,
             'required': self.required,
             'order': self.sequence_number,
-            'choices': choices_dicts
+            'choices': choices_dicts,
+            'min_value': self.min_value,
+            'max_value': self.max_value
+
         }
 
 
