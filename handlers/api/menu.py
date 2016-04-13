@@ -56,7 +56,12 @@ class RemainderHandler(ApiHandler):
 class CategoryHandler(ApiHandler):
     def get(self):
         category_id = self.request.get('category_id')
-        category = MenuCategory.get(category_id)
+
+        category = memcache.get('menu_category_%s' % category_id)
+        if not category:
+            category = MenuCategory.get(category_id)
+            memcache.add('menu_category_%s' % category_id, category, 60*30)
+
         self.render_json({
             'category': category.dict()
         })
