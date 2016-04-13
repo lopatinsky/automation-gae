@@ -18,21 +18,23 @@ def _get_venue(venue_id, cache):
 
 def _order_data(order, lite, venue_cache):
     venue = _get_venue(order.venue_id, venue_cache)
+    tz_offset = venue.timezone_offset if venue else 3  # TODO: Moscow time is hardcoded in case venue is not found
+    venue_title = venue.title if venue else order.venue_id
     dct = {
         "order_id": order.key.id(),
         "comment": order.comment if order.comment else '',
         "return_comment": order.return_comment if order.return_comment else '',
         "status": STATUS_MAP[order.status],
-        "date": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%d.%m.%Y"),
-        "created_time": (order.date_created + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
-        "delivery_time": (order.delivery_time + timedelta(hours=venue.timezone_offset)).strftime("%H:%M:%S"),
+        "date": (order.date_created + timedelta(hours=tz_offset)).strftime("%d.%m.%Y"),
+        "created_time": (order.date_created + timedelta(hours=tz_offset)).strftime("%H:%M:%S"),
+        "delivery_time": (order.delivery_time + timedelta(hours=tz_offset)).strftime("%H:%M:%S"),
         "payment_type": PAYMENT_TYPE_MAP[order.payment_type_id],
         "menu_sum": sum(d.price / 100.0 for d in order.item_details),
         "sum_after_promos": order.total_sum - order.delivery_sum,
         "sum_after_delivery": order.total_sum,
         "sum_after_wallet": order.total_sum - order.wallet_payment,
         "venue_revenue": sum(d.revenue for d in order.item_details),
-        "venue": venue.title,
+        "venue": venue_title,
         "delivery_type": order.delivery_type
     }
     if lite:
