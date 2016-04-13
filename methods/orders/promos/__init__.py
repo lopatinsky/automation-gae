@@ -193,7 +193,7 @@ def _set_outcome(outcome, items, promo, wallet_payment_sum, delivery_type, deliv
     elif outcome.method == PromoOutcome.MARKED_FIX_DISCOUNT_CHEAPEST:
         return set_fix_discount_marked_cheapest(response, outcome, items, promo)
     elif outcome.method == PromoOutcome.FORBID_ORDER:
-        return forbid_order(response)
+        return forbid_order(response, outcome)
     else:
         response.success = True
         return response

@@ -90,6 +90,8 @@ class PromoOutcome(ndb.Model):
     item_details = ndb.LocalStructuredProperty(PromoMenuItem)
     method = ndb.IntegerProperty(choices=CHOICES, required=True)
     value = ndb.IntegerProperty(required=True)
+    message = ndb.StringProperty()
+    error_message = ndb.StringProperty()
 
 
 class PromoCondition(ndb.Model):

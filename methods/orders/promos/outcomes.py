@@ -363,10 +363,12 @@ def forbid_menu_category(response, outcome, item_dicts):
     return response
 
 
-def forbid_order(response):
-    response.error = u'Заказ недоступен в данное время. Вы можете сделать заказ с 13:30!'
+def forbid_order(response, outcome):
+    if outcome.error_message:
+        response.error = outcome.error_message
+    else:
+        response.error = u"К сожалению, заказ невозможен"
     response.success = True
-    logging.debug(response)
     return response
 
 

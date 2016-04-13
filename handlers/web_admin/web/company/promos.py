@@ -357,6 +357,9 @@ class AddPromoOutcomeHandler(CompanyBaseHandler):
         outcome.method = self.request.get_range('method')
         outcome.value = self.request.get_range('value')
         outcome.item_details = PromoMenuItem()
+
+        outcome.error_message = self.request.get('error_message')
+
         promo.outcomes.append(outcome)
         promo.put()
         self.redirect('/company/promos/list')

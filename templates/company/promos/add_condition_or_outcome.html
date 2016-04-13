@@ -4,25 +4,33 @@
     <title>Добавить</title>
 </head>
 <body>
-    {% include '/company/header.html' %}
-    <form method="post">
-        <input type="text" name="promo_id" value="{{ promo.key.id() }}" hidden>
-        <label>
-            Метод:
-            <select name="method">
-                {% for method in methods %}
-                  <option value="{{ method['value'] }}" {% if feature and feature.method == method['value'] %} selected {% endif %}>
-                      {{ method['name'] }}
-                  </option>
-                {% endfor %}
-            </select>
-        </label><br>
-        <label>
-            Значение:
-            <input type="number" name="value" value="{% if feature %} {{ feature.value }} {% endif %}">
-        </label><br>
-        <input type="submit">
-        <a href="/company/promos/list">Назад</a>
-    </form>
+{% include '/company/header.html' %}
+<form method="post">
+    <input type="text" name="promo_id" value="{{ promo.key.id() }}" hidden>
+    <label>
+        Метод:
+        <select name="method">
+            {% for method in methods %}
+                <option value="{{ method['value'] }}" {% if feature and feature.method == method['value'] %}
+                        selected {% endif %}>
+                    {{ method['name'] }}
+                </option>
+            {% endfor %}
+        </select>
+    </label><br>
+    <label>
+        Значение:
+        <input type="number" name="value" value="{% if feature %} {{ feature.value }} {% endif %}">
+    </label><br>
+
+    <label>
+        Сообщение ошибки:
+        <input type="text" name="error_message" value="{% if feature %} {{ feature.error_message }} {% endif %}">
+    </label><br>
+
+
+    <input type="submit">
+    <a href="/company/promos/list">Назад</a>
+</form>
 </body>
 </html>
