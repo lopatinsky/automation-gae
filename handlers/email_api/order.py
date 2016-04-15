@@ -10,7 +10,7 @@ from methods.orders.cancel import cancel_order
 
 __author__ = 'dvpermyakov'
 
-POSTPONE_MINUTES = 5
+POSTPONE_MINUTES = 15
 
 
 class DoneOrderHandler(RequestHandler):
