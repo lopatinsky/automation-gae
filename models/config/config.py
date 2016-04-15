@@ -26,6 +26,10 @@ MODULE_TYPES = (SUBSCRIPTION, SHARE_GIFT, SHARE_INVITATION, CLIENT_INFO_MODULE, 
                 CASH_CHANGE_MODULE, CUSTOM_SECTIONS_MODULE, PLATIUS_WHITE_LABEL_MODULE, SMS_CONFIRMATION_MODULE,
                 CLIENT_INFO_TIP_MODULE)
 
+DEFAULT_TYPE = 0
+MINIMIZED = 1
+ORDER_EMAIL_FORMAT_TYPES = (DEFAULT_TYPE, MINIMIZED)
+
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from webapp2 import cached_property
@@ -153,6 +157,7 @@ class Config(ndb.Model):
     SUPPORT_PHONE = ndb.StringProperty(indexed=False)
     SUPPORT_SITE = ndb.StringProperty(indexed=False)
     SUPPORT_EMAILS = ndb.StringProperty(indexed=False, repeated=True)
+    ORDER_EMAIL_FORMAT_TYPE = ndb.IntegerProperty(choices=ORDER_EMAIL_FORMAT_TYPES, default=DEFAULT_TYPE, indexed=False)
     ADDITION_INFO_ABOUT_DELIVERY = ndb.StringProperty(indexed=False)
     ANOTHER_CITY_IN_LIST = ndb.BooleanProperty(default=False)
     REJECT_IF_NOT_IN_ZONES = ndb.BooleanProperty(default=False)

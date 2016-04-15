@@ -6,7 +6,7 @@ from google.appengine.ext.deferred import deferred
 from webapp2_extras import security
 from models import Order
 
-from models.config.config import config, EMAIL_FROM
+from models.config.config import config, EMAIL_FROM, DEFAULT_TYPE, MINIMIZED
 from handlers.api.paypal import paypal
 from handlers.email_api.order import POSTPONE_MINUTES
 from handlers.web_admin.web.company.delivery.orders import order_items_values
@@ -95,7 +95,7 @@ def send_demo_sms(client):
         send_error('sms_error', 'Send sms', error_text)
 
 
-def send_venue_email(venue, order, host_url, jinja2, move=False):
+def send_venue_email(venue, order, host_url, jinja2, move=False, format_type=DEFAULT_TYPE):
     if venue.emails:
         if move:
             text = u'Заказ №%s перенесен на эту точку приготовления' % order.key.id()
@@ -121,8 +121,13 @@ def send_venue_email(venue, order, host_url, jinja2, move=False):
                 item_values['confirm_url'] = '%s/email/order/confirm?key=%s' % (host_url, order.email_key_confirm)
         for email in venue.emails:
             if email:
+                template = ''
+                if format_type == DEFAULT_TYPE:
+                    template = '/company/delivery/items.html'
+                elif format_type == MINIMIZED:
+                    template = '/company/delivery/items_light.html'
                 deferred.defer(send_email, EMAIL_FROM, email, text,
-                               jinja2.render_template('/company/delivery/items.html', **item_values))
+                               jinja2.render_template(template, **item_values))
 
 
 def need_to_show_share_invitation(client):

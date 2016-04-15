@@ -104,7 +104,6 @@ class OrderHandler(ApiHandler):
             else:
                 self.order.comment = u"Клиент просит перезвонить. " + self.order.comment
 
-
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
         if self.order.delivery_slot_id > 0:
@@ -265,7 +264,8 @@ class OrderHandler(ApiHandler):
         self.order.put()
 
         send_venue_sms(venue, self.order)
-        send_venue_email(venue, self.order, self.request.host_url, self.jinja2)
+        send_venue_email(venue, self.order, self.request.host_url, self.jinja2,
+                         format_type=config.ORDER_EMAIL_FORMAT_TYPE)
         if config.SUSHINSON_EMAIL_MODULE and config.SUSHINSON_EMAIL_MODULE.status == STATUS_AVAILABLE:
             config.SUSHINSON_EMAIL_MODULE.send(self.order, self.jinja2)
         send_client_sms_task(self.order, namespace_manager.get_namespace())

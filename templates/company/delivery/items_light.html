@@ -4,8 +4,6 @@
     <title></title>
 </head>
 <body>
-
-
     {% include '/company/header.html' %}
     <p>
         <b>Заказ № {{ order.key.id() }}</b>
@@ -45,42 +43,22 @@
             <b>Тип заказа:</b> {{ delivery_type_str }}
         </p>
     {% endif %}
-    <table style="border-collapse:collapse; width:100%" border="1">
-        <tr>
-            <th>Номер</th>
-            <th>Название</th>
-            <th>Цена</th>
-            <th>Количество</th>
-            <th>Название модификатора</th>
-            <th>Цена модификатора</th>
-            <th>Количество модификатора</th>
-        </tr>
-        {% for item in items %}
-            {% set len = item.modifiers|length if item.modifiers|length > 0 else 1 %}
-            <tr>
-                <td rowspan="{{ len }}">{{ loop.index }}</td>
-                <td rowspan="{{ len }}">
-                    {{ item.title }}
-                    {% if item.is_gift %}
-                        (<b>Подарок</b>)
-                    {% endif %}
-                </td>
-                <td rowspan="{{ len }}">{{ item.total_float_price }}</td>
-                <td rowspan="{{ len }}">{{ item.amount }}</td>
-                {% if item.modifiers %}
-                    {% for modifier in item.modifiers %}
-                        <td>{{ modifier.title }}</td>
-                        <td>{{ modifier.total_float_price }}</td>
-                        <td>{{ modifier.amount }}</td>
-                        </tr><tr>
-                    {% endfor %}
-                {% else %}
-                    <td>-</td>
-                    <td>-</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </table>
+
+    <br><b>Состав заказа:</b><br/>
+    {% for item in items %}
+        Позиция{% if item.is_gift %}(<b>Подарок</b>){% endif %}: {{ item.title }}<br>
+        {% if item.modifiers %}
+         Модификаторы:
+            {% for modifier in item.modifiers %}
+                Название: {{ modifier.title }}, Сумма: {{ modifier.total_float_price }}, Количество: {{ modifier.amount }};
+            {% endfor %}<br>
+        {% endif %}
+        Количество: {{ item.amount }}<br>
+        Цена: {{ item.float_price }}<br>
+        Сумма: {{ item.total_float_price }}<br/><br>{% endfor %}
+    <br/>
+
+
     {% if user %}
         <a href="/company/delivery/orders/current">Назад</a>
     {% endif %}
