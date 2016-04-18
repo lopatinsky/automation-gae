@@ -179,6 +179,8 @@ def check_promo_code(condition, client, order):
         if promo_code.kind == KIND_ORDER_PROMO and promo_code.group_id == condition.value:
             if order:
                 performing.put_in_order()
+                if promo_code.persist:
+                    performing.recover()
                 order.promo_code_performings.append(performing.key)
             return True
     return False
