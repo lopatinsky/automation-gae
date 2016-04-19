@@ -456,9 +456,13 @@ class MenuItem(PriceBase):
     picture_background = ndb.StringProperty(default="FFFFFF", indexed=False)
 
     icon = ndb.StringProperty(indexed=False)
-    kal = ndb.IntegerProperty(indexed=False)
     weight = ndb.FloatProperty(indexed=False, default=0)
     volume = ndb.FloatProperty(indexed=False, default=0)
+
+    kal = ndb.IntegerProperty(indexed=False)
+    carbohydrate = ndb.FloatProperty(indexed=False, default=0)
+    fat = ndb.FloatProperty(indexed=False, default=0)
+    fiber = ndb.FloatProperty(indexed=False, default=0)
 
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     sequence_number = ndb.IntegerProperty(default=0)
@@ -493,6 +497,9 @@ class MenuItem(PriceBase):
             'description': self.description,
             'price': self.float_price_for_venue(venue.key.id()) if venue else self.float_price,
             'kal': self.kal,
+            'carbohydrate': self.carbohydrate,
+            'fat': self.fat,
+            'fiber': self.fiber,
             'pic': self.picture if not self.cut_picture else self.cut_picture,
             'pic_resize': self.picture_resize_mode,
             'pic_background': self.picture_background,

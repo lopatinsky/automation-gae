@@ -55,7 +55,8 @@ class AppConfigurationHandler(ApiHandler):
                 'parse': {
                     'app_key': config.PARSE_APP_API_KEY,
                     'client_key': config.PARSE_CLIENT_API_KEY,
-                }
+                },
+                'yandex_metrics': config.YANDEX_METRICA_KEY,
             }
         })
 

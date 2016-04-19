@@ -115,6 +115,8 @@ class Config(ndb.Model):
     GOOGLE_ANALYTICS_API_KEY_IOS = ndb.StringProperty(indexed=False)
     GOOGLE_ANALYTICS_API_KEY_ANDROID = ndb.StringProperty(indexed=False)
 
+    YANDEX_METRICA_KEY = ndb.StringProperty(indexed=False)
+
     EMAIL_REQUESTS = ndb.BooleanProperty(default=False)
 
     PROMOS_API_KEY = ndb.StringProperty(indexed=False)
