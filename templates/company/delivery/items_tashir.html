@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include '/company/header.html' %}
+    <p>
+        <b>Заказ № {{ order.key.id() }}</b>
+    </p>
+    <p>
+        <b>Тип оплаты:</b> {{ order.payment_type_str }}
+    </p>    
+    <p>
+        <b>Адрес:</b> {{ order.address_str }}
+    </p>
+    <p>
+        <b>Акции:</b> {{ order.promo_text }}
+    </p>
+    <p>
+        <b>Время заказа:</b> {{ order.date_str }}<br>
+        <b>Время доставки:</b> {{ order.delivery_time_str }}<br>
+    </p>
+    <p>
+        <b>Клиент:</b> {{ '%s %s' % (order.client.name, order.client.surmame) }}<br>
+        <b>Телефон:</b> {{ order.client.tel }}<br>
+        {% for key in order.client.extra_data %}
+            <b>{{ key }}:</b> {{ order.client.extra_data[key] }}<br>
+        {% endfor %}
+        <b>Комментарий:</b> {{ order.comment }}
+    </p>
+    {% if venue and delivery_type_str %}
+        <p>
+            <b>В заведение:</b> {{ venue.title }}<br>
+            <b>Тип заказа:</b> {{ delivery_type_str }}
+        </p>
+    {% endif %}
+
+    <table cellpadding="3" style="border-collapse:collapse; border-style: dotted; width:100%; " border="1">
+        {% for item in items %}
+            {% set len = item.modifiers|length if item.modifiers|length > 0 else 1 %}
+            <tr>
+                <td rowspan="{{ len }}">
+                    {{ item.title }}
+                    {% for modifier in item.modifiers %}
+                        <br>{{ modifier.title }} <br>
+                    {% endfor %}
+                    {% if item.is_gift %}
+                        (<b>Подарок</b>)
+                    {% endif %}
+                </td>
+                <td rowspan="{{ len }}">{{ item.amount }} шт.</td>
+                <td rowspan="{{ len }}">{{ item.total_float_price }} руб.</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="2">Cумма заказа:</td>
+            <td>
+                {{ order.total_sum - order.wallet_payment }} руб.
+                {% if order.wallet_payment %}
+                    (оплачено бонусами {{ order.wallet_payment }})
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">Стоимость доставик:</td>
+            <td>
+                {{ order.delivery_sum }} руб.
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">Итого:</td>
+            <td>
+                {{ order.total_sum }} руб.
+            </td>
+        </tr>
+    </table>
+    {% if user %}
+        <a href="/company/delivery/orders/current">Назад</a>
+    {% endif %}
+    {% if cancel_url and done_url and postpone_url %}
+        <a href="{{ done_url }}">Выдать</a>
+        <a href="{{ cancel_url }}">Отменить</a>
+        <a href="{{ postpone_url }}">Перенести на {{ minutes }} минут</a>
+        {% if confirm_url %}
+            <a href="{{ confirm_url }}">Подтвердить</a>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

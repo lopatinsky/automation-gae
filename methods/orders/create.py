@@ -125,7 +125,7 @@ def send_venue_email(venue, order, host_url, jinja2, move=False, format_type=DEF
                 if format_type == DEFAULT_TYPE:
                     template = '/company/delivery/items.html'
                 elif format_type == MINIMIZED:
-                    template = '/company/delivery/items_light.html'
+                    template = '/company/delivery/items_tashir.html'
                 deferred.defer(send_email, EMAIL_FROM, email, text,
                                jinja2.render_template(template, **item_values))
 
