@@ -13,9 +13,9 @@ from models.venue import Venue
 
 
 BITRIX_PAYMENT_TYPES = {
-    CASH_PAYMENT_TYPE: 'cash',
-    CARD_PAYMENT_TYPE: 'card_online',
-    CARD_COURIER_PAYMENT_TYPE: 'card_courier',
+    CASH_PAYMENT_TYPE: '1',
+    CARD_PAYMENT_TYPE: '10',
+    CARD_COURIER_PAYMENT_TYPE: '9',
 }
 
 
