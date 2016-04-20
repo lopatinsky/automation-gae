@@ -56,7 +56,7 @@
         <tr>
             <td colspan="2">Cумма заказа:</td>
             <td>
-                {{ order.total_sum - order.wallet_payment }} руб.
+                {{ order.total_sum - order.wallet_payment - order.delivery_sum}} руб.
                 {% if order.wallet_payment %}
                     (оплачено бонусами {{ order.wallet_payment }})
                 {% endif %}
