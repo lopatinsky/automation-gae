@@ -6,7 +6,7 @@ from conditions import check_condition_by_value, check_first_order, check_condit
     mark_item_without_category, check_marked_min_sum, mark_item, mark_not_item, mark_item_with_quantity, \
     check_promo_code, check_order_number, check_item_not_in_order, check_marked_quantity, check_version, check_geo_push, \
     check_persist_mark, check_repeated_order_before, check_max_promo_uses, check_min_date, check_max_date, \
-    get_registration_days, check_is_not_delivery_zone, check_is_delivery_zone
+    get_registration_days, check_is_not_delivery_zone, check_is_delivery_zone, check_registration_date
 from methods.orders.promos.conditions import check_left_basket_promo, check_user_invited_another, check_user_is_invited, \
     check_marked_dish_has_group_modifiers, check_marked_dish_has_not_group_modifiers
 from methods.orders.promos.outcomes import set_fix_discount_marked_cheapest, forbid_order
@@ -136,6 +136,8 @@ def _check_condition(condition, venue, client, item_dicts, payment_info, deliver
         return check_is_delivery_zone(condition, delivery_zone)
     elif condition.method == PromoCondition.CHECK_IS_NOT_DELIVERY_ZONE:
         return check_is_not_delivery_zone(condition, delivery_zone)
+    elif condition.method == PromoCondition.CHECK_REGISTRATION_DATE:
+        return check_registration_date(condition, client)
     else:
         return True
 

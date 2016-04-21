@@ -14,6 +14,7 @@ from models.order import Order
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 from models.share import SharedPromo
 from outcomes import get_item_dict
+import datetime
 
 
 def _get_category_ids(current_id):
@@ -324,3 +325,10 @@ def check_user_is_invited(client, order):
             order.shared_promo = shared_promo.key
             shared_promo.put()
     return shared_promo is not None
+
+
+def check_registration_date(condition, client):
+    if client:
+        return condition.value <= (datetime.datetime.now() - client.created).days
+    else:
+        return False
