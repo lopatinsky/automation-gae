@@ -14,7 +14,6 @@ from models.order import Order
 from models.promo_code import PromoCodePerforming, KIND_ORDER_PROMO
 from models.share import SharedPromo
 from outcomes import get_item_dict
-import datetime
 
 
 def _get_category_ids(current_id):
