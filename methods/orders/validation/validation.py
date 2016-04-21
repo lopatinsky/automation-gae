@@ -150,7 +150,8 @@ def set_modifiers(items, with_gift_obj=False, with_share_gift_obj=False):
         if with_gift_obj:
             menu_item.gift_obj = item['gift_obj']
         else:
-            menu_item.gift_obj = None
+            if menu_item:
+                menu_item.gift_obj = None
         if with_share_gift_obj:
             menu_item.share_gift_obj = item['share_gift_obj']
         else:
