@@ -328,6 +328,6 @@ def check_user_is_invited(client, order):
 
 def check_registration_date(condition, client):
     if client:
-        return condition.value <= (datetime.datetime.now() - client.created).days
+        return condition.value <= (datetime.now() - client.created).days
     else:
         return False
