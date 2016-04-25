@@ -10,13 +10,13 @@ from google.appengine.ext.ndb import GeoPt
 
 from handlers.api.base import ApiHandler
 from methods import empatika_promos, empatika_wallet
+from methods.fuckups import fuckup_move_items_to_gifts
 from methods.orders.create import send_venue_sms, send_venue_email, send_client_sms_task, card_payment_performing, \
     paypal_payment_performing, set_address_obj, send_demo_sms, need_to_show_share_invitation
 from methods.orders.validation.precheck import get_order_id, set_client_info, get_venue_and_zone_by_address, \
     check_items_and_gifts, get_delivery_time, validate_address, check_after_error, after_validation_check, \
     set_extra_order_info
 from methods.orders.validation.validation import validate_order
-from methods.fuckups import fuckup_move_items_to_gifts
 from methods.proxy.doubleb.place_order import doubleb_place_order
 from methods.proxy.resto.place_order import resto_place_order
 from methods.subscription import get_amount_of_subscription_items
@@ -98,8 +98,8 @@ class OrderHandler(ApiHandler):
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
 
         if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status == STATUS_AVAILABLE:
-            confirm_by_sms = order_json.get('confirm_by_sms', False)
-            if confirm_by_sms == '1':
+            confirm_by_sms = self.request.get('confirm_by_sms')
+            if confirm_by_sms:
                 self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
             else:
                 self.order.comment = u"Клиент просит перезвонить. " + self.order.comment
@@ -206,8 +206,11 @@ class OrderHandler(ApiHandler):
             self.order.total_sum += self.order.delivery_sum
 
         self.order.item_details = validation_result["details"]
+
         self.order.order_gift_details = validation_result["order_gift_details"]
+
         self.order.shared_gift_details = validation_result['share_gift_details']
+
         self.order.promos = [ndb.Key('Promo', promo['id']) for promo in validation_result["promos"]]
         self.order.delivery_time_str = validation_result['delivery_time']
 
@@ -241,6 +244,7 @@ class OrderHandler(ApiHandler):
             empatika_wallet.pay(client.key.id(), self.order.key.id(), int(self.order.wallet_payment * 100))
 
         gift_details = []
+
         for gift_detail in validation_result['gift_details']:
             gift_item = gift_detail.gift.get()
             activation_dict = empatika_promos.activate_promo(client.key.id(), gift_item.promo_id, 1)
