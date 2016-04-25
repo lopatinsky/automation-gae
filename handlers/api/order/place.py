@@ -98,11 +98,12 @@ class OrderHandler(ApiHandler):
         self.order.device_type = order_json.get('device_type', IOS_DEVICE)
 
         if config.SMS_CONFIRMATION_MODULE and config.SMS_CONFIRMATION_MODULE.status == STATUS_AVAILABLE:
-            confirm_by_sms = self.request.get('confirm_by_sms')
+            confirm_by_sms = order_json.get('confirm_by_sms')
             if confirm_by_sms:
                 self.order.comment = u"Клиенту нужно отправить СМС-подтверждение. " + self.order.comment
             else:
                 self.order.comment = u"Клиент просит перезвонить. " + self.order.comment
+
 
         self.order.delivery_slot_id = int(order_json.get('delivery_slot_id')) \
             if order_json.get('delivery_slot_id') else None
