@@ -258,7 +258,7 @@ def get_delivery_text(delivery_sum, delivery_type, delivery_zone):
     with_delivery_sum = user.get(VERSION) < 5 or 'iOS' not in user.get(USER_AGENT)
     if with_delivery_sum:
         if delivery_sum:
-            delivery_sum_str = u'Стоимость доставки %sр' % delivery_sum
+            delivery_sum_str = u'Стоимость доставки %dр' % delivery_sum
         else:
             delivery_sum_str = u'Бесплатная доставка'
     if config.ADDITION_INFO_ABOUT_DELIVERY:
@@ -299,7 +299,8 @@ def get_order_position_details(item_dicts):
 
 
 def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(), cancelled_order_gifts=(),
-                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0, promos=()):
+                      shared_gift_dicts=(), error=None, full_points=0, rest_points=0, promos=(),
+                      delivery_type=-1, delivery_sum=0):
     return {
         'valid': valid,
         'more_gift': False,
@@ -315,8 +316,8 @@ def get_response_dict(valid, total_sum, item_dicts, gift_dicts=(), order_gifts=(
         'cancelled_order_gifts': group_item_dicts(cancelled_order_gifts) if item_dicts else [],
         'promos': promos,
         'total_sum': total_sum,
-        'delivery_sum': 0,
-        'delivery_sum_str': '',
+        'delivery_sum': delivery_sum,
+        'delivery_sum_str': get_delivery_text(delivery_sum, delivery_type, None),
         'max_wallet_payment': 0,
         'delivery_time': '',
         'delivery_slot_name': ''

@@ -132,6 +132,8 @@ def resto_validate_order(client, init_item_dicts, venue, delivery_time, order_gi
         'error': resto_validation['description'] if resto_validation['error'] else None,
         'total_sum': total_sum - resto_validation.get('order_discounts', 0),
         'item_dicts': item_dicts,
+        'delivery_type': delivery_type,
+        'delivery_sum': resto_validation.get('delivery_sum', 0)
     }
     response = get_response_dict(**required_value)
     if response['valid']:
