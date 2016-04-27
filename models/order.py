@@ -273,7 +273,7 @@ class Order(ndb.Model):
 
     def history_dict(self):
         dct = self.status_dict()
-        if self.delivery_slot_id:
+        if self.delivery_slot_id > 0:
             delivery_slot = DeliverySlot.get_by_id(self.delivery_slot_id)
         else:
             delivery_slot = None
