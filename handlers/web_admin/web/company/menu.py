@@ -178,17 +178,17 @@ class EditCategoryHandler(CompanyBaseHandler):
         if not category:
             self.abort(400)
         category.title = self.request.get('title')
-        if self.request.get('image_file') or self.request.get('picture'):
-            if self.request.get('image_file'):
-                new_url = get_new_image_url('MenuCategory', category.key.id(), image_data=str(self.request.get('image_file')))
-            elif self.request.get('picture'):
-                new_url = get_new_image_url('MenuCategory', category.key.id(), url=self.request.get('picture'))
-            else:
-                new_url = None
-            if new_url:
-                category.picture = new_url
+        if self.request.get('image_file'):
+            new_url = get_new_image_url('MenuCategory', category.key.id(), image_data=str(self.request.get('image_file')))
+        elif self.request.get('picture'):
+            new_url = get_new_image_url('MenuCategory', category.key.id(), url=self.request.get('picture'))
+        else:
+            new_url = None
+        category.picture = new_url
         if category.picture:
             category.icon = get_new_image_url('MenuCategoryIcon', category.key.id(), url=category.picture, size=ICON_SIZE)
+        else:
+            category.icon = None
         category.put()
         self.redirect_to('mt_category_list')
 
