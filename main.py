@@ -503,12 +503,16 @@ app = WSGIApplication([
             Route('/start', tasks.StartPushesHandler),
             Route('/review', tasks.SendPushReviewHandler),
         ]),
+
+        PathPrefixRoute('/bitrix', [
+            Route('/export', tasks.BitrixExportHandler, 'bitrix_export_task'),
+        ])
     ]),
 
     PathPrefixRoute('/ext', [
         Route('/export_legals', ext_api.ExportLegalsHandler),
         PathPrefixRoute('/bitrix/<namespace:[a-z0-9]+>/<order_id:\d+>', [
-            Route('/info', ext_api.BitrixOrderInfoHandler),
+            Route('/info', ext_api.BitrixOrderInfoHandler, 'bitrix_order_info'),
         ])
     ]),
 

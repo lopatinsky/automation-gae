@@ -3,7 +3,7 @@ import copy
 import json
 import logging
 
-from google.appengine.api import memcache
+from google.appengine.api import memcache, taskqueue
 from google.appengine.api.namespace_manager import namespace_manager
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import GeoPt
@@ -276,6 +276,8 @@ class OrderHandler(ApiHandler):
         send_client_sms_task(self.order, namespace_manager.get_namespace())
         if CURRENT_APP_ID == DEMO_APP_ID:
             send_demo_sms(client)
+        if config.BITRIX_EXT_API_MODULE and config.BITRIX_EXT_API_MODULE.status == STATUS_AVAILABLE:
+            taskqueue.add(url=self.uri_for('bitrix_export_task'), params={'order_id': order_id})
 
         self.response.status_int = 201
 
