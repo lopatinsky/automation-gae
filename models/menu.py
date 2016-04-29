@@ -311,6 +311,7 @@ class MenuCategory(ndb.Model):
             items = doubleb_get_products(self)
         else:
             items = []
+
         if only_available or city:
             for item in items[:]:
                 if only_available and item.status != STATUS_AVAILABLE:
@@ -324,10 +325,12 @@ class MenuCategory(ndb.Model):
                     if forbid:
                         items.remove(item)
                         continue
+
         if venue:
             for item in items[:]:
                 if venue.key in item.restrictions:
                     items.remove(item)
+
         return items
 
     @staticmethod
@@ -385,7 +388,9 @@ class MenuCategory(ndb.Model):
 
     def dict(self, venue=None, city=None, city_venues=None, exclude_items=False):
         subcategories = self.get_categories(only_available=True)
+
         items = []
+        categories = []
         if not subcategories and not exclude_items:
             for item in self.get_items(city=city, city_venues=city_venues, only_available=True):
                 if not venue:
@@ -393,22 +398,31 @@ class MenuCategory(ndb.Model):
                 else:
                     if venue.key not in item.restrictions:
                         items.append(item.dict(venue=venue, without_restrictions=True))
-        dct = {
-            'info': {
-                'category_id': str(self.key.id()),
-                'title': self.title,
-                'pic': self.picture,
-                'restrictions': {
-                    'venues': []  # todo: update restrictions logic for categories
+        if subcategories:
+            for subcategory in subcategories:
+                subcategory_dict = subcategory.dict(venue, city=city, city_venues=city_venues, exclude_items=exclude_items)
+                if subcategory_dict:
+                    categories.append(subcategory_dict)
+
+        dct = None
+        if len(categories) > 0 or len(items) > 0:
+            dct = {
+                'info': {
+                    'category_id': str(self.key.id()),
+                    'title': self.title,
+                    'pic': self.picture,
+                    'restrictions': {
+                        'venues': []  # todo: update restrictions logic for categories
+                    },
+                    'order': self.sequence_number if self.sequence_number else 0,
+                    'items_were_excluded': exclude_items
                 },
-                'order': self.sequence_number if self.sequence_number else 0,
-                'items_were_excluded': exclude_items
-            },
-            'items': items,
-            'categories': [category.dict(venue, exclude_items=exclude_items) for category in subcategories]
-        }
-        if venue:
-            del dct['info']['restrictions']
+                'items': items,
+                'categories': categories
+            }
+            if venue:
+                del dct['info']['restrictions']
+
         return dct
 
     @classmethod
@@ -428,7 +442,7 @@ class MenuCategory(ndb.Model):
             exclude_items = False
         for category in init_category.get_categories(only_available=True):
             category_dict = category.dict(venue=venue, city=city, city_venues=venue_keys, exclude_items=exclude_items)
-            if category_dict['items'] or category_dict['categories'] or exclude_items:
+            if category_dict and (category_dict['items'] or category_dict['categories'] or exclude_items):
                 category_dicts.append(category_dict)
         if subscription_include:
             success, category_dict = get_subscription_category_dict()
