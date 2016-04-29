@@ -128,6 +128,8 @@ def validate_address(address):
                 if candidate['address']['home'].lower() == address['address']['home'].lower():
                     address['coordinates']['lat'] = candidate['coordinates']['lat']
                     address['coordinates']['lon'] = candidate['coordinates']['lon']
+                    if address['coordinates']['lat'] and address['coordinates']['lon']:
+                        break
 
 
     # if yandex maps did not find required address in the query, but there is suggested address
