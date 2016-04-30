@@ -246,6 +246,12 @@ class GroupModifier(ndb.Model):
         }
 
 
+class PictureResizeMode(object):
+    CENTER_CROP = 0
+    CENTER_SHRINK = 1
+    CHOICES = (CENTER_CROP, CENTER_SHRINK)
+
+
 class MenuCategory(ndb.Model):
     category = ndb.KeyProperty()  # kind=self, if it is None, that is initial category
     title = ndb.StringProperty(required=True, indexed=False)
@@ -253,6 +259,10 @@ class MenuCategory(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     icon = ndb.StringProperty(indexed=False)
     sequence_number = ndb.IntegerProperty()
+
+    picture_resize_mode = ndb.IntegerProperty(choices=PictureResizeMode.CHOICES, default=PictureResizeMode.CENTER_CROP,
+                                              indexed=False)
+    picture_background = ndb.StringProperty(default="FFFFFF", indexed=False)
 
     @classmethod
     def get(cls, category_id):
@@ -411,6 +421,8 @@ class MenuCategory(ndb.Model):
                     'category_id': str(self.key.id()),
                     'title': self.title,
                     'pic': self.picture,
+                    'pic_resize': self.picture_resize_mode,
+                    'pic_background': self.picture_background,
                     'restrictions': {
                         'venues': []  # todo: update restrictions logic for categories
                     },
@@ -450,12 +462,6 @@ class MenuCategory(ndb.Model):
                 logging.info('subscription is included')
                 category_dicts.append(category_dict)
         return category_dicts
-
-
-class PictureResizeMode(object):
-    CENTER_CROP = 0
-    CENTER_SHRINK = 1
-    CHOICES = (CENTER_CROP, CENTER_SHRINK)
 
 
 class MenuItem(PriceBase):

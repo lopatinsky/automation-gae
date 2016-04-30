@@ -124,7 +124,7 @@ class OrderModule(ndb.Model):
     status = ndb.IntegerProperty(choices=STATUS_CHOICES, default=STATUS_AVAILABLE)
     extra_fields = ndb.StructuredProperty(Field, repeated=True)
     restrictions = ndb.StructuredProperty(Restriction, repeated=True)
-    enable_number_of_people =  ndb.BooleanProperty(default=False)
+    enable_number_of_people = ndb.BooleanProperty(default=False)
     enable_change = ndb.BooleanProperty(default=False)
 
     def _main_dict(self):
